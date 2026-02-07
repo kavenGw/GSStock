@@ -1,7 +1,11 @@
 import os
 import secrets
+from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# 加载 .env 文件
+load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config:
