@@ -192,7 +192,9 @@ class BriefingService:
                 'error': None
             }
 
-            if price_data:
+            # 检查数据是否有效（非降级数据）
+            # 降级数据（过期缓存）不应在简报中显示，因为可能误导用户
+            if price_data and not price_data.get('_is_degraded'):
                 stock_item['close'] = price_data.get('current_price', 0)
                 stock_item['change_percent'] = price_data.get('change_percent', 0)
                 stock_item['volume'] = price_data.get('volume', 0)
@@ -273,7 +275,8 @@ class BriefingService:
                 code = idx_info['code']
                 region = idx_info.get('region', 'china_a')
                 quote = a_data.get(code)
-                if quote and quote.get('close') is not None:
+                # 检查数据有效且非降级
+                if quote and quote.get('close') is not None and not quote.get('_is_degraded'):
                     indices_by_region[region].append({
                         'code': code,
                         'name': idx_info['name'],
@@ -303,7 +306,8 @@ class BriefingService:
                 code = idx_info['code']
                 region = idx_info.get('region', 'asia')
                 quote = yf_data.get(code)
-                if quote and quote.get('close') is not None:
+                # 检查数据有效且非降级
+                if quote and quote.get('close') is not None and not quote.get('_is_degraded'):
                     indices_by_region[region].append({
                         'code': code,
                         'name': idx_info['name'],
@@ -377,7 +381,8 @@ class BriefingService:
         for futures_info in BRIEFING_FUTURES:
             code = futures_info['code']
             quote = yf_data.get(code)
-            if quote and quote.get('close') is not None:
+            # 检查数据有效且非降级
+            if quote and quote.get('close') is not None and not quote.get('_is_degraded'):
                 result.append({
                     'code': code,
                     'name': futures_info['name'],
@@ -487,7 +492,8 @@ class BriefingService:
         for etf in US_SECTOR_ETFS:
             code = etf['code']
             quote = yf_data.get(code)
-            if quote and quote.get('change_percent') is not None:
+            # 检查数据有效且非降级
+            if quote and quote.get('change_percent') is not None and not quote.get('_is_degraded'):
                 all_sectors.append({
                     'code': code,
                     'name': etf['name'],
@@ -553,7 +559,8 @@ class BriefingService:
             code = etf_info['code']
             price_data = prices.get(code)
 
-            if not price_data:
+            # 检查数据有效且非降级
+            if not price_data or price_data.get('_is_degraded'):
                 result.append({
                     'code': code,
                     'name': etf_info['name'],
@@ -825,6 +832,9 @@ class BriefingService:
                 prices = unified_stock_data_service.get_realtime_prices(sector_stocks, force_refresh)
                 for code in sector_stocks:
                     price_data = prices.get(code, {})
+                    # 排除降级数据
+                    if price_data.get('_is_degraded'):
+                        price_data = {}
                     stock_list.append({
                         'code': code,
                         'name': price_data.get('name', code),

@@ -328,7 +328,10 @@ class UnifiedStockDataService:
         return result
 
     def _get_expired_cache(self, stock_code: str, cache_type: str) -> dict | None:
-        """获取过期缓存数据作为降级方案"""
+        """获取过期缓存数据作为降级方案
+
+        返回的数据会被标记 _is_degraded=True，调用方可根据此标记决定是否使用降级数据。
+        """
         try:
             cache = UnifiedStockCache.query.filter_by(
                 stock_code=stock_code,
@@ -338,6 +341,8 @@ class UnifiedStockDataService:
             if cache and cache.data_json:
                 import json
                 data = json.loads(cache.data_json)
+                # 标记为降级数据，调用方可据此决定是否使用
+                data['_is_degraded'] = True
                 stock_name = self._get_stock_name(stock_code, data)
                 logger.info(f"[降级] 使用过期缓存: {stock_code} {stock_name} ({cache_type})")
                 return data
