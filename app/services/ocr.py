@@ -10,6 +10,104 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 
+def get_rapidocr_version() -> str:
+    """获取 rapidocr-onnxruntime 版本"""
+    try:
+        import importlib.metadata
+        return importlib.metadata.version('rapidocr-onnxruntime')
+    except Exception:
+        return 'unknown'
+
+
+class OcrResultParser:
+    """处理不同版本 RapidOCR 的输出格式兼容性
+
+    旧版本 (1.3.x 及更早): 返回 (result, elapsed_time)
+        result 格式: [[bbox, text, confidence], ...]
+
+    新版本 (1.4.x+): 返回 (result, elapsed_time) 或 RapidOCRResult 对象
+        result 格式可能是:
+        - [[bbox, text, confidence], ...]  (旧格式)
+        - [{'box': [...], 'txt': '...', 'score': ...}, ...]  (新格式)
+    """
+
+    @staticmethod
+    def parse(ocr_output) -> list:
+        """解析 OCR 输出，返回统一格式 [[bbox, text, confidence], ...]
+
+        Args:
+            ocr_output: OCR 函数的原始返回值
+
+        Returns:
+            统一格式的结果列表: [[bbox, text, confidence], ...]
+            如果无结果返回空列表
+        """
+        # 处理元组返回值 (result, elapsed_time)
+        if isinstance(ocr_output, tuple):
+            result = ocr_output[0]
+        else:
+            result = ocr_output
+
+        # 处理 RapidOCRResult 对象（新版本可能返回）
+        if hasattr(result, '__iter__') and hasattr(result, '__len__'):
+            # 可迭代对象，继续处理
+            pass
+        elif result is None:
+            return []
+        else:
+            # 尝试获取结果属性
+            if hasattr(result, 'result'):
+                result = result.result
+            elif hasattr(result, 'data'):
+                result = result.data
+            else:
+                logger.warning(f"未知的 OCR 结果类型: {type(result)}")
+                return []
+
+        if not result:
+            return []
+
+        # 统一转换为 [[bbox, text, confidence], ...] 格式
+        normalized = []
+        for item in result:
+            try:
+                parsed = OcrResultParser._parse_item(item)
+                if parsed:
+                    normalized.append(parsed)
+            except Exception as e:
+                logger.warning(f"解析 OCR 结果项失败: {e}, item={item}")
+                continue
+
+        return normalized
+
+    @staticmethod
+    def _parse_item(item) -> list:
+        """解析单个结果项
+
+        支持格式:
+        1. [bbox, text, confidence] - 旧格式列表
+        2. {'box': bbox, 'txt': text, 'score': confidence} - 新格式字典
+        3. 其他可能的变体
+        """
+        # 格式1: 列表 [bbox, text, confidence]
+        if isinstance(item, (list, tuple)):
+            if len(item) >= 2:
+                bbox = item[0]
+                text = item[1]
+                confidence = item[2] if len(item) > 2 else 0.0
+                return [bbox, str(text), float(confidence) if confidence else 0.0]
+
+        # 格式2: 字典 {'box': ..., 'txt': ..., 'score': ...}
+        elif isinstance(item, dict):
+            bbox = item.get('box') or item.get('bbox') or item.get('position') or []
+            text = item.get('txt') or item.get('text') or item.get('content') or ''
+            confidence = item.get('score') or item.get('confidence') or item.get('conf') or 0.0
+            if text:
+                return [bbox, str(text), float(confidence) if confidence else 0.0]
+
+        return None
+
+
 class ImagePreprocessor:
     """图片预处理，控制输入尺寸"""
 
@@ -89,7 +187,10 @@ class OcrBackend:
 
         backend = cls.detect_gpu()
         cls._backend_type = backend
-        logger.info(f"OCR 后端: {backend.upper()}")
+
+        # 记录版本信息
+        version = get_rapidocr_version()
+        logger.info(f"OCR 后端: {backend.upper()}, rapidocr-onnxruntime 版本: {version}")
 
         # 根据后端配置 providers
         if backend == 'cuda':
@@ -284,7 +385,10 @@ class OcrService:
 
             # 获取 OCR 实例并识别
             ocr = OcrBackend.get_ocr_instance()
-            result, _ = ocr(process_path)
+            ocr_output = ocr(process_path)
+
+            # 使用兼容性解析器处理不同版本的输出格式
+            result = OcrResultParser.parse(ocr_output)
 
             if ocr_logger:
                 ocr_logger.log_raw_result(result)
@@ -575,7 +679,10 @@ class OcrService:
 
             # 获取 OCR 实例并识别
             ocr = OcrBackend.get_ocr_instance()
-            result, _ = ocr(process_path)
+            ocr_output = ocr(process_path)
+
+            # 使用兼容性解析器处理不同版本的输出格式
+            result = OcrResultParser.parse(ocr_output)
 
             if ocr_logger:
                 ocr_logger.log_raw_result(result)
