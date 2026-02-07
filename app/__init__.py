@@ -30,6 +30,28 @@ def migrate_position_table():
         logging.info("positions 表迁移完成")
 
 
+def migrate_daily_snapshot_table():
+    """迁移 daily_snapshots 表：添加 daily_fee 列"""
+    from sqlalchemy import inspect, text
+
+    private_engine = db.get_engine(bind='private')
+    inspector = inspect(private_engine)
+
+    try:
+        columns = [col['name'] for col in inspector.get_columns('daily_snapshots')]
+    except Exception:
+        return
+
+    if 'daily_fee' in columns:
+        return
+
+    logging.info("迁移 daily_snapshots 表: 添加 daily_fee 列")
+    with private_engine.connect() as conn:
+        conn.execute(text('ALTER TABLE daily_snapshots ADD COLUMN daily_fee FLOAT DEFAULT 0'))
+        conn.commit()
+    logging.info("daily_snapshots 表迁移完成")
+
+
 def setup_logging(app):
     """配置应用日志系统"""
     log_dir = app.config.get('LOG_DIR', 'data/logs')
@@ -118,6 +140,7 @@ def create_app(config_class=None):
         from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, PreloadStatus, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache
         db.create_all()
         migrate_position_table()
+        migrate_daily_snapshot_table()
 
     # 预加载 OCR 模型，避免首次识别时卡顿
     from app.services.ocr import preload_model
