@@ -21,19 +21,21 @@
             <div class="navbar-nav">
                 <a class="nav-link" href="{{ url_for('briefing.index') }}">每日简报</a>
                 <a class="nav-link" href="{{ url_for('alert.index') }}">预警</a>
-                <a class="nav-link" href="{{ url_for('daily_record.index') }}">每日记录</a>
-                <a class="nav-link" href="{{ url_for('trade.index') }}">交易列表</a>
                 <a class="nav-link" href="{{ url_for('heavy_metals.index') }}">走势看板</a>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        收益
+                        <i class="bi bi-person-circle"></i> 我的
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('profit.daily') }}">每日收益</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('profit.overall') }}">整体收益</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('daily_record.index') }}"><i class="bi bi-calendar-check"></i> 每日记录</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('trade.index') }}"><i class="bi bi-list-ul"></i> 交易列表</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('profit.daily') }}"><i class="bi bi-graph-up"></i> 每日收益</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('profit.overall') }}"><i class="bi bi-pie-chart"></i> 整体收益</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('rebalance.index') }}"><i class="bi bi-sliders"></i> 仓位配平</a></li>
                     </ul>
                 </li>
-                <a class="nav-link" href="{{ url_for('rebalance.index') }}">仓位配平</a>
                 <a class="nav-link" href="{{ url_for('stock.manage') }}">股票代码</a>
             </div>
         </div>
