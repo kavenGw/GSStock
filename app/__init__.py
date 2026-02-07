@@ -52,6 +52,28 @@ def migrate_daily_snapshot_table():
     logging.info("daily_snapshots 表迁移完成")
 
 
+def migrate_trades_table():
+    """迁移 trades 表：添加 fee 列"""
+    from sqlalchemy import inspect, text
+
+    private_engine = db.get_engine(bind='private')
+    inspector = inspect(private_engine)
+
+    try:
+        columns = [col['name'] for col in inspector.get_columns('trades')]
+    except Exception:
+        return
+
+    if 'fee' in columns:
+        return
+
+    logging.info("迁移 trades 表: 添加 fee 列")
+    with private_engine.connect() as conn:
+        conn.execute(text('ALTER TABLE trades ADD COLUMN fee FLOAT DEFAULT 0'))
+        conn.commit()
+    logging.info("trades 表迁移完成")
+
+
 def setup_logging(app):
     """配置应用日志系统"""
     log_dir = app.config.get('LOG_DIR', 'data/logs')
@@ -141,6 +163,7 @@ def create_app(config_class=None):
         db.create_all()
         migrate_position_table()
         migrate_daily_snapshot_table()
+        migrate_trades_table()
 
     # 预加载 OCR 模型，避免首次识别时卡顿
     from app.services.ocr import preload_model
