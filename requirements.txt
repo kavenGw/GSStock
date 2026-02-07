@@ -1,0 +1,12 @@
+flask>=3.0.0
+flask-sqlalchemy>=3.1.0
+pillow>=10.0.0
+rapidocr-onnxruntime>=1.4.0
+yfinance>=0.2.0
+akshare>=1.10.0
+exchange-calendars>=4.5.0
+
+# GPU 加速（根据硬件选择一个安装）:
+# NVIDIA GPU: pip install onnxruntime-gpu>=1.19.0
+# Windows DirectML: pip install onnxruntime-directml>=1.19.0
+# CPU-only: 已包含在 rapidocr-onnxruntime 中，无需额外安装

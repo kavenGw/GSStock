@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}每日收益{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">每日收益</h2>
+
+{% if data.daily_profits %}
+<!-- 统计摘要卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">统计天数</h6>
+                <h3 class="card-title">{{ data.summary.total_days }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">盈利/亏损天数</h6>
+                <h3 class="card-title">
+                    <span class="text-success">{{ data.summary.win_days }}</span>
+                    /
+                    <span class="text-danger">{{ data.summary.loss_days }}</span>
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">日胜率</h6>
+                <h3 class="card-title">{{ '%.1f'|format(data.summary.win_rate) }}%</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">累计盈亏</h6>
+                <h3 class="card-title {{ 'text-success' if data.summary.total_profit > 0 else 'text-danger' if data.summary.total_profit < 0 else '' }}">
+                    {{ '%+.2f'|format(data.summary.total_profit) }}
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">单日最大盈利</h6>
+                <h3 class="card-title text-success">{{ '%+.2f'|format(data.summary.max_profit) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">单日最大亏损</h6>
+                <h3 class="card-title text-danger">{{ '%+.2f'|format(data.summary.max_loss) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">日均盈亏</h6>
+                <h3 class="card-title {{ 'text-success' if data.summary.avg_profit > 0 else 'text-danger' if data.summary.avg_profit < 0 else '' }}">
+                    {{ '%+.2f'|format(data.summary.avg_profit) }}
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表区域 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">每日盈亏</div>
+            <div class="card-body">
+                <canvas id="dailyProfitChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">累计盈亏</div>
+            <div class="card-body">
+                <canvas id="cumulativeProfitChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 按股票和分类的盈亏分布 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">按股票盈亏分布</div>
+            <div class="card-body">
+                <canvas id="profitByStockChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">按板块盈亏分布</div>
+            <div class="card-body">
+                <canvas id="profitByCategoryChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 每日收益明细列表 -->
+<div class="card">
+    <div class="card-header">每日收益明细</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>日期</th>
+                        <th>当日盈亏</th>
+                        <th>盈亏比例</th>
+                        <th>当日市值</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.daily_profits|reverse %}
+                    <tr>
+                        <td>{{ item.date }}</td>
+                        <td class="{{ 'text-success' if item.daily_profit > 0 else 'text-danger' if item.daily_profit < 0 else '' }}">
+                            {{ '%+.2f'|format(item.daily_profit) }}
+                        </td>
+                        <td class="{{ 'text-success' if item.daily_profit_pct > 0 else 'text-danger' if item.daily_profit_pct < 0 else '' }}">
+                            {{ '%+.2f'|format(item.daily_profit_pct) }}%
+                        </td>
+                        <td>{{ '%.2f'|format(item.market_value) }}</td>
+                        <td>
+                            <a href="{{ url_for('daily_record.stats', date_str=item.date) }}" class="btn btn-sm btn-outline-primary">详情</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <h4>暂无收益数据</h4>
+    <p>上传每日持仓数据后即可查看收益统计</p>
+    <a href="{{ url_for('daily_record.index') }}" class="btn btn-primary">上传持仓</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.profitData = {{ data|tojson }};
+    window.byStockData = {{ by_stock|tojson }};
+    window.byCategoryData = {{ by_category|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/profit_charts.js') }}"></script>
+{% endblock %}

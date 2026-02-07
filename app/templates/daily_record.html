@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}每日记录 - 股票管理{% endblock %}
+
+{% block extra_css %}
+<style>
+.account-info-grid {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.account-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.account-info-item .label {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+.account-info-item .value {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.account-info-item .value.profit {
+    color: #dc3545;
+}
+.account-info-item .value.loss {
+    color: #198754;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>每日记录</h2>
+    <div class="d-flex align-items-center gap-2">
+        <label for="targetDate" class="form-label mb-0">日期:</label>
+        <input type="date" class="form-control" id="targetDate" value="{{ today }}" style="width: 160px;">
+    </div>
+</div>
+
+<div class="row">
+    <!-- 持仓上传区 -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">持仓截图</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="upload-zone" id="positionUploadZone1">
+                            <input type="file" id="positionFileInput1" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
+                            <h5>点击或拖拽图片到此处</h5>
+                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
+                        </div>
+                        <div id="positionProgress1" class="mt-2" style="display:none">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="positionProgressText1"></small>
+                        </div>
+                        <div id="positionErrors1" class="mt-2"></div>
+                    </div>
+                    <div class="col-6">
+                        <div class="upload-zone" id="positionUploadZone2">
+                            <input type="file" id="positionFileInput2" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
+                            <h5>点击或拖拽图片到此处</h5>
+                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
+                        </div>
+                        <div id="positionProgress2" class="mt-2" style="display:none">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="positionProgressText2"></small>
+                        </div>
+                        <div id="positionErrors2" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div id="positionPreview" class="mt-3" style="display:none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">持仓预览 (<span id="positionCount">0</span>条)</h6>
+                        <button class="btn btn-sm btn-outline-primary" id="addPositionBtn">添加</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>代码</th>
+                                    <th>状态</th>
+                                    <th>名称</th>
+                                    <th>数量</th>
+                                    <th>总成本</th>
+                                    <th>现价</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 交易上传区 -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">交易截图</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="upload-zone" id="tradeUploadZone1">
+                            <input type="file" id="tradeFileInput1" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
+                            <h5>点击或拖拽图片到此处</h5>
+                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
+                        </div>
+                        <div id="tradeProgress1" class="mt-2" style="display:none">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="tradeProgressText1"></small>
+                        </div>
+                        <div id="tradeErrors1" class="mt-2"></div>
+                    </div>
+                    <div class="col-6">
+                        <div class="upload-zone" id="tradeUploadZone2">
+                            <input type="file" id="tradeFileInput2" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
+                            <h5>点击或拖拽图片到此处</h5>
+                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
+                        </div>
+                        <div id="tradeProgress2" class="mt-2" style="display:none">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="tradeProgressText2"></small>
+                        </div>
+                        <div id="tradeErrors2" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div id="tradePreview" class="mt-3" style="display:none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">交易预览 (<span id="tradeCount">0</span>条)</h6>
+                        <button class="btn btn-sm btn-outline-primary" id="addTradeBtn">添加</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>类型</th>
+                                    <th>代码</th>
+                                    <th>名称</th>
+                                    <th>数量</th>
+                                    <th>价格</th>
+                                    <th>金额</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tradeTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 账户概览信息 -->
+<div id="accountInfoContainer" class="card mt-4" style="display:none">
+    <div class="card-header">
+        <h5 class="mb-0">账户概览</h5>
+    </div>
+    <div class="card-body">
+        <!-- 由 JS 动态填充 -->
+    </div>
+</div>
+
+<!-- 银证转账 -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">银证转账</h5>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-end">
+            <div class="col-md-3">
+                <label for="transferType" class="form-label">转账类型</label>
+                <select id="transferType" class="form-select">
+                    <option value="">无转账</option>
+                    <option value="in">转入（银行→证券）</option>
+                    <option value="out">转出（证券→银行）</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="transferAmount" class="form-label">金额</label>
+                <input type="number" id="transferAmount" class="form-control" placeholder="输入金额" step="0.01" min="0" disabled>
+            </div>
+            <div class="col-md-4">
+                <label for="transferNote" class="form-label">备注</label>
+                <input type="text" id="transferNote" class="form-control" placeholder="可选" disabled>
+            </div>
+        </div>
+        <div id="existingTransfers" class="mt-3" style="display:none">
+            <small class="text-muted">当日已有转账记录：</small>
+            <div id="existingTransfersList"></div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 text-center">
+    <button class="btn btn-lg btn-primary" id="saveAllBtn" disabled>保存全部</button>
+</div>
+
+<!-- 添加别名模态框 -->
+<div class="modal fade" id="addAliasModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加别名</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>将 "<span id="aliasOriginalName"></span>" 作为以下股票的别名：</p>
+                <select id="aliasStockSelect" class="form-select"></select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveAliasBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/daily_record.js') }}"></script>
+{% endblock %}

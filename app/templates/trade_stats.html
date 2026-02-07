@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>交易统计</h2>
+    <div class="d-flex gap-2">
+        <select id="periodFilter" class="form-select" style="width:auto">
+            <option value="month">按月统计</option>
+            <option value="quarter">按季度统计</option>
+        </select>
+    </div>
+</div>
+
+{% if settlements %}
+<!-- 统计摘要卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="text-muted small mb-1">总交易数</div>
+                <h3 class="mb-0 fw-bold">{{ chart_data.summary.total_trades }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="text-muted small mb-1">已结算</div>
+                <h3 class="mb-0 fw-bold">{{ chart_data.summary.total_settlements }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="text-muted small mb-1">总盈亏</div>
+                <h3 class="mb-0 fw-bold {{ 'text-success' if chart_data.summary.total_profit > 0 else 'text-danger' if chart_data.summary.total_profit < 0 else '' }}">
+                    ¥{{ '%.2f'|format(chart_data.summary.total_profit) }}
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="text-muted small mb-1">胜率</div>
+                <h3 class="mb-0 fw-bold {{ 'text-success' if chart_data.summary.win_rate >= 50 else 'text-warning' }}">
+                    {{ '%.1f'|format(chart_data.summary.win_rate) }}%
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表区域第一行 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">盈亏分布</div>
+            <div class="card-body">
+                <canvas id="profitChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">累计盈亏</div>
+            <div class="card-body">
+                <canvas id="cumulativeChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表区域第二行 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">分类收益</div>
+            <div class="card-body">
+                <div id="categoryChart" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">持仓周期分析</div>
+            <div class="card-body">
+                <div id="holdingChart" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表区域第三行 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">月度/季度趋势</div>
+            <div class="card-body">
+                <div id="trendChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 已结算股票列表 -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>已结算股票</span>
+        <span class="badge bg-secondary">{{ settlements|length }} 只</span>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-hover" id="settlementTable">
+            <thead class="table-light">
+                <tr>
+                    <th>股票代码</th>
+                    <th>股票名称</th>
+                    <th>买入成本</th>
+                    <th>卖出收入</th>
+                    <th>盈亏</th>
+                    <th>盈亏比例</th>
+                    <th>持仓天数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in settlements %}
+                <tr data-stock-code="{{ s.stock_code }}">
+                    <td>{{ s.stock_code }}</td>
+                    <td>{{ s.stock_name }}</td>
+                    <td>¥{{ '%.2f'|format(s.total_buy_amount) }}</td>
+                    <td>¥{{ '%.2f'|format(s.total_sell_amount) }}</td>
+                    <td class="{{ 'text-success' if s.profit > 0 else 'text-danger' if s.profit < 0 else '' }}">
+                        ¥{{ '%.2f'|format(s.profit) }}
+                    </td>
+                    <td class="{{ 'text-success' if s.profit_pct > 0 else 'text-danger' if s.profit_pct < 0 else '' }}">
+                        {{ '%.2f'|format(s.profit_pct) }}%
+                    </td>
+                    <td>{{ s.holding_days }}天</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <h4>暂无已结算交易</h4>
+    <p>当股票完全卖出后，可进行结算统计</p>
+    <a href="{{ url_for('trade.index') }}" class="btn btn-primary">查看交易记录</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+    window.chartData = {{ chart_data|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/trade_stats.js') }}"></script>
+{% endblock %}

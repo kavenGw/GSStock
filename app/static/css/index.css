@@ -1,0 +1,265 @@
+/* 首页持仓卡片列表样式 */
+
+/* ========== 股票列表 ========== */
+.stock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stock-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stock-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.stock-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.stock-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.stock-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.stock-name:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.stock-code {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* ========== 板块标签 ========== */
+.category-tag {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.category-tag:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* ========== 迷你走势图 ========== */
+.mini-chart-container {
+    width: 100px;
+    height: 30px;
+    margin: 0 1rem;
+}
+
+.mini-chart {
+    width: 100%;
+    height: 100%;
+}
+
+/* ========== 收益显示 ========== */
+.profit-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 90px;
+    margin-right: 0.75rem;
+}
+
+.profit-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.profit-value.up {
+    color: #ef4444;
+}
+
+.profit-value.down {
+    color: #22c55e;
+}
+
+.profit-pct {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.125rem;
+}
+
+.profit-pct.up {
+    color: #ef4444;
+}
+
+.profit-pct.down {
+    color: #22c55e;
+}
+
+/* ========== 威科夫建议标签 ========== */
+.advice-section {
+    margin-left: 0.5rem;
+}
+
+.advice-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 40px;
+    cursor: pointer;
+}
+
+.advice-tag:hover {
+    opacity: 0.85;
+}
+
+.advice-tag.buy {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.advice-tag.sell {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.advice-tag.hold {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.advice-tag.watch {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.advice-tag.unknown {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
+/* ========== 威科夫详情弹窗 ========== */
+.info-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.phase-badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.phase-badge.accumulation {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.phase-badge.markup {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.phase-badge.distribution {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.phase-badge.markdown {
+    background: #f0fdf4;
+    color: #22c55e;
+}
+
+.advice-badge {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.advice-badge.buy {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.advice-badge.sell {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.advice-badge.hold {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.advice-badge.watch {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.analysis-reason {
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #374151;
+}
+
+/* ========== 板块资讯弹窗 ========== */
+.category-info-content {
+    margin: 0;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #374151;
+    white-space: pre-wrap;
+    font-family: inherit;
+    min-height: 120px;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+    .mini-chart-container {
+        width: 80px;
+        margin: 0 0.5rem;
+    }
+
+    .profit-section {
+        min-width: 70px;
+    }
+
+    .stock-item {
+        padding: 0.5rem 0.75rem;
+    }
+}

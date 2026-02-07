@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>交易记录</h2>
+    <div class="d-flex gap-2">
+        <select id="dateRangeFilter" class="form-select" style="width:auto">
+            <option value="">全部时间</option>
+            <option value="7">近7天</option>
+            <option value="30">近30天</option>
+            <option value="90">近90天</option>
+            <option value="180">近半年</option>
+            <option value="365">近一年</option>
+        </select>
+        <select id="stockCodeFilter" class="form-select" style="width:auto">
+            <option value="">全部股票</option>
+            {% for item in stock_codes_with_names %}
+            <option value="{{ item.code }}" {{ 'selected' if current_stock_code == item.code else '' }}>{{ item.code }}{% if item.name %}({{ item.name }}){% endif %}</option>
+            {% endfor %}
+        </select>
+        <select id="tradeTypeFilter" class="form-select" style="width:auto">
+            <option value="">全部类型</option>
+            <option value="buy" {{ 'selected' if current_trade_type == 'buy' else '' }}>买入</option>
+            <option value="sell" {{ 'selected' if current_trade_type == 'sell' else '' }}>卖出</option>
+        </select>
+        <a href="{{ url_for('daily_record.index') }}" class="btn btn-primary">上传交易</a>
+    </div>
+</div>
+
+<!-- 标签页切换 -->
+<ul class="nav nav-tabs mb-3" id="viewTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-view" type="button" role="tab">
+            列表视图
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="chart-tab" data-bs-toggle="tab" data-bs-target="#chart-view" type="button" role="tab">
+            图表视图
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer-view" type="button" role="tab">
+            银证转账
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- 列表视图 -->
+    <div class="tab-pane fade show active" id="list-view" role="tabpanel">
+        {% if trades %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>交易日期</th>
+                    <th>股票代码</th>
+                    <th>股票名称</th>
+                    <th>类型</th>
+                    <th>数量</th>
+                    <th>价格</th>
+                    <th>金额</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="tradeTable">
+                {% for t in trades %}
+                <tr data-trade-id="{{ t.id }}" data-stock-code="{{ t.stock_code }}" data-trade-type="{{ t.trade_type }}">
+                    <td>{{ t.trade_date }}</td>
+                    <td>{{ t.stock_code }}</td>
+                    <td>{{ t.stock_name }}</td>
+                    <td>
+                        <span class="badge {{ 'bg-success' if t.trade_type == 'buy' else 'bg-danger' }}">
+                            {{ '买入' if t.trade_type == 'buy' else '卖出' }}
+                        </span>
+                    </td>
+                    <td>{{ t.quantity }}</td>
+                    <td>{{ '%.2f'|format(t.price) }}</td>
+                    <td>{{ '%.2f'|format(t.amount) }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary btn-edit"
+                                    data-trade='{{ t.to_dict()|tojson }}'>编辑</button>
+                            <button class="btn btn-outline-danger btn-delete">删除</button>
+                            {% if t.stock_code in settleable_stocks %}
+                            <button class="btn btn-outline-success btn-settle"
+                                    data-stock-code="{{ t.stock_code }}">结算</button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <h4>暂无交易记录</h4>
+            <p>请上传交易截图开始记录</p>
+            <a href="{{ url_for('daily_record.index') }}" class="btn btn-primary">上传交易</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 图表视图 -->
+    <div class="tab-pane fade" id="chart-view" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">交易金额分布</div>
+                    <div class="card-body">
+                        <canvas id="amountDistChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">买卖金额对比</div>
+                    <div class="card-body">
+                        <canvas id="buySellChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>交易频率趋势</span>
+                        <small class="text-muted">支持缩放查看</small>
+                    </div>
+                    <div class="card-body">
+                        <div id="frequencyChart" style="height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>单股交易时间线</span>
+                        <select id="timelineStockSelect" class="form-select form-select-sm" style="width:auto">
+                            <option value="">选择股票</option>
+                            {% for item in stock_codes_with_names %}
+                            <option value="{{ item.code }}">{{ item.code }}{% if item.name %}({{ item.name }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div id="timelineChart" style="height: 350px;"></div>
+                        <div id="timelineEmpty" class="text-center text-muted py-5">请选择股票查看交易时间线</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 银证转账视图 -->
+    <div class="tab-pane fade" id="transfer-view" role="tabpanel">
+        <!-- 统计卡片 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">累计转入</h6>
+                        <h4 class="card-title text-success" id="totalTransferIn">--</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">累计转出</h6>
+                        <h4 class="card-title text-danger" id="totalTransferOut">--</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">净流入</h6>
+                        <h4 class="card-title" id="netTransferFlow">--</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">转账笔数</h6>
+                        <h4 class="card-title" id="transferCount">--</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 月度资金流向图表 -->
+        <div class="card mb-4">
+            <div class="card-header">月度资金流向</div>
+            <div class="card-body">
+                <div id="transferFlowChart" style="height: 350px;"></div>
+            </div>
+        </div>
+
+        <!-- 转账列表 -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>转账记录</span>
+                <button class="btn btn-sm btn-primary" id="addTransferBtn">新增转账</button>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover" id="transferTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>日期</th>
+                            <th>类型</th>
+                            <th>金额</th>
+                            <th>备注</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transferTableBody">
+                        <tr><td colspan="5" class="text-center text-muted">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑模态框 -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">编辑交易记录</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTradeId">
+                <div class="mb-3">
+                    <label class="form-label">股票</label>
+                    <input type="text" class="form-control" id="editStockInfo" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="editTradeDate" class="form-label">交易日期</label>
+                    <input type="date" class="form-control" id="editTradeDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editTradeType" class="form-label">交易类型</label>
+                    <select class="form-select" id="editTradeType" required>
+                        <option value="buy">买入</option>
+                        <option value="sell">卖出</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="editQuantity" class="form-label">数量</label>
+                    <input type="number" class="form-control" id="editQuantity" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editPrice" class="form-label">价格</label>
+                    <input type="number" class="form-control" id="editPrice" min="0.01" step="0.01" required>
+                </div>
+                <div id="editError" class="alert alert-danger" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveEditBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 转账编辑模态框 -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">银证转账</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTransferId">
+                <div class="mb-3">
+                    <label for="editTransferDate" class="form-label">日期</label>
+                    <input type="date" class="form-control" id="editTransferDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editTransferType" class="form-label">类型</label>
+                    <select class="form-select" id="editTransferType" required>
+                        <option value="in">转入（银行→证券）</option>
+                        <option value="out">转出（证券→银行）</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="editTransferAmount" class="form-label">金额</label>
+                    <input type="number" class="form-control" id="editTransferAmount" min="0.01" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editTransferNote" class="form-label">备注</label>
+                    <input type="text" class="form-control" id="editTransferNote" placeholder="可选">
+                </div>
+                <div id="transferError" class="alert alert-danger" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveTransferBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+    window.stockCodes = {{ stock_codes|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/trade_list.js') }}"></script>
+{% endblock %}

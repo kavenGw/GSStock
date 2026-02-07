@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}股票代码管理 - 股票管理{% endblock %}
+
+{% block extra_css %}
+<style>
+.editable {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+.editable:hover {
+    background-color: #f0f0f0;
+}
+.editable input {
+    border: 1px solid #0d6efd;
+    padding: 2px 4px;
+    border-radius: 3px;
+    width: 100%;
+}
+.category-select {
+    min-width: 120px;
+}
+.add-category-option {
+    color: #0d6efd;
+    font-style: italic;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">股票代码管理</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">新增股票</div>
+            <div class="card-body">
+                <form id="createForm" class="d-flex gap-2">
+                    <input type="text" class="form-control" id="stockCode" placeholder="股票代码" required style="width: 150px;">
+                    <input type="text" class="form-control" id="stockName" placeholder="股票名称" maxlength="50" required>
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </form>
+                <div id="createError" class="text-danger mt-2" style="display:none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4" id="stockList">
+    <!-- 按分类显示股票 -->
+    {% for parent_id, parent_data in stocks_by_category.items() %}
+    {% set child_stock_count = namespace(value=0) %}
+    {% for child_data in parent_data.children.values() %}
+        {% set child_stock_count.value = child_stock_count.value + child_data.stocks|length %}
+    {% endfor %}
+    {% set total_count = parent_data.stocks|length + child_stock_count.value %}
+    {% if total_count > 0 %}
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <strong>{{ parent_data.name }}</strong>
+            <span class="badge bg-light text-primary ms-2">{{ total_count }}</span>
+        </div>
+        <div class="card-body p-0">
+            <!-- 直接归属一级分类的股票 -->
+            {% if parent_data.stocks %}
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 120px;">股票代码</th>
+                        <th style="width: 150px;">股票名称</th>
+                        <th style="width: 150px;">别名</th>
+                        <th style="width: 200px;">投资建议</th>
+                        <th style="width: 150px;">分类</th>
+                        <th style="width: 80px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in parent_data.stocks %}
+                    {% include "partials/stock_row.html" %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            <!-- 二级分类 -->
+            {% for child_id, child_data in parent_data.children.items() %}
+            {% if child_data.stocks %}
+            <div class="border-top">
+                <div class="bg-light px-3 py-2 border-bottom">
+                    <span class="text-muted">└</span> <strong>{{ child_data.name }}</strong>
+                    <span class="badge bg-secondary ms-1">{{ child_data.stocks|length }}</span>
+                </div>
+                <table class="table table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 120px;">股票代码</th>
+                            <th style="width: 150px;">股票名称</th>
+                            <th style="width: 150px;">别名</th>
+                            <th style="width: 200px;">投资建议</th>
+                            <th style="width: 150px;">分类</th>
+                            <th style="width: 80px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in child_data.stocks %}
+                        {% include "partials/stock_row.html" %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- 未分类股票 -->
+    {% if uncategorized_stocks %}
+    <div class="card mb-3">
+        <div class="card-header bg-secondary text-white">
+            <strong>未分类</strong>
+            <span class="badge bg-light text-secondary ms-2">{{ uncategorized_stocks|length }}</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 120px;">股票代码</th>
+                        <th style="width: 150px;">股票名称</th>
+                        <th style="width: 150px;">别名</th>
+                        <th style="width: 200px;">投资建议</th>
+                        <th style="width: 150px;">分类</th>
+                        <th style="width: 80px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in uncategorized_stocks %}
+                    {% include "partials/stock_row.html" %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not stocks %}
+    <div class="text-center text-muted py-4">暂无股票</div>
+    {% endif %}
+</div>
+
+<!-- 新增分类弹窗 -->
+<div class="modal fade" id="newCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增分类</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">分类类型</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="categoryType" id="typeChild" value="child" checked>
+                        <label class="btn btn-outline-primary" for="typeChild">二级分类</label>
+                        <input type="radio" class="btn-check" name="categoryType" id="typeParent" value="parent">
+                        <label class="btn btn-outline-primary" for="typeParent">一级分类</label>
+                    </div>
+                </div>
+                <div class="mb-3" id="parentSelectGroup">
+                    <label class="form-label">父级分类</label>
+                    <select class="form-select" id="newCategoryParent">
+                        {% for parent in categories %}
+                        <option value="{{ parent.id }}">{{ parent.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">分类名称</label>
+                    <input type="text" class="form-control" id="newCategoryName" placeholder="输入分类名称" maxlength="20">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="confirmNewCategory">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const createForm = document.getElementById('createForm');
+const stockList = document.getElementById('stockList');
+let pendingCategorySelect = null;
+
+createForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const codeInput = document.getElementById('stockCode');
+    const nameInput = document.getElementById('stockName');
+    const errorDiv = document.getElementById('createError');
+
+    const code = codeInput.value.trim();
+    const name = nameInput.value.trim();
+
+    // 支持多市场股票代码验证
+    const patterns = [
+        /^\d{6}$/,           // A股: 6位数字
+        /^[A-Z]{1,5}$/i,     // 美股: 1-5位字母
+        /^\d{5}\.HK$/i,      // 港股: 5位数字+.HK
+        /^\d{4}\.TW$/i,      // 台股: 4位数字+.TW
+        /^\d{6}\.KS$/i,      // 韩股: 6位数字+.KS
+    ];
+    const isValid = patterns.some(pattern => pattern.test(code));
+    if (!isValid) {
+        errorDiv.textContent = '股票代码格式不正确';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    if (!name) {
+        errorDiv.textContent = '股票名称不能为空';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    const res = await fetch('/stocks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({stock_code: code, stock_name: name})
+    });
+    const data = await res.json();
+
+    if (data.error) {
+        errorDiv.textContent = data.error;
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    errorDiv.style.display = 'none';
+    codeInput.value = '';
+    nameInput.value = '';
+    location.reload();
+});
+
+// 双击编辑
+stockList.addEventListener('dblclick', (e) => {
+    const cell = e.target.closest('.editable');
+    if (!cell || cell.querySelector('input')) return;
+
+    const row = cell.closest('tr');
+    const code = row.dataset.code;
+    const field = cell.dataset.field;
+    const oldValue = cell.textContent.trim();
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = oldValue;
+    input.maxLength = field === 'advice' ? 500 : (field === 'alias' ? 200 : (field === 'code' ? 20 : 50));
+    if (field === 'alias') {
+        input.placeholder = '多个别名用逗号分隔';
+    }
+    if (field === 'advice') {
+        input.placeholder = '输入投资建议';
+    }
+
+    cell.textContent = '';
+    cell.appendChild(input);
+    input.focus();
+    input.select();
+
+    const saveEdit = async () => {
+        const newValue = input.value.trim();
+
+        // 别名和投资建议字段允许清空
+        if (field !== 'alias' && field !== 'advice' && !newValue) {
+            cell.textContent = oldValue;
+            return;
+        }
+        if (newValue === oldValue) {
+            cell.textContent = oldValue;
+            return;
+        }
+
+        if (field === 'advice') {
+            const res = await fetch(`/stocks/${code}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({investment_advice: newValue || null})
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                cell.textContent = oldValue;
+                return;
+            }
+            cell.textContent = data.investment_advice || '';
+        } else if (field === 'alias') {
+            // 解析逗号分隔的别名
+            const aliases = newValue ? newValue.split(',').map(a => a.trim()).filter(a => a) : [];
+
+            const res = await fetch(`/stocks/${code}/aliases`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({aliases: aliases})
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                cell.textContent = oldValue;
+                return;
+            }
+            cell.textContent = data.aliases.join(', ');
+        } else if (field === 'code') {
+            // 支持多市场股票代码验证
+            const patterns = [
+                /^\d{6}$/,           // A股: 6位数字
+                /^[A-Z]{1,5}$/i,     // 美股: 1-5位字母
+                /^\d{5}\.HK$/i,      // 港股: 5位数字+.HK
+                /^\d{4}\.TW$/i,      // 台股: 4位数字+.TW
+                /^\d{6}\.KS$/i,      // 韩股: 6位数字+.KS
+            ];
+            if (!patterns.some(pattern => pattern.test(newValue))) {
+                alert('股票代码格式不正确');
+                cell.textContent = oldValue;
+                return;
+            }
+            // 更新股票代码需要删除旧的再创建新的
+            const nameCell = row.querySelector('.stock-name');
+            const stockName = nameCell.textContent.trim();
+
+            const deleteRes = await fetch(`/stocks/${code}`, {method: 'DELETE'});
+            if (!deleteRes.ok) {
+                alert('更新失败');
+                cell.textContent = oldValue;
+                return;
+            }
+
+            const createRes = await fetch('/stocks', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({stock_code: newValue, stock_name: stockName})
+            });
+            const createData = await createRes.json();
+
+            if (createData.error) {
+                // 恢复原股票
+                await fetch('/stocks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({stock_code: code, stock_name: stockName})
+                });
+                alert(createData.error);
+                cell.textContent = oldValue;
+                return;
+            }
+
+            row.dataset.code = newValue;
+            cell.textContent = newValue;
+            // 更新分类下拉框的 data-code
+            const select = row.querySelector('.category-select');
+            if (select) select.dataset.code = newValue;
+        } else if (field === 'name') {
+            const res = await fetch(`/stocks/${code}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({stock_name: newValue})
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                cell.textContent = oldValue;
+                return;
+            }
+            cell.textContent = data.stock_name;
+        }
+    };
+
+    input.addEventListener('blur', saveEdit);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            input.blur();
+        }
+        if (e.key === 'Escape') {
+            cell.textContent = oldValue;
+        }
+    });
+});
+
+// 删除按钮
+stockList.addEventListener('click', async (e) => {
+    if (!e.target.classList.contains('delete-btn')) return;
+
+    const row = e.target.closest('tr');
+    const code = row.dataset.code;
+
+    if (!confirm('确定删除此股票？')) return;
+
+    const res = await fetch(`/stocks/${code}`, {method: 'DELETE'});
+    if (res.ok) {
+        location.reload();
+    }
+});
+
+// 分类下拉框变化
+stockList.addEventListener('change', async (e) => {
+    if (!e.target.classList.contains('category-select')) return;
+
+    const select = e.target;
+    const code = select.dataset.code;
+    const value = select.value;
+
+    if (value === '__new__') {
+        pendingCategorySelect = select;
+        new bootstrap.Modal(document.getElementById('newCategoryModal')).show();
+        return;
+    }
+
+    const categoryId = value ? parseInt(value) : null;
+    const res = await fetch(`/categories/stock/${code}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({category_id: categoryId})
+    });
+
+    if (!res.ok) {
+        alert('设置分类失败');
+        location.reload();
+    }
+});
+
+// 分类类型切换
+document.querySelectorAll('input[name="categoryType"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const isParent = document.getElementById('typeParent').checked;
+        document.getElementById('parentSelectGroup').style.display = isParent ? 'none' : 'block';
+    });
+});
+
+// 新增分类确认
+document.getElementById('confirmNewCategory').addEventListener('click', async () => {
+    const isParent = document.getElementById('typeParent').checked;
+    const parentId = isParent ? null : document.getElementById('newCategoryParent').value;
+    const name = document.getElementById('newCategoryName').value.trim();
+
+    if (!name) {
+        alert('分类名称不能为空');
+        return;
+    }
+
+    const body = isParent
+        ? {name: name, parent_id: null}
+        : {name: name, parent_id: parseInt(parentId)};
+
+    const res = await fetch('/categories', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    });
+    const data = await res.json();
+
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('newCategoryModal')).hide();
+
+    // 如果有待处理的下拉框，设置新分类
+    if (pendingCategorySelect) {
+        const code = pendingCategorySelect.dataset.code;
+        await fetch(`/categories/stock/${code}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({category_id: data.id})
+        });
+        pendingCategorySelect = null;
+    }
+
+    location.reload();
+});
+
+// 弹窗关闭时重置
+document.getElementById('newCategoryModal').addEventListener('hidden.bs.modal', () => {
+    if (pendingCategorySelect) {
+        pendingCategorySelect.value = '';
+        pendingCategorySelect = null;
+    }
+    document.getElementById('newCategoryName').value = '';
+    document.getElementById('typeChild').checked = true;
+    document.getElementById('parentSelectGroup').style.display = 'block';
+});
+
+</script>
+{% endblock %}

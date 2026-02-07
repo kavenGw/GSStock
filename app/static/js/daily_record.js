@@ -1,0 +1,713 @@
+document.addEventListener('DOMContentLoaded', function() {
+    initDailyRecordPage();
+});
+
+function initDailyRecordPage() {
+    const positionZone1 = document.getElementById('positionUploadZone1');
+    const positionZone2 = document.getElementById('positionUploadZone2');
+    const tradeZone1 = document.getElementById('tradeUploadZone1');
+    const tradeZone2 = document.getElementById('tradeUploadZone2');
+
+    if (!positionZone1 || !positionZone2 || !tradeZone1 || !tradeZone2) return;
+
+    let positionData = [];
+    let tradeData = [];
+    let accountData = {};  // 账户概览数据
+    let transferData = { type: '', amount: 0, note: '' };  // 银证转账数据
+
+    // 初始化转账输入控件
+    initTransferControls();
+
+    // 上传队列，确保串行执行
+    const uploadQueue = [];
+    let isUploading = false;
+
+    // 持仓上传区域1
+    initUploadZone(positionZone1, 'positionFileInput1', 'position', '1');
+
+    // 持仓上传区域2
+    initUploadZone(positionZone2, 'positionFileInput2', 'position', '2');
+
+    // 交易上传区域1
+    initUploadZone(tradeZone1, 'tradeFileInput1', 'trade', '1');
+
+    // 交易上传区域2
+    initUploadZone(tradeZone2, 'tradeFileInput2', 'trade', '2');
+
+    // 日期变化时重新计算当日盈亏和加载已有转账
+    document.getElementById('targetDate')?.addEventListener('change', async () => {
+        await loadExistingTransfers();
+        if (accountData.total_asset) {
+            await calculateDailyProfit();
+            renderAccountInfo();
+        }
+    });
+
+    // 页面加载时检查已有转账
+    loadExistingTransfers();
+
+    function initTransferControls() {
+        const transferType = document.getElementById('transferType');
+        const transferAmount = document.getElementById('transferAmount');
+        const transferNote = document.getElementById('transferNote');
+
+        if (!transferType || !transferAmount) return;
+
+        transferType.addEventListener('change', () => {
+            const hasTransfer = transferType.value !== '';
+            transferAmount.disabled = !hasTransfer;
+            transferNote.disabled = !hasTransfer;
+            if (!hasTransfer) {
+                transferAmount.value = '';
+                transferNote.value = '';
+            }
+            transferData.type = transferType.value;
+            updateSaveButton();
+        });
+
+        transferAmount.addEventListener('input', () => {
+            transferData.amount = parseFloat(transferAmount.value) || 0;
+        });
+
+        transferNote.addEventListener('input', () => {
+            transferData.note = transferNote.value;
+        });
+    }
+
+    async function loadExistingTransfers() {
+        const targetDate = document.getElementById('targetDate').value;
+        try {
+            const response = await fetch(`/daily-record/api/prev-asset/${targetDate}`);
+            const data = await response.json();
+
+            const existingDiv = document.getElementById('existingTransfers');
+            const listDiv = document.getElementById('existingTransfersList');
+
+            if (data.transfer && data.transfer.transfers && data.transfer.transfers.length > 0) {
+                existingDiv.style.display = 'block';
+                listDiv.innerHTML = data.transfer.transfers.map(t => {
+                    const typeText = t.transfer_type === 'in' ? '转入' : '转出';
+                    const colorClass = t.transfer_type === 'in' ? 'text-success' : 'text-danger';
+                    return `<span class="badge ${colorClass} me-2">${typeText} ${t.amount.toLocaleString()}${t.note ? ` (${t.note})` : ''}</span>`;
+                }).join('');
+            } else {
+                existingDiv.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('加载已有转账失败:', error);
+        }
+    }
+
+    function initUploadZone(zone, inputId, type, suffix) {
+        const fileInput = document.getElementById(inputId);
+
+        zone.addEventListener('click', () => fileInput.click());
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('dragover');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('dragover');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files, type, suffix);
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files, type, suffix);
+            }
+        });
+    }
+
+    // 将上传任务加入队列
+    function handleFiles(files, type, suffix) {
+        if (files.length > 10) {
+            alert('最多支持10张图片');
+            return;
+        }
+        uploadQueue.push({ files, type, suffix });
+        processQueue();
+    }
+
+    // 处理上传队列
+    async function processQueue() {
+        if (isUploading || uploadQueue.length === 0) return;
+
+        isUploading = true;
+        const { files, type, suffix } = uploadQueue.shift();
+        await doUpload(files, type, suffix);
+        isUploading = false;
+
+        // 继续处理队列中的下一个任务
+        processQueue();
+    }
+
+    // 实际执行上传
+    async function doUpload(files, type, suffix) {
+        const progressDiv = document.getElementById(`${type}Progress${suffix}`);
+        const progressBar = progressDiv.querySelector('.progress-bar');
+        const progressText = document.getElementById(`${type}ProgressText${suffix}`);
+        const errorsDiv = document.getElementById(`${type}Errors${suffix}`);
+
+        progressDiv.style.display = 'block';
+        errorsDiv.innerHTML = '';
+
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+        // 持仓上传时携带已有数据，实现累加合并
+        if (type === 'position' && positionData.length > 0) {
+            formData.append('existing', JSON.stringify(positionData));
+        }
+        // 交易上传时携带已有数据，实现累加合并
+        if (type === 'trade' && tradeData.length > 0) {
+            formData.append('existing', JSON.stringify(tradeData));
+        }
+
+        // 模拟进度
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            if (progress < 90) {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `正在识别... ${progress}%`;
+            }
+        }, 200);
+
+        const url = type === 'position' ? '/daily-record/upload-position' : '/daily-record/upload-trade';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            progressText.textContent = '识别完成';
+
+            const data = await response.json();
+
+            if (!data.success) {
+                errorsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                progressDiv.style.display = 'none';
+                return;
+            }
+
+            // 显示识别错误
+            const errors = data.results.filter(r => !r.success);
+            if (errors.length > 0) {
+                const errorHtml = errors.map(e =>
+                    `<div class="alert alert-warning py-1 mb-1">${e.filename}: ${e.error}</div>`
+                ).join('');
+                errorsDiv.innerHTML = errorHtml;
+            }
+
+            if (type === 'position') {
+                positionData = data.merged || [];
+
+                // 账户数据：后端已处理同批次叠加，这里处理跨批次叠加
+                if (data.account && Object.keys(data.account).length > 0) {
+                    // 判断是否已有账户数据（追加模式）
+                    const hasExistingAccount = accountData.total_asset !== undefined;
+                    if (hasExistingAccount) {
+                        // 追加模式：叠加总资产
+                        if (data.account.total_asset) {
+                            accountData.total_asset = (accountData.total_asset || 0) + data.account.total_asset;
+                        }
+                    } else {
+                        // 首次上传：只保留总资产
+                        accountData = { total_asset: data.account.total_asset };
+                    }
+                    // 计算真正的当日盈亏（今日总资产 - 前日总资产）
+                    await calculateDailyProfit();
+                    renderAccountInfo();
+                }
+                renderPositionTable();
+            } else {
+                tradeData = data.all_trades || [];
+                renderTradeTable();
+            }
+
+            setTimeout(() => {
+                progressDiv.style.display = 'none';
+            }, 500);
+
+        } catch (error) {
+            clearInterval(progressInterval);
+            progressDiv.style.display = 'none';
+            errorsDiv.innerHTML = `<div class="alert alert-danger">上传失败: ${error.message}</div>`;
+        }
+    }
+
+    async function calculateDailyProfit() {
+        if (!accountData.total_asset) return;
+
+        const targetDate = document.getElementById('targetDate').value;
+        try {
+            const response = await fetch(`/daily-record/api/prev-asset/${targetDate}`);
+            const data = await response.json();
+
+            if (data.success && data.has_prev && data.prev_total_asset) {
+                const dailyProfit = accountData.total_asset - data.prev_total_asset;
+                const dailyProfitPct = (dailyProfit / data.prev_total_asset) * 100;
+                accountData.daily_profit = dailyProfit;
+                accountData.daily_profit_pct = dailyProfitPct;
+                accountData.prev_date = data.prev_date;
+                accountData.prev_total_asset = data.prev_total_asset;
+            } else {
+                // 无前日数据，清除当日盈亏
+                delete accountData.daily_profit;
+                delete accountData.daily_profit_pct;
+                delete accountData.prev_date;
+                delete accountData.prev_total_asset;
+            }
+        } catch (error) {
+            console.error('获取前日资产失败:', error);
+        }
+    }
+
+    function renderAccountInfo() {
+        const container = document.getElementById('accountInfoContainer');
+        if (!container) return;
+
+        if (!accountData.total_asset && accountData.daily_profit === undefined) {
+            container.style.display = 'none';
+            return;
+        }
+
+        const cardBody = container.querySelector('.card-body');
+        if (!cardBody) return;
+
+        let html = '<div class="account-info-grid">';
+        if (accountData.total_asset) {
+            html += `<div class="account-info-item">
+                <span class="label">总资产</span>
+                <span class="value">¥${accountData.total_asset.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+            </div>`;
+        }
+        if (accountData.daily_profit !== undefined) {
+            const profitClass = accountData.daily_profit >= 0 ? 'profit' : 'loss';
+            const profitSign = accountData.daily_profit >= 0 ? '+' : '';
+            let pctStr = '';
+            if (accountData.daily_profit_pct !== undefined) {
+                pctStr = ` (${profitSign}${accountData.daily_profit_pct.toFixed(2)}%)`;
+            }
+            html += `<div class="account-info-item">
+                <span class="label">当日盈亏</span>
+                <span class="value ${profitClass}">${profitSign}${accountData.daily_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}${pctStr}</span>
+            </div>`;
+        } else if (accountData.total_asset) {
+            // 有总资产但无前日数据，显示提示
+            html += `<div class="account-info-item">
+                <span class="label">当日盈亏</span>
+                <span class="value text-muted">无前日数据</span>
+            </div>`;
+        }
+        html += '</div>';
+
+        cardBody.innerHTML = html;
+        container.style.display = 'block';
+    }
+
+    function renderPositionTable() {
+        const preview = document.getElementById('positionPreview');
+        const tbody = document.getElementById('positionTableBody');
+        const countEl = document.getElementById('positionCount');
+
+        if (positionData.length === 0) {
+            preview.style.display = 'none';
+            updateSaveButton();
+            return;
+        }
+
+        tbody.innerHTML = '';
+        positionData.forEach((p, idx) => {
+            const row = document.createElement('tr');
+            row.dataset.index = idx;
+
+            // 未匹配记录添加警告样式
+            if (p.unmatched) {
+                row.classList.add('table-warning');
+            }
+
+            let statusHtml = '';
+            if (p.unmatched) {
+                statusHtml += `<span class="badge bg-warning text-dark">未匹配</span>`;
+            }
+            if (p.merged_count > 1) {
+                statusHtml += `<span class="badge bg-info">已合并${p.merged_count}条</span>`;
+            }
+            if (p.alias_matched) {
+                statusHtml += `<span class="badge bg-secondary">别名匹配</span>`;
+            }
+
+            let actionHtml = '<button class="btn btn-sm btn-outline-danger delete-row">×</button>';
+            if (p.unmatched) {
+                actionHtml = `<button class="btn btn-sm btn-outline-primary add-alias-btn" data-name="${p.stock_name || ''}">添加别名</button> ` + actionHtml;
+            }
+
+            row.innerHTML = `
+                <td><input type="text" class="form-control form-control-sm stock-code" value="${p.stock_code || ''}"></td>
+                <td>${statusHtml}</td>
+                <td><input type="text" class="form-control form-control-sm stock-name" value="${p.stock_name || ''}"></td>
+                <td><input type="number" class="form-control form-control-sm quantity" value="${p.quantity || ''}"></td>
+                <td><input type="number" class="form-control form-control-sm total-amount" step="0.01" value="${p.total_amount ? p.total_amount.toFixed(2) : ''}"></td>
+                <td><input type="number" class="form-control form-control-sm current-price" step="0.001" value="${p.current_price ? p.current_price.toFixed(3) : ''}"></td>
+                <td>${actionHtml}</td>
+            `;
+            tbody.appendChild(row);
+
+            row.querySelector('.delete-row').addEventListener('click', () => {
+                positionData.splice(idx, 1);
+                renderPositionTable();
+            });
+
+            const addAliasBtn = row.querySelector('.add-alias-btn');
+            if (addAliasBtn) {
+                addAliasBtn.addEventListener('click', async () => {
+                    const stockName = addAliasBtn.dataset.name;
+                    document.getElementById('aliasOriginalName').textContent = stockName;
+
+                    await loadStockListForAlias();
+
+                    const modal = new bootstrap.Modal(document.getElementById('addAliasModal'));
+                    modal.show();
+                });
+            }
+        });
+
+        countEl.textContent = positionData.length;
+        preview.style.display = 'block';
+        updateSaveButton();
+    }
+
+    function renderTradeTable() {
+        const preview = document.getElementById('tradePreview');
+        const tbody = document.getElementById('tradeTableBody');
+        const countEl = document.getElementById('tradeCount');
+
+        if (tradeData.length === 0) {
+            preview.style.display = 'none';
+            updateSaveButton();
+            return;
+        }
+
+        tbody.innerHTML = '';
+        tradeData.forEach((t, idx) => {
+            const row = document.createElement('tr');
+            row.dataset.index = idx;
+            const amount = (t.quantity || 0) * (t.price || 0);
+            row.innerHTML = `
+                <td>
+                    <select class="form-select form-select-sm trade-type">
+                        <option value="buy" ${t.trade_type === 'buy' ? 'selected' : ''}>买入</option>
+                        <option value="sell" ${t.trade_type === 'sell' ? 'selected' : ''}>卖出</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control form-control-sm stock-code" value="${t.stock_code || ''}"></td>
+                <td><input type="text" class="form-control form-control-sm stock-name" value="${t.stock_name || ''}"></td>
+                <td><input type="number" class="form-control form-control-sm quantity" value="${t.quantity || ''}"></td>
+                <td><input type="number" class="form-control form-control-sm price" step="0.001" value="${t.price ? t.price.toFixed(3) : ''}"></td>
+                <td class="amount">${amount.toFixed(2)}</td>
+                <td><button class="btn btn-sm btn-outline-danger delete-row">×</button></td>
+            `;
+            tbody.appendChild(row);
+
+            // 自动重算金额
+            row.querySelector('.quantity').addEventListener('input', () => updateAmount(row));
+            row.querySelector('.price').addEventListener('input', () => updateAmount(row));
+
+            row.querySelector('.delete-row').addEventListener('click', () => {
+                tradeData.splice(idx, 1);
+                renderTradeTable();
+            });
+        });
+
+        countEl.textContent = tradeData.length;
+        preview.style.display = 'block';
+        updateSaveButton();
+    }
+
+    function updateAmount(row) {
+        const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.price').value) || 0;
+        row.querySelector('.amount').textContent = (quantity * price).toFixed(2);
+    }
+
+    function updateSaveButton() {
+        const saveBtn = document.getElementById('saveAllBtn');
+        const hasTransfer = transferData.type && transferData.amount > 0;
+        saveBtn.disabled = (positionData.length === 0 && tradeData.length === 0 && !hasTransfer);
+    }
+
+    // 添加持仓行
+    document.getElementById('addPositionBtn')?.addEventListener('click', () => {
+        positionData.push({
+            stock_code: '',
+            stock_name: '',
+            quantity: 0,
+            total_amount: 0,
+            current_price: 0
+        });
+        renderPositionTable();
+    });
+
+    // 添加交易行
+    document.getElementById('addTradeBtn')?.addEventListener('click', () => {
+        tradeData.push({
+            stock_code: '',
+            stock_name: '',
+            trade_type: 'buy',
+            quantity: 0,
+            price: 0
+        });
+        renderTradeTable();
+    });
+
+    // 保存全部
+    document.getElementById('saveAllBtn')?.addEventListener('click', async () => {
+        // 从表格收集数据
+        const positions = collectPositionData();
+        const trades = collectTradeData();
+
+        // 验证数据
+        if (!validateData(positions, trades)) {
+            return;
+        }
+
+        await saveData(positions, trades, false);
+    });
+
+    async function saveData(positions, trades, overwriteStocks) {
+        const targetDate = document.getElementById('targetDate').value;
+
+        // 收集转账数据
+        const transfer = transferData.type && transferData.amount > 0 ? {
+            type: transferData.type,
+            amount: transferData.amount,
+            note: transferData.note
+        } : null;
+
+        try {
+            const response = await fetch('/daily-record/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: targetDate,
+                    positions: positions,
+                    trades: trades,
+                    account: accountData,
+                    transfer: transfer,
+                    overwrite: true,
+                    overwrite_stocks: overwriteStocks
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else if (data.has_conflicts) {
+                // 显示冲突确认对话框
+                const conflictMsg = data.conflicts.map(c =>
+                    `${c.code}: "${c.old_name}" → "${c.new_name}"`
+                ).join('\n');
+
+                if (confirm(`以下股票名称与本地记录不一致:\n\n${conflictMsg}\n\n是否覆盖本地记录？`)) {
+                    await saveData(positions, trades, true);
+                }
+            } else {
+                alert(data.error || '保存失败');
+            }
+        } catch (error) {
+            alert('保存失败: ' + error.message);
+        }
+    }
+
+    function collectPositionData() {
+        const tbody = document.getElementById('positionTableBody');
+        const positions = [];
+
+        tbody.querySelectorAll('tr').forEach(row => {
+            const stockCode = row.querySelector('.stock-code').value.trim();
+            if (!stockCode) return;
+
+            positions.push({
+                stock_code: stockCode,
+                stock_name: row.querySelector('.stock-name').value.trim(),
+                quantity: parseInt(row.querySelector('.quantity').value) || 0,
+                total_amount: parseFloat(row.querySelector('.total-amount').value) || 0,
+                current_price: parseFloat(row.querySelector('.current-price').value) || 0
+            });
+        });
+
+        return positions;
+    }
+
+    function collectTradeData() {
+        const tbody = document.getElementById('tradeTableBody');
+        const trades = [];
+
+        tbody.querySelectorAll('tr').forEach(row => {
+            const stockCode = row.querySelector('.stock-code').value.trim();
+            if (!stockCode) return;
+
+            trades.push({
+                stock_code: stockCode,
+                stock_name: row.querySelector('.stock-name').value.trim(),
+                trade_type: row.querySelector('.trade-type').value,
+                quantity: parseInt(row.querySelector('.quantity').value) || 0,
+                price: parseFloat(row.querySelector('.price').value) || 0
+            });
+        });
+
+        return trades;
+    }
+
+    function validateData(positions, trades) {
+        let valid = true;
+
+        // 清除之前的错误样式
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+        // 验证持仓数据
+        document.querySelectorAll('#positionTableBody tr').forEach(row => {
+            const codeInput = row.querySelector('.stock-code');
+            const code = codeInput.value.trim();
+
+            if (code && !/^\d{6}$/.test(code)) {
+                codeInput.classList.add('is-invalid');
+                valid = false;
+            }
+
+            const quantityInput = row.querySelector('.quantity');
+            if (quantityInput.value && parseFloat(quantityInput.value) <= 0) {
+                quantityInput.classList.add('is-invalid');
+                valid = false;
+            }
+
+            const priceInput = row.querySelector('.current-price');
+            if (priceInput.value && parseFloat(priceInput.value) <= 0) {
+                priceInput.classList.add('is-invalid');
+                valid = false;
+            }
+        });
+
+        // 验证交易数据
+        document.querySelectorAll('#tradeTableBody tr').forEach(row => {
+            const codeInput = row.querySelector('.stock-code');
+            const code = codeInput.value.trim();
+
+            if (code && !/^\d{6}$/.test(code)) {
+                codeInput.classList.add('is-invalid');
+                valid = false;
+            }
+
+            const quantityInput = row.querySelector('.quantity');
+            if (quantityInput.value && parseFloat(quantityInput.value) <= 0) {
+                quantityInput.classList.add('is-invalid');
+                valid = false;
+            }
+
+            const priceInput = row.querySelector('.price');
+            if (priceInput.value && parseFloat(priceInput.value) <= 0) {
+                priceInput.classList.add('is-invalid');
+                valid = false;
+            }
+        });
+
+        if (!valid) {
+            alert('请检查输入数据（红色高亮的字段）');
+        }
+
+        return valid;
+    }
+
+    async function loadStockListForAlias() {
+        const select = document.getElementById('aliasStockSelect');
+        select.innerHTML = '<option value="">加载中...</option>';
+
+        try {
+            const response = await fetch('/stock');
+            const data = await response.json();
+
+            select.innerHTML = '<option value="">请选择股票</option>';
+            if (data.stocks && data.stocks.length > 0) {
+                data.stocks.forEach(stock => {
+                    const option = document.createElement('option');
+                    option.value = stock.stock_code;
+                    option.textContent = `${stock.stock_code} - ${stock.stock_name}`;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('加载股票列表失败:', error);
+            select.innerHTML = '<option value="">加载失败</option>';
+        }
+    }
+
+    async function remergePositionData() {
+        if (positionData.length === 0) return;
+
+        const formData = new FormData();
+        formData.append('existing', JSON.stringify(positionData));
+
+        try {
+            const response = await fetch('/daily-record/upload-position', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                positionData = data.merged || [];
+                renderPositionTable();
+            }
+        } catch (error) {
+            console.error('重新合并失败:', error);
+        }
+    }
+
+    document.getElementById('saveAliasBtn')?.addEventListener('click', async () => {
+        const aliasName = document.getElementById('aliasOriginalName').textContent;
+        const stockCode = document.getElementById('aliasStockSelect').value;
+
+        if (!stockCode) {
+            alert('请选择股票');
+            return;
+        }
+
+        try {
+            const response = await fetch('/stock/aliases', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    alias_name: aliasName,
+                    stock_code: stockCode
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addAliasModal'));
+                modal.hide();
+
+                await remergePositionData();
+            } else {
+                alert(data.error || '保存别名失败');
+            }
+        } catch (error) {
+            alert('保存别名失败: ' + error.message);
+        }
+    });
+}

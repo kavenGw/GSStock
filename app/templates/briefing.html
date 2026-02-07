@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}每日简报{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 自适应网格布局 */
+    .briefing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+    }
+    .briefing-grid-wide {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    /* 紧凑卡片样式 */
+    .briefing-card {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 8px 10px;
+        background: #fff;
+        transition: box-shadow 0.2s;
+    }
+    .briefing-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .briefing-card.has-error {
+        border-color: #ffc107;
+    }
+
+    /* 卡片头部 */
+    .bc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 4px;
+    }
+    .bc-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: #333;
+    }
+    .bc-code {
+        font-size: 0.7rem;
+        color: #888;
+    }
+    .bc-badge {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+        border-radius: 3px;
+        background: #6c757d;
+        color: #fff;
+    }
+
+    /* 核心数据 */
+    .bc-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .bc-change {
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    /* 次要信息 */
+    .bc-secondary {
+        font-size: 0.7rem;
+        color: #666;
+        margin-top: 4px;
+        line-height: 1.4;
+    }
+    .bc-secondary span {
+        margin-right: 6px;
+    }
+
+    /* 分类标题 */
+    .category-title {
+        font-size: 0.8rem;
+        color: #666;
+        padding: 4px 0;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #eee;
+        grid-column: 1 / -1;
+    }
+
+    /* 区块卡片 */
+    .section-card {
+        margin-bottom: 16px;
+    }
+    .section-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 8px 12px;
+    }
+    .section-card .card-header h5 {
+        color: #495057;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+    .section-card .card-body {
+        padding: 12px;
+    }
+
+    /* ETF 特殊样式 */
+    .etf-card {
+        border-left: 3px solid #0d6efd;
+    }
+    .etf-card .bc-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        margin-top: 4px;
+    }
+    .etf-card .bc-row-label {
+        color: #888;
+    }
+
+    /* 板块列表 */
+    .sector-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .sector-item:last-child {
+        border-bottom: none;
+    }
+    .sector-leader {
+        font-size: 0.75rem;
+        color: #888;
+        margin-left: 8px;
+    }
+
+    /* 板块评级卡片 */
+    .rating-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px 16px;
+        background: #fff;
+        display: inline-flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 200px;
+    }
+    .rating-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .rating-sector-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .rating-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .rating-bullish {
+        background: #d4edda;
+        color: #28a745;
+    }
+    .rating-neutral {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .rating-bearish {
+        background: #f8d7da;
+        color: #dc3545;
+    }
+    .rating-detail {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+    .rating-stocks {
+        font-size: 0.8rem;
+        color: #495057;
+    }
+
+    /* 颜色 */
+    .text-up { color: #dc3545 !important; }
+    .text-down { color: #28a745 !important; }
+    .text-flat { color: #6c757d !important; }
+    .text-warning-dark { color: #856404 !important; }
+
+    /* 财报预警 */
+    .earnings-alert-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.85rem;
+    }
+    .earnings-alert-item:last-child {
+        border-bottom: none;
+    }
+
+    /* 头部右侧 */
+    .bc-header-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* 投资建议按钮 */
+    .advice-icon-btn {
+        cursor: pointer;
+        color: #6c757d;
+        font-size: 14px;
+        opacity: 0.7;
+        transition: opacity 0.2s, color 0.2s;
+    }
+    .advice-icon-btn:hover {
+        opacity: 1;
+        color: #0d6efd;
+    }
+
+    /* 投资建议弹窗 */
+    .advice-popover {
+        position: fixed;
+        z-index: 1050;
+        max-width: 280px;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 0.85rem;
+    }
+    .advice-popover-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+    }
+    .advice-popover-close {
+        border: none;
+        background: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #6c757d;
+        line-height: 1;
+    }
+    .advice-popover-close:hover {
+        color: #333;
+    }
+    .advice-popover-body {
+        padding: 12px;
+        white-space: pre-wrap;
+        line-height: 1.5;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 页面标题 -->
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1"><i class="bi bi-newspaper"></i> 每日简报</h4>
+            <small class="text-muted">关键股票、主要指数、ETF溢价监控</small>
+        </div>
+        <div class="header-actions">
+            <span class="text-muted me-3" id="lastUpdate">--</span>
+            <button class="btn btn-outline-primary btn-sm" onclick="BriefingPage.refresh()" id="refreshBtn">
+                <i class="bi bi-arrow-clockwise"></i> 刷新
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 加载状态 -->
+<div id="loadingState" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">加载中...</span>
+    </div>
+    <p class="mt-2 text-muted">正在获取市场数据...</p>
+</div>
+
+<!-- 错误状态 -->
+<div id="errorState" class="alert alert-danger d-none">
+    <i class="bi bi-exclamation-triangle"></i> 数据加载失败: <span id="errorMessage"></span>
+</div>
+
+<!-- 数据内容 -->
+<div id="dataContent" class="d-none">
+    <!-- 财报预警 -->
+    <div id="earningsAlertSection" class="d-none">
+        <div class="card section-card border-warning">
+            <div class="card-header bg-warning bg-opacity-25">
+                <h5><i class="bi bi-calendar-event"></i> 财报预警</h5>
+            </div>
+            <div class="card-body">
+                <div id="earningsAlertContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 个股行情 -->
+    <div class="card section-card">
+        <div class="card-header">
+            <h5><i class="bi bi-graph-up"></i> 个股行情</h5>
+        </div>
+        <div class="card-body">
+            <div class="briefing-grid" id="stocksContainer"></div>
+        </div>
+    </div>
+
+    <!-- 主要指数 -->
+    <div class="card section-card">
+        <div class="card-header">
+            <h5><i class="bi bi-bar-chart"></i> 主要指数</h5>
+        </div>
+        <div class="card-body">
+            <div class="briefing-grid" id="indicesContainer"></div>
+        </div>
+    </div>
+
+    <!-- 期货行情 -->
+    <div class="card section-card">
+        <div class="card-header">
+            <h5><i class="bi bi-currency-exchange"></i> 期货行情</h5>
+        </div>
+        <div class="card-body">
+            <div class="briefing-grid" id="futuresContainer"></div>
+        </div>
+    </div>
+
+    <!-- ETF溢价监控 -->
+    <div class="card section-card">
+        <div class="card-header">
+            <h5><i class="bi bi-percent"></i> ETF溢价监控</h5>
+        </div>
+        <div class="card-body">
+            <div class="briefing-grid briefing-grid-wide" id="etfContainer"></div>
+        </div>
+    </div>
+
+    <!-- 板块评级 -->
+    <div class="card section-card">
+        <div class="card-header">
+            <h5><i class="bi bi-speedometer2"></i> 板块评级</h5>
+        </div>
+        <div class="card-body">
+            <div id="sectorRatingsContainer"></div>
+        </div>
+    </div>
+
+    <!-- 板块涨幅 -->
+    <div class="card section-card">
+        <div class="card-header">
+            <h5><i class="bi bi-grid"></i> 板块涨幅TOP5</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="category-title">A股热门板块</div>
+                    <div id="cnSectorsContainer"></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="category-title">美股热门板块</div>
+                    <div id="usSectorsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/briefing.js') }}"></script>
+{% endblock %}

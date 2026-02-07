@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}板块管理 - 股票管理{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">板块管理</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">新建一级板块</div>
+            <div class="card-body">
+                <form id="createForm" class="d-flex gap-2">
+                    <input type="text" class="form-control" id="newCategoryName" placeholder="输入板块名称" maxlength="20" required>
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </form>
+                <div id="createError" class="text-danger mt-2" style="display:none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <h4>板块列表</h4>
+    <div id="categoryTree">
+        {% for parent in category_tree %}
+        <div class="card mb-2 category-card" data-id="{{ parent.id }}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="category-name fw-bold">{{ parent.name }}</span>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success add-child-btn" title="添加子板块">+ 子板块</button>
+                    <button class="btn btn-outline-primary edit-btn" title="编辑">编辑</button>
+                    <button class="btn btn-outline-danger delete-btn" title="删除">删除</button>
+                </div>
+            </div>
+            {% if parent.children %}
+            <ul class="list-group list-group-flush">
+                {% for child in parent.children %}
+                <li class="list-group-item d-flex justify-content-between align-items-center child-item" data-id="{{ child.id }}">
+                    <span class="category-name">{{ child.name }}</span>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary edit-btn" title="编辑">编辑</button>
+                        <button class="btn btn-outline-danger delete-btn" title="删除">删除</button>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% else %}
+        <div id="emptyState" class="text-center text-muted py-4">暂无板块</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const createForm = document.getElementById('createForm');
+const categoryTree = document.getElementById('categoryTree');
+
+createForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('newCategoryName');
+    const errorDiv = document.getElementById('createError');
+    const name = input.value.trim();
+    if (!name) return;
+
+    const res = await fetch('/categories', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name})
+    });
+    const data = await res.json();
+
+    if (data.error) {
+        errorDiv.textContent = data.error;
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    errorDiv.style.display = 'none';
+    input.value = '';
+    location.reload();
+});
+
+categoryTree.addEventListener('click', async (e) => {
+    const btn = e.target;
+    const card = btn.closest('.category-card');
+    const childItem = btn.closest('.child-item');
+
+    if (btn.classList.contains('add-child-btn') && card) {
+        const parentId = card.dataset.id;
+        const name = prompt('输入子板块名称');
+        if (!name || !name.trim()) return;
+
+        const res = await fetch('/categories', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name.trim(), parent_id: parseInt(parentId)})
+        });
+        const data = await res.json();
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        location.reload();
+    }
+
+    if (btn.classList.contains('edit-btn')) {
+        const id = childItem ? childItem.dataset.id : card.dataset.id;
+        const nameEl = (childItem || card).querySelector('.category-name');
+        const oldName = nameEl.textContent;
+        const newName = prompt('编辑板块名称', oldName);
+        if (!newName || newName.trim() === oldName) return;
+
+        const res = await fetch(`/categories/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: newName.trim()})
+        });
+        const data = await res.json();
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        nameEl.textContent = data.name;
+    }
+
+    if (btn.classList.contains('delete-btn')) {
+        const id = childItem ? childItem.dataset.id : card.dataset.id;
+        const isParent = !childItem;
+        const msg = isParent
+            ? '确定删除此板块？其子板块和关联股票将一并处理。'
+            : '确定删除此子板块？关联的股票将变为未设板块。';
+        if (!confirm(msg)) return;
+
+        const res = await fetch(`/categories/${id}`, {method: 'DELETE'});
+        if (res.ok) {
+            location.reload();
+        }
+    }
+});
+</script>
+{% endblock %}

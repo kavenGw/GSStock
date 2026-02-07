@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}预警中心{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/alert.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- 页面标题 -->
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1"><i class="bi bi-bell"></i> 预警中心</h4>
+            <small class="text-muted">实时监控自选股的技术指标预警</small>
+        </div>
+        <div class="header-actions">
+            <div class="view-switcher" id="viewSwitcher">
+                <button class="view-btn active" data-view="card" title="卡片视图">
+                    <i class="bi bi-grid-3x2-gap"></i>
+                </button>
+                <button class="view-btn" data-view="list" title="列表视图">
+                    <i class="bi bi-table"></i>
+                </button>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="AlertPage.refresh()">
+                <i class="bi bi-arrow-clockwise"></i> 刷新
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="AlertPage.showSettings()">
+                <i class="bi bi-gear"></i> 设置
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 分类过滤器 -->
+<div class="filter-section mb-4">
+    <div class="filter-group">
+        <label class="filter-label">分类筛选</label>
+        <div class="category-toggle-group" id="categoryToggleFilter">
+            <!-- Toggle 开关由 JS 动态渲染 -->
+        </div>
+    </div>
+    <div class="filter-group">
+        <label class="filter-label">信号类型</label>
+        <div class="signal-filter" id="signalFilter">
+            <button class="filter-btn active" data-type="all">全部</button>
+            <button class="filter-btn" data-type="buy">买入信号</button>
+            <button class="filter-btn" data-type="sell">卖出信号</button>
+            <button class="filter-btn" data-type="neutral">中性信号</button>
+        </div>
+    </div>
+</div>
+
+<!-- 加载状态 -->
+<div id="loadingState" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">加载中...</span>
+    </div>
+    <p class="mt-2 text-muted">正在分析预警数据...</p>
+</div>
+
+<!-- 空状态 -->
+<div id="emptyState" class="empty-state text-center py-5 d-none">
+    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+    <p class="mt-3 text-muted">暂无预警信息</p>
+    <small class="text-muted">请在上方开启分类的 Toggle 开关以启用预警</small>
+</div>
+
+<!-- 股票列表视图 -->
+<div id="stockListView" class="stock-list-view d-none">
+    <div id="stockListContent"></div>
+    <div id="stockListEmpty" class="empty-state text-center py-5 d-none">
+        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        <p class="mt-3 text-muted">请开启至少一个分类的预警</p>
+    </div>
+</div>
+
+<!-- 预警卡片视图（按板块分组） -->
+<div id="alertCardView" class="alert-card-view d-none">
+    <div id="alertCardContent"></div>
+</div>
+
+<!-- 预警详情弹窗 -->
+<div class="modal fade" id="alertDetailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <span id="detailStockName">--</span>
+                    <small class="text-muted ms-2" id="detailStockCode">--</small>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-alerts" id="detailAlerts"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 设置弹窗 -->
+<div class="modal fade" id="alertSettingsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-gear"></i> 预警设置</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 阈值设置 -->
+                <div class="settings-section">
+                    <h6 class="section-title">指标阈值</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="setting-item">
+                                <label>RSI 超买阈值</label>
+                                <div class="range-wrapper">
+                                    <input type="range" class="form-range" min="60" max="90" value="70" id="rsiOverboughtRange">
+                                    <span class="value-display" id="rsiOverboughtValue">70</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="setting-item">
+                                <label>RSI 超卖阈值</label>
+                                <div class="range-wrapper">
+                                    <input type="range" class="form-range" min="10" max="40" value="30" id="rsiOversoldRange">
+                                    <span class="value-display" id="rsiOversoldValue">30</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="setting-item">
+                                <label>放量倍数</label>
+                                <div class="range-wrapper">
+                                    <input type="range" class="form-range" min="1.5" max="5" step="0.5" value="2" id="volumeRatioRange">
+                                    <span class="value-display" id="volumeRatioValue">2.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 预警类型 -->
+                <div class="settings-section">
+                    <h6 class="section-title">预警类型</h6>
+                    <div class="alert-type-grid" id="alertTypeCheckboxes"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="AlertPage.saveSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 指标介绍 Popover -->
+<div id="indicatorPopover" class="indicator-popover" style="display: none;">
+    <div class="indicator-popover-arrow"></div>
+    <div class="indicator-popover-header">
+        <div>
+            <span class="indicator-popover-title" id="popoverTitle">--</span>
+            <span class="indicator-popover-subtitle" id="popoverSubtitle">--</span>
+        </div>
+        <button class="indicator-popover-close" id="popoverClose">&times;</button>
+    </div>
+    <div class="indicator-popover-body">
+        <div class="indicator-popover-section">
+            <div class="indicator-popover-section-title">计算方法</div>
+            <div class="indicator-popover-section-content" id="popoverCalculation">--</div>
+        </div>
+        <div class="indicator-popover-section">
+            <div class="indicator-popover-section-title">信号说明</div>
+            <div class="indicator-popover-section-content" id="popoverSignals">--</div>
+        </div>
+    </div>
+    <div class="indicator-popover-footer" id="popoverFooter" style="display: none;">
+        <div class="indicator-popover-current">
+            <span class="indicator-popover-current-label">当前状态：</span>
+            <span class="indicator-popover-current-value" id="popoverCurrentState">--</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/signal-detector.js') }}"></script>
+<script src="{{ url_for('static', filename='js/alert-page.js') }}"></script>
+{% endblock %}

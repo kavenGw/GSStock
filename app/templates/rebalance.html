@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}仓位管理 - 股票管理{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>仓位管理</h2>
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-muted">当前总市值: <strong id="currentValue">--</strong></span>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text">目标总市值</span>
+            <input type="text" id="targetValue" class="form-control" placeholder="请输入目标总市值" inputmode="numeric">
+            <span class="input-group-text">元</span>
+            <button id="calculateBtn" class="btn btn-primary">计算</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">股票选择</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="stockListLoading" class="text-center py-4 text-muted">加载中...</div>
+                <div id="stockListEmpty" class="text-center py-4 text-muted" style="display: none;">
+                    暂无股票数据
+                </div>
+                <table id="stockTable" class="table table-hover mb-0" style="display: none;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">选中</th>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th style="width: 80px;">权重</th>
+                            <th class="text-end">当前市值</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">操作建议</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="resultEmpty" class="text-center py-4 text-muted">
+                    请输入目标市值并选择股票后点击「计算」
+                </div>
+                <table id="resultTable" class="table table-hover mb-0" style="display: none;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>代码</th>
+                            <th>名称</th>
+                            <th class="text-end">目标市值</th>
+                            <th class="text-end">当前市值</th>
+                            <th class="text-end">差额</th>
+                            <th class="text-center">建议</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/rebalance.js') }}"></script>
+{% endblock %}

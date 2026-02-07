@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}每日统计 - {{ date }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>每日统计 - {{ date }}</h2>
+    <a href="{{ url_for('daily_record.index') }}" class="btn btn-outline-primary">返回上传</a>
+</div>
+
+{% if not stats.prev_date %}
+<div class="alert alert-warning">
+    无前日数据，无法计算当日盈亏
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <!-- 当日盈亏卡片 -->
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">当日盈亏</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.summary.daily_profit is not none %}
+                <h2 class="{% if stats.summary.daily_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ '%+.2f'|format(stats.summary.daily_profit) }}
+                    <small class="fs-5">({{ '%+.2f'|format(stats.summary.daily_profit_pct) }}%)</small>
+                </h2>
+                <div class="text-muted">
+                    <p class="mb-0">前日总资产: {{ '%.2f'|format(stats.summary.prev_total_asset) }}</p>
+                </div>
+                {% else %}
+                <p class="text-muted">暂无数据</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 总体情况卡片 -->
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">总体情况</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <p class="mb-1 text-muted">总市值</p>
+                        <h4>{{ '%.2f'|format(stats.summary.today_market_value) }}</h4>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-1 text-muted">总成本</p>
+                        <h4>{{ '%.2f'|format(stats.summary.today_cost) }}</h4>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <p class="mb-0 text-muted">总浮盈</p>
+                    <h4 class="{% if stats.summary.total_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ '%+.2f'|format(stats.summary.total_profit) }}
+                        <small class="fs-6">({{ '%+.2f'|format(stats.summary.total_profit_pct) }}%)</small>
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 盈亏组成 -->
+{% if stats.profit_breakdown %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">盈亏组成</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>股票</th>
+                        <th>状态</th>
+                        <th>前日市值</th>
+                        <th>今日市值</th>
+                        <th>交易净额</th>
+                        <th>当日盈亏</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in stats.profit_breakdown %}
+                    <tr>
+                        <td>{{ item.stock_name }} ({{ item.stock_code }})</td>
+                        <td>
+                            {% if item.status == 'holding' %}
+                            <span class="badge bg-primary">持仓</span>
+                            {% elif item.status == 'new' %}
+                            <span class="badge bg-success">新开仓</span>
+                            {% else %}
+                            <span class="badge bg-secondary">已清仓</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ '%.2f'|format(item.prev_market_value) if item.prev_market_value else '-' }}</td>
+                        <td>{{ '%.2f'|format(item.today_market_value) if item.today_market_value else '-' }}</td>
+                        <td class="{% if item.trade_profit > 0 %}text-success{% elif item.trade_profit < 0 %}text-danger{% endif %}">
+                            {{ '%+.2f'|format(item.trade_profit) if item.trade_profit else '-' }}
+                        </td>
+                        <td class="{% if item.daily_profit > 0 %}text-success{% elif item.daily_profit < 0 %}text-danger{% endif %} fw-bold">
+                            {{ '%+.2f'|format(item.daily_profit) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 轻仓股票 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">轻仓股票 (仓位 &lt;5%)</h5>
+    </div>
+    <div class="card-body">
+        {% if stats.light_positions %}
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>股票</th>
+                        <th>市值</th>
+                        <th>仓位</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in stats.light_positions %}
+                    <tr>
+                        <td>{{ item.stock_name }} ({{ item.stock_code }})</td>
+                        <td>{{ '%.2f'|format(item.market_value) }}</td>
+                        <td>{{ '%.2f'|format(item.position_pct) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">无轻仓股票</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

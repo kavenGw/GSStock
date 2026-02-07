@@ -1,0 +1,2113 @@
+{% extends "base.html" %}
+
+{% block title %}走势看板 - 股票管理{% endblock %}
+
+{% block content %}
+<style>
+.category-dropdown {
+    width: auto;
+    min-width: 120px;
+}
+
+.timeframe-controls {
+    margin-bottom: 0;
+}
+
+.advice-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+}
+
+.advice-badge {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.advice-badge:hover {
+    transform: translateY(-1px);
+}
+
+.advice-badge.hidden-line {
+    opacity: 0.4;
+}
+
+.advice-badge .stock-name {
+    font-weight: 600;
+}
+
+.advice-badge .change-pct {
+    font-size: 12px;
+}
+
+.advice-badge .advice-text {
+    font-size: 13px;
+}
+
+.advice-buy {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.advice-sell {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.advice-hold {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b3d9ff;
+}
+
+.advice-watch {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* 威科夫分析模块样式 */
+.wyckoff-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+}
+
+.wyckoff-card {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    min-width: 140px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.wyckoff-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.wyckoff-card.hidden-line {
+    opacity: 0.4;
+}
+
+.wyckoff-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.wyckoff-score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+}
+
+.score-excellent { background: #198754; }
+.score-good { background: #5cb85c; }
+.score-neutral { background: #ffc107; color: #333; }
+.score-caution { background: #fd7e14; }
+.score-danger { background: #dc3545; }
+.score-na { background: #adb5bd; }
+
+.wyckoff-card .stock-name {
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+}
+
+.wyckoff-phase-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+.phase-accumulation { background: #d4edda; color: #155724; }
+.phase-markup { background: #cce5ff; color: #004085; }
+.phase-distribution { background: #f8d7da; color: #721c24; }
+.phase-markdown { background: #fff3cd; color: #856404; }
+
+.wyckoff-event-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.wyckoff-event-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    background: #e9ecef;
+    color: #495057;
+}
+
+.wyckoff-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+/* 相对走势模块样式 */
+.relative-strength-container {
+    padding: 15px;
+}
+
+/* 估值和相对差值样式 */
+.valuation-row, .rank-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.undervalued-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #ff9800;
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 6px;
+}
+
+.valuation-low { color: #28a745; }
+.valuation-fair { color: #6c757d; }
+.valuation-high { color: #dc3545; }
+
+.rank-first { color: #28a745; font-weight: 600; }
+.rank-last { color: #dc3545; font-weight: 600; }
+
+/* 排序筛选控件 */
+.sort-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e9ecef;
+    flex-wrap: wrap;
+}
+
+.sort-filter-controls .btn-group .btn {
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.sort-filter-controls .form-check-label {
+    font-size: 12px;
+}
+
+/* 趋势标签样式 */
+.trend-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.trend-overvalued { background: #f8d7da; color: #721c24; }
+.trend-undervalued, .trend-recovering { background: #d4edda; color: #155724; }
+.trend-reverting { background: #d4edda; color: #155724; }
+.trend-neutral, .trend-stable { background: #e2e3e5; color: #383d41; }
+.trend-leading { background: #cce5ff; color: #004085; }
+.trend-lagging { background: #fff3cd; color: #856404; }
+
+/* 卡片边框高亮样式 */
+.wyckoff-card.buy-opportunity {
+    border: 2px solid #28a745;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.3);
+}
+
+.wyckoff-card.risk-warning {
+    border: 2px solid #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+}
+
+/* 可点击标签样式 */
+.clickable-label {
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.clickable-label:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* 标签分析弹窗样式 */
+.label-analysis-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.label-analysis-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.label-analysis-content {
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.analysis-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.check-icon {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.warn-icon {
+    color: #fd7e14;
+    font-weight: bold;
+}
+
+.neutral-icon {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.analysis-conclusion {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.analysis-conclusion.buy-signal {
+    background: #d4edda;
+    color: #155724;
+}
+
+.label-analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.analysis-grid-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: white;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.grid-label {
+    color: #6c757d;
+}
+
+.grid-value {
+    font-weight: 600;
+    color: #333;
+}
+
+/* 降息概率图表样式 */
+.fed-prob-chart-wrapper {
+    border-top: 1px solid #e9ecef;
+    background: #fafbfc;
+    position: relative;
+}
+
+.fed-prob-chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* 投资建议按钮 */
+.advice-icon-btn {
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+    margin-left: auto;
+}
+
+.advice-icon-btn:hover {
+    opacity: 1;
+    color: #0d6efd;
+}
+
+/* 投资建议弹窗 */
+.advice-popover {
+    position: fixed;
+    z-index: 1070;
+    max-width: 280px;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 0.85rem;
+}
+
+.advice-popover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+}
+
+.advice-popover-close {
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #6c757d;
+    line-height: 1;
+}
+
+.advice-popover-close:hover {
+    color: #333;
+}
+
+.advice-popover-body {
+    padding: 12px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    color: #333;
+}
+
+</style>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <h2 class="mb-0">走势看板</h2>
+        <select id="categoryDropdown" class="form-select form-select-sm category-dropdown">
+            <option value="heavy_metals" selected>重金属</option>
+            <option value="gold">黄金</option>
+            <option value="copper">铜</option>
+            <option value="aluminum">铝</option>
+            <option value="silver">银</option>
+            <option value="index">指数</option>
+            <option value="etf">ETF</option>
+            <option value="storage">存储</option>
+            <option value="pcb">PCB</option>
+            <option value="custom">自定义</option>
+        </select>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <span id="cacheStatus" class="text-muted small"></span>
+        <button id="refreshBtn" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-clockwise"></i> 刷新数据
+        </button>
+    </div>
+</div>
+
+<!-- 走势图表模块 -->
+<div class="module-card trend-chart-module mb-4">
+    <div class="module-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5>走势图</h5>
+            <div class="timeframe-controls d-flex align-items-center gap-3" id="timeframeControls">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary" data-timeframe="7d">7天</button>
+                    <button type="button" class="btn btn-outline-primary active" data-timeframe="30d">月</button>
+                    <button type="button" class="btn btn-outline-primary" data-timeframe="365d">年</button>
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="showBSSignals" checked>
+                    <label class="form-check-label small" for="showBSSignals">BS</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="trend-chart-container">
+        <div id="categoryChartWrapper" class="trend-chart-canvas-wrapper">
+            <div class="chart-loading">加载走势数据中...</div>
+        </div>
+        <div id="categoryVolumeWrapper" class="volume-chart-wrapper" style="height: 80px;">
+        </div>
+        <div id="fedProbWrapper" class="fed-prob-chart-wrapper" style="height: 60px;">
+        </div>
+    </div>
+    <div id="chartResizeHandle" class="chart-resize-handle" title="拖拽调整图表高度"></div>
+</div>
+
+<!-- 自定义选择器（仅在自定义模式下显示） -->
+<div id="customSelectorModule" class="module-card mb-4" style="display: none;">
+    <div class="module-header">
+        <h5>选择数据</h5>
+    </div>
+    <div class="custom-trend-selector" id="selectorContent">
+        <div class="text-muted">加载可选数据...</div>
+    </div>
+</div>
+
+<!-- 威科夫分析模块 -->
+<div class="module-card mb-4" id="wyckoffModule">
+    <div class="module-header">
+        <h5>威科夫分析</h5>
+    </div>
+    <!-- 排序筛选控件 -->
+    <div class="sort-filter-controls" id="sortFilterControls">
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-secondary active" data-sort="score" data-asc="false">评分</button>
+            <button type="button" class="btn btn-outline-secondary" data-sort="change_pct" data-asc="false">涨跌幅</button>
+            <button type="button" class="btn btn-outline-secondary" data-sort="valuation" data-asc="true">估值</button>
+            <button type="button" class="btn btn-outline-secondary" data-sort="investment_value" data-asc="false">投资价值</button>
+            <button type="button" class="btn btn-outline-secondary" data-sort="trend_strength" data-asc="false">趋势强度</button>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="filterUndervalued">
+            <label class="form-check-label" for="filterUndervalued">只看低估</label>
+        </div>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="filterBuyOpportunity">
+            <label class="form-check-label" for="filterBuyOpportunity">买入机会</label>
+        </div>
+    </div>
+    <div class="wyckoff-container" id="wyckoffContainer">
+        加载威科夫分析中...
+    </div>
+</div>
+
+<!-- 相对走势模块 -->
+<div class="module-card mb-4" id="relativeStrengthModule">
+    <div class="module-header">
+        <h5>相对走势</h5>
+    </div>
+    <div class="relative-strength-container" style="height: 250px;">
+        <canvas id="relativeStrengthTrendChart"></canvas>
+    </div>
+    <div class="relative-strength-container" style="height: 150px; border-top: 1px solid #e9ecef;">
+        <canvas id="relativeStrengthChart"></canvas>
+    </div>
+</div>
+
+<!-- 威科夫分析弹窗 -->
+<div class="modal fade wyckoff-modal" id="wyckoffAnalysisModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wyckoffModalTitle">威科夫分析</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="wyckoffModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/signal-detector.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const refreshBtn = document.getElementById('refreshBtn');
+        const cacheStatus = document.getElementById('cacheStatus');
+        const selectorContent = document.getElementById('selectorContent');
+        const customSelectorModule = document.getElementById('customSelectorModule');
+
+        // 获取已选择的代码
+        function getSelectedCodes() {
+            const stored = localStorage.getItem('custom_trend_codes');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            return [];
+        }
+
+        // 保存选择的代码
+        function saveSelectedCodes(codes) {
+            localStorage.setItem('custom_trend_codes', JSON.stringify(codes));
+        }
+
+        // 威科夫映射
+        const WYCKOFF_ADVICE_MAP = {
+            'buy': '买入',
+            'sell': '卖出',
+            'hold': '持有',
+            'watch': '观望'
+        };
+        const WYCKOFF_ADVICE_CLASS = {
+            'buy': 'wyckoff-buy',
+            'sell': 'wyckoff-sell',
+            'hold': 'wyckoff-hold',
+            'watch': 'wyckoff-watch'
+        };
+
+        // CategoryController 对象
+        const CategoryController = {
+            currentCategory: 'heavy_metals',
+            currentTimeframe: '30d',
+            showBSSignals: true,
+            debounceTimer: null,
+            pendingFetch: null,
+
+            debounce: function(func, delay) {
+                return (...args) => {
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => func.apply(this, args), delay);
+                };
+            },
+
+            cancelPendingRequest: function() {
+                if (this.pendingFetch) {
+                    this.pendingFetch.abort();
+                    this.pendingFetch = null;
+                }
+            },
+
+            init: function() {
+                this.currentCategory = localStorage.getItem('last_category') || 'heavy_metals';
+                this.currentTimeframe = localStorage.getItem('last_timeframe') || '30d';
+                this.showBSSignals = localStorage.getItem('show_bs_signals') !== 'false';
+
+                const dropdown = document.getElementById('categoryDropdown');
+                if (dropdown) {
+                    dropdown.value = this.currentCategory;
+                }
+
+                const bsSwitch = document.getElementById('showBSSignals');
+                if (bsSwitch) {
+                    bsSwitch.checked = this.showBSSignals;
+                }
+
+                this.updateTimeframeButtons();
+                this.bindEvents();
+                this.updateUI();
+                this.loadTrendData();
+            },
+
+            loadFomcDecisions: async function(startDate, endDate) {
+                try {
+                    const url = `/heavy-metals/api/fed-decisions?start=${startDate}&end=${endDate}`;
+                    const response = await fetch(url);
+                    if (!response.ok) return;
+
+                    const decisions = await response.json();
+                    if (!decisions || decisions.length === 0) return;
+
+                    // 获取走势图实例并添加 FOMC 标记
+                    const chart = Chart.getChart('categoryTrendChart');
+                    if (!chart) return;
+
+                    // 存储决议数据到图表实例
+                    chart._fomcDecisions = decisions;
+
+                    // 注册或更新 FOMC 标记插件
+                    this.addFomcMarkersToChart(chart, decisions);
+                } catch (error) {
+                    console.error('加载FOMC决议数据失败:', error);
+                }
+            },
+
+            addFomcMarkersToChart: function(chart, decisions) {
+                if (!chart || !decisions || decisions.length === 0) return;
+
+                // 获取图表的日期标签（格式如 "12-18"）
+                const labels = chart.data.labels;
+                if (!labels || labels.length === 0) return;
+
+                // 添加顶部 padding 以容纳标签
+                if (!chart.options.layout) chart.options.layout = {};
+                if (!chart.options.layout.padding) chart.options.layout.padding = {};
+                chart.options.layout.padding.top = 20;
+
+                // 将决议日期转换为标签格式
+                const markers = decisions.map(d => {
+                    const dateObj = new Date(d.date);
+                    const monthDay = `${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
+                    const label = `${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                    // 显示格式：日期 + 决议结果
+                    const displayText = `${monthDay} ${d.label}`;
+                    return {
+                        label: label,
+                        fullDate: d.date,
+                        action: d.action,
+                        text: displayText,
+                        bps: d.bps
+                    };
+                });
+
+                // FOMC 标记线插件
+                const fomcMarkerPlugin = {
+                    id: 'fomcMarkers',
+                    afterDraw(chart) {
+                        const ctx = chart.ctx;
+                        const xAxis = chart.scales.x;
+                        const yAxis = chart.scales.y;
+                        const labels = chart.data.labels;
+
+                        markers.forEach(marker => {
+                            const idx = labels.indexOf(marker.label);
+                            if (idx === -1) return;
+
+                            const x = xAxis.getPixelForValue(idx);
+
+                            // 根据决议类型选择颜色
+                            let color, bgColor;
+                            if (marker.action === 'cut') {
+                                color = '#22c55e';  // 降息绿色
+                                bgColor = 'rgba(34, 197, 94, 0.1)';
+                            } else if (marker.action === 'hike') {
+                                color = '#ef4444';  // 加息红色
+                                bgColor = 'rgba(239, 68, 68, 0.1)';
+                            } else {
+                                color = '#6b7280';  // 维持灰色
+                                bgColor = 'rgba(107, 114, 128, 0.05)';
+                            }
+
+                            ctx.save();
+
+                            // 绘制垂直虚线
+                            ctx.strokeStyle = color;
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([4, 4]);
+                            ctx.globalAlpha = 0.8;
+                            ctx.beginPath();
+                            ctx.moveTo(x, yAxis.top);
+                            ctx.lineTo(x, yAxis.bottom);
+                            ctx.stroke();
+
+                            // 绘制顶部标签背景
+                            ctx.setLineDash([]);
+                            ctx.globalAlpha = 1;
+                            const text = marker.text;
+                            ctx.font = '10px sans-serif';
+                            const textWidth = ctx.measureText(text).width;
+                            const padding = 3;
+                            const labelX = x - textWidth / 2 - padding;
+                            const labelY = yAxis.top - 16;
+
+                            ctx.fillStyle = color;
+                            ctx.beginPath();
+                            ctx.roundRect(labelX, labelY, textWidth + padding * 2, 14, 2);
+                            ctx.fill();
+
+                            // 绘制标签文字
+                            ctx.fillStyle = '#fff';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(text, x, labelY + 7);
+
+                            ctx.restore();
+                        });
+                    }
+                };
+
+                // 移除旧的 FOMC 插件（如果存在）
+                const existingIdx = chart.config.plugins.findIndex(p => p.id === 'fomcMarkers');
+                if (existingIdx !== -1) {
+                    chart.config.plugins.splice(existingIdx, 1);
+                }
+
+                // 添加新插件并更新图表
+                chart.config.plugins.push(fomcMarkerPlugin);
+                chart.update();
+            },
+
+            loadFedProbabilities: async function(startDate, endDate) {
+                const wrapper = document.getElementById('fedProbWrapper');
+                if (!wrapper) return;
+
+                try {
+                    const url = `/heavy-metals/api/fed-probabilities?start=${startDate}&end=${endDate}`;
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        wrapper.innerHTML = '';
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (!data || data.length === 0) {
+                        wrapper.innerHTML = '<div class="text-muted small p-2">暂无降息概率数据</div>';
+                        return;
+                    }
+
+                    this.renderFedProbChart(data);
+                } catch (error) {
+                    console.error('加载降息概率数据失败:', error);
+                    wrapper.innerHTML = '';
+                }
+            },
+
+            renderFedProbChart: function(data) {
+                const wrapper = document.getElementById('fedProbWrapper');
+                if (!wrapper || !data || data.length === 0) return;
+
+                // 创建 canvas
+                wrapper.innerHTML = '<canvas id="fedProbChart"></canvas>';
+                const canvas = document.getElementById('fedProbChart');
+
+                // 获取走势图的日期标签用于对齐
+                const trendChart = Chart.getChart('categoryTrendChart');
+                const trendLabels = trendChart ? trendChart.data.labels : [];
+
+                // 构建与走势图对齐的数据
+                const probMap = {};
+                data.forEach(d => {
+                    const dateObj = new Date(d.date);
+                    const label = `${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                    probMap[label] = d;
+                });
+
+                // 使用走势图的标签，填充概率数据
+                const labels = trendLabels.length > 0 ? trendLabels : data.map(d => {
+                    const dateObj = new Date(d.date);
+                    return `${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                });
+
+                const cutData = labels.map(l => probMap[l] ? probMap[l].cut : null);
+
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '降息概率',
+                            data: cutData,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                            borderWidth: 1.5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `降息概率: ${ctx.raw}%`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                display: true,
+                                position: 'right',
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    font: { size: 9 },
+                                    callback: (v) => `${v}%`,
+                                    stepSize: 50
+                                },
+                                grid: { color: '#e9ecef' }
+                            }
+                        }
+                    }
+                });
+            },
+
+            updateUI: function() {
+                const isCustom = this.currentCategory === 'custom';
+                const wyckoffModule = document.getElementById('wyckoffModule');
+
+                // 显示/隐藏自定义选择器
+                if (customSelectorModule) {
+                    customSelectorModule.style.display = isCustom ? 'block' : 'none';
+                }
+
+                // 自定义模式下隐藏威科夫分析模块（相对走势模块保留显示）
+                if (wyckoffModule) {
+                    wyckoffModule.style.display = isCustom ? 'none' : 'block';
+                }
+            },
+
+            switchCategory: function(category) {
+                this.currentCategory = category;
+                localStorage.setItem('last_category', category);
+                this.cancelPendingRequest();
+                this.updateUI();
+                this.debounce(() => this.loadTrendData(), 300)();
+            },
+
+            switchTimeframe: function(timeframe) {
+                this.currentTimeframe = timeframe;
+                localStorage.setItem('last_timeframe', timeframe);
+                this.updateTimeframeButtons();
+                this.debounce(() => this.loadTrendData(), 300)();
+            },
+
+            updateTimeframeButtons: function() {
+                const buttons = document.querySelectorAll('[data-timeframe]');
+                buttons.forEach(btn => {
+                    if (btn.dataset.timeframe === this.currentTimeframe) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            },
+
+            updateBSSignalsVisibility: function() {
+                const chart = Chart.getChart('categoryTrendChart');
+                if (chart) {
+                    chart._showBSSignals = this.showBSSignals;
+                    chart.update('none');
+                }
+            },
+
+            bindEvents: function() {
+                const self = this;
+
+                const dropdown = document.getElementById('categoryDropdown');
+                if (dropdown) {
+                    dropdown.addEventListener('change', function() {
+                        // 切换分类时重置排序和筛选状态
+                        self.currentSort = 'score';
+                        self.currentSortAsc = false;
+                        self.filterUndervalued = false;
+                        self.filterBuyOpportunity = false;
+                        document.getElementById('filterUndervalued').checked = false;
+                        document.getElementById('filterBuyOpportunity').checked = false;
+                        self.updateSortButtons();
+                        self.switchCategory(this.value);
+                    });
+                }
+
+                const timeframeButtons = document.querySelectorAll('[data-timeframe]');
+                timeframeButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        self.switchTimeframe(this.dataset.timeframe);
+                    });
+                });
+
+                // BS信号开关事件
+                const bsSwitch = document.getElementById('showBSSignals');
+                if (bsSwitch) {
+                    bsSwitch.addEventListener('change', function() {
+                        self.showBSSignals = this.checked;
+                        localStorage.setItem('show_bs_signals', this.checked);
+                        self.updateBSSignalsVisibility();
+                    });
+                }
+
+                // 排序按钮事件
+                const sortButtons = document.querySelectorAll('[data-sort]');
+                sortButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const sortField = this.dataset.sort;
+                        const defaultAsc = this.dataset.asc === 'true';
+
+                        // 如果点击同一个按钮，切换排序方向
+                        if (self.currentSort === sortField) {
+                            self.currentSortAsc = !self.currentSortAsc;
+                        } else {
+                            self.currentSort = sortField;
+                            self.currentSortAsc = defaultAsc;
+                        }
+
+                        self.updateSortButtons();
+                        self.renderWyckoffCards();
+                    });
+                });
+
+                // 筛选开关事件
+                const filterCheckbox = document.getElementById('filterUndervalued');
+                if (filterCheckbox) {
+                    filterCheckbox.addEventListener('change', function() {
+                        self.filterUndervalued = this.checked;
+                        self.renderWyckoffCards();
+                    });
+                }
+
+                // 买入机会筛选开关事件
+                const buyOpportunityCheckbox = document.getElementById('filterBuyOpportunity');
+                if (buyOpportunityCheckbox) {
+                    buyOpportunityCheckbox.addEventListener('change', function() {
+                        self.filterBuyOpportunity = this.checked;
+                        self.renderWyckoffCards();
+                    });
+                }
+            },
+
+            updateSortButtons: function() {
+                const buttons = document.querySelectorAll('[data-sort]');
+                buttons.forEach(btn => {
+                    if (btn.dataset.sort === this.currentSort) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            },
+
+            loadTrendData: async function() {
+                const chartWrapper = document.getElementById('categoryChartWrapper');
+                const volumeWrapper = document.getElementById('categoryVolumeWrapper');
+
+                chartWrapper.innerHTML = '<div class="chart-loading">加载走势数据中...</div>';
+                volumeWrapper.innerHTML = '';
+
+                this.cancelPendingRequest();
+                const abortController = new AbortController();
+                this.pendingFetch = abortController;
+
+                const timeframeToDays = { '7d': 7, '30d': 30, '365d': 365 };
+                const days = timeframeToDays[this.currentTimeframe] || 30;
+
+                try {
+                    let url;
+                    if (this.currentCategory === 'custom') {
+                        const codes = getSelectedCodes();
+                        if (codes.length === 0) {
+                            chartWrapper.innerHTML = '<div class="chart-empty">请选择要显示的数据</div>';
+                            return;
+                        }
+                        url = `/heavy-metals/api/custom-trend-data?codes=${codes.join(',')}&days=${days}`;
+                    } else {
+                        url = `/heavy-metals/api/category-trend-data?category=${this.currentCategory}&days=${days}`;
+                    }
+
+                    const response = await fetch(url, { signal: abortController.signal });
+
+                    if (response.status === 400) {
+                        chartWrapper.innerHTML = '<div class="chart-empty">分类参数错误</div>';
+                        return;
+                    } else if (response.status === 503) {
+                        chartWrapper.innerHTML = '<div class="chart-empty">数据暂时不可用，请稍后重试</div>';
+                        return;
+                    } else if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (!data.stocks || data.stocks.length === 0) {
+                        chartWrapper.innerHTML = '<div class="chart-empty">暂无走势数据</div>';
+                        return;
+                    }
+
+                    chartWrapper.innerHTML = '<canvas id="categoryTrendChart"></canvas>';
+                    volumeWrapper.innerHTML = '<canvas id="categoryVolumeChart"></canvas>';
+
+                    // 缓存走势数据供相对走势图使用
+                    Charts.trendData = data;
+                    const chart = Charts.renderTrendChart(data, 'all', 'categoryTrendChart');
+                    Charts.renderVolumeChart(data, 'categoryVolumeChart');
+
+                    // 设置 BS 信号显示状态
+                    if (chart) {
+                        chart._showBSSignals = this.showBSSignals;
+                    }
+
+                    // 使用后端返回的信号数据
+                    if (chart && data.signals) {
+                        try {
+                            const sortedDates = chart._sortedDates || [];
+                            const allSignals = { buySignals: [], sellSignals: [] };
+
+                            // 创建股票名称到 datasetIndex 的映射
+                            const stockIndexMap = {};
+                            chart.data.datasets.forEach((ds, idx) => {
+                                stockIndexMap[ds.label] = idx;
+                            });
+
+                            // 处理买点信号
+                            (data.signals.buy_signals || []).forEach(sig => {
+                                const datasetIndex = stockIndexMap[sig.stock_name];
+                                if (datasetIndex === undefined) return;
+
+                                const chartIndex = sortedDates.indexOf(sig.date);
+                                if (chartIndex === -1) return;
+
+                                allSignals.buySignals.push({
+                                    ...sig,
+                                    index: chartIndex,
+                                    datasetIndex: datasetIndex,
+                                    stockName: sig.stock_name,
+                                    type: 'buy'
+                                });
+                            });
+
+                            // 处理卖点信号
+                            (data.signals.sell_signals || []).forEach(sig => {
+                                const datasetIndex = stockIndexMap[sig.stock_name];
+                                if (datasetIndex === undefined) return;
+
+                                const chartIndex = sortedDates.indexOf(sig.date);
+                                if (chartIndex === -1) return;
+
+                                allSignals.sellSignals.push({
+                                    ...sig,
+                                    index: chartIndex,
+                                    datasetIndex: datasetIndex,
+                                    stockName: sig.stock_name,
+                                    type: 'sell'
+                                });
+                            });
+
+                            chart._tradeSignals = allSignals;
+                            chart.update('none');
+
+                            // 绑定信号点击事件
+                            Charts.bindSignalClickListener(chart, 'categoryTrendChart');
+                        } catch (error) {
+                            console.error('信号处理失败:', error);
+                        }
+                    }
+
+                    // 加载并渲染 FOMC 决议标记线和概率折线图
+                    if (data.date_range && data.date_range.start && data.date_range.end) {
+                        this.loadFomcDecisions(data.date_range.start, data.date_range.end);
+                        this.loadFedProbabilities(data.date_range.start, data.date_range.end);
+                    }
+
+                    if (data.cache_info) {
+                        const info = data.cache_info;
+                        const parts = [];
+                        if (info.cached_count > 0) parts.push(`缓存: ${info.cached_count}`);
+                        if (info.fetched_count > 0) parts.push(`实时: ${info.fetched_count}`);
+                        if (info.last_update) parts.push(`更新: ${info.last_update}`);
+                        cacheStatus.textContent = parts.join(' | ');
+                    }
+
+                    if (this.currentCategory !== 'custom') {
+                        this.loadAdvice();
+                    } else {
+                        // 自定义模式：从 trendData 构造数据并渲染相对走势图表
+                        this.renderCustomRelativeStrength(data);
+                    }
+
+                    return data;
+
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        return null;
+                    }
+                    console.error('Error loading trend data:', error);
+                    chartWrapper.innerHTML = '<div class="chart-empty">网络错误，请检查连接</div>';
+                    return null;
+                } finally {
+                    if (this.pendingFetch === abortController) {
+                        this.pendingFetch = null;
+                    }
+                }
+            },
+
+            // 威科夫阶段中文映射
+            PHASE_MAP: {
+                'accumulation': '吸筹',
+                'markup': '上涨',
+                'distribution': '派发',
+                'markdown': '下跌'
+            },
+
+            PHASE_DESC: {
+                'accumulation': '底部蓄力阶段，聪明资金正在吸筹',
+                'markup': '上涨阶段，价格沿趋势上升，伴随健康成交量',
+                'distribution': '高位派发阶段，主力可能正在出货',
+                'markdown': '下跌阶段，建议规避风险'
+            },
+
+            // 威科夫事件中文映射
+            EVENT_MAP: {
+                'spring': '弹簧效应',
+                'breakout': '放量突破',
+                'shakeout': '洗盘',
+                'utad': '末端冲高'
+            },
+
+            EVENT_DESC: {
+                'spring': '假跌破后快速回升，强买入信号',
+                'breakout': '放量突破前期高点，确认上涨趋势',
+                'shakeout': '快速下跌后恢复，短期买入机会',
+                'utad': '派发末端的虚假冲高，卖出信号'
+            },
+
+            // 获取评分颜色类
+            getScoreBadgeClass: function(score) {
+                if (score === null || score === undefined) return 'score-na';
+                if (score >= 80) return 'score-excellent';
+                if (score >= 60) return 'score-good';
+                if (score >= 40) return 'score-neutral';
+                if (score >= 20) return 'score-caution';
+                return 'score-danger';
+            },
+
+            // 获取评分颜色
+            getScoreColor: function(score) {
+                if (score === null || score === undefined) return '#adb5bd';
+                if (score >= 80) return '#198754';
+                if (score >= 60) return '#5cb85c';
+                if (score >= 40) return '#ffc107';
+                if (score >= 20) return '#fd7e14';
+                return '#dc3545';
+            },
+
+            // 当前排序和筛选状态
+            currentSort: 'score',
+            currentSortAsc: false,
+            filterUndervalued: false,
+            filterBuyOpportunity: false,
+            processedStocks: [],
+
+            displayWyckoffPanel: function(adviceData) {
+                const container = document.getElementById('wyckoffContainer');
+                const sortFilterControls = document.getElementById('sortFilterControls');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (!adviceData || !adviceData.stocks || adviceData.stocks.length === 0) {
+                    container.innerHTML = '<div class="text-muted">暂无威科夫分析数据</div>';
+                    if (sortFilterControls) sortFilterControls.style.display = 'none';
+                    return;
+                }
+
+                // 应用相对分析
+                let stocks = adviceData.stocks.map(s => ({...s}));
+                if (typeof RelativeAnalysis !== 'undefined') {
+                    stocks = RelativeAnalysis.calculate(stocks);
+                    // 计算趋势
+                    if (Charts.trendData) {
+                        RelativeAnalysis.calculateTrend(stocks, Charts.trendData);
+                    }
+                }
+                this.processedStocks = stocks;
+
+                // 控制排序筛选控件的显示
+                if (sortFilterControls) {
+                    sortFilterControls.style.display = stocks.length > 1 ? 'flex' : 'none';
+                }
+
+                // 应用筛选和排序
+                this.renderWyckoffCards();
+            },
+
+            renderWyckoffCards: function() {
+                const container = document.getElementById('wyckoffContainer');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                let stocks = [...this.processedStocks];
+
+                // 应用筛选
+                if (this.filterUndervalued && typeof RelativeAnalysis !== 'undefined') {
+                    stocks = RelativeAnalysis.filterUndervalued(stocks);
+                }
+                // 筛选买入机会：修复中（相对落后但正在走强）
+                if (this.filterBuyOpportunity && typeof RelativeAnalysis !== 'undefined') {
+                    stocks = stocks.filter(s => {
+                        const label = RelativeAnalysis.getDynamicLabel(s);
+                        return label && label.type === 'recovering';
+                    });
+                }
+
+                // 应用排序
+                if (this.currentSort === 'score') {
+                    stocks.sort((a, b) => {
+                        const scoreA = a.wyckoff_score ?? -1;
+                        const scoreB = b.wyckoff_score ?? -1;
+                        return this.currentSortAsc ? scoreA - scoreB : scoreB - scoreA;
+                    });
+                } else if (this.currentSort === 'change_pct') {
+                    stocks.sort((a, b) => {
+                        return this.currentSortAsc ? (a.change_pct || 0) - (b.change_pct || 0) : (b.change_pct || 0) - (a.change_pct || 0);
+                    });
+                } else if (this.currentSort === 'valuation') {
+                    stocks.sort((a, b) => {
+                        const va = a.valuation?.valuation_score ?? 100;
+                        const vb = b.valuation?.valuation_score ?? 100;
+                        return this.currentSortAsc ? va - vb : vb - va;
+                    });
+                } else if (this.currentSort === 'investment_value') {
+                    stocks.sort((a, b) => {
+                        return this.currentSortAsc ? (a.investment_value || 0) - (b.investment_value || 0) : (b.investment_value || 0) - (a.investment_value || 0);
+                    });
+                } else if (this.currentSort === 'trend_strength') {
+                    stocks.sort((a, b) => {
+                        const changeA = a.trend?.diff_change ?? 0;
+                        const changeB = b.trend?.diff_change ?? 0;
+                        return this.currentSortAsc ? changeA - changeB : changeB - changeA;
+                    });
+                }
+
+                if (stocks.length === 0) {
+                    container.innerHTML = '<div class="text-muted">没有符合条件的品种</div>';
+                    return;
+                }
+
+                const self = this;
+                const total = this.processedStocks.length;
+
+                stocks.forEach(stock => {
+                    const card = document.createElement('div');
+                    card.dataset.stockName = stock.name;
+
+                    // 评分徽章
+                    const score = stock.wyckoff_score;
+                    const scoreClass = this.getScoreBadgeClass(score);
+                    const scoreText = score !== null && score !== undefined ? score : 'N/A';
+
+                    // 阶段标签
+                    const phase = stock.analysis?.phase || '';
+                    const phaseName = this.PHASE_MAP[phase] || '';
+                    const phaseClass = phase ? `phase-${phase}` : '';
+
+                    // 事件标签
+                    const events = stock.analysis?.events || [];
+                    let eventsHtml = '';
+                    if (events.length > 0) {
+                        eventsHtml = '<div class="wyckoff-event-tags">';
+                        events.forEach(event => {
+                            const eventName = this.EVENT_MAP[event] || event;
+                            eventsHtml += `<span class="wyckoff-event-tag">${eventName}</span>`;
+                        });
+                        eventsHtml += '</div>';
+                    }
+
+                    // 估值信息
+                    let valuationHtml = '';
+                    if (stock.valuation) {
+                        const v = stock.valuation;
+                        const levelMap = { 'low': '低估', 'fair': '合理', 'high': '高估' };
+                        const levelClass = `valuation-${v.valuation_level}`;
+                        valuationHtml = `<div class="valuation-row">
+                            <span class="${levelClass}">估值: ${v.valuation_score}</span>
+                            <span class="${levelClass}">${levelMap[v.valuation_level] || ''}</span>
+                        </div>`;
+                    }
+
+                    // 相对差值和排名
+                    let relativeHtml = '';
+                    if (total > 1 && stock.relative_diff !== undefined) {
+                        const diffSign = stock.relative_diff >= 0 ? '+' : '';
+                        const diffClass = stock.relative_diff >= 0 ? 'text-success' : 'text-danger';
+                        const rankClass = stock.rank_num === 1 ? 'rank-first' : (stock.rank_num === total ? 'rank-last' : '');
+                        relativeHtml = `<div class="rank-row">
+                            <span class="${diffClass}">相对: ${diffSign}${stock.relative_diff.toFixed(1)}%</span>
+                            <span class="${rankClass}">排名: ${stock.rank}</span>
+                        </div>`;
+                    }
+
+                    // 低估标签（可点击）
+                    let labelHtml = '';
+                    if (stock.label) {
+                        labelHtml = `<div class="undervalued-label clickable-label" data-label-type="static" data-label="${stock.label}">${stock.label}</div>`;
+                    }
+
+                    // 动态趋势标签（可点击）
+                    let trendLabelHtml = '';
+                    let cardExtraClass = '';
+                    let dynamicLabel = null;
+                    if (typeof RelativeAnalysis !== 'undefined' && stock.trend) {
+                        dynamicLabel = RelativeAnalysis.getDynamicLabel(stock);
+                        if (dynamicLabel) {
+                            trendLabelHtml = `<div class="trend-row"><span class="trend-label trend-${dynamicLabel.type} clickable-label" data-label-type="dynamic" data-label="${dynamicLabel.text}">${dynamicLabel.text} ${dynamicLabel.arrow}</span></div>`;
+                            // 买入机会：修复中
+                            if (dynamicLabel.type === 'recovering') {
+                                cardExtraClass = ' buy-opportunity';
+                            }
+                            // 风险警示：相对高估
+                            else if (dynamicLabel.type === 'overvalued') {
+                                cardExtraClass = ' risk-warning';
+                            }
+                        }
+                    }
+
+                    // 设置卡片样式类
+                    card.className = 'wyckoff-card' + cardExtraClass;
+
+                    // 投资建议按钮
+                    const adviceBtnHtml = stock.investment_advice
+                        ? `<i class="bi bi-journal-text advice-icon-btn" data-advice="${this.escapeHtml(stock.investment_advice)}" title="查看投资建议"></i>`
+                        : '';
+
+                    // 构建卡片内容
+                    let cardHtml = `
+                        <div class="wyckoff-card-header">
+                            <span class="wyckoff-score-badge ${scoreClass}">${scoreText}</span>
+                            <span class="stock-name">${stock.name}</span>
+                            ${adviceBtnHtml}
+                        </div>
+                    `;
+
+                    if (phaseName) {
+                        cardHtml += `<span class="wyckoff-phase-tag ${phaseClass}">${phaseName}</span>`;
+                    }
+
+                    cardHtml += eventsHtml;
+                    cardHtml += valuationHtml;
+                    cardHtml += relativeHtml;
+                    cardHtml += labelHtml;
+                    cardHtml += trendLabelHtml;
+
+                    // 如果有分析数据，添加分析按钮
+                    if (stock.analysis) {
+                        cardHtml += `<div class="wyckoff-card-footer"><button class="btn btn-outline-secondary btn-sm analysis-btn" data-code="${stock.code}">分析</button></div>`;
+                    }
+
+                    card.innerHTML = cardHtml;
+
+                    // 存储分析数据（包含标签分析所需的数据）
+                    card.dataset.analysisData = JSON.stringify({
+                        name: stock.name,
+                        code: stock.code,
+                        score: stock.wyckoff_score,
+                        score_details: stock.score_details,
+                        analysis: stock.analysis,
+                        // 标签分析数据
+                        label: stock.label,
+                        relative_diff: stock.relative_diff,
+                        rank: stock.rank,
+                        rank_num: stock.rank_num,
+                        total: total,
+                        valuation: stock.valuation,
+                        change_pct: stock.change_pct,
+                        trend: stock.trend,
+                        dynamicLabel: dynamicLabel
+                    });
+
+                    // 点击切换图表显示
+                    card.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('analysis-btn')) {
+                            return;
+                        }
+                        // 投资建议点击显示弹窗
+                        if (e.target.classList.contains('advice-icon-btn')) {
+                            e.stopPropagation();
+                            const advice = e.target.dataset.advice;
+                            if (advice) {
+                                self.showAdvicePopover(e.target, advice);
+                            }
+                            return;
+                        }
+                        // 标签点击显示分析
+                        if (e.target.classList.contains('clickable-label')) {
+                            e.stopPropagation();
+                            const data = JSON.parse(card.dataset.analysisData);
+                            const labelType = e.target.dataset.labelType;
+                            self.showLabelAnalysisModal(data, labelType);
+                            return;
+                        }
+                        self.toggleChartLine(stock.name, this);
+                    });
+
+                    // 分析按钮点击事件
+                    const analysisBtn = card.querySelector('.analysis-btn');
+                    if (analysisBtn) {
+                        analysisBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const data = JSON.parse(card.dataset.analysisData);
+                            self.showAnalysisModal(data);
+                        });
+                    }
+
+                    container.appendChild(card);
+                });
+            },
+
+            showAnalysisModal: function(data) {
+                const modal = document.getElementById('wyckoffAnalysisModal');
+                const title = document.getElementById('wyckoffModalTitle');
+                const body = document.getElementById('wyckoffModalBody');
+
+                title.textContent = `${data.name} 威科夫分析`;
+
+                if (!data.analysis) {
+                    body.innerHTML = '<div class="wyckoff-no-data">数据不足，无法进行分析</div>';
+                    new bootstrap.Modal(modal).show();
+                    return;
+                }
+
+                const score = data.score;
+                const scoreColor = this.getScoreColor(score);
+                const analysis = data.analysis;
+                const scoreDetails = data.score_details || {};
+
+                // 阶段信息
+                const phaseName = this.PHASE_MAP[analysis.phase] || analysis.phase;
+                const phaseDesc = this.PHASE_DESC[analysis.phase] || '';
+
+                // 事件列表
+                let eventsHtml = '';
+                if (analysis.events && analysis.events.length > 0) {
+                    eventsHtml = '<ul class="wyckoff-events-list">';
+                    analysis.events.forEach(event => {
+                        const eventName = this.EVENT_MAP[event] || event;
+                        const eventDesc = this.EVENT_DESC[event] || '';
+                        eventsHtml += `<li>${eventName}${eventDesc ? ` - ${eventDesc}` : ''}</li>`;
+                    });
+                    eventsHtml += '</ul>';
+                } else {
+                    eventsHtml = '<div class="text-muted">无特殊事件</div>';
+                }
+
+                // 成交量趋势
+                const volumeTrendMap = {
+                    'increasing': '放量',
+                    'decreasing': '缩量',
+                    'stable': '稳定'
+                };
+                const volumeTrend = volumeTrendMap[analysis.volume_trend] || analysis.volume_trend;
+
+                body.innerHTML = `
+                    <div class="wyckoff-score-display">
+                        <div class="wyckoff-score-big" style="color: ${scoreColor}">${score !== null ? score : 'N/A'}</div>
+                        <div class="wyckoff-score-label">综合评分</div>
+                        <div class="wyckoff-progress-bar">
+                            <div class="wyckoff-progress-fill" style="width: ${score || 0}%; background: ${scoreColor}"></div>
+                        </div>
+                    </div>
+
+                    <div class="wyckoff-section">
+                        <div class="wyckoff-section-title">📊 阶段分析</div>
+                        <div class="wyckoff-section-content">
+                            <strong>当前阶段：</strong>${phaseName}
+                            <br><span class="text-muted">${phaseDesc}</span>
+                        </div>
+                    </div>
+
+                    <div class="wyckoff-section">
+                        <div class="wyckoff-section-title">⚡ 关键事件</div>
+                        <div class="wyckoff-section-content">${eventsHtml}</div>
+                    </div>
+
+                    <div class="wyckoff-section">
+                        <div class="wyckoff-section-title">📈 价格区间</div>
+                        <div class="wyckoff-price-grid">
+                            <div class="wyckoff-price-item">
+                                <div class="wyckoff-price-label">支撑位</div>
+                                <div class="wyckoff-price-value">${analysis.support?.toFixed(2) || '-'}</div>
+                            </div>
+                            <div class="wyckoff-price-item">
+                                <div class="wyckoff-price-label">当前价</div>
+                                <div class="wyckoff-price-value">${analysis.current_price?.toFixed(2) || '-'}</div>
+                            </div>
+                            <div class="wyckoff-price-item">
+                                <div class="wyckoff-price-label">阻力位</div>
+                                <div class="wyckoff-price-value">${analysis.resistance?.toFixed(2) || '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wyckoff-section">
+                        <div class="wyckoff-section-title">📊 成交量</div>
+                        <div class="wyckoff-section-content">
+                            趋势：<strong>${volumeTrend}</strong>
+                            （量比 ${analysis.volume_ratio?.toFixed(2) || '-'}）
+                        </div>
+                    </div>
+
+                    <div class="wyckoff-section">
+                        <div class="wyckoff-section-title">📋 评分明细</div>
+                        <div class="wyckoff-score-details">
+                            <div class="wyckoff-score-item">
+                                <span class="wyckoff-score-item-label">阶段得分</span>
+                                <span class="wyckoff-score-item-value">${scoreDetails.phase_score ?? '-'}/40</span>
+                            </div>
+                            <div class="wyckoff-score-item">
+                                <span class="wyckoff-score-item-label">事件得分</span>
+                                <span class="wyckoff-score-item-value">${scoreDetails.event_score ?? '-'}/20</span>
+                            </div>
+                            <div class="wyckoff-score-item">
+                                <span class="wyckoff-score-item-label">相对强度</span>
+                                <span class="wyckoff-score-item-value">${scoreDetails.relative_strength_score !== undefined ? (scoreDetails.relative_strength_score >= 0 ? '+' : '') + scoreDetails.relative_strength_score : '-'}</span>
+                            </div>
+                            <div class="wyckoff-score-item">
+                                <span class="wyckoff-score-item-label">成交量</span>
+                                <span class="wyckoff-score-item-value">${scoreDetails.volume_score ?? '-'}/15</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                new bootstrap.Modal(modal).show();
+            },
+
+            escapeHtml: function(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+
+            showAdvicePopover: function(target, advice) {
+                // 移除已有的 popover
+                const existing = document.getElementById('advicePopover');
+                if (existing) existing.remove();
+
+                const rect = target.getBoundingClientRect();
+                const popover = document.createElement('div');
+                popover.id = 'advicePopover';
+                popover.className = 'advice-popover';
+                popover.innerHTML = `
+                    <div class="advice-popover-header">
+                        <span>投资建议</span>
+                        <button class="advice-popover-close">&times;</button>
+                    </div>
+                    <div class="advice-popover-body">${advice}</div>
+                `;
+
+                document.body.appendChild(popover);
+
+                // 计算位置
+                const popoverRect = popover.getBoundingClientRect();
+                let top = rect.bottom + 8;
+                let left = rect.left - popoverRect.width / 2 + rect.width / 2;
+
+                // 边界检查
+                if (left < 10) left = 10;
+                if (left + popoverRect.width > window.innerWidth - 10) {
+                    left = window.innerWidth - popoverRect.width - 10;
+                }
+                if (top + popoverRect.height > window.innerHeight - 10) {
+                    top = rect.top - popoverRect.height - 8;
+                }
+
+                popover.style.top = top + 'px';
+                popover.style.left = left + 'px';
+
+                // 关闭按钮事件
+                popover.querySelector('.advice-popover-close').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    popover.remove();
+                });
+
+                // 点击其他地方关闭
+                setTimeout(() => {
+                    document.addEventListener('click', function closePopover(e) {
+                        if (!popover.contains(e.target) && !e.target.classList.contains('advice-icon-btn')) {
+                            popover.remove();
+                            document.removeEventListener('click', closePopover);
+                        }
+                    });
+                }, 10);
+            },
+
+            showLabelAnalysisModal: function(data, labelType) {
+                const modal = document.getElementById('wyckoffAnalysisModal');
+                const title = document.getElementById('wyckoffModalTitle');
+                const body = document.getElementById('wyckoffModalBody');
+
+                title.textContent = `${data.name} 标签分析`;
+
+                let html = '';
+
+                // 静态标签分析（相对低估、明显落后等）
+                if (labelType === 'static' && data.label) {
+                    html += `<div class="label-analysis-section">
+                        <div class="label-analysis-title">📊 标签: ${data.label}</div>
+                        <div class="label-analysis-content">`;
+
+                    const valuationScore = data.valuation?.valuation_score ?? 100;
+                    const isLast = data.rank_num === data.total;
+                    const isLowValuation = valuationScore < 40;
+                    const isVeryLowValuation = valuationScore < 30;
+                    const isLagging = (data.relative_diff || 0) < -2;
+
+                    // 根据标签类型显示不同分析
+                    if (data.label === '双重低估') {
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 排名最后（${data.rank}）：同组涨幅最低</div>`;
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 估值低估（评分 ${valuationScore}）：低于40分视为低估</div>`;
+                        html += `<div class="analysis-conclusion">结论：双重低估，存在较大修复潜力</div>`;
+                    } else if (data.label === '相对低估') {
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 排名最后（${data.rank}）：同组涨幅最低</div>`;
+                        html += `<div class="analysis-item"><span class="neutral-icon">-</span> 估值评分 ${valuationScore}：未达到低估阈值（<40）</div>`;
+                        html += `<div class="analysis-conclusion">结论：相对落后，可能存在补涨机会</div>`;
+                    } else if (data.label === '估值低估') {
+                        html += `<div class="analysis-item"><span class="neutral-icon">-</span> 排名（${data.rank}）：不是最后一名</div>`;
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 估值很低（评分 ${valuationScore}）：低于30分视为显著低估</div>`;
+                        html += `<div class="analysis-conclusion">结论：估值较低，具备投资价值</div>`;
+                    } else if (data.label === '明显落后') {
+                        const diffStr = (data.relative_diff || 0).toFixed(1);
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 相对差值（${diffStr}%）：落后组均超过2%</div>`;
+                        html += `<div class="analysis-item"><span class="neutral-icon">-</span> 估值评分 ${valuationScore}：未达到低估阈值</div>`;
+                        html += `<div class="analysis-conclusion">结论：明显落后于同组，关注补涨机会</div>`;
+                    }
+
+                    html += `</div></div>`;
+
+                    // 显示计算明细
+                    html += `<div class="label-analysis-section">
+                        <div class="label-analysis-title">📋 计算明细</div>
+                        <div class="label-analysis-grid">
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">当前涨幅</span>
+                                <span class="grid-value">${(data.change_pct || 0).toFixed(2)}%</span>
+                            </div>
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">相对差值</span>
+                                <span class="grid-value">${(data.relative_diff || 0).toFixed(2)}%</span>
+                            </div>
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">排名</span>
+                                <span class="grid-value">${data.rank || '-'}</span>
+                            </div>
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">估值评分</span>
+                                <span class="grid-value">${valuationScore}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+
+                // 动态趋势标签分析
+                if (labelType === 'dynamic' && data.dynamicLabel && data.trend) {
+                    const trend = data.trend;
+                    const diff = data.relative_diff || 0;
+                    const diffChange = trend.diff_change || 0;
+                    const label = data.dynamicLabel;
+
+                    html += `<div class="label-analysis-section">
+                        <div class="label-analysis-title">📈 趋势标签: ${label.text} ${label.arrow}</div>
+                        <div class="label-analysis-content">`;
+
+                    // 根据标签类型显示分析逻辑
+                    if (label.type === 'neutral') {
+                        html += `<div class="analysis-item"><span class="neutral-icon">→</span> 相对差值（${diff.toFixed(2)}%）接近0</div>`;
+                        html += `<div class="analysis-conclusion">结论：与组内平均水平持平</div>`;
+                    } else if (label.type === 'leading') {
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 相对差值为正（${diff.toFixed(2)}%）：领先于组均</div>`;
+                        html += `<div class="analysis-item"><span class="neutral-icon">→</span> 趋势变化（${diffChange.toFixed(2)}%）稳定</div>`;
+                        html += `<div class="analysis-conclusion">结论：持续领先，走势稳定</div>`;
+                    } else if (label.type === 'lagging') {
+                        html += `<div class="analysis-item"><span class="warn-icon">!</span> 相对差值为负（${diff.toFixed(2)}%）：落后于组均</div>`;
+                        html += `<div class="analysis-item"><span class="neutral-icon">→</span> 趋势变化（${diffChange.toFixed(2)}%）稳定</div>`;
+                        html += `<div class="analysis-conclusion">结论：持续落后，关注转机</div>`;
+                    } else if (label.type === 'overvalued') {
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 相对差值为正（${diff.toFixed(2)}%）：领先于组均</div>`;
+                        html += `<div class="analysis-item"><span class="warn-icon">↑</span> 趋势仍在走强（${diffChange.toFixed(2)}%）</div>`;
+                        html += `<div class="analysis-conclusion">结论：相对高估且持续走强，注意风险</div>`;
+                    } else if (label.type === 'reverting') {
+                        html += `<div class="analysis-item"><span class="check-icon">✓</span> 相对差值为正（${diff.toFixed(2)}%）：领先于组均</div>`;
+                        html += `<div class="analysis-item"><span class="check-icon">↓</span> 趋势开始走弱（${diffChange.toFixed(2)}%）</div>`;
+                        html += `<div class="analysis-conclusion">结论：正在回归均值，可能继续调整</div>`;
+                    } else if (label.type === 'undervalued') {
+                        html += `<div class="analysis-item"><span class="warn-icon">!</span> 相对差值为负（${diff.toFixed(2)}%）：落后于组均</div>`;
+                        html += `<div class="analysis-item"><span class="warn-icon">↓</span> 趋势仍在走弱（${diffChange.toFixed(2)}%）</div>`;
+                        html += `<div class="analysis-conclusion">结论：相对低估且持续走弱，等待企稳</div>`;
+                    } else if (label.type === 'recovering') {
+                        html += `<div class="analysis-item"><span class="warn-icon">!</span> 相对差值为负（${diff.toFixed(2)}%）：落后于组均</div>`;
+                        html += `<div class="analysis-item"><span class="check-icon">↑</span> 趋势开始走强（${diffChange.toFixed(2)}%）</div>`;
+                        html += `<div class="analysis-conclusion buy-signal">结论：修复中！落后但正在追赶，买入机会</div>`;
+                    }
+
+                    html += `</div></div>`;
+
+                    // 趋势计算明细
+                    html += `<div class="label-analysis-section">
+                        <div class="label-analysis-title">📋 趋势计算明细</div>
+                        <div class="label-analysis-grid">
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">当前差值</span>
+                                <span class="grid-value">${diff.toFixed(2)}%</span>
+                            </div>
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">移动平均差值</span>
+                                <span class="grid-value">${(trend.diff_ma || 0).toFixed(2)}%</span>
+                            </div>
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">差值变化</span>
+                                <span class="grid-value ${diffChange >= 0 ? 'text-success' : 'text-danger'}">${diffChange >= 0 ? '+' : ''}${diffChange.toFixed(2)}%</span>
+                            </div>
+                            <div class="analysis-grid-item">
+                                <span class="grid-label">趋势方向</span>
+                                <span class="grid-value">${trend.arrow} ${trend.trend_type === 'strengthening' ? '走强' : trend.trend_type === 'weakening' ? '走弱' : '稳定'}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+
+                body.innerHTML = html;
+                new bootstrap.Modal(modal).show();
+            },
+
+            toggleChartLine: function(stockName, badge) {
+                const chart = Chart.getChart('categoryTrendChart');
+                if (!chart) return;
+
+                const datasets = chart.data.datasets;
+                for (let i = 0; i < datasets.length; i++) {
+                    if (datasets[i].label === stockName) {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.hidden = !meta.hidden;
+                        const isHidden = meta.hidden;
+
+                        // 更新点击的元素状态
+                        badge.classList.toggle('hidden-line', isHidden);
+
+                        // 同步威科夫卡片状态
+                        this.syncWyckoffCardState(stockName, isHidden);
+
+                        // 同步相对强度条形状态
+                        this.syncRelativeStrengthBarState(stockName, isHidden);
+
+                        chart.update();
+                        break;
+                    }
+                }
+            },
+
+            toggleChartLineByName: function(stockName) {
+                const chart = Chart.getChart('categoryTrendChart');
+                if (!chart) return;
+
+                const datasets = chart.data.datasets;
+                for (let i = 0; i < datasets.length; i++) {
+                    if (datasets[i].label === stockName) {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.hidden = !meta.hidden;
+                        const isHidden = meta.hidden;
+
+                        // 同步威科夫卡片状态
+                        this.syncWyckoffCardState(stockName, isHidden);
+
+                        // 同步相对强度条形状态
+                        this.syncRelativeStrengthBarState(stockName, isHidden);
+
+                        chart.update();
+                        break;
+                    }
+                }
+            },
+
+            syncWyckoffCardState: function(stockName, isHidden) {
+                const container = document.getElementById('wyckoffContainer');
+                if (!container) return;
+
+                const cards = container.querySelectorAll('.wyckoff-card');
+                cards.forEach(card => {
+                    if (card.dataset.stockName === stockName) {
+                        card.classList.toggle('hidden-line', isHidden);
+                    }
+                });
+            },
+
+            syncRelativeStrengthBarState: function(stockName, isHidden) {
+                const rsChart = Chart.getChart('relativeStrengthChart');
+                if (!rsChart || !rsChart._relativeData) return;
+
+                // 找到对应条形的索引并更新背景透明度
+                const relativeData = rsChart._relativeData;
+                const idx = relativeData.findIndex(d => d.name === stockName);
+                if (idx === -1) return;
+
+                const dataset = rsChart.data.datasets[0];
+                const baseColor = relativeData[idx].relative_strength >= 0 ? '#22c55e' : '#ef4444';
+                dataset.backgroundColor[idx] = isHidden ? baseColor + '40' : baseColor;
+                rsChart.update('none');
+            },
+
+            getAdviceText: function(advice) {
+                const adviceMap = {
+                    'buy': '买入',
+                    'sell': '卖出',
+                    'hold': '持有',
+                    'watch': '观望'
+                };
+                return adviceMap[advice] || advice;
+            },
+
+            currentAdviceData: null,
+
+            loadAdvice: async function() {
+                if (this.currentCategory === 'custom') {
+                    this.displayWyckoffPanel(null);
+                    return;
+                }
+
+                const timeframeToDays = { '7d': 7, '30d': 30, '365d': 365 };
+                const days = timeframeToDays[this.currentTimeframe] || 30;
+
+                try {
+                    const url = `/heavy-metals/api/trading-advice?category=${this.currentCategory}&days=${days}`;
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const adviceData = await response.json();
+                    this.currentAdviceData = adviceData;
+                    this.displayWyckoffPanel(adviceData);
+
+                    // 渲染相对强度图表（曲线图和条形图）
+                    const self = this;
+                    // 使用缓存的走势数据渲染曲线图
+                    if (Charts.trendData) {
+                        Charts.renderRelativeStrengthTrendChart(Charts.trendData, adviceData, 'relativeStrengthTrendChart', function(stockName) {
+                            self.toggleChartLineByName(stockName);
+                        });
+                    }
+                    // 渲染条形图
+                    Charts.renderRelativeStrengthChart(null, adviceData, 'relativeStrengthChart', function(stockName) {
+                        self.toggleChartLineByName(stockName);
+                    });
+
+                } catch (error) {
+                    console.error('Error loading advice:', error);
+                }
+            },
+
+            // 自定义模式下渲染相对走势图表
+            renderCustomRelativeStrength: function(trendData) {
+                if (!trendData || !trendData.stocks || trendData.stocks.length < 2) {
+                    return;
+                }
+
+                // 从 trendData 构造 adviceData 格式的数据
+                // 取每只股票最后一天的累计涨跌幅作为 change_pct
+                const stocks = trendData.stocks.map(stock => {
+                    let changePct = null;
+                    if (stock.data && stock.data.length > 0) {
+                        const lastData = stock.data[stock.data.length - 1];
+                        changePct = lastData.change_pct;
+                    }
+                    return {
+                        name: stock.stock_name,
+                        code: stock.stock_code,
+                        change_pct: changePct
+                    };
+                }).filter(s => s.change_pct !== null);
+
+                if (stocks.length < 2) return;
+
+                const adviceData = { stocks: stocks };
+                const self = this;
+
+                // 渲染相对走势曲线图
+                Charts.renderRelativeStrengthTrendChart(trendData, adviceData, 'relativeStrengthTrendChart', function(stockName) {
+                    self.toggleChartLineByName(stockName);
+                });
+
+                // 渲染相对强度条形图
+                Charts.renderRelativeStrengthChart(null, adviceData, 'relativeStrengthChart', function(stockName) {
+                    self.toggleChartLineByName(stockName);
+                });
+            }
+        };
+
+        // 加载可选数据项并渲染选择列表
+        async function loadAvailableCodes() {
+            const response = await fetch('/heavy-metals/api/available-codes');
+            if (!response.ok) {
+                selectorContent.innerHTML = '<div class="text-danger">加载失败</div>';
+                return;
+            }
+
+            const data = await response.json();
+            const selectedCodes = getSelectedCodes();
+
+            let html = '';
+
+            function renderGroup(title, items, showWyckoff = false) {
+                if (!items || items.length === 0) return '';
+                let groupHtml = `<div class="custom-trend-group">
+                    <div class="custom-trend-group-title">${title}</div>
+                    <div class="custom-trend-group-items">`;
+                items.forEach(item => {
+                    const isSelected = selectedCodes.includes(item.code);
+                    let wyckoffHtml = '';
+                    if (showWyckoff && item.wyckoff) {
+                        const w = item.wyckoff;
+                        const adviceText = WYCKOFF_ADVICE_MAP[w.advice] || w.advice;
+                        const adviceClass = WYCKOFF_ADVICE_CLASS[w.advice] || '';
+                        wyckoffHtml = `<span class="wyckoff-badge ${adviceClass}">${adviceText}</span>`;
+                    }
+                    groupHtml += `<div class="custom-trend-item ${isSelected ? 'active' : ''}" data-code="${item.code}">
+                        <span class="custom-trend-item-check">✓</span>
+                        <span class="item-name">${item.name}</span>
+                        ${wyckoffHtml}
+                    </div>`;
+                });
+                groupHtml += '</div></div>';
+                return groupHtml;
+            }
+
+            html += renderGroup('指数', data.indices);
+            html += renderGroup('重金属', data.futures);
+            html += renderGroup('ETF', data.etfs);
+
+            // 股票按板块分组渲染
+            if (data.stock_groups && Object.keys(data.stock_groups).length > 0) {
+                html += '<div class="custom-trend-group stock-groups-container">';
+                html += '<div class="custom-trend-group-title">股票</div>';
+                html += '<div class="stock-subgroups">';
+                for (const [groupName, items] of Object.entries(data.stock_groups)) {
+                    if (items && items.length > 0) {
+                        html += `<div class="stock-subgroup">`;
+                        html += `<div class="stock-subgroup-title">${groupName}</div>`;
+                        html += '<div class="custom-trend-group-items">';
+                        items.forEach(item => {
+                            const isSelected = selectedCodes.includes(item.code);
+                            let wyckoffHtml = '';
+                            if (item.wyckoff) {
+                                const w = item.wyckoff;
+                                const adviceText = WYCKOFF_ADVICE_MAP[w.advice] || w.advice;
+                                const adviceClass = WYCKOFF_ADVICE_CLASS[w.advice] || '';
+                                wyckoffHtml = `<span class="wyckoff-badge ${adviceClass}">${adviceText}</span>`;
+                            }
+                            html += `<div class="custom-trend-item ${isSelected ? 'active' : ''}" data-code="${item.code}">
+                                <span class="custom-trend-item-check">✓</span>
+                                <span class="item-name">${item.name}</span>
+                                ${wyckoffHtml}
+                            </div>`;
+                        });
+                        html += '</div></div>';
+                    }
+                }
+                html += '</div></div>';
+            }
+
+            if (!html) {
+                html = '<div class="text-muted">暂无可选数据</div>';
+            }
+
+            selectorContent.innerHTML = html;
+
+            selectorContent.querySelectorAll('.custom-trend-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const code = this.dataset.code;
+                    this.classList.toggle('active');
+
+                    const codes = getSelectedCodes();
+                    const index = codes.indexOf(code);
+                    if (index >= 0) {
+                        codes.splice(index, 1);
+                    } else {
+                        codes.push(code);
+                    }
+                    saveSelectedCodes(codes);
+
+                    if (CategoryController.currentCategory === 'custom') {
+                        CategoryController.loadTrendData();
+                    }
+                });
+            });
+        }
+
+        // 刷新按钮
+        refreshBtn.addEventListener('click', async function() {
+            refreshBtn.disabled = true;
+            await CategoryController.loadTrendData();
+            refreshBtn.disabled = false;
+        });
+
+        // 图表高度调整功能
+        (function initChartResize() {
+            const STORAGE_KEY = 'chart_height_heavy_metals';
+            const MIN_HEIGHT = 200;
+            const DEFAULT_HEIGHT = 500;
+
+            const chartWrapper = document.getElementById('categoryChartWrapper');
+            const resizeHandle = document.getElementById('chartResizeHandle');
+
+            if (!chartWrapper || !resizeHandle) return;
+
+            // 从localStorage恢复高度
+            const savedHeight = localStorage.getItem(STORAGE_KEY);
+            if (savedHeight) {
+                const height = Math.max(parseInt(savedHeight), MIN_HEIGHT);
+                chartWrapper.style.height = height + 'px';
+            }
+
+            let isResizing = false;
+            let startY = 0;
+            let startHeight = 0;
+
+            resizeHandle.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                startY = e.clientY;
+                startHeight = chartWrapper.offsetHeight;
+                document.body.style.cursor = 'ns-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+                const deltaY = e.clientY - startY;
+                const newHeight = Math.max(startHeight + deltaY, MIN_HEIGHT);
+                chartWrapper.style.height = newHeight + 'px';
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+
+                // 保存高度到localStorage
+                const currentHeight = chartWrapper.offsetHeight;
+                localStorage.setItem(STORAGE_KEY, currentHeight);
+
+                // 触发图表resize
+                if (window.Charts && typeof window.Charts.resize === 'function') {
+                    window.Charts.resize();
+                }
+            });
+
+            // 触摸设备支持
+            resizeHandle.addEventListener('touchstart', function(e) {
+                isResizing = true;
+                startY = e.touches[0].clientY;
+                startHeight = chartWrapper.offsetHeight;
+                e.preventDefault();
+            });
+
+            document.addEventListener('touchmove', function(e) {
+                if (!isResizing) return;
+                const deltaY = e.touches[0].clientY - startY;
+                const newHeight = Math.max(startHeight + deltaY, MIN_HEIGHT);
+                chartWrapper.style.height = newHeight + 'px';
+            });
+
+            document.addEventListener('touchend', function() {
+                if (!isResizing) return;
+                isResizing = false;
+                const currentHeight = chartWrapper.offsetHeight;
+                localStorage.setItem(STORAGE_KEY, currentHeight);
+
+                if (window.Charts && typeof window.Charts.resize === 'function') {
+                    window.Charts.resize();
+                }
+            });
+        })();
+
+        // 初始加载
+        loadAvailableCodes();
+        CategoryController.init();
+    });
+</script>
+<script src="{{ url_for('static', filename='js/relative.js') }}"></script>
+{% endblock %}

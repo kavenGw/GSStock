@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>持仓列表</h2>
+    <div class="d-flex gap-2">
+        <select id="categoryFilter" class="form-select" style="width:auto">
+            <option value="all" {{ 'selected' if category_filter == 'all' else '' }}>全部板块</option>
+            <option value="uncategorized" {{ 'selected' if category_filter == 'uncategorized' else '' }}>未设板块</option>
+            {% for parent in category_tree %}
+            <optgroup label="{{ parent.name }}">
+                <option value="{{ parent.id }}" {{ 'selected' if category_filter == parent.id|string else '' }}>{{ parent.name }}（全部）</option>
+                {% for child in parent.children %}
+                <option value="{{ child.id }}" {{ 'selected' if category_filter == child.id|string else '' }}>{{ child.name }}</option>
+                {% endfor %}
+            </optgroup>
+            {% endfor %}
+        </select>
+        <select id="dateSelector" class="form-select date-selector">
+            {% if current_date %}
+            {% set snap = snapshot_map.get(current_date, {}) %}
+            <option value="{{ current_date }}" selected>{{ current_date }}{% if snap.get('total_asset') %} | ¥{{ '%.0f'|format(snap.get('total_asset')) }}{% endif %}{% if snap.get('daily_profit') is not none %} | {{ '%+.0f'|format(snap.get('daily_profit')) }}{% endif %}</option>
+            {% endif %}
+            {% for d in dates %}
+            {% if d != current_date %}
+            {% set snap = snapshot_map.get(d, {}) %}
+            <option value="{{ d }}">{{ d }}{% if snap.get('total_asset') %} | ¥{{ '%.0f'|format(snap.get('total_asset')) }}{% endif %}{% if snap.get('daily_profit') is not none %} | {{ '%+.0f'|format(snap.get('daily_profit')) }}{% endif %}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+{% if positions %}
+<!-- 模块1: 账户信息 -->
+<div class="module-card account-info-module">
+    <div class="module-header">
+        <h5>账户信息</h5>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#configModal">
+            设置
+        </button>
+    </div>
+    <div class="account-stats-grid">
+        <div class="account-stat-item">
+            <span class="stat-label">总市值</span>
+            <span class="stat-value" id="summaryMarketValue">¥{{ '%.2f'|format(summary.total_market_value) if summary else '0.00' }}</span>
+        </div>
+        <div class="account-stat-item">
+            <span class="stat-label">总成本</span>
+            <span class="stat-value" id="summaryCost">¥{{ '%.2f'|format(summary.total_cost) if summary else '0.00' }}</span>
+        </div>
+        <div class="account-stat-item">
+            <span class="stat-label">总收益</span>
+            <span class="stat-value {{ 'profit' if summary and summary.total_profit > 0 else 'loss' if summary and summary.total_profit < 0 else '' }}" id="summaryProfit">
+                {{ '%+.2f'|format(summary.total_profit) if summary else '0.00' }} ({{ '%+.2f'|format(summary.total_profit_pct) if summary else '0.00' }}%)
+            </span>
+        </div>
+        <div class="account-stat-item">
+            <span class="stat-label">总资金</span>
+            <span class="stat-value" id="summaryCapital" title="双击编辑">
+                {% if summary and summary.total_capital %}
+                ¥{{ '%.2f'|format(summary.total_capital) }}
+                {% else %}
+                <span class="text-muted">未设置</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="account-stat-item">
+            <span class="stat-label">总仓位</span>
+            <span class="stat-value" id="summaryPositionPct">
+                {% if summary and summary.total_position_pct is not none %}
+                {{ summary.total_position_pct }}%
+                <span class="total-position-bar">
+                    <span class="total-position-bar-inner position-bar-{{ 'danger' if summary.total_position_pct > 90 else 'warning' if summary.total_position_pct > 80 else 'normal' }}"
+                          style="width: {{ [summary.total_position_pct, 100]|min }}%"></span>
+                </span>
+                {% else %}
+                <span class="text-muted">--</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <!-- 风险警告 -->
+    {% if summary and summary.risk_level == 'danger' %}
+    <div class="risk-alert risk-alert-danger mt-3">
+        <strong>⚠️ 满仓风险</strong> 当前总仓位超过90%，请注意控制风险
+    </div>
+    {% elif summary and summary.risk_level == 'high' %}
+    <div class="risk-alert risk-alert-high mt-3">
+        <strong>⚠️ 总仓位过高</strong> 当前总仓位超过80%，建议适当降低仓位
+    </div>
+    {% endif %}
+</div>
+
+<!-- 模块2: 每日收益 -->
+<div class="module-card daily-profit-module">
+    <div class="module-header">
+        <h5>每日收益</h5>
+        <div class="profit-summary">
+            <span class="profit-item">
+                <span class="profit-label">今日</span>
+                <span class="profit-value {{ 'profit' if daily_change and daily_change.daily_change > 0 else 'loss' if daily_change and daily_change.daily_change < 0 else '' }}">
+                    {% if daily_change %}{{ '%+.2f'|format(daily_change.daily_change) }} ({{ '%+.2f'|format(daily_change.daily_change_pct) }}%){% else %}0.00{% endif %}
+                </span>
+            </span>
+            {% if profit_history and profit_history.summary %}
+            <span class="profit-item">
+                <span class="profit-label">胜率</span>
+                <span class="profit-value">{{ profit_history.summary.win_rate }}%</span>
+            </span>
+            <span class="profit-item">
+                <span class="profit-label">最大盈利</span>
+                <span class="profit-value profit">{{ '%+.2f'|format(profit_history.summary.max_profit) }}</span>
+            </span>
+            <span class="profit-item">
+                <span class="profit-label">最大亏损</span>
+                <span class="profit-value loss">{{ '%+.2f'|format(profit_history.summary.max_loss) }}</span>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="daily-profit-grid">
+        <div class="daily-profit-chart-container">
+            <div class="chart-title">每日盈亏</div>
+            <canvas id="dailyProfitBarChart"></canvas>
+        </div>
+        <div class="daily-profit-chart-container">
+            <div class="chart-title">股票收益分布</div>
+            <canvas id="profitPieChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- 模块3: 总收益 -->
+<div class="module-card total-profit-module">
+    <div class="module-header">
+        <h5>总收益</h5>
+        <div class="profit-summary">
+            <span class="profit-item">
+                <span class="profit-label">累计收益</span>
+                <span class="profit-value {{ 'profit' if summary and summary.total_profit > 0 else 'loss' if summary and summary.total_profit < 0 else '' }}">
+                    {% if summary %}{{ '%+.2f'|format(summary.total_profit) }}{% else %}0.00{% endif %}
+                </span>
+            </span>
+            <span class="profit-item">
+                <span class="profit-label">收益率</span>
+                <span class="profit-value {{ 'profit' if summary and summary.total_profit_pct > 0 else 'loss' if summary and summary.total_profit_pct < 0 else '' }}">
+                    {% if summary %}{{ '%+.2f'|format(summary.total_profit_pct) }}%{% else %}0.00%{% endif %}
+                </span>
+            </span>
+            {% if profit_history and profit_history.summary %}
+            <span class="profit-item">
+                <span class="profit-label">交易天数</span>
+                <span class="profit-value">{{ profit_history.summary.total_days }}</span>
+            </span>
+            <span class="profit-item">
+                <span class="profit-label">日均收益</span>
+                <span class="profit-value {{ 'profit' if profit_history.summary.avg_profit > 0 else 'loss' if profit_history.summary.avg_profit < 0 else '' }}">
+                    {{ '%+.2f'|format(profit_history.summary.avg_profit) }}
+                </span>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="daily-profit-grid">
+        <div class="daily-profit-chart-container">
+            <div class="chart-title">累计收益趋势</div>
+            <canvas id="cumulativeProfitChart"></canvas>
+        </div>
+        <div class="daily-profit-chart-container">
+            <div class="chart-title">板块收益</div>
+            <canvas id="categoryProfitChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- 模块4: 持仓分布 -->
+<div class="module-card position-distribution-module">
+    <div class="module-header">
+        <h5>持仓分布</h5>
+    </div>
+    <div class="distribution-grid">
+        <div class="distribution-chart-container">
+            <div class="chart-title">持仓分布</div>
+            <canvas id="positionPieChart"></canvas>
+        </div>
+        <div class="distribution-chart-container">
+            <div class="chart-title">板块分布</div>
+            <canvas id="categoryPieChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="empty-state">
+    <h4>暂无持仓数据</h4>
+    <p>请通过「每日记录」上传持仓截图</p>
+</div>
+{% endif %}
+
+<!-- 设置总资金模态框 -->
+<div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configModalLabel">设置总资金</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="totalCapitalInput" class="form-label">总资金金额</label>
+                    <input type="number" class="form-control" id="totalCapitalInput" min="0" step="1000" placeholder="请输入总资金金额">
+                    <div class="form-text">设置总资金后，可显示总仓位百分比</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveConfigBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 板块管理模态框 -->
+<div class="modal fade" id="sectorManageModal" tabindex="-1" aria-labelledby="sectorManageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sectorManageModalLabel">板块管理</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createSectorForm" class="d-flex gap-2 mb-3">
+                    <input type="text" class="form-control" id="newSectorName" placeholder="输入板块名称" maxlength="20" required>
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </form>
+                <div id="sectorTree"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.currentDate = {{ current_date | tojson }};
+    window.currentSummary = {{ summary | tojson if summary else 'null' }};
+    window.currentPositions = {{ positions | tojson if positions else '[]' }};
+    window.stockCategories = {{ stock_categories | tojson if stock_categories else '{}' }};
+    window.categoryTree = {{ category_tree | tojson if category_tree else '[]' }};
+    window.dailyProfitData = {{ daily_profit_data | tojson if daily_profit_data else '{}' }};
+    window.dailyProfitBreakdown = {{ daily_profit_breakdown | tojson if daily_profit_breakdown else '[]' }};
+    window.profitHistory = {{ profit_history | tojson if profit_history else '{}' }};
+
+    // 预加载管理器
+    const PreloadManager = {
+        overlay: null,
+        pollTimer: null,
+
+        showOverlay(title, status, current, total, currentStock) {
+            if (!this.overlay) {
+                this.overlay = document.createElement('div');
+                this.overlay.className = 'preload-overlay';
+                this.overlay.innerHTML = `
+                    <div class="preload-modal">
+                        <div class="preload-title"></div>
+                        <div class="preload-progress-container">
+                            <div class="preload-progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="preload-status"></div>
+                        <div class="preload-current"></div>
+                    </div>
+                `;
+                document.body.appendChild(this.overlay);
+            }
+            this.updateOverlay(title, status, current, total, currentStock);
+            this.overlay.style.display = 'flex';
+        },
+
+        updateOverlay(title, status, current, total, currentStock) {
+            if (!this.overlay) return;
+            const pct = total > 0 ? Math.round(current / total * 100) : 0;
+            this.overlay.querySelector('.preload-title').textContent = title;
+            this.overlay.querySelector('.preload-progress-bar').style.width = pct + '%';
+            this.overlay.querySelector('.preload-status').textContent = status || `${current} / ${total}`;
+            this.overlay.querySelector('.preload-current').textContent = currentStock || '';
+        },
+
+        hideOverlay() {
+            if (this.overlay) {
+                this.overlay.style.display = 'none';
+            }
+            if (this.pollTimer) {
+                clearInterval(this.pollTimer);
+                this.pollTimer = null;
+            }
+        },
+
+        async checkAndStart() {
+            if (!window.currentPositions || window.currentPositions.length === 0) {
+                return;
+            }
+
+            const resp = await fetch('/api/preload/status');
+            const data = await resp.json();
+
+            if (data.status === 'none') {
+                this.startPreload();
+            } else if (data.status === 'running') {
+                this.showOverlay('数据预加载中', null, 0, data.total_count, null);
+                this.pollProgress();
+            }
+        },
+
+        async startPreload() {
+            this.showOverlay('数据预加载中', '正在启动...', 0, 0, null);
+
+            const resp = await fetch('/api/preload/start', { method: 'POST' });
+            const data = await resp.json();
+
+            if (data.success) {
+                this.hideOverlay();
+            } else if (data.message === '预加载正在进行中') {
+                this.pollProgress();
+            } else {
+                this.hideOverlay();
+            }
+        },
+
+        pollProgress() {
+            if (this.pollTimer) return;
+
+            this.pollTimer = setInterval(async () => {
+                const resp = await fetch('/api/preload/progress');
+                const data = await resp.json();
+
+                if (data.status === 'completed' || data.status === 'failed') {
+                    this.hideOverlay();
+                    return;
+                }
+
+                if (data.status === 'running') {
+                    this.updateOverlay(
+                        '数据预加载中',
+                        `正在分析 ${data.current} / ${data.total}`,
+                        data.current,
+                        data.total,
+                        data.current_stock
+                    );
+                }
+            }, 1000);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.Charts && window.currentPositions && window.currentPositions.length > 0) {
+            Charts.renderPositionPieChart(window.currentPositions, window.currentSummary?.total_capital);
+            Charts.renderDailyProfitPieChart(window.dailyProfitBreakdown);
+            Charts.renderCategoryPieChart(window.currentPositions, window.stockCategories, window.categoryTree);
+            Charts.renderCategoryProfitChart(window.dailyProfitData);
+            Charts.renderDailyProfitBarChart(window.profitHistory);
+            Charts.renderCumulativeProfitChart(window.profitHistory);
+        }
+
+        // 检查并启动预加载
+        PreloadManager.checkAndStart();
+    });
+</script>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}

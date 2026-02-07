@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}整体收益{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">整体收益</h2>
+
+<!-- 整体收益统计卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">浮动盈亏 (持仓中)</h6>
+                {% if daily_data.daily_profits %}
+                {% set latest = daily_data.daily_profits[-1] %}
+                <h3 class="card-title {{ 'text-success' if daily_data.summary.total_profit > 0 else 'text-danger' if daily_data.summary.total_profit < 0 else '' }}">
+                    {{ '%+.2f'|format(daily_data.summary.total_profit) }}
+                </h3>
+                {% else %}
+                <h3 class="card-title">--</h3>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">已实现盈亏</h6>
+                <h3 class="card-title {{ 'text-success' if trade_data.summary.total_profit > 0 else 'text-danger' if trade_data.summary.total_profit < 0 else '' }}">
+                    {{ '%+.2f'|format(trade_data.summary.total_profit) }}
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">已结算交易</h6>
+                <h3 class="card-title">{{ trade_data.summary.total_settlements }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-muted">交易胜率</h6>
+                <h3 class="card-title">{{ '%.1f'|format(trade_data.summary.win_rate) }}%</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 累计收益曲线 -->
+{% if daily_data.cumulative_profits or trade_data.cumulative_profit %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">累计盈亏走势</div>
+            <div class="card-body">
+                <canvas id="overallCumulativeChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 浮动盈亏按股票和分类分布 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">浮动盈亏 - 按股票</div>
+            <div class="card-body">
+                <canvas id="floatingByStockChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">浮动盈亏 - 按板块</div>
+            <div class="card-body">
+                <canvas id="floatingByCategoryChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 已结算交易盈亏分布 -->
+{% if trade_data.profit_distribution %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">已实现盈亏 - 按股票</div>
+            <div class="card-body">
+                <canvas id="profitDistributionChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">已实现盈亏 - 按板块</div>
+            <div class="card-body">
+                <canvas id="realizedByCategoryChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 已结算交易列表 -->
+{% if settlements %}
+<div class="card">
+    <div class="card-header">已结算交易</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>股票代码</th>
+                        <th>股票名称</th>
+                        <th>买入成本</th>
+                        <th>卖出收入</th>
+                        <th>盈亏</th>
+                        <th>盈亏比例</th>
+                        <th>持仓天数</th>
+                        <th>结算日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in settlements %}
+                    <tr>
+                        <td>{{ s.stock_code }}</td>
+                        <td>{{ s.stock_name }}</td>
+                        <td>{{ '%.2f'|format(s.total_buy_amount) }}</td>
+                        <td>{{ '%.2f'|format(s.total_sell_amount) }}</td>
+                        <td class="{{ 'text-success' if s.profit > 0 else 'text-danger' if s.profit < 0 else '' }}">
+                            {{ '%+.2f'|format(s.profit) }}
+                        </td>
+                        <td class="{{ 'text-success' if s.profit_pct > 0 else 'text-danger' if s.profit_pct < 0 else '' }}">
+                            {{ '%+.2f'|format(s.profit_pct) }}%
+                        </td>
+                        <td>{{ s.holding_days }}天</td>
+                        <td>{{ s.last_sell_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <h4>暂无已结算交易</h4>
+            <p>当股票完全卖出后，可进行结算统计</p>
+            <a href="{{ url_for('trade.index') }}" class="btn btn-primary">查看交易记录</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.dailyData = {{ daily_data|tojson }};
+    window.byStockData = {{ by_stock|tojson }};
+    window.byCategoryData = {{ by_category|tojson }};
+    window.tradeData = {{ trade_data|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/profit_charts.js') }}"></script>
+{% endblock %}

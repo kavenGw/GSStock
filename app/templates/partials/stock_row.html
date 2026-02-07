@@ -1,0 +1,25 @@
+<tr data-code="{{ stock.stock_code }}">
+    <td class="editable stock-code" data-field="code">{{ stock.stock_code }}</td>
+    <td class="editable stock-name" data-field="name">{{ stock.stock_name }}</td>
+    <td class="editable alias-cell" data-field="alias">{{ alias_map.get(stock.stock_code, [])|join(', ') }}</td>
+    <td class="editable advice-cell" data-field="advice">{{ stock.investment_advice or '' }}</td>
+    <td>
+        <select class="form-select form-select-sm category-select" data-code="{{ stock.stock_code }}">
+            <option value="">未分类</option>
+            {% for parent in categories %}
+            <option value="{{ parent.id }}" {% if stock_categories.get(stock.stock_code) and stock_categories[stock.stock_code].category_id == parent.id %}selected{% endif %}>
+                {{ parent.name }}
+            </option>
+            {% for child in parent.children %}
+            <option value="{{ child.id }}" {% if stock_categories.get(stock.stock_code) and stock_categories[stock.stock_code].category_id == child.id %}selected{% endif %}>
+                &nbsp;&nbsp;└ {{ child.name }}
+            </option>
+            {% endfor %}
+            {% endfor %}
+            <option value="__new__" class="add-category-option">+ 新增分类...</option>
+        </select>
+    </td>
+    <td>
+        <button class="btn btn-sm btn-outline-danger delete-btn">删除</button>
+    </td>
+</tr>

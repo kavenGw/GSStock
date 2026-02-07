@@ -1,0 +1,885 @@
+/* 模块卡片通用样式 */
+.module-card {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.module-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 模块1: 账户信息 */
+.account-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.account-stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.stat-value.profit {
+    color: #dc3545;
+}
+
+.stat-value.loss {
+    color: #198754;
+}
+
+/* 模块2: 每日收益 & 模块3: 总收益 */
+.profit-summary {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.profit-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.profit-label {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.profit-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.profit-value.profit {
+    color: #dc3545;
+}
+
+.profit-value.loss {
+    color: #198754;
+}
+
+.daily-profit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.daily-profit-chart-container {
+    height: 220px;
+    position: relative;
+}
+
+/* 模块4: 持仓分布 */
+.distribution-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.distribution-chart-container {
+    height: 220px;
+    position: relative;
+}
+
+/* 模块5: 持仓明细 */
+.position-detail-module .module-header .badge {
+    font-size: 12px;
+}
+
+.position-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.position-table th,
+.position-table td {
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+.position-table th:nth-child(1),
+.position-table td:nth-child(1) {
+    width: 120px;
+}
+
+.position-table th:nth-child(2),
+.position-table td:nth-child(2) {
+    width: 140px;
+}
+
+.position-table th:nth-child(3),
+.position-table td:nth-child(3) {
+    width: 80px;
+}
+
+.position-table th:nth-child(4),
+.position-table td:nth-child(4) {
+    width: 80px;
+}
+
+.position-table th:nth-child(5),
+.position-table td:nth-child(5) {
+    width: 100px;
+}
+
+.advice-cell {
+    width: 180px;
+    min-width: 180px;
+    vertical-align: top;
+    padding-top: 8px !important;
+}
+
+.advice-cell input,
+.advice-cell textarea {
+    width: 100%;
+    margin-bottom: 0.25rem;
+}
+
+.advice-cell textarea {
+    resize: vertical;
+    min-height: 40px;
+}
+
+.date-selector {
+    max-width: 200px;
+}
+
+.upload-zone {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.upload-zone:hover {
+    border-color: #0d6efd;
+}
+
+.upload-zone.dragover {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+}
+
+.preview-table input {
+    width: 100%;
+    border: 1px solid #ced4da;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.preview-table input:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.loading {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.profit {
+    color: #dc3545;
+}
+
+.loss {
+    color: #198754;
+}
+
+/* 仓位进度条样式 */
+.position-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.position-bar-inner {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.position-bar-normal {
+    background-color: #198754;
+}
+
+.position-bar-warning {
+    background-color: #ffc107;
+}
+
+.position-bar-danger {
+    background-color: #dc3545;
+}
+
+.position-cell {
+    min-width: 100px;
+}
+
+.position-pct {
+    font-weight: 500;
+}
+
+.position-warning-icon {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+/* 风险警告样式 */
+.risk-alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.risk-alert-high {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.risk-alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+.total-position-bar {
+    width: 120px;
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+.total-position-bar-inner {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.chart-back-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 11px;
+    padding: 2px 8px;
+    cursor: pointer;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 3px;
+}
+
+.chart-back-btn:hover {
+    background: #5a6268;
+}
+
+.chart-title {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* 股票名称点击样式 */
+.stock-name-link {
+    cursor: pointer;
+    color: #0d6efd;
+    transition: color 0.2s;
+}
+
+.stock-name-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* 双击编辑样式 */
+.inline-editable {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: background-color 0.2s;
+}
+
+.inline-editable:hover {
+    background-color: #e9ecef;
+}
+
+.inline-edit-input {
+    width: 120px !important;
+}
+
+/* 迷你股价图样式 */
+.sparkline-cell {
+    width: 180px;
+    min-width: 180px;
+    vertical-align: top;
+    padding-top: 8px !important;
+}
+
+.sparkline-canvas {
+    width: 100%;
+    height: 50px !important;
+    max-height: 50px;
+}
+
+.sparkline-price-info {
+    display: flex;
+    gap: 6px;
+    font-size: 11px;
+    margin-top: 4px;
+    align-items: center;
+}
+
+.sparkline-price-info .price-current {
+    font-weight: 600;
+    color: #4299e1;
+}
+
+.sparkline-price-info .price-cost {
+    color: #6c757d;
+}
+
+.sparkline-price-info .price-pct {
+    font-weight: 500;
+}
+
+.sparkline-price-info .price-pct.profit {
+    color: #dc3545;
+}
+
+.sparkline-price-info .price-pct.loss {
+    color: #198754;
+}
+
+/* 股票详情弹窗图表 */
+.stock-detail-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stock-detail-chart-item {
+    height: 200px;
+}
+
+.stock-detail-chart-item h6 {
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 14px;
+}
+
+.stock-detail-chart-item canvas {
+    height: 160px !important;
+}
+
+/* 评级下拉框样式 */
+.rating-select {
+    width: auto !important;
+    display: inline-block;
+    padding: 0.15rem 1.5rem 0.15rem 0.4rem;
+    font-size: 0.75rem;
+    margin-left: 6px;
+    vertical-align: middle;
+    background-position: right 0.25rem center;
+}
+
+/* 持仓走势图模块 */
+.trend-chart-module .module-header {
+    margin-bottom: 12px;
+}
+
+.trend-chart-container {
+    width: 100%;
+}
+
+.trend-chart-canvas-wrapper {
+    height: 500px;
+    position: relative;
+}
+
+.trend-chart-canvas-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* 自定义走势选择器 - Grid 布局 */
+.custom-trend-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 160px) 1fr;
+    gap: 16px;
+    padding: 16px;
+}
+
+.custom-trend-group {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.custom-trend-group-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.custom-trend-group-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* 股票分组内使用网格布局 */
+.stock-groups-container .custom-trend-group-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 6px;
+}
+
+.custom-trend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    transition: all 0.15s;
+    font-size: 12px;
+}
+
+.custom-trend-item:hover {
+    border-color: #0d6efd;
+    background-color: #f0f7ff;
+}
+
+.custom-trend-item.active {
+    background-color: #e7f1ff;
+    border-color: #0d6efd;
+}
+
+.custom-trend-item-check {
+    color: #0d6efd;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-size: 12px;
+}
+
+.custom-trend-item.active .custom-trend-item-check {
+    opacity: 1;
+}
+
+.custom-trend-item .item-name {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 股票板块分组 */
+.stock-groups-container {
+    grid-column: 4 / -1;
+}
+
+.stock-subgroups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.stock-subgroup {
+    flex: 0 0 auto;
+}
+
+.stock-subgroup-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 6px;
+    padding-left: 2px;
+}
+
+/* 威科夫建议标签 */
+.wyckoff-badge {
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.wyckoff-buy {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.wyckoff-sell {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.wyckoff-hold {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.wyckoff-watch {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* 预加载进度条样式 */
+.preload-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.preload-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 32px 48px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    min-width: 320px;
+}
+
+.preload-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.preload-progress-container {
+    width: 100%;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.preload-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4299e1, #667eea);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.preload-status {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.preload-current {
+    font-size: 13px;
+    color: #999;
+}
+
+/* 威科夫评分徽章 */
+.wyckoff-score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.score-excellent {
+    background: linear-gradient(135deg, #0d6f3d, #198754);
+}
+
+.score-good {
+    background: linear-gradient(135deg, #198754, #5cb85c);
+}
+
+.score-neutral {
+    background: linear-gradient(135deg, #e0a800, #ffc107);
+    color: #333;
+}
+
+.score-caution {
+    background: linear-gradient(135deg, #d9534f, #fd7e14);
+}
+
+.score-danger {
+    background: linear-gradient(135deg, #a71d2a, #dc3545);
+}
+
+.score-na {
+    background: #adb5bd;
+    font-size: 10px;
+}
+
+/* 分析按钮 */
+.analysis-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+}
+
+/* 威科夫分析弹窗 */
+.wyckoff-modal .modal-header {
+    border-bottom: 1px solid #e9ecef;
+    padding: 16px 20px;
+}
+
+.wyckoff-modal .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.wyckoff-modal .modal-body {
+    padding: 20px;
+}
+
+.wyckoff-score-display {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.wyckoff-score-big {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.wyckoff-score-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.wyckoff-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.wyckoff-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.wyckoff-section {
+    margin-bottom: 16px;
+}
+
+.wyckoff-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wyckoff-section-content {
+    font-size: 14px;
+    color: #495057;
+    padding-left: 20px;
+}
+
+.wyckoff-events-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wyckoff-events-list li {
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wyckoff-events-list li::before {
+    content: "•";
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+.wyckoff-price-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    text-align: center;
+}
+
+.wyckoff-price-item {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.wyckoff-price-label {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.wyckoff-price-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.wyckoff-score-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.wyckoff-score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.wyckoff-score-item-label {
+    font-size: 13px;
+    color: #495057;
+}
+
+.wyckoff-score-item-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.wyckoff-no-data {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+/* 图表高度调整手柄 */
+.chart-resize-handle {
+    height: 24px;
+    background: #e9ecef;
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 7px 7px;
+    transition: background 0.2s;
+    margin: 16px -20px -16px -20px;
+}
+
+.chart-resize-handle:hover {
+    background: #dee2e6;
+}
+
+.chart-resize-handle::before {
+    content: '⋯';
+    font-size: 18px;
+    color: #6c757d;
+    letter-spacing: 2px;
+}
+
+.chart-resize-handle:hover::before {
+    color: #495057;
+}
