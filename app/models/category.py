@@ -31,7 +31,7 @@ class StockCategory(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String(6), nullable=False)
+    stock_code = db.Column(db.String(20), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id', ondelete='SET NULL'), nullable=True)
 
     category = db.relationship('Category', backref='stocks')

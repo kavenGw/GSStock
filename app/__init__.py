@@ -174,6 +174,16 @@ def create_app(config_class=None):
         # 创建所有表
         db.create_all()
 
+        # CockroachDB 需要 ALTER 已有列宽度（db.create_all 不会修改已有列）
+        if app.config.get('COCKROACH_CONFIGURED'):
+            from sqlalchemy import text
+            try:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE stock_categories ALTER COLUMN stock_code TYPE VARCHAR(20)'))
+                    conn.commit()
+            except Exception:
+                pass
+
         # 如果配置了 CockroachDB 且本地数据库存在，执行迁移
         if cockroach_migration_needed:
             logging.info("检测到 CockroachDB 配置，开始将本地数据迁移到云端...")

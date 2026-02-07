@@ -9,18 +9,13 @@ from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 
-# stock.db 中的表（不包含 private.db 的表）
+# stock.db 中需要迁移的表（缓存表跳过，应用运行后会自动重新获取）
 STOCK_DB_TABLES = [
     'stock',
     'stock_alias',
     'categories',
     'stock_categories',
     'wyckoff_reference',
-    'unified_stock_cache',
-    'metal_trend_cache',
-    'index_trend_cache',
-    'preload_status',
-    'signal_cache',
 ]
 
 
@@ -85,13 +80,23 @@ def migrate_table_to_cockroach(sqlite_conn: sqlite3.Connection, pg_engine, table
     Returns:
         int: 迁移的记录数
     """
-    from sqlalchemy import text
+    from sqlalchemy import text, inspect
 
     columns, rows = get_table_data(sqlite_conn, table_name)
 
     if not columns or not rows:
         logger.info(f"表 {table_name} 为空或不存在，跳过")
         return 0
+
+    # 查询目标表的布尔类型列（SQLite 存 0/1，CockroachDB 需要 bool）
+    bool_columns = set()
+    try:
+        inspector = inspect(pg_engine)
+        for col_info in inspector.get_columns(table_name):
+            if str(col_info['type']).upper() == 'BOOLEAN':
+                bool_columns.add(col_info['name'])
+    except Exception:
+        pass
 
     # 构建插入语句
     placeholders = ', '.join([f':{col}' for col in columns])
@@ -100,19 +105,22 @@ def migrate_table_to_cockroach(sqlite_conn: sqlite3.Connection, pg_engine, table
     insert_sql = f'INSERT INTO "{table_name}" ({columns_str}) VALUES ({placeholders}) ON CONFLICT DO NOTHING'
 
     migrated = 0
-    with pg_engine.connect() as conn:
-        for row in rows:
-            try:
-                params = {}
-                for i, col in enumerate(columns):
-                    params[col] = convert_value_for_postgres(row[i], col)
+    for row in rows:
+        try:
+            params = {}
+            for i, col in enumerate(columns):
+                val = convert_value_for_postgres(row[i], col)
+                if col in bool_columns and isinstance(val, int):
+                    val = bool(val)
+                params[col] = val
 
+            with pg_engine.connect() as conn:
                 conn.execute(text(insert_sql), params)
-                migrated += 1
-            except Exception as e:
-                logger.warning(f"插入记录到 {table_name} 时出错: {e}")
-                continue
-        conn.commit()
+                conn.commit()
+            migrated += 1
+        except Exception as e:
+            logger.warning(f"插入记录到 {table_name} 时出错: {e}")
+            continue
 
     logger.info(f"表 {table_name} 迁移完成，共 {migrated}/{len(rows)} 条记录")
     return migrated
