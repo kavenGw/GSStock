@@ -123,4 +123,13 @@ def create_app(config_class=None):
     from app.services.ocr import preload_model
     preload_model()
 
+    # 添加只读模式上下文处理器
+    @app.context_processor
+    def inject_readonly_mode():
+        from app.utils.readonly_mode import is_readonly_mode
+        return {'readonly_mode': is_readonly_mode()}
+
+    if app.config.get('READONLY_MODE'):
+        logging.info("应用运行在只读模式：不从服务器获取数据，stock.db 只读")
+
     return app

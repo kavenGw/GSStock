@@ -23,6 +23,7 @@ from app.services.memory_cache import memory_cache
 from app.services.trading_calendar import TradingCalendarService
 from app.services.market_session import SmartCacheStrategy, BatchCacheStrategy
 from app.utils.market_identifier import MarketIdentifier
+from app.utils.readonly_mode import is_readonly_mode
 
 logger = logging.getLogger(__name__)
 
@@ -453,13 +454,22 @@ class UnifiedStockDataService:
 
         # 第三层：API获取
         if need_refresh:
-            self._miss_count += len(need_refresh)
-            fetched = self._fetch_realtime_prices(need_refresh)
-            result.update(fetched)
-            # 写入内存缓存
-            memory_cache.set_batch(fetched, cache_type)
+            # 只读模式下不从外部 API 获取，尝试使用过期缓存
+            if is_readonly_mode():
+                logger.info(f"[只读模式] 跳过 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                for code in need_refresh:
+                    expired_data = self._get_expired_cache(code, cache_type)
+                    if expired_data:
+                        result[code] = expired_data
+            else:
+                self._miss_count += len(need_refresh)
+                fetched = self._fetch_realtime_prices(need_refresh)
+                result.update(fetched)
+                # 写入内存缓存
+                memory_cache.set_batch(fetched, cache_type)
 
-        logger.info(f"[实时价格] 完成: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (内存命中 {memory_hit_count}, DB命中 {db_hit_count})")
+        readonly_msg = " [只读模式]" if is_readonly_mode() else ""
+        logger.info(f"[实时价格] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (内存命中 {memory_hit_count}, DB命中 {db_hit_count})")
 
         return result
 
@@ -958,55 +968,71 @@ class UnifiedStockDataService:
 
         # 全量获取
         fetched_stocks = []
+        readonly = is_readonly_mode()
+
         if need_refresh:
-            self._miss_count += len(need_refresh)
-            fetched_stocks = self._fetch_trend_data(need_refresh, days)
-            # 写入内存缓存
-            for stock_data in fetched_stocks:
-                code = stock_data.get('stock_code')
-                if code:
-                    memory_cache.set(code, cache_type, stock_data)
+            if readonly:
+                # 只读模式下不从外部 API 获取，尝试使用过期缓存
+                logger.info(f"[只读模式] 跳过走势数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                for code in need_refresh:
+                    expired_data = self._get_expired_cache(code, cache_type)
+                    if expired_data:
+                        cached_stocks.append(expired_data)
+            else:
+                self._miss_count += len(need_refresh)
+                fetched_stocks = self._fetch_trend_data(need_refresh, days)
+                # 写入内存缓存
+                for stock_data in fetched_stocks:
+                    code = stock_data.get('stock_code')
+                    if code:
+                        memory_cache.set(code, cache_type, stock_data)
 
         # 增量获取
         if incremental_codes:
-            self._miss_count += len(incremental_codes)
-            for code, fetch_days, cached_stock_data in incremental_codes:
-                new_data = self._fetch_incremental_trend_data(code, fetch_days, days)
-                if new_data:
-                    merged_data = self._merge_ohlc_data(
-                        cached_stock_data.get('data', []),
-                        new_data.get('data', []),
-                        days
-                    )
-                    merged_stock = {
-                        'stock_code': code,
-                        'stock_name': cached_stock_data.get('stock_name', code),
-                        'category_id': cached_stock_data.get('category_id'),
-                        'data': merged_data
-                    }
-                    fetched_stocks.append(merged_stock)
-
-                    # 更新DB缓存和内存缓存
-                    market = self._identify_market(code)
-                    is_closed = TradingCalendarService.is_after_close(market)
-                    data_end_date = None
-                    if merged_data:
-                        try:
-                            data_end_date = date.fromisoformat(merged_data[-1]['date'])
-                        except ValueError:
-                            pass
-                    UnifiedStockCache.set_cached_data(
-                        code, cache_type, merged_stock, today,
-                        is_complete=is_closed,
-                        data_end_date=data_end_date
-                    )
-                    memory_cache.set(code, cache_type, merged_stock)
-                    stock_name = cached_stock_data.get('stock_name', code)
-                    logger.debug(f"[增量] {code} {stock_name}: 获取{fetch_days}天, 合并后{len(merged_data)}天")
-                else:
-                    stock_name = cached_stock_data.get('stock_name', code)
-                    logger.debug(f"[增量] {code} {stock_name}: 获取失败, 使用缓存")
+            if readonly:
+                # 只读模式下跳过增量获取，使用现有缓存
+                logger.info(f"[只读模式] 跳过增量获取 {len(incremental_codes)}只，使用现有缓存")
+                for code, fetch_days, cached_stock_data in incremental_codes:
                     cached_stocks.append(cached_stock_data)
+            else:
+                self._miss_count += len(incremental_codes)
+                for code, fetch_days, cached_stock_data in incremental_codes:
+                    new_data = self._fetch_incremental_trend_data(code, fetch_days, days)
+                    if new_data:
+                        merged_data = self._merge_ohlc_data(
+                            cached_stock_data.get('data', []),
+                            new_data.get('data', []),
+                            days
+                        )
+                        merged_stock = {
+                            'stock_code': code,
+                            'stock_name': cached_stock_data.get('stock_name', code),
+                            'category_id': cached_stock_data.get('category_id'),
+                            'data': merged_data
+                        }
+                        fetched_stocks.append(merged_stock)
+
+                        # 更新DB缓存和内存缓存
+                        market = self._identify_market(code)
+                        is_closed = TradingCalendarService.is_after_close(market)
+                        data_end_date = None
+                        if merged_data:
+                            try:
+                                data_end_date = date.fromisoformat(merged_data[-1]['date'])
+                            except ValueError:
+                                pass
+                        UnifiedStockCache.set_cached_data(
+                            code, cache_type, merged_stock, today,
+                            is_complete=is_closed,
+                            data_end_date=data_end_date
+                        )
+                        memory_cache.set(code, cache_type, merged_stock)
+                        stock_name = cached_stock_data.get('stock_name', code)
+                        logger.debug(f"[增量] {code} {stock_name}: 获取{fetch_days}天, 合并后{len(merged_data)}天")
+                    else:
+                        stock_name = cached_stock_data.get('stock_name', code)
+                        logger.debug(f"[增量] {code} {stock_name}: 获取失败, 使用缓存")
+                        cached_stocks.append(cached_stock_data)
 
         # 合并结果（内存缓存命中 + DB缓存命中 + 新获取）
         all_stocks = memory_hit_stocks + cached_stocks + fetched_stocks
@@ -1023,7 +1049,8 @@ class UnifiedStockDataService:
             'end': sorted_dates[-1] if sorted_dates else None
         }
 
-        logger.info(f"[走势数据] 完成: 成功 {len(all_stocks)}只 (内存 {memory_hit_count}, DB {db_hit_count})")
+        readonly_msg = " [只读模式]" if readonly else ""
+        logger.info(f"[走势数据] 完成{readonly_msg}: 成功 {len(all_stocks)}只 (内存 {memory_hit_count}, DB {db_hit_count})")
 
         return {
             'stocks': all_stocks,
@@ -1795,6 +1822,15 @@ class UnifiedStockDataService:
 
         # 获取需要刷新的数据
         if need_refresh:
+            # 只读模式下不从外部 API 获取，尝试使用过期缓存
+            if is_readonly_mode():
+                logger.info(f"[只读模式] 跳过指数数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                for code in need_refresh:
+                    expired_data = self._get_expired_cache(code, cache_type)
+                    if expired_data:
+                        results[code] = expired_data
+                return results
+
             self._miss_count += len(need_refresh)
             now_str = datetime.now().isoformat()
 
@@ -1953,11 +1989,20 @@ class UnifiedStockDataService:
 
         # 获取需要刷新的数据
         if need_refresh:
-            self._miss_count += len(need_refresh)
-            fetched = self._fetch_pe_data(need_refresh, today, now_str)
-            result.update(fetched)
+            # 只读模式下不从外部 API 获取，尝试使用过期缓存
+            if is_readonly_mode():
+                logger.info(f"[只读模式] 跳过 PE 数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                for code in need_refresh:
+                    expired_data = self._get_expired_cache(code, cache_type)
+                    if expired_data:
+                        result[code] = expired_data
+            else:
+                self._miss_count += len(need_refresh)
+                fetched = self._fetch_pe_data(need_refresh, today, now_str)
+                result.update(fetched)
 
-        logger.info(f"[PE数据] 完成: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
+        readonly_msg = " [只读模式]" if is_readonly_mode() else ""
+        logger.info(f"[PE数据] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
         return result
 
     def _fetch_pe_data(self, stock_codes: list, today: date, now_str: str) -> dict:
@@ -2535,11 +2580,20 @@ class UnifiedStockDataService:
 
         # 获取需要刷新的数据
         if need_refresh:
-            self._miss_count += len(need_refresh)
-            fetched = self._fetch_etf_nav(need_refresh, today, now_str)
-            result.update(fetched)
+            # 只读模式下不从外部 API 获取，尝试使用过期缓存
+            if is_readonly_mode():
+                logger.info(f"[只读模式] 跳过 ETF 净值 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                for code in need_refresh:
+                    expired_data = self._get_expired_cache(code, cache_type)
+                    if expired_data:
+                        result[code] = expired_data
+            else:
+                self._miss_count += len(need_refresh)
+                fetched = self._fetch_etf_nav(need_refresh, today, now_str)
+                result.update(fetched)
 
-        logger.info(f"[ETF净值] 完成: 请求 {len(etf_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
+        readonly_msg = " [只读模式]" if is_readonly_mode() else ""
+        logger.info(f"[ETF净值] 完成{readonly_msg}: 请求 {len(etf_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
         return result
 
     def _fetch_etf_nav(self, etf_codes: list, today: date, now_str: str) -> dict:

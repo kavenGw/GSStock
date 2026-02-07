@@ -13,6 +13,9 @@ class Config:
             'sqlite:///' + os.path.join(basedir, 'data', 'private.db')
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # 只读模式：不从服务器获取数据，不修改 stock.db，但可以修改 private.db
+    READONLY_MODE = os.environ.get('READONLY_MODE', '').lower() in ('1', 'true', 'yes')
     UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
     LOG_DIR = os.path.join(basedir, 'logs')
