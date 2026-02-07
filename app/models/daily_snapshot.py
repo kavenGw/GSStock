@@ -12,6 +12,7 @@ class DailySnapshot(db.Model):
     total_asset = db.Column(db.Float, nullable=True)  # 总资产
     daily_profit = db.Column(db.Float, nullable=True)  # 当日参考盈亏
     daily_profit_pct = db.Column(db.Float, nullable=True)  # 当日盈亏百分比
+    daily_fee = db.Column(db.Float, nullable=True, default=0)  # 当日手续费
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -22,11 +23,13 @@ class DailySnapshot(db.Model):
             'total_asset': self.total_asset,
             'daily_profit': self.daily_profit,
             'daily_profit_pct': self.daily_profit_pct,
+            'daily_fee': self.daily_fee or 0,
         }
 
     @classmethod
     def save_snapshot(cls, target_date: date, total_asset: float = None,
-                      daily_profit: float = None, daily_profit_pct: float = None):
+                      daily_profit: float = None, daily_profit_pct: float = None,
+                      daily_fee: float = None):
         """保存或更新每日快照"""
         snapshot = cls.query.filter_by(date=target_date).first()
         if snapshot:
@@ -36,12 +39,15 @@ class DailySnapshot(db.Model):
                 snapshot.daily_profit = daily_profit
             if daily_profit_pct is not None:
                 snapshot.daily_profit_pct = daily_profit_pct
+            if daily_fee is not None:
+                snapshot.daily_fee = daily_fee
         else:
             snapshot = cls(
                 date=target_date,
                 total_asset=total_asset,
                 daily_profit=daily_profit,
                 daily_profit_pct=daily_profit_pct,
+                daily_fee=daily_fee,
             )
             db.session.add(snapshot)
         db.session.commit()

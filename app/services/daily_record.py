@@ -38,6 +38,15 @@ class DailyRecordService:
         transfer_out = sum(t.amount for t in transfers if t.transfer_type == 'out')
         net_transfer = transfer_in - transfer_out
 
+        # 获取当日手续费（从快照或交易记录）
+        daily_fee = 0
+        if today_snapshot and today_snapshot.daily_fee:
+            daily_fee = today_snapshot.daily_fee
+        else:
+            # 从交易记录汇总手续费
+            trades = Trade.query.filter_by(trade_date=target_date).all()
+            daily_fee = sum(t.fee or 0 for t in trades)
+
         result = {
             'today_market_value': round(today_market_value, 2),
             'today_total_asset': round(today_total_asset, 2),
@@ -50,6 +59,7 @@ class DailyRecordService:
             'transfer_in': round(transfer_in, 2),
             'transfer_out': round(transfer_out, 2),
             'net_transfer': round(net_transfer, 2),
+            'daily_fee': round(daily_fee, 2),
         }
 
         if prev_date:
@@ -86,11 +96,12 @@ class DailyRecordService:
         trade_by_stock = {}
         for t in trades:
             if t.stock_code not in trade_by_stock:
-                trade_by_stock[t.stock_code] = {'buy': 0, 'sell': 0}
+                trade_by_stock[t.stock_code] = {'buy': 0, 'sell': 0, 'fee': 0}
             if t.trade_type == 'buy':
                 trade_by_stock[t.stock_code]['buy'] += t.amount
             else:
                 trade_by_stock[t.stock_code]['sell'] += t.amount
+            trade_by_stock[t.stock_code]['fee'] += t.fee or 0
 
         # 汇总所有相关股票代码
         all_stocks = set(today_positions.keys()) | set(prev_positions.keys())
@@ -99,7 +110,7 @@ class DailyRecordService:
         for code in all_stocks:
             today_pos = today_positions.get(code)
             prev_pos = prev_positions.get(code)
-            trade_data = trade_by_stock.get(code, {'buy': 0, 'sell': 0})
+            trade_data = trade_by_stock.get(code, {'buy': 0, 'sell': 0, 'fee': 0})
 
             today_market_value = today_pos.current_price * today_pos.quantity if today_pos else 0
             prev_market_value = prev_pos.current_price * prev_pos.quantity if prev_pos else 0
@@ -114,8 +125,8 @@ class DailyRecordService:
             else:
                 status = 'closed'
 
-            # 统一公式：当日盈亏 = 今日市值 - 昨日市值 + 卖出金额 - 买入金额
-            daily_profit = today_market_value - prev_market_value + trade_data['sell'] - trade_data['buy']
+            # 统一公式：当日盈亏 = 今日市值 - 昨日市值 + 卖出金额 - 买入金额 - 手续费
+            daily_profit = today_market_value - prev_market_value + trade_data['sell'] - trade_data['buy'] - trade_data['fee']
             # 交易净额 = 卖出金额 - 买入金额（注意：对于已清仓股票，这等于卖出收入，而非实际盈亏）
             trade_net = trade_data['sell'] - trade_data['buy']
 
@@ -129,6 +140,7 @@ class DailyRecordService:
                 'today_market_value': round(today_market_value, 2),
                 'trade_profit': round(trade_net, 2),
                 'daily_profit': round(daily_profit, 2),
+                'fee': round(trade_data['fee'], 2),
             })
 
         # 按盈亏绝对值从大到小排序
@@ -219,6 +231,7 @@ class DailyRecordService:
                     'daily_profit_pct': profit_data['daily_profit_pct'],
                     'market_value': profit_data['today_market_value'],
                     'net_transfer': profit_data.get('net_transfer', 0),
+                    'daily_fee': profit_data.get('daily_fee', 0),
                 })
                 cumulative_profits.append({
                     'date': target_date.isoformat(),
@@ -230,11 +243,13 @@ class DailyRecordService:
         # 计算统计摘要
         if daily_profits:
             profits = [d['daily_profit'] for d in daily_profits]
+            fees = [d.get('daily_fee', 0) for d in daily_profits]
             win_days = sum(1 for p in profits if p > 0)
             loss_days = sum(1 for p in profits if p < 0)
             max_profit = max(profits) if profits else 0
             max_loss = min(profits) if profits else 0
             avg_profit = sum(profits) / len(profits) if profits else 0
+            total_fee = sum(fees)
 
             summary = {
                 'total_days': len(daily_profits),
@@ -245,6 +260,7 @@ class DailyRecordService:
                 'max_profit': round(max_profit, 2),
                 'max_loss': round(max_loss, 2),
                 'avg_profit': round(avg_profit, 2),
+                'total_fee': round(total_fee, 2),
             }
         else:
             summary = {}

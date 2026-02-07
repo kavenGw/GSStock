@@ -255,14 +255,15 @@ def save():
             logger.error(f"保存银证转账失败: {e}")
             errors['transfer'] = str(e)
 
-    # 保存账户快照数据（总资产、当日盈亏）
+    # 保存账户快照数据（总资产、当日盈亏、手续费）
     if account:
         try:
             DailySnapshot.save_snapshot(
                 target_date,
                 total_asset=account.get('total_asset'),
                 daily_profit=account.get('daily_profit'),
-                daily_profit_pct=account.get('daily_profit_pct')
+                daily_profit_pct=account.get('daily_profit_pct'),
+                daily_fee=account.get('daily_fee')
             )
             logger.info(f"保存账户快照: {account}")
         except Exception as e:

@@ -18,6 +18,12 @@ function initDailyRecordPage() {
     // 初始化转账输入控件
     initTransferControls();
 
+    // 初始化手续费输入控件
+    const dailyFeeInput = document.getElementById('dailyFee');
+    if (dailyFeeInput) {
+        dailyFeeInput.addEventListener('input', updateSaveButton);
+    }
+
     // 上传队列，确保串行执行
     const uploadQueue = [];
     let isUploading = false;
@@ -417,6 +423,7 @@ function initDailyRecordPage() {
                 <td><input type="number" class="form-control form-control-sm quantity" value="${t.quantity || ''}"></td>
                 <td><input type="number" class="form-control form-control-sm price" step="0.001" value="${t.price ? t.price.toFixed(3) : ''}"></td>
                 <td class="amount">${amount.toFixed(2)}</td>
+                <td><input type="number" class="form-control form-control-sm fee" step="0.01" min="0" value="${t.fee ? t.fee.toFixed(2) : ''}"></td>
                 <td><button class="btn btn-sm btn-outline-danger delete-row">×</button></td>
             `;
             tbody.appendChild(row);
@@ -445,7 +452,9 @@ function initDailyRecordPage() {
     function updateSaveButton() {
         const saveBtn = document.getElementById('saveAllBtn');
         const hasTransfer = transferData.type && transferData.amount > 0;
-        saveBtn.disabled = (positionData.length === 0 && tradeData.length === 0 && !hasTransfer);
+        const dailyFeeInput = document.getElementById('dailyFee');
+        const hasDailyFee = dailyFeeInput && parseFloat(dailyFeeInput.value) > 0;
+        saveBtn.disabled = (positionData.length === 0 && tradeData.length === 0 && !hasTransfer && !hasDailyFee);
     }
 
     // 添加持仓行
@@ -467,7 +476,8 @@ function initDailyRecordPage() {
             stock_name: '',
             trade_type: 'buy',
             quantity: 0,
-            price: 0
+            price: 0,
+            fee: 0
         });
         renderTradeTable();
     });
@@ -496,6 +506,14 @@ function initDailyRecordPage() {
             note: transferData.note
         } : null;
 
+        // 收集手续费数据
+        const dailyFeeInput = document.getElementById('dailyFee');
+        const dailyFee = dailyFeeInput ? parseFloat(dailyFeeInput.value) || 0 : 0;
+        const account = { ...accountData };
+        if (dailyFee > 0) {
+            account.daily_fee = dailyFee;
+        }
+
         try {
             const response = await fetch('/daily-record/save', {
                 method: 'POST',
@@ -504,7 +522,7 @@ function initDailyRecordPage() {
                     date: targetDate,
                     positions: positions,
                     trades: trades,
-                    account: accountData,
+                    account: account,
                     transfer: transfer,
                     overwrite: true,
                     overwrite_stocks: overwriteStocks
@@ -565,7 +583,8 @@ function initDailyRecordPage() {
                 stock_name: row.querySelector('.stock-name').value.trim(),
                 trade_type: row.querySelector('.trade-type').value,
                 quantity: parseInt(row.querySelector('.quantity').value) || 0,
-                price: parseFloat(row.querySelector('.price').value) || 0
+                price: parseFloat(row.querySelector('.price').value) || 0,
+                fee: parseFloat(row.querySelector('.fee').value) || 0
             });
         });
 
