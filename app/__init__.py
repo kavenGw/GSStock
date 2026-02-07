@@ -127,7 +127,13 @@ def create_app(config_class=None):
 
     # 确保必要目录存在
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    os.makedirs(os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')), exist_ok=True)
+
+    # 只有在使用 SQLite 时才创建数据目录
+    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+    if db_uri.startswith('sqlite:///'):
+        db_dir = os.path.dirname(db_uri.replace('sqlite:///', ''))
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
 
     setup_logging(app)
 
@@ -160,7 +166,22 @@ def create_app(config_class=None):
 
     with app.app_context():
         from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, PreloadStatus, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache
+
+        # 检查是否需要执行 CockroachDB 迁移
+        from app.services.cockroach_migration import check_cockroach_migration_needed, migrate_local_to_cockroach
+        cockroach_migration_needed = check_cockroach_migration_needed(app)
+
+        # 创建所有表
         db.create_all()
+
+        # 如果配置了 CockroachDB 且本地数据库存在，执行迁移
+        if cockroach_migration_needed:
+            logging.info("检测到 CockroachDB 配置，开始将本地数据迁移到云端...")
+            if migrate_local_to_cockroach(app):
+                logging.info("本地数据已成功迁移到 CockroachDB")
+            else:
+                logging.warning("CockroachDB 迁移未完成，请检查日志")
+
         migrate_position_table()
         migrate_daily_snapshot_table()
         migrate_trades_table()
