@@ -13,35 +13,77 @@
 - **预警系统** — 信号检测与提醒
 - **期货/贵金属** — 指数、期货、贵金属走势追踪
 
-## 快速开始
+## 环境要求
+
+- Python 3.10+
+- Windows 系统（OCR 功能依赖 DirectML/CUDA，其他功能跨平台可用）
+
+## 安装步骤
+
+### 1. 安装 Python 依赖
 
 ```bash
 pip install -r requirements.txt
+```
+
+首次运行会自动下载 RapidOCR 中文模型。
+
+### 2. 环境配置
+
+复制环境配置示例文件：
+
+```bash
+cp .env.sample .env
+```
+
+编辑 `.env` 文件配置选项：
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `READONLY_MODE` | 只读模式，不从服务器获取数据，不修改 stock.db | `false` |
+| `SECRET_KEY` | Flask 密钥，留空则自动生成 | 自动生成 |
+| `DATABASE_URL` | 公共数据库路径 | `sqlite:///data/stock.db` |
+| `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
+
+**只读模式**适用于：
+- 无网络环境
+- 仅查看历史数据
+- 共享 stock.db 给其他用户使用
+
+### 3. GPU 加速（可选）
+
+OCR 识别支持 GPU 加速，根据硬件选择安装一个：
+
+```bash
+# NVIDIA 显卡（CUDA）
+pip install onnxruntime-gpu>=1.19.0
+
+# Windows DirectML（Intel/AMD/NVIDIA 通用）
+pip install onnxruntime-directml>=1.19.0
+```
+
+注意：`onnxruntime-gpu` 和 `onnxruntime-directml` 互斥，只能安装其中一个。不安装则使用 CPU。
+
+### 4. 启动应用
+
+```bash
 python run.py
 ```
 
 访问 http://127.0.0.1:5000
 
+启动时会显示 OCR 后端类型（CUDA/DIRECTML/CPU）。
+
 Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
 
-## 环境要求
+## 功能说明
 
-- Python 3.10+
-- Windows（OCR 功能依赖 DirectML/CUDA，其他功能跨平台可用）
-
-## GPU 加速（可选）
-
-OCR 识别支持 GPU 加速，根据硬件选择：
-
-```bash
-# NVIDIA 显卡
-pip install onnxruntime-gpu>=1.19.0
-
-# Intel/AMD/NVIDIA 通用 (Windows DirectML)
-pip install onnxruntime-directml>=1.19.0
-```
-
-两者互斥，只能安装其中一个。不安装则使用 CPU。
+| 功能 | 说明 |
+|------|------|
+| 上传持仓 | 上传截图自动识别或手动输入 |
+| 持仓列表 | 查看当日持仓及盈亏 |
+| 操作建议 | 记录支撑位、压力位、策略 |
+| 历史查询 | 切换日期查看历史数据 |
 
 ## 数据存储
 
