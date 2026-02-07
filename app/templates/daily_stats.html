@@ -29,6 +29,9 @@
                 </h2>
                 <div class="text-muted">
                     <p class="mb-0">前日总资产: {{ '%.2f'|format(stats.summary.prev_total_asset) }}</p>
+                    {% if stats.summary.daily_fee %}
+                    <p class="mb-0">当日手续费: {{ '%.2f'|format(stats.summary.daily_fee) }}</p>
+                    {% endif %}
                 </div>
                 {% else %}
                 <p class="text-muted">暂无数据</p>
@@ -82,6 +85,7 @@
                         <th>前日市值</th>
                         <th>今日市值</th>
                         <th>交易净额</th>
+                        <th>手续费</th>
                         <th>当日盈亏</th>
                     </tr>
                 </thead>
@@ -102,6 +106,9 @@
                         <td>{{ '%.2f'|format(item.today_market_value) if item.today_market_value else '-' }}</td>
                         <td class="{% if item.trade_profit > 0 %}text-success{% elif item.trade_profit < 0 %}text-danger{% endif %}">
                             {{ '%+.2f'|format(item.trade_profit) if item.trade_profit else '-' }}
+                        </td>
+                        <td class="text-danger">
+                            {{ '%.2f'|format(item.fee) if item.fee else '-' }}
                         </td>
                         <td class="{% if item.daily_profit > 0 %}text-success{% elif item.daily_profit < 0 %}text-danger{% endif %} fw-bold">
                             {{ '%+.2f'|format(item.daily_profit) }}

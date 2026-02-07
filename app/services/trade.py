@@ -25,6 +25,7 @@ class TradeService:
             quantity=data['quantity'],
             price=data['price'],
             amount=data['quantity'] * data['price'],
+            fee=data.get('fee', 0),
         )
         db.session.add(trade)
         db.session.commit()
@@ -85,6 +86,8 @@ class TradeService:
             trade.quantity = data['quantity']
         if 'price' in data:
             trade.price = data['price']
+        if 'fee' in data:
+            trade.fee = data['fee']
 
         trade.amount = trade.quantity * trade.price
 
@@ -134,7 +137,8 @@ class TradeService:
 
         total_buy_amount = sum(t.amount for t in buy_trades)
         total_sell_amount = sum(t.amount for t in sell_trades)
-        profit = total_sell_amount - total_buy_amount
+        total_fee = sum(t.fee or 0 for t in trades)
+        profit = total_sell_amount - total_buy_amount - total_fee
         profit_pct = (profit / total_buy_amount * 100) if total_buy_amount > 0 else 0
 
         first_buy_date = min(t.trade_date for t in buy_trades)

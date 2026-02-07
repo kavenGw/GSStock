@@ -19,6 +19,7 @@ class Trade(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    fee = db.Column(db.Float, nullable=True, default=0)  # 手续费（佣金+印花税+过户费）
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -32,4 +33,5 @@ class Trade(db.Model):
             'quantity': self.quantity,
             'price': self.price,
             'amount': self.amount,
+            'fee': self.fee or 0,
         }
