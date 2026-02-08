@@ -12,6 +12,9 @@ exchange-calendars>=4.5.0
 psycopg2-binary>=2.9.0
 sqlalchemy-cockroachdb>=2.0.0
 
+# Redis 缓存支持（可选）
+redis>=5.0.0
+
 # GPU 加速（根据硬件选择一个安装）:
 # NVIDIA GPU: pip install onnxruntime-gpu>=1.19.0
 # Windows DirectML: pip install onnxruntime-directml>=1.19.0

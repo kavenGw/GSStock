@@ -20,6 +20,7 @@ from app.services.cache_validator import CacheValidator
 from app.services.circuit_breaker import circuit_breaker
 from app.services.load_balancer import load_balancer
 from app.services.memory_cache import memory_cache
+from app.services.redis_cache import redis_cache
 from app.services.trading_calendar import TradingCalendarService
 from app.services.market_session import SmartCacheStrategy, BatchCacheStrategy
 from app.utils.market_identifier import MarketIdentifier
@@ -355,7 +356,7 @@ class UnifiedStockDataService:
     def get_realtime_prices(self, stock_codes: list, force_refresh: bool = False) -> dict:
         """获取实时价格数据
 
-        多级缓存策略：内存缓存 → 数据库缓存 → API获取
+        多级缓存策略：内存缓存 → Redis缓存 → 数据库缓存 → API获取
         - 交易时段内: 30分钟TTL
         - 收盘后/非交易日: 使用缓存不刷新
 
@@ -380,6 +381,7 @@ class UnifiedStockDataService:
         result = {}
         remaining_codes = list(stock_codes)
         memory_hit_count = 0
+        redis_hit_count = 0
         db_hit_count = 0
 
         # 第一层：内存缓存（非强制刷新时）
@@ -395,6 +397,23 @@ class UnifiedStockDataService:
 
         if not remaining_codes:
             logger.info(f"[实时价格] 完成: 请求 {len(stock_codes)}只, 全部内存缓存命中")
+            return result
+
+        # 第1.5层：Redis缓存（非强制刷新时）
+        if not force_refresh and redis_cache.is_available():
+            redis_cached = redis_cache.get_batch(remaining_codes, cache_type)
+            for code, data in redis_cached.items():
+                result[code] = data
+                redis_hit_count += 1
+                # 同步到内存缓存
+                memory_cache.set(code, cache_type, data)
+            remaining_codes = [c for c in remaining_codes if c not in redis_cached]
+
+            if redis_hit_count > 0:
+                logger.debug(f"[Redis缓存] 命中 {redis_hit_count}只")
+
+        if not remaining_codes:
+            logger.info(f"[实时价格] 完成: 请求 {len(stock_codes)}只, 内存命中 {memory_hit_count}, Redis命中 {redis_hit_count}")
             return result
 
         # 第二层：数据库缓存 + 智能TTL判断
@@ -418,6 +437,7 @@ class UnifiedStockDataService:
                 if cache_info.get('is_complete') and data_end == today:
                     result[code] = cache_info['data']
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 完整数据")
@@ -428,6 +448,7 @@ class UnifiedStockDataService:
                 if cache_info:
                     result[code] = cache_info['data']
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间")
@@ -436,6 +457,7 @@ class UnifiedStockDataService:
                 if expired_data:
                     result[code] = expired_data
                     memory_cache.set(code, cache_type, expired_data)
+                    redis_cache.set(code, cache_type, expired_data)
                     continue
                 logger.debug(f"[缓存] {code} {stock_name} 未命中: 无缓存")
                 need_refresh.append(code)
@@ -447,6 +469,7 @@ class UnifiedStockDataService:
                 if last_fetch and not SmartCacheStrategy.should_refresh(code, last_fetch, today):
                     result[code] = cache_info['data']
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: TTL内")
@@ -470,11 +493,12 @@ class UnifiedStockDataService:
                 self._miss_count += len(need_refresh)
                 fetched = self._fetch_realtime_prices(need_refresh)
                 result.update(fetched)
-                # 写入内存缓存
+                # 写入内存缓存和Redis缓存
                 memory_cache.set_batch(fetched, cache_type)
+                redis_cache.set_batch(fetched, cache_type)
 
         readonly_msg = " [只读模式]" if is_readonly_mode() else ""
-        logger.info(f"[实时价格] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (内存命中 {memory_hit_count}, DB命中 {db_hit_count})")
+        logger.info(f"[实时价格] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (内存命中 {memory_hit_count}, Redis命中 {redis_hit_count}, DB命中 {db_hit_count})")
 
         return result
 
@@ -830,7 +854,7 @@ class UnifiedStockDataService:
                        force_refresh: bool = False) -> dict:
         """获取OHLC走势数据
 
-        多级缓存策略：内存缓存 → 数据库缓存 → API获取
+        多级缓存策略：内存缓存 → Redis缓存 → 数据库缓存 → API获取
         - 完整数据（收盘后）且 data_end_date 是最近交易日 → 直接返回
         - 有缓存但不完整 → 增量获取缺失数据并合并
         - 无缓存 → 全量获取
@@ -858,6 +882,7 @@ class UnifiedStockDataService:
         remaining_codes = list(stock_codes)
         memory_hit_stocks = []
         memory_hit_count = 0
+        redis_hit_count = 0
 
         # 第一层：内存缓存（非强制刷新时）
         if not force_refresh:
@@ -879,6 +904,34 @@ class UnifiedStockDataService:
             logger.info(f"[走势数据] 完成: 全部内存缓存命中 {memory_hit_count}只")
             return {
                 'stocks': memory_hit_stocks,
+                'date_range': {'start': sorted_dates[0] if sorted_dates else None,
+                              'end': sorted_dates[-1] if sorted_dates else None}
+            }
+
+        # 第1.5层：Redis缓存（非强制刷新时）
+        redis_hit_stocks = []
+        if not force_refresh and redis_cache.is_available():
+            redis_cached = redis_cache.get_batch(remaining_codes, cache_type)
+            for code, data in redis_cached.items():
+                redis_hit_stocks.append(data)
+                redis_hit_count += 1
+                # 同步到内存缓存
+                memory_cache.set(code, cache_type, data)
+            remaining_codes = [c for c in remaining_codes if c not in redis_cached]
+
+            if redis_hit_count > 0:
+                logger.debug(f"[Redis缓存] 走势数据命中 {redis_hit_count}只")
+
+        if not remaining_codes:
+            all_stocks = memory_hit_stocks + redis_hit_stocks
+            all_dates = set()
+            for stock in all_stocks:
+                for dp in stock.get('data', []):
+                    all_dates.add(dp['date'])
+            sorted_dates = sorted(all_dates)
+            logger.info(f"[走势数据] 完成: 内存命中 {memory_hit_count}, Redis命中 {redis_hit_count}")
+            return {
+                'stocks': all_stocks,
                 'date_range': {'start': sorted_dates[0] if sorted_dates else None,
                               'end': sorted_dates[-1] if sorted_dates else None}
             }
@@ -910,6 +963,7 @@ class UnifiedStockDataService:
                 if data_end >= last_trading:
                     cached_stocks.append(cache_info['data'])
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 完整数据")
@@ -920,6 +974,7 @@ class UnifiedStockDataService:
                 if cache_info:
                     cached_stocks.append(cache_info['data'])
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间")
@@ -928,6 +983,7 @@ class UnifiedStockDataService:
                 if expired_data:
                     cached_stocks.append(expired_data)
                     memory_cache.set(code, cache_type, expired_data)
+                    redis_cache.set(code, cache_type, expired_data)
                     continue
                 logger.debug(f"[缓存] {code} {stock_name} 未命中: 无缓存")
                 need_refresh.append(code)
@@ -946,6 +1002,7 @@ class UnifiedStockDataService:
                 else:
                     cached_stocks.append(cache_info['data'])
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 无缺失交易日")
@@ -957,6 +1014,7 @@ class UnifiedStockDataService:
                 if last_fetch and not SmartCacheStrategy.should_refresh(code, last_fetch, today):
                     cached_stocks.append(cache_info['data'])
                     memory_cache.set(code, cache_type, cache_info['data'])
+                    redis_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: TTL内")
@@ -969,7 +1027,7 @@ class UnifiedStockDataService:
             need_refresh.append(code)
 
         # 缓存决策汇总日志
-        logger.info(f"[走势数据] 内存命中 {memory_hit_count}, DB命中 {db_hit_count}, 需刷新 {len(need_refresh)}, 需增量 {len(incremental_codes)}")
+        logger.info(f"[走势数据] 内存命中 {memory_hit_count}, Redis命中 {redis_hit_count}, DB命中 {db_hit_count}, 需刷新 {len(need_refresh)}, 需增量 {len(incremental_codes)}")
 
         # 全量获取
         fetched_stocks = []
@@ -986,11 +1044,12 @@ class UnifiedStockDataService:
             else:
                 self._miss_count += len(need_refresh)
                 fetched_stocks = self._fetch_trend_data(need_refresh, days)
-                # 写入内存缓存
+                # 写入内存缓存和Redis缓存
                 for stock_data in fetched_stocks:
                     code = stock_data.get('stock_code')
                     if code:
                         memory_cache.set(code, cache_type, stock_data)
+                        redis_cache.set(code, cache_type, stock_data)
 
         # 增量获取
         if incremental_codes:
@@ -1032,6 +1091,7 @@ class UnifiedStockDataService:
                             data_end_date=data_end_date
                         )
                         memory_cache.set(code, cache_type, merged_stock)
+                        redis_cache.set(code, cache_type, merged_stock)
                         stock_name = cached_stock_data.get('stock_name', code)
                         logger.debug(f"[增量] {code} {stock_name}: 获取{fetch_days}天, 合并后{len(merged_data)}天")
                     else:
@@ -1039,8 +1099,8 @@ class UnifiedStockDataService:
                         logger.debug(f"[增量] {code} {stock_name}: 获取失败, 使用缓存")
                         cached_stocks.append(cached_stock_data)
 
-        # 合并结果（内存缓存命中 + DB缓存命中 + 新获取）
-        all_stocks = memory_hit_stocks + cached_stocks + fetched_stocks
+        # 合并结果（内存缓存命中 + Redis缓存命中 + DB缓存命中 + 新获取）
+        all_stocks = memory_hit_stocks + redis_hit_stocks + cached_stocks + fetched_stocks
 
         # 获取日期范围
         all_dates = set()
@@ -1055,7 +1115,7 @@ class UnifiedStockDataService:
         }
 
         readonly_msg = " [只读模式]" if readonly else ""
-        logger.info(f"[走势数据] 完成{readonly_msg}: 成功 {len(all_stocks)}只 (内存 {memory_hit_count}, DB {db_hit_count})")
+        logger.info(f"[走势数据] 完成{readonly_msg}: 成功 {len(all_stocks)}只 (内存 {memory_hit_count}, Redis {redis_hit_count}, DB {db_hit_count})")
 
         return {
             'stocks': all_stocks,
@@ -2739,14 +2799,32 @@ class UnifiedStockDataService:
         Returns:
             删除的记录数
         """
+        # 清除数据库缓存
         count = UnifiedStockCache.clear_cache(stock_codes, cache_type)
-        logger.info(f"清除缓存: {count} 条记录")
+
+        # 清除 Redis 缓存
+        if stock_codes:
+            for code in stock_codes:
+                redis_cache.invalidate(code, cache_type)
+        else:
+            redis_cache.invalidate(None, cache_type)
+
+        # 清除内存缓存
+        if stock_codes:
+            for code in stock_codes:
+                memory_cache.invalidate(code, cache_type)
+        else:
+            memory_cache.invalidate(None, cache_type)
+
+        logger.info(f"清除缓存: {count} 条记录 (DB), Redis和内存缓存已同步清除")
         return count
 
     def reset_stats(self):
         """重置统计计数"""
         self._hit_count = 0
         self._miss_count = 0
+        memory_cache.reset_stats()
+        redis_cache.reset_stats()
 
 
 # 创建单例实例
