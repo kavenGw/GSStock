@@ -33,153 +33,72 @@ def index():
     return render_template('daily_record.html', today=today)
 
 
-@daily_record_bp.route('/upload-position', methods=['POST'])
-def upload_position():
-    """上传持仓图片（支持多张）"""
-    files = request.files.getlist('files')
-    # 获取前端传来的已有数据（用于累加合并）
-    existing_json = request.form.get('existing', '[]')
-    existing_positions = json.loads(existing_json) if existing_json else []
-    logger.info(f"[上传持仓] 收到existing数据: {len(existing_positions)}条")
-    for i, pos in enumerate(existing_positions):
-        logger.info(f"  existing[{i+1}] code={pos.get('stock_code')}, name={pos.get('stock_name')}, qty={pos.get('quantity')}")
+@daily_record_bp.route('/upload-single', methods=['POST'])
+def upload_single():
+    """单文件上传识别"""
+    file = request.files.get('file')
+    upload_type = request.form.get('type')
 
-    if not files or len(files) == 0:
+    if not file or file.filename == '':
         return jsonify({'success': False, 'error': '请选择要上传的图片'})
 
-    if len(files) > MAX_FILES:
-        return jsonify({'success': False, 'error': f'最多支持{MAX_FILES}张图片'})
+    if not allowed_file(file.filename):
+        return jsonify({'success': False, 'error': '仅支持 JPG/PNG/BMP 格式'})
 
-    results = []
-    all_positions = list(existing_positions)  # 从已有数据开始
-    account_data = {}  # 账户概览数据
+    if upload_type not in ('position', 'trade'):
+        return jsonify({'success': False, 'error': '无效的上传类型'})
 
-    for file in files:
-        if not file or file.filename == '':
-            continue
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-        if not allowed_file(file.filename):
-            results.append({
-                'filename': file.filename,
-                'success': False,
-                'error': '仅支持 JPG/PNG/BMP 格式'
-            })
-            continue
-
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-
-        try:
+    try:
+        if upload_type == 'position':
             ocr_result = OcrService.recognize(filepath)
-            positions = ocr_result.get('positions', [])
-            account = ocr_result.get('account', {})
-
-            results.append({
-                'filename': file.filename,
+            return jsonify({
                 'success': True,
-                'positions': positions,
-                'account': account
+                'positions': ocr_result.get('positions', []),
+                'account': ocr_result.get('account', {})
             })
-            all_positions.extend(positions)
+        else:
+            trades = OcrService.recognize_trade(filepath)
+            StockService.fill_missing_codes(trades)
+            return jsonify({'success': True, 'trades': trades})
+    except Exception as e:
+        logger.error(f"图片识别失败: {file.filename} - {e}")
+        return jsonify({'success': False, 'error': f'识别失败: {str(e)}'})
+    finally:
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
-            # 叠加账户数据（多账户总资产和盈亏相加）
+
+@daily_record_bp.route('/merge', methods=['POST'])
+def merge():
+    """合并多张识别结果"""
+    data = request.get_json()
+    merge_type = data.get('type')
+    items = data.get('data', [])
+
+    if merge_type == 'position':
+        all_positions = []
+        account_data = {}
+        for item in items:
+            all_positions.extend(item.get('positions', []))
+            account = item.get('account', {})
             if account:
                 if 'total_asset' in account:
                     account_data['total_asset'] = account_data.get('total_asset', 0) + account['total_asset']
-                if 'daily_profit' in account:
-                    account_data['daily_profit'] = account_data.get('daily_profit', 0) + account['daily_profit']
-                if 'daily_profit_pct' in account:
-                    account_data['daily_profit_pct'] = account.get('daily_profit_pct')
-        except Exception as e:
-            logger.error(f"持仓图片识别失败: {file.filename} - {e}")
-            results.append({
-                'filename': file.filename,
-                'success': False,
-                'error': f'识别失败: {str(e)}'
-            })
-        finally:
-            if os.path.exists(filepath):
-                os.remove(filepath)
 
-    # 合并相同股票的持仓
-    logger.info(f"[上传持仓] OCR识别结果: {len(all_positions)}条")
-    for i, pos in enumerate(all_positions):
-        logger.info(f"  [{i+1}] code={pos.get('stock_code')}, name={pos.get('stock_name')}, qty={pos.get('quantity')}")
+        merged = PositionService.merge_positions(all_positions) if all_positions else []
+        return jsonify({'success': True, 'merged': merged, 'account': account_data})
 
-    merged = PositionService.merge_positions(all_positions) if all_positions else []
+    elif merge_type == 'trade':
+        all_trades = []
+        for item in items:
+            all_trades.extend(item.get('trades', []))
+        return jsonify({'success': True, 'trades': all_trades})
 
-    logger.info(f"[上传持仓] 合并后: {len(merged)}条")
-    for i, pos in enumerate(merged):
-        logger.info(f"  [{i+1}] code={pos.get('stock_code')}, name={pos.get('stock_name')}, qty={pos.get('quantity')}")
-
-    return jsonify({
-        'success': True,
-        'results': results,
-        'merged': merged,
-        'account': account_data
-    })
-
-
-@daily_record_bp.route('/upload-trade', methods=['POST'])
-def upload_trade():
-    """上传交易图片（支持多张）"""
-    files = request.files.getlist('files')
-    # 获取前端传来的已有数据（用于累加合并）
-    existing_json = request.form.get('existing', '[]')
-    existing_trades = json.loads(existing_json) if existing_json else []
-
-    if not files or len(files) == 0:
-        return jsonify({'success': False, 'error': '请选择要上传的图片'})
-
-    if len(files) > MAX_FILES:
-        return jsonify({'success': False, 'error': f'最多支持{MAX_FILES}张图片'})
-
-    results = []
-    all_trades = list(existing_trades)  # 从已有数据开始
-
-    for file in files:
-        if not file or file.filename == '':
-            continue
-
-        if not allowed_file(file.filename):
-            results.append({
-                'filename': file.filename,
-                'success': False,
-                'error': '仅支持 JPG/PNG/BMP 格式'
-            })
-            continue
-
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-
-        try:
-            trades = OcrService.recognize_trade(filepath)
-            # 根据股票名称补全缺失的股票代码
-            StockService.fill_missing_codes(trades)
-            results.append({
-                'filename': file.filename,
-                'success': True,
-                'trades': trades
-            })
-            all_trades.extend(trades)
-        except Exception as e:
-            logger.error(f"交易图片识别失败: {file.filename} - {e}")
-            results.append({
-                'filename': file.filename,
-                'success': False,
-                'error': f'识别失败: {str(e)}'
-            })
-        finally:
-            if os.path.exists(filepath):
-                os.remove(filepath)
-
-    return jsonify({
-        'success': True,
-        'results': results,
-        'all_trades': all_trades
-    })
+    return jsonify({'success': False, 'error': '无效的合并类型'})
 
 
 @daily_record_bp.route('/save', methods=['POST'])

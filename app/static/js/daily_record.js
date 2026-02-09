@@ -3,44 +3,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initDailyRecordPage() {
-    const positionZone1 = document.getElementById('positionUploadZone1');
-    const positionZone2 = document.getElementById('positionUploadZone2');
-    const tradeZone1 = document.getElementById('tradeUploadZone1');
-    const tradeZone2 = document.getElementById('tradeUploadZone2');
+    const positionZone = document.getElementById('positionUploadZone');
+    const tradeZone = document.getElementById('tradeUploadZone');
 
-    if (!positionZone1 || !positionZone2 || !tradeZone1 || !tradeZone2) return;
+    if (!positionZone || !tradeZone) return;
 
     let positionData = [];
     let tradeData = [];
-    let accountData = {};  // 账户概览数据
-    let transferData = { type: '', amount: 0, note: '' };  // 银证转账数据
+    let accountData = {};
+    let transferData = { type: '', amount: 0, note: '' };
 
-    // 初始化转账输入控件
+    // 每个区域的上传状态
+    const uploadState = {
+        position: { files: [], results: [] },
+        trade: { files: [], results: [] }
+    };
+
     initTransferControls();
 
-    // 初始化手续费输入控件
     const dailyFeeInput = document.getElementById('dailyFee');
     if (dailyFeeInput) {
         dailyFeeInput.addEventListener('input', updateSaveButton);
     }
 
-    // 上传队列，确保串行执行
-    const uploadQueue = [];
-    let isUploading = false;
+    initUploadZone(positionZone, 'positionFileInput', 'position');
+    initUploadZone(tradeZone, 'tradeFileInput', 'trade');
 
-    // 持仓上传区域1
-    initUploadZone(positionZone1, 'positionFileInput1', 'position', '1');
-
-    // 持仓上传区域2
-    initUploadZone(positionZone2, 'positionFileInput2', 'position', '2');
-
-    // 交易上传区域1
-    initUploadZone(tradeZone1, 'tradeFileInput1', 'trade', '1');
-
-    // 交易上传区域2
-    initUploadZone(tradeZone2, 'tradeFileInput2', 'trade', '2');
-
-    // 日期变化时重新计算当日盈亏和加载已有转账
     document.getElementById('targetDate')?.addEventListener('change', async () => {
         await loadExistingTransfers();
         if (accountData.total_asset) {
@@ -49,7 +37,6 @@ function initDailyRecordPage() {
         }
     });
 
-    // 页面加载时检查已有转账
     loadExistingTransfers();
 
     function initTransferControls() {
@@ -104,7 +91,7 @@ function initDailyRecordPage() {
         }
     }
 
-    function initUploadZone(zone, inputId, type, suffix) {
+    function initUploadZone(zone, inputId, type) {
         const fileInput = document.getElementById(inputId);
 
         zone.addEventListener('click', () => fileInput.click());
@@ -121,136 +108,177 @@ function initDailyRecordPage() {
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
             zone.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files, type, suffix);
+            handleFiles(e.dataTransfer.files, type);
         });
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                handleFiles(fileInput.files, type, suffix);
+                handleFiles(fileInput.files, type);
+                fileInput.value = '';
             }
         });
     }
 
-    // 将上传任务加入队列
-    function handleFiles(files, type, suffix) {
-        if (files.length > 10) {
+    // 接收文件，创建文件项，并行发起上传
+    function handleFiles(files, type) {
+        const fileArray = Array.from(files);
+        if (fileArray.length > 10) {
             alert('最多支持10张图片');
             return;
         }
-        uploadQueue.push({ files, type, suffix });
-        processQueue();
+
+        const state = uploadState[type];
+
+        fileArray.forEach(file => {
+            const item = {
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                file: file,
+                name: file.name,
+                status: 'waiting',
+                result: null,
+                error: null
+            };
+            state.files.push(item);
+        });
+
+        renderFileList(type);
+
+        // 并行上传所有新文件
+        const newItems = state.files.filter(f => f.status === 'waiting');
+        newItems.forEach(item => uploadSingleFile(item, type));
     }
 
-    // 处理上传队列
-    async function processQueue() {
-        if (isUploading || uploadQueue.length === 0) return;
-
-        isUploading = true;
-        const { files, type, suffix } = uploadQueue.shift();
-        await doUpload(files, type, suffix);
-        isUploading = false;
-
-        // 继续处理队列中的下一个任务
-        processQueue();
-    }
-
-    // 实际执行上传
-    async function doUpload(files, type, suffix) {
-        const progressDiv = document.getElementById(`${type}Progress${suffix}`);
-        const progressBar = progressDiv.querySelector('.progress-bar');
-        const progressText = document.getElementById(`${type}ProgressText${suffix}`);
-        const errorsDiv = document.getElementById(`${type}Errors${suffix}`);
-
-        progressDiv.style.display = 'block';
-        errorsDiv.innerHTML = '';
+    async function uploadSingleFile(item, type) {
+        item.status = 'uploading';
+        renderFileList(type);
 
         const formData = new FormData();
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
-        // 持仓上传时携带已有数据，实现累加合并
-        if (type === 'position' && positionData.length > 0) {
-            formData.append('existing', JSON.stringify(positionData));
-        }
-        // 交易上传时携带已有数据，实现累加合并
-        if (type === 'trade' && tradeData.length > 0) {
-            formData.append('existing', JSON.stringify(tradeData));
-        }
-
-        // 模拟进度
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            if (progress < 90) {
-                progress += 10;
-                progressBar.style.width = `${progress}%`;
-                progressText.textContent = `正在识别... ${progress}%`;
-            }
-        }, 200);
-
-        const url = type === 'position' ? '/daily-record/upload-position' : '/daily-record/upload-trade';
+        formData.append('file', item.file);
+        formData.append('type', type);
 
         try {
-            const response = await fetch(url, {
+            const response = await fetch('/daily-record/upload-single', {
                 method: 'POST',
                 body: formData
             });
 
-            clearInterval(progressInterval);
-            progressBar.style.width = '100%';
-            progressText.textContent = '识别完成';
+            const data = await response.json();
+
+            if (data.success) {
+                item.status = 'completed';
+                item.result = data;
+            } else {
+                item.status = 'failed';
+                item.error = data.error || '识别失败';
+            }
+        } catch (error) {
+            item.status = 'failed';
+            item.error = error.message;
+        }
+
+        renderFileList(type);
+        checkAllCompleted(type);
+    }
+
+    // 全部完成后调用 merge 合并
+    async function checkAllCompleted(type) {
+        const state = uploadState[type];
+        const pending = state.files.filter(f => f.status === 'waiting' || f.status === 'uploading');
+        if (pending.length > 0) return;
+
+        const successItems = state.files.filter(f => f.status === 'completed' && f.result);
+        if (successItems.length === 0) return;
+
+        // 收集所有成功结果
+        const resultData = successItems.map(f => f.result);
+
+        // 加上已有数据
+        if (type === 'position' && positionData.length > 0) {
+            resultData.unshift({ positions: positionData, account: {} });
+        }
+        if (type === 'trade' && tradeData.length > 0) {
+            resultData.unshift({ trades: tradeData });
+        }
+
+        try {
+            const response = await fetch('/daily-record/merge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, data: resultData })
+            });
 
             const data = await response.json();
 
-            if (!data.success) {
-                errorsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                progressDiv.style.display = 'none';
-                return;
-            }
+            if (data.success) {
+                if (type === 'position') {
+                    positionData = data.merged || [];
 
-            // 显示识别错误
-            const errors = data.results.filter(r => !r.success);
-            if (errors.length > 0) {
-                const errorHtml = errors.map(e =>
-                    `<div class="alert alert-warning py-1 mb-1">${e.filename}: ${e.error}</div>`
-                ).join('');
-                errorsDiv.innerHTML = errorHtml;
-            }
-
-            if (type === 'position') {
-                positionData = data.merged || [];
-
-                // 账户数据：后端已处理同批次叠加，这里处理跨批次叠加
-                if (data.account && Object.keys(data.account).length > 0) {
-                    // 判断是否已有账户数据（追加模式）
-                    const hasExistingAccount = accountData.total_asset !== undefined;
-                    if (hasExistingAccount) {
-                        // 追加模式：叠加总资产
-                        if (data.account.total_asset) {
+                    if (data.account && data.account.total_asset) {
+                        const hasExisting = accountData.total_asset !== undefined;
+                        if (hasExisting) {
                             accountData.total_asset = (accountData.total_asset || 0) + data.account.total_asset;
+                        } else {
+                            accountData = { total_asset: data.account.total_asset };
                         }
-                    } else {
-                        // 首次上传：只保留总资产
-                        accountData = { total_asset: data.account.total_asset };
+                        await calculateDailyProfit();
+                        renderAccountInfo();
                     }
-                    // 计算真正的当日盈亏（今日总资产 - 前日总资产）
-                    await calculateDailyProfit();
-                    renderAccountInfo();
+                    renderPositionTable();
+                } else {
+                    tradeData = data.trades || [];
+                    renderTradeTable();
                 }
-                renderPositionTable();
-            } else {
-                tradeData = data.all_trades || [];
-                renderTradeTable();
             }
-
-            setTimeout(() => {
-                progressDiv.style.display = 'none';
-            }, 500);
-
         } catch (error) {
-            clearInterval(progressInterval);
-            progressDiv.style.display = 'none';
-            errorsDiv.innerHTML = `<div class="alert alert-danger">上传失败: ${error.message}</div>`;
+            console.error('合并失败:', error);
         }
+
+        // 清空已处理的文件项
+        state.files = [];
+        state.results = [];
+        renderFileList(type);
+    }
+
+    function renderFileList(type) {
+        const listEl = document.getElementById(`${type}FileList`);
+        const progressEl = document.getElementById(`${type}TotalProgress`);
+        const state = uploadState[type];
+
+        if (state.files.length === 0) {
+            listEl.innerHTML = '';
+            progressEl.style.display = 'none';
+            return;
+        }
+
+        const total = state.files.length;
+        const completed = state.files.filter(f => f.status === 'completed').length;
+        const failed = state.files.filter(f => f.status === 'failed').length;
+        const done = completed + failed;
+
+        listEl.innerHTML = state.files.map(item => {
+            let statusHtml = '';
+            switch (item.status) {
+                case 'waiting':
+                    statusHtml = '<span class="text-muted">等待中</span>';
+                    break;
+                case 'uploading':
+                    statusHtml = '<span class="text-primary"><span class="spinner-border spinner-border-sm"></span> 识别中</span>';
+                    break;
+                case 'completed':
+                    statusHtml = '<span class="text-success">&#10003; 完成</span>';
+                    break;
+                case 'failed':
+                    statusHtml = `<span class="text-danger">&#10007; ${item.error}</span>`;
+                    break;
+            }
+            return `<div class="file-item">
+                <span class="file-name">${item.name}</span>
+                <span class="file-status">${statusHtml}</span>
+            </div>`;
+        }).join('');
+
+        progressEl.style.display = 'block';
+        progressEl.querySelector('small').textContent = `进度: ${done}/${total}` + (failed > 0 ? ` (${failed}个失败)` : '');
     }
 
     async function calculateDailyProfit() {
@@ -269,7 +297,6 @@ function initDailyRecordPage() {
                 accountData.prev_date = data.prev_date;
                 accountData.prev_total_asset = data.prev_total_asset;
             } else {
-                // 无前日数据，清除当日盈亏
                 delete accountData.daily_profit;
                 delete accountData.daily_profit_pct;
                 delete accountData.prev_date;
@@ -311,7 +338,6 @@ function initDailyRecordPage() {
                 <span class="value ${profitClass}">${profitSign}${accountData.daily_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}${pctStr}</span>
             </div>`;
         } else if (accountData.total_asset) {
-            // 有总资产但无前日数据，显示提示
             html += `<div class="account-info-item">
                 <span class="label">当日盈亏</span>
                 <span class="value text-muted">无前日数据</span>
@@ -339,7 +365,6 @@ function initDailyRecordPage() {
             const row = document.createElement('tr');
             row.dataset.index = idx;
 
-            // 未匹配记录添加警告样式
             if (p.unmatched) {
                 row.classList.add('table-warning');
             }
@@ -428,7 +453,6 @@ function initDailyRecordPage() {
             `;
             tbody.appendChild(row);
 
-            // 自动重算金额
             row.querySelector('.quantity').addEventListener('input', () => updateAmount(row));
             row.querySelector('.price').addEventListener('input', () => updateAmount(row));
 
@@ -457,7 +481,6 @@ function initDailyRecordPage() {
         saveBtn.disabled = (positionData.length === 0 && tradeData.length === 0 && !hasTransfer && !hasDailyFee);
     }
 
-    // 添加持仓行
     document.getElementById('addPositionBtn')?.addEventListener('click', () => {
         positionData.push({
             stock_code: '',
@@ -469,7 +492,6 @@ function initDailyRecordPage() {
         renderPositionTable();
     });
 
-    // 添加交易行
     document.getElementById('addTradeBtn')?.addEventListener('click', () => {
         tradeData.push({
             stock_code: '',
@@ -482,13 +504,10 @@ function initDailyRecordPage() {
         renderTradeTable();
     });
 
-    // 保存全部
     document.getElementById('saveAllBtn')?.addEventListener('click', async () => {
-        // 从表格收集数据
         const positions = collectPositionData();
         const trades = collectTradeData();
 
-        // 验证数据
         if (!validateData(positions, trades)) {
             return;
         }
@@ -499,14 +518,12 @@ function initDailyRecordPage() {
     async function saveData(positions, trades, overwriteStocks) {
         const targetDate = document.getElementById('targetDate').value;
 
-        // 收集转账数据
         const transfer = transferData.type && transferData.amount > 0 ? {
             type: transferData.type,
             amount: transferData.amount,
             note: transferData.note
         } : null;
 
-        // 收集手续费数据
         const dailyFeeInput = document.getElementById('dailyFee');
         const dailyFee = dailyFeeInput ? parseFloat(dailyFeeInput.value) || 0 : 0;
         const account = { ...accountData };
@@ -534,7 +551,6 @@ function initDailyRecordPage() {
             if (data.success) {
                 window.location.href = data.redirect;
             } else if (data.has_conflicts) {
-                // 显示冲突确认对话框
                 const conflictMsg = data.conflicts.map(c =>
                     `${c.code}: "${c.old_name}" → "${c.new_name}"`
                 ).join('\n');
@@ -594,10 +610,8 @@ function initDailyRecordPage() {
     function validateData(positions, trades) {
         let valid = true;
 
-        // 清除之前的错误样式
         document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-        // 验证持仓数据
         document.querySelectorAll('#positionTableBody tr').forEach(row => {
             const codeInput = row.querySelector('.stock-code');
             const code = codeInput.value.trim();
@@ -620,7 +634,6 @@ function initDailyRecordPage() {
             }
         });
 
-        // 验证交易数据
         document.querySelectorAll('#tradeTableBody tr').forEach(row => {
             const codeInput = row.querySelector('.stock-code');
             const code = codeInput.value.trim();
@@ -676,13 +689,14 @@ function initDailyRecordPage() {
     async function remergePositionData() {
         if (positionData.length === 0) return;
 
-        const formData = new FormData();
-        formData.append('existing', JSON.stringify(positionData));
-
         try {
-            const response = await fetch('/daily-record/upload-position', {
+            const response = await fetch('/daily-record/merge', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'position',
+                    data: [{ positions: positionData, account: {} }]
+                })
             });
 
             const data = await response.json();

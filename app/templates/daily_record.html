@@ -28,6 +28,36 @@
 .account-info-item .value.loss {
     color: #198754;
 }
+.file-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.875rem;
+}
+.file-item:last-child {
+    border-bottom: none;
+}
+.file-item .file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 0.5rem;
+}
+.file-item .file-status {
+    flex-shrink: 0;
+}
+.file-item .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
 </style>
 {% endblock %}
 
@@ -48,35 +78,14 @@
                 <h5 class="mb-0">持仓截图</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="upload-zone" id="positionUploadZone1">
-                            <input type="file" id="positionFileInput1" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
-                            <h5>点击或拖拽图片到此处</h5>
-                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
-                        </div>
-                        <div id="positionProgress1" class="mt-2" style="display:none">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <small class="text-muted" id="positionProgressText1"></small>
-                        </div>
-                        <div id="positionErrors1" class="mt-2"></div>
-                    </div>
-                    <div class="col-6">
-                        <div class="upload-zone" id="positionUploadZone2">
-                            <input type="file" id="positionFileInput2" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
-                            <h5>点击或拖拽图片到此处</h5>
-                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
-                        </div>
-                        <div id="positionProgress2" class="mt-2" style="display:none">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <small class="text-muted" id="positionProgressText2"></small>
-                        </div>
-                        <div id="positionErrors2" class="mt-2"></div>
-                    </div>
+                <div class="upload-zone" id="positionUploadZone">
+                    <input type="file" id="positionFileInput" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
+                    <h5>点击或拖拽图片到此处</h5>
+                    <p class="text-muted mb-0">支持多张图片并行上传 (JPG/PNG/BMP)</p>
+                </div>
+                <div id="positionFileList" class="file-list mt-2"></div>
+                <div id="positionTotalProgress" class="mt-1" style="display:none">
+                    <small class="text-muted"></small>
                 </div>
 
                 <div id="positionPreview" class="mt-3" style="display:none">
@@ -112,35 +121,14 @@
                 <h5 class="mb-0">交易截图</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="upload-zone" id="tradeUploadZone1">
-                            <input type="file" id="tradeFileInput1" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
-                            <h5>点击或拖拽图片到此处</h5>
-                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
-                        </div>
-                        <div id="tradeProgress1" class="mt-2" style="display:none">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <small class="text-muted" id="tradeProgressText1"></small>
-                        </div>
-                        <div id="tradeErrors1" class="mt-2"></div>
-                    </div>
-                    <div class="col-6">
-                        <div class="upload-zone" id="tradeUploadZone2">
-                            <input type="file" id="tradeFileInput2" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
-                            <h5>点击或拖拽图片到此处</h5>
-                            <p class="text-muted mb-0">支持多张图片 (JPG/PNG/BMP)</p>
-                        </div>
-                        <div id="tradeProgress2" class="mt-2" style="display:none">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <small class="text-muted" id="tradeProgressText2"></small>
-                        </div>
-                        <div id="tradeErrors2" class="mt-2"></div>
-                    </div>
+                <div class="upload-zone" id="tradeUploadZone">
+                    <input type="file" id="tradeFileInput" accept=".jpg,.jpeg,.png,.bmp" multiple style="display:none">
+                    <h5>点击或拖拽图片到此处</h5>
+                    <p class="text-muted mb-0">支持多张图片并行上传 (JPG/PNG/BMP)</p>
+                </div>
+                <div id="tradeFileList" class="file-list mt-2"></div>
+                <div id="tradeTotalProgress" class="mt-1" style="display:none">
+                    <small class="text-muted"></small>
                 </div>
 
                 <div id="tradePreview" class="mt-3" style="display:none">

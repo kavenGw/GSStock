@@ -328,7 +328,7 @@ class UnifiedStockDataService:
 
         return result
 
-    def _get_expired_cache(self, stock_code: str, cache_type: str) -> dict | None:
+    def _get_expired_cache(self, stock_code: str, cache_type: str, reason: str = '') -> dict | None:
         """获取过期缓存数据作为降级方案
 
         返回的数据会被标记 _is_degraded=True，调用方可根据此标记决定是否使用降级数据。
@@ -342,10 +342,12 @@ class UnifiedStockDataService:
             if cache and cache.data_json:
                 import json
                 data = json.loads(cache.data_json)
-                # 标记为降级数据，调用方可据此决定是否使用
                 data['_is_degraded'] = True
                 stock_name = self._get_stock_name(stock_code, data)
-                logger.info(f"[降级] 使用过期缓存: {stock_code} {stock_name} ({cache_type})")
+                cache_date_str = cache.cache_date.isoformat() if cache.cache_date else '未知'
+                fetch_time_str = cache.last_fetch_time.strftime('%m-%d %H:%M') if cache.last_fetch_time else '未知'
+                reason_str = f" 原因: {reason}" if reason else ""
+                logger.info(f"[降级] {stock_code} {stock_name} 使用过期缓存 ({cache_type}) 数据日期: {cache_date_str}, 获取时间: {fetch_time_str}{reason_str}")
                 return data
         except Exception as e:
             logger.warning(f"获取过期缓存失败 {stock_code}: {e}")
@@ -453,7 +455,7 @@ class UnifiedStockDataService:
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间")
                     continue
-                expired_data = self._get_expired_cache(code, cache_type)
+                expired_data = self._get_expired_cache(code, cache_type, '非交易时间无有效缓存')
                 if expired_data:
                     result[code] = expired_data
                     memory_cache.set(code, cache_type, expired_data)
@@ -486,7 +488,7 @@ class UnifiedStockDataService:
             if is_readonly_mode():
                 logger.info(f"[只读模式] 跳过 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
-                    expired_data = self._get_expired_cache(code, cache_type)
+                    expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
                         result[code] = expired_data
             else:
@@ -600,7 +602,7 @@ class UnifiedStockDataService:
 
             # 对于被限流的股票，尝试使用过期缓存
             for code in rate_limited_codes:
-                expired_data = self._get_expired_cache(code, 'price')
+                expired_data = self._get_expired_cache(code, 'price', 'API限流')
                 if expired_data:
                     result[code] = expired_data
 
@@ -979,7 +981,7 @@ class UnifiedStockDataService:
                     db_hit_count += 1
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间")
                     continue
-                expired_data = self._get_expired_cache(code, cache_type)
+                expired_data = self._get_expired_cache(code, cache_type, '非交易时间无有效缓存')
                 if expired_data:
                     cached_stocks.append(expired_data)
                     memory_cache.set(code, cache_type, expired_data)
@@ -1038,7 +1040,7 @@ class UnifiedStockDataService:
                 # 只读模式下不从外部 API 获取，尝试使用过期缓存
                 logger.info(f"[只读模式] 跳过走势数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
-                    expired_data = self._get_expired_cache(code, cache_type)
+                    expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
                         cached_stocks.append(expired_data)
             else:
@@ -1795,7 +1797,7 @@ class UnifiedStockDataService:
                         logger.debug(f"[获取] {result['stock_code']} {stock_name} 成功 (yfinance)")
 
         for code in rate_limited_codes:
-            expired_data = self._get_expired_cache(code, cache_type)
+            expired_data = self._get_expired_cache(code, cache_type, 'API限流')
             if expired_data:
                 results.append(expired_data)
 
@@ -1891,7 +1893,7 @@ class UnifiedStockDataService:
             if is_readonly_mode():
                 logger.info(f"[只读模式] 跳过指数数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
-                    expired_data = self._get_expired_cache(code, cache_type)
+                    expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
                         results[code] = expired_data
                 return results
@@ -2058,7 +2060,7 @@ class UnifiedStockDataService:
             if is_readonly_mode():
                 logger.info(f"[只读模式] 跳过 PE 数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
-                    expired_data = self._get_expired_cache(code, cache_type)
+                    expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
                         result[code] = expired_data
             else:
@@ -2138,8 +2140,7 @@ class UnifiedStockDataService:
                         UnifiedStockCache.set_cached_data(code, 'pe', data, today)
                         logger.debug(f"[获取] {code} {data['name']} PE成功 (yfinance)")
                     else:
-                        # 尝试过期缓存
-                        expired = self._get_expired_cache(code, 'pe')
+                        expired = self._get_expired_cache(code, 'pe', 'yfinance获取失败')
                         if expired:
                             result[code] = expired
 
@@ -2325,7 +2326,7 @@ class UnifiedStockDataService:
         if not circuit_breaker.is_available('yfinance'):
             logger.info(f"[yfinance批量] yfinance已熔断，尝试过期缓存")
             for sym in need_fetch:
-                expired = self._get_expired_cache(sym, cache_type)
+                expired = self._get_expired_cache(sym, cache_type, 'yfinance熔断')
                 if expired:
                     result[sym] = expired
             return result
@@ -2367,7 +2368,7 @@ class UnifiedStockDataService:
                     success_count += 1
                     UnifiedStockCache.set_cached_data(sym, cache_type, data, today)
                 else:
-                    expired = self._get_expired_cache(sym, cache_type)
+                    expired = self._get_expired_cache(sym, cache_type, 'yfinance获取失败')
                     if expired:
                         result[sym] = expired
 
@@ -2566,7 +2567,7 @@ class UnifiedStockDataService:
         # 熔断检查
         if not circuit_breaker.is_available('eastmoney'):
             logger.info("[A股板块] 东方财富已熔断，尝试过期缓存")
-            expired = self._get_expired_cache(cache_key, cache_type)
+            expired = self._get_expired_cache(cache_key, cache_type, '东方财富熔断')
             if expired and isinstance(expired, list):
                 return expired
             return []
@@ -2598,7 +2599,7 @@ class UnifiedStockDataService:
         except Exception as e:
             logger.warning(f"[A股板块] 获取失败: {e}")
             circuit_breaker.record_failure('eastmoney')
-            expired = self._get_expired_cache(cache_key, cache_type)
+            expired = self._get_expired_cache(cache_key, cache_type, 'API获取失败')
             if expired and isinstance(expired, list):
                 return expired
             return []
@@ -2649,7 +2650,7 @@ class UnifiedStockDataService:
             if is_readonly_mode():
                 logger.info(f"[只读模式] 跳过 ETF 净值 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
-                    expired_data = self._get_expired_cache(code, cache_type)
+                    expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
                         result[code] = expired_data
             else:
