@@ -4,8 +4,14 @@
 支持智能TTL控制，根据交易时段动态调整缓存有效期。
 """
 import json
+import logging
 from datetime import datetime, date
+from sqlalchemy.exc import OperationalError
 from app import db
+
+logger = logging.getLogger(__name__)
+
+MAX_RETRIES = 3
 
 
 class UnifiedStockCache(db.Model):
@@ -100,41 +106,37 @@ class UnifiedStockCache(db.Model):
     def set_cached_data(cls, stock_code: str, cache_type: str, data: dict | list,
                         cache_date: date = None, is_complete: bool = False,
                         data_end_date: date = None) -> 'UnifiedStockCache':
-        """设置缓存数据
-
-        Args:
-            stock_code: 股票代码
-            cache_type: 缓存类型
-            data: 要缓存的数据
-            cache_date: 缓存日期，默认为当天
-            is_complete: 数据是否完整（收盘后的完整数据）
-            data_end_date: 数据截止日期
-
-        Returns:
-            缓存记录对象
-        """
+        """设置缓存数据（带CockroachDB重试）"""
         if cache_date is None:
             cache_date = date.today()
 
-        cache = cls.query.filter_by(
-            stock_code=stock_code,
-            cache_type=cache_type,
-            cache_date=cache_date
-        ).first()
+        for attempt in range(MAX_RETRIES):
+            try:
+                cache = cls.query.filter_by(
+                    stock_code=stock_code,
+                    cache_type=cache_type,
+                    cache_date=cache_date
+                ).first()
 
-        if cache:
-            cache.set_data(data, is_complete, data_end_date)
-        else:
-            cache = cls(
-                stock_code=stock_code,
-                cache_type=cache_type,
-                cache_date=cache_date,
-            )
-            cache.set_data(data, is_complete, data_end_date)
-            db.session.add(cache)
+                if cache:
+                    cache.set_data(data, is_complete, data_end_date)
+                else:
+                    cache = cls(
+                        stock_code=stock_code,
+                        cache_type=cache_type,
+                        cache_date=cache_date,
+                    )
+                    cache.set_data(data, is_complete, data_end_date)
+                    db.session.add(cache)
 
-        db.session.commit()
-        return cache
+                db.session.commit()
+                return cache
+            except OperationalError as e:
+                db.session.rollback()
+                if ('SerializationFailure' in str(e) or 'restart transaction' in str(e)) and attempt < MAX_RETRIES - 1:
+                    logger.warning(f"[CockroachDB] set_cached_data {stock_code} 序列化冲突，重试 {attempt + 1}")
+                    continue
+                raise
 
     @classmethod
     def get_batch_cached_data(cls, stock_codes: list, cache_type: str,
@@ -218,18 +220,25 @@ class UnifiedStockCache(db.Model):
         Returns:
             删除的记录数
         """
-        query = cls.query
+        for attempt in range(MAX_RETRIES):
+            try:
+                query = cls.query
+                if stock_codes:
+                    query = query.filter(cls.stock_code.in_(stock_codes))
+                if cache_type:
+                    query = query.filter_by(cache_type=cache_type)
+                if cache_date:
+                    query = query.filter_by(cache_date=cache_date)
 
-        if stock_codes:
-            query = query.filter(cls.stock_code.in_(stock_codes))
-        if cache_type:
-            query = query.filter_by(cache_type=cache_type)
-        if cache_date:
-            query = query.filter_by(cache_date=cache_date)
-
-        count = query.delete(synchronize_session=False)
-        db.session.commit()
-        return count
+                count = query.delete(synchronize_session=False)
+                db.session.commit()
+                return count
+            except OperationalError as e:
+                db.session.rollback()
+                if ('SerializationFailure' in str(e) or 'restart transaction' in str(e)) and attempt < MAX_RETRIES - 1:
+                    logger.warning(f"[CockroachDB] clear_cache 序列化冲突，重试 {attempt + 1}")
+                    continue
+                raise
 
     @classmethod
     def get_complete_cache(cls, stock_codes: list, cache_type: str,
@@ -280,20 +289,29 @@ class UnifiedStockCache(db.Model):
         if cache_date is None:
             cache_date = date.today()
 
-        cache = cls.query.filter_by(
-            stock_code=stock_code,
-            cache_type=cache_type,
-            cache_date=cache_date
-        ).first()
+        for attempt in range(MAX_RETRIES):
+            try:
+                cache = cls.query.filter_by(
+                    stock_code=stock_code,
+                    cache_type=cache_type,
+                    cache_date=cache_date
+                ).first()
 
-        if cache:
-            cache.is_complete = True
-            if data_end_date:
-                cache.data_end_date = data_end_date
-            cache.updated_at = datetime.now()
-            db.session.commit()
-            return True
-        return False
+                if not cache:
+                    return False
+
+                cache.is_complete = True
+                if data_end_date:
+                    cache.data_end_date = data_end_date
+                cache.updated_at = datetime.now()
+                db.session.commit()
+                return True
+            except OperationalError as e:
+                db.session.rollback()
+                if ('SerializationFailure' in str(e) or 'restart transaction' in str(e)) and attempt < MAX_RETRIES - 1:
+                    logger.warning(f"[CockroachDB] mark_complete {stock_code} 序列化冲突，重试 {attempt + 1}")
+                    continue
+                raise
 
     @classmethod
     def get_data_end_dates(cls, stock_codes: list, cache_type: str,

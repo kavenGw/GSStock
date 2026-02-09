@@ -118,7 +118,8 @@ def save():
     if not target_date_str:
         return jsonify({'success': False, 'error': '日期不能为空'})
 
-    if not positions and not trades and not transfer:
+    has_account = account and account.get('total_asset')
+    if not positions and not trades and not transfer and not has_account:
         return jsonify({'success': False, 'error': '没有数据需要保存'})
 
     # 合并持仓和交易的股票信息用于检测冲突
@@ -138,6 +139,10 @@ def save():
     target_date = date.fromisoformat(target_date_str)
     errors = {}
 
+    logger.info(f"保存每日记录: date={target_date_str}, "
+                f"positions={len(positions)}, trades={len(trades)}, "
+                f"account={account}, transfer={transfer}")
+
     # 保存持仓数据（PositionService.save_snapshot 内部处理合并逻辑）
     if positions:
         try:
@@ -155,6 +160,11 @@ def save():
 
             for trade_data in trades:
                 trade_data['trade_date'] = target_date_str
+                logger.info(f"保存交易: {trade_data.get('stock_code')} "
+                            f"{trade_data.get('trade_type')} "
+                            f"qty={trade_data.get('quantity')} "
+                            f"price={trade_data.get('price')} "
+                            f"fee={trade_data.get('fee')}")
                 TradeService.save_trade(trade_data)
         except Exception as e:
             logger.error(f"保存交易数据失败: {e}")
@@ -182,7 +192,6 @@ def save():
                 total_asset=account.get('total_asset'),
                 daily_profit=account.get('daily_profit'),
                 daily_profit_pct=account.get('daily_profit_pct'),
-                daily_fee=account.get('daily_fee')
             )
             logger.info(f"保存账户快照: {account}")
         except Exception as e:
@@ -220,6 +229,89 @@ def api_stats(date_str: str):
     target_date = date.fromisoformat(date_str)
     stats_data = DailyRecordService.calculate_daily_stats(target_date)
     return jsonify({'success': True, 'data': stats_data})
+
+
+@daily_record_bp.route('/api/calc-fee', methods=['POST'])
+def api_calc_fee():
+    """根据当前输入数据和前一交易日数据计算手续费"""
+    from app.models.daily_snapshot import DailySnapshot
+
+    data = request.get_json()
+    target_date_str = data.get('date')
+    positions = data.get('positions', [])
+    trades = data.get('trades', [])
+    total_asset = data.get('total_asset')
+    new_transfer = data.get('transfer')
+
+    if not target_date_str or not total_asset:
+        return jsonify({'success': False, 'error': '缺少日期或总资产数据'})
+
+    target_date = date.fromisoformat(target_date_str)
+    prev_date = DailyRecordService.get_previous_trading_date(target_date)
+
+    if not prev_date:
+        return jsonify({'success': False, 'error': '无前一交易日数据，无法计算'})
+
+    # 前日数据
+    prev_snapshot = DailySnapshot.get_snapshot(prev_date)
+    prev_positions = Position.query.filter_by(date=prev_date).all()
+    prev_pos_map = {p.stock_code: p for p in prev_positions}
+
+    prev_total_asset = prev_snapshot.total_asset if prev_snapshot and prev_snapshot.total_asset else \
+        sum(p.current_price * p.quantity for p in prev_positions)
+
+    # 净转入（已有 + 新输入）
+    existing_transfers = BankTransfer.query.filter_by(transfer_date=target_date).all()
+    net_transfer = sum(t.amount if t.transfer_type == 'in' else -t.amount for t in existing_transfers)
+    if new_transfer and new_transfer.get('type') and new_transfer.get('amount'):
+        net_transfer += new_transfer['amount'] if new_transfer['type'] == 'in' else -new_transfer['amount']
+
+    # 实际盈亏
+    actual_profit = total_asset - prev_total_asset - net_transfer
+
+    # 理论盈亏：遍历所有股票计算 市值变动 + 交易净额
+    today_pos_map = {}
+    for p in positions:
+        code = p.get('stock_code')
+        if code:
+            today_pos_map[code] = {
+                'market_value': (p.get('current_price', 0) or 0) * (p.get('quantity', 0) or 0)
+            }
+
+    trade_by_stock = {}
+    for t in trades:
+        code = t.get('stock_code')
+        if not code:
+            continue
+        if code not in trade_by_stock:
+            trade_by_stock[code] = {'buy': 0, 'sell': 0}
+        amount = (t.get('quantity', 0) or 0) * (t.get('price', 0) or 0)
+        if t.get('trade_type') == 'buy':
+            trade_by_stock[code]['buy'] += amount
+        else:
+            trade_by_stock[code]['sell'] += amount
+
+    all_stocks = set(today_pos_map.keys()) | set(prev_pos_map.keys())
+    theoretical_profit = 0
+    for code in all_stocks:
+        today_mv = today_pos_map.get(code, {}).get('market_value', 0)
+        prev_p = prev_pos_map.get(code)
+        prev_mv = prev_p.current_price * prev_p.quantity if prev_p else 0
+        td = trade_by_stock.get(code, {'buy': 0, 'sell': 0})
+        theoretical_profit += today_mv - prev_mv + td['sell'] - td['buy']
+
+    fee = max(0, round(theoretical_profit - actual_profit, 2))
+
+    return jsonify({
+        'success': True,
+        'fee': fee,
+        'detail': {
+            'theoretical_profit': round(theoretical_profit, 2),
+            'actual_profit': round(actual_profit, 2),
+            'prev_date': prev_date.isoformat(),
+            'prev_total_asset': round(prev_total_asset, 2),
+        }
+    })
 
 
 @daily_record_bp.route('/api/prev-asset/<date_str>')

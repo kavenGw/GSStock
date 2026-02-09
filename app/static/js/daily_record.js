@@ -21,11 +21,6 @@ function initDailyRecordPage() {
 
     initTransferControls();
 
-    const dailyFeeInput = document.getElementById('dailyFee');
-    if (dailyFeeInput) {
-        dailyFeeInput.addEventListener('input', updateSaveButton);
-    }
-
     initUploadZone(positionZone, 'positionFileInput', 'position');
     initUploadZone(tradeZone, 'tradeFileInput', 'trade');
 
@@ -46,7 +41,7 @@ function initDailyRecordPage() {
 
         if (!transferType || !transferAmount) return;
 
-        transferType.addEventListener('change', () => {
+        transferType.addEventListener('change', async () => {
             const hasTransfer = transferType.value !== '';
             transferAmount.disabled = !hasTransfer;
             transferNote.disabled = !hasTransfer;
@@ -56,10 +51,18 @@ function initDailyRecordPage() {
             }
             transferData.type = transferType.value;
             updateSaveButton();
+            if (accountData.total_asset) {
+                await calculateDailyProfit();
+                renderAccountInfo();
+            }
         });
 
-        transferAmount.addEventListener('input', () => {
+        transferAmount.addEventListener('input', async () => {
             transferData.amount = parseFloat(transferAmount.value) || 0;
+            if (accountData.total_asset) {
+                await calculateDailyProfit();
+                renderAccountInfo();
+            }
         });
 
         transferNote.addEventListener('input', () => {
@@ -290,7 +293,17 @@ function initDailyRecordPage() {
             const data = await response.json();
 
             if (data.success && data.has_prev && data.prev_total_asset) {
-                const dailyProfit = accountData.total_asset - data.prev_total_asset;
+                // 已有转账的净转入
+                let netTransfer = 0;
+                if (data.transfer) {
+                    netTransfer = data.transfer.net_transfer || 0;
+                }
+                // 加上当前输入的新转账
+                if (transferData.type && transferData.amount > 0) {
+                    netTransfer += transferData.type === 'in' ? transferData.amount : -transferData.amount;
+                }
+
+                const dailyProfit = accountData.total_asset - data.prev_total_asset - netTransfer;
                 const dailyProfitPct = (dailyProfit / data.prev_total_asset) * 100;
                 accountData.daily_profit = dailyProfit;
                 accountData.daily_profit_pct = dailyProfitPct;
@@ -448,7 +461,6 @@ function initDailyRecordPage() {
                 <td><input type="number" class="form-control form-control-sm quantity" value="${t.quantity || ''}"></td>
                 <td><input type="number" class="form-control form-control-sm price" step="0.001" value="${t.price ? t.price.toFixed(3) : ''}"></td>
                 <td class="amount">${amount.toFixed(2)}</td>
-                <td><input type="number" class="form-control form-control-sm fee" step="0.01" min="0" value="${t.fee ? t.fee.toFixed(2) : ''}"></td>
                 <td><button class="btn btn-sm btn-outline-danger delete-row">×</button></td>
             `;
             tbody.appendChild(row);
@@ -476,9 +488,12 @@ function initDailyRecordPage() {
     function updateSaveButton() {
         const saveBtn = document.getElementById('saveAllBtn');
         const hasTransfer = transferData.type && transferData.amount > 0;
-        const dailyFeeInput = document.getElementById('dailyFee');
-        const hasDailyFee = dailyFeeInput && parseFloat(dailyFeeInput.value) > 0;
-        saveBtn.disabled = (positionData.length === 0 && tradeData.length === 0 && !hasTransfer && !hasDailyFee);
+        saveBtn.disabled = (positionData.length === 0 && tradeData.length === 0 && !hasTransfer);
+
+        const calcFeeBtn = document.getElementById('calcFeeBtn');
+        if (calcFeeBtn) {
+            calcFeeBtn.disabled = !accountData.total_asset || positionData.length === 0;
+        }
     }
 
     document.getElementById('addPositionBtn')?.addEventListener('click', () => {
@@ -498,8 +513,7 @@ function initDailyRecordPage() {
             stock_name: '',
             trade_type: 'buy',
             quantity: 0,
-            price: 0,
-            fee: 0
+            price: 0
         });
         renderTradeTable();
     });
@@ -524,12 +538,7 @@ function initDailyRecordPage() {
             note: transferData.note
         } : null;
 
-        const dailyFeeInput = document.getElementById('dailyFee');
-        const dailyFee = dailyFeeInput ? parseFloat(dailyFeeInput.value) || 0 : 0;
         const account = { ...accountData };
-        if (dailyFee > 0) {
-            account.daily_fee = dailyFee;
-        }
 
         try {
             const response = await fetch('/daily-record/save', {
@@ -599,8 +608,7 @@ function initDailyRecordPage() {
                 stock_name: row.querySelector('.stock-name').value.trim(),
                 trade_type: row.querySelector('.trade-type').value,
                 quantity: parseInt(row.querySelector('.quantity').value) || 0,
-                price: parseFloat(row.querySelector('.price').value) || 0,
-                fee: parseFloat(row.querySelector('.fee').value) || 0
+                price: parseFloat(row.querySelector('.price').value) || 0
             });
         });
 
@@ -709,6 +717,65 @@ function initDailyRecordPage() {
             console.error('重新合并失败:', error);
         }
     }
+
+    document.getElementById('calcFeeBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('calcFeeBtn');
+        const resultDiv = document.getElementById('feeResult');
+        btn.disabled = true;
+        btn.textContent = '计算中...';
+
+        const targetDate = document.getElementById('targetDate').value;
+        const positions = collectPositionData();
+        const trades = collectTradeData();
+
+        const newTransfer = (transferData.type && transferData.amount > 0)
+            ? { type: transferData.type, amount: transferData.amount }
+            : null;
+
+        try {
+            const response = await fetch('/daily-record/api/calc-fee', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: targetDate,
+                    positions: positions,
+                    trades: trades,
+                    total_asset: accountData.total_asset,
+                    transfer: newTransfer
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                const d = data.detail;
+                resultDiv.innerHTML = `
+                    <div class="account-info-grid">
+                        <div class="account-info-item">
+                            <span class="label">理论盈亏</span>
+                            <span class="value">${d.theoretical_profit >= 0 ? '+' : ''}${d.theoretical_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="account-info-item">
+                            <span class="label">实际盈亏</span>
+                            <span class="value">${d.actual_profit >= 0 ? '+' : ''}${d.actual_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="account-info-item">
+                            <span class="label">手续费</span>
+                            <span class="value text-danger">${data.fee.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        </div>
+                    </div>`;
+                resultDiv.style.display = 'block';
+            } else {
+                resultDiv.innerHTML = `<span class="text-danger">${data.error}</span>`;
+                resultDiv.style.display = 'block';
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `<span class="text-danger">计算失败: ${error.message}</span>`;
+            resultDiv.style.display = 'block';
+        }
+
+        btn.disabled = false;
+        btn.textContent = '计算手续费';
+    });
 
     document.getElementById('saveAliasBtn')?.addEventListener('click', async () => {
         const aliasName = document.getElementById('aliasOriginalName').textContent;
