@@ -1,0 +1,98 @@
+/* 骨架屏基础动画 */
+@keyframes skeleton-pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.6; }
+}
+
+.skeleton {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+/* 文本占位 */
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+    border-radius: 3px;
+}
+.skeleton-text.w-60 { width: 60%; }
+.skeleton-text.w-80 { width: 80%; }
+.skeleton-text.w-40 { width: 40%; }
+.skeleton-text.lg { height: 20px; }
+.skeleton-text.sm { height: 10px; }
+
+/* 卡片占位 */
+.skeleton-card {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: #fff;
+}
+.skeleton-card .skeleton-price {
+    height: 24px;
+    width: 70%;
+    margin: 6px 0;
+}
+.skeleton-card .skeleton-change {
+    height: 16px;
+    width: 50%;
+}
+.skeleton-card .skeleton-info {
+    height: 10px;
+    width: 90%;
+    margin-top: 8px;
+}
+
+/* 表格行占位 */
+.skeleton-table-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 12px;
+}
+.skeleton-table-row .skeleton-cell {
+    height: 14px;
+    flex: 1;
+}
+.skeleton-table-row .skeleton-cell-sm { flex: 0.5; }
+.skeleton-table-row .skeleton-cell-lg { flex: 2; }
+
+/* 图表占位 */
+.skeleton-chart {
+    height: 200px;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+/* 威科夫卡片骨架 */
+.skeleton-wyckoff {
+    min-width: 140px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+.skeleton-wyckoff .skeleton-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.skeleton-wyckoff .skeleton-name {
+    height: 14px;
+    width: 60px;
+    margin-left: 8px;
+}
+.skeleton-wyckoff .skeleton-tags {
+    height: 20px;
+    width: 80%;
+    margin-top: 8px;
+}
+
+/* 简报卡片网格骨架 */
+.skeleton-briefing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}

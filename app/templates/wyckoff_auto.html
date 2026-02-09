@@ -50,7 +50,7 @@
             </thead>
             <tbody id="resultsBody">
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="7" class="text-center text-muted py-4" id="wyckoffPlaceholder">
                         点击"分析持仓"开始分析
                     </td>
                 </tr>
@@ -160,6 +160,14 @@ async function analyzeStocks() {
     }
 
     showProgress(0, stockList.length);
+
+    // 显示骨架屏
+    const tbody = document.getElementById('resultsBody');
+    let skeletonHtml = '';
+    for (let i = 0; i < Math.min(stockList.length, 8); i++) {
+        skeletonHtml += `<tr><td colspan="7"><div class="skeleton-table-row"><div class="skeleton skeleton-cell skeleton-cell-sm"></div><div class="skeleton skeleton-cell"></div><div class="skeleton skeleton-cell skeleton-cell-sm"></div><div class="skeleton skeleton-cell"></div><div class="skeleton skeleton-cell"></div><div class="skeleton skeleton-cell skeleton-cell-sm"></div><div class="skeleton skeleton-cell"></div></div></td></tr>`;
+    }
+    tbody.innerHTML = skeletonHtml;
 
     try {
         const response = await fetch('/wyckoff/auto/analyze', {

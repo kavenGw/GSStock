@@ -1815,7 +1815,7 @@ const Charts = {
         const container = document.querySelector('.trend-chart-canvas-wrapper');
         if (!container) return;
 
-        container.innerHTML = '<div class="chart-loading">加载走势数据中...</div>';
+        container.innerHTML = '<div class="skeleton skeleton-chart" style="height:280px"></div>';
 
         const response = await fetch(`/positions/api/trend-data?date=${date}&category=${category}`);
         if (!response.ok) {

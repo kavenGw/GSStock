@@ -28,11 +28,14 @@ class BriefingPage {
     }
 
     static setLoadingPlaceholders() {
-        const ids = ['stocksContainer', 'indicesContainer', 'futuresContainer',
-                     'etfContainer', 'sectorRatingsContainer', 'cnSectorsContainer', 'usSectorsContainer'];
-        for (const id of ids) {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = '<div class="text-muted"><span class="spinner-border spinner-border-sm me-1"></span>加载中...</div>';
+        if (window.Skeleton) {
+            Skeleton.show('stocksContainer', 'card', 6);
+            Skeleton.show('indicesContainer', 'card', 4);
+            Skeleton.show('futuresContainer', 'card', 4);
+            Skeleton.show('etfContainer', 'card', 4);
+            Skeleton.show('sectorRatingsContainer', 'card', 3);
+            Skeleton.show('cnSectorsContainer', 'table-row', 3);
+            Skeleton.show('usSectorsContainer', 'table-row', 3);
         }
     }
 

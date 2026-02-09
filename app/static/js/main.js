@@ -1,3 +1,57 @@
+// 骨架屏工具
+const Skeleton = {
+    show(containerId, type, count = 3) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        let html = '';
+        for (let i = 0; i < count; i++) {
+            if (type === 'card') {
+                html += `<div class="skeleton-card skeleton">
+                    <div class="skeleton skeleton-text w-60"></div>
+                    <div class="skeleton skeleton-price"></div>
+                    <div class="skeleton skeleton-change"></div>
+                    <div class="skeleton skeleton-info"></div>
+                </div>`;
+            } else if (type === 'table-row') {
+                html += `<div class="skeleton-table-row">
+                    <div class="skeleton skeleton-cell skeleton-cell-sm"></div>
+                    <div class="skeleton skeleton-cell"></div>
+                    <div class="skeleton skeleton-cell skeleton-cell-sm"></div>
+                    <div class="skeleton skeleton-cell skeleton-cell-sm"></div>
+                </div>`;
+            } else if (type === 'chart') {
+                html = `<div class="skeleton skeleton-chart"></div>`;
+                break;
+            } else if (type === 'wyckoff') {
+                html += `<div class="skeleton-wyckoff skeleton">
+                    <div class="d-flex align-items-center">
+                        <div class="skeleton skeleton-circle"></div>
+                        <div class="skeleton skeleton-name"></div>
+                    </div>
+                    <div class="skeleton skeleton-tags"></div>
+                </div>`;
+            }
+        }
+        container.dataset.skeletonActive = 'true';
+        container.innerHTML = html;
+    },
+
+    hide(containerId) {
+        const container = document.getElementById(containerId);
+        if (container && container.dataset.skeletonActive === 'true') {
+            container.innerHTML = '';
+            delete container.dataset.skeletonActive;
+        }
+    },
+
+    isActive(containerId) {
+        const container = document.getElementById(containerId);
+        return container && container.dataset.skeletonActive === 'true';
+    }
+};
+
+window.Skeleton = Skeleton;
+
 document.addEventListener('DOMContentLoaded', function() {
     initIndexPage();
     initConfigModal();

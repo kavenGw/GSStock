@@ -213,8 +213,27 @@ class UnifiedStockDataService:
         return cls._instance
 
     def __init__(self):
+        if hasattr(self, '_fetch_lock'):
+            return
         self._fetch_lock = threading.Lock()
-        self._stock_name_cache = {}  # 临时名称缓存，避免重复查询
+        self._stock_name_cache = {}
+        self._source_snapshots = {}
+        self._snapshot_lock = threading.Lock()
+        self._SNAPSHOT_TTL = 120
+
+    def _get_source_snapshot(self, source_key: str):
+        with self._snapshot_lock:
+            snap = self._source_snapshots.get(source_key)
+            if snap and (datetime.now() - snap['timestamp']).total_seconds() < self._SNAPSHOT_TTL:
+                return snap['data']
+            return None
+
+    def _set_source_snapshot(self, source_key: str, data):
+        with self._snapshot_lock:
+            self._source_snapshots[source_key] = {
+                'data': data,
+                'timestamp': datetime.now(),
+            }
 
     def _get_stock_name(self, code: str, data: dict = None) -> str:
         """获取股票名称（用于日志显示）"""
@@ -600,30 +619,41 @@ class UnifiedStockDataService:
         _source_cache = {}
 
         def fetch_from_eastmoney(codes: list) -> dict:
-            """东方财富获取函数"""
             result = {}
             try:
                 import akshare as ak
 
-                # 检查缓存
                 if 'eastmoney' not in _source_cache:
-                    stock_df = ak.stock_zh_a_spot_em()
-                    stock_map = {}
-                    for _, row in stock_df.iterrows():
-                        stock_map[row['代码']] = row
-                    try:
-                        etf_df = ak.fund_etf_spot_em()
-                        for _, row in etf_df.iterrows():
+                    stock_map = self._get_source_snapshot('eastmoney_stock')
+                    if stock_map is None:
+                        stock_df = ak.stock_zh_a_spot_em()
+                        stock_map = {}
+                        for _, row in stock_df.iterrows():
                             stock_map[row['代码']] = row
-                    except Exception:
-                        pass
-                    _source_cache['eastmoney'] = stock_map
+                        self._set_source_snapshot('eastmoney_stock', stock_map)
+                        logger.info(f"[快照] 东方财富A股数据已缓存: {len(stock_map)}只")
+                    else:
+                        logger.info(f"[快照命中] 东方财富A股数据: {len(stock_map)}只")
+
+                    etf_map = self._get_source_snapshot('eastmoney_etf')
+                    if etf_map is None:
+                        try:
+                            etf_df = ak.fund_etf_spot_em()
+                            etf_map = {}
+                            for _, row in etf_df.iterrows():
+                                etf_map[row['代码']] = row
+                            self._set_source_snapshot('eastmoney_etf', etf_map)
+                        except Exception:
+                            etf_map = {}
+
+                    combined = {**stock_map, **etf_map}
+                    _source_cache['eastmoney'] = combined
                 else:
-                    stock_map = _source_cache['eastmoney']
+                    combined = _source_cache['eastmoney']
 
                 for code in codes:
-                    if code in stock_map:
-                        row = stock_map[code]
+                    if code in combined:
+                        row = combined[code]
                         result[code] = {
                             'code': code,
                             'name': row.get('名称', code),
@@ -639,6 +669,8 @@ class UnifiedStockDataService:
                             'market': 'A',
                         }
 
+                self._cache_pe_from_snapshot(codes, combined, today, now_str)
+
                 if result:
                     logger.info(f"[实时价格] 东方财富: 成功 {len(result)}只")
                 return result
@@ -648,16 +680,21 @@ class UnifiedStockDataService:
                 raise
 
         def fetch_from_sina(codes: list) -> dict:
-            """新浪财经获取函数"""
             result = {}
             try:
                 import akshare as ak
 
                 if 'sina' not in _source_cache:
-                    stock_df = ak.stock_zh_a_spot()
-                    stock_map = {}
-                    for _, row in stock_df.iterrows():
-                        stock_map[row['代码']] = row
+                    stock_map = self._get_source_snapshot('sina_stock')
+                    if stock_map is None:
+                        stock_df = ak.stock_zh_a_spot()
+                        stock_map = {}
+                        for _, row in stock_df.iterrows():
+                            stock_map[row['代码']] = row
+                        self._set_source_snapshot('sina_stock', stock_map)
+                        logger.info(f"[快照] 新浪A股数据已缓存: {len(stock_map)}只")
+                    else:
+                        logger.info(f"[快照命中] 新浪A股数据: {len(stock_map)}只")
                     _source_cache['sina'] = stock_map
                 else:
                     stock_map = _source_cache['sina']
@@ -679,6 +716,8 @@ class UnifiedStockDataService:
                             'last_fetch_time': now_str,
                             'market': 'A',
                         }
+
+                self._cache_pe_from_sina_snapshot(codes, stock_map, today, now_str)
 
                 if result:
                     logger.info(f"[实时价格] 新浪财经: 成功 {len(result)}只")
@@ -2095,10 +2134,16 @@ class UnifiedStockDataService:
             import akshare as ak
             result = {}
             if 'eastmoney' not in _source_cache:
-                df = ak.stock_zh_a_spot_em()
-                stock_map = {}
-                for _, row in df.iterrows():
-                    stock_map[str(row.get('代码', ''))] = row
+                stock_map = self._get_source_snapshot('eastmoney_stock')
+                if stock_map is None:
+                    df = ak.stock_zh_a_spot_em()
+                    stock_map = {}
+                    for _, row in df.iterrows():
+                        stock_map[str(row.get('代码', ''))] = row
+                    self._set_source_snapshot('eastmoney_stock', stock_map)
+                    logger.info(f"[快照] 东方财富A股数据已缓存: {len(stock_map)}只")
+                else:
+                    logger.info(f"[快照命中] 东方财富A股PE数据: {len(stock_map)}只")
                 _source_cache['eastmoney'] = stock_map
             else:
                 stock_map = _source_cache['eastmoney']
@@ -2146,10 +2191,16 @@ class UnifiedStockDataService:
             import akshare as ak
             result = {}
             if 'sina' not in _source_cache:
-                df = ak.stock_zh_a_spot()
-                stock_map = {}
-                for _, row in df.iterrows():
-                    stock_map[str(row.get('代码', ''))] = row
+                stock_map = self._get_source_snapshot('sina_stock')
+                if stock_map is None:
+                    df = ak.stock_zh_a_spot()
+                    stock_map = {}
+                    for _, row in df.iterrows():
+                        stock_map[str(row.get('代码', ''))] = row
+                    self._set_source_snapshot('sina_stock', stock_map)
+                    logger.info(f"[快照] 新浪A股数据已缓存: {len(stock_map)}只")
+                else:
+                    logger.info(f"[快照命中] 新浪A股PE数据: {len(stock_map)}只")
                 _source_cache['sina'] = stock_map
             else:
                 stock_map = _source_cache['sina']
@@ -2215,6 +2266,93 @@ class UnifiedStockDataService:
         if pe_ttm <= PE_THRESHOLD_HIGH:
             return 'high', str(round(pe_ttm, 1))
         return 'very_high', str(round(pe_ttm, 1))
+
+    def _cache_pe_from_snapshot(self, codes: list, stock_map: dict, today: date, now_str: str):
+        cached_count = 0
+        for code in codes:
+            row = stock_map.get(code)
+            if row is None:
+                continue
+            if memory_cache.get(code, 'pe') is not None:
+                continue
+            pe_data = self._build_pe_data_from_eastmoney(code, row, now_str)
+            if pe_data:
+                memory_cache.set(code, 'pe', pe_data, stable=True)
+                UnifiedStockCache.set_cached_data(code, 'pe', pe_data, today)
+                cached_count += 1
+        if cached_count:
+            logger.info(f"[附带缓存] 东方财富PE数据: {cached_count}只")
+
+    def _cache_pe_from_sina_snapshot(self, codes: list, stock_map: dict, today: date, now_str: str):
+        cached_count = 0
+        for code in codes:
+            row = stock_map.get(code)
+            if row is None:
+                continue
+            if memory_cache.get(code, 'pe') is not None:
+                continue
+            pe_data = self._build_pe_data_from_sina(code, row, now_str)
+            if pe_data:
+                memory_cache.set(code, 'pe', pe_data, stable=True)
+                UnifiedStockCache.set_cached_data(code, 'pe', pe_data, today)
+                cached_count += 1
+        if cached_count:
+            logger.info(f"[附带缓存] 新浪PE数据: {cached_count}只")
+
+    def _build_pe_data_from_eastmoney(self, code: str, row, now_str: str) -> dict | None:
+        pe = row.get('市盈率-动态')
+        pb = row.get('市净率')
+        pe_val = None
+        pb_val = None
+        if pe and pe != '-':
+            try:
+                pe_val = round(float(pe), 2)
+            except (ValueError, TypeError):
+                pass
+        if pb and pb != '-':
+            try:
+                pb_val = round(float(pb), 2)
+            except (ValueError, TypeError):
+                pass
+        if pe_val is None and pb_val is None:
+            return None
+        pe_status, pe_display = self._format_pe_status(pe_val)
+        name = row.get('名称', code)
+        return {
+            'code': code,
+            'name': name,
+            'pe_ttm': pe_val,
+            'pe_forward': None,
+            'pb': pb_val,
+            'pe_status': pe_status,
+            'pe_display': pe_display,
+            'market': 'A',
+            'last_fetch_time': now_str,
+        }
+
+    def _build_pe_data_from_sina(self, code: str, row, now_str: str) -> dict | None:
+        pe = row.get('pe', row.get('市盈率'))
+        pe_val = None
+        if pe and pe != '-':
+            try:
+                pe_val = round(float(pe), 2)
+            except (ValueError, TypeError):
+                pass
+        if pe_val is None:
+            return None
+        pe_status, pe_display = self._format_pe_status(pe_val)
+        name = row.get('名称', code)
+        return {
+            'code': code,
+            'name': name,
+            'pe_ttm': pe_val,
+            'pe_forward': None,
+            'pb': None,
+            'pe_status': pe_status,
+            'pe_display': pe_display,
+            'market': 'A',
+            'last_fetch_time': now_str,
+        }
 
     # ============ 通用批量报价 ============
 
@@ -2637,16 +2775,20 @@ class UnifiedStockDataService:
             return result
 
         def fetch_via_spot(codes: list) -> dict:
-            """通过 fund_etf_spot_em 获取实时 IOPV"""
             import akshare as ak
             result = {}
 
             try:
-                df = ak.fund_etf_spot_em()
-                if df is None or df.empty:
-                    return result
-
-                etf_map = {str(row.get('代码', '')): row for _, row in df.iterrows()}
+                etf_map = self._get_source_snapshot('eastmoney_etf')
+                if etf_map is None:
+                    df = ak.fund_etf_spot_em()
+                    if df is None or df.empty:
+                        return result
+                    etf_map = {str(row.get('代码', '')): row for _, row in df.iterrows()}
+                    self._set_source_snapshot('eastmoney_etf', etf_map)
+                    logger.info(f"[快照] ETF数据已缓存: {len(etf_map)}只")
+                else:
+                    logger.info(f"[快照命中] ETF数据: {len(etf_map)}只")
 
                 for code in codes:
                     row = etf_map.get(code)
