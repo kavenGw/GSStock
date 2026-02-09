@@ -13,7 +13,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">股票管理</a>
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">股票管理</a>
             {% if readonly_mode %}
             <span class="badge bg-warning text-dark ms-2" title="只读模式：仅使用缓存数据，不从服务器获取实时数据">
                 <i class="bi bi-lock"></i> 只读模式
@@ -35,9 +35,10 @@
                         <li><a class="dropdown-item" href="{{ url_for('profit.overall') }}"><i class="bi bi-pie-chart"></i> 整体收益</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ url_for('rebalance.index') }}"><i class="bi bi-sliders"></i> 仓位配平</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('stock.manage') }}"><i class="bi bi-tags"></i> 股票管理</a></li>
                     </ul>
                 </li>
-                <a class="nav-link" href="{{ url_for('stock.manage') }}">股票代码</a>
             </div>
         </div>
     </nav>

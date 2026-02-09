@@ -1,4 +1,4 @@
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, redirect, url_for
 from app.routes import main_bp
 from app.services.position import PositionService
 from app.services.category import CategoryService
@@ -11,6 +11,12 @@ from app.models.daily_snapshot import DailySnapshot
 
 @main_bp.route('/')
 def index():
+    """Default page redirects to daily briefing"""
+    return redirect(url_for('briefing.index'))
+
+
+@main_bp.route('/dashboard')
+def dashboard():
     latest_date = PositionService.get_latest_date()
     positions = []
     advices = {}
