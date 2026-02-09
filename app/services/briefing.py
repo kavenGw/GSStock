@@ -94,56 +94,22 @@ class BriefingService:
     """每日简报服务"""
 
     @staticmethod
-    def get_stocks_data(force_refresh: bool = False) -> dict:
-        """获取股票数据（按分类组织）
-
-        调用 UnifiedStockDataService 获取美股和韩股数据，
-        并集成 EarningsService 获取财报日期和PE数据。
-
-        Returns:
-            {
-                'categories': [{'key': 'storage', 'name': '存储芯片'}, ...],
-                'stocks': {
-                    'storage': [stock_item, ...],
-                    'tech_giant': [stock_item, ...],
-                    ...
-                }
-            }
-            每个 stock_item 包含：
-            - code: 股票代码
-            - name: 股票名称
-            - close: 收盘价
-            - change_percent: 涨跌幅
-            - volume: 成交量
-            - market: 市场
-            - category: 分类key
-            - earnings_date: 下次财报日期
-            - days_until_earnings: 距财报天数
-            - is_earnings_today: 是否今日发布
-            - pe_ttm: 动态市盈率
-            - pe_forward: 预期市盈率
-            - pe_status: PE状态
-            - error: 错误信息（如有）
-        """
+    def get_stocks_basic_data(force_refresh: bool = False) -> dict:
+        """获取基础股票数据（价格+投资建议，不含PE和财报）"""
         from app.services.unified_stock_data import unified_stock_data_service
-        from app.services.earnings import EarningsService
 
         stock_codes = [s['code'] for s in BRIEFING_STOCKS]
-        stock_map = {s['code']: s for s in BRIEFING_STOCKS}
 
-        # 按分类组织结果
         sorted_categories = sorted(STOCK_CATEGORIES.items(), key=lambda x: x[1]['order'])
         categories = [{'key': k, 'name': v['name']} for k, v in sorted_categories if k != 'other']
         stocks_by_category = {k: [] for k, _ in sorted_categories}
 
-        # 获取实时价格
         prices = {}
         try:
             prices = unified_stock_data_service.get_realtime_prices(stock_codes, force_refresh)
         except Exception as e:
             logger.error(f"获取股票价格失败: {e}")
 
-        # 获取投资建议
         from app.models.stock import Stock
         advice_map = {}
         try:
@@ -152,27 +118,10 @@ class BriefingService:
         except Exception as e:
             logger.warning(f"获取投资建议失败: {e}")
 
-        # 获取财报日期数据
-        earnings_data = {}
-        try:
-            earnings_data = EarningsService.get_earnings_dates(stock_codes, force_refresh)
-        except Exception as e:
-            logger.warning(f"获取财报日期失败: {e}")
-
-        # 获取PE数据（包含 TTM 和 forward PE）
-        pe_data = {}
-        try:
-            pe_data = unified_stock_data_service.get_pe_data(stock_codes, force_refresh)
-        except Exception as e:
-            logger.warning(f"获取PE数据失败: {e}")
-
-        # 组装结果
         for stock_info in BRIEFING_STOCKS:
             code = stock_info['code']
             category = stock_info.get('category', 'other')
             price_data = prices.get(code)
-            earnings = earnings_data.get(code, {})
-            pe = pe_data.get(code, {})
 
             stock_item = {
                 'code': code,
@@ -182,18 +131,10 @@ class BriefingService:
                 'close': None,
                 'change_percent': None,
                 'volume': None,
-                'earnings_date': earnings.get('next_earnings_date'),
-                'days_until_earnings': earnings.get('days_until_next'),
-                'is_earnings_today': earnings.get('is_today', False),
-                'pe_ttm': pe.get('pe_ttm'),
-                'pe_forward': pe.get('pe_forward'),
-                'pe_status': pe.get('pe_status', 'na'),
                 'investment_advice': advice_map.get(code),
                 'error': None
             }
 
-            # 检查数据是否有效（非降级数据）
-            # 降级数据（过期缓存）不应在简报中显示，因为可能误导用户
             if price_data and not price_data.get('_is_degraded'):
                 stock_item['close'] = price_data.get('current_price', 0)
                 stock_item['change_percent'] = price_data.get('change_percent', 0)
@@ -203,23 +144,72 @@ class BriefingService:
 
             stocks_by_category[category].append(stock_item)
 
-        # 移除空分类
         stocks_by_category = {k: v for k, v in stocks_by_category.items() if v}
 
-        # 每个分类内按涨幅降序排序
         for category_key in stocks_by_category:
             stocks_by_category[category_key].sort(
                 key=lambda x: x['change_percent'] if x['change_percent'] is not None else float('-inf'),
                 reverse=True
             )
 
-        # 只保留有数据的分类
         categories = [c for c in categories if c['key'] in stocks_by_category]
+
+        cache_time = BriefingService.get_cache_update_time()
+        last_update = cache_time if cache_time else datetime.now()
 
         return {
             'categories': categories,
-            'stocks': stocks_by_category
+            'stocks': stocks_by_category,
+            'last_update': last_update.strftime('%Y-%m-%d %H:%M:%S')
         }
+
+    @staticmethod
+    def get_stocks_pe_data(force_refresh: bool = False) -> dict:
+        """获取股票PE数据"""
+        from app.services.unified_stock_data import unified_stock_data_service
+
+        stock_codes = [s['code'] for s in BRIEFING_STOCKS]
+        pe_data = {}
+        try:
+            pe_data = unified_stock_data_service.get_pe_data(stock_codes, force_refresh)
+        except Exception as e:
+            logger.warning(f"获取PE数据失败: {e}")
+
+        result = {}
+        for code in stock_codes:
+            pe = pe_data.get(code, {})
+            if pe:
+                result[code] = {
+                    'pe_ttm': pe.get('pe_ttm'),
+                    'pe_forward': pe.get('pe_forward'),
+                    'pe_status': pe.get('pe_status', 'na')
+                }
+
+        return result
+
+    @staticmethod
+    def get_stocks_earnings_data(force_refresh: bool = False) -> dict:
+        """获取股票财报日期数据"""
+        from app.services.earnings import EarningsService
+
+        stock_codes = [s['code'] for s in BRIEFING_STOCKS]
+        earnings_data = {}
+        try:
+            earnings_data = EarningsService.get_earnings_dates(stock_codes, force_refresh)
+        except Exception as e:
+            logger.warning(f"获取财报日期失败: {e}")
+
+        result = {}
+        for code in stock_codes:
+            earnings = earnings_data.get(code, {})
+            if earnings:
+                result[code] = {
+                    'earnings_date': earnings.get('next_earnings_date'),
+                    'days_until_earnings': earnings.get('days_until_next'),
+                    'is_earnings_today': earnings.get('is_today', False)
+                }
+
+        return result
 
     @staticmethod
     def get_indices_data(force_refresh: bool = False) -> dict:
@@ -642,75 +632,6 @@ class BriefingService:
         if cache and cache.last_fetch_time:
             return cache.last_fetch_time
         return None
-
-    @staticmethod
-    def get_briefing_data(force_refresh: bool = False) -> dict:
-        """获取完整的简报数据
-
-        聚合所有简报数据：股票、指数、ETF溢价、板块涨幅。
-        使用 ThreadPoolExecutor 并行获取所有数据。
-
-        Args:
-            force_refresh: 是否强制刷新缓存
-
-        Returns:
-            {
-                'stocks': 股票数据列表,
-                'indices': 指数数据列表,
-                'futures': 期货数据列表,
-                'etf_premium': ETF溢价数据列表,
-                'cn_sectors': A股板块涨幅列表,
-                'us_sectors': 美股板块涨幅列表,
-                'last_update': 更新时间戳
-            }
-        """
-        from concurrent.futures import ThreadPoolExecutor
-        from flask import current_app
-
-        logger.info(f"获取简报数据, force_refresh={force_refresh}")
-
-        app = current_app._get_current_object()
-
-        def run_with_context(func, *args):
-            """在应用上下文中执行函数"""
-            with app.app_context():
-                return func(*args)
-
-        with ThreadPoolExecutor(max_workers=6) as executor:
-            stocks_future = executor.submit(run_with_context, BriefingService.get_stocks_data, force_refresh)
-            indices_future = executor.submit(run_with_context, BriefingService.get_indices_data, force_refresh)
-            futures_future = executor.submit(run_with_context, BriefingService.get_futures_data, force_refresh)
-            etf_future = executor.submit(run_with_context, BriefingService.get_etf_premium_data, force_refresh)
-            cn_sectors_future = executor.submit(run_with_context, BriefingService.get_cn_sectors_data, force_refresh)
-            us_sectors_future = executor.submit(run_with_context, BriefingService.get_us_sectors_data, force_refresh)
-
-            stocks = stocks_future.result()
-            indices = indices_future.result()
-            futures = futures_future.result()
-            etf_premium = etf_future.result()
-            cn_sectors = cn_sectors_future.result()
-            us_sectors = us_sectors_future.result()
-
-        # 计算板块评级（使用已获取的股票数据）
-        sector_ratings = BriefingService.get_sector_ratings(stocks, force_refresh)
-
-        # 获取缓存实际更新时间
-        cache_time = BriefingService.get_cache_update_time()
-        if force_refresh or cache_time is None:
-            last_update = datetime.now()
-        else:
-            last_update = cache_time
-
-        return {
-            'stocks': stocks,
-            'indices': indices,
-            'futures': futures,
-            'etf_premium': etf_premium,
-            'cn_sectors': cn_sectors,
-            'us_sectors': us_sectors,
-            'sector_ratings': sector_ratings,
-            'last_update': last_update.strftime('%Y-%m-%d %H:%M:%S')
-        }
 
     @staticmethod
     def get_earnings_alert_data() -> dict:
