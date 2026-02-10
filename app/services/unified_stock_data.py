@@ -669,8 +669,6 @@ class UnifiedStockDataService:
                             'market': 'A',
                         }
 
-                self._cache_pe_from_snapshot(codes, combined, today, now_str)
-
                 if result:
                     logger.info(f"[实时价格] 东方财富: 成功 {len(result)}只")
                 return result
@@ -716,8 +714,6 @@ class UnifiedStockDataService:
                             'last_fetch_time': now_str,
                             'market': 'A',
                         }
-
-                self._cache_pe_from_sina_snapshot(codes, stock_map, today, now_str)
 
                 if result:
                     logger.info(f"[实时价格] 新浪财经: 成功 {len(result)}只")
@@ -1994,14 +1990,16 @@ class UnifiedStockDataService:
         if not stock_codes:
             return {}
 
+        # A股不获取PE数据
+        stock_codes = [c for c in stock_codes if self._identify_market(c) != 'A']
+        if not stock_codes:
+            return {}
+
         today = date.today()
         cache_type = 'pe'
         now_str = datetime.now().isoformat()
 
-        # 入口日志
-        a_count = sum(1 for c in stock_codes if self._identify_market(c) == 'A')
-        other_count = len(stock_codes) - a_count
-        logger.info(f"[PE数据] 开始获取: A股 {a_count}只, 美股/港股 {other_count}只")
+        logger.info(f"[PE数据] 开始获取: 美股/港股 {len(stock_codes)}只")
 
         # 检查缓存（PE缓存24小时有效）
         result = {}
@@ -2050,22 +2048,12 @@ class UnifiedStockDataService:
         return result
 
     def _fetch_pe_data(self, stock_codes: list, today: date, now_str: str) -> dict:
-        """从外部API获取PE数据（A股用akshare负载均衡，美股/港股用yfinance）"""
+        """从外部API获取PE数据（美股/港股用yfinance）"""
         import yfinance as yf
 
         result = {}
 
-        # 分离A股和其他市场
-        a_share_codes = [c for c in stock_codes if self._identify_market(c) == 'A']
-        other_codes = [c for c in stock_codes if self._identify_market(c) != 'A']
-
-        # A股PE获取（负载均衡：东方财富/新浪）
-        if a_share_codes:
-            a_share_result = self._fetch_a_share_pe(a_share_codes, today, now_str)
-            result.update(a_share_result)
-
-        # 美股/港股获取（yfinance）
-        if other_codes:
+        if stock_codes:
             def fetch_single(code: str) -> tuple:
                 try:
                     yf_code = self._get_yfinance_symbol(code)
@@ -2108,7 +2096,7 @@ class UnifiedStockDataService:
 
             yf_success = 0
             with ThreadPoolExecutor(max_workers=3) as executor:
-                futures = {executor.submit(fetch_single, code): code for code in other_codes}
+                futures = {executor.submit(fetch_single, code): code for code in stock_codes}
                 for future in as_completed(futures):
                     code, data = future.result()
                     if data:
@@ -2126,133 +2114,6 @@ class UnifiedStockDataService:
 
         return result
 
-    def _fetch_a_share_pe(self, stock_codes: list, today: date, now_str: str) -> dict:
-        """A股PE数据获取（负载均衡：东方财富/新浪）"""
-        _source_cache = {}
-
-        def fetch_pe_eastmoney(codes: list) -> dict:
-            import akshare as ak
-            result = {}
-            if 'eastmoney' not in _source_cache:
-                stock_map = self._get_source_snapshot('eastmoney_stock')
-                if stock_map is None:
-                    df = ak.stock_zh_a_spot_em()
-                    stock_map = {}
-                    for _, row in df.iterrows():
-                        stock_map[str(row.get('代码', ''))] = row
-                    self._set_source_snapshot('eastmoney_stock', stock_map)
-                    logger.info(f"[快照] 东方财富A股数据已缓存: {len(stock_map)}只")
-                else:
-                    logger.info(f"[快照命中] 东方财富A股PE数据: {len(stock_map)}只")
-                _source_cache['eastmoney'] = stock_map
-            else:
-                stock_map = _source_cache['eastmoney']
-
-            for code in codes:
-                row = stock_map.get(code)
-                if row is None:
-                    continue
-                pe = row.get('市盈率-动态')
-                pb = row.get('市净率')
-                if pe and pe != '-':
-                    try:
-                        pe_val = round(float(pe), 2)
-                    except (ValueError, TypeError):
-                        pe_val = None
-                else:
-                    pe_val = None
-                if pb and pb != '-':
-                    try:
-                        pb_val = round(float(pb), 2)
-                    except (ValueError, TypeError):
-                        pb_val = None
-                else:
-                    pb_val = None
-
-                pe_status, pe_display = self._format_pe_status(pe_val)
-                name = row.get('名称', code)
-                result[code] = {
-                    'code': code,
-                    'name': name,
-                    'pe_ttm': pe_val,
-                    'pe_forward': None,
-                    'pb': pb_val,
-                    'pe_status': pe_status,
-                    'pe_display': pe_display,
-                    'market': 'A',
-                    'last_fetch_time': now_str,
-                }
-
-            if result:
-                logger.info(f"[PE数据] 东方财富: 成功 {len(result)}只")
-            return result
-
-        def fetch_pe_sina(codes: list) -> dict:
-            import akshare as ak
-            result = {}
-            if 'sina' not in _source_cache:
-                stock_map = self._get_source_snapshot('sina_stock')
-                if stock_map is None:
-                    df = ak.stock_zh_a_spot()
-                    stock_map = {}
-                    for _, row in df.iterrows():
-                        stock_map[str(row.get('代码', ''))] = row
-                    self._set_source_snapshot('sina_stock', stock_map)
-                    logger.info(f"[快照] 新浪A股数据已缓存: {len(stock_map)}只")
-                else:
-                    logger.info(f"[快照命中] 新浪A股PE数据: {len(stock_map)}只")
-                _source_cache['sina'] = stock_map
-            else:
-                stock_map = _source_cache['sina']
-
-            for code in codes:
-                row = stock_map.get(code)
-                if row is None:
-                    continue
-                pe = row.get('pe', row.get('市盈率'))
-                if pe and pe != '-':
-                    try:
-                        pe_val = round(float(pe), 2)
-                    except (ValueError, TypeError):
-                        pe_val = None
-                else:
-                    pe_val = None
-
-                pe_status, pe_display = self._format_pe_status(pe_val)
-                name = row.get('名称', code)
-                result[code] = {
-                    'code': code,
-                    'name': name,
-                    'pe_ttm': pe_val,
-                    'pe_forward': None,
-                    'pb': None,
-                    'pe_status': pe_status,
-                    'pe_display': pe_display,
-                    'market': 'A',
-                    'last_fetch_time': now_str,
-                }
-
-            if result:
-                logger.info(f"[PE数据] 新浪: 成功 {len(result)}只")
-            return result
-
-        fetch_funcs = {
-            'eastmoney': fetch_pe_eastmoney,
-            'sina': fetch_pe_sina,
-        }
-
-        a_result = load_balancer.fetch_with_balancing(stock_codes, fetch_funcs)
-
-        # 保存到缓存
-        for code, data in a_result.items():
-            UnifiedStockCache.set_cached_data(code, 'pe', data, today)
-            logger.debug(f"[PE数据] {code} {data.get('name', code)} PE={data.get('pe_ttm')}")
-
-        if a_result:
-            logger.info(f"[PE数据] A股: 成功 {len(a_result)}只")
-
-        return a_result
-
     def _format_pe_status(self, pe_ttm: float | None) -> tuple:
         """格式化PE状态"""
         if pe_ttm is None:
@@ -2266,93 +2127,6 @@ class UnifiedStockDataService:
         if pe_ttm <= PE_THRESHOLD_HIGH:
             return 'high', str(round(pe_ttm, 1))
         return 'very_high', str(round(pe_ttm, 1))
-
-    def _cache_pe_from_snapshot(self, codes: list, stock_map: dict, today: date, now_str: str):
-        cached_count = 0
-        for code in codes:
-            row = stock_map.get(code)
-            if row is None:
-                continue
-            if memory_cache.get(code, 'pe') is not None:
-                continue
-            pe_data = self._build_pe_data_from_eastmoney(code, row, now_str)
-            if pe_data:
-                memory_cache.set(code, 'pe', pe_data, stable=True)
-                UnifiedStockCache.set_cached_data(code, 'pe', pe_data, today)
-                cached_count += 1
-        if cached_count:
-            logger.info(f"[附带缓存] 东方财富PE数据: {cached_count}只")
-
-    def _cache_pe_from_sina_snapshot(self, codes: list, stock_map: dict, today: date, now_str: str):
-        cached_count = 0
-        for code in codes:
-            row = stock_map.get(code)
-            if row is None:
-                continue
-            if memory_cache.get(code, 'pe') is not None:
-                continue
-            pe_data = self._build_pe_data_from_sina(code, row, now_str)
-            if pe_data:
-                memory_cache.set(code, 'pe', pe_data, stable=True)
-                UnifiedStockCache.set_cached_data(code, 'pe', pe_data, today)
-                cached_count += 1
-        if cached_count:
-            logger.info(f"[附带缓存] 新浪PE数据: {cached_count}只")
-
-    def _build_pe_data_from_eastmoney(self, code: str, row, now_str: str) -> dict | None:
-        pe = row.get('市盈率-动态')
-        pb = row.get('市净率')
-        pe_val = None
-        pb_val = None
-        if pe and pe != '-':
-            try:
-                pe_val = round(float(pe), 2)
-            except (ValueError, TypeError):
-                pass
-        if pb and pb != '-':
-            try:
-                pb_val = round(float(pb), 2)
-            except (ValueError, TypeError):
-                pass
-        if pe_val is None and pb_val is None:
-            return None
-        pe_status, pe_display = self._format_pe_status(pe_val)
-        name = row.get('名称', code)
-        return {
-            'code': code,
-            'name': name,
-            'pe_ttm': pe_val,
-            'pe_forward': None,
-            'pb': pb_val,
-            'pe_status': pe_status,
-            'pe_display': pe_display,
-            'market': 'A',
-            'last_fetch_time': now_str,
-        }
-
-    def _build_pe_data_from_sina(self, code: str, row, now_str: str) -> dict | None:
-        pe = row.get('pe', row.get('市盈率'))
-        pe_val = None
-        if pe and pe != '-':
-            try:
-                pe_val = round(float(pe), 2)
-            except (ValueError, TypeError):
-                pass
-        if pe_val is None:
-            return None
-        pe_status, pe_display = self._format_pe_status(pe_val)
-        name = row.get('名称', code)
-        return {
-            'code': code,
-            'name': name,
-            'pe_ttm': pe_val,
-            'pe_forward': None,
-            'pb': None,
-            'pe_status': pe_status,
-            'pe_display': pe_display,
-            'market': 'A',
-            'last_fetch_time': now_str,
-        }
 
     # ============ 通用批量报价 ============
 

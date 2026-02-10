@@ -23,6 +23,7 @@
                 <a class="nav-link" href="{{ url_for('briefing.index') }}">每日简报</a>
                 <a class="nav-link" href="{{ url_for('alert.index') }}">预警</a>
                 <a class="nav-link" href="{{ url_for('heavy_metals.index') }}">走势看板</a>
+                <a class="nav-link" href="{{ url_for('stock.manage') }}">股票代码管理</a>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i> 我的
@@ -37,8 +38,6 @@
                         <li><a class="dropdown-item" href="{{ url_for('profit.overall') }}"><i class="bi bi-pie-chart"></i> 整体收益</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ url_for('rebalance.index') }}"><i class="bi bi-sliders"></i> 仓位配平</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('stock.manage') }}"><i class="bi bi-tags"></i> 股票代码管理</a></li>
                     </ul>
                 </li>
             </div>
