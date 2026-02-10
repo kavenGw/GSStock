@@ -103,6 +103,18 @@ def get_sectors():
         return jsonify({'error': str(e)}), 500
 
 
+@briefing_bp.route('/api/stocks/technical')
+def get_stocks_technical():
+    """股票技术指标数据（评分+MACD信号）"""
+    try:
+        force = request.args.get('force', 'false') == 'true'
+        data = BriefingService.get_stocks_technical_data(force)
+        return jsonify(data)
+    except Exception as e:
+        logger.error(f"获取技术指标失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
 @briefing_bp.route('/api/earnings-alerts')
 def get_earnings_alerts():
     """财报预警数据"""

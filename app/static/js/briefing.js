@@ -4,6 +4,7 @@
 class BriefingPage {
     static peData = null;
     static earningsData = null;
+    static technicalData = null;
     static stocksRendered = false;
 
     static init() {
@@ -20,6 +21,7 @@ class BriefingPage {
         this.loadStocks();
         this.loadStocksPE();
         this.loadStocksEarnings();
+        this.loadStocksTechnical();
         this.loadIndices();
         this.loadFutures();
         this.loadETF();
@@ -96,9 +98,10 @@ class BriefingPage {
 
             this.renderStocks(data);
             this.stocksRendered = true;
-            // 应用已到达的PE/财报数据
+            // 应用已到达的PE/财报/技术指标数据
             this.applyPEData();
             this.applyEarningsData();
+            this.applyTechnicalData();
 
             if (data.last_update) {
                 document.getElementById('lastUpdate').textContent = `更新时间: ${data.last_update}`;
@@ -136,6 +139,21 @@ class BriefingPage {
             this.applyEarningsData();
         } catch (e) {
             console.error('加载财报数据失败:', e);
+        }
+    }
+
+    static async loadStocksTechnical(force = false) {
+        try {
+            const url = '/briefing/api/stocks/technical' + (force ? '?force=true' : '');
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+
+            this.technicalData = data;
+            this.applyTechnicalData();
+        } catch (e) {
+            console.error('加载技术指标失败:', e);
         }
     }
 
@@ -219,6 +237,7 @@ class BriefingPage {
         this.stocksRendered = false;
         this.peData = null;
         this.earningsData = null;
+        this.technicalData = null;
         this.setLoadingPlaceholders();
 
         try {
@@ -226,6 +245,7 @@ class BriefingPage {
                 this.loadStocks(true),
                 this.loadStocksPE(true),
                 this.loadStocksEarnings(true),
+                this.loadStocksTechnical(true),
                 this.loadIndices(true),
                 this.loadFutures(true),
                 this.loadETF(true),
@@ -276,6 +296,29 @@ class BriefingPage {
             }
             el.innerHTML = `财报:<span class="${cls}">${text}</span>`;
         }
+    }
+
+    static applyTechnicalData() {
+        if (!this.technicalData || !this.stocksRendered) return;
+        for (const [code, tech] of Object.entries(this.technicalData)) {
+            const el = document.querySelector(`.stock-technical[data-code="${code}"]`);
+            if (!el) continue;
+
+            const scoreBg = this.getScoreBg(tech.score);
+            const macdCls = tech.macd_signal.includes('金叉') || tech.macd_signal === '多头' ? 'text-up' :
+                           tech.macd_signal.includes('死叉') || tech.macd_signal === '空头' ? 'text-down' : 'text-flat';
+
+            el.innerHTML = `<span class="bc-score-badge" style="background:${scoreBg}" title="${tech.signal_text}">${tech.score}</span>` +
+                `<span class="bc-macd-tag ${macdCls}">${tech.macd_signal}</span>`;
+        }
+    }
+
+    static getScoreBg(score) {
+        if (score >= 80) return '#28a745';
+        if (score >= 60) return '#20c997';
+        if (score >= 40) return '#ffc107';
+        if (score >= 20) return '#fd7e14';
+        return '#dc3545';
     }
 
     // ========== 渲染方法 ==========
@@ -352,6 +395,9 @@ class BriefingPage {
                 ${stock.error ? `<div class="text-warning-dark" style="font-size:0.75rem">${stock.error}</div>` : `
                     <div class="bc-price">${priceText}</div>
                     <div class="bc-change ${changeClass}">${changeText}</div>
+                    <div class="bc-technical" data-code="${stock.code}">
+                        <span class="stock-technical" data-code="${stock.code}"></span>
+                    </div>
                     <div class="bc-secondary">
                         <span class="stock-pe" data-code="${stock.code}"></span>
                         <span class="stock-earnings" data-code="${stock.code}"></span>

@@ -342,6 +342,24 @@
 }
 
 /* 降息概率图表样式 */
+.tech-sub-chart-wrapper {
+    border-top: 1px solid #e9ecef;
+    background: #fafbfc;
+    position: relative;
+}
+.tech-sub-chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+.tech-sub-chart-label {
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    font-size: 10px;
+    color: #999;
+    z-index: 1;
+}
+
 .fed-prob-chart-wrapper {
     border-top: 1px solid #e9ecef;
     background: #fafbfc;
@@ -460,6 +478,8 @@
         </div>
         <div id="categoryVolumeWrapper" class="volume-chart-wrapper" style="height: 80px;">
         </div>
+        <div id="macdChartWrapper" class="tech-sub-chart-wrapper" style="height: 80px;"></div>
+        <div id="rsiChartWrapper" class="tech-sub-chart-wrapper" style="height: 60px;"></div>
         <div id="fedProbWrapper" class="fed-prob-chart-wrapper" style="height: 60px;">
         </div>
     </div>
@@ -1026,6 +1046,12 @@
                     Charts.trendData = data;
                     const chart = Charts.renderTrendChart(data, 'all', 'categoryTrendChart');
                     Charts.renderVolumeChart(data, 'categoryVolumeChart');
+
+                    // MACD/RSI副图
+                    if (data.technical && chart) {
+                        Charts.renderMACDChart(data.technical, chart, 'macdChart');
+                        Charts.renderRSIChart(data.technical, chart, 'rsiChart');
+                    }
 
                     // 设置 BS 信号显示状态
                     if (chart) {

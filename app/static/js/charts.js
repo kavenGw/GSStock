@@ -2600,6 +2600,161 @@ const Charts = {
 
         return chartInstance;
     }
+    // MACD副图
+    renderMACDChart(technicalData, trendChart, canvasId = 'macdChart') {
+        const wrapper = document.getElementById(canvasId.replace('Chart', 'ChartWrapper'));
+        if (!wrapper) return null;
+
+        if (this._macdChart) {
+            this._macdChart.destroy();
+            this._macdChart = null;
+        }
+
+        if (!technicalData || !trendChart) {
+            wrapper.innerHTML = '';
+            return null;
+        }
+
+        // 获取走势图的股票列表和labels
+        const labels = trendChart.data.labels;
+        const stockNames = trendChart.data.datasets.map(d => d.label);
+
+        // 只取第一只股票的MACD数据（单股模式下清晰）
+        const firstStock = Object.keys(technicalData)[0];
+        if (!firstStock) { wrapper.innerHTML = ''; return null; }
+
+        const macd = technicalData[firstStock]?.macd;
+        if (!macd || !macd.history || macd.history.length === 0) {
+            wrapper.innerHTML = '';
+            return null;
+        }
+
+        // MACD历史数据对齐到图表尾部
+        const history = macd.history;
+        const histLen = Math.min(history.length, labels.length);
+        const offset = labels.length - histLen;
+
+        const difData = new Array(labels.length).fill(null);
+        const deaData = new Array(labels.length).fill(null);
+        const histData = new Array(labels.length).fill(null);
+        const histColors = [];
+
+        for (let i = 0; i < histLen; i++) {
+            difData[offset + i] = history[i].dif;
+            deaData[offset + i] = history[i].dea;
+            histData[offset + i] = history[i].histogram;
+        }
+        for (let i = 0; i < labels.length; i++) {
+            histColors.push(histData[i] !== null && histData[i] >= 0 ? 'rgba(220,53,69,0.6)' : 'rgba(40,167,69,0.6)');
+        }
+
+        wrapper.innerHTML = `<span class="tech-sub-chart-label">MACD · ${macd.signal}</span><canvas id="${canvasId}"></canvas>`;
+        const canvas = document.getElementById(canvasId);
+
+        this._macdChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    { type: 'bar', data: histData, backgroundColor: histColors, borderWidth: 0, order: 2 },
+                    { type: 'line', label: 'DIF', data: difData, borderColor: '#2196F3', borderWidth: 1.2, pointRadius: 0, order: 1 },
+                    { type: 'line', label: 'DEA', data: deaData, borderColor: '#FF9800', borderWidth: 1.2, pointRadius: 0, order: 1 },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: {
+                    x: { display: false },
+                    y: { ticks: { font: { size: 9 }, maxTicksLimit: 3 }, grid: { color: '#f0f0f0' } }
+                }
+            }
+        });
+
+        return this._macdChart;
+    },
+
+    // RSI副图
+    renderRSIChart(technicalData, trendChart, canvasId = 'rsiChart') {
+        const wrapper = document.getElementById(canvasId.replace('Chart', 'ChartWrapper'));
+        if (!wrapper) return null;
+
+        if (this._rsiChart) {
+            this._rsiChart.destroy();
+            this._rsiChart = null;
+        }
+
+        if (!technicalData || !trendChart) {
+            wrapper.innerHTML = '';
+            return null;
+        }
+
+        const labels = trendChart.data.labels;
+        const firstStock = Object.keys(technicalData)[0];
+        if (!firstStock) { wrapper.innerHTML = ''; return null; }
+
+        const rsi = technicalData[firstStock]?.rsi;
+        if (!rsi || !rsi.history || rsi.history.length === 0) {
+            wrapper.innerHTML = '';
+            return null;
+        }
+
+        const history = rsi.history;
+        const histLen = Math.min(history.length, labels.length);
+        const offset = labels.length - histLen;
+
+        const rsi6Data = new Array(labels.length).fill(null);
+        const rsi12Data = new Array(labels.length).fill(null);
+        const rsi24Data = new Array(labels.length).fill(null);
+
+        for (let i = 0; i < histLen; i++) {
+            rsi6Data[offset + i] = history[i].rsi_6;
+            rsi12Data[offset + i] = history[i].rsi_12;
+            rsi24Data[offset + i] = history[i].rsi_24;
+        }
+
+        wrapper.innerHTML = `<span class="tech-sub-chart-label">RSI · ${rsi.status}</span><canvas id="${canvasId}"></canvas>`;
+        const canvas = document.getElementById(canvasId);
+
+        this._rsiChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'RSI6', data: rsi6Data, borderColor: '#9C27B0', borderWidth: 1.2, pointRadius: 0 },
+                    { label: 'RSI12', data: rsi12Data, borderColor: '#2196F3', borderWidth: 1, pointRadius: 0 },
+                    { label: 'RSI24', data: rsi24Data, borderColor: '#FF9800', borderWidth: 1, pointRadius: 0 },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false },
+                    // 超买超卖区域
+                    annotation: undefined,
+                },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        min: 0, max: 100,
+                        ticks: { font: { size: 9 }, stepSize: 30, callback: v => v === 70 ? '70' : v === 30 ? '30' : '' },
+                        grid: {
+                            color: (ctx) => {
+                                if (ctx.tick.value === 70) return 'rgba(220,53,69,0.3)';
+                                if (ctx.tick.value === 30) return 'rgba(40,167,69,0.3)';
+                                return '#f0f0f0';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return this._rsiChart;
+    },
 };
 
 // 导出

@@ -705,6 +705,48 @@ class BriefingService:
             return {'earnings_alerts': [], 'has_alerts': False}
 
     @staticmethod
+    def get_stocks_technical_data(force_refresh: bool = False) -> dict:
+        """获取股票技术指标数据（评分+MACD信号）"""
+        from app.services.unified_stock_data import unified_stock_data_service
+        from app.services.technical_indicators import TechnicalIndicatorService
+
+        stock_codes = [s['code'] for s in BRIEFING_STOCKS]
+
+        try:
+            trend_result = unified_stock_data_service.get_trend_data(stock_codes, days=60, force_refresh=force_refresh)
+        except Exception as e:
+            logger.warning(f"获取走势数据失败: {e}")
+            return {}
+
+        result = {}
+        stocks_data = trend_result.get('stocks', [])
+        for stock in stocks_data:
+            code = stock.get('stock_code', '')
+            ohlcv = stock.get('data', [])
+            if not ohlcv:
+                continue
+
+            # 转换为dict格式（如果是OHLCData对象）
+            if hasattr(ohlcv[0], 'to_dict'):
+                ohlcv = [d.to_dict() for d in ohlcv]
+
+            indicators = TechnicalIndicatorService.calculate_all(ohlcv)
+            if indicators:
+                result[code] = {
+                    'score': indicators['score'],
+                    'signal': indicators['signal'],
+                    'signal_text': indicators['signal_text'],
+                    'macd_signal': indicators['macd']['signal'],
+                    'rsi_6': indicators['rsi'].get('rsi_6', 0),
+                    'rsi_status': indicators['rsi']['status'],
+                    'bias_20': indicators['bias']['bias_20'],
+                    'bias_warning': indicators['bias']['warning'],
+                    'trend_state': indicators['trend']['state'],
+                }
+
+        return result
+
+    @staticmethod
     def get_sector_ratings(stocks_data: dict = None, force_refresh: bool = False) -> dict:
         """获取板块评级数据
 

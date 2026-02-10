@@ -7,6 +7,7 @@ from app.services.wyckoff import WyckoffAutoService
 from app.services.wyckoff_score import WyckoffScoreCalculator
 from app.services.fed_rate import FedRateService
 from app.services.signal_cache import SignalCacheService
+from app.services.technical_indicators import TechnicalIndicatorService
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,24 @@ def custom_trend_data():
     codes_str = request.args.get('codes', '')
     codes = [c.strip() for c in codes_str.split(',') if c.strip()]
     data = FuturesService.get_custom_trend_data(codes, days=30)
+
+    # 附加技术指标
+    if data and data.get('stocks'):
+        technical = {}
+        for stock in data['stocks']:
+            ohlcv = stock.get('data', [])
+            if not ohlcv or len(ohlcv) < 26:
+                continue
+            indicators = TechnicalIndicatorService.calculate_all(ohlcv)
+            if indicators:
+                technical[stock['stock_code']] = {
+                    'macd': indicators['macd'],
+                    'rsi': indicators['rsi'],
+                    'score': indicators['score'],
+                    'signal': indicators['signal'],
+                }
+        data['technical'] = technical
+
     return jsonify(data)
 
 
@@ -116,6 +135,23 @@ def category_trend_data():
 
         data['signals'] = all_signals
         logger.info(f'[信号检测] 总计: 买点={len(all_signals["buy_signals"])}, 卖点={len(all_signals["sell_signals"])}')
+
+    # 附加技术指标数据
+    if data and data.get('stocks'):
+        technical = {}
+        for stock in data['stocks']:
+            ohlcv = stock.get('data', [])
+            if not ohlcv or len(ohlcv) < 26:
+                continue
+            indicators = TechnicalIndicatorService.calculate_all(ohlcv)
+            if indicators:
+                technical[stock['stock_code']] = {
+                    'macd': indicators['macd'],
+                    'rsi': indicators['rsi'],
+                    'score': indicators['score'],
+                    'signal': indicators['signal'],
+                }
+        data['technical'] = technical
 
     return jsonify(data)
 
