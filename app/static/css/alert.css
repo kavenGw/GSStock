@@ -549,6 +549,18 @@
     color: #6b7280;
 }
 
+.win-rate-badge {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0 0.25rem;
+    border-radius: 2px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    background: rgba(0,0,0,0.08);
+    color: inherit;
+    opacity: 0.8;
+}
+
 /* ========== 股票列表视图 ========== */
 .stock-list-view {
     display: flex;

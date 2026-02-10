@@ -2,6 +2,7 @@ from datetime import date, datetime
 from flask import request, jsonify, render_template, send_file
 from app.routes import wyckoff_bp
 from app.services.wyckoff import WyckoffService, WyckoffAutoService
+from app.services.backtest import BacktestService
 from app.services.position import PositionService
 
 
@@ -163,3 +164,41 @@ def auto_history():
 
     records = WyckoffAutoService.get_auto_history(stock_code, start_date, end_date)
     return jsonify({'success': True, 'records': records})
+
+
+@wyckoff_bp.route('/api/backtest')
+def backtest_wyckoff():
+    """威科夫回测验证"""
+    stock_code = request.args.get('stock_code')
+    lookback_days = request.args.get('days', 180, type=int)
+
+    if not stock_code:
+        return jsonify({'error': '缺少 stock_code 参数'}), 400
+
+    try:
+        service = BacktestService()
+        result = service.backtest_wyckoff(stock_code, lookback_days)
+        return jsonify(result)
+    except Exception as e:
+        import logging
+        logging.error(f'[backtest] 威科夫回测失败 {stock_code}: {e}', exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@wyckoff_bp.route('/api/backtest/batch', methods=['POST'])
+def backtest_batch():
+    """批量回测"""
+    data = request.get_json()
+    stock_codes = data.get('stock_codes', [])
+
+    if not stock_codes:
+        return jsonify({'error': '未提供股票列表'}), 400
+
+    try:
+        service = BacktestService()
+        result = service.backtest_batch(stock_codes)
+        return jsonify(result)
+    except Exception as e:
+        import logging
+        logging.error(f'[backtest] 批量回测失败: {e}', exc_info=True)
+        return jsonify({'error': str(e)}), 500

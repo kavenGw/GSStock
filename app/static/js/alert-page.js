@@ -523,6 +523,9 @@ const AlertPage = {
             // 评估预警
             this.evaluateAlerts();
 
+            // 异步加载信号胜率（不阻塞主流程）
+            this.loadSignalWinRates();
+
             // 渲染界面
             this.render();
         } catch (e) {
@@ -649,6 +652,22 @@ const AlertPage = {
         this.data.summary = summary;
 
         console.log(`[AlertPage] 评估完成: 高${summary.high} 中${summary.medium} 低${summary.low}`);
+    },
+
+    /**
+     * 加载信号胜率数据
+     */
+    async loadSignalWinRates() {
+        try {
+            const response = await fetch('/alert/api/backtest/win-rates');
+            const data = await response.json();
+            this.data.signalWinRates = data || {};
+            // 重新渲染以显示胜率
+            this.render();
+        } catch (e) {
+            console.warn('[AlertPage] 加载信号胜率失败:', e);
+            this.data.signalWinRates = {};
+        }
     },
 
     /**
@@ -1127,9 +1146,14 @@ const AlertPage = {
         const highestLevel = this.getHighestAlertLevel(alerts);
         const signalType = this.getStockSignalType(alerts);
 
-        // 预警标签
+        // 预警标签（含信号胜率）
+        const winRates = this.data.signalWinRates || {};
         const alertTags = alerts.slice(0, 3).map(alert => {
-            return `<span class="alert-tag ${alert.type}" title="${alert.description}">${alert.name}</span>`;
+            const wr = winRates[alert.name];
+            const wrBadge = wr && wr.total >= 3
+                ? `<span class="win-rate-badge" title="历史胜率(${wr.wins}/${wr.total})">${Math.round(wr.win_rate * 100)}%</span>`
+                : '';
+            return `<span class="alert-tag ${alert.type}" title="${alert.description}">${alert.name}${wrBadge}</span>`;
         }).join('');
 
         const moreCount = alerts.length > 3 ? `<span class="alert-tag more">+${alerts.length - 3}</span>` : '';

@@ -295,8 +295,11 @@
             <h4 class="mb-1"><i class="bi bi-newspaper"></i> 每日简报</h4>
             <small class="text-muted">关键股票、主要指数、ETF溢价监控</small>
         </div>
-        <div class="header-actions">
-            <span class="text-muted me-3" id="lastUpdate">--</span>
+        <div class="header-actions d-flex align-items-center gap-2">
+            <span class="text-muted me-1" id="lastUpdate">--</span>
+            <button class="btn btn-outline-secondary btn-sm" onclick="BriefingPage.pushReport(this)" id="pushBtn" title="推送每日报告到Slack/邮箱">
+                <i class="bi bi-send"></i> 推送
+            </button>
             <button class="btn btn-outline-primary btn-sm" onclick="BriefingPage.refresh()" id="refreshBtn">
                 <i class="bi bi-arrow-clockwise"></i> 刷新
             </button>

@@ -3,6 +3,7 @@ import logging
 from flask import render_template, jsonify, request
 from app.routes import briefing_bp
 from app.services.briefing import BriefingService
+from app.services.notification import NotificationService
 
 logger = logging.getLogger(__name__)
 
@@ -173,4 +174,46 @@ def ai_batch():
         return jsonify({'results': results})
     except Exception as e:
         logger.error(f"批量AI分析失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@briefing_bp.route('/api/notification/status')
+def notification_status():
+    """推送配置状态"""
+    return jsonify(NotificationService.get_status())
+
+
+@briefing_bp.route('/api/notification/push', methods=['POST'])
+def notification_push():
+    """推送每日报告"""
+    data = request.get_json() or {}
+    include_ai = data.get('include_ai', False)
+
+    try:
+        results = NotificationService.push_daily_report(include_ai=include_ai)
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"推送报告失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@briefing_bp.route('/api/notification/test', methods=['POST'])
+def notification_test():
+    """测试推送"""
+    data = request.get_json() or {}
+    channel = data.get('channel', 'all')
+
+    try:
+        test_msg = '测试消息 - 股票分析系统推送配置验证'
+        test_html = '<h3>测试消息</h3><p>股票分析系统推送配置验证成功</p>'
+        results = {}
+
+        if channel in ('slack', 'all'):
+            results['slack'] = NotificationService.send_slack(test_msg)
+        if channel in ('email', 'all'):
+            results['email'] = NotificationService.send_email('推送测试', test_html)
+
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"测试推送失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500

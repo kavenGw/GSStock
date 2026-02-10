@@ -260,6 +260,42 @@ class BriefingPage {
         }
     }
 
+    // ========== 推送报告 ==========
+
+    static async pushReport(btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 推送中...';
+
+        try {
+            // 先检查推送状态
+            const statusResp = await fetch('/briefing/api/notification/status');
+            const status = await statusResp.json();
+
+            if (!status.slack && !status.email) {
+                alert('未配置推送渠道。请设置环境变量：\n- Slack: SLACK_WEBHOOK_URL\n- 邮件: SMTP_HOST, SMTP_USER, SMTP_PASSWORD, NOTIFY_EMAIL_TO');
+                return;
+            }
+
+            const resp = await fetch('/briefing/api/notification/push', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({include_ai: false})
+            });
+            const result = await resp.json();
+
+            const parts = [];
+            if (result.slack !== undefined) parts.push(`Slack: ${result.slack ? '成功' : '失败'}`);
+            if (result.email !== undefined) parts.push(`邮件: ${result.email ? '成功' : '失败'}`);
+            alert('推送结果: ' + (parts.join(', ') || '无可用渠道'));
+        } catch (e) {
+            console.error('推送失败:', e);
+            alert('推送请求失败');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send"></i> 推送';
+        }
+    }
+
     // ========== PE/财报异步填充 ==========
 
     static applyPEData() {

@@ -6,6 +6,7 @@ from app.routes import alert_bp
 from app.services.signal_cache import SignalCacheService
 from app.services.position import PositionService
 from app.services.earnings import EarningsService
+from app.services.backtest import BacktestService
 from app.models.category import Category, StockCategory
 from app.models.stock import Stock
 from app.utils.market_identifier import MarketIdentifier
@@ -241,3 +242,33 @@ def get_alert_data():
     finally:
         elapsed = time.time() - start_time
         logger.info(f'[alert/data] 请求完成, 耗时 {elapsed:.2f}s')
+
+
+@alert_bp.route('/api/backtest/signals')
+def backtest_signals():
+    """信号回测"""
+    stock_code = request.args.get('stock_code')
+    lookback_days = request.args.get('days', 365, type=int)
+
+    if not stock_code:
+        return jsonify({'error': '缺少 stock_code 参数'}), 400
+
+    try:
+        service = BacktestService()
+        result = service.backtest_signals(stock_code, lookback_days)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f'[backtest] 信号回测失败 {stock_code}: {e}', exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@alert_bp.route('/api/backtest/win-rates')
+def backtest_win_rates():
+    """各信号类型的历史胜率"""
+    try:
+        service = BacktestService()
+        result = service.get_signal_win_rates()
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f'[backtest] 获取信号胜率失败: {e}', exc_info=True)
+        return jsonify({'error': str(e)}), 500

@@ -38,6 +38,8 @@
                         <li><a class="dropdown-item" href="{{ url_for('profit.overall') }}"><i class="bi bi-pie-chart"></i> 整体收益</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ url_for('rebalance.index') }}"><i class="bi bi-sliders"></i> 仓位配平</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="NotifySettings.show()"><i class="bi bi-send"></i> 推送设置</a></li>
                     </ul>
                 </li>
             </div>
@@ -53,6 +55,73 @@
     <script src="{{ url_for('static', filename='js/profit_charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- 推送设置模态框 -->
+    <div class="modal fade" id="notifySettingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">推送设置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notifyStatus" class="mb-3">
+                        <p class="text-muted">检查中...</p>
+                    </div>
+                    <div class="small text-muted mb-3">
+                        推送配置通过环境变量管理：
+                        <ul class="mt-1 mb-0">
+                            <li>Slack: <code>SLACK_WEBHOOK_URL</code></li>
+                            <li>邮件: <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code>, <code>NOTIFY_EMAIL_TO</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="NotifySettings.test('slack')">测试 Slack</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="NotifySettings.test('email')">测试邮件</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const NotifySettings = {
+        show() {
+            const modal = new bootstrap.Modal(document.getElementById('notifySettingsModal'));
+            modal.show();
+            this.loadStatus();
+        },
+        async loadStatus() {
+            const el = document.getElementById('notifyStatus');
+            try {
+                const resp = await fetch('/briefing/api/notification/status');
+                const data = await resp.json();
+                el.innerHTML = `
+                    <div class="d-flex gap-3">
+                        <span>Slack: ${data.slack ? '<span class="text-success fw-bold">已配置</span>' : '<span class="text-muted">未配置</span>'}</span>
+                        <span>邮件: ${data.email ? '<span class="text-success fw-bold">已配置</span>' : '<span class="text-muted">未配置</span>'}</span>
+                    </div>`;
+            } catch (e) {
+                el.innerHTML = '<p class="text-danger">获取状态失败</p>';
+            }
+        },
+        async test(channel) {
+            try {
+                const resp = await fetch('/briefing/api/notification/test', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({channel})
+                });
+                const result = await resp.json();
+                const ok = result[channel];
+                alert(channel + ' 测试: ' + (ok ? '成功' : '失败'));
+            } catch (e) {
+                alert('测试请求失败');
+            }
+        }
+    };
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

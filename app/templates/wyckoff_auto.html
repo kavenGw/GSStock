@@ -13,15 +13,28 @@
 .event-badge { font-size: 0.8em; margin-right: 2px; }
 .progress-container { display: none; margin-bottom: 1rem; }
 .price-info { font-size: 0.9em; color: #666; }
+.backtest-card { background: #f8f9fa; border-radius: 8px; padding: 1rem; margin-top: 1rem; }
+.backtest-card h6 { margin-bottom: 0.75rem; }
+.bt-stat { display: inline-block; margin-right: 1rem; margin-bottom: 0.5rem; font-size: 0.875rem; }
+.bt-stat .label { color: #6c757d; }
+.bt-stat .value { font-weight: 600; }
+.bt-stat .value.good { color: #16a34a; }
+.bt-stat .value.bad { color: #dc2626; }
+.bt-stat .value.neutral { color: #ca8a04; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">威科夫量价分析</h4>
-    <button class="btn btn-primary" id="btnAnalyze" onclick="analyzeStocks()">
-        分析持仓
-    </button>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" id="btnAnalyze" onclick="analyzeStocks()">
+            分析持仓
+        </button>
+        <button class="btn btn-outline-info" id="btnBacktest" onclick="backtestStocks()">
+            回测验证
+        </button>
+    </div>
 </div>
 
 <div class="progress-container" id="progressContainer">
@@ -58,6 +71,8 @@
         </table>
     </div>
 </div>
+
+<div id="backtestResultContainer" class="d-none mt-3"></div>
 
 <script>
 const POSITIONS = {{ positions | tojson }};
@@ -195,6 +210,104 @@ async function analyzeStocks() {
         btn.disabled = false;
         btn.textContent = '分析持仓';
     }
+}
+
+async function backtestStocks() {
+    const btn = document.getElementById('btnBacktest');
+    btn.disabled = true;
+    btn.textContent = '回测中...';
+
+    const stockCodes = POSITIONS.map(p => p.code);
+    if (stockCodes.length === 0) {
+        alert('没有持仓数据');
+        btn.disabled = false;
+        btn.textContent = '回测验证';
+        return;
+    }
+
+    try {
+        const response = await fetch('/wyckoff/api/backtest/batch', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({stock_codes: stockCodes})
+        });
+        const data = await response.json();
+        renderBacktestResults(data);
+    } catch (err) {
+        console.error('回测请求失败:', err);
+        alert('回测请求失败');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '回测验证';
+    }
+}
+
+function renderBacktestResults(data) {
+    const container = document.getElementById('backtestResultContainer');
+    container.classList.remove('d-none');
+
+    const summary = data.summary || {};
+    const wyckoff = data.wyckoff || {};
+    const signals = data.signals || {};
+
+    function rateClass(val) {
+        if (val === null || val === undefined) return 'neutral';
+        return val >= 60 ? 'good' : val >= 40 ? 'neutral' : 'bad';
+    }
+
+    function fmtRate(val) {
+        return val !== null && val !== undefined ? val + '%' : '-';
+    }
+
+    // 整体汇总
+    let html = `<div class="backtest-card">
+        <h6>回测验证报告</h6>
+        <div>
+            <span class="bt-stat"><span class="label">覆盖股票:</span> <span class="value">${summary.total_stocks || 0}</span></span>`;
+
+    if (summary.wyckoff_accuracy) {
+        Object.entries(summary.wyckoff_accuracy).forEach(([days, acc]) => {
+            html += `<span class="bt-stat"><span class="label">威科夫${days}日准确率:</span> <span class="value ${rateClass(acc)}">${fmtRate(acc)}</span></span>`;
+        });
+    }
+
+    if (summary.signal_buy_win_rate !== null) {
+        html += `<span class="bt-stat"><span class="label">买入信号胜率:</span> <span class="value ${rateClass(summary.signal_buy_win_rate)}">${fmtRate(summary.signal_buy_win_rate)}</span></span>`;
+    }
+    if (summary.signal_sell_win_rate !== null) {
+        html += `<span class="bt-stat"><span class="label">卖出信号胜率:</span> <span class="value ${rateClass(summary.signal_sell_win_rate)}">${fmtRate(summary.signal_sell_win_rate)}</span></span>`;
+    }
+
+    html += `</div>`;
+
+    // 各股票详情
+    const codes = [...new Set([...Object.keys(wyckoff), ...Object.keys(signals)])];
+    if (codes.length > 0) {
+        html += `<table class="table table-sm mt-2 mb-0">
+            <thead><tr><th>代码</th><th>威科夫总数</th><th>10日准确率</th><th>信号总数</th><th>买入胜率(10日)</th><th>卖出胜率(10日)</th></tr></thead><tbody>`;
+
+        codes.forEach(code => {
+            const w = wyckoff[code] || {};
+            const s = signals[code] || {};
+            const wAcc = w.accuracy ? w.accuracy[10] : null;
+            const sBuyWr = s.buy && s.buy.win_rates ? s.buy.win_rates[10] : null;
+            const sSellWr = s.sell && s.sell.win_rates ? s.sell.win_rates[10] : null;
+
+            html += `<tr>
+                <td>${code}</td>
+                <td>${w.total || 0}</td>
+                <td class="${rateClass(wAcc)}">${fmtRate(wAcc)}</td>
+                <td>${s.total || 0}</td>
+                <td class="${rateClass(sBuyWr)}">${fmtRate(sBuyWr)}</td>
+                <td class="${rateClass(sSellWr)}">${fmtRate(sSellWr)}</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table>`;
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
 }
 </script>
 {% endblock %}
