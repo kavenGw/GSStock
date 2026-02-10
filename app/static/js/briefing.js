@@ -399,7 +399,7 @@ class BriefingPage {
                         <span class="stock-technical" data-code="${stock.code}"></span>
                     </div>
                     <div class="bc-secondary">
-                        <span class="stock-pe" data-code="${stock.code}"></span>
+                        ${stock.market !== 'A' ? `<span class="stock-pe" data-code="${stock.code}"></span>` : ''}
                         <span class="stock-earnings" data-code="${stock.code}"></span>
                     </div>
                 `}

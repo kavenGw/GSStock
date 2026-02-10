@@ -22,14 +22,14 @@ MARKET_SOURCES = {
         'weights': {'sina': 40, 'tencent': 35, 'eastmoney': 25},  # 初始权重
     },
     'US': {
-        'sources': ['yfinance', 'finnhub', 'alphavantage', 'twelvedata', 'marketdata', 'polygon'],
+        'sources': ['yfinance', 'twelvedata', 'polygon'],
         'fallback': 'yfinance',
-        'weights': {'yfinance': 50, 'finnhub': 20, 'alphavantage': 10, 'twelvedata': 10, 'marketdata': 5, 'polygon': 5},
+        'weights': {'yfinance': 70, 'twelvedata': 20, 'polygon': 10},
     },
     'HK': {
-        'sources': ['yfinance', 'finnhub', 'alphavantage', 'twelvedata'],
+        'sources': ['yfinance', 'twelvedata'],
         'fallback': 'yfinance',
-        'weights': {'yfinance': 50, 'finnhub': 25, 'alphavantage': 15, 'twelvedata': 10},
+        'weights': {'yfinance': 75, 'twelvedata': 25},
     },
     'KR': {
         'sources': ['yfinance'],

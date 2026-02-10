@@ -1270,23 +1270,13 @@ const AlertPage = {
         const market = earningsData.market || 'unknown';
         const nextDate = earningsData.next_earnings_date;
         const daysUntil = earningsData.days_until_next;
-        const peDisplay = earningsData.pe_display || '暂无数据';
-        const peStatus = earningsData.pe_status || 'na';
 
-        // PE样式
-        const peClassMap = {
-            'low': 'bg-success',
-            'normal': 'bg-secondary',
-            'high': 'bg-warning',
-            'very_high': 'bg-danger',
-            'loss': 'bg-dark text-white',
-            'na': 'bg-light text-muted'
-        };
-        const peClass = peClassMap[peStatus] || 'bg-secondary';
+        // A股不显示财报日期和PE
+        if (market === 'A') return '';
 
-        // A股不显示财报日期，负数（已过期）也不显示
+        // 财报日期（负数已过期不显示）
         let earningsDateHtml = '';
-        if (market !== 'A' && nextDate && (daysUntil === null || daysUntil >= 0)) {
+        if (nextDate && (daysUntil === null || daysUntil >= 0)) {
             let dateClass = 'bg-secondary';
             let dateText = nextDate;
             if (earningsData.is_today) {
@@ -1303,6 +1293,18 @@ const AlertPage = {
                 </div>
             `;
         }
+
+        const peDisplay = earningsData.pe_display || '暂无数据';
+        const peStatus = earningsData.pe_status || 'na';
+        const peClassMap = {
+            'low': 'bg-success',
+            'normal': 'bg-secondary',
+            'high': 'bg-warning',
+            'very_high': 'bg-danger',
+            'loss': 'bg-dark text-white',
+            'na': 'bg-light text-muted'
+        };
+        const peClass = peClassMap[peStatus] || 'bg-secondary';
 
         return `
             <div class="earnings-info mt-2 pt-2 border-top">

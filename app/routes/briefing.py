@@ -124,3 +124,53 @@ def get_earnings_alerts():
     except Exception as e:
         logger.error(f"获取财报预警失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
+
+
+@briefing_bp.route('/api/ai/status')
+def ai_status():
+    """AI分析功能状态"""
+    from app.services.ai_analyzer import AIAnalyzerService
+    return jsonify({'enabled': AIAnalyzerService.is_available()})
+
+
+@briefing_bp.route('/api/ai/analyze', methods=['POST'])
+def ai_analyze():
+    """单只股票AI分析"""
+    from app.services.ai_analyzer import AIAnalyzerService
+    if not AIAnalyzerService.is_available():
+        return jsonify({'error': 'AI分析未配置'}), 400
+
+    data = request.get_json() or {}
+    stock_code = data.get('stock_code', '')
+    stock_name = data.get('stock_name', '')
+    force = data.get('force', False)
+
+    if not stock_code:
+        return jsonify({'error': '缺少 stock_code'}), 400
+
+    try:
+        result = AIAnalyzerService.analyze_stock(stock_code, stock_name, force)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"AI分析 {stock_code} 失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@briefing_bp.route('/api/ai/batch', methods=['POST'])
+def ai_batch():
+    """批量AI分析"""
+    from app.services.ai_analyzer import AIAnalyzerService
+    if not AIAnalyzerService.is_available():
+        return jsonify({'error': 'AI分析未配置'}), 400
+
+    data = request.get_json() or {}
+    stocks = data.get('stocks', [])
+    if not stocks:
+        return jsonify({'error': '缺少 stocks 列表'}), 400
+
+    try:
+        results = AIAnalyzerService.analyze_batch(stocks)
+        return jsonify({'results': results})
+    except Exception as e:
+        logger.error(f"批量AI分析失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500

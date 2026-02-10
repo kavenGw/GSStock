@@ -44,6 +44,8 @@ cp .env.sample .env
 | `SECRET_KEY` | Flask 密钥，留空则自动生成 | 自动生成 |
 | `DATABASE_URL` | 公共数据库路径 | `sqlite:///data/stock.db` |
 | `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
+| `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
+| `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
 
 **只读模式**适用于：
 - 无网络环境
@@ -94,11 +96,58 @@ Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
 
 首次运行时，如果 `stock.db` 中包含私有表，会自动迁移到 `private.db`。
 
+## 数据源
+
+系统通过负载均衡器自动分配数据源，支持熔断和故障转移。未配置 API 密钥的数据源会自动跳过。
+
+### A股
+
+无需配置，开箱即用。
+
+| 数据源 | 说明 | 密钥 |
+|--------|------|------|
+| 新浪财经 | 实时行情，权重 40% | 无需 |
+| 腾讯财经 | 实时行情，批量获取效率高，权重 35% | 无需 |
+| 东方财富 | 实时行情 + 历史K线，权重 25% | 无需 |
+| yfinance | 兜底数据源 | 无需 |
+
+### 美股
+
+默认使用 yfinance（无需密钥）。配置额外密钥可启用多数据源负载均衡，提升稳定性。
+
+| 数据源 | 免费额度 | 环境变量 | 支持功能 |
+|--------|---------|---------|---------|
+| Yahoo Finance | 无限制 | 无需 | 实时 + 历史 + 信息 |
+| Twelve Data | 8请求/分钟, 800请求/天 | `TWELVE_DATA_API_KEY` | 实时 + 历史 |
+| Polygon.io | 5请求/分钟 | `POLYGON_API_KEY` | 实时 + 历史 |
+
+### 港股
+
+| 数据源 | 环境变量 |
+|--------|---------|
+| Yahoo Finance | 无需 |
+| Twelve Data | `TWELVE_DATA_API_KEY` |
+
+### 韩股 / 台股
+
+仅支持 yfinance，无需配置。
+
+### 数据源配置
+
+在 `.env` 中添加对应的 API 密钥即可启用（详见 `.env.sample`）：
+
+```env
+TWELVE_DATA_API_KEY=your_key_here
+POLYGON_API_KEY=your_key_here
+```
+
+数据源配置文件：`app/config/data_sources.py`（权重、优先级、市场映射）
+
 ## 技术栈
 
 - **后端** — Flask + SQLAlchemy + SQLite
 - **前端** — Bootstrap 5 + 原生 JavaScript
-- **数据源** — akshare (A股) + yfinance (美股/港股/期货)
+- **数据源** — akshare + yfinance + Twelve Data + Polygon（多源负载均衡）
 - **OCR** — RapidOCR (ONNX Runtime)
 
 ## 项目结构

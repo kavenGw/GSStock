@@ -3,10 +3,7 @@
 配置各市场的数据源优先级、权重和API密钥环境变量。
 
 环境变量配置：
-- ALPHA_VANTAGE_API_KEY: Alpha Vantage API密钥 (免费: 25请求/天)
-- FINNHUB_API_KEY: Finnhub API密钥 (免费: 60请求/分钟)
 - TWELVE_DATA_API_KEY: Twelve Data API密钥 (免费: 8请求/分钟, 800请求/天)
-- MARKETDATA_API_KEY: MarketData.app API密钥 (免费: 100请求/天)
 - POLYGON_API_KEY: Polygon.io API密钥 (免费: 5请求/分钟)
 """
 import os
@@ -30,30 +27,25 @@ MARKET_DATA_SOURCES = {
 
     # 美股市场
     'US': {
-        'sources': ['yfinance', 'finnhub', 'alphavantage', 'twelvedata', 'marketdata', 'polygon'],
+        'sources': ['yfinance', 'twelvedata', 'polygon'],
         'fallback': 'yfinance',
         'weights': {
-            'yfinance': 50,      # Yahoo Finance - 免费无限制
-            'finnhub': 20,       # Finnhub - 60请求/分钟
-            'alphavantage': 10,  # Alpha Vantage - 25请求/天
-            'twelvedata': 10,    # Twelve Data - 8请求/分钟
-            'marketdata': 5,     # MarketData - 100请求/天
-            'polygon': 5         # Polygon - 5请求/分钟
+            'yfinance': 70,      # Yahoo Finance - 免费无限制
+            'twelvedata': 20,    # Twelve Data - 8请求/分钟
+            'polygon': 10        # Polygon - 5请求/分钟
         },
         'description': '美股市场使用多数据源负载均衡'
     },
 
     # 港股市场
     'HK': {
-        'sources': ['yfinance', 'finnhub', 'alphavantage', 'twelvedata'],
+        'sources': ['yfinance', 'twelvedata'],
         'fallback': 'yfinance',
         'weights': {
-            'yfinance': 50,
-            'finnhub': 25,
-            'alphavantage': 15,
-            'twelvedata': 10
+            'yfinance': 75,
+            'twelvedata': 25
         },
-        'description': '港股市场使用yfinance为主，其他数据源辅助'
+        'description': '港股市场使用yfinance为主，Twelve Data辅助'
     },
 
     # 韩国市场
@@ -82,32 +74,11 @@ DATA_SOURCE_API_CONFIG = {
         'markets': ['A', 'US', 'HK', 'KR', 'TW'],
         'features': ['realtime', 'historical', 'info']
     },
-    'alphavantage': {
-        'name': 'Alpha Vantage',
-        'rate_limit': '25/day (free)',
-        'api_key_env': 'ALPHA_VANTAGE_API_KEY',
-        'markets': ['US', 'HK'],
-        'features': ['realtime', 'historical']
-    },
-    'finnhub': {
-        'name': 'Finnhub',
-        'rate_limit': '60/minute (free)',
-        'api_key_env': 'FINNHUB_API_KEY',
-        'markets': ['US', 'HK'],
-        'features': ['realtime', 'historical', 'news']
-    },
     'twelvedata': {
         'name': 'Twelve Data',
         'rate_limit': '8/minute, 800/day (free)',
         'api_key_env': 'TWELVE_DATA_API_KEY',
         'markets': ['US', 'HK'],
-        'features': ['realtime', 'historical']
-    },
-    'marketdata': {
-        'name': 'MarketData.app',
-        'rate_limit': '100/day (free)',
-        'api_key_env': 'MARKETDATA_API_KEY',
-        'markets': ['US'],
         'features': ['realtime', 'historical']
     },
     'polygon': {
