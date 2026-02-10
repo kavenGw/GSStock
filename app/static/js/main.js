@@ -54,8 +54,6 @@ window.Skeleton = Skeleton;
 
 document.addEventListener('DOMContentLoaded', function() {
     initIndexPage();
-    initConfigModal();
-    initInlineEdit();
     initTrendChart();
     initSectorManageModal();
 });
@@ -191,7 +189,7 @@ function initIndexPage() {
 
         // 渲染迷你图和饼图
         if (window.Charts) {
-            Charts.renderPositionPieChart(positions, summary?.total_capital);
+            Charts.renderPositionPieChart(positions);
             Charts.renderSparklines(positions);
         }
     }
@@ -207,34 +205,6 @@ function initIndexPage() {
         const profitSign = summary.total_profit >= 0 ? '+' : '';
         profitEl.textContent = `${profitSign}${summary.total_profit.toFixed(2)} (${profitSign}${summary.total_profit_pct.toFixed(2)}%)`;
         profitEl.className = 'position-summary-value ' + (summary.total_profit > 0 ? 'profit' : summary.total_profit < 0 ? 'loss' : '');
-
-        const capitalEl = document.getElementById('summaryCapital');
-        capitalEl.innerHTML = summary.total_capital ? `¥${summary.total_capital.toFixed(2)}` : '<span class="text-muted">未设置</span>';
-
-        const positionPctEl = document.getElementById('summaryPositionPct');
-        if (summary.total_position_pct !== null) {
-            const barClass = summary.total_position_pct > 90 ? 'danger' : summary.total_position_pct > 80 ? 'warning' : 'normal';
-            positionPctEl.innerHTML = `
-                ${summary.total_position_pct}%
-                <span class="total-position-bar">
-                    <span class="total-position-bar-inner position-bar-${barClass}" style="width: ${Math.min(summary.total_position_pct, 100)}%"></span>
-                </span>
-            `;
-        } else {
-            positionPctEl.innerHTML = '<span class="text-muted">--</span>';
-        }
-
-        // 更新风险警告
-        const riskArea = document.getElementById('riskAlertArea');
-        if (riskArea) {
-            if (summary.risk_level === 'danger') {
-                riskArea.innerHTML = '<div class="risk-alert risk-alert-danger"><strong>⚠️ 满仓风险</strong> 当前总仓位超过90%，请注意控制风险</div>';
-            } else if (summary.risk_level === 'high') {
-                riskArea.innerHTML = '<div class="risk-alert risk-alert-high"><strong>⚠️ 总仓位过高</strong> 当前总仓位超过80%，建议适当降低仓位</div>';
-            } else {
-                riskArea.innerHTML = '';
-            }
-        }
 
         window.currentSummary = summary;
     }
@@ -280,45 +250,6 @@ function initIndexPage() {
     }
 }
 
-function initConfigModal() {
-    const modal = document.getElementById('configModal');
-    const input = document.getElementById('totalCapitalInput');
-    const saveBtn = document.getElementById('saveConfigBtn');
-
-    if (!modal || !input || !saveBtn) return;
-
-    // 模态框打开时加载当前配置
-    modal.addEventListener('show.bs.modal', async () => {
-        const response = await fetch('/positions/config');
-        if (response.ok) {
-            const data = await response.json();
-            input.value = data.total_capital || '';
-        }
-    });
-
-    // 保存配置
-    saveBtn.addEventListener('click', async () => {
-        const value = parseFloat(input.value);
-        if (!value || value <= 0) {
-            alert('请输入有效的总资金金额');
-            return;
-        }
-
-        const response = await fetch('/positions/config', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ total_capital: value })
-        });
-
-        if (response.ok) {
-            window.location.reload();
-        } else {
-            const data = await response.json();
-            alert(data.error || '保存失败');
-        }
-    });
-}
-
 function bindStockNameClick() {
     document.querySelectorAll('.stock-name-link').forEach(el => {
         el.addEventListener('click', () => {
@@ -326,68 +257,6 @@ function bindStockNameClick() {
             const stockName = el.dataset.stockName;
             if (window.Charts) {
                 Charts.openStockDetailModal(stockCode, stockName);
-            }
-        });
-    });
-}
-
-function initInlineEdit() {
-    const capitalEl = document.getElementById('summaryCapital');
-    if (!capitalEl) return;
-
-    capitalEl.classList.add('inline-editable');
-
-    capitalEl.addEventListener('dblclick', () => {
-        if (capitalEl.querySelector('input')) return;
-
-        const currentText = capitalEl.textContent.trim();
-        const currentValue = parseFloat(currentText.replace(/[¥,]/g, '')) || '';
-
-        const originalHtml = capitalEl.innerHTML;
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.className = 'form-control form-control-sm inline-edit-input';
-        input.value = currentValue;
-        input.step = '1000';
-        input.min = '0';
-
-        capitalEl.innerHTML = '';
-        capitalEl.appendChild(input);
-        input.focus();
-        input.select();
-
-        const saveValue = async () => {
-            const value = parseFloat(input.value);
-            if (!value || value <= 0 || isNaN(value)) {
-                capitalEl.innerHTML = originalHtml;
-                return;
-            }
-
-            const response = await fetch('/positions/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ total_capital: value })
-            });
-
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                capitalEl.innerHTML = originalHtml;
-            }
-        };
-
-        const cancel = () => {
-            capitalEl.innerHTML = originalHtml;
-        };
-
-        input.addEventListener('blur', saveValue);
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                input.blur();
-            } else if (e.key === 'Escape') {
-                input.removeEventListener('blur', saveValue);
-                cancel();
             }
         });
     });

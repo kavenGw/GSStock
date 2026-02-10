@@ -40,9 +40,6 @@
 <div class="module-card account-info-module">
     <div class="module-header">
         <h5>账户信息</h5>
-        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#configModal">
-            设置
-        </button>
     </div>
     <div class="account-stats-grid">
         <div class="account-stat-item">
@@ -59,41 +56,7 @@
                 {{ '%+.2f'|format(summary.total_profit) if summary else '0.00' }} ({{ '%+.2f'|format(summary.total_profit_pct) if summary else '0.00' }}%)
             </span>
         </div>
-        <div class="account-stat-item">
-            <span class="stat-label">总资金</span>
-            <span class="stat-value" id="summaryCapital" title="双击编辑">
-                {% if summary and summary.total_capital %}
-                ¥{{ '%.2f'|format(summary.total_capital) }}
-                {% else %}
-                <span class="text-muted">未设置</span>
-                {% endif %}
-            </span>
-        </div>
-        <div class="account-stat-item">
-            <span class="stat-label">总仓位</span>
-            <span class="stat-value" id="summaryPositionPct">
-                {% if summary and summary.total_position_pct is not none %}
-                {{ summary.total_position_pct }}%
-                <span class="total-position-bar">
-                    <span class="total-position-bar-inner position-bar-{{ 'danger' if summary.total_position_pct > 90 else 'warning' if summary.total_position_pct > 80 else 'normal' }}"
-                          style="width: {{ [summary.total_position_pct, 100]|min }}%"></span>
-                </span>
-                {% else %}
-                <span class="text-muted">--</span>
-                {% endif %}
-            </span>
-        </div>
     </div>
-    <!-- 风险警告 -->
-    {% if summary and summary.risk_level == 'danger' %}
-    <div class="risk-alert risk-alert-danger mt-3">
-        <strong>⚠️ 满仓风险</strong> 当前总仓位超过90%，请注意控制风险
-    </div>
-    {% elif summary and summary.risk_level == 'high' %}
-    <div class="risk-alert risk-alert-high mt-3">
-        <strong>⚠️ 总仓位过高</strong> 当前总仓位超过80%，建议适当降低仓位
-    </div>
-    {% endif %}
 </div>
 
 <!-- 模块2: 每日收益 -->
@@ -201,29 +164,6 @@
     <p>请通过「每日记录」上传持仓截图</p>
 </div>
 {% endif %}
-
-<!-- 设置总资金模态框 -->
-<div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="configModalLabel">设置总资金</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="totalCapitalInput" class="form-label">总资金金额</label>
-                    <input type="number" class="form-control" id="totalCapitalInput" min="0" step="1000" placeholder="请输入总资金金额">
-                    <div class="form-text">设置总资金后，可显示总仓位百分比</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="saveConfigBtn">保存</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- 板块管理模态框 -->
 <div class="modal fade" id="sectorManageModal" tabindex="-1" aria-labelledby="sectorManageModalLabel" aria-hidden="true">
@@ -356,7 +296,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         if (window.Charts && window.currentPositions && window.currentPositions.length > 0) {
-            Charts.renderPositionPieChart(window.currentPositions, window.currentSummary?.total_capital);
+            Charts.renderPositionPieChart(window.currentPositions);
             Charts.renderDailyProfitPieChart(window.dailyProfitBreakdown);
             Charts.renderCategoryPieChart(window.currentPositions, window.stockCategories, window.categoryTree);
             Charts.renderCategoryProfitChart(window.dailyProfitData);

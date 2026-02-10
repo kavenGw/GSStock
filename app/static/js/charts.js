@@ -615,7 +615,7 @@ const Charts = {
     },
 
     // 渲染仓位饼图（带引导线）
-    renderPositionPieChart(positions, totalCapital) {
+    renderPositionPieChart(positions) {
         const canvas = document.getElementById('positionPieChart');
         if (!canvas) return;
 
@@ -625,11 +625,6 @@ const Charts = {
 
         if (!positions || positions.length === 0) {
             canvas.parentElement.innerHTML = '<div class="chart-empty">暂无持仓数据</div>';
-            return;
-        }
-
-        if (!totalCapital) {
-            canvas.parentElement.innerHTML = '<div class="chart-empty">请设置总资金</div>';
             return;
         }
 
