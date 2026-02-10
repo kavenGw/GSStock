@@ -801,16 +801,18 @@ class UnifiedStockDataService:
         if not stock_codes:
             return result
 
-        # 构建腾讯格式代码: sh600519, sz000001
+        # 构建腾讯格式代码: sh600519, sz000001, sh510300
         tencent_codes = []
         code_map = {}
         for code in stock_codes:
-            if code.startswith('6'):
+            if code.startswith(('6', '5')):
                 tc = f'sh{code}'
             else:
                 tc = f'sz{code}'
             tencent_codes.append(tc)
             code_map[tc] = code
+
+        headers = {'User-Agent': 'Mozilla/5.0'}
 
         # 批量请求（每次最多50个）
         batch_size = 50
@@ -818,7 +820,7 @@ class UnifiedStockDataService:
             batch = tencent_codes[i:i + batch_size]
             url = f"http://qt.gtimg.cn/q={','.join(batch)}"
 
-            resp = requests.get(url, timeout=10)
+            resp = requests.get(url, timeout=10, headers=headers)
             resp.encoding = 'gbk'
 
             for line in resp.text.strip().split('\n'):
@@ -1624,17 +1626,19 @@ class UnifiedStockDataService:
         results = []
         logger.debug(f"[走势数据] 腾讯获取 ({len(stock_codes)}只)...")
 
+        headers = {'User-Agent': 'Mozilla/5.0'}
+
         for stock_code in stock_codes:
             try:
-                # 腾讯格式: sh600519 或 sz000001
-                if stock_code.startswith('6'):
+                # 腾讯格式: sh600519, sz000001, sh510300
+                if stock_code.startswith(('6', '5')):
                     tc = f'sh{stock_code}'
                 else:
                     tc = f'sz{stock_code}'
 
                 # 腾讯日K线接口
                 url = f"http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={tc},day,{start_date.strftime('%Y-%m-%d')},{today.strftime('%Y-%m-%d')},{days},qfq"
-                resp = requests.get(url, timeout=10)
+                resp = requests.get(url, timeout=10, headers=headers)
                 data = resp.json()
 
                 if data.get('code') != 0:
