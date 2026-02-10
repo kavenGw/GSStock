@@ -2594,7 +2594,7 @@ const Charts = {
         chartInstance._relativeData = relativeData;
 
         return chartInstance;
-    }
+    },
     // MACD副图
     renderMACDChart(technicalData, trendChart, canvasId = 'macdChart') {
         const wrapper = document.getElementById(canvasId.replace('Chart', 'ChartWrapper'));
