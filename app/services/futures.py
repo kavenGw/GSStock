@@ -21,13 +21,16 @@ class CategoryCodeResolver:
         合并配置文件中的期货/指数代码 + 数据库中该分类的股票
 
         Args:
-            category: 分类标识符 ('heavy_metals', 'gold', 'copper', 'aluminum', 'silver', 'etf', 'custom')
+            category: 分类标识符 ('heavy_metals', 'gold', 'copper', 'aluminum', 'silver', 'etf', 'positions', 'custom')
 
         Returns:
             股票/期货代码列表
         """
         if category == 'etf':
             return CategoryCodeResolver._get_etf_codes()
+
+        if category == 'positions':
+            return CategoryCodeResolver._get_position_codes()
 
         # 配置文件中的非股票代码
         config_codes = CATEGORY_CODES.get(category, [])
@@ -80,6 +83,19 @@ class CategoryCodeResolver:
         for stock in Stock.query.all():
             if 'ETF' in stock.stock_name.upper() and stock.stock_code not in codes:
                 codes.append(stock.stock_code)
+        return codes
+
+    @staticmethod
+    def _get_position_codes() -> list[str]:
+        """从最新持仓快照获取股票代码"""
+        from app.services.position import PositionService
+
+        latest_date = PositionService.get_latest_date()
+        if not latest_date:
+            return []
+
+        positions = PositionService.get_snapshot(latest_date)
+        codes = [p.stock_code for p in positions if p.stock_code]
         return codes
 
     @staticmethod

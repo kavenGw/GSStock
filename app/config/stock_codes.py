@@ -59,5 +59,6 @@ CATEGORY_NAMES = {
     'storage': '存储',
     'pcb': 'PCB',
     'cpu': 'CPU',
+    'positions': '持仓',
     'custom': '自定义'
 }
