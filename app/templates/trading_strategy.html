@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}交易策略{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/trading_strategy.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-lightbulb"></i> 交易策略</h4>
+    <button class="btn btn-primary btn-sm" onclick="StrategyPage.showAddModal()">
+        <i class="bi bi-plus-lg"></i> 新增策略
+    </button>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body py-3">
+                <div class="h4 mb-1 text-primary" id="stat-total">{{ statistics.total_strategies }}</div>
+                <div class="small text-muted">总策略数</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body py-3">
+                <div class="h4 mb-1 text-success" id="stat-active">{{ statistics.active_strategies }}</div>
+                <div class="small text-muted">启用中</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body py-3">
+                <div class="h4 mb-1 text-info" id="stat-executions">{{ statistics.total_executions }}</div>
+                <div class="small text-muted">执行次数</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body py-3">
+                <div class="h4 mb-1 {% if statistics.total_profit >= 0 %}text-success{% else %}text-danger{% endif %}" id="stat-profit">
+                    {{ "%.2f"|format(statistics.total_profit) }}
+                </div>
+                <div class="small text-muted">累计盈亏</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分类过滤 -->
+<div class="mb-3">
+    <div class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-outline-secondary active" onclick="StrategyPage.filterCategory(null, this)">全部</button>
+        {% for key, name in categories.items() %}
+        <button type="button" class="btn btn-outline-secondary" onclick="StrategyPage.filterCategory('{{ key }}', this)">{{ name }}</button>
+        {% endfor %}
+    </div>
+    <label class="ms-3">
+        <input type="checkbox" id="showInactive" onchange="StrategyPage.toggleInactive()"> 显示已禁用
+    </label>
+</div>
+
+<!-- 策略列表 -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">状态</th>
+                        <th>策略名称</th>
+                        <th>分类</th>
+                        <th>触发条件</th>
+                        <th>操作建议</th>
+                        <th style="width: 120px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="strategyList">
+                    {% for strategy in strategies %}
+                    <tr data-id="{{ strategy.id }}" data-category="{{ strategy.category }}" data-active="{{ strategy.is_active|lower }}">
+                        <td>
+                            <span class="badge {% if strategy.is_active %}bg-success{% else %}bg-secondary{% endif %}"
+                                  style="cursor: pointer;" onclick="StrategyPage.toggle({{ strategy.id }})">
+                                {{ '启用' if strategy.is_active else '禁用' }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ strategy.name }}</strong>
+                            {% if strategy.priority > 0 %}
+                            <span class="badge bg-warning text-dark ms-1">优先级 {{ strategy.priority }}</span>
+                            {% endif %}
+                            {% if strategy.description %}
+                            <div class="small text-muted mt-1">{{ strategy.description[:50] }}{% if strategy.description|length > 50 %}...{% endif %}</div>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-light text-dark">{{ categories.get(strategy.category, strategy.category) }}</span></td>
+                        <td>
+                            <div class="small">
+                                {% if strategy.trigger_market %}
+                                <span class="text-muted">市场:</span> {{ markets.get(strategy.trigger_market, strategy.trigger_market) }}
+                                {% endif %}
+                                {% if strategy.trigger_index %}
+                                <span class="text-muted ms-2">指数:</span> {{ strategy.trigger_index }}
+                                {% endif %}
+                            </div>
+                            <div class="text-truncate" style="max-width: 250px;" title="{{ strategy.trigger_condition }}">
+                                {{ strategy.trigger_condition }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge
+                                {% if strategy.action_type == 'buy' %}bg-success
+                                {% elif strategy.action_type == 'sell' %}bg-danger
+                                {% elif strategy.action_type == 'switch' %}bg-info
+                                {% else %}bg-secondary{% endif %}">
+                                {{ action_types.get(strategy.action_type, strategy.action_type) }}
+                            </span>
+                            {% if strategy.sell_target %}
+                            <div class="small text-danger mt-1">卖: {{ strategy.sell_target }}</div>
+                            {% endif %}
+                            {% if strategy.buy_target %}
+                            <div class="small text-success mt-1">买: {{ strategy.buy_target }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="StrategyPage.edit({{ strategy.id }})" title="编辑">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-success" onclick="StrategyPage.execute({{ strategy.id }})" title="记录执行">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="StrategyPage.delete({{ strategy.id }})" title="删除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr id="emptyRow">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox"></i> 暂无策略，点击右上角"新增策略"添加
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 执行记录 -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history"></i> 最近执行记录</span>
+        <button class="btn btn-outline-secondary btn-sm" onclick="StrategyPage.loadExecutions()">
+            <i class="bi bi-arrow-clockwise"></i> 刷新
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>日期</th>
+                        <th>策略</th>
+                        <th>触发原因</th>
+                        <th>执行操作</th>
+                        <th>结果</th>
+                        <th>盈亏</th>
+                        <th style="width: 50px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="executionList">
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑策略模态框 -->
+<div class="modal fade" id="strategyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="strategyModalTitle">新增策略</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="strategyForm">
+                    <input type="hidden" id="strategyId">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">策略名称 *</label>
+                            <input type="text" class="form-control" id="strategyName" required placeholder="例如：纳指透支换仓策略">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">分类</label>
+                            <select class="form-select" id="strategyCategory">
+                                {% for key, name in categories.items() %}
+                                <option value="{{ key }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">触发市场</label>
+                            <select class="form-select" id="triggerMarket">
+                                <option value="">不限</option>
+                                {% for key, name in markets.items() %}
+                                <option value="{{ key }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">触发指数代码</label>
+                            <input type="text" class="form-control" id="triggerIndex" placeholder="例如：NDX, SPX">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">触发条件 *</label>
+                            <textarea class="form-control" id="triggerCondition" rows="2" required
+                                      placeholder="例如：当纳指提前透支晚上涨幅（日内涨幅超过预期）"></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">操作类型 *</label>
+                            <select class="form-select" id="actionType" required>
+                                {% for key, name in action_types.items() %}
+                                <option value="{{ key }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">卖出标的</label>
+                            <input type="text" class="form-control" id="sellTarget" placeholder="股票代码，多个用逗号分隔">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">买入标的</label>
+                            <input type="text" class="form-control" id="buyTarget" placeholder="例如：达链, 谷歌链">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">详细说明</label>
+                            <textarea class="form-control" id="strategyDescription" rows="2"
+                                      placeholder="策略的详细逻辑和注意事项"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">优先级</label>
+                            <input type="number" class="form-control" id="strategyPriority" value="0" min="0">
+                            <div class="form-text">数值越大优先级越高</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">备注</label>
+                            <input type="text" class="form-control" id="strategyNotes" placeholder="可选备注">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="StrategyPage.save()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 记录执行模态框 -->
+<div class="modal fade" id="executeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">记录策略执行</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="executeForm">
+                    <input type="hidden" id="executeStrategyId">
+                    <div class="mb-3">
+                        <label class="form-label">策略名称</label>
+                        <input type="text" class="form-control" id="executeStrategyName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">执行日期</label>
+                        <input type="date" class="form-control" id="executeDate">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">触发原因</label>
+                        <input type="text" class="form-control" id="executeTriggeredBy" placeholder="是什么触发了此次执行">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">实际操作</label>
+                        <textarea class="form-control" id="executeActionTaken" rows="2" placeholder="实际执行了什么操作"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">执行结果</label>
+                            <select class="form-select" id="executeResult">
+                                <option value="success">成功</option>
+                                <option value="partial">部分执行</option>
+                                <option value="skipped">跳过</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">盈亏金额</label>
+                            <input type="number" class="form-control" id="executeProfitLoss" step="0.01" placeholder="正为盈利">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">备注</label>
+                        <input type="text" class="form-control" id="executeNotes" placeholder="可选备注">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="StrategyPage.saveExecution()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CATEGORIES = {{ categories | tojson }};
+const ACTION_TYPES = {{ action_types | tojson }};
+const MARKETS = {{ markets | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/trading_strategy.js') }}"></script>
+{% endblock %}

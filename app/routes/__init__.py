@@ -14,5 +14,6 @@ heavy_metals_bp = Blueprint('heavy_metals', __name__, url_prefix='/heavy-metals'
 preload_bp = Blueprint('preload', __name__)
 alert_bp = Blueprint('alert', __name__, url_prefix='/alert')
 briefing_bp = Blueprint('briefing', __name__, url_prefix='/briefing')
+strategy_bp = Blueprint('strategy', __name__, url_prefix='/strategies')
 
-from app.routes import main, position, advice, category, trade, wyckoff, stock, daily_record, profit, rebalance, heavy_metals, preload, alert, briefing
+from app.routes import main, position, advice, category, trade, wyckoff, stock, daily_record, profit, rebalance, heavy_metals, preload, alert, briefing, strategy

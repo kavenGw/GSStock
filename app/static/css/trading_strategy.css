@@ -1,0 +1,80 @@
+/* 交易策略页面样式 */
+
+/* 统计卡片 */
+.card.text-center .h4 {
+    font-weight: 600;
+}
+
+/* 表格样式 */
+#strategyList tr[data-active="false"] {
+    opacity: 0.6;
+    background-color: #f8f9fa;
+}
+
+#strategyList tr[data-active="false"]:hover {
+    opacity: 0.8;
+}
+
+/* 策略行状态徽章 */
+#strategyList .badge {
+    font-size: 0.75rem;
+}
+
+/* 触发条件文本 */
+.text-truncate {
+    max-width: 250px;
+}
+
+/* 执行记录表格 */
+#executionList .badge {
+    font-size: 0.7rem;
+}
+
+/* 模态框表单 */
+#strategyForm .form-label,
+#executeForm .form-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+#strategyForm .form-text {
+    font-size: 0.75rem;
+}
+
+/* 按钮组 */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* 分类过滤按钮 */
+.btn-group .btn.active {
+    font-weight: 600;
+}
+
+/* 空状态 */
+#emptyRow td {
+    padding: 2rem 1rem;
+}
+
+#emptyRow i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .table th, .table td {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+
+    .btn-group .btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .text-truncate {
+        max-width: 150px;
+    }
+}
