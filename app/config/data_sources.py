@@ -18,9 +18,9 @@ MARKET_DATA_SOURCES = {
         'sources': ['sina', 'tencent', 'eastmoney'],
         'fallback': 'yfinance',
         'weights': {
-            'sina': 40,      # 新浪财经 - 稳定性较好
-            'tencent': 35,   # 腾讯财经 - 批量获取效率高
-            'eastmoney': 25  # 东方财富 - 降为最后备选
+            'sina': 35,      # 新浪财经 - 稳定性较好
+            'tencent': 45,   # 腾讯财经 - 批量获取效率高，优先使用
+            'eastmoney': 20  # 东方财富 - 最后备选
         },
         'description': 'A股市场使用国内数据源，yfinance作为兜底'
     },
