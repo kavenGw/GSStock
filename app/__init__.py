@@ -197,6 +197,10 @@ def create_app(config_class=None):
         migrate_daily_snapshot_table()
         migrate_trades_table()
 
+        # 初始化默认交易策略
+        from app.services.trading_strategy import TradingStrategyService
+        TradingStrategyService.init_default_strategies()
+
     # 预加载 OCR 模型，避免首次识别时卡顿
     from app.services.ocr import preload_model
     preload_model()

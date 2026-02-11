@@ -193,6 +193,44 @@ class TradingStrategyService:
         return True
 
     @staticmethod
+    def init_default_strategies():
+        """初始化默认交易策略
+
+        如果数据库中没有默认策略，则创建它们。
+        """
+        # 默认策略列表
+        default_strategies = [
+            {
+                'name': '均线突破策略',
+                'category': 'trend_follow',
+                'trigger_condition': '5日线偏离卖出，10日线回踩买入',
+                'trigger_market': 'ALL',
+                'trigger_index': None,
+                'action_type': 'switch',
+                'sell_target': None,
+                'buy_target': None,
+                'description': '当股价向上偏离5日均线较多时，说明短期涨幅过大，可以考虑先卖出锁定利润；当股价回调至10日均线附近获得支撑时，是较好的买入时机。',
+                'notes': '适用于震荡上行的市场环境，需结合成交量判断。',
+                'is_active': True,
+                'priority': 10,
+            },
+        ]
+
+        created_count = 0
+        for strategy_data in default_strategies:
+            # 检查是否已存在同名策略
+            existing = TradingStrategy.query.filter_by(name=strategy_data['name']).first()
+            if not existing:
+                strategy = TradingStrategy(**strategy_data)
+                db.session.add(strategy)
+                created_count += 1
+
+        if created_count > 0:
+            db.session.commit()
+
+        return created_count
+
+    @staticmethod
     def get_statistics():
         """获取策略统计信息"""
         total_strategies = TradingStrategy.query.count()
