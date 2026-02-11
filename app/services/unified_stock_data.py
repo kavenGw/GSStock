@@ -592,7 +592,8 @@ class UnifiedStockDataService:
 
             yf_success = len(fetched_other)
             if yf_success > 0:
-                logger.info(f"[实时价格] yfinance: 成功 {yf_success}只")
+                names = ', '.join(d.get('name', code) for code, d in fetched_other)
+                logger.info(f"[实时价格] {today} yfinance → {names} ({yf_success}只)")
 
             # 对于被限流的股票，尝试使用过期缓存
             for code in rate_limited_codes:
@@ -670,7 +671,8 @@ class UnifiedStockDataService:
                         }
 
                 if result:
-                    logger.info(f"[实时价格] 东方财富: 成功 {len(result)}只")
+                    names = ', '.join(d.get('name', code) for code, d in result.items())
+                    logger.info(f"[实时价格] {today} 东方财富 → {names} ({len(result)}只)")
                 return result
 
             except Exception as e:
@@ -716,7 +718,8 @@ class UnifiedStockDataService:
                         }
 
                 if result:
-                    logger.info(f"[实时价格] 新浪财经: 成功 {len(result)}只")
+                    names = ', '.join(d.get('name', code) for code, d in result.items())
+                    logger.info(f"[实时价格] {today} 新浪财经 → {names} ({len(result)}只)")
                 return result
 
             except Exception as e:
@@ -728,7 +731,8 @@ class UnifiedStockDataService:
             try:
                 result = self._fetch_from_tencent(codes, now_str)
                 if result:
-                    logger.info(f"[实时价格] 腾讯财经: 成功 {len(result)}只")
+                    names = ', '.join(d.get('name', code) for code, d in result.items())
+                    logger.info(f"[实时价格] {today} 腾讯财经 → {names} ({len(result)}只)")
                 return result
             except Exception as e:
                 logger.warning(f"[实时价格] 腾讯财经失败: {e}")
@@ -779,7 +783,8 @@ class UnifiedStockDataService:
                         result[code] = data
 
             if result:
-                logger.info(f"[实时价格] yfinance(A股兜底): 成功 {len(result)}只")
+                names = ', '.join(d.get('name', code) for code, d in result.items())
+                logger.info(f"[实时价格] {today} yfinance(A股兜底) → {names} ({len(result)}只)")
             return result
 
         # 使用负载均衡器分配任务
@@ -1498,7 +1503,8 @@ class UnifiedStockDataService:
                     logger.debug(f"[获取] {etf_code} {stock_name} 失败 (etf_hist): {e}")
 
             if results:
-                logger.info(f"[走势数据] ETF: 成功 {len(results)}只")
+                names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+                logger.info(f"[走势数据] {today} ETF → {names} ({len(results)}只)")
 
         except Exception as e:
             logger.warning(f"[走势数据] ETF获取失败: {e}")
@@ -1555,7 +1561,8 @@ class UnifiedStockDataService:
                 logger.debug(f"[获取] {stock_code} {stock_name} 失败 (eastmoney_hist): {e}")
 
         if results:
-            logger.info(f"[走势数据] 东方财富: 成功 {len(results)}只")
+            names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+            logger.info(f"[走势数据] {today} 东方财富 → {names} ({len(results)}只)")
 
         return results
 
@@ -1614,7 +1621,8 @@ class UnifiedStockDataService:
                 logger.debug(f"[获取] {stock_code} {stock_name} 失败 (sina_hist): {e}")
 
         if results:
-            logger.info(f"[走势数据] 新浪: 成功 {len(results)}只")
+            names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+            logger.info(f"[走势数据] {today} 新浪 → {names} ({len(results)}只)")
 
         return results
 
@@ -1688,7 +1696,8 @@ class UnifiedStockDataService:
                 logger.debug(f"[获取] {stock_code} {stock_name} 失败 (tencent_hist): {e}")
 
         if results:
-            logger.info(f"[走势数据] 腾讯: 成功 {len(results)}只")
+            names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+            logger.info(f"[走势数据] {today} 腾讯 → {names} ({len(results)}只)")
 
         return results
 
@@ -1779,7 +1788,8 @@ class UnifiedStockDataService:
                 results.append(expired_data)
 
         if results:
-            logger.info(f"[走势数据] yfinance: 成功 {len(results)}只")
+            names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+            logger.info(f"[走势数据] {today} yfinance → {names} ({len(results)}只)")
         return results
 
     # ============ 指数数据 ============
