@@ -19,7 +19,7 @@ MARKET_SOURCES = {
     'A': {
         'sources': ['sina', 'tencent', 'eastmoney'],
         'fallback': 'yfinance',
-        'weights': {'sina': 40, 'tencent': 35, 'eastmoney': 25},  # 初始权重
+        'weights': {'sina': 35, 'tencent': 45, 'eastmoney': 20},  # 初始权重：腾讯优先
     },
     'US': {
         'sources': ['yfinance', 'twelvedata', 'polygon'],
