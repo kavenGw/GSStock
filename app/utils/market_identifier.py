@@ -53,6 +53,10 @@ class MarketIdentifier:
         if code.upper().endswith('.KS'):
             return 'KR'
 
+        # 美股指数：以^开头（如 ^GSPC, ^DJI, ^IXIC, ^VIX）
+        if code.startswith('^'):
+            return 'US'
+
         # A股：6位纯数字，或数字开头带.SS/.SZ后缀
         if code.isdigit() and len(code) == 6:
             return 'A'
