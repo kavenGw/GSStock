@@ -500,13 +500,13 @@ const AlertPage = {
     },
 
     /**
-     * 加载数据
+     * 加载数据（两阶段：快速首屏 + 异步补充）
      */
     async loadData() {
         this.showLoading(true);
 
         try {
-            // 传递启用的分类 ID，后端只获取这些分类的数据
+            // 阶段1：快速路径 - 60天OHLC + 已缓存信号 + 投资建议
             const enabledIds = Array.from(this.config.enabledCategories).join(',');
             const url = enabledIds ? `/alert/api/data?categories=${enabledIds}` : '/alert/api/data';
             const response = await fetch(url);
@@ -515,25 +515,72 @@ const AlertPage = {
             this.data.stocks = data.stocks || [];
             this.data.ohlcData = data.ohlc_data || {};
             this.data.categories = data.categories || [];
-            this.data.earningsData = data.earnings_data || {};
+            this.data.earningsData = {};
 
-            // 渲染分类 Toggle
             this.renderCategoryToggles();
-
-            // 评估预警
             this.evaluateAlerts();
-
-            // 异步加载信号胜率（不阻塞主流程）
-            this.loadSignalWinRates();
-
-            // 渲染界面
             this.render();
+
+            // 阶段2：异步并行加载（不阻塞首屏）
+            const stockCodes = this.data.stocks.map(s => s.code);
+            if (stockCodes.length > 0) {
+                this.loadSignalRefresh(stockCodes);
+                this.loadEarningsData(stockCodes);
+            }
+            this.loadSignalWinRates();
         } catch (e) {
             console.error('[AlertPage] 加载数据失败:', e);
             this.showEmpty();
         } finally {
             this.showLoading(false);
         }
+    },
+
+    /**
+     * 异步刷新信号缓存（后台静默，不更新UI）
+     */
+    async loadSignalRefresh(stockCodes) {
+        try {
+            await fetch('/alert/api/signals/refresh', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stock_codes: stockCodes })
+            });
+        } catch (e) {
+            console.warn('[AlertPage] 信号刷新失败:', e);
+        }
+    },
+
+    /**
+     * 异步加载财报/PE数据，到达后增量更新卡片
+     */
+    async loadEarningsData(stockCodes) {
+        try {
+            const response = await fetch(`/alert/api/earnings?codes=${stockCodes.join(',')}`);
+            const earningsData = await response.json();
+            if (earningsData.error) return;
+
+            this.data.earningsData = earningsData;
+            this.updateEarningsDisplay();
+        } catch (e) {
+            console.warn('[AlertPage] 财报数据加载失败:', e);
+        }
+    },
+
+    /**
+     * 增量更新卡片中的财报区域（避免全量re-render）
+     */
+    updateEarningsDisplay() {
+        document.querySelectorAll('.alert-card[data-stock-code]').forEach(card => {
+            const stockCode = card.dataset.stockCode;
+            const html = this.renderEarningsInfo(stockCode);
+            const existing = card.querySelector('.earnings-info');
+            if (existing) {
+                existing.outerHTML = html;
+            } else if (html) {
+                card.insertAdjacentHTML('beforeend', html);
+            }
+        });
     },
 
     /**
