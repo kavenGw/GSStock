@@ -17,9 +17,13 @@ logger = logging.getLogger(__name__)
 # 各市场数据源配置
 MARKET_SOURCES = {
     'A': {
-        'sources': ['sina', 'tencent', 'eastmoney'],
+        'sources': ['tencent', 'sina', 'eastmoney'],
         'fallback': 'yfinance',
-        'weights': {'sina': 35, 'tencent': 45, 'eastmoney': 20},  # 初始权重：腾讯优先
+        'weights': {'tencent': 50, 'sina': 50, 'eastmoney': 0},  # 腾讯和新浪为主，东方财富为备用
+        # 优先级模式配置：主数据源失败后再用备用数据源
+        'priority_mode': True,
+        'primary_sources': ['tencent', 'sina'],  # 主数据源：腾讯和新浪
+        'secondary_sources': ['eastmoney'],  # 备用数据源：东方财富
     },
     'US': {
         'sources': ['yfinance', 'twelvedata', 'polygon'],
@@ -57,8 +61,10 @@ class LoadBalancer:
     _instance = None
     _lock = threading.Lock()
 
-    # A股数据源（按优先级排序：东方财富降为最后备选，减少熔断影响）
-    A_SHARE_SOURCES = ['sina', 'tencent', 'eastmoney']
+    # A股数据源（按优先级排序：腾讯和新浪为主，东方财富为备用）
+    A_SHARE_SOURCES = ['tencent', 'sina', 'eastmoney']
+    A_SHARE_PRIMARY = ['tencent', 'sina']  # 主数据源
+    A_SHARE_SECONDARY = ['eastmoney']  # 备用数据源
 
     def __new__(cls):
         if cls._instance is None:
@@ -267,6 +273,113 @@ class LoadBalancer:
             fallback_result = fallback_func(final_failed)
             if fallback_result:
                 result.update(fallback_result)
+
+        return result
+
+    def fetch_with_priority_balancing(self, stock_codes: list, fetch_funcs: dict,
+                                       primary_sources: list = None,
+                                       secondary_sources: list = None,
+                                       fallback_func: Callable = None) -> dict:
+        """使用优先级模式执行数据获取
+
+        主数据源（腾讯/新浪）并行获取，失败的代码再用备用数据源（东方财富），最后yfinance兜底
+
+        Args:
+            stock_codes: 股票代码列表
+            fetch_funcs: {source_name: fetch_function} 各数据源的获取函数
+            primary_sources: 主数据源列表（默认腾讯和新浪）
+            secondary_sources: 备用数据源列表（默认东方财富）
+            fallback_func: 兜底函数（如yfinance）
+
+        Returns:
+            {stock_code: data} 获取结果
+        """
+        if primary_sources is None:
+            primary_sources = self.A_SHARE_PRIMARY
+        if secondary_sources is None:
+            secondary_sources = self.A_SHARE_SECONDARY
+
+        result = {}
+        failed_codes = list(stock_codes)
+
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        # ============ 第一阶段：主数据源（腾讯/新浪）并行获取 ============
+        healthy_primary = [s for s in primary_sources if circuit_breaker.is_available(s)]
+
+        if healthy_primary:
+            # 在主数据源之间轮询分配
+            distribution = {s: [] for s in healthy_primary}
+            with self._index_lock:
+                for i, code in enumerate(stock_codes):
+                    source = healthy_primary[i % len(healthy_primary)]
+                    distribution[source].append(code)
+
+            dist_info = ', '.join([f"{s}:{len(codes)}" for s, codes in distribution.items() if codes])
+            logger.info(f"[优先级负载] 主数据源分配 {len(stock_codes)} 只: {dist_info}")
+
+            with ThreadPoolExecutor(max_workers=len(healthy_primary)) as executor:
+                futures = {}
+                for source, codes in distribution.items():
+                    if codes and source in fetch_funcs:
+                        futures[executor.submit(fetch_funcs[source], codes)] = (source, codes)
+
+                for future in as_completed(futures):
+                    source, codes = futures[future]
+                    try:
+                        source_result = future.result()
+                        if source_result:
+                            result.update(source_result)
+                            circuit_breaker.record_success(source)
+                            # 更新失败列表
+                            failed_codes = [c for c in failed_codes if c not in source_result]
+                        else:
+                            circuit_breaker.record_failure(source)
+                            logger.warning(f"[优先级负载] 主数据源 {source} 返回空结果")
+                    except Exception as e:
+                        logger.warning(f"[优先级负载] 主数据源 {source} 执行异常: {e}")
+                        circuit_breaker.record_failure(source)
+        else:
+            logger.warning("[优先级负载] 所有主数据源都已熔断")
+
+        # ============ 第二阶段：备用数据源（东方财富）获取失败的 ============
+        if failed_codes:
+            healthy_secondary = [s for s in secondary_sources if circuit_breaker.is_available(s)]
+
+            if healthy_secondary:
+                logger.info(f"[优先级负载] 备用数据源获取剩余 {len(failed_codes)} 只: {', '.join(healthy_secondary)}")
+
+                for source in healthy_secondary:
+                    if not failed_codes:
+                        break
+                    if source not in fetch_funcs:
+                        continue
+
+                    try:
+                        source_result = fetch_funcs[source](failed_codes)
+                        if source_result:
+                            result.update(source_result)
+                            circuit_breaker.record_success(source)
+                            failed_codes = [c for c in failed_codes if c not in source_result]
+                            logger.info(f"[优先级负载] 备用数据源 {source} 获取成功 {len(source_result)} 只")
+                        else:
+                            circuit_breaker.record_failure(source)
+                            logger.warning(f"[优先级负载] 备用数据源 {source} 返回空结果")
+                    except Exception as e:
+                        logger.warning(f"[优先级负载] 备用数据源 {source} 执行异常: {e}")
+                        circuit_breaker.record_failure(source)
+            else:
+                logger.warning("[优先级负载] 所有备用数据源都已熔断")
+
+        # ============ 第三阶段：yfinance 兜底 ============
+        if failed_codes and fallback_func:
+            logger.info(f"[优先级负载] yfinance 兜底获取 {len(failed_codes)} 只")
+            try:
+                fallback_result = fallback_func(failed_codes)
+                if fallback_result:
+                    result.update(fallback_result)
+            except Exception as e:
+                logger.warning(f"[优先级负载] yfinance 兜底异常: {e}")
 
         return result
 

@@ -613,7 +613,7 @@ class UnifiedStockDataService:
         return result
 
     def _fetch_a_share_prices(self, stock_codes: list, today: date, now_str: str) -> dict:
-        """获取A股实时价格（负载均衡模式：东方财富/新浪/腾讯轮询分配，yfinance兜底）"""
+        """获取A股实时价格（优先级模式：腾讯/新浪为主，东方财富为备用，yfinance兜底）"""
         import yfinance as yf
 
         # 各数据源的行情缓存（避免重复拉取全量数据）
@@ -787,15 +787,22 @@ class UnifiedStockDataService:
                 logger.info(f"[实时价格] {today} yfinance(A股兜底) → {names} ({len(result)}只)")
             return result
 
-        # 使用负载均衡器分配任务
+        # 使用优先级负载均衡器分配任务
+        # 主数据源：腾讯和新浪并行获取
+        # 备用数据源：东方财富获取主数据源失败的
+        # 兜底：yfinance
         fetch_funcs = {
-            'eastmoney': fetch_from_eastmoney,
-            'sina': fetch_from_sina,
             'tencent': fetch_from_tencent,
+            'sina': fetch_from_sina,
+            'eastmoney': fetch_from_eastmoney,
         }
 
-        return load_balancer.fetch_with_balancing(
-            stock_codes, fetch_funcs, fallback_func=fetch_from_yfinance
+        return load_balancer.fetch_with_priority_balancing(
+            stock_codes,
+            fetch_funcs,
+            primary_sources=['tencent', 'sina'],
+            secondary_sources=['eastmoney'],
+            fallback_func=fetch_from_yfinance
         )
 
     def _fetch_from_tencent(self, stock_codes: list, now_str: str) -> dict:
@@ -1381,10 +1388,10 @@ class UnifiedStockDataService:
                     })
                 return data_points if data_points else None
 
-            # 按健康状态和优先级尝试数据源
+            # 按优先级尝试数据源：腾讯和新浪为主，东方财富为备用
             sources = [
-                ('sina_hist', fetch_from_sina, '新浪'),
                 ('tencent_hist', fetch_from_tencent, '腾讯'),
+                ('sina_hist', fetch_from_sina, '新浪'),
                 ('eastmoney_hist', fetch_from_eastmoney, '东方财富'),
             ]
 
