@@ -81,7 +81,7 @@ createForm.addEventListener('submit', async (e) => {
 
     errorDiv.style.display = 'none';
     input.value = '';
-    location.reload();
+    StockMeta.invalidate(); location.reload();
 });
 
 categoryTree.addEventListener('click', async (e) => {
@@ -104,7 +104,7 @@ categoryTree.addEventListener('click', async (e) => {
             alert(data.error);
             return;
         }
-        location.reload();
+        StockMeta.invalidate(); location.reload();
     }
 
     if (btn.classList.contains('edit-btn')) {
@@ -137,7 +137,7 @@ categoryTree.addEventListener('click', async (e) => {
 
         const res = await fetch(`/categories/${id}`, {method: 'DELETE'});
         if (res.ok) {
-            location.reload();
+            StockMeta.invalidate(); location.reload();
         }
     }
 });

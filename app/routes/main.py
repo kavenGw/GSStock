@@ -4,6 +4,7 @@ from app.services.position import PositionService
 from app.services.category import CategoryService
 from app.services.rebalance import RebalanceService
 from app.services.daily_record import DailyRecordService
+from app.services.stock_meta import StockMetaService
 from app.models.advice import Advice
 from app.models.config import Config
 from app.models.daily_snapshot import DailySnapshot
@@ -25,11 +26,13 @@ def dashboard():
     daily_profit_data = {}
     profit_history = {}
 
-    # 分类筛选
+    # 分类筛选（从 StockMetaService 缓存获取）
     category_filter = request.args.get('category', 'all')
-    category_tree = CategoryService.get_category_tree()
+    meta = StockMetaService.get_meta()
+    data_version = meta['version']
+    category_tree = meta['category_tree']
+    stock_categories = meta['stock_categories']
     categories = CategoryService.get_all_categories()
-    stock_categories = CategoryService.get_stock_categories_map()
 
     daily_change = None
     daily_profit_breakdown = []
@@ -117,4 +120,16 @@ def dashboard():
         category_filter=category_filter,
         rebalance_data=rebalance_data,
         snapshot_map=snapshot_map,
+        data_version=data_version,
     )
+
+
+@main_bp.route('/api/stock-meta')
+def stock_meta():
+    """股票元数据API，支持版本号增量检查"""
+    v = request.args.get('v', type=int)
+    current = StockMetaService.get_version()
+    if v == current:
+        return jsonify({'changed': False, 'version': current})
+    meta = StockMetaService.get_meta()
+    return jsonify({'changed': True, **meta})

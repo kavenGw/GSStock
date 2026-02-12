@@ -577,7 +577,7 @@ class UnifiedStockDataService:
 
             fetched_other = []
             rate_limited_codes = []
-            with ThreadPoolExecutor(max_workers=3) as executor:
+            with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = {executor.submit(fetch_single, code): code for code in other_codes}
                 for future in as_completed(futures):
                     code, data = future.result()
@@ -775,7 +775,7 @@ class UnifiedStockDataService:
                     logger.debug(f"[获取] {code} 失败 (yfinance): {e}")
                     return code, None
 
-            with ThreadPoolExecutor(max_workers=3) as executor:
+            with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = {executor.submit(fetch_single, code): code for code in codes}
                 for future in as_completed(futures):
                     code, data = future.result()
@@ -1050,43 +1050,50 @@ class UnifiedStockDataService:
                     cached_stocks.append(cached_stock_data)
             else:
                 self._miss_count += len(incremental_codes)
-                for code, fetch_days, cached_stock_data in incremental_codes:
-                    new_data = self._fetch_incremental_trend_data(code, fetch_days, days)
-                    if new_data:
-                        merged_data = self._merge_ohlc_data(
-                            cached_stock_data.get('data', []),
-                            new_data.get('data', []),
-                            days
-                        )
-                        merged_stock = {
-                            'stock_code': code,
-                            'stock_name': cached_stock_data.get('stock_name', code),
-                            'category_id': cached_stock_data.get('category_id'),
-                            'data': merged_data
-                        }
-                        fetched_stocks.append(merged_stock)
 
-                        # 更新DB缓存和内存缓存
-                        market = self._identify_market(code)
-                        is_closed = TradingCalendarService.is_after_close(market)
-                        data_end_date = None
-                        if merged_data:
-                            try:
-                                data_end_date = date.fromisoformat(merged_data[-1]['date'])
-                            except ValueError:
-                                pass
-                        UnifiedStockCache.set_cached_data(
-                            code, cache_type, merged_stock, today,
-                            is_complete=is_closed,
-                            data_end_date=data_end_date
-                        )
-                        memory_cache.set(code, cache_type, merged_stock)
-                        stock_name = cached_stock_data.get('stock_name', code)
-                        logger.debug(f"[增量] {code} {stock_name}: 获取{fetch_days}天, 合并后{len(merged_data)}天")
-                    else:
-                        stock_name = cached_stock_data.get('stock_name', code)
-                        logger.debug(f"[增量] {code} {stock_name}: 获取失败, 使用缓存")
-                        cached_stocks.append(cached_stock_data)
+                def _fetch_incremental(item):
+                    code, fetch_days_val, cached_stock_data = item
+                    new_data = self._fetch_incremental_trend_data(code, fetch_days_val, days)
+                    return code, fetch_days_val, cached_stock_data, new_data
+
+                with ThreadPoolExecutor(max_workers=5) as executor:
+                    futures = {executor.submit(_fetch_incremental, item): item[0] for item in incremental_codes}
+                    for future in as_completed(futures):
+                        code, fetch_days_val, cached_stock_data, new_data = future.result()
+                        if new_data:
+                            merged_data = self._merge_ohlc_data(
+                                cached_stock_data.get('data', []),
+                                new_data.get('data', []),
+                                days
+                            )
+                            merged_stock = {
+                                'stock_code': code,
+                                'stock_name': cached_stock_data.get('stock_name', code),
+                                'category_id': cached_stock_data.get('category_id'),
+                                'data': merged_data
+                            }
+                            fetched_stocks.append(merged_stock)
+
+                            market = self._identify_market(code)
+                            is_closed = TradingCalendarService.is_after_close(market)
+                            data_end_date = None
+                            if merged_data:
+                                try:
+                                    data_end_date = date.fromisoformat(merged_data[-1]['date'])
+                                except ValueError:
+                                    pass
+                            UnifiedStockCache.set_cached_data(
+                                code, cache_type, merged_stock, today,
+                                is_complete=is_closed,
+                                data_end_date=data_end_date
+                            )
+                            memory_cache.set(code, cache_type, merged_stock)
+                            stock_name = cached_stock_data.get('stock_name', code)
+                            logger.debug(f"[增量] {code} {stock_name}: 获取{fetch_days_val}天, 合并后{len(merged_data)}天")
+                        else:
+                            stock_name = cached_stock_data.get('stock_name', code)
+                            logger.debug(f"[增量] {code} {stock_name}: 获取失败, 使用缓存")
+                            cached_stocks.append(cached_stock_data)
 
         # 合并结果（内存缓存命中 + DB缓存命中 + 新获取）
         all_stocks = memory_hit_stocks + cached_stocks + fetched_stocks
@@ -1465,7 +1472,7 @@ class UnifiedStockDataService:
             import akshare as ak
             logger.debug(f"[走势数据] 获取ETF历史数据 ({len(etf_codes)}只)...")
 
-            for etf_code in etf_codes:
+            def _fetch_single_etf(etf_code):
                 try:
                     df = ak.fund_etf_hist_em(
                         symbol=etf_code,
@@ -1477,7 +1484,7 @@ class UnifiedStockDataService:
                     if df is None or df.empty or len(df) < 2:
                         stock_name = stock_name_map.get(etf_code, etf_code)
                         logger.debug(f"[获取] {etf_code} {stock_name} ETF数据为空")
-                        continue
+                        return None
 
                     df = df.tail(days)
                     base_price = df['收盘'].iloc[0]
@@ -1497,17 +1504,25 @@ class UnifiedStockDataService:
                     if len(data_points) >= 2:
                         sc = stock_categories.get(etf_code, {})
                         stock_name = stock_name_map.get(etf_code, etf_code)
-                        results.append({
+                        logger.debug(f"[获取] {etf_code} {stock_name} 成功 (etf_hist)")
+                        return {
                             'stock_code': etf_code,
                             'stock_name': stock_name,
                             'category_id': sc.get('category_id'),
                             'data': data_points
-                        })
-                        logger.debug(f"[获取] {etf_code} {stock_name} 成功 (etf_hist)")
-
+                        }
+                    return None
                 except Exception as e:
                     stock_name = stock_name_map.get(etf_code, etf_code)
                     logger.debug(f"[获取] {etf_code} {stock_name} 失败 (etf_hist): {e}")
+                    return None
+
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                futures = {executor.submit(_fetch_single_etf, code): code for code in etf_codes}
+                for future in as_completed(futures):
+                    result = future.result()
+                    if result:
+                        results.append(result)
 
             if results:
                 names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
@@ -1777,7 +1792,7 @@ class UnifiedStockDataService:
 
         results = []
         rate_limited_codes = []
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
             futures = {executor.submit(fetch_single, code): code for code in stock_codes}
             for future in as_completed(futures):
                 result = future.result()

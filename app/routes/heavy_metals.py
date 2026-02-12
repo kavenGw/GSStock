@@ -1,6 +1,8 @@
 import logging
+import threading
 from datetime import date, datetime, timedelta
-from flask import render_template, jsonify, request
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from flask import render_template, jsonify, request, current_app
 from app.routes import heavy_metals_bp
 from app.services.futures import FuturesService, CATEGORY_CODES, CATEGORY_NAMES, TradingAdviceCalculator, CategoryCodeResolver
 from app.services.wyckoff import WyckoffAutoService
@@ -82,6 +84,138 @@ def available_codes():
                     'advice': w['advice'],
                     'events': w['events'],
                 }
+
+    return jsonify(data)
+
+
+@heavy_metals_bp.route('/api/category-data')
+def category_data():
+    """合并端点：一次请求返回走势数据+技术指标+交易建议+威科夫评分
+
+    合并了 category-trend-data 和 trading-advice 两个端点，避免重复获取走势数据。
+    信号检测（365天数据）在后台线程执行，不阻塞响应。
+    """
+    from app.models.stock import Stock
+
+    category = request.args.get('category', 'heavy_metals')
+    days = int(request.args.get('days', 30))
+    force = request.args.get('force', '0') == '1'
+
+    logger.info(f'[category-data] 请求分类={category}, 天数={days}')
+
+    if category not in CATEGORY_NAMES:
+        return jsonify({'error': 'Invalid category'}), 400
+
+    # 获取走势数据（只调一次）
+    data = FuturesService.get_category_trend_data(category, days, force)
+
+    if not data or not data.get('stocks'):
+        return jsonify(data or {'stocks': [], 'date_range': {}})
+
+    logger.info(f'[category-data] 获取到 {len(data["stocks"])} 只股票数据')
+
+    stock_codes = [s['stock_code'] for s in data['stocks']]
+    stock_name_map = {s['stock_code']: s['stock_name'] for s in data['stocks']}
+
+    # 后台线程更新信号缓存（365天数据），不阻塞响应
+    app = current_app._get_current_object()
+
+    def _update_signals_background():
+        try:
+            with app.app_context():
+                year_data = FuturesService.get_category_trend_data(category, 365, False)
+                if year_data and year_data.get('stocks'):
+                    SignalCacheService.update_signals_from_trend_data(year_data, stock_name_map)
+                    logger.info(f'[category-data] 后台信号缓存更新完成: {category}')
+        except Exception as e:
+            logger.error(f'[category-data] 后台信号更新失败: {e}')
+
+    threading.Thread(target=_update_signals_background, daemon=True).start()
+
+    # 并行计算：技术指标 + 交易建议&威科夫评分
+    technical_result = {}
+    advice_result = {}
+
+    def _calc_technical():
+        tech = {}
+        for stock in data['stocks']:
+            ohlcv = stock.get('data', [])
+            if not ohlcv or len(ohlcv) < 26:
+                continue
+            indicators = TechnicalIndicatorService.calculate_all(ohlcv)
+            if indicators:
+                tech[stock['stock_code']] = {
+                    'macd': indicators['macd'],
+                    'rsi': indicators['rsi'],
+                    'score': indicators['score'],
+                    'signal': indicators['signal'],
+                }
+        return tech
+
+    def _calc_advice():
+        timeframe = f'{days}d'
+        advice = TradingAdviceCalculator.calculate_advice(data, timeframe)
+
+        valuation_map = {s['stock_code']: s.get('valuation') for s in data['stocks']}
+
+        codes = [s['code'] for s in advice.get('stocks', [])]
+        advice_map = {}
+        try:
+            stocks_with_advice = Stock.query.filter(Stock.stock_code.in_(codes)).all()
+            advice_map = {s.stock_code: s.investment_advice for s in stocks_with_advice if s.investment_advice}
+        except Exception as e:
+            logger.warning(f"获取投资建议失败: {e}")
+
+        try:
+            scores = WyckoffScoreCalculator.calculate_scores(data, category, days)
+            score_map = {s['code']: s for s in scores}
+
+            for stock in advice['stocks']:
+                code = stock['code']
+                if code in score_map:
+                    score_data = score_map[code]
+                    stock['wyckoff_score'] = score_data.get('score')
+                    stock['score_details'] = score_data.get('score_details')
+                    stock['analysis'] = score_data.get('analysis')
+                else:
+                    stock['wyckoff_score'] = None
+                    stock['score_details'] = None
+                    stock['analysis'] = None
+                stock['valuation'] = valuation_map.get(code)
+                stock['investment_advice'] = advice_map.get(code)
+        except Exception as e:
+            logger.error(f"计算威科夫评分失败: {e}")
+            for stock in advice['stocks']:
+                stock['wyckoff_score'] = None
+                stock['score_details'] = None
+                stock['analysis'] = None
+                stock['valuation'] = valuation_map.get(stock['code'])
+                stock['investment_advice'] = advice_map.get(stock['code'])
+
+        return advice
+
+    def _calc_advice_with_ctx():
+        with app.app_context():
+            return _calc_advice()
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        tech_future = executor.submit(_calc_technical)
+        advice_future = executor.submit(_calc_advice_with_ctx)
+
+        technical_result = tech_future.result()
+        advice_result = advice_future.result()
+
+    data['technical'] = technical_result
+    data['advice'] = advice_result
+
+    # 从缓存获取信号（不等365天更新，用已有缓存）
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days)
+    all_signals = SignalCacheService.get_cached_signals_with_names(
+        stock_codes, stock_name_map, start_date, end_date
+    )
+    data['signals'] = all_signals
+    logger.info(f'[category-data] 完成: 技术指标={len(technical_result)}, 建议={len(advice_result.get("stocks", []))}')
 
     return jsonify(data)
 

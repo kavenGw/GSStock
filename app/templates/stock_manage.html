@@ -241,7 +241,7 @@ createForm.addEventListener('submit', async (e) => {
     errorDiv.style.display = 'none';
     codeInput.value = '';
     nameInput.value = '';
-    location.reload();
+    StockMeta.invalidate(); location.reload();
 });
 
 // 双击编辑
@@ -403,7 +403,7 @@ stockList.addEventListener('click', async (e) => {
 
     const res = await fetch(`/stocks/${code}`, {method: 'DELETE'});
     if (res.ok) {
-        location.reload();
+        StockMeta.invalidate(); location.reload();
     }
 });
 
@@ -430,7 +430,7 @@ stockList.addEventListener('change', async (e) => {
 
     if (!res.ok) {
         alert('设置分类失败');
-        location.reload();
+        StockMeta.invalidate(); location.reload();
     }
 });
 
@@ -482,7 +482,7 @@ document.getElementById('confirmNewCategory').addEventListener('click', async ()
         pendingCategorySelect = null;
     }
 
-    location.reload();
+    StockMeta.invalidate(); location.reload();
 });
 
 // 弹窗关闭时重置

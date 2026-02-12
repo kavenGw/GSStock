@@ -1,6 +1,7 @@
 from flask import request, jsonify, render_template
 from app.routes import category_bp
 from app.services.category import CategoryService
+from app.services.stock_meta import StockMetaService
 
 
 @category_bp.route('/manage')
@@ -32,6 +33,7 @@ def create():
     category, error = CategoryService.create_category(name, parent_id)
     if error:
         return jsonify({'error': error}), 400
+    StockMetaService.bump_version()
     return jsonify(category.to_dict())
 
 
@@ -43,6 +45,7 @@ def update(category_id):
     category, error = CategoryService.update_category(category_id, name)
     if error:
         return jsonify({'error': error}), 400 if '不能' in error or '已存在' in error else 404
+    StockMetaService.bump_version()
     return jsonify(category.to_dict())
 
 
@@ -52,6 +55,7 @@ def delete(category_id):
     success, error = CategoryService.delete_category(category_id)
     if not success:
         return jsonify({'error': error}), 404
+    StockMetaService.bump_version()
     return jsonify({'success': True})
 
 
@@ -63,6 +67,7 @@ def set_stock_category(stock_code):
     success = CategoryService.set_stock_category(stock_code, category_id)
     if not success:
         return jsonify({'error': '板块不存在'}), 404
+    StockMetaService.bump_version()
     return jsonify({'success': True})
 
 
@@ -74,4 +79,5 @@ def update_description(category_id):
     category, error = CategoryService.update_description(category_id, description)
     if error:
         return jsonify({'error': error}), 404
+    StockMetaService.bump_version()
     return jsonify(category.to_dict())

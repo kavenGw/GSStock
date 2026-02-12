@@ -2,6 +2,7 @@ from flask import request, jsonify, render_template
 from app.routes import stock_bp
 from app.services.stock import StockService
 from app.services.category import CategoryService
+from app.services.stock_meta import StockMetaService
 
 
 @stock_bp.route('/manage')
@@ -84,6 +85,7 @@ def create():
     stock, error = StockService.create_stock(code, name)
     if error:
         return jsonify({'error': error}), 400
+    StockMetaService.bump_version()
     return jsonify(stock.to_dict()), 201
 
 
@@ -98,6 +100,7 @@ def update(code):
     if error:
         status = 404 if '不存在' in error else 400
         return jsonify({'error': error}), status
+    StockMetaService.bump_version()
     return jsonify(stock.to_dict())
 
 
@@ -107,6 +110,7 @@ def delete(code):
     error = StockService.delete_stock(code)
     if error:
         return jsonify({'error': error}), 404
+    StockMetaService.bump_version()
     return jsonify({'message': '删除成功'})
 
 
@@ -126,6 +130,7 @@ def create_alias():
     alias, error = StockService.create_alias(alias_name, stock_code)
     if error:
         return jsonify({'error': error}), 400
+    StockMetaService.bump_version()
     return jsonify(alias.to_dict()), 201
 
 
@@ -135,6 +140,7 @@ def delete_alias(alias_id):
     error = StockService.delete_alias(alias_id)
     if error:
         return jsonify({'error': error}), 404
+    StockMetaService.bump_version()
     return jsonify({'message': '删除成功'})
 
 
@@ -175,6 +181,7 @@ def update_aliases(code):
         if alias:
             created_aliases.append(alias_name)
 
+    StockMetaService.bump_version()
     return jsonify({'aliases': created_aliases})
 
 

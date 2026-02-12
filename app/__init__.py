@@ -205,6 +205,11 @@ def create_app(config_class=None):
     from app.services.ocr import preload_model
     preload_model()
 
+    # 预加载走势看板数据
+    if not app.config.get('READONLY_MODE'):
+        from app.services.heavy_metals_preload import start_background_preload
+        start_background_preload(app)
+
     # 添加只读模式上下文处理器
     @app.context_processor
     def inject_readonly_mode():

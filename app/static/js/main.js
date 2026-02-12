@@ -52,7 +52,50 @@ const Skeleton = {
 
 window.Skeleton = Skeleton;
 
+// 股票元数据缓存工具
+const StockMeta = {
+    KEY: 'stock_meta',
+
+    async load(serverVersion) {
+        try {
+            const cached = this._getCache();
+            const v = serverVersion ?? cached?.version;
+            if (v != null) {
+                const resp = await fetch(`/api/stock-meta?v=${v}`);
+                if (!resp.ok) return cached;
+                const data = await resp.json();
+                if (!data.changed && cached) return cached;
+                localStorage.setItem(this.KEY, JSON.stringify(data));
+                return data;
+            }
+            const resp = await fetch('/api/stock-meta');
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            localStorage.setItem(this.KEY, JSON.stringify(data));
+            return data;
+        } catch (e) {
+            console.error('[StockMeta] load failed:', e);
+            return this._getCache();
+        }
+    },
+
+    _getCache() {
+        try { return JSON.parse(localStorage.getItem(this.KEY)); }
+        catch { return null; }
+    },
+
+    getSync() { return this._getCache(); },
+
+    invalidate() { localStorage.removeItem(this.KEY); }
+};
+
+window.StockMeta = StockMeta;
+
 document.addEventListener('DOMContentLoaded', function() {
+    // 预加载元数据缓存（不阻塞页面）
+    if (window.__dataVersion !== undefined) {
+        StockMeta.load(window.__dataVersion);
+    }
     initIndexPage();
     initTrendChart();
     initSectorManageModal();
@@ -418,9 +461,15 @@ async function loadSectorTree() {
     const sectorTree = document.getElementById('sectorTree');
     if (!sectorTree) return;
 
-    const res = await fetch('/categories/tree');
-    const data = await res.json();
-    const categories = data.categories || [];
+    const meta = StockMeta.getSync();
+    let categories;
+    if (meta && meta.category_tree) {
+        categories = meta.category_tree;
+    } else {
+        const res = await fetch('/categories/tree');
+        const data = await res.json();
+        categories = data.categories || [];
+    }
 
     if (categories.length === 0) {
         sectorTree.innerHTML = '<div class="text-center text-muted py-3">暂无板块</div>';
@@ -461,9 +510,15 @@ async function loadSectorTree() {
 }
 
 async function refreshSectorDropdowns() {
-    const res = await fetch('/categories/tree');
-    const data = await res.json();
-    const categories = data.categories || [];
+    const meta = StockMeta.getSync();
+    let categories;
+    if (meta && meta.category_tree) {
+        categories = meta.category_tree;
+    } else {
+        const res = await fetch('/categories/tree');
+        const data = await res.json();
+        categories = data.categories || [];
+    }
 
     // 更新顶部筛选器
     const categoryFilter = document.getElementById('categoryFilter');

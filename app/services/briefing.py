@@ -122,11 +122,11 @@ class BriefingService:
         except Exception as e:
             logger.error(f"获取股票价格失败: {e}")
 
-        from app.models.stock import Stock
+        from app.services.stock_meta import StockMetaService
         advice_map = {}
         try:
-            stocks_with_advice = Stock.query.filter(Stock.stock_code.in_(stock_codes)).all()
-            advice_map = {s.stock_code: s.investment_advice for s in stocks_with_advice if s.investment_advice}
+            meta_stocks = StockMetaService.get_meta().get('stocks', [])
+            advice_map = {s['stock_code']: s['investment_advice'] for s in meta_stocks if s.get('stock_code') and s.get('investment_advice')}
         except Exception as e:
             logger.warning(f"获取投资建议失败: {e}")
 

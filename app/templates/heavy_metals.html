@@ -1018,7 +1018,7 @@
                         }
                         url = `/heavy-metals/api/custom-trend-data?codes=${codes.join(',')}&days=${days}`;
                     } else {
-                        url = `/heavy-metals/api/category-trend-data?category=${this.currentCategory}&days=${days}`;
+                        url = `/heavy-metals/api/category-data?category=${this.currentCategory}&days=${days}`;
                     }
 
                     const response = await fetch(url, { signal: abortController.signal });
@@ -1131,7 +1131,21 @@
                     }
 
                     if (this.currentCategory !== 'custom') {
-                        this.loadAdvice();
+                        // 合并端点已返回 advice 数据，直接渲染
+                        if (data.advice) {
+                            this.currentAdviceData = data.advice;
+                            this.displayWyckoffPanel(data.advice);
+
+                            const self = this;
+                            if (Charts.trendData) {
+                                Charts.renderRelativeStrengthTrendChart(Charts.trendData, data.advice, 'relativeStrengthTrendChart', function(stockName) {
+                                    self.toggleChartLineByName(stockName);
+                                });
+                            }
+                            Charts.renderRelativeStrengthChart(null, data.advice, 'relativeStrengthChart', function(stockName) {
+                                self.toggleChartLineByName(stockName);
+                            });
+                        }
                     } else {
                         // 自定义模式：从 trendData 构造数据并渲染相对走势图表
                         this.renderCustomRelativeStrength(data);
