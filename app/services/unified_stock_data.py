@@ -2405,7 +2405,11 @@ class UnifiedStockDataService:
         return result
 
     def get_cn_sector_data(self, force_refresh: bool = False) -> list:
-        """A股板块数据获取（熔断保护+过期缓存降级）
+        """A股板块数据获取（负载均衡+熔断保护+过期缓存降级）
+
+        支持多数据源负载均衡：
+        - eastmoney (东方财富): akshare.stock_board_industry_name_em
+        - sina (新浪财经): akshare.stock_sector_spot (备用)
 
         Returns:
             板块列表 [{'name': str, 'change_percent': float, 'leader': str}]
@@ -2413,7 +2417,6 @@ class UnifiedStockDataService:
         today = date.today()
         cache_type = 'cn_sector'
         cache_key = 'CN_SECTOR_ALL'
-        now_str = datetime.now().isoformat()
 
         # 缓存检查
         if not force_refresh:
@@ -2426,47 +2429,98 @@ class UnifiedStockDataService:
                     age = datetime.now() - cache_record.last_fetch_time
                     if age < timedelta(hours=8):
                         self._hit_count += 1
+                        logger.debug("[A股板块] 缓存命中")
                         return cached
-
-        # 熔断检查
-        if not circuit_breaker.is_available('eastmoney'):
-            logger.info("[A股板块] 东方财富已熔断，尝试过期缓存")
-            expired = self._get_expired_cache(cache_key, cache_type, '东方财富熔断')
-            if expired and isinstance(expired, list):
-                return expired
-            return []
 
         self._miss_count += 1
 
-        try:
-            import akshare as ak
-            df = ak.stock_board_industry_name_em()
-            if df is None or df.empty:
-                circuit_breaker.record_failure('eastmoney')
-                return []
+        # 数据源配置
+        sources = [
+            ('eastmoney', 'akshare.stock_board_industry_name_em'),
+            ('sina', 'akshare.stock_sector_spot'),
+        ]
 
-            circuit_breaker.record_success('eastmoney')
+        result = None
+        last_error = None
+        tried_sources = []
 
-            result = []
-            for _, row in df.iterrows():
-                result.append({
-                    'name': row['板块名称'],
-                    'change_percent': round(float(row['涨跌幅']), 2),
-                    'leader': row['领涨股票'],
-                })
+        for source_name, api_func in sources:
+            # 熔断检查
+            if not circuit_breaker.is_available(source_name):
+                logger.info(f"[A股板块] 数据源 {source_name} 已熔断，跳过")
+                tried_sources.append(f"{source_name}(熔断)")
+                continue
 
-            # 保存缓存
-            UnifiedStockCache.set_cached_data(cache_key, cache_type, result, today)
-            logger.info(f"[A股板块] 获取成功: {len(result)}个板块")
-            return result
+            try:
+                import akshare as ak
 
-        except Exception as e:
-            logger.warning(f"[A股板块] 获取失败: {e}")
-            circuit_breaker.record_failure('eastmoney')
-            expired = self._get_expired_cache(cache_key, cache_type, 'API获取失败')
-            if expired and isinstance(expired, list):
-                return expired
-            return []
+                if source_name == 'eastmoney':
+                    logger.debug(f"[A股板块] 尝试数据源: {source_name} ({api_func})")
+                    df = ak.stock_board_industry_name_em()
+                    if df is None or df.empty:
+                        logger.warning(f"[A股板块] {source_name} ({api_func}) 返回空数据")
+                        circuit_breaker.record_failure(source_name)
+                        tried_sources.append(f"{source_name}(空数据)")
+                        continue
+
+                    circuit_breaker.record_success(source_name)
+                    result = []
+                    for _, row in df.iterrows():
+                        result.append({
+                            'name': row['板块名称'],
+                            'change_percent': round(float(row['涨跌幅']), 2),
+                            'leader': row['领涨股票'],
+                        })
+
+                elif source_name == 'sina':
+                    logger.debug(f"[A股板块] 尝试数据源: {source_name} ({api_func})")
+                    df = ak.stock_sector_spot(indicator="行业板块")
+                    if df is None or df.empty:
+                        logger.warning(f"[A股板块] {source_name} ({api_func}) 返回空数据")
+                        circuit_breaker.record_failure(source_name)
+                        tried_sources.append(f"{source_name}(空数据)")
+                        continue
+
+                    circuit_breaker.record_success(source_name)
+                    result = []
+                    for _, row in df.iterrows():
+                        result.append({
+                            'name': row.get('板块', row.get('label', '')),
+                            'change_percent': round(float(row.get('涨跌幅', row.get('pct_change', 0)) or 0), 2),
+                            'leader': row.get('领涨股', ''),
+                        })
+
+                if result:
+                    # 保存缓存
+                    UnifiedStockCache.set_cached_data(cache_key, cache_type, result, today)
+                    tried_info = f" (已尝试: {', '.join(tried_sources)})" if tried_sources else ""
+                    logger.info(f"[A股板块] {source_name} 获取成功: {len(result)}个板块{tried_info}")
+                    return result
+
+            except Exception as e:
+                error_type = type(e).__name__
+                error_msg = str(e)
+                last_error = e
+                circuit_breaker.record_failure(source_name)
+                tried_sources.append(f"{source_name}(失败)")
+
+                # 详细错误日志
+                logger.warning(
+                    f"[A股板块] 数据源获取失败 | "
+                    f"source={source_name} | "
+                    f"api={api_func} | "
+                    f"error_type={error_type} | "
+                    f"error_msg={error_msg}"
+                )
+
+        # 所有数据源都失败，尝试过期缓存
+        tried_info = ', '.join(tried_sources) if tried_sources else '无可用数据源'
+        logger.warning(f"[A股板块] 所有数据源获取失败 (已尝试: {tried_info})")
+
+        expired = self._get_expired_cache(cache_key, cache_type, f'所有数据源失败: {tried_info}')
+        if expired and isinstance(expired, list):
+            return expired
+        return []
 
     # ============ ETF净值 ============
 
