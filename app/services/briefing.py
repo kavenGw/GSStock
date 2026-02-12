@@ -111,12 +111,14 @@ class BriefingService:
         prices = {}
         try:
             if force_refresh:
-                # 强制刷新：从API获取实时数据并缓存
-                # get_realtime_prices 返回 {stock_code: data_dict} 格式
                 prices = unified_stock_data_service.get_realtime_prices(stock_codes, force_refresh=True)
             else:
-                # 使用缓存的收盘价，不发起实时API请求
                 prices = unified_stock_data_service.get_closing_prices(stock_codes)
+                # 缓存未命中的股票，回退到API获取
+                missing_codes = [c for c in stock_codes if c not in prices]
+                if missing_codes:
+                    fetched = unified_stock_data_service.get_realtime_prices(missing_codes)
+                    prices.update(fetched)
         except Exception as e:
             logger.error(f"获取股票价格失败: {e}")
 
@@ -145,7 +147,7 @@ class BriefingService:
                 'error': None
             }
 
-            if price_data and not price_data.get('_is_degraded'):
+            if price_data and price_data.get('current_price'):
                 stock_item['close'] = price_data.get('current_price', 0)
                 stock_item['change_percent'] = price_data.get('change_percent', 0)
                 stock_item['volume'] = price_data.get('volume', 0)
