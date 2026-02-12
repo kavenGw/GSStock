@@ -445,7 +445,7 @@ const AlertPage = {
             btn.classList.add('active');
 
             this.filter.signalType = btn.dataset.type;
-            this.renderAlerts();
+            this.render();
         });
 
         // 设置弹窗滑块变化
@@ -1433,7 +1433,7 @@ const AlertPage = {
 
         // 重新评估并渲染
         this.evaluateAlerts();
-        this.renderAlerts();
+        this.render();
     },
 
     /**
