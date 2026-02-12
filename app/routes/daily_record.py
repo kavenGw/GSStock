@@ -252,13 +252,28 @@ def api_calc_fee():
     if not prev_date:
         return jsonify({'success': False, 'error': '无前一交易日数据，无法计算'})
 
-    # 前日数据
+    # 前日数据：必须有快照（含现金的总资产）才能准确推算手续费
     prev_snapshot = DailySnapshot.get_snapshot(prev_date)
     prev_positions = Position.query.filter_by(date=prev_date).all()
     prev_pos_map = {p.stock_code: p for p in prev_positions}
 
-    prev_total_asset = prev_snapshot.total_asset if prev_snapshot and prev_snapshot.total_asset else \
-        sum(p.current_price * p.quantity for p in prev_positions)
+    if not (prev_snapshot and prev_snapshot.total_asset):
+        # 无前日快照，回退到已记录的 Trade.fee 累加
+        existing_trades = Trade.query.filter_by(trade_date=target_date).all()
+        trade_fee = round(sum(t.fee or 0 for t in existing_trades), 2)
+        return jsonify({
+            'success': True,
+            'fee': trade_fee,
+            'detail': {
+                'theoretical_profit': None,
+                'actual_profit': None,
+                'prev_date': prev_date.isoformat(),
+                'prev_total_asset': None,
+                'note': '前日无总资产快照，使用交易记录手续费累加',
+            }
+        })
+
+    prev_total_asset = prev_snapshot.total_asset
 
     # 净转入（已有 + 新输入）
     existing_transfers = BankTransfer.query.filter_by(transfer_date=target_date).all()

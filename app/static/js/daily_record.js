@@ -748,8 +748,9 @@ function initDailyRecordPage() {
             const data = await response.json();
             if (data.success) {
                 const d = data.detail;
-                resultDiv.innerHTML = `
-                    <div class="account-info-grid">
+                let html = '<div class="account-info-grid">';
+                if (d.theoretical_profit !== null) {
+                    html += `
                         <div class="account-info-item">
                             <span class="label">理论盈亏</span>
                             <span class="value">${d.theoretical_profit >= 0 ? '+' : ''}${d.theoretical_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
@@ -757,12 +758,18 @@ function initDailyRecordPage() {
                         <div class="account-info-item">
                             <span class="label">实际盈亏</span>
                             <span class="value">${d.actual_profit >= 0 ? '+' : ''}${d.actual_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
-                        </div>
-                        <div class="account-info-item">
-                            <span class="label">手续费</span>
-                            <span class="value text-danger">${data.fee.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
-                        </div>
-                    </div>`;
+                        </div>`;
+                }
+                html += `
+                    <div class="account-info-item">
+                        <span class="label">手续费</span>
+                        <span class="value text-danger">${data.fee.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                </div>`;
+                if (d.note) {
+                    html += `<small class="text-muted d-block mt-1">${d.note}</small>`;
+                }
+                resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';
             } else {
                 resultDiv.innerHTML = `<span class="text-danger">${data.error}</span>`;

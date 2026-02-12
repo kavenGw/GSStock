@@ -69,30 +69,37 @@ class DailyRecordService:
             result['daily_profit'] = round(daily_profit, 2)
             result['daily_profit_pct'] = round(daily_profit_pct, 2)
 
-            # 手续费 = 理论盈亏 - 实际盈亏
-            today_pos_dict = {p.stock_code: p for p in today_positions}
+            # 手续费计算：需要前后两天都有快照（含现金的总资产）才能用推算公式
             trades = Trade.query.filter_by(trade_date=target_date).all()
-            trade_by_stock = {}
-            for t in trades:
-                if t.stock_code not in trade_by_stock:
-                    trade_by_stock[t.stock_code] = {'buy': 0, 'sell': 0}
-                if t.trade_type == 'buy':
-                    trade_by_stock[t.stock_code]['buy'] += t.amount
-                else:
-                    trade_by_stock[t.stock_code]['sell'] += t.amount
+            has_both_snapshots = (today_snapshot and today_snapshot.total_asset and
+                                 prev_snapshot and prev_snapshot.total_asset)
 
-            all_stocks = set(today_pos_dict.keys()) | set(prev_pos_map.keys())
-            theoretical_profit = 0
-            for code in all_stocks:
-                today_p = today_pos_dict.get(code)
-                prev_p = prev_pos_map.get(code)
-                today_mv = today_p.current_price * today_p.quantity if today_p else 0
-                prev_mv = prev_p.current_price * prev_p.quantity if prev_p else 0
-                td = trade_by_stock.get(code, {'buy': 0, 'sell': 0})
-                theoretical_profit += today_mv - prev_mv + td['sell'] - td['buy']
+            if has_both_snapshots:
+                today_pos_dict = {p.stock_code: p for p in today_positions}
+                trade_by_stock = {}
+                for t in trades:
+                    if t.stock_code not in trade_by_stock:
+                        trade_by_stock[t.stock_code] = {'buy': 0, 'sell': 0}
+                    if t.trade_type == 'buy':
+                        trade_by_stock[t.stock_code]['buy'] += t.amount
+                    else:
+                        trade_by_stock[t.stock_code]['sell'] += t.amount
 
-            daily_fee = theoretical_profit - daily_profit
-            result['daily_fee'] = round(max(0, daily_fee), 2)
+                all_stocks = set(today_pos_dict.keys()) | set(prev_pos_map.keys())
+                theoretical_profit = 0
+                for code in all_stocks:
+                    today_p = today_pos_dict.get(code)
+                    prev_p = prev_pos_map.get(code)
+                    today_mv = today_p.current_price * today_p.quantity if today_p else 0
+                    prev_mv = prev_p.current_price * prev_p.quantity if prev_p else 0
+                    td = trade_by_stock.get(code, {'buy': 0, 'sell': 0})
+                    theoretical_profit += today_mv - prev_mv + td['sell'] - td['buy']
+
+                daily_fee = theoretical_profit - daily_profit
+                result['daily_fee'] = round(max(0, daily_fee), 2)
+            else:
+                # 无快照时回退到 Trade.fee 累加
+                result['daily_fee'] = round(sum(t.fee or 0 for t in trades), 2)
 
         return result
 
