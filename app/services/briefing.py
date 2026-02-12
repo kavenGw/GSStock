@@ -97,7 +97,8 @@ class BriefingService:
     def get_stocks_basic_data(force_refresh: bool = False) -> dict:
         """获取基础股票数据（价格+投资建议，不含PE和财报）
 
-        使用缓存的收盘价数据，不发起实时API请求。
+        当 force_refresh=False 时，使用缓存的收盘价数据，不发起实时API请求。
+        当 force_refresh=True 时，从API获取数据并缓存。
         """
         from app.services.unified_stock_data import unified_stock_data_service
 
@@ -109,8 +110,13 @@ class BriefingService:
 
         prices = {}
         try:
-            # 使用缓存的收盘价，不发起实时API请求
-            prices = unified_stock_data_service.get_closing_prices(stock_codes)
+            if force_refresh:
+                # 强制刷新：从API获取实时数据并缓存
+                # get_realtime_prices 返回 {stock_code: data_dict} 格式
+                prices = unified_stock_data_service.get_realtime_prices(stock_codes, force_refresh=True)
+            else:
+                # 使用缓存的收盘价，不发起实时API请求
+                prices = unified_stock_data_service.get_closing_prices(stock_codes)
         except Exception as e:
             logger.error(f"获取股票价格失败: {e}")
 
