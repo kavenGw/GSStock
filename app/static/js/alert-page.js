@@ -167,6 +167,10 @@ const DEFAULT_CONFIG = {
 
 const STORAGE_KEY = 'alert_config';
 
+// 分类缓存配置
+const CATEGORY_CACHE_KEY = 'alert_category_cache';
+const CATEGORY_CACHE_TTL = 30 * 60 * 1000; // 30分钟有效期
+
 const AlertPage = {
     // 数据缓存
     data: {
@@ -252,6 +256,61 @@ const AlertPage = {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
         } catch (e) {
             console.warn('[AlertPage] 保存配置失败:', e);
+        }
+    },
+
+    /**
+     * 获取分类缓存
+     * @returns {Object|null} 缓存的分类数据，如果缓存无效则返回null
+     */
+    getCategoryCache() {
+        try {
+            const cached = localStorage.getItem(CATEGORY_CACHE_KEY);
+            if (!cached) return null;
+
+            const parsed = JSON.parse(cached);
+            const now = Date.now();
+
+            // 检查缓存是否过期
+            if (parsed.timestamp && (now - parsed.timestamp) < CATEGORY_CACHE_TTL) {
+                console.log('[AlertPage] 使用分类缓存，剩余有效时间:', Math.round((CATEGORY_CACHE_TTL - (now - parsed.timestamp)) / 1000), '秒');
+                return parsed.data;
+            }
+
+            console.log('[AlertPage] 分类缓存已过期');
+            return null;
+        } catch (e) {
+            console.warn('[AlertPage] 读取分类缓存失败:', e);
+            return null;
+        }
+    },
+
+    /**
+     * 保存分类缓存
+     * @param {Array} categories 分类数据
+     */
+    saveCategoryCache(categories) {
+        try {
+            const cacheData = {
+                timestamp: Date.now(),
+                data: categories
+            };
+            localStorage.setItem(CATEGORY_CACHE_KEY, JSON.stringify(cacheData));
+            console.log('[AlertPage] 分类缓存已更新');
+        } catch (e) {
+            console.warn('[AlertPage] 保存分类缓存失败:', e);
+        }
+    },
+
+    /**
+     * 清除分类缓存
+     */
+    clearCategoryCache() {
+        try {
+            localStorage.removeItem(CATEGORY_CACHE_KEY);
+            console.log('[AlertPage] 分类缓存已清除');
+        } catch (e) {
+            console.warn('[AlertPage] 清除分类缓存失败:', e);
         }
     },
 
@@ -501,11 +560,18 @@ const AlertPage = {
 
     /**
      * 加载数据
+     * @param {boolean} forceRefreshCategories 是否强制刷新分类缓存
      */
-    async loadData() {
+    async loadData(forceRefreshCategories = false) {
         this.showLoading(true);
 
         try {
+            // 尝试从缓存获取分类数据
+            let cachedCategories = null;
+            if (!forceRefreshCategories) {
+                cachedCategories = this.getCategoryCache();
+            }
+
             // 传递启用的分类 ID，后端只获取这些分类的数据
             const enabledIds = Array.from(this.config.enabledCategories).join(',');
             const url = enabledIds ? `/alert/api/data?categories=${enabledIds}` : '/alert/api/data';
@@ -514,8 +580,20 @@ const AlertPage = {
 
             this.data.stocks = data.stocks || [];
             this.data.ohlcData = data.ohlc_data || {};
-            this.data.categories = data.categories || [];
             this.data.earningsData = data.earnings_data || {};
+
+            // 分类数据处理：如果有缓存且未强制刷新，使用缓存；否则使用服务器返回的数据并更新缓存
+            if (cachedCategories && !forceRefreshCategories) {
+                this.data.categories = cachedCategories;
+                console.log('[AlertPage] 使用本地缓存的分类数据');
+            } else {
+                this.data.categories = data.categories || [];
+                // 保存分类数据到缓存
+                if (this.data.categories.length > 0) {
+                    this.saveCategoryCache(this.data.categories);
+                }
+                console.log('[AlertPage] 从服务器获取分类数据并更新缓存');
+            }
 
             // 渲染分类 Toggle
             this.renderCategoryToggles();
@@ -1438,9 +1516,18 @@ const AlertPage = {
 
     /**
      * 刷新数据
+     * @param {boolean} forceRefreshCategories 是否强制刷新分类缓存
      */
-    refresh() {
-        this.loadData();
+    refresh(forceRefreshCategories = false) {
+        this.loadData(forceRefreshCategories);
+    },
+
+    /**
+     * 强制刷新分类缓存
+     */
+    refreshCategories() {
+        this.clearCategoryCache();
+        this.loadData(true);
     },
 
     /**
