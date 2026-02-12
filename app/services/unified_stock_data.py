@@ -2480,8 +2480,23 @@ class UnifiedStockDataService:
                         })
 
                 elif source_name == 'sina':
+                    # 注意: akshare的stock_sector_spot存在已知bug
+                    # 当网络请求失败时，会触发 UnboundLocalError: local variable 'r' referenced before assignment
+                    # 这是akshare库的内部错误，非本代码问题
                     logger.debug(f"[A股板块] 尝试数据源: {source_name} ({api_func})")
-                    df = ak.stock_sector_spot(indicator="行业板块")
+                    try:
+                        df = ak.stock_sector_spot(indicator="行业板块")
+                    except UnboundLocalError as ule:
+                        # akshare库内部bug：网络请求失败时变量未赋值
+                        logger.warning(
+                            f"[A股板块] {source_name} akshare内部错误 | "
+                            f"error_type=UnboundLocalError | "
+                            f"error_msg={str(ule)} | "
+                            f"suggestion=akshare库bug，建议升级akshare版本"
+                        )
+                        circuit_breaker.record_failure(source_name)
+                        tried_sources.append(f"{source_name}(akshare内部错误)")
+                        continue
                     if df is None or df.empty:
                         logger.warning(f"[A股板块] {source_name} ({api_func}) 返回空数据")
                         circuit_breaker.record_failure(source_name)
