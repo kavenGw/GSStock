@@ -5,6 +5,7 @@ from app.services.category import CategoryService
 from app.services.rebalance import RebalanceService
 from app.services.daily_record import DailyRecordService
 from app.services.stock_meta import StockMetaService
+from app.services.portfolio_advice import PortfolioAdviceBatchService
 from app.models.advice import Advice
 from app.models.config import Config
 from app.models.daily_snapshot import DailySnapshot
@@ -133,3 +134,37 @@ def stock_meta():
         return jsonify({'changed': False, 'version': current})
     meta = StockMetaService.get_meta()
     return jsonify({'changed': True, **meta})
+
+
+@main_bp.route('/api/portfolio-advice')
+def portfolio_advice():
+    """获取持仓操作建议API
+
+    Query参数:
+        codes: 股票代码列表，逗号分隔（可选，默认获取当前持仓）
+
+    Returns:
+        {
+            success: bool,
+            data: {stock_code: advice_data},
+            failed: [stock_code]
+        }
+    """
+    codes_param = request.args.get('codes', '')
+
+    if codes_param:
+        stock_codes = [c.strip() for c in codes_param.split(',') if c.strip()]
+    else:
+        # 获取当前持仓的股票代码
+        latest_date = PositionService.get_latest_date()
+        if not latest_date:
+            return jsonify({'success': True, 'data': {}, 'failed': []})
+
+        positions = PositionService.get_snapshot(latest_date)
+        stock_codes = [p.stock_code for p in positions]
+
+    if not stock_codes:
+        return jsonify({'success': True, 'data': {}, 'failed': []})
+
+    result = PortfolioAdviceBatchService.get_batch_advice(stock_codes)
+    return jsonify(result)

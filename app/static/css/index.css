@@ -263,3 +263,311 @@
         padding: 0.5rem 0.75rem;
     }
 }
+
+/* ========== 持仓操作建议模块 ========== */
+.position-advice-module {
+    margin-top: 1rem;
+}
+
+.position-advice-module .module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.position-advice-module .module-header h5 {
+    margin: 0;
+}
+
+.position-advice-container {
+    min-height: 100px;
+}
+
+.advice-loading,
+.advice-empty,
+.advice-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.advice-error {
+    color: #ef4444;
+}
+
+.advice-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+}
+
+.advice-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.advice-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.advice-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stock-info-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stock-info-section .stock-name {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.stock-info-section .stock-code {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.advice-signal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.advice-signal.signal-buy {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.advice-signal.signal-sell {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.advice-signal.signal-hold {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.advice-signal.signal-watch {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.advice-card-body {
+    padding: 0.75rem 1rem;
+}
+
+.advice-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.advice-row:last-child {
+    margin-bottom: 0;
+}
+
+.advice-item {
+    flex: 1;
+    min-width: 0;
+}
+
+.advice-label {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.advice-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+}
+
+/* 均线信息样式 */
+.ma-trend {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.ma-trend.trend-up {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.ma-trend.trend-down {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.ma-trend.trend-neutral {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.ma-value {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.ma-value.above {
+    border-left: 2px solid #22c55e;
+}
+
+.ma-value.below {
+    border-left: 2px solid #ef4444;
+}
+
+/* 支撑/压力区样式 */
+.zone-position {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.zone-position.pos-support {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.zone-position.pos-resistance {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.zone-position.pos-middle {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.zone-support,
+.zone-resistance {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+}
+
+.zone-support {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.zone-resistance {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* 三角形形态样式 */
+.triangle-type {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.triangle-type.triangle-ascending {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.triangle-type.triangle-descending {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.triangle-type.triangle-symmetric {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.triangle-convergence,
+.triangle-direction {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* 建议理由 */
+.advice-reason {
+    font-size: 0.8rem;
+    color: #374151;
+    line-height: 1.4;
+}
+
+/* 关键价位 */
+.key-prices-row {
+    padding-top: 0.5rem;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.key-prices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.key-price-tag {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    border: 1px solid #bfdbfe;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .advice-list {
+        grid-template-columns: 1fr;
+    }
+
+    .advice-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .advice-content {
+        flex-wrap: wrap;
+    }
+}

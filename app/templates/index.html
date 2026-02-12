@@ -159,6 +159,23 @@
     </div>
 </div>
 
+<!-- 模块5: 持仓操作建议 -->
+<div class="module-card position-advice-module">
+    <div class="module-header">
+        <h5>持仓操作建议</h5>
+        <button class="btn btn-sm btn-outline-primary" id="refreshAdviceBtn" onclick="AdviceManager.loadAdvice(true)">
+            <span class="btn-text">刷新</span>
+            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+        </button>
+    </div>
+    <div id="positionAdviceContainer" class="position-advice-container">
+        <div class="advice-loading">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+</div>
+
 {% else %}
 <div class="empty-state">
     <h4>暂无持仓数据</h4>
@@ -194,6 +211,235 @@
     window.dailyProfitData = {{ daily_profit_data | tojson if daily_profit_data else '{}' }};
     window.dailyProfitBreakdown = {{ daily_profit_breakdown | tojson if daily_profit_breakdown else '[]' }};
     window.profitHistory = {{ profit_history | tojson if profit_history else '{}' }};
+
+    // 操作建议管理器
+    const AdviceManager = {
+        cache: null,
+
+        async loadAdvice(forceRefresh = false) {
+            const container = document.getElementById('positionAdviceContainer');
+            const refreshBtn = document.getElementById('refreshAdviceBtn');
+
+            if (!container) return;
+
+            // 显示加载状态
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.querySelector('.btn-text').classList.add('d-none');
+                refreshBtn.querySelector('.spinner-border').classList.remove('d-none');
+            }
+
+            if (!forceRefresh && this.cache) {
+                this.renderAdvice(this.cache);
+                this.resetButton(refreshBtn);
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="advice-loading">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span>加载操作建议中...</span>
+                </div>
+            `;
+
+            try {
+                const resp = await fetch('/api/portfolio-advice');
+                const result = await resp.json();
+
+                if (result.success) {
+                    this.cache = result.data;
+                    this.renderAdvice(result.data);
+                } else {
+                    container.innerHTML = '<div class="advice-error">加载失败</div>';
+                }
+            } catch (err) {
+                console.error('加载操作建议失败:', err);
+                container.innerHTML = '<div class="advice-error">加载失败</div>';
+            } finally {
+                this.resetButton(refreshBtn);
+            }
+        },
+
+        resetButton(btn) {
+            if (btn) {
+                btn.disabled = false;
+                btn.querySelector('.btn-text').classList.remove('d-none');
+                btn.querySelector('.spinner-border').classList.add('d-none');
+            }
+        },
+
+        renderAdvice(data) {
+            const container = document.getElementById('positionAdviceContainer');
+            if (!container) return;
+
+            const positions = window.currentPositions || [];
+            if (positions.length === 0 || Object.keys(data).length === 0) {
+                container.innerHTML = '<div class="advice-empty">暂无操作建议</div>';
+                return;
+            }
+
+            let html = '<div class="advice-list">';
+
+            positions.forEach(pos => {
+                const advice = data[pos.stock_code];
+                if (!advice) return;
+
+                const signalClass = this.getSignalClass(advice.advice?.signal);
+                const signalText = advice.advice?.signal_text || '观望';
+
+                html += `
+                <div class="advice-card" data-code="${pos.stock_code}">
+                    <div class="advice-card-header">
+                        <div class="stock-info-section">
+                            <span class="stock-name">${pos.stock_name}</span>
+                            <span class="stock-code">${pos.stock_code}</span>
+                        </div>
+                        <div class="advice-signal ${signalClass}">${signalText}</div>
+                    </div>
+                    <div class="advice-card-body">
+                        <div class="advice-row">
+                            <div class="advice-item ma-info">
+                                <div class="advice-label">均线信息</div>
+                                <div class="advice-content">
+                                    ${this.renderMAInfo(advice.ma, advice.current_price)}
+                                </div>
+                            </div>
+                            <div class="advice-item zone-info">
+                                <div class="advice-label">支撑/压力</div>
+                                <div class="advice-content">
+                                    ${this.renderZones(advice.zones, advice.current_price)}
+                                </div>
+                            </div>
+                        </div>
+                        ${advice.triangle?.detected ? `
+                        <div class="advice-row">
+                            <div class="advice-item triangle-info">
+                                <div class="advice-label">形态识别</div>
+                                <div class="advice-content">
+                                    ${this.renderTriangle(advice.triangle)}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="advice-row">
+                            <div class="advice-item reason-info">
+                                <div class="advice-label">建议理由</div>
+                                <div class="advice-content advice-reason">${advice.advice?.reason || '-'}</div>
+                            </div>
+                        </div>
+                        ${advice.advice?.key_prices?.length > 0 ? `
+                        <div class="advice-row key-prices-row">
+                            <div class="advice-item">
+                                <div class="advice-label">关键价位</div>
+                                <div class="advice-content key-prices">
+                                    ${advice.advice.key_prices.map(p => `<span class="key-price-tag">${p}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        },
+
+        getSignalClass(signal) {
+            const map = {
+                'buy': 'signal-buy',
+                'sell': 'signal-sell',
+                'hold': 'signal-hold',
+                'watch': 'signal-watch'
+            };
+            return map[signal] || 'signal-watch';
+        },
+
+        renderMAInfo(ma, currentPrice) {
+            if (!ma) return '-';
+
+            const items = [];
+            const trend = ma.trend || '';
+            const trendClass = trend.includes('多头') ? 'trend-up' : (trend.includes('空头') ? 'trend-down' : 'trend-neutral');
+
+            items.push(`<span class="ma-trend ${trendClass}">${trend}</span>`);
+
+            if (ma.ma5) {
+                const ma5Class = currentPrice > ma.ma5 ? 'above' : 'below';
+                items.push(`<span class="ma-value ${ma5Class}">MA5: ${ma.ma5}</span>`);
+            }
+            if (ma.ma20) {
+                const ma20Class = currentPrice > ma.ma20 ? 'above' : 'below';
+                items.push(`<span class="ma-value ${ma20Class}">MA20: ${ma.ma20}</span>`);
+            }
+            if (ma.ma60) {
+                const ma60Class = currentPrice > ma.ma60 ? 'above' : 'below';
+                items.push(`<span class="ma-value ${ma60Class}">MA60: ${ma.ma60}</span>`);
+            }
+
+            return items.join('');
+        },
+
+        renderZones(zones, currentPrice) {
+            if (!zones) return '-';
+
+            const items = [];
+
+            // 当前位置
+            if (zones.position) {
+                const posMap = {
+                    'near_support': '接近支撑',
+                    'near_resistance': '接近压力',
+                    'middle': '中间区域'
+                };
+                const posClass = zones.position === 'near_support' ? 'pos-support' :
+                                 (zones.position === 'near_resistance' ? 'pos-resistance' : 'pos-middle');
+                items.push(`<span class="zone-position ${posClass}">${posMap[zones.position] || zones.position}</span>`);
+            }
+
+            // 支撑区
+            if (zones.support_zone) {
+                items.push(`<span class="zone-support">支撑: ${zones.support_zone.min}-${zones.support_zone.max}</span>`);
+            } else if (zones.support?.length > 0) {
+                items.push(`<span class="zone-support">支撑: ${zones.support[0].price}</span>`);
+            }
+
+            // 压力区
+            if (zones.resistance_zone) {
+                items.push(`<span class="zone-resistance">压力: ${zones.resistance_zone.min}-${zones.resistance_zone.max}</span>`);
+            } else if (zones.resistance?.length > 0) {
+                items.push(`<span class="zone-resistance">压力: ${zones.resistance[0].price}</span>`);
+            }
+
+            return items.join('');
+        },
+
+        renderTriangle(triangle) {
+            if (!triangle || !triangle.detected) return '';
+
+            const typeMap = {
+                'ascending': '上升三角形',
+                'descending': '下降三角形',
+                'symmetric': '对称三角形'
+            };
+            const directionMap = {
+                'up': '向上突破',
+                'down': '向下突破',
+                'uncertain': '方向待定'
+            };
+
+            const typeName = typeMap[triangle.type] || triangle.type;
+            const direction = directionMap[triangle.breakout_direction] || '';
+            const convergence = triangle.convergence || 0;
+
+            return `
+                <span class="triangle-type triangle-${triangle.type}">${typeName}</span>
+                <span class="triangle-convergence">收敛度: ${convergence}%</span>
+                <span class="triangle-direction">${direction}</span>
+            `;
+        }
+    };
 
     // 预加载管理器
     const PreloadManager = {
@@ -303,6 +549,9 @@
             Charts.renderCategoryProfitChart(window.dailyProfitData);
             Charts.renderDailyProfitBarChart(window.profitHistory);
             Charts.renderCumulativeProfitChart(window.profitHistory);
+
+            // 加载操作建议
+            AdviceManager.loadAdvice();
         }
 
         // 检查并启动预加载
