@@ -2632,6 +2632,114 @@ class UnifiedStockDataService:
 
         return result
 
+    # ============ 每日简报专用（仅缓存） ============
+
+    def get_closing_prices(self, stock_codes: list) -> dict:
+        """获取收盘价数据（仅从缓存读取，不发起API请求）
+
+        用于每日简报等不需要实时数据的场景，只返回已缓存的收盘价。
+        优先使用今日价格缓存，如果没有则尝试使用最近的缓存数据。
+
+        Args:
+            stock_codes: 股票代码列表
+
+        Returns:
+            {stock_code: {'current_price': float, 'change_percent': float, ...}} 字典
+        """
+        if not stock_codes:
+            return {}
+
+        today = date.today()
+        cache_type = 'price'
+
+        result = {}
+
+        # 入口日志
+        logger.info(f"[收盘价] 开始获取(仅缓存): {len(stock_codes)}只")
+
+        # 第一层：内存缓存
+        memory_cached = memory_cache.get_batch(stock_codes, cache_type)
+        for code, data in memory_cached.items():
+            result[code] = data
+        remaining_codes = [c for c in stock_codes if c not in memory_cached]
+
+        if not remaining_codes:
+            logger.info(f"[收盘价] 完成: 全部内存缓存命中 {len(result)}只")
+            return result
+
+        # 第二层：数据库缓存（今日）
+        cached_data = UnifiedStockCache.get_cache_with_status(remaining_codes, cache_type, today)
+        for code, cache_info in cached_data.items():
+            if cache_info and cache_info.get('data'):
+                result[code] = cache_info['data']
+                memory_cache.set(code, cache_type, cache_info['data'], stable=True)
+        remaining_codes = [c for c in remaining_codes if c not in cached_data]
+
+        # 第三层：尝试获取过期缓存（最近7天的缓存）
+        for code in remaining_codes:
+            for days_ago in range(1, 8):
+                cache_date = today - timedelta(days=days_ago)
+                cached = UnifiedStockCache.get_cached_data(code, cache_type, cache_date)
+                if cached:
+                    # 标记为降级数据
+                    cached['_is_degraded'] = True
+                    result[code] = cached
+                    stock_name = self._get_stock_name(code, cached)
+                    logger.debug(f"[收盘价] {code} {stock_name} 使用{days_ago}天前的缓存")
+                    break
+
+        cache_hit = len(result)
+        cache_miss = len(stock_codes) - cache_hit
+        logger.info(f"[收盘价] 完成(仅缓存): 请求 {len(stock_codes)}只, 命中 {cache_hit}只, 未命中 {cache_miss}只")
+
+        return result
+
+    def get_cached_quotes(self, symbols: list, cache_type: str) -> dict:
+        """获取缓存的报价数据（仅从缓存读取，不发起API请求）
+
+        用于每日简报获取指数、期货等数据，只返回已缓存的数据。
+
+        Args:
+            symbols: 代码列表
+            cache_type: 缓存类型标识
+
+        Returns:
+            {symbol: {'close': float, 'change_percent': float, ...}} 字典
+        """
+        if not symbols:
+            return {}
+
+        today = date.today()
+
+        result = {}
+
+        # 入口日志
+        logger.info(f"[缓存报价] 开始获取: {len(symbols)}只 (cache_type={cache_type})")
+
+        # 从数据库缓存获取（今日）
+        for sym in symbols:
+            cached = UnifiedStockCache.get_cached_data(sym, cache_type, today)
+            if cached:
+                result[sym] = cached
+                self._hit_count += 1
+                continue
+
+            # 尝试获取过期缓存（最近7天）
+            for days_ago in range(1, 8):
+                cache_date = today - timedelta(days=days_ago)
+                cached = UnifiedStockCache.get_cached_data(sym, cache_type, cache_date)
+                if cached:
+                    cached['_is_degraded'] = True
+                    result[sym] = cached
+                    logger.debug(f"[缓存报价] {sym} 使用{days_ago}天前的缓存")
+                    break
+
+        cache_hit = len(result)
+        cache_miss = len(symbols) - cache_hit
+        logger.info(f"[缓存报价] 完成: 请求 {len(symbols)}只, 命中 {cache_hit}只, 未命中 {cache_miss}只")
+
+        return result
+
     # ============ 缓存管理 ============
 
     def get_cache_stats(self) -> CacheStats:
