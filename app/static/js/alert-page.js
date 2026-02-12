@@ -723,10 +723,23 @@ const AlertPage = {
 
             if (totalCount >= MAX_STOCKS) break;
 
+            // 应用信号类型过滤
+            const stockAlerts = this.data.alerts[stock.code] || [];
+            let filteredAlerts = stockAlerts;
+            if (this.filter.signalType !== 'all') {
+                filteredAlerts = stockAlerts.filter(a => a.type === this.filter.signalType);
+            }
+
+            // 只显示有信号的股票
+            if (filteredAlerts.length === 0) continue;
+
             if (!categoryStocks[catId]) {
                 categoryStocks[catId] = [];
             }
-            categoryStocks[catId].push(stock);
+            categoryStocks[catId].push({
+                ...stock,
+                alerts: filteredAlerts
+            });
             totalCount++;
         }
 
@@ -1015,6 +1028,9 @@ const AlertPage = {
             if (this.filter.signalType !== 'all') {
                 filteredAlerts = stockAlerts.filter(a => a.type === this.filter.signalType);
             }
+
+            // 只显示有信号的股票卡片
+            if (filteredAlerts.length === 0) continue;
 
             categoryData[catId].stocks.push({
                 ...stock,
