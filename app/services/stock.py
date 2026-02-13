@@ -22,6 +22,7 @@ class StockService:
             r'^\d{5}\.HK$',       # 港股
             r'^\d{4}\.TW$',       # 台股
             r'^\d{6}\.KS$',       # 韩股
+            r'^[0-9A-Z]{3,4}\.T$',  # 日股
         ]
         return any(re.match(pattern, code, re.IGNORECASE) for pattern in patterns)
 
