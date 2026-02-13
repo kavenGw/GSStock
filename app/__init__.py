@@ -139,6 +139,10 @@ def create_app(config_class=None):
 
     db.init_app(app)
 
+    # CockroachDB: patch Session.execute 自动重试读查询
+    from app.utils.db_retry import setup_db_retry
+    setup_db_retry(db, app)
+
     from app.services.migration import check_migration_needed, migrate_to_dual_db, cleanup_legacy_tables, get_db_paths
     if check_migration_needed(app):
         logging.info("检测到需要数据迁移，开始执行...")
@@ -205,10 +209,13 @@ def create_app(config_class=None):
     from app.services.ocr import preload_model
     preload_model()
 
-    # 预加载走势看板数据
+    # 预加载数据（简报优先，走势看板其次）
     if not app.config.get('READONLY_MODE'):
-        from app.services.heavy_metals_preload import start_background_preload
-        start_background_preload(app)
+        from app.services.briefing_preload import start_background_preload as start_briefing_preload
+        start_briefing_preload(app)
+
+        from app.services.heavy_metals_preload import start_background_preload as start_heavy_metals_preload
+        start_heavy_metals_preload(app)
 
     # 添加只读模式上下文处理器
     @app.context_processor

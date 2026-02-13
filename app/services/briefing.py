@@ -37,6 +37,7 @@ BRIEFING_STOCKS = [
     {'code': '005930.KS', 'name': '三星电子', 'market': 'KR', 'category': 'storage'},
     {'code': '000660.KS', 'name': 'SK海力士', 'market': 'KR', 'category': 'storage'},
     {'code': 'STX', 'name': '希捷', 'market': 'US', 'category': 'storage'},
+    {'code': '285A.T', 'name': '铠侠', 'market': 'JP', 'category': 'storage'},
     {'code': 'AMD', 'name': 'AMD', 'market': 'US', 'category': 'cpu'},
     {'code': 'INTC', 'name': '英特尔', 'market': 'US', 'category': 'cpu'},
 ]
@@ -753,7 +754,7 @@ class BriefingService:
     def get_sector_ratings(stocks_data: dict = None, force_refresh: bool = False) -> dict:
         """获取板块评级数据
 
-        根据美股存储板块（WDC、MU、SNDK）的表现，计算综合评分并生成评级。
+        根据存储板块（WDC、MU、SNDK、铠侠）的表现，计算综合评分并生成评级。
         评分算法：涨跌幅(60%) + 一致性(30%) + 成交量(10%)
 
         Args:

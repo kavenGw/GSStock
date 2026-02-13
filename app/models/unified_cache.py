@@ -8,10 +8,9 @@ import logging
 from datetime import datetime, date
 from sqlalchemy.exc import OperationalError
 from app import db
+from app.utils.db_retry import is_retryable_error, with_db_retry, MAX_RETRIES
 
 logger = logging.getLogger(__name__)
-
-MAX_RETRIES = 3
 
 
 class UnifiedStockCache(db.Model):
@@ -103,6 +102,7 @@ class UnifiedStockCache(db.Model):
         return None
 
     @classmethod
+    @with_db_retry
     def set_cached_data(cls, stock_code: str, cache_type: str, data: dict | list,
                         cache_date: date = None, is_complete: bool = False,
                         data_end_date: date = None) -> 'UnifiedStockCache':
@@ -110,33 +110,25 @@ class UnifiedStockCache(db.Model):
         if cache_date is None:
             cache_date = date.today()
 
-        for attempt in range(MAX_RETRIES):
-            try:
-                cache = cls.query.filter_by(
-                    stock_code=stock_code,
-                    cache_type=cache_type,
-                    cache_date=cache_date
-                ).first()
+        cache = cls.query.filter_by(
+            stock_code=stock_code,
+            cache_type=cache_type,
+            cache_date=cache_date
+        ).first()
 
-                if cache:
-                    cache.set_data(data, is_complete, data_end_date)
-                else:
-                    cache = cls(
-                        stock_code=stock_code,
-                        cache_type=cache_type,
-                        cache_date=cache_date,
-                    )
-                    cache.set_data(data, is_complete, data_end_date)
-                    db.session.add(cache)
+        if cache:
+            cache.set_data(data, is_complete, data_end_date)
+        else:
+            cache = cls(
+                stock_code=stock_code,
+                cache_type=cache_type,
+                cache_date=cache_date,
+            )
+            cache.set_data(data, is_complete, data_end_date)
+            db.session.add(cache)
 
-                db.session.commit()
-                return cache
-            except OperationalError as e:
-                db.session.rollback()
-                if ('SerializationFailure' in str(e) or 'restart transaction' in str(e)) and attempt < MAX_RETRIES - 1:
-                    logger.warning(f"[CockroachDB] set_cached_data {stock_code} 序列化冲突，重试 {attempt + 1}")
-                    continue
-                raise
+        db.session.commit()
+        return cache
 
     @classmethod
     def get_batch_cached_data(cls, stock_codes: list, cache_type: str,
@@ -208,6 +200,7 @@ class UnifiedStockCache(db.Model):
         return {cache.stock_code: cache.last_fetch_time for cache in caches}
 
     @classmethod
+    @with_db_retry
     def clear_cache(cls, stock_codes: list = None, cache_type: str = None,
                     cache_date: date = None) -> int:
         """清除缓存
@@ -220,25 +213,17 @@ class UnifiedStockCache(db.Model):
         Returns:
             删除的记录数
         """
-        for attempt in range(MAX_RETRIES):
-            try:
-                query = cls.query
-                if stock_codes:
-                    query = query.filter(cls.stock_code.in_(stock_codes))
-                if cache_type:
-                    query = query.filter_by(cache_type=cache_type)
-                if cache_date:
-                    query = query.filter_by(cache_date=cache_date)
+        query = cls.query
+        if stock_codes:
+            query = query.filter(cls.stock_code.in_(stock_codes))
+        if cache_type:
+            query = query.filter_by(cache_type=cache_type)
+        if cache_date:
+            query = query.filter_by(cache_date=cache_date)
 
-                count = query.delete(synchronize_session=False)
-                db.session.commit()
-                return count
-            except OperationalError as e:
-                db.session.rollback()
-                if ('SerializationFailure' in str(e) or 'restart transaction' in str(e)) and attempt < MAX_RETRIES - 1:
-                    logger.warning(f"[CockroachDB] clear_cache 序列化冲突，重试 {attempt + 1}")
-                    continue
-                raise
+        count = query.delete(synchronize_session=False)
+        db.session.commit()
+        return count
 
     @classmethod
     def get_complete_cache(cls, stock_codes: list, cache_type: str,
@@ -273,6 +258,7 @@ class UnifiedStockCache(db.Model):
         return result
 
     @classmethod
+    @with_db_retry
     def mark_complete(cls, stock_code: str, cache_type: str,
                       cache_date: date = None, data_end_date: date = None) -> bool:
         """标记缓存数据为完整
@@ -289,29 +275,21 @@ class UnifiedStockCache(db.Model):
         if cache_date is None:
             cache_date = date.today()
 
-        for attempt in range(MAX_RETRIES):
-            try:
-                cache = cls.query.filter_by(
-                    stock_code=stock_code,
-                    cache_type=cache_type,
-                    cache_date=cache_date
-                ).first()
+        cache = cls.query.filter_by(
+            stock_code=stock_code,
+            cache_type=cache_type,
+            cache_date=cache_date
+        ).first()
 
-                if not cache:
-                    return False
+        if not cache:
+            return False
 
-                cache.is_complete = True
-                if data_end_date:
-                    cache.data_end_date = data_end_date
-                cache.updated_at = datetime.now()
-                db.session.commit()
-                return True
-            except OperationalError as e:
-                db.session.rollback()
-                if ('SerializationFailure' in str(e) or 'restart transaction' in str(e)) and attempt < MAX_RETRIES - 1:
-                    logger.warning(f"[CockroachDB] mark_complete {stock_code} 序列化冲突，重试 {attempt + 1}")
-                    continue
-                raise
+        cache.is_complete = True
+        if data_end_date:
+            cache.data_end_date = data_end_date
+        cache.updated_at = datetime.now()
+        db.session.commit()
+        return True
 
     @classmethod
     def get_data_end_dates(cls, stock_codes: list, cache_type: str,

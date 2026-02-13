@@ -33,6 +33,7 @@ class MarketIdentifier:
             'HK' - 港股 (.HK后缀)
             'TW' - 台股 (.TW后缀)
             'KR' - 韩股 (.KS后缀)
+            'JP' - 日股 (.T后缀)
             None - 无法识别
         """
         if not code or not isinstance(code, str):
@@ -52,6 +53,10 @@ class MarketIdentifier:
         # 韩股：以.KS结尾
         if code.upper().endswith('.KS'):
             return 'KR'
+
+        # 日股：以.T结尾
+        if code.upper().endswith('.T'):
+            return 'JP'
 
         # 美股指数：以^开头（如 ^GSPC, ^DJI, ^IXIC, ^VIX）
         if code.startswith('^'):

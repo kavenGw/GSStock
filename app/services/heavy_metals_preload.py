@@ -43,6 +43,8 @@ def _do_preload():
             FuturesService.get_category_trend_data(category, 30, False)
             logger.debug(f'[预加载] {category} 完成')
         except Exception as e:
+            from app import db
+            db.session.rollback()
             logger.warning(f'[预加载] {category} 失败: {e}')
 
     logger.info('[预加载] 走势看板数据预加载完成')

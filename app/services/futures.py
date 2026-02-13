@@ -2,6 +2,8 @@ import logging
 from datetime import date, datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from app.utils.db_retry import with_db_retry
+
 from app import db
 from app.models.metal_trend_cache import MetalTrendCache
 from app.models.index_trend_cache import IndexTrendCache
@@ -220,6 +222,7 @@ class FuturesService:
         return {c.date: {'price': c.price, 'volume': c.volume} for c in cached}
 
     @staticmethod
+    @with_db_retry
     def _save_to_cache(metal_code: str, data_points: list[dict]):
         """保存价格和成交量数据到缓存"""
         for dp in data_points:
@@ -253,6 +256,7 @@ class FuturesService:
         return {c.date: {'price': c.price, 'volume': c.volume} for c in cached}
 
     @staticmethod
+    @with_db_retry
     def _save_index_to_cache(index_code: str, data_points: list[dict]):
         """保存指数价格和成交量数据到缓存"""
         for dp in data_points:

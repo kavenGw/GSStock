@@ -3,7 +3,7 @@
 SECTOR_RATING_CONFIG = {
     'storage': {
         'name': '存储板块',
-        'stocks': ['WDC', 'MU', 'SNDK'],
+        'stocks': ['WDC', 'MU', 'SNDK', '285A.T'],
         'weights': {
             'change': 0.6,
             'consistency': 0.3,
