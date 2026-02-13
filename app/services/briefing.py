@@ -7,7 +7,7 @@
 - 板块评级（根据美股表现评级A股板块风险）
 """
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Optional
 
 from app.config.sector_ratings import SECTOR_RATING_CONFIG
