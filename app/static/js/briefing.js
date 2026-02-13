@@ -6,18 +6,18 @@ class BriefingPage {
     static earningsData = null;
     static technicalData = null;
     static stocksRendered = false;
+    static aiEnabled = false;
 
     static init() {
         this.bindAdviceEvents();
+        this.bindAIEvents();
+        this.checkAIStatus();
 
-        // 立即显示内容区域，各section独立加载
         document.getElementById('dataContent').classList.remove('d-none');
         document.getElementById('loadingState').classList.add('d-none');
 
-        // 设置各容器的加载占位
         this.setLoadingPlaceholders();
 
-        // 并行请求所有数据
         this.loadStocks();
         this.loadStocksPE();
         this.loadStocksEarnings();
@@ -84,6 +84,103 @@ class BriefingPage {
         popover.style.top = top + 'px';
         popover.style.left = left + 'px';
         popover.querySelector('.advice-popover-close').addEventListener('click', () => popover.remove());
+    }
+
+    static async checkAIStatus() {
+        try {
+            const resp = await fetch('/briefing/api/ai/status');
+            const data = await resp.json();
+            this.aiEnabled = data.enabled;
+            if (this.aiEnabled) {
+                document.querySelectorAll('.bc-ai').forEach(el => el.classList.remove('d-none'));
+            }
+        } catch (e) {
+            console.error('检查AI状态失败:', e);
+        }
+    }
+
+    static bindAIEvents() {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.bc-ai-btn');
+            if (!btn) return;
+            e.stopPropagation();
+            const container = btn.closest('.bc-ai');
+            const code = container.dataset.code;
+            const name = container.dataset.name;
+
+            const existingResult = container.querySelector('.bc-ai-result');
+            if (existingResult) {
+                existingResult.remove();
+                return;
+            }
+
+            this.fetchAIAnalysis(btn, container, code, name);
+        });
+    }
+
+    static async fetchAIAnalysis(btn, container, code, name) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" style="width:10px;height:10px"></span>';
+
+        try {
+            const resp = await fetch('/briefing/api/ai/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({stock_code: code, stock_name: name})
+            });
+            const result = await resp.json();
+            if (result.error) throw new Error(result.error);
+            this.renderAIResult(container, result);
+        } catch (e) {
+            console.error(`AI分析 ${code} 失败:`, e);
+            const errDiv = document.createElement('div');
+            errDiv.className = 'bc-ai-result';
+            errDiv.innerHTML = `<span style="color:#dc3545">分析失败: ${e.message}</span>`;
+            container.appendChild(errDiv);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-robot"></i> AI';
+        }
+    }
+
+    static renderAIResult(container, result) {
+        container.querySelector('.bc-ai-result')?.remove();
+
+        const signalMap = {
+            'STRONG_BUY': {text: '强烈买入', bg: '#28a745'},
+            'BUY': {text: '买入', bg: '#20c997'},
+            'HOLD': {text: '持有', bg: '#ffc107'},
+            'SELL': {text: '卖出', bg: '#fd7e14'},
+            'STRONG_SELL': {text: '强烈卖出', bg: '#dc3545'}
+        };
+        const sig = signalMap[result.signal] || {text: result.signal || '--', bg: '#6c757d'};
+
+        const analysis = result.analysis || {};
+        const plan = result.action_plan || {};
+
+        let html = `<div class="bc-ai-result">`;
+        html += `<div style="margin-bottom:4px"><span class="bc-ai-signal" style="background:${sig.bg};color:#fff">${sig.text}</span>`;
+        if (result.score !== undefined) html += ` <span style="font-weight:600">${result.score}分</span>`;
+        if (result.from_cache) html += ` <span style="color:#aaa;font-size:0.6rem">缓存</span>`;
+        html += `</div>`;
+
+        if (result.conclusion) html += `<div style="margin-bottom:4px;font-weight:500">${result.conclusion}</div>`;
+
+        const details = [];
+        if (analysis.trend) details.push(`趋势: ${analysis.trend}`);
+        if (analysis.volume) details.push(`量能: ${analysis.volume}`);
+        if (analysis.risk) details.push(`风险: ${analysis.risk}`);
+        if (details.length) html += `<div style="color:#666;margin-bottom:4px">${details.join(' | ')}</div>`;
+
+        const planItems = [];
+        if (plan.buy_price) planItems.push(`买入:${plan.buy_price}`);
+        if (plan.stop_loss) planItems.push(`止损:${plan.stop_loss}`);
+        if (plan.target_price) planItems.push(`目标:${plan.target_price}`);
+        if (planItems.length) html += `<div style="color:#888">${planItems.join(' | ')}</div>`;
+        if (plan.position_advice) html += `<div style="color:#888">${plan.position_advice}</div>`;
+
+        html += `</div>`;
+        container.insertAdjacentHTML('beforeend', html);
     }
 
     // ========== 数据加载 ==========
@@ -437,6 +534,9 @@ class BriefingPage {
                     <div class="bc-secondary">
                         ${stock.market !== 'A' ? `<span class="stock-pe" data-code="${stock.code}"></span>` : ''}
                         <span class="stock-earnings" data-code="${stock.code}"></span>
+                    </div>
+                    <div class="bc-ai ${this.aiEnabled ? '' : 'd-none'}" data-code="${stock.code}" data-name="${stock.name}">
+                        <button class="bc-ai-btn" title="AI分析"><i class="bi bi-robot"></i> AI</button>
                     </div>
                 `}
             </div>
