@@ -78,6 +78,8 @@ class DailyRecordService:
                 today_pos_dict = {p.stock_code: p for p in today_positions}
                 trade_by_stock = {}
                 for t in trades:
+                    if not t.stock_code:
+                        continue
                     if t.stock_code not in trade_by_stock:
                         trade_by_stock[t.stock_code] = {'buy': 0, 'sell': 0}
                     if t.trade_type == 'buy':
@@ -85,7 +87,8 @@ class DailyRecordService:
                     else:
                         trade_by_stock[t.stock_code]['sell'] += t.amount
 
-                all_stocks = set(today_pos_dict.keys()) | set(prev_pos_map.keys())
+                # 合并所有相关股票（持仓 + 交易），避免遗漏仅有交易但无持仓的股票
+                all_stocks = set(today_pos_dict.keys()) | set(prev_pos_map.keys()) | set(trade_by_stock.keys())
                 theoretical_profit = 0
                 for code in all_stocks:
                     today_p = today_pos_dict.get(code)
@@ -95,8 +98,8 @@ class DailyRecordService:
                     td = trade_by_stock.get(code, {'buy': 0, 'sell': 0})
                     theoretical_profit += today_mv - prev_mv + td['sell'] - td['buy']
 
-                daily_fee = theoretical_profit - daily_profit
-                result['daily_fee'] = round(max(0, daily_fee), 2)
+                daily_fee = round(theoretical_profit - daily_profit, 2)
+                result['daily_fee'] = daily_fee
             else:
                 # 无快照时回退到 Trade.fee 累加
                 result['daily_fee'] = round(sum(t.fee or 0 for t in trades), 2)
@@ -116,6 +119,8 @@ class DailyRecordService:
         trades = Trade.query.filter_by(trade_date=target_date).all()
         trade_by_stock = {}
         for t in trades:
+            if not t.stock_code:
+                continue
             if t.stock_code not in trade_by_stock:
                 trade_by_stock[t.stock_code] = {'buy': 0, 'sell': 0, 'fee': 0}
             if t.trade_type == 'buy':
@@ -124,8 +129,8 @@ class DailyRecordService:
                 trade_by_stock[t.stock_code]['sell'] += t.amount
             trade_by_stock[t.stock_code]['fee'] += t.fee or 0
 
-        # 汇总所有相关股票代码
-        all_stocks = set(today_positions.keys()) | set(prev_positions.keys())
+        # 合并所有相关股票（持仓 + 交易），避免遗漏仅有交易但无持仓的股票
+        all_stocks = set(today_positions.keys()) | set(prev_positions.keys()) | set(trade_by_stock.keys())
 
         breakdown = []
         for code in all_stocks:

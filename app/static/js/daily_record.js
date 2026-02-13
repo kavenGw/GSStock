@@ -748,26 +748,46 @@ function initDailyRecordPage() {
             const data = await response.json();
             if (data.success) {
                 const d = data.detail;
+                const fmt = v => (v >= 0 ? '+' : '') + v.toLocaleString('zh-CN', {minimumFractionDigits: 2});
                 let html = '<div class="account-info-grid">';
                 if (d.theoretical_profit !== null) {
                     html += `
                         <div class="account-info-item">
                             <span class="label">理论盈亏</span>
-                            <span class="value">${d.theoretical_profit >= 0 ? '+' : ''}${d.theoretical_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                            <span class="value">${fmt(d.theoretical_profit)}</span>
                         </div>
                         <div class="account-info-item">
                             <span class="label">实际盈亏</span>
-                            <span class="value">${d.actual_profit >= 0 ? '+' : ''}${d.actual_profit.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                            <span class="value">${fmt(d.actual_profit)}</span>
                         </div>`;
                 }
                 html += `
                     <div class="account-info-item">
-                        <span class="label">手续费</span>
-                        <span class="value text-danger">${data.fee.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</span>
+                        <span class="label">手续费${data.is_abnormal ? '(异常)' : ''}</span>
+                        <span class="value ${data.is_abnormal ? 'text-warning' : 'text-danger'}">${fmt(data.fee)}</span>
                     </div>
                 </div>`;
+                if (data.is_abnormal) {
+                    html += `<small class="text-warning d-block mt-1">手续费为负值，说明实际盈亏 > 理论盈亏，请检查持仓/交易/转账数据是否完整</small>`;
+                }
                 if (d.note) {
                     html += `<small class="text-muted d-block mt-1">${d.note}</small>`;
+                }
+                // 计算过程明细
+                if (d.theoretical_profit !== null) {
+                    html += `<div class="mt-2" style="font-size:0.8rem;color:#6c757d">`;
+                    html += `<div>公式: 手续费 = 理论盈亏 - 实际盈亏 = ${fmt(d.theoretical_profit)} - (${fmt(d.actual_profit)}) = ${fmt(data.fee)}</div>`;
+                    html += `<div>实际盈亏 = 今日总资产(${d.today_total_asset.toLocaleString()}) - 前日总资产(${d.prev_total_asset.toLocaleString()}) - 净转入(${d.net_transfer.toLocaleString()}) = ${fmt(d.actual_profit)}</div>`;
+                    if (d.stock_details && d.stock_details.length > 0) {
+                        html += `<details class="mt-1"><summary>各股票理论盈亏明细 (${d.stock_details.length}只)</summary>`;
+                        html += `<table class="table table-sm table-bordered mt-1" style="font-size:0.75rem"><thead><tr><th>代码</th><th>今日市值</th><th>前日市值</th><th>买入</th><th>卖出</th><th>理论盈亏</th></tr></thead><tbody>`;
+                        for (const s of d.stock_details) {
+                            const cls = s.profit > 0 ? 'text-danger' : s.profit < 0 ? 'text-success' : '';
+                            html += `<tr><td>${s.code}</td><td>${s.today_mv.toLocaleString()}</td><td>${s.prev_mv.toLocaleString()}</td><td>${s.buy.toLocaleString()}</td><td>${s.sell.toLocaleString()}</td><td class="${cls}">${fmt(s.profit)}</td></tr>`;
+                        }
+                        html += `</tbody></table></details>`;
+                    }
+                    html += `</div>`;
                 }
                 resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';

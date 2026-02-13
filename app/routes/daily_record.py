@@ -306,25 +306,42 @@ def api_calc_fee():
         else:
             trade_by_stock[code]['sell'] += amount
 
-    all_stocks = set(today_pos_map.keys()) | set(prev_pos_map.keys())
+    # 合并所有相关股票（持仓 + 交易），避免遗漏仅有交易但无持仓的股票
+    all_stocks = set(today_pos_map.keys()) | set(prev_pos_map.keys()) | set(trade_by_stock.keys())
     theoretical_profit = 0
-    for code in all_stocks:
+    stock_details = []
+    for code in sorted(all_stocks):
         today_mv = today_pos_map.get(code, {}).get('market_value', 0)
         prev_p = prev_pos_map.get(code)
         prev_mv = prev_p.current_price * prev_p.quantity if prev_p else 0
         td = trade_by_stock.get(code, {'buy': 0, 'sell': 0})
-        theoretical_profit += today_mv - prev_mv + td['sell'] - td['buy']
+        stock_profit = today_mv - prev_mv + td['sell'] - td['buy']
+        theoretical_profit += stock_profit
+        stock_details.append({
+            'code': code,
+            'today_mv': round(today_mv, 2),
+            'prev_mv': round(prev_mv, 2),
+            'buy': round(td['buy'], 2),
+            'sell': round(td['sell'], 2),
+            'profit': round(stock_profit, 2),
+        })
 
-    fee = max(0, round(theoretical_profit - actual_profit, 2))
+    fee = round(theoretical_profit - actual_profit, 2)
+    # 负值表示数据异常（实际盈亏 > 理论盈亏）
+    is_abnormal = fee < 0
 
     return jsonify({
         'success': True,
         'fee': fee,
+        'is_abnormal': is_abnormal,
         'detail': {
             'theoretical_profit': round(theoretical_profit, 2),
             'actual_profit': round(actual_profit, 2),
             'prev_date': prev_date.isoformat(),
             'prev_total_asset': round(prev_total_asset, 2),
+            'net_transfer': round(net_transfer, 2),
+            'today_total_asset': round(total_asset, 2),
+            'stock_details': stock_details,
         }
     })
 

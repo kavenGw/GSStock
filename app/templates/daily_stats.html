@@ -29,8 +29,11 @@
                 </h2>
                 <div class="text-muted">
                     <p class="mb-0">前日总资产: {{ '%.2f'|format(stats.summary.prev_total_asset) }}</p>
-                    {% if stats.summary.daily_fee %}
-                    <p class="mb-0">当日手续费: {{ '%.2f'|format(stats.summary.daily_fee) }}</p>
+                    {% if stats.summary.daily_fee is not none and stats.summary.daily_fee != 0 %}
+                    <p class="mb-0 {% if stats.summary.daily_fee < 0 %}text-warning{% endif %}">
+                        当日手续费: {{ '%+.2f'|format(stats.summary.daily_fee) }}
+                        {% if stats.summary.daily_fee < 0 %}(异常: 实际盈亏 > 理论盈亏){% endif %}
+                    </p>
                     {% endif %}
                 </div>
                 {% else %}
