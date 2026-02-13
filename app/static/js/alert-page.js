@@ -175,7 +175,8 @@ const AlertPage = {
         categories: [],
         alerts: {},
         summary: { high: 0, medium: 0, low: 0 },
-        earningsData: {}
+        earningsData: {},
+        signalCache: new Map()
     },
 
     // 配置
@@ -518,6 +519,7 @@ const AlertPage = {
             this.data.earningsData = {};
 
             this.renderCategoryToggles();
+            this.computeAllSignals();
             this.evaluateAlerts();
             this.render();
 
@@ -634,44 +636,21 @@ const AlertPage = {
     },
 
     /**
-     * 评估预警
+     * 计算所有股票的信号并缓存（仅在OHLC数据变化或阈值变化时调用）
      */
-    evaluateAlerts() {
-        const alerts = {};
-        const summary = { high: 0, medium: 0, low: 0 };
-
-        // 如果没有启用任何分类，显示空状态
-        if (this.config.enabledCategories.size === 0) {
-            this.data.alerts = alerts;
-            this.data.summary = summary;
-            return;
-        }
+    computeAllSignals() {
+        this.data.signalCache.clear();
 
         this.data.stocks.forEach(stock => {
-            const categoryId = Number(stock.categoryId || 0);
-
-            // 检查分类是否启用
-            if (!this.config.enabledCategories.has(categoryId)) {
-                return;
-            }
-
             const ohlcData = this.data.ohlcData[stock.code];
-            if (!ohlcData || ohlcData.length < 20) {
-                return;
-            }
+            if (!ohlcData || ohlcData.length < 20) return;
 
             try {
                 const result = SignalDetector.detectAll(ohlcData, this.config.thresholds);
-                const stockAlerts = [];
-
                 if (result.alerts && result.alerts.length > 0) {
-                    result.alerts.forEach(alert => {
-                        if (this.config.disabledTypes.has(alert.alertType)) {
-                            return;
-                        }
-
+                    const fullAlerts = result.alerts.map(alert => {
                         const typeInfo = ALERT_TYPES[alert.alertType] || { level: 'low' };
-                        const fullAlert = {
+                        return {
                             ...alert,
                             stockCode: stock.code,
                             stockName: stock.name,
@@ -681,24 +660,47 @@ const AlertPage = {
                             category: typeInfo.category,
                             timestamp: Date.now()
                         };
-
-                        stockAlerts.push(fullAlert);
-                        summary[typeInfo.level]++;
                     });
-                }
-
-                if (stockAlerts.length > 0) {
-                    alerts[stock.code] = stockAlerts;
+                    this.data.signalCache.set(stock.code, fullAlerts);
                 }
             } catch (e) {
-                console.warn(`[AlertPage] 评估股票 ${stock.code} 失败:`, e);
+                console.warn(`[AlertPage] 计算股票 ${stock.code} 信号失败:`, e);
+            }
+        });
+
+        console.log(`[AlertPage] 信号计算完成: ${this.data.signalCache.size} 只股票有信号`);
+    },
+
+    /**
+     * 从缓存过滤预警（Toggle切换/信号过滤时调用，无需重新计算）
+     */
+    evaluateAlerts() {
+        const alerts = {};
+        const summary = { high: 0, medium: 0, low: 0 };
+
+        if (this.config.enabledCategories.size === 0) {
+            this.data.alerts = alerts;
+            this.data.summary = summary;
+            return;
+        }
+
+        this.data.stocks.forEach(stock => {
+            const categoryId = Number(stock.categoryId || 0);
+            if (!this.config.enabledCategories.has(categoryId)) return;
+
+            const cached = this.data.signalCache.get(stock.code);
+            if (!cached) return;
+
+            const stockAlerts = cached.filter(alert => !this.config.disabledTypes.has(alert.alertType));
+            stockAlerts.forEach(a => summary[a.level]++);
+
+            if (stockAlerts.length > 0) {
+                alerts[stock.code] = stockAlerts;
             }
         });
 
         this.data.alerts = alerts;
         this.data.summary = summary;
-
-        console.log(`[AlertPage] 评估完成: 高${summary.high} 中${summary.medium} 低${summary.low}`);
     },
 
     /**
@@ -742,117 +744,251 @@ const AlertPage = {
         return alerts;
     },
 
+    // 虚拟滚动状态
+    virtual: {
+        items: [],
+        rowHeight: 44,
+        headerHeight: 36,
+        bufferSize: 5,
+        collapsedCategories: new Set(),
+        scrollHandler: null
+    },
+
     /**
-     * 渲染股票列表视图
+     * 构建虚拟滚动数据列表
+     */
+    buildVirtualItems() {
+        const items = [];
+        const mergedColumns = this.getMergedIndicatorColumns();
+        this.virtual.cachedMergedColumns = mergedColumns;
+
+        for (const cat of this.data.categories) {
+            if (!this.config.enabledCategories.has(cat.id)) continue;
+
+            // 收集该分类下有信号的股票
+            const stocks = [];
+            for (const stock of this.data.stocks) {
+                const catId = Number(stock.categoryId || 0);
+                if (catId !== cat.id) continue;
+
+                const stockAlerts = this.data.alerts[stock.code] || [];
+                let filteredAlerts = stockAlerts;
+                if (this.filter.signalType !== 'all') {
+                    filteredAlerts = stockAlerts.filter(a => a.type === this.filter.signalType);
+                }
+                if (filteredAlerts.length === 0) continue;
+
+                stocks.push({ ...stock, alerts: filteredAlerts });
+            }
+
+            if (stocks.length === 0) continue;
+
+            items.push({
+                type: 'header',
+                category: cat,
+                stockCount: stocks.length,
+                height: this.virtual.headerHeight
+            });
+
+            if (!this.virtual.collapsedCategories.has(cat.id)) {
+                for (const stock of stocks) {
+                    items.push({
+                        type: 'row',
+                        stock,
+                        mergedColumns,
+                        height: this.virtual.rowHeight
+                    });
+                }
+            }
+        }
+
+        this.virtual.items = items;
+    },
+
+    /**
+     * 渲染固定表头
+     */
+    renderFixedHeader() {
+        const headerRow = document.getElementById('virtualHeaderRow');
+        if (!headerRow) return;
+
+        const mergedColumns = this.getMergedIndicatorColumns();
+        let cells = '<th class="stock-info-cell">股票</th>';
+        for (const [, columns] of Object.entries(mergedColumns)) {
+            for (const col of columns) {
+                const tooltip = col.tooltip || (INDICATOR_DESCRIPTIONS[col.key]?.fullName || col.label);
+                cells += `<th class="indicator-cell" title="${tooltip}">${col.label}</th>`;
+            }
+        }
+        headerRow.innerHTML = cells;
+    },
+
+    /**
+     * 渲染股票列表视图（虚拟滚动）
      */
     renderStockListView() {
         const container = document.getElementById('stockListContent');
         const emptyEl = document.getElementById('stockListEmpty');
+        const viewport = document.getElementById('virtualScrollViewport');
+        const scrollContainer = document.querySelector('.virtual-scroll-container');
         if (!container) return;
 
-        // 检查是否有启用的分类
         if (this.config.enabledCategories.size === 0) {
             container.innerHTML = '';
+            scrollContainer?.classList.add('d-none');
             emptyEl?.classList.remove('d-none');
             return;
         }
 
         emptyEl?.classList.add('d-none');
+        scrollContainer?.classList.remove('d-none');
 
-        // 按分类分组股票
-        const categoryStocks = {};
-        let totalCount = 0;
-        const MAX_STOCKS = 200;
+        this.renderFixedHeader();
+        this.buildVirtualItems();
 
-        for (const stock of this.data.stocks) {
-            const catId = Number(stock.categoryId || 0);
-            if (!this.config.enabledCategories.has(catId)) continue;
-
-            if (totalCount >= MAX_STOCKS) break;
-
-            // 应用信号类型过滤
-            const stockAlerts = this.data.alerts[stock.code] || [];
-            let filteredAlerts = stockAlerts;
-            if (this.filter.signalType !== 'all') {
-                filteredAlerts = stockAlerts.filter(a => a.type === this.filter.signalType);
-            }
-
-            // 只显示有信号的股票
-            if (filteredAlerts.length === 0) continue;
-
-            if (!categoryStocks[catId]) {
-                categoryStocks[catId] = [];
-            }
-            categoryStocks[catId].push({
-                ...stock,
-                alerts: filteredAlerts
-            });
-            totalCount++;
+        if (this.virtual.items.length === 0) {
+            container.innerHTML = '';
+            scrollContainer?.classList.add('d-none');
+            emptyEl?.classList.remove('d-none');
+            return;
         }
 
-        // 渲染各分类
+        // 计算总高度
+        const totalHeight = this.virtual.items.reduce((sum, item) => sum + item.height, 0);
+
+        // 绑定滚动事件（只绑定一次）
+        if (!this.virtual.scrollHandler) {
+            this.virtual.scrollHandler = () => {
+                this.onVirtualScroll();
+                // 同步表头横向滚动
+                const header = document.getElementById('virtualScrollHeader');
+                if (header) header.scrollLeft = viewport.scrollLeft;
+            };
+            viewport.addEventListener('scroll', this.virtual.scrollHandler);
+        }
+
+        // 设置spacer总高度（初始渲染后由 onVirtualScroll 精确调整）
+        document.getElementById('virtualSpacerTop').style.height = '0px';
+        document.getElementById('virtualSpacerBottom').style.height = totalHeight + 'px';
+
+        // 触发首次渲染
+        this.onVirtualScroll();
+    },
+
+    /**
+     * 虚拟滚动事件处理
+     */
+    onVirtualScroll() {
+        const viewport = document.getElementById('virtualScrollViewport');
+        const container = document.getElementById('stockListContent');
+        if (!viewport || !container) return;
+
+        const scrollTop = viewport.scrollTop;
+        const viewportHeight = viewport.clientHeight;
+        const items = this.virtual.items;
+        const buffer = this.virtual.bufferSize;
+
+        if (items.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // 二分查找 startIndex
+        let startIndex = this.findStartIndex(scrollTop);
+        startIndex = Math.max(0, startIndex - buffer);
+
+        // 找 endIndex
+        let endIndex = startIndex;
+        let accHeight = this.getOffsetForIndex(startIndex);
+        while (endIndex < items.length && accHeight < scrollTop + viewportHeight) {
+            accHeight += items[endIndex].height;
+            endIndex++;
+        }
+        endIndex = Math.min(items.length, endIndex + buffer);
+
+        // 渲染可见项
         const html = [];
-        for (const cat of this.data.categories) {
-            if (!this.config.enabledCategories.has(cat.id)) continue;
-            const stocks = categoryStocks[cat.id] || [];
-            html.push(this.renderCategoryGroup(cat, stocks));
+        const mergedColumns = this.virtual.cachedMergedColumns;
+
+        for (let i = startIndex; i < endIndex; i++) {
+            const item = items[i];
+            if (item.type === 'header') {
+                const collapsed = this.virtual.collapsedCategories.has(item.category.id);
+                html.push(`
+                    <div class="virtual-category-header ${collapsed ? 'collapsed' : ''}" data-category-id="${item.category.id}">
+                        <div class="category-title">
+                            <i class="bi bi-chevron-down"></i>
+                            <span>${item.category.name}</span>
+                        </div>
+                        <span class="category-count">${item.stockCount} 只</span>
+                    </div>
+                `);
+            } else {
+                html.push(`<table class="stock-table"><tbody>${this.renderStockRow(item.stock, mergedColumns)}</tbody></table>`);
+            }
         }
 
         container.innerHTML = html.join('');
 
+        // 设置 spacer
+        const topOffset = this.getOffsetForIndex(startIndex);
+        const bottomOffset = this.getTotalHeight() - this.getOffsetForIndex(endIndex);
+
+        document.getElementById('virtualSpacerTop').style.height = topOffset + 'px';
+        document.getElementById('virtualSpacerBottom').style.height = Math.max(0, bottomOffset) + 'px';
+
         // 绑定分类折叠事件
-        container.querySelectorAll('.category-group-header').forEach(header => {
+        container.querySelectorAll('.virtual-category-header').forEach(header => {
             header.addEventListener('click', () => {
-                header.closest('.category-group').classList.toggle('collapsed');
+                const catId = Number(header.dataset.categoryId);
+                if (this.virtual.collapsedCategories.has(catId)) {
+                    this.virtual.collapsedCategories.delete(catId);
+                } else {
+                    this.virtual.collapsedCategories.add(catId);
+                }
+                this.buildVirtualItems();
+                this.onVirtualScroll();
             });
         });
     },
 
     /**
-     * 渲染分类分组
+     * 二分查找：scrollTop 对应的起始 item index
      */
-    renderCategoryGroup(category, stocks) {
-        const mergedColumns = this.getMergedIndicatorColumns();
+    findStartIndex(scrollTop) {
+        const items = this.virtual.items;
+        let low = 0, high = items.length - 1;
 
-        // 构建表头
-        let headerCells = '<th class="stock-info-cell">股票</th>';
-        for (const [, columns] of Object.entries(mergedColumns)) {
-            for (const col of columns) {
-                const tooltip = col.tooltip || (INDICATOR_DESCRIPTIONS[col.key]?.fullName || col.label);
-                headerCells += `<th class="indicator-cell" title="${tooltip}">${col.label}</th>`;
+        while (low <= high) {
+            const mid = (low + high) >>> 1;
+            const midOffset = this.getOffsetForIndex(mid);
+
+            if (midOffset <= scrollTop) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
 
-        // 构建股票行
-        let rows = '';
-        if (stocks.length === 0) {
-            const colSpan = 1 + Object.values(mergedColumns).flat().length;
-            rows = `<tr><td colspan="${colSpan}" class="category-empty-msg">该分类暂无股票</td></tr>`;
-        } else {
-            for (const stock of stocks) {
-                rows += this.renderStockRow(stock, mergedColumns);
-            }
-        }
+        return Math.max(0, high);
+    },
 
-        return `
-            <div class="category-group">
-                <div class="category-group-header">
-                    <div class="category-group-title">
-                        <i class="bi bi-chevron-down"></i>
-                        <span>${category.name}</span>
-                    </div>
-                    <span class="category-group-count">${stocks.length} 只</span>
-                </div>
-                <div class="category-group-body">
-                    <div class="stock-table-wrapper">
-                        <table class="stock-table">
-                            <thead><tr>${headerCells}</tr></thead>
-                            <tbody>${rows}</tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
+    /**
+     * 获取指定 index 的累积偏移量
+     */
+    getOffsetForIndex(index) {
+        let offset = 0;
+        for (let i = 0; i < index && i < this.virtual.items.length; i++) {
+            offset += this.virtual.items[i].height;
+        }
+        return offset;
+    },
+
+    /**
+     * 获取所有项的总高度
+     */
+    getTotalHeight() {
+        return this.virtual.items.reduce((sum, item) => sum + item.height, 0);
     },
 
     /**
@@ -1494,7 +1630,8 @@ const AlertPage = {
         const modal = bootstrap.Modal.getInstance(document.getElementById('alertSettingsModal'));
         if (modal) modal.hide();
 
-        // 重新评估并渲染
+        // 阈值变化需重新计算信号
+        this.computeAllSignals();
         this.evaluateAlerts();
         this.render();
     },

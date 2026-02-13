@@ -1051,9 +1051,13 @@ class UnifiedStockDataService:
             else:
                 self._miss_count += len(incremental_codes)
 
+                from flask import current_app
+                _app = current_app._get_current_object()
+
                 def _fetch_incremental(item):
                     code, fetch_days_val, cached_stock_data = item
-                    new_data = self._fetch_incremental_trend_data(code, fetch_days_val, days)
+                    with _app.app_context():
+                        new_data = self._fetch_incremental_trend_data(code, fetch_days_val, days)
                     return code, fetch_days_val, cached_stock_data, new_data
 
                 with ThreadPoolExecutor(max_workers=5) as executor:

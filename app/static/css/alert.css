@@ -561,61 +561,92 @@
     opacity: 0.8;
 }
 
-/* ========== 股票列表视图 ========== */
+/* ========== 股票列表视图（虚拟滚动） ========== */
 .stock-list-view {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.category-group {
+.virtual-scroll-container {
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
 }
 
-.category-group-header {
+.virtual-scroll-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.virtual-scroll-header::-webkit-scrollbar {
+    display: none;
+}
+
+.virtual-scroll-viewport {
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
+}
+
+.virtual-scroll-spacer-top,
+.virtual-scroll-spacer-bottom {
+    width: 100%;
+    pointer-events: none;
+}
+
+/* 虚拟滚动中的分类标题行 */
+.virtual-category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 1rem;
     background: #f9fafb;
     border-bottom: 1px solid #e5e7eb;
+    border-top: 1px solid #e5e7eb;
     cursor: pointer;
     user-select: none;
-}
-
-.category-group-header:hover {
-    background: #f3f4f6;
-}
-
-.category-group-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     font-weight: 600;
     color: #374151;
 }
 
-.category-group-title i {
-    transition: transform 0.2s ease;
+.virtual-category-header:first-child {
+    border-top: none;
 }
 
-.category-group.collapsed .category-group-title i {
+.virtual-category-header:hover {
+    background: #f3f4f6;
+}
+
+.virtual-category-header .category-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.virtual-category-header .category-title i {
+    transition: transform 0.2s ease;
+    color: #9ca3af;
+}
+
+.virtual-category-header.collapsed .category-title i {
     transform: rotate(-90deg);
 }
 
-.category-group.collapsed .category-group-body {
-    display: none;
-}
-
-.category-group-count {
+.virtual-category-header .category-count {
     font-size: 0.75rem;
     color: #6b7280;
     background: #e5e7eb;
     padding: 0.125rem 0.5rem;
     border-radius: 10px;
+    font-weight: 400;
 }
 
 .stock-table {
@@ -638,16 +669,8 @@
     white-space: nowrap;
 }
 
-.stock-table tr:last-child td {
-    border-bottom: none;
-}
-
 .stock-table tr:hover td {
     background: #f9fafb;
-}
-
-.stock-table-wrapper {
-    overflow-x: auto;
 }
 
 .stock-info-cell {
@@ -655,6 +678,7 @@
     left: 0;
     background: #fff;
     z-index: 1;
+    width: 140px;
     min-width: 140px;
 }
 
@@ -683,6 +707,8 @@
 .indicator-cell {
     text-align: center;
     padding: 0.375rem 0.25rem !important;
+    width: 48px;
+    min-width: 48px;
 }
 
 .category-empty-msg {
