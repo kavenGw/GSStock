@@ -255,8 +255,7 @@ class NotificationService:
 
         if include_ai:
             try:
-                from app.services.ai_analyzer import AIAnalyzerService
-                from app.config.ai_config import AI_ENABLED
+                from app.services.ai_analyzer import AIAnalyzerService, AI_ENABLED
                 if AI_ENABLED:
                     ai_service = AIAnalyzerService()
                     from app.services.position import PositionService

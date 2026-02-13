@@ -2,12 +2,24 @@
 
 接入OpenAI兼容API，整合技术面数据为每只股票生成结构化决策建议。
 分析结果缓存到 UnifiedStockCache（cache_type='ai_analysis'），每日有效。
+
+配置通过环境变量：
+- AI_API_KEY: API密钥（必需）
+- AI_BASE_URL: API地址（默认 https://api.openai.com/v1）
+- AI_MODEL: 模型名称（默认 gpt-4o-mini）
 """
 import json
 import logging
+import os
 from datetime import date
 
 logger = logging.getLogger(__name__)
+
+# AI配置 - 直接从环境变量读取
+AI_API_KEY = os.environ.get('AI_API_KEY', '')
+AI_BASE_URL = os.environ.get('AI_BASE_URL', 'https://api.openai.com/v1')
+AI_MODEL = os.environ.get('AI_MODEL', 'gpt-4o-mini')
+AI_ENABLED = bool(AI_API_KEY)
 
 
 class AIAnalyzerService:
@@ -15,7 +27,6 @@ class AIAnalyzerService:
 
     @staticmethod
     def is_available() -> bool:
-        from app.config.ai_config import AI_ENABLED
         return AI_ENABLED
 
     @staticmethod
@@ -30,7 +41,6 @@ class AIAnalyzerService:
         Returns:
             AI分析结果字典
         """
-        from app.config.ai_config import AI_ENABLED
         if not AI_ENABLED:
             return {'error': 'AI分析未配置，请在 .env 中设置 AI_API_KEY'}
 
@@ -285,7 +295,6 @@ class AIAnalyzerService:
     @staticmethod
     def _call_llm(prompt: str) -> dict:
         """调用LLM API"""
-        from app.config.ai_config import AI_API_KEY, AI_BASE_URL, AI_MODEL
         import httpx
 
         try:

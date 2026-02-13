@@ -46,6 +46,9 @@ cp .env.sample .env
 | `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
+| `AI_API_KEY` | AI 分析 API 密钥（可选） | 空 |
+| `AI_BASE_URL` | AI API 地址（可选） | `https://api.openai.com/v1` |
+| `AI_MODEL` | AI 模型名称（可选） | `gpt-4o-mini` |
 
 **只读模式**适用于：
 - 无网络环境
@@ -142,6 +145,20 @@ POLYGON_API_KEY=your_key_here
 ```
 
 数据源配置文件：`app/config/data_sources.py`（权重、优先级、市场映射）
+
+### AI 分析（可选）
+
+支持 OpenAI 兼容 API（OpenAI、DeepSeek、本地模型等），为持仓股票生成结构化分析建议。
+
+在 `.env` 中配置：
+
+```env
+AI_API_KEY=sk-xxx
+AI_BASE_URL=https://api.openai.com/v1   # 可选，默认 OpenAI
+AI_MODEL=gpt-4o-mini                     # 可选，默认 gpt-4o-mini
+```
+
+配置 `AI_API_KEY` 后自动启用 AI 分析功能。
 
 ## 技术栈
 
