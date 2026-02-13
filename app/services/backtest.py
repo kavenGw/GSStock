@@ -155,8 +155,19 @@ class BacktestService:
         if not all_signals:
             return {}
 
+        # 在进行任何可能修改session的操作前，先提取所有需要的信号数据
+        # 避免 ObjectDeletedError（信号可能在 get_trend_data 期间被删除重建）
+        signal_data_list = []
+        for s in all_signals:
+            signal_data_list.append({
+                'stock_code': s.stock_code,
+                'signal_date': s.signal_date,
+                'signal_type': s.signal_type,
+                'signal_name': s.signal_name,
+            })
+
         # 按股票分组获取走势数据
-        codes = list(set(s.stock_code for s in all_signals))
+        codes = list(set(d['stock_code'] for d in signal_data_list))
         extra_days = max(EVAL_PERIODS) + 5
 
         price_cache = {}
@@ -167,23 +178,23 @@ class BacktestService:
         # 按信号名称分组统计
         stats = defaultdict(lambda: {'wins': 0, 'total': 0})
 
-        for signal in all_signals:
-            prices = price_cache.get(signal.stock_code)
+        for signal_data in signal_data_list:
+            prices = price_cache.get(signal_data['stock_code'])
             if not prices:
                 continue
 
-            eval_result = self._evaluate_signal(signal, prices)
+            eval_result = self._evaluate_signal_from_dict(signal_data, prices)
             if not eval_result:
                 continue
 
-            name = signal.signal_name
+            name = signal_data['signal_name']
             stats[name]['total'] += 1
             # 用10天收益率判断胜负
             ret_10 = eval_result.get('returns', {}).get(10)
             if ret_10 is not None:
-                if signal.signal_type == 'buy' and ret_10 > 0:
+                if signal_data['signal_type'] == 'buy' and ret_10 > 0:
                     stats[name]['wins'] += 1
-                elif signal.signal_type == 'sell' and ret_10 < 0:
+                elif signal_data['signal_type'] == 'sell' and ret_10 < 0:
                     stats[name]['wins'] += 1
 
         result = {}
@@ -302,6 +313,58 @@ class BacktestService:
             'date': signal_date,
             'type': signal.signal_type,
             'name': signal.signal_name,
+            'base_price': base_price,
+            'returns': returns,
+            'max_drawdown': round(max_drawdown, 2),
+        }
+
+    def _evaluate_signal_from_dict(self, signal_data: dict, price_data: dict) -> dict:
+        """评估单条信号（从字典数据）
+
+        Args:
+            signal_data: 包含 signal_date, signal_type, signal_name 的字典
+            price_data: 价格数据
+        """
+        signal_date = signal_data['signal_date'].isoformat()
+
+        sorted_dates = sorted(price_data.keys())
+        start_idx = None
+        for i, d in enumerate(sorted_dates):
+            if d >= signal_date:
+                start_idx = i
+                break
+        if start_idx is None:
+            return None
+
+        base_price = price_data.get(sorted_dates[start_idx])
+        if not base_price:
+            return None
+
+        returns = {}
+        max_drawdown = 0
+        for period in EVAL_PERIODS:
+            target_idx = start_idx + period
+            if target_idx < len(sorted_dates):
+                future_price = price_data[sorted_dates[target_idx]]
+                ret = (future_price - base_price) / base_price * 100
+                returns[period] = round(ret, 2)
+
+                # 计算期间最大回撤
+                for j in range(start_idx, target_idx + 1):
+                    p = price_data[sorted_dates[j]]
+                    dd = (p - base_price) / base_price * 100
+                    if signal_data['signal_type'] == 'buy':
+                        max_drawdown = min(max_drawdown, dd)
+                    else:
+                        max_drawdown = max(max_drawdown, dd)
+
+        if not returns:
+            return None
+
+        return {
+            'date': signal_date,
+            'type': signal_data['signal_type'],
+            'name': signal_data['signal_name'],
             'base_price': base_price,
             'returns': returns,
             'max_drawdown': round(max_drawdown, 2),
