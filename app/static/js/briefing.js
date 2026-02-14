@@ -7,10 +7,12 @@ class BriefingPage {
     static technicalData = null;
     static stocksRendered = false;
     static aiEnabled = false;
+    static currentStock = null;  // 当前选中的股票 {code, name}
 
     static init() {
         this.bindAdviceEvents();
-        this.bindAIEvents();
+        this.bindCardClickEvents();
+        this.bindModalEvents();
         this.checkAIStatus();
 
         document.getElementById('dataContent').classList.remove('d-none');
@@ -91,61 +93,146 @@ class BriefingPage {
             const resp = await fetch('/briefing/api/ai/status');
             const data = await resp.json();
             this.aiEnabled = data.enabled;
-            if (this.aiEnabled) {
-                document.querySelectorAll('.bc-ai').forEach(el => el.classList.remove('d-none'));
+            // 如果股票已渲染，重新添加clickable类
+            if (this.aiEnabled && this.stocksRendered) {
+                document.querySelectorAll('.briefing-card[data-code]').forEach(el => {
+                    el.classList.add('clickable');
+                });
             }
         } catch (e) {
             console.error('检查AI状态失败:', e);
         }
     }
 
-    static bindAIEvents() {
+    static bindCardClickEvents() {
         document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.bc-ai-btn');
-            if (!btn) return;
-            e.stopPropagation();
-            const container = btn.closest('.bc-ai');
-            const code = container.dataset.code;
-            const name = container.dataset.name;
+            const card = e.target.closest('.briefing-card.clickable');
+            if (!card) return;
+            // 不拦截建议图标点击
+            if (e.target.classList.contains('advice-icon-btn')) return;
 
-            const existingResult = container.querySelector('.bc-ai-result');
-            if (existingResult) {
-                existingResult.remove();
-                return;
+            const code = card.dataset.code;
+            const name = card.dataset.name;
+            if (code && this.aiEnabled) {
+                this.openAIModal(code, name);
             }
-
-            this.fetchAIAnalysis(btn, container, code, name);
         });
     }
 
-    static async fetchAIAnalysis(btn, container, code, name) {
+    static bindModalEvents() {
+        // 点击背景关闭模态框
+        document.getElementById('aiModal')?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('ai-modal-overlay')) {
+                this.closeAIModal();
+            }
+        });
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAIModal();
+            }
+        });
+    }
+
+    static openAIModal(code, name) {
+        this.currentStock = {code, name};
+        document.getElementById('aiModalTitle').textContent = name || code;
+        document.getElementById('aiModalSubtitle').textContent = code;
+        document.getElementById('aiResultPanel').innerHTML = '';
+        document.getElementById('aiHistoryList').innerHTML = '<div class="ai-history-empty">加载中...</div>';
+        document.getElementById('aiModal').classList.remove('d-none');
+        document.body.style.overflow = 'hidden';
+
+        // 加载历史记录
+        this.loadAIHistory(code);
+    }
+
+    static closeAIModal() {
+        document.getElementById('aiModal').classList.add('d-none');
+        document.body.style.overflow = '';
+        this.currentStock = null;
+    }
+
+    static async loadAIHistory(code) {
+        try {
+            const resp = await fetch(`/briefing/api/ai/history?stock_code=${encodeURIComponent(code)}`);
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+            this.renderAIHistory(data.history || []);
+        } catch (e) {
+            console.error('加载AI历史失败:', e);
+            document.getElementById('aiHistoryList').innerHTML =
+                '<div class="ai-history-empty">加载历史记录失败</div>';
+        }
+    }
+
+    static renderAIHistory(history) {
+        const container = document.getElementById('aiHistoryList');
+        if (!history || history.length === 0) {
+            container.innerHTML = '<div class="ai-history-empty">暂无历史分析记录</div>';
+            return;
+        }
+
+        const signalMap = {
+            'STRONG_BUY': {text: '强烈买入', bg: '#28a745'},
+            'BUY': {text: '买入', bg: '#20c997'},
+            'HOLD': {text: '持有', bg: '#ffc107'},
+            'SELL': {text: '卖出', bg: '#fd7e14'},
+            'STRONG_SELL': {text: '强烈卖出', bg: '#dc3545'}
+        };
+
+        container.innerHTML = history.map((item, idx) => {
+            const sig = signalMap[item.signal] || {text: item.signal || '--', bg: '#6c757d'};
+            return `
+                <div class="ai-history-item" onclick="BriefingPage.showHistoryDetail(${idx})">
+                    <div class="ai-history-item-header">
+                        <span class="ai-history-date">${item.date}</span>
+                        <span class="ai-history-signal" style="background:${sig.bg}">${sig.text}</span>
+                    </div>
+                    <div class="ai-history-conclusion">${item.conclusion || '--'}</div>
+                </div>
+            `;
+        }).join('');
+
+        // 存储历史数据供详情展示
+        this._historyData = history;
+    }
+
+    static showHistoryDetail(idx) {
+        if (!this._historyData || !this._historyData[idx]) return;
+        this.renderAIResultPanel(this._historyData[idx], true);
+    }
+
+    static async runAIAnalysis() {
+        if (!this.currentStock) return;
+        const {code, name} = this.currentStock;
+        const btn = document.getElementById('aiAnalyzeBtn');
+
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" style="width:10px;height:10px"></span>';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 分析中...';
 
         try {
             const resp = await fetch('/briefing/api/ai/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({stock_code: code, stock_name: name})
+                body: JSON.stringify({stock_code: code, stock_name: name, force: true})
             });
             const result = await resp.json();
             if (result.error) throw new Error(result.error);
-            this.renderAIResult(container, result);
+            this.renderAIResultPanel(result);
+            // 刷新历史
+            this.loadAIHistory(code);
         } catch (e) {
             console.error(`AI分析 ${code} 失败:`, e);
-            const errDiv = document.createElement('div');
-            errDiv.className = 'bc-ai-result';
-            errDiv.innerHTML = `<span style="color:#dc3545">分析失败: ${e.message}</span>`;
-            container.appendChild(errDiv);
+            document.getElementById('aiResultPanel').innerHTML =
+                `<div class="ai-result-panel" style="color:#dc3545">分析失败: ${e.message}</div>`;
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-robot"></i> AI';
+            btn.innerHTML = '<i class="bi bi-robot"></i> AI智能分析';
         }
     }
 
-    static renderAIResult(container, result) {
-        container.querySelector('.bc-ai-result')?.remove();
-
+    static renderAIResultPanel(result, isHistory = false) {
         const signalMap = {
             'STRONG_BUY': {text: '强烈买入', bg: '#28a745'},
             'BUY': {text: '买入', bg: '#20c997'},
@@ -158,29 +245,33 @@ class BriefingPage {
         const analysis = result.analysis || {};
         const plan = result.action_plan || {};
 
-        let html = `<div class="bc-ai-result">`;
-        html += `<div style="margin-bottom:4px"><span class="bc-ai-signal" style="background:${sig.bg};color:#fff">${sig.text}</span>`;
-        if (result.score !== undefined) html += ` <span style="font-weight:600">${result.score}分</span>`;
-        if (result.from_cache) html += ` <span style="color:#aaa;font-size:0.6rem">缓存</span>`;
+        let html = `<div class="ai-result-panel">`;
+        if (isHistory && result.date) {
+            html += `<div style="color:#888;font-size:0.75rem;margin-bottom:8px">${result.date} 的分析</div>`;
+        }
+        html += `<div class="ai-result-header">`;
+        html += `<span class="ai-signal-badge" style="background:${sig.bg}">${sig.text}</span>`;
+        if (result.score !== undefined) html += `<span class="ai-score">${result.score}分</span>`;
+        if (result.from_cache && !isHistory) html += `<span class="ai-cache-tag">缓存</span>`;
         html += `</div>`;
 
-        if (result.conclusion) html += `<div style="margin-bottom:4px;font-weight:500">${result.conclusion}</div>`;
+        if (result.conclusion) html += `<div class="ai-conclusion">${result.conclusion}</div>`;
 
         const details = [];
         if (analysis.trend) details.push(`趋势: ${analysis.trend}`);
         if (analysis.volume) details.push(`量能: ${analysis.volume}`);
         if (analysis.risk) details.push(`风险: ${analysis.risk}`);
-        if (details.length) html += `<div style="color:#666;margin-bottom:4px">${details.join(' | ')}</div>`;
+        if (details.length) html += `<div class="ai-details">${details.join('<br>')}</div>`;
 
         const planItems = [];
-        if (plan.buy_price) planItems.push(`买入:${plan.buy_price}`);
-        if (plan.stop_loss) planItems.push(`止损:${plan.stop_loss}`);
-        if (plan.target_price) planItems.push(`目标:${plan.target_price}`);
-        if (planItems.length) html += `<div style="color:#888">${planItems.join(' | ')}</div>`;
-        if (plan.position_advice) html += `<div style="color:#888">${plan.position_advice}</div>`;
+        if (plan.buy_price) planItems.push(`买入价: ${plan.buy_price}`);
+        if (plan.stop_loss) planItems.push(`止损价: ${plan.stop_loss}`);
+        if (plan.target_price) planItems.push(`目标价: ${plan.target_price}`);
+        if (planItems.length) html += `<div class="ai-action-plan">${planItems.join(' | ')}</div>`;
+        if (plan.position_advice) html += `<div class="ai-action-plan">${plan.position_advice}</div>`;
 
         html += `</div>`;
-        container.insertAdjacentHTML('beforeend', html);
+        document.getElementById('aiResultPanel').innerHTML = html;
     }
 
     // ========== 数据加载 ==========
@@ -513,8 +604,14 @@ class BriefingPage {
             ? `<i class="bi bi-journal-text advice-icon-btn" data-advice="${this.escapeHtml(stock.investment_advice)}" title="查看投资建议"></i>`
             : '';
 
+        // 如果AI已启用且无错误，添加clickable类和数据属性
+        const clickableClass = !stock.error && this.aiEnabled ? 'clickable' : '';
+        const dataAttrs = !stock.error && this.aiEnabled
+            ? `data-code="${stock.code}" data-name="${stock.name}"`
+            : '';
+
         return `
-            <div class="briefing-card ${stock.error ? 'has-error' : ''}">
+            <div class="briefing-card ${stock.error ? 'has-error' : ''} ${clickableClass}" ${dataAttrs}>
                 <div class="bc-header">
                     <div>
                         <div class="bc-name">${stock.name}</div>
@@ -534,9 +631,6 @@ class BriefingPage {
                     <div class="bc-secondary">
                         ${stock.market !== 'A' ? `<span class="stock-pe" data-code="${stock.code}"></span>` : ''}
                         <span class="stock-earnings" data-code="${stock.code}"></span>
-                    </div>
-                    <div class="bc-ai ${this.aiEnabled ? '' : 'd-none'}" data-code="${stock.code}" data-name="${stock.name}">
-                        <button class="bc-ai-btn" title="AI分析"><i class="bi bi-robot"></i> AI</button>
                     </div>
                 `}
             </div>

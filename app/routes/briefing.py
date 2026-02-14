@@ -1,5 +1,6 @@
 """每日简报路由 - 渐进式加载"""
 import logging
+from datetime import date, timedelta
 from flask import render_template, jsonify, request
 from app.routes import briefing_bp
 from app.services.briefing import BriefingService
@@ -132,6 +133,46 @@ def ai_status():
     """AI分析功能状态"""
     from app.services.ai_analyzer import AIAnalyzerService
     return jsonify({'enabled': AIAnalyzerService.is_available()})
+
+
+@briefing_bp.route('/api/ai/history')
+def ai_history():
+    """获取股票AI分析历史"""
+    from app.models.unified_cache import UnifiedStockCache
+
+    stock_code = request.args.get('stock_code', '')
+    if not stock_code:
+        return jsonify({'error': '缺少 stock_code'}), 400
+
+    try:
+        # 获取最近30天的AI分析记录
+        today = date.today()
+        history = []
+
+        # 查询该股票的所有AI分析缓存记录
+        caches = UnifiedStockCache.query.filter(
+            UnifiedStockCache.stock_code == stock_code,
+            UnifiedStockCache.cache_type == 'ai_analysis',
+            UnifiedStockCache.cache_date >= today - timedelta(days=30)
+        ).order_by(UnifiedStockCache.cache_date.desc()).limit(10).all()
+
+        for cache in caches:
+            data = cache.get_data()
+            if data and isinstance(data, dict) and 'error' not in data:
+                history.append({
+                    'date': cache.cache_date.strftime('%Y-%m-%d'),
+                    'signal': data.get('signal'),
+                    'score': data.get('score'),
+                    'conclusion': data.get('conclusion'),
+                    'confidence': data.get('confidence'),
+                    'analysis': data.get('analysis'),
+                    'action_plan': data.get('action_plan'),
+                })
+
+        return jsonify({'history': history})
+    except Exception as e:
+        logger.error(f"获取AI历史失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
 
 
 @briefing_bp.route('/api/ai/analyze', methods=['POST'])
