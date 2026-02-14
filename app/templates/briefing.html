@@ -285,29 +285,214 @@
         font-weight: 500;
     }
 
-    /* AI分析按钮 */
-    .bc-ai { margin-top: 4px; }
-    .bc-ai-btn {
-        border: 1px solid #6f42c1; color: #6f42c1; background: transparent;
-        font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; cursor: pointer;
+    /* 可点击卡片 */
+    .briefing-card.clickable {
+        cursor: pointer;
+        transition: box-shadow 0.2s, transform 0.1s;
     }
-    .bc-ai-btn:hover { background: #6f42c1; color: #fff; }
-    .bc-ai-btn:disabled { opacity: 0.6; cursor: wait; }
+    .briefing-card.clickable:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+    .briefing-card.clickable:active {
+        transform: translateY(0);
+    }
+
+    /* AI分析模态框 */
+    .ai-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1040;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ai-modal {
+        background: #fff;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    .ai-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .ai-modal-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    .ai-modal-subtitle {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 2px;
+    }
+    .ai-modal-close {
+        border: none;
+        background: none;
+        font-size: 1.5rem;
+        color: #6c757d;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .ai-modal-close:hover { color: #333; }
+    .ai-modal-body {
+        padding: 20px;
+        overflow-y: auto;
+        max-height: calc(80vh - 120px);
+    }
+
+    /* AI分析按钮 */
+    .ai-modal-btn {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #6f42c1;
+        color: #6f42c1;
+        background: transparent;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .ai-modal-btn:hover { background: #6f42c1; color: #fff; }
+    .ai-modal-btn:disabled { opacity: 0.6; cursor: wait; }
 
     /* AI分析结果面板 */
-    .bc-ai-result {
-        margin-top: 6px; padding: 6px 8px;
-        background: #f8f7fc; border-radius: 4px; border: 1px solid #e8e0f0;
-        font-size: 0.72rem; line-height: 1.5;
+    .ai-result-panel {
+        margin-top: 16px;
+        padding: 16px;
+        background: #f8f7fc;
+        border-radius: 8px;
+        border: 1px solid #e8e0f0;
     }
-    .bc-ai-signal {
-        display: inline-block; padding: 1px 6px; border-radius: 3px;
-        font-weight: 600; font-size: 0.65rem;
+    .ai-result-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .ai-signal-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #fff;
+    }
+    .ai-score {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .ai-cache-tag {
+        font-size: 0.7rem;
+        color: #aaa;
+    }
+    .ai-conclusion {
+        font-weight: 500;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    .ai-details {
+        color: #666;
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+    }
+    .ai-action-plan {
+        color: #888;
+        font-size: 0.8rem;
+    }
+
+    /* AI历史记录 */
+    .ai-history-section {
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 16px;
+    }
+    .ai-history-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 12px;
+    }
+    .ai-history-empty {
+        color: #aaa;
+        font-size: 0.8rem;
+        text-align: center;
+        padding: 16px;
+    }
+    .ai-history-item {
+        padding: 10px 12px;
+        border: 1px solid #e8e0f0;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .ai-history-item:hover {
+        background: #f8f7fc;
+    }
+    .ai-history-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    .ai-history-date {
+        font-size: 0.75rem;
+        color: #888;
+    }
+    .ai-history-signal {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        color: #fff;
+    }
+    .ai-history-conclusion {
+        font-size: 0.8rem;
+        color: #555;
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- AI分析模态框 -->
+<div id="aiModal" class="ai-modal-overlay d-none">
+    <div class="ai-modal">
+        <div class="ai-modal-header">
+            <div>
+                <h5 class="ai-modal-title" id="aiModalTitle">--</h5>
+                <div class="ai-modal-subtitle" id="aiModalSubtitle">--</div>
+            </div>
+            <button class="ai-modal-close" onclick="BriefingPage.closeAIModal()">&times;</button>
+        </div>
+        <div class="ai-modal-body">
+            <button class="ai-modal-btn" id="aiAnalyzeBtn" onclick="BriefingPage.runAIAnalysis()">
+                <i class="bi bi-robot"></i> AI智能分析
+            </button>
+            <div id="aiResultPanel"></div>
+            <div class="ai-history-section">
+                <div class="ai-history-title"><i class="bi bi-clock-history"></i> 历史分析记录</div>
+                <div id="aiHistoryList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 页面标题 -->
 <div class="page-header mb-4">
     <div class="d-flex justify-content-between align-items-center">
