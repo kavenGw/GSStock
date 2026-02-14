@@ -6,6 +6,17 @@ from app.services.backtest import BacktestService
 from app.services.position import PositionService
 
 
+@wyckoff_bp.route('/auto')
+def auto_index():
+    """威科夫自动分析页面"""
+    latest_date = PositionService.get_latest_date()
+    positions = []
+    if latest_date:
+        position_list = PositionService.get_snapshot(latest_date)
+        positions = [{'code': p.stock_code, 'name': p.stock_name} for p in position_list]
+    return render_template('wyckoff_auto.html', positions=positions)
+
+
 # 参考图路由
 @wyckoff_bp.route('/reference')
 def reference_list():
