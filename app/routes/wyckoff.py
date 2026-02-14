@@ -25,13 +25,6 @@ def reference_list():
     return render_template('wyckoff_reference.html', references=references, current_phase=phase)
 
 
-# 威科夫自动分析页面
-@wyckoff_bp.route('/auto')
-def auto_index():
-    """威科夫自动分析页面"""
-    return render_template('wyckoff_auto.html')
-
-
 @wyckoff_bp.route('/reference/upload', methods=['POST'])
 def reference_upload():
     if 'file' not in request.files:
