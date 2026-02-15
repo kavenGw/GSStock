@@ -407,11 +407,11 @@ class StockDetailDrawer {
 
     static PHASE_MAP = {
         'accumulation': {text: '吸筹', bg: '#28a745'},
+        'accumulation_markup': {text: '吸筹确认', bg: '#20c997'},
         'markup': {text: '上涨', bg: '#0d6efd'},
         'distribution': {text: '派发', bg: '#fd7e14'},
+        'distribution_markdown': {text: '派发确认', bg: '#e83e8c'},
         'markdown': {text: '下跌', bg: '#dc3545'},
-        'reaccumulation': {text: '再吸筹', bg: '#20c997'},
-        'redistribution': {text: '再派发', bg: '#e83e8c'},
     };
 
     static ADVICE_MAP = {
@@ -422,19 +422,15 @@ class StockDetailDrawer {
     };
 
     static EVENT_MAP = {
-        'spring': '弹簧效应',
-        'shakeout': '震仓',
-        'breakout': '突破',
-        'utad': '上冲回落',
-        'test': '测试',
-        'sos': '强势信号',
-        'lpsy': '最后供给点',
-        'creek': '小溪',
+        'PS': '初步支撑', 'SC': '恐慌抛售', 'AR': '自动反弹',
+        'ST': '二次测试', 'spring': '弹簧效应', 'test': '测试',
+        'SOS': '强势信号', 'LPS': '最后支撑',
+        'PSY': '初步供应', 'BC': '买入高潮',
+        'UTAD': '上冲回落', 'SOW': '弱势信号', 'LPSY': '最后供给',
     };
 
     static renderWyckoff(wyckoff) {
         const content = document.getElementById('sdWyckoffContent');
-
         if (!wyckoff) {
             content.innerHTML = '<div style="color:#aaa;font-size:0.8rem">暂无分析数据，点击"分析"开始</div>';
             document.getElementById('sdWkHistorySection').classList.add('d-none');
@@ -450,6 +446,11 @@ class StockDetailDrawer {
         html += `<span class="sd-wk-phase-badge" style="background:${phase.bg}">${phase.text}</span>`;
         html += `<i class="bi bi-image sd-wk-ref-icon" title="查看参考图" onclick="StockDetailDrawer.showReference('${wyckoff.phase}')"></i>`;
         html += `<span class="sd-wk-advice-badge" style="background:${advice.bg}">${advice.text}</span>`;
+
+        if (wyckoff.score !== null && wyckoff.score !== undefined) {
+            const scoreBg = this.getScoreBg(wyckoff.score);
+            html += `<span style="background:${scoreBg};color:#fff;padding:1px 6px;border-radius:3px;font-size:0.7rem;margin-left:4px">${wyckoff.score}分</span>`;
+        }
         html += '</div>';
 
         if (events.length) {
@@ -466,6 +467,20 @@ class StockDetailDrawer {
             if (wyckoff.support_price) html += `<span>支撑: ${wyckoff.support_price.toFixed(2)}</span>`;
             if (wyckoff.resistance_price) html += `<span>阻力: ${wyckoff.resistance_price.toFixed(2)}</span>`;
             html += '</div>';
+        }
+
+        if (wyckoff.composite_signal && wyckoff.composite_signal !== 'watch') {
+            const csMap = {
+                'strong_buy': {text:'多周期共振：强买', bg:'#28a745'},
+                'buy': {text:'多周期共振：买入', bg:'#20c997'},
+                'hold_add': {text:'多周期共振：持有加仓', bg:'#0d6efd'},
+                'strong_sell': {text:'多周期共振：强卖', bg:'#dc3545'},
+                'sell': {text:'多周期共振：卖出', bg:'#fd7e14'},
+            };
+            const cs = csMap[wyckoff.composite_signal];
+            if (cs) {
+                html += `<div style="margin-top:4px"><span style="background:${cs.bg};color:#fff;padding:1px 8px;border-radius:3px;font-size:0.7rem">${cs.text}</span></div>`;
+            }
         }
 
         if (wyckoff.analysis_date) {
@@ -491,13 +506,20 @@ class StockDetailDrawer {
             const resp = await fetch(`/api/stock-detail/${encodeURIComponent(this.currentCode)}/wyckoff/analyze`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({multi_timeframe: true}),
                 signal: this.abortController?.signal
             });
             const result = await resp.json();
             if (result.error) throw new Error(result.error);
-            if (result.status === 'failed') throw new Error(result.error_msg || '分析失败');
 
-            if (this.currentCode) {
+            if (result.daily) {
+                const daily = result.daily;
+                if (result.composite) {
+                    daily.composite_signal = result.composite.signal;
+                }
+                this.renderWyckoff(daily);
+            } else {
+                if (result.status === 'failed') throw new Error(result.error_msg || '分析失败');
                 this.renderWyckoff(result);
             }
         } catch (e) {
@@ -555,6 +577,27 @@ class StockDetailDrawer {
                 if (acc !== null) {
                     html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">${days}日准确率</span><span class="sd-wk-backtest-value">${acc}%</span></div>`;
                 }
+            }
+        }
+
+        if (w.sharpe) {
+            html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">夏普比率</span><span class="sd-wk-backtest-value">${w.sharpe}</span></div>`;
+        }
+        if (w.profit_loss_ratio) {
+            html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">盈亏比</span><span class="sd-wk-backtest-value">${w.profit_loss_ratio}</span></div>`;
+        }
+        if (w.grade) {
+            const gradeColors = {A:'#28a745', B:'#0d6efd', C:'#ffc107', D:'#dc3545'};
+            html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">信号评级</span><span class="sd-wk-backtest-value" style="color:${gradeColors[w.grade] || '#6c757d'};font-weight:bold">${w.grade}</span></div>`;
+        }
+
+        if (w.event_summary && Object.keys(w.event_summary).length) {
+            html += '</div>';
+            html += '<div class="sd-wk-backtest-title" style="margin-top:8px">事件准确率</div>';
+            html += '<div class="sd-wk-backtest-grid">';
+            for (const [event, stats] of Object.entries(w.event_summary)) {
+                const name = this.EVENT_MAP[event] || event;
+                html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">${name} (${stats.total}次)</span><span class="sd-wk-backtest-value">${stats.accuracy}% ${stats.grade}</span></div>`;
             }
         }
 

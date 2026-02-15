@@ -263,55 +263,29 @@ class WyckoffAutoService:
             return []
 
     @staticmethod
-    def analyze_single(stock_code: str, stock_name: str = '', app=None) -> dict:
-        """分析单只股票
-
-        Args:
-            stock_code: 股票代码
-            stock_name: 股票名称
-            app: Flask 应用实例（用于线程池中建立上下文）
-
-        Returns:
-            分析结果字典
-        """
+    def analyze_single(stock_code: str, stock_name: str = '', timeframe: str = 'daily', app=None) -> dict:
         valid, error = WyckoffAutoService._validate_stock_code(stock_code)
         if not valid:
-            return {
-                'stock_code': stock_code,
-                'stock_name': stock_name,
-                'status': 'failed',
-                'error_msg': error,
-            }
+            return {'stock_code': stock_code, 'stock_name': stock_name, 'status': 'failed', 'error_msg': error}
 
-        # 获取数据
-        ohlcv_data = WyckoffAutoService._fetch_ohlcv(stock_code)
+        days_map = {'daily': 120, 'weekly': 400, 'monthly': 400}
+        days = days_map.get(timeframe, 120)
+        ohlcv_data = WyckoffAutoService._fetch_ohlcv(stock_code, days)
 
         if not ohlcv_data:
-            return {
-                'stock_code': stock_code,
-                'stock_name': stock_name,
-                'status': 'failed',
-                'error_msg': '数据获取失败',
-            }
+            return {'stock_code': stock_code, 'stock_name': stock_name, 'status': 'failed', 'error_msg': '数据获取失败'}
 
-        if len(ohlcv_data) < 60:
-            return {
-                'stock_code': stock_code,
-                'stock_name': stock_name,
-                'status': 'insufficient',
-                'error_msg': f'数据不足（仅{len(ohlcv_data)}天）',
-            }
+        if len(ohlcv_data) < 20:
+            return {'stock_code': stock_code, 'stock_name': stock_name, 'status': 'insufficient',
+                    'error_msg': f'数据不足（仅{len(ohlcv_data)}条{timeframe}数据）'}
 
-        # 执行分析
         analyzer = WyckoffAnalyzer()
-        result = analyzer.analyze(ohlcv_data)
+        result = analyzer.analyze(ohlcv_data, timeframe=timeframe)
 
-        # 保存到数据库（需要应用上下文）
         def save_to_db():
             today = date.today()
             existing = WyckoffAutoResult.query.filter_by(
-                analysis_date=today,
-                stock_code=stock_code
+                analysis_date=today, stock_code=stock_code, timeframe=timeframe
             ).first()
 
             if existing:
@@ -322,25 +296,22 @@ class WyckoffAutoService:
                 existing.resistance_price = result.resistance_price
                 existing.current_price = result.current_price
                 existing.details = json.dumps(result.details)
+                existing.score = result.score
+                existing.confidence = result.confidence
                 existing.status = 'success'
                 existing.error_msg = None
             else:
                 record = WyckoffAutoResult(
-                    analysis_date=today,
-                    stock_code=stock_code,
-                    phase=result.phase,
-                    events=json.dumps(result.events),
-                    advice=result.advice,
-                    support_price=result.support_price,
-                    resistance_price=result.resistance_price,
-                    current_price=result.current_price,
-                    details=json.dumps(result.details),
-                    status='success',
+                    analysis_date=today, stock_code=stock_code, timeframe=timeframe,
+                    phase=result.phase, events=json.dumps(result.events),
+                    advice=result.advice, support_price=result.support_price,
+                    resistance_price=result.resistance_price, current_price=result.current_price,
+                    details=json.dumps(result.details), score=result.score,
+                    confidence=result.confidence, status='success',
                 )
                 db.session.add(record)
             db.session.commit()
 
-        # 如果传入了 app，在新上下文中执行数据库操作
         if app:
             with app.app_context():
                 save_to_db()
@@ -348,15 +319,12 @@ class WyckoffAutoService:
             save_to_db()
 
         return {
-            'stock_code': stock_code,
-            'stock_name': stock_name,
-            'phase': result.phase,
-            'events': result.events,
-            'advice': result.advice,
-            'support_price': result.support_price,
-            'resistance_price': result.resistance_price,
-            'current_price': result.current_price,
-            'details': result.details,
+            'stock_code': stock_code, 'stock_name': stock_name,
+            'timeframe': timeframe, 'phase': result.phase,
+            'events': result.events, 'advice': result.advice,
+            'support_price': result.support_price, 'resistance_price': result.resistance_price,
+            'current_price': result.current_price, 'details': result.details,
+            'score': result.score, 'confidence': result.confidence,
             'status': 'success',
         }
 
@@ -380,6 +348,7 @@ class WyckoffAutoService:
                     WyckoffAutoService.analyze_single,
                     item['code'],
                     item.get('name', ''),
+                    'daily',
                     app
                 ): item
                 for item in stock_list
@@ -444,7 +413,6 @@ class WyckoffAutoService:
 
     @staticmethod
     def _sort_results(results: list) -> list:
-        """按优先级排序结果"""
         return sorted(results, key=lambda x: (
             ADVICE_PRIORITY.get(x.get('advice', 'watch'), 4),
             x.get('status') != 'success',
@@ -452,26 +420,63 @@ class WyckoffAutoService:
         ))
 
     @staticmethod
-    def get_auto_history(stock_code: str = None, start_date: date = None,
-                         end_date: date = None) -> list:
-        """获取历史分析记录
+    def analyze_multi_timeframe(stock_code: str, stock_name: str = '', app=None) -> dict:
+        results = {}
+        for tf in ['daily', 'weekly', 'monthly']:
+            results[tf] = WyckoffAutoService.analyze_single(stock_code, stock_name, tf, app)
 
-        Args:
-            stock_code: 股票代码筛选
-            start_date: 开始日期
-            end_date: 结束日期
+        composite = WyckoffAutoService._compute_composite_signal(results)
 
-        Returns:
-            历史记录列表
-        """
+        def update_composite():
+            today = date.today()
+            record = WyckoffAutoResult.query.filter_by(
+                analysis_date=today, stock_code=stock_code, timeframe='daily'
+            ).first()
+            if record:
+                record.composite_signal = composite['signal']
+                db.session.commit()
+
+        if app:
+            with app.app_context():
+                update_composite()
+        else:
+            update_composite()
+
+        return {**results, 'composite': composite}
+
+    @staticmethod
+    def _compute_composite_signal(results: dict) -> dict:
+        monthly = results.get('monthly', {})
+        weekly = results.get('weekly', {})
+        daily = results.get('daily', {})
+
+        m_phase = monthly.get('phase', '')
+        w_phase = weekly.get('phase', '')
+        d_events = daily.get('events', [])
+
+        if m_phase == 'accumulation' and w_phase in ('accumulation', 'accumulation_markup') and any(e in d_events for e in ['spring', 'SOS']):
+            return {'signal': 'strong_buy', 'confidence': 0.9}
+        if m_phase == 'markup' and w_phase == 'accumulation' and any(e in d_events for e in ['spring', 'SOS']):
+            return {'signal': 'buy', 'confidence': 0.7}
+        if m_phase == 'markup' and w_phase == 'markup' and 'LPS' in d_events:
+            return {'signal': 'hold_add', 'confidence': 0.6}
+        if m_phase == 'distribution' and w_phase in ('distribution', 'distribution_markdown') and any(e in d_events for e in ['UTAD', 'LPSY']):
+            return {'signal': 'strong_sell', 'confidence': 0.9}
+        if m_phase == 'markdown' and w_phase == 'distribution' and 'SOW' in d_events:
+            return {'signal': 'sell', 'confidence': 0.7}
+
+        return {'signal': 'watch', 'confidence': 0.3}
+
+    @staticmethod
+    def get_auto_history(stock_code=None, start_date=None, end_date=None, timeframe=None):
         query = WyckoffAutoResult.query
-
         if stock_code:
             query = query.filter_by(stock_code=stock_code)
+        if timeframe:
+            query = query.filter_by(timeframe=timeframe)
         if start_date:
             query = query.filter(WyckoffAutoResult.analysis_date >= start_date)
         if end_date:
             query = query.filter(WyckoffAutoResult.analysis_date <= end_date)
-
         records = query.order_by(WyckoffAutoResult.analysis_date.desc()).all()
         return [r.to_dict() for r in records]

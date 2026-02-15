@@ -75,7 +75,7 @@ def get_detail(code):
         with app.app_context():
             from app.models.wyckoff import WyckoffAutoResult
             wyckoff = WyckoffAutoResult.query.filter_by(
-                stock_code=code, status='success'
+                stock_code=code, status='success', timeframe='daily'
             ).order_by(WyckoffAutoResult.analysis_date.desc()).first()
             if not wyckoff:
                 return None
@@ -85,6 +85,9 @@ def get_detail(code):
                 'support_price': wyckoff.support_price,
                 'resistance_price': wyckoff.resistance_price,
                 'events': wyckoff.to_dict().get('events', []),
+                'score': wyckoff.score,
+                'confidence': wyckoff.confidence,
+                'composite_signal': wyckoff.composite_signal,
                 'analysis_date': wyckoff.analysis_date.isoformat() if wyckoff.analysis_date else None,
             }
 
@@ -289,14 +292,21 @@ def ai_batch():
 
 @stock_detail_bp.route('/<code>/wyckoff/analyze', methods=['POST'])
 def wyckoff_analyze(code):
-    """单股威科夫实时分析"""
     from app.services.wyckoff import WyckoffAutoService
     from app.models.stock import Stock
+
+    data = request.get_json() or {}
+    timeframe = data.get('timeframe', 'daily')
+    multi = data.get('multi_timeframe', False)
 
     try:
         stock = Stock.query.filter_by(stock_code=code).first()
         stock_name = stock.stock_name if stock else ''
-        result = WyckoffAutoService.analyze_single(code, stock_name)
+
+        if multi:
+            result = WyckoffAutoService.analyze_multi_timeframe(code, stock_name)
+        else:
+            result = WyckoffAutoService.analyze_single(code, stock_name, timeframe)
         return jsonify(result)
     except Exception as e:
         logger.error(f"威科夫分析 {code} 失败: {e}", exc_info=True)
@@ -339,12 +349,11 @@ def wyckoff_reference(code, phase):
 
 @stock_detail_bp.route('/<code>/wyckoff/history')
 def wyckoff_history(code):
-    """股票威科夫历史"""
     from app.models.wyckoff import WyckoffAutoResult
 
     try:
         records = WyckoffAutoResult.query.filter_by(
-            stock_code=code, status='success'
+            stock_code=code, status='success', timeframe='daily'
         ).order_by(WyckoffAutoResult.analysis_date.desc()).limit(20).all()
         return jsonify({'history': [r.to_dict() for r in records]})
     except Exception as e:

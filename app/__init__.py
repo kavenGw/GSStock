@@ -74,6 +74,30 @@ def migrate_trades_table():
     logging.info("trades 表迁移完成")
 
 
+def migrate_wyckoff_table():
+    """迁移 wyckoff_auto_result 表：新增多周期字段"""
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(db.engine)
+    try:
+        columns = [col['name'] for col in inspector.get_columns('wyckoff_auto_result')]
+    except Exception:
+        return
+
+    if 'timeframe' in columns:
+        return
+
+    logging.info("迁移 wyckoff_auto_result: 添加 timeframe/score/confidence/composite_signal")
+    with db.engine.connect() as conn:
+        conn.execute(text("ALTER TABLE wyckoff_auto_result ADD COLUMN timeframe VARCHAR(10) DEFAULT 'daily'"))
+        conn.execute(text("ALTER TABLE wyckoff_auto_result ADD COLUMN score INTEGER"))
+        conn.execute(text("ALTER TABLE wyckoff_auto_result ADD COLUMN confidence FLOAT"))
+        conn.execute(text("ALTER TABLE wyckoff_auto_result ADD COLUMN composite_signal VARCHAR(20)"))
+        conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS uq_wyckoff_auto_date_stock_tf ON wyckoff_auto_result(analysis_date, stock_code, timeframe)"))
+        conn.commit()
+    logging.info("wyckoff_auto_result 迁移完成")
+
+
 def setup_logging(app):
     """配置应用日志系统"""
     log_dir = app.config.get('LOG_DIR', 'data/logs')
@@ -200,6 +224,7 @@ def create_app(config_class=None):
         migrate_position_table()
         migrate_daily_snapshot_table()
         migrate_trades_table()
+        migrate_wyckoff_table()
 
         # 初始化默认交易策略
         from app.services.trading_strategy import TradingStrategyService

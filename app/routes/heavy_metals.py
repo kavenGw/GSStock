@@ -1,3 +1,4 @@
+import json
 import logging
 import threading
 from datetime import date, datetime, timedelta
@@ -6,7 +7,6 @@ from flask import render_template, jsonify, request, current_app
 from app.routes import heavy_metals_bp
 from app.services.futures import FuturesService, CATEGORY_CODES, CATEGORY_NAMES, TradingAdviceCalculator, CategoryCodeResolver
 from app.services.wyckoff import WyckoffAutoService
-from app.services.wyckoff_score import WyckoffScoreCalculator
 from app.services.fed_rate import FedRateService
 from app.services.signal_cache import SignalCacheService
 from app.services.technical_indicators import TechnicalIndicatorService
@@ -167,16 +167,46 @@ def category_data():
             logger.warning(f"获取投资建议失败: {e}")
 
         try:
-            scores = WyckoffScoreCalculator.calculate_scores(data, category, days)
-            score_map = {s['code']: s for s in scores}
+            from app.models.wyckoff import WyckoffAutoResult
+            today = date.today()
+
+            cached = WyckoffAutoResult.query.filter(
+                WyckoffAutoResult.analysis_date == today,
+                WyckoffAutoResult.timeframe == 'daily',
+                WyckoffAutoResult.status == 'success',
+                WyckoffAutoResult.stock_code.in_(codes)
+            ).all()
+            cached_map = {r.stock_code: r for r in cached}
+
+            uncached_codes = [c for c in codes if c not in cached_map]
+            if uncached_codes:
+                stock_name_map_local = {s['stock_code']: s['stock_name'] for s in data['stocks']}
+                for uc in uncached_codes:
+                    result = WyckoffAutoService.analyze_single(uc, stock_name_map_local.get(uc, ''), 'daily')
+                    if result.get('status') == 'success':
+                        new_record = WyckoffAutoResult.query.filter_by(
+                            analysis_date=today, stock_code=uc, timeframe='daily'
+                        ).first()
+                        if new_record:
+                            cached_map[uc] = new_record
 
             for stock in advice['stocks']:
                 code = stock['code']
-                if code in score_map:
-                    score_data = score_map[code]
-                    stock['wyckoff_score'] = score_data.get('score')
-                    stock['score_details'] = score_data.get('score_details')
-                    stock['analysis'] = score_data.get('analysis')
+                record = cached_map.get(code)
+                if record:
+                    stock['wyckoff_score'] = record.score
+                    stock['score_details'] = {
+                        'phase': record.phase,
+                        'events': json.loads(record.events) if record.events else [],
+                        'confidence': record.confidence,
+                    }
+                    stock['analysis'] = {
+                        'phase': record.phase,
+                        'events': json.loads(record.events) if record.events else [],
+                        'support': record.support_price,
+                        'resistance': record.resistance_price,
+                        'current_price': record.current_price,
+                    }
                 else:
                     stock['wyckoff_score'] = None
                     stock['score_details'] = None
@@ -184,7 +214,7 @@ def category_data():
                 stock['valuation'] = valuation_map.get(code)
                 stock['investment_advice'] = advice_map.get(code)
         except Exception as e:
-            logger.error(f"计算威科夫评分失败: {e}")
+            logger.error(f"威科夫评分失败: {e}")
             for stock in advice['stocks']:
                 stock['wyckoff_score'] = None
                 stock['score_details'] = None
@@ -338,32 +368,55 @@ def trading_advice():
     except Exception as e:
         logger.warning(f"获取投资建议失败: {e}")
 
-    # 计算威科夫评分（根据时间周期）
     try:
-        scores = WyckoffScoreCalculator.calculate_scores(trend_data, category, days)
-        score_map = {s['code']: s for s in scores}
+        from app.models.wyckoff import WyckoffAutoResult
+        today = date.today()
 
-        # 合并评分数据和估值数据到 stocks
+        cached = WyckoffAutoResult.query.filter(
+            WyckoffAutoResult.analysis_date == today,
+            WyckoffAutoResult.timeframe == 'daily',
+            WyckoffAutoResult.status == 'success',
+            WyckoffAutoResult.stock_code.in_(stock_codes)
+        ).all()
+        cached_map = {r.stock_code: r for r in cached}
+
+        uncached = [c for c in stock_codes if c not in cached_map]
+        if uncached and trend_data and trend_data.get('stocks'):
+            name_map = {s['stock_code']: s['stock_name'] for s in trend_data['stocks']}
+            for uc in uncached:
+                result = WyckoffAutoService.analyze_single(uc, name_map.get(uc, ''), 'daily')
+                if result.get('status') == 'success':
+                    new_record = WyckoffAutoResult.query.filter_by(
+                        analysis_date=today, stock_code=uc, timeframe='daily'
+                    ).first()
+                    if new_record:
+                        cached_map[uc] = new_record
+
         for stock in advice['stocks']:
             code = stock['code']
-            if code in score_map:
-                score_data = score_map[code]
-                stock['wyckoff_score'] = score_data.get('score')
-                stock['score_details'] = score_data.get('score_details')
-                stock['analysis'] = score_data.get('analysis')
+            record = cached_map.get(code)
+            if record:
+                stock['wyckoff_score'] = record.score
+                stock['score_details'] = {
+                    'phase': record.phase,
+                    'events': json.loads(record.events) if record.events else [],
+                    'confidence': record.confidence,
+                }
+                stock['analysis'] = {
+                    'phase': record.phase,
+                    'events': json.loads(record.events) if record.events else [],
+                    'support': record.support_price,
+                    'resistance': record.resistance_price,
+                    'current_price': record.current_price,
+                }
             else:
                 stock['wyckoff_score'] = None
                 stock['score_details'] = None
                 stock['analysis'] = None
-
-            # 添加估值数据
             stock['valuation'] = valuation_map.get(code)
-            # 添加投资建议
             stock['investment_advice'] = advice_map.get(code)
-
     except Exception as e:
         logger.error(f"计算威科夫评分失败: {e}")
-        # 评分失败不影响原有功能
         for stock in advice['stocks']:
             stock['wyckoff_score'] = None
             stock['score_details'] = None

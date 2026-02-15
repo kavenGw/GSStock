@@ -1,9 +1,11 @@
 """
 回测验证服务 - 验证威科夫阶段判断和买卖信号的历史准确率
 """
+import json
 import logging
 from datetime import date, timedelta
 from collections import defaultdict
+from statistics import mean, stdev
 
 from app import db
 from app.models.wyckoff import WyckoffAutoResult
@@ -11,16 +13,16 @@ from app.models.signal_cache import SignalCache
 
 logger = logging.getLogger(__name__)
 
-# 威科夫阶段的预期方向
 PHASE_EXPECTED_DIRECTION = {
-    'accumulation': 'up',      # 吸筹 → 预期上涨
-    'markup': 'up',            # 上升 → 预期继续上涨
-    'distribution': 'down',    # 派发 → 预期下跌
-    'markdown': 'down',        # 下降 → 预期继续下跌
+    'accumulation': 'up',
+    'accumulation_markup': 'up',
+    'markup': 'up',
+    'distribution': 'down',
+    'distribution_markdown': 'down',
+    'markdown': 'down',
 }
 
-# 回测评估周期（天）
-EVAL_PERIODS = [5, 10, 20]
+EVAL_PERIODS = [5, 10, 20, 40, 60]
 
 
 class BacktestService:
@@ -30,19 +32,14 @@ class BacktestService:
         from app.services.unified_stock_data import UnifiedStockDataService
         self.data_service = UnifiedStockDataService()
 
-    def backtest_wyckoff(self, stock_code: str, lookback_days: int = 180) -> dict:
-        """回测威科夫阶段判断
-
-        1. 获取历史自动分析记录（WyckoffAutoResult表）
-        2. 获取对应时段的实际走势
-        3. 验证阶段判断后N天的走势是否符合预期
-        4. 输出：方向准确率、平均收益率
-        """
+    def backtest_wyckoff(self, stock_code: str, lookback_days: int = 180, timeframe: str = 'daily') -> dict:
+        """回测威科夫阶段判断"""
         start_date = date.today() - timedelta(days=lookback_days)
 
         records = WyckoffAutoResult.query.filter(
             WyckoffAutoResult.stock_code == stock_code,
             WyckoffAutoResult.analysis_date >= start_date,
+            WyckoffAutoResult.timeframe == timeframe,
             WyckoffAutoResult.status == 'success'
         ).order_by(WyckoffAutoResult.analysis_date).all()
 
@@ -247,6 +244,7 @@ class BacktestService:
 
         returns = {}
         correct = {}
+        max_drawdowns = {}
         for period in EVAL_PERIODS:
             target_idx = start_idx + period
             if target_idx < len(sorted_dates):
@@ -257,6 +255,15 @@ class BacktestService:
                     correct[period] = ret > 0
                 else:
                     correct[period] = ret < 0
+
+                peak = base_price
+                max_dd = 0
+                for j in range(start_idx, target_idx + 1):
+                    p = price_data[sorted_dates[j]]
+                    peak = max(peak, p)
+                    dd = (p - peak) / peak * 100
+                    max_dd = min(max_dd, dd)
+                max_drawdowns[period] = round(max_dd, 2)
 
         if not returns:
             return None
@@ -269,6 +276,8 @@ class BacktestService:
             'base_price': base_price,
             'returns': returns,
             'correct': correct,
+            'max_drawdowns': max_drawdowns,
+            'events': json.loads(record.events) if record.events else [],
         }
 
     def _evaluate_signal(self, signal: SignalCache, price_data: dict) -> dict:
@@ -370,8 +379,25 @@ class BacktestService:
             'max_drawdown': round(max_drawdown, 2),
         }
 
+    @staticmethod
+    def _calculate_grade(accuracy, plr, sharpe):
+        score = 0
+        if accuracy and accuracy > 70:
+            score += 2
+        elif accuracy and accuracy > 55:
+            score += 1
+        if plr > 1.5:
+            score += 2
+        elif plr > 1:
+            score += 1
+        if sharpe > 1.5:
+            score += 2
+        elif sharpe > 0.5:
+            score += 1
+        grades = {6: 'A', 5: 'A', 4: 'B', 3: 'B', 2: 'C', 1: 'C', 0: 'D'}
+        return grades.get(score, 'D')
+
     def _summarize_wyckoff(self, stock_code: str, results: list) -> dict:
-        """汇总威科夫回测结果"""
         if not results:
             return {'stock_code': stock_code, 'total': 0, 'message': '无可评估记录'}
 
@@ -386,6 +412,23 @@ class BacktestService:
 
             period_returns = [r['returns'][period] for r in results if period in r['returns']]
             avg_returns[period] = round(sum(period_returns) / len(period_returns), 2) if period_returns else None
+
+        # 盈亏比（基于10日收益）
+        wins = [r['returns'].get(10, 0) for r in results if r['correct'].get(10)]
+        losses = [r['returns'].get(10, 0) for r in results if not r['correct'].get(10) and 10 in r['correct']]
+        avg_win = mean(wins) if wins else 0
+        avg_loss = abs(mean(losses)) if losses else 1
+        profit_loss_ratio = round(avg_win / avg_loss, 2) if avg_loss > 0 else 0
+
+        # 夏普比率（基于10日收益）
+        all_returns = [r['returns'].get(10, 0) for r in results if 10 in r['returns']]
+        if len(all_returns) > 1:
+            sharpe = round(mean(all_returns) / stdev(all_returns) * (252 ** 0.5), 2) if stdev(all_returns) > 0 else 0
+        else:
+            sharpe = 0
+
+        # 信号评级
+        grade = self._calculate_grade(accuracy.get(10), profit_loss_ratio, sharpe)
 
         # 按阶段分组
         phase_stats = defaultdict(lambda: {'total': 0, 'correct': 0, 'returns': []})
@@ -406,13 +449,42 @@ class BacktestService:
                 'avg_return': round(sum(stats['returns']) / len(stats['returns']), 2) if stats['returns'] else 0,
             }
 
+        # 按事件类型统计
+        event_stats = defaultdict(lambda: {'total': 0, 'correct': 0, 'returns': []})
+        for r in results:
+            for event in r.get('events', []):
+                event_stats[event]['total'] += 1
+                ret_10 = r['returns'].get(10)
+                if ret_10 is not None:
+                    event_stats[event]['returns'].append(ret_10)
+                    if r['correct'].get(10, False):
+                        event_stats[event]['correct'] += 1
+
+        event_summary = {}
+        for event, stats in event_stats.items():
+            evt_returns = stats['returns']
+            evt_acc = round(stats['correct'] / stats['total'] * 100, 1) if stats['total'] > 0 else 0
+            evt_avg = round(mean(evt_returns), 2) if evt_returns else 0
+            evt_sharpe = round(mean(evt_returns) / stdev(evt_returns) * (252 ** 0.5), 2) if len(evt_returns) > 1 and stdev(evt_returns) > 0 else 0
+            event_summary[event] = {
+                'total': stats['total'],
+                'accuracy': evt_acc,
+                'avg_return': evt_avg,
+                'sharpe': evt_sharpe,
+                'grade': self._calculate_grade(evt_acc, 0, evt_sharpe),
+            }
+
         return {
             'stock_code': stock_code,
             'total': total,
             'accuracy': accuracy,
             'avg_returns': avg_returns,
+            'profit_loss_ratio': profit_loss_ratio,
+            'sharpe': sharpe,
+            'grade': grade,
             'phase_summary': phase_summary,
-            'details': results[-10:],  # 最近10条
+            'event_summary': event_summary,
+            'details': results[-10:],
         }
 
     def _summarize_signals(self, stock_code: str, results: list) -> dict:

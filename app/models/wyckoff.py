@@ -7,14 +7,14 @@ class WyckoffAutoResult(db.Model):
     """威科夫自动分析结果模型"""
     __tablename__ = 'wyckoff_auto_result'
     __table_args__ = (
-        db.UniqueConstraint('analysis_date', 'stock_code', name='uq_wyckoff_auto_date_stock'),
+        db.UniqueConstraint('analysis_date', 'stock_code', 'timeframe', name='uq_wyckoff_auto_date_stock_tf'),
         db.Index('idx_wyckoff_auto_date', 'analysis_date'),
     )
 
     id = db.Column(db.Integer, primary_key=True)
     analysis_date = db.Column(db.Date, nullable=False)
-    stock_code = db.Column(db.String(6), nullable=False)
-    phase = db.Column(db.String(20), nullable=False)  # accumulation/markup/distribution/markdown
+    stock_code = db.Column(db.String(20), nullable=False)
+    phase = db.Column(db.String(30), nullable=False)  # accumulation/markup/distribution/markdown
     events = db.Column(db.Text, nullable=True)  # JSON 数组
     advice = db.Column(db.String(20), nullable=False)  # buy/hold/sell/watch
     support_price = db.Column(db.Float, nullable=True)
@@ -22,6 +22,10 @@ class WyckoffAutoResult(db.Model):
     current_price = db.Column(db.Float, nullable=True)
     details = db.Column(db.Text, nullable=True)  # JSON 详情
     status = db.Column(db.String(20), default='success')  # success/failed/insufficient
+    timeframe = db.Column(db.String(10), default='daily', nullable=False)
+    score = db.Column(db.Integer, nullable=True)
+    confidence = db.Column(db.Float, nullable=True)
+    composite_signal = db.Column(db.String(20), nullable=True)
     error_msg = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -36,12 +40,16 @@ class WyckoffAutoResult(db.Model):
             'id': self.id,
             'analysis_date': self.analysis_date.isoformat() if self.analysis_date else None,
             'stock_code': self.stock_code,
+            'timeframe': self.timeframe,
             'phase': self.phase,
             'events': events_list,
             'advice': self.advice,
             'support_price': self.support_price,
             'resistance_price': self.resistance_price,
             'current_price': self.current_price,
+            'score': self.score,
+            'confidence': self.confidence,
+            'composite_signal': self.composite_signal,
             'details': details_dict,
             'status': self.status,
             'error_msg': self.error_msg,
