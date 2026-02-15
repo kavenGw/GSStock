@@ -7,6 +7,8 @@ from app.models.preload import PreloadStatus
 from app.models.wyckoff import WyckoffAutoResult
 from app.models.index_trend_cache import IndexTrendCache
 from app.models.metal_trend_cache import MetalTrendCache
+from app.models.category import StockCategory
+from app.models.stock import Stock
 from app.services.position import PositionService
 from app.services.wyckoff import WyckoffAutoService
 
@@ -125,21 +127,8 @@ class PreloadService:
         if existing and existing.status == 'running':
             return {'success': False, 'message': '预加载正在进行中', 'total': existing.total_count}
 
-        # 获取最新持仓股票列表
-        latest_date = PositionService.get_latest_date()
-        if not latest_date:
-            return {'success': False, 'message': '无持仓数据', 'total': 0}
-
-        positions = PositionService.get_snapshot(latest_date)
-        if not positions:
-            return {'success': False, 'message': '无持仓数据', 'total': 0}
-
-        # 过滤有效的6位股票代码
-        stock_list = []
-        for p in positions:
-            code = p.stock_code
-            if code and re.match(r'^[0-9]{6}$', code):
-                stock_list.append({'code': code, 'name': p.stock_name})
+        # 获取所有需要预加载的股票（持仓 + 分类）
+        stock_list = PreloadService.get_all_stock_codes()
 
         if not stock_list:
             return {'success': False, 'message': '无有效股票代码', 'total': 0}
@@ -432,8 +421,8 @@ class PreloadService:
 
     @staticmethod
     def get_all_stock_codes() -> list:
-        """获取所有需要预加载的股票代码（持仓）"""
-        stock_set = set()
+        """获取所有需要预加载的股票代码（持仓 + 所有分类）"""
+        stock_map = {}  # code -> name
 
         # 获取持仓股票
         latest_date = PositionService.get_latest_date()
@@ -441,9 +430,16 @@ class PreloadService:
             positions = PositionService.get_snapshot(latest_date)
             for p in positions:
                 if p.stock_code and re.match(r'^[0-9]{6}$', p.stock_code):
-                    stock_set.add((p.stock_code, p.stock_name))
+                    stock_map[p.stock_code] = p.stock_name
 
-        return [{'code': code, 'name': name} for code, name in stock_set]
+        # 获取所有分类中的A股
+        stock_cats = StockCategory.query.all()
+        for sc in stock_cats:
+            if sc.stock_code and re.match(r'^[0-9]{6}$', sc.stock_code) and sc.stock_code not in stock_map:
+                stock = Stock.query.filter_by(stock_code=sc.stock_code).first()
+                stock_map[sc.stock_code] = stock.stock_name if stock else sc.stock_code
+
+        return [{'code': code, 'name': name} for code, name in stock_map.items()]
 
     @staticmethod
     def start_preload_extended(target_date: date, max_workers: int = 15) -> dict:
