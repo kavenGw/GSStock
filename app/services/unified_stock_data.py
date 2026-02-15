@@ -469,21 +469,17 @@ class UnifiedStockDataService:
                     logger.debug(f"[DB缓存] {code} {stock_name} 命中: 完整数据")
                     continue
 
-            # 非交易时间使用缓存
+            # 非交易时间使用缓存（仅当有效日期有数据时才使用）
             if code in trading_status['use_cache']:
                 if cache_info:
                     result[code] = cache_info['data']
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间")
+                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间 (date={effective_date})")
                     continue
-                expired_data = self._get_expired_cache(code, cache_type, '非交易时间无有效缓存')
-                if expired_data:
-                    result[code] = expired_data
-                    memory_cache.set(code, cache_type, expired_data, stable=True)
-                    continue
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 无缓存")
+                # 有效日期无缓存，需要获取最新数据
+                logger.debug(f"[缓存] {code} {stock_name} 未命中: 有效日期 {effective_date} 无缓存")
                 need_refresh.append(code)
                 continue
 
@@ -923,7 +919,6 @@ class UnifiedStockDataService:
         if not stock_codes:
             return {'stocks': [], 'date_range': {'start': None, 'end': None}}
 
-        today = date.today()
         cache_type = f'ohlc_{days}'
 
         # 入口日志
@@ -959,8 +954,16 @@ class UnifiedStockDataService:
 
         # 第二层：数据库缓存 + 智能TTL判断
         trading_status = BatchCacheStrategy.filter_by_trading_status(remaining_codes)
-        cached_data = UnifiedStockCache.get_cache_with_status(remaining_codes, cache_type, today)
-        data_end_dates = UnifiedStockCache.get_data_end_dates(remaining_codes, cache_type, today)
+        effective_dates = self._get_effective_cache_dates(remaining_codes)
+        date_groups = {}
+        for code in remaining_codes:
+            d = effective_dates[code]
+            date_groups.setdefault(d, []).append(code)
+        cached_data = {}
+        data_end_dates = {}
+        for cache_date, codes in date_groups.items():
+            cached_data.update(UnifiedStockCache.get_cache_with_status(codes, cache_type, cache_date))
+            data_end_dates.update(UnifiedStockCache.get_data_end_dates(codes, cache_type, cache_date))
 
         cached_stocks = []
         need_refresh = []  # 全量获取
@@ -971,6 +974,7 @@ class UnifiedStockDataService:
             cache_info = cached_data.get(code)
             data_end = data_end_dates.get(code)
             stock_name = self._get_stock_name(code, cache_info.get('data') if cache_info else None)
+            effective_date = effective_dates[code]
 
             if force_refresh:
                 logger.debug(f"[缓存] {code} {stock_name} 未命中: 强制刷新")
@@ -980,7 +984,7 @@ class UnifiedStockDataService:
             # 情况A: 已完整且 data_end_date 是最近交易日 → 直接使用
             if cache_info and cache_info.get('is_complete') and data_end:
                 market = self._identify_market(code)
-                last_trading = TradingCalendarService.get_last_trading_day(market, today + timedelta(days=1))
+                last_trading = TradingCalendarService.get_last_trading_day(market, effective_date + timedelta(days=1))
                 if data_end >= last_trading:
                     cached_stocks.append(cache_info['data'])
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
@@ -1011,7 +1015,7 @@ class UnifiedStockDataService:
             if cache_info and data_end:
                 market = self._identify_market(code)
                 missing_days = TradingCalendarService.get_trading_days(
-                    market, data_end + timedelta(days=1), today
+                    market, data_end + timedelta(days=1), effective_date
                 )
                 if missing_days:
                     logger.debug(f"[缓存] {code} {stock_name} 需增量: 缺少{len(missing_days)}个交易日")
@@ -1028,7 +1032,7 @@ class UnifiedStockDataService:
             # 交易时间内，使用智能TTL判断
             if cache_info:
                 last_fetch = cache_info.get('last_fetch_time')
-                if last_fetch and not SmartCacheStrategy.should_refresh(code, last_fetch, today):
+                if last_fetch and not SmartCacheStrategy.should_refresh(code, last_fetch, effective_date):
                     cached_stocks.append(cache_info['data'])
                     memory_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
@@ -1111,7 +1115,7 @@ class UnifiedStockDataService:
                                 except ValueError:
                                     pass
                             UnifiedStockCache.set_cached_data(
-                                code, cache_type, merged_stock, today,
+                                code, cache_type, merged_stock, effective_dates[code],
                                 is_complete=is_closed,
                                 data_end_date=data_end_date
                             )
@@ -1266,6 +1270,7 @@ class UnifiedStockDataService:
 
             market = self._identify_market(code)
             is_closed = TradingCalendarService.is_after_close(market)
+            effective_date = SmartCacheStrategy.get_effective_cache_date(code)
             data_end = None
             if data_points:
                 last_date_str = data_points[-1].get('date')
@@ -1275,7 +1280,7 @@ class UnifiedStockDataService:
                     except ValueError:
                         pass
             UnifiedStockCache.set_cached_data(
-                code, cache_type, result, today,
+                code, cache_type, result, effective_date,
                 is_complete=is_closed,
                 data_end_date=data_end
             )
@@ -1861,7 +1866,7 @@ class UnifiedStockDataService:
         from app.models.index_trend_cache import IndexTrendCache
 
         if target_date is None:
-            target_date = date.today()
+            target_date = SmartCacheStrategy.get_effective_cache_date('600519')
 
         INDEX_CODES = {
             'sh000001': '000001.SS',
@@ -2059,7 +2064,7 @@ class UnifiedStockDataService:
         if not stock_codes:
             return {}
 
-        today = date.today()
+        effective_dates = self._get_effective_cache_dates(stock_codes)
         cache_type = 'pe'
         now_str = datetime.now().isoformat()
 
@@ -2075,11 +2080,11 @@ class UnifiedStockDataService:
                 need_refresh.append(code)
                 continue
 
-            cached = UnifiedStockCache.get_cached_data(code, cache_type, today)
+            effective_date = effective_dates[code]
+            cached = UnifiedStockCache.get_cached_data(code, cache_type, effective_date)
             if cached:
-                # 检查24小时有效期
                 cache_record = UnifiedStockCache.query.filter_by(
-                    stock_code=code, cache_type=cache_type, cache_date=today
+                    stock_code=code, cache_type=cache_type, cache_date=effective_date
                 ).first()
                 if cache_record and cache_record.last_fetch_time:
                     age = datetime.now() - cache_record.last_fetch_time
@@ -2095,7 +2100,6 @@ class UnifiedStockDataService:
 
         # 获取需要刷新的数据
         if need_refresh:
-            # 只读模式下不从外部 API 获取，尝试使用过期缓存
             if is_readonly_mode():
                 logger.info(f"[只读模式] 跳过 PE 数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
@@ -2104,14 +2108,14 @@ class UnifiedStockDataService:
                         result[code] = expired_data
             else:
                 self._miss_count += len(need_refresh)
-                fetched = self._fetch_pe_data(need_refresh, today, now_str)
+                fetched = self._fetch_pe_data(need_refresh, effective_dates, now_str)
                 result.update(fetched)
 
         readonly_msg = " [只读模式]" if is_readonly_mode() else ""
         logger.info(f"[PE数据] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
         return result
 
-    def _fetch_pe_data(self, stock_codes: list, today: date, now_str: str) -> dict:
+    def _fetch_pe_data(self, stock_codes: list, effective_dates: dict, now_str: str) -> dict:
         """从外部API获取PE数据（美股/港股用yfinance）"""
         import yfinance as yf
 
@@ -2166,7 +2170,7 @@ class UnifiedStockDataService:
                     if data:
                         result[code] = data
                         yf_success += 1
-                        UnifiedStockCache.set_cached_data(code, 'pe', data, today)
+                        UnifiedStockCache.set_cached_data(code, 'pe', data, effective_dates[code])
                         logger.debug(f"[获取] {code} {data['name']} PE成功 (yfinance)")
                     else:
                         expired = self._get_expired_cache(code, 'pe', 'yfinance获取失败')
@@ -2209,7 +2213,7 @@ class UnifiedStockDataService:
         if not symbols:
             return {}
 
-        today = date.today()
+        effective_dates = self._get_effective_cache_dates(symbols)
         now_str = datetime.now().isoformat()
 
         # 缓存检查
@@ -2218,10 +2222,11 @@ class UnifiedStockDataService:
 
         if not force_refresh:
             for sym in symbols:
-                cached = UnifiedStockCache.get_cached_data(sym, cache_type, today)
+                effective_date = effective_dates[sym]
+                cached = UnifiedStockCache.get_cached_data(sym, cache_type, effective_date)
                 if cached:
                     cache_record = UnifiedStockCache.query.filter_by(
-                        stock_code=sym, cache_type=cache_type, cache_date=today
+                        stock_code=sym, cache_type=cache_type, cache_date=effective_date
                     ).first()
                     if cache_record and cache_record.last_fetch_time:
                         age = datetime.now() - cache_record.last_fetch_time
@@ -2280,7 +2285,7 @@ class UnifiedStockDataService:
                 if data:
                     result[sym] = data
                     success_count += 1
-                    UnifiedStockCache.set_cached_data(sym, cache_type, data, today)
+                    UnifiedStockCache.set_cached_data(sym, cache_type, data, effective_dates[sym])
                 else:
                     expired = self._get_expired_cache(sym, cache_type, 'yfinance获取失败')
                     if expired:
@@ -2309,7 +2314,7 @@ class UnifiedStockDataService:
         if not index_codes:
             return {}
 
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'a_index_quote'
         now_str = datetime.now().isoformat()
 
@@ -2464,7 +2469,7 @@ class UnifiedStockDataService:
         Returns:
             板块列表 [{'name': str, 'change_percent': float, 'leader': str}]
         """
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'cn_sector'
         cache_key = 'CN_SECTOR_ALL'
 
@@ -2602,7 +2607,7 @@ class UnifiedStockDataService:
         if not etf_codes:
             return {}
 
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'etf_nav'
         now_str = datetime.now().isoformat()
 

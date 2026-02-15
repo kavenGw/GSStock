@@ -246,11 +246,12 @@ class BriefingService:
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
+        from app.services.market_session import SmartCacheStrategy
 
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'briefing_index'
 
-        # 检查整体缓存（不强制刷新时直接使用）
+        # 检查整体缓存
         cache_key = 'BRIEFING_INDICES_V2'
         cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
         if cached and isinstance(cached, dict) and 'regions' in cached:
@@ -358,11 +359,12 @@ class BriefingService:
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
+        from app.services.market_session import SmartCacheStrategy
 
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('NQ=F')
         cache_type = 'briefing_futures'
 
-        # 检查整体缓存（直接使用）
+        # 检查整体缓存
         cache_key = 'BRIEFING_FUTURES'
         cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
         if cached and isinstance(cached, list):
@@ -419,8 +421,9 @@ class BriefingService:
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
         from app.services.cache_validator import CacheValidator
+        from app.services.market_session import SmartCacheStrategy
 
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'sector_cn'
         stock_code = 'SECTOR_CN'
 
@@ -466,12 +469,13 @@ class BriefingService:
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
+        from app.services.market_session import SmartCacheStrategy
 
-        today = date.today()
+        today = SmartCacheStrategy.get_effective_cache_date('XLK')
         cache_type = 'sector_us'
         stock_code = 'SECTOR_US'
 
-        # 检查整体缓存（直接使用）
+        # 检查整体缓存
         cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, today)
         if cached and isinstance(cached, list):
             return cached
@@ -634,7 +638,7 @@ class BriefingService:
 
         cache = UnifiedStockCache.query.filter(
             UnifiedStockCache.cache_type.in_(cache_types),
-            UnifiedStockCache.cache_date == today
+            UnifiedStockCache.cache_date >= today - timedelta(days=3)
         ).order_by(UnifiedStockCache.last_fetch_time.asc()).first()
 
         if cache and cache.last_fetch_time:
@@ -799,8 +803,13 @@ class BriefingService:
                                 'volume': s.get('volume')
                             })
             else:
-                # 使用缓存的收盘价
+                # 使用缓存的收盘价，检测降级数据并刷新
                 prices = unified_stock_data_service.get_closing_prices(sector_stocks)
+                stale_codes = [c for c in sector_stocks
+                               if c not in prices or prices.get(c, {}).get('_is_degraded')]
+                if stale_codes:
+                    fetched = unified_stock_data_service.get_realtime_prices(stale_codes)
+                    prices.update(fetched)
                 for code in sector_stocks:
                     price_data = prices.get(code, {})
                     stock_list.append({
