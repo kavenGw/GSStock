@@ -152,13 +152,12 @@ def create_app(config_class=None):
         stock_db_path, _ = get_db_paths(app)
         cleanup_legacy_tables(stock_db_path)
 
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, wyckoff_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, preload_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, preload_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
     app.register_blueprint(category_bp)
     app.register_blueprint(trade_bp)
-    app.register_blueprint(wyckoff_bp)
     app.register_blueprint(stock_bp)
     app.register_blueprint(daily_record_bp)
     app.register_blueprint(profit_bp)

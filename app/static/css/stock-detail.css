@@ -188,30 +188,159 @@
 .sd-tech-label { color: #888; }
 .sd-tech-value { font-weight: 600; }
 
-/* 威科夫分析 */
-.sd-wyckoff {
-    margin-top: 10px;
+/* 威科夫分析按钮 */
+.sd-wyckoff-btns {
+    display: flex;
+    gap: 6px;
+}
+.sd-wk-btn {
+    padding: 3px 12px;
+    border: 1px solid #6f42c1;
+    color: #6f42c1;
+    background: transparent;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.sd-wk-btn:hover { background: #6f42c1; color: #fff; }
+.sd-wk-btn:disabled { opacity: 0.5; cursor: wait; }
+.sd-wk-btn-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+.sd-wk-btn-secondary:hover { background: #6c757d; color: #fff; }
+
+/* 威科夫分析结果 */
+.sd-wk-result {
     padding: 10px 12px;
     background: #f8f7fc;
     border-radius: 6px;
     border: 1px solid #e8e0f0;
 }
-.sd-wyckoff-phase {
+.sd-wk-result-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.sd-wk-phase-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
     font-weight: 600;
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-}
-.sd-wyckoff-advice {
     font-size: 0.8rem;
-    color: #666;
+    color: #fff;
 }
-.sd-wyckoff-prices {
+.sd-wk-advice-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #fff;
+}
+.sd-wk-ref-icon {
+    cursor: pointer;
+    color: #6f42c1;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+.sd-wk-ref-icon:hover { opacity: 1; }
+.sd-wk-events {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+.sd-wk-event-tag {
+    padding: 1px 8px;
+    background: #e8e0f0;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    color: #6f42c1;
+}
+.sd-wk-prices {
     display: flex;
     gap: 16px;
-    margin-top: 6px;
     font-size: 0.75rem;
     color: #888;
+    margin-bottom: 4px;
 }
+.sd-wk-time {
+    font-size: 0.7rem;
+    color: #aaa;
+}
+
+/* 威科夫折叠区 */
+.sd-wk-collapse {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+.sd-wk-history-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.sd-wk-toggle-icon {
+    font-size: 0.65rem;
+    transition: transform 0.2s;
+    margin-left: auto;
+}
+.sd-wk-toggle-icon.open {
+    transform: rotate(180deg);
+}
+.sd-wk-history-item {
+    padding: 6px 10px;
+    border: 1px solid #e8e0f0;
+    border-radius: 4px;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sd-wk-history-date {
+    color: #888;
+    font-size: 0.7rem;
+    min-width: 80px;
+}
+
+/* 回测结果 */
+.sd-wk-backtest {
+    padding: 10px 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+}
+.sd-wk-backtest-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+}
+.sd-wk-backtest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.sd-wk-backtest-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: #fff;
+    border-radius: 3px;
+    font-size: 0.75rem;
+}
+.sd-wk-backtest-label { color: #888; }
+.sd-wk-backtest-value { font-weight: 600; }
 
 /* 投资建议 */
 .sd-advice-content {

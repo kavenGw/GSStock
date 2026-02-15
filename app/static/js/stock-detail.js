@@ -31,6 +31,9 @@ class StockDetailDrawer {
         });
 
         document.getElementById('sdAIBtn')?.addEventListener('click', () => this.runAIAnalysis());
+        document.getElementById('sdWkAnalyzeBtn')?.addEventListener('click', () => this.runWyckoffAnalysis());
+        document.getElementById('sdWkBacktestBtn')?.addEventListener('click', () => this.runWyckoffBacktest());
+        document.getElementById('sdWkHistoryToggle')?.addEventListener('click', () => this.toggleWyckoffHistory());
     }
 
     static open(code, name) {
@@ -103,6 +106,13 @@ class StockDetailDrawer {
 
         document.getElementById('sdTechnicalContent').innerHTML = '<div class="sd-skeleton-rows"><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div>';
 
+        document.getElementById('sdWyckoffContent').innerHTML = '<div class="sd-skeleton-rows"><div class="skeleton skeleton-text w-80"></div><div class="skeleton skeleton-text w-60"></div></div>';
+        document.getElementById('sdWkBacktestResult').classList.add('d-none');
+        document.getElementById('sdWkBacktestResult').innerHTML = '';
+        document.getElementById('sdWkHistorySection').classList.add('d-none');
+        document.getElementById('sdWkHistoryList').innerHTML = '';
+        document.getElementById('sdWkHistoryList').classList.add('d-none');
+
         document.getElementById('sdAdviceSection').classList.add('d-none');
         document.getElementById('sdAISection').classList.add('d-none');
         document.getElementById('sdAIResult').innerHTML = '';
@@ -123,7 +133,8 @@ class StockDetailDrawer {
             this.renderBasic(data.basic);
             this.renderPosition(data.position, data.basic?.price);
             this.renderChart(data.ohlc);
-            this.renderTechnical(data.technical, data.wyckoff);
+            this.renderTechnical(data.technical);
+            this.renderWyckoff(data.wyckoff);
             this.renderAdvice(data.advice);
             this.renderAISection(data.ai_enabled, code);
 
@@ -331,62 +342,38 @@ class StockDetailDrawer {
         }
     }
 
-    static renderTechnical(technical, wyckoff) {
+    static renderTechnical(technical) {
         const content = document.getElementById('sdTechnicalContent');
 
-        if (!technical && !wyckoff) {
+        if (!technical) {
             content.innerHTML = '<div style="color:#aaa;font-size:0.8rem">暂无技术分析</div>';
             return;
         }
 
         let html = '';
 
-        if (technical) {
-            const scoreBg = this.getScoreBg(technical.score);
-            html += `<div class="sd-tech-grid">`;
-            html += `<div class="sd-tech-item"><span class="sd-tech-label">综合评分</span><span class="sd-tech-value" style="color:#fff;background:${scoreBg};padding:1px 8px;border-radius:3px">${technical.score}</span></div>`;
+        const scoreBg = this.getScoreBg(technical.score);
+        html += `<div class="sd-tech-grid">`;
+        html += `<div class="sd-tech-item"><span class="sd-tech-label">综合评分</span><span class="sd-tech-value" style="color:#fff;background:${scoreBg};padding:1px 8px;border-radius:3px">${technical.score}</span></div>`;
 
-            if (technical.signal_text) {
-                html += `<div class="sd-tech-item"><span class="sd-tech-label">信号</span><span class="sd-tech-value">${technical.signal_text}</span></div>`;
-            }
-            if (technical.macd_signal) {
-                const macdCls = technical.macd_signal.includes('金叉') || technical.macd_signal === '多头' ? 'sd-text-up' :
-                               technical.macd_signal.includes('死叉') || technical.macd_signal === '空头' ? 'sd-text-down' : 'sd-text-flat';
-                html += `<div class="sd-tech-item"><span class="sd-tech-label">MACD</span><span class="sd-tech-value ${macdCls}">${technical.macd_signal}</span></div>`;
-            }
-            if (technical.rsi_6 !== undefined) {
-                const rsiCls = technical.rsi_6 > 70 ? 'sd-text-up' : technical.rsi_6 < 30 ? 'sd-text-down' : '';
-                html += `<div class="sd-tech-item"><span class="sd-tech-label">RSI(6)</span><span class="sd-tech-value ${rsiCls}">${technical.rsi_6?.toFixed(1) || '--'}</span></div>`;
-            }
-            if (technical.trend_state) {
-                const trendText = {'uptrend':'上升趋势','downtrend':'下降趋势','sideways':'横盘整理'}[technical.trend_state] || technical.trend_state;
-                const trendCls = technical.trend_state === 'uptrend' ? 'sd-text-up' : technical.trend_state === 'downtrend' ? 'sd-text-down' : 'sd-text-flat';
-                html += `<div class="sd-tech-item"><span class="sd-tech-label">趋势</span><span class="sd-tech-value ${trendCls}">${trendText}</span></div>`;
-            }
-            html += `</div>`;
+        if (technical.signal_text) {
+            html += `<div class="sd-tech-item"><span class="sd-tech-label">信号</span><span class="sd-tech-value">${technical.signal_text}</span></div>`;
         }
-
-        if (wyckoff) {
-            const phaseMap = {
-                'accumulation': '吸筹阶段', 'markup': '上涨阶段',
-                'distribution': '派发阶段', 'markdown': '下跌阶段',
-                'reaccumulation': '再吸筹', 'redistribution': '再派发'
-            };
-            const phaseName = phaseMap[wyckoff.phase] || wyckoff.phase || '未知';
-
-            html += `<div class="sd-wyckoff">`;
-            html += `<div class="sd-wyckoff-phase">威科夫: ${phaseName}</div>`;
-            if (wyckoff.advice) {
-                html += `<div class="sd-wyckoff-advice">${wyckoff.advice}</div>`;
-            }
-            if (wyckoff.support_price || wyckoff.resistance_price) {
-                html += `<div class="sd-wyckoff-prices">`;
-                if (wyckoff.support_price) html += `<span>支撑: ${wyckoff.support_price.toFixed(2)}</span>`;
-                if (wyckoff.resistance_price) html += `<span>阻力: ${wyckoff.resistance_price.toFixed(2)}</span>`;
-                html += `</div>`;
-            }
-            html += `</div>`;
+        if (technical.macd_signal) {
+            const macdCls = technical.macd_signal.includes('金叉') || technical.macd_signal === '多头' ? 'sd-text-up' :
+                           technical.macd_signal.includes('死叉') || technical.macd_signal === '空头' ? 'sd-text-down' : 'sd-text-flat';
+            html += `<div class="sd-tech-item"><span class="sd-tech-label">MACD</span><span class="sd-tech-value ${macdCls}">${technical.macd_signal}</span></div>`;
         }
+        if (technical.rsi_6 !== undefined) {
+            const rsiCls = technical.rsi_6 > 70 ? 'sd-text-up' : technical.rsi_6 < 30 ? 'sd-text-down' : '';
+            html += `<div class="sd-tech-item"><span class="sd-tech-label">RSI(6)</span><span class="sd-tech-value ${rsiCls}">${technical.rsi_6?.toFixed(1) || '--'}</span></div>`;
+        }
+        if (technical.trend_state) {
+            const trendText = {'uptrend':'上升趋势','downtrend':'下降趋势','sideways':'横盘整理'}[technical.trend_state] || technical.trend_state;
+            const trendCls = technical.trend_state === 'uptrend' ? 'sd-text-up' : technical.trend_state === 'downtrend' ? 'sd-text-down' : 'sd-text-flat';
+            html += `<div class="sd-tech-item"><span class="sd-tech-label">趋势</span><span class="sd-tech-value ${trendCls}">${trendText}</span></div>`;
+        }
+        html += `</div>`;
 
         content.innerHTML = html;
     }
@@ -414,6 +401,241 @@ class StockDetailDrawer {
         btn.innerHTML = '<i class="bi bi-robot"></i> AI 智能分析';
 
         this.loadAIHistory(code);
+    }
+
+    // ====== 威科夫方法 ======
+
+    static PHASE_MAP = {
+        'accumulation': {text: '吸筹', bg: '#28a745'},
+        'markup': {text: '上涨', bg: '#0d6efd'},
+        'distribution': {text: '派发', bg: '#fd7e14'},
+        'markdown': {text: '下跌', bg: '#dc3545'},
+        'reaccumulation': {text: '再吸筹', bg: '#20c997'},
+        'redistribution': {text: '再派发', bg: '#e83e8c'},
+    };
+
+    static ADVICE_MAP = {
+        'buy': {text: '买入', bg: '#28a745'},
+        'hold': {text: '持有', bg: '#0d6efd'},
+        'sell': {text: '卖出', bg: '#dc3545'},
+        'watch': {text: '观望', bg: '#6c757d'},
+    };
+
+    static EVENT_MAP = {
+        'spring': '弹簧效应',
+        'shakeout': '震仓',
+        'breakout': '突破',
+        'utad': '上冲回落',
+        'test': '测试',
+        'sos': '强势信号',
+        'lpsy': '最后供给点',
+        'creek': '小溪',
+    };
+
+    static renderWyckoff(wyckoff) {
+        const content = document.getElementById('sdWyckoffContent');
+
+        if (!wyckoff) {
+            content.innerHTML = '<div style="color:#aaa;font-size:0.8rem">暂无分析数据，点击"分析"开始</div>';
+            document.getElementById('sdWkHistorySection').classList.add('d-none');
+            return;
+        }
+
+        const phase = this.PHASE_MAP[wyckoff.phase] || {text: wyckoff.phase || '未知', bg: '#6c757d'};
+        const advice = this.ADVICE_MAP[wyckoff.advice] || {text: wyckoff.advice || '--', bg: '#6c757d'};
+        const events = wyckoff.events || [];
+
+        let html = '<div class="sd-wk-result">';
+        html += '<div class="sd-wk-result-header">';
+        html += `<span class="sd-wk-phase-badge" style="background:${phase.bg}">${phase.text}</span>`;
+        html += `<i class="bi bi-image sd-wk-ref-icon" title="查看参考图" onclick="StockDetailDrawer.showReference('${wyckoff.phase}')"></i>`;
+        html += `<span class="sd-wk-advice-badge" style="background:${advice.bg}">${advice.text}</span>`;
+        html += '</div>';
+
+        if (events.length) {
+            html += '<div class="sd-wk-events">';
+            events.forEach(e => {
+                const name = this.EVENT_MAP[e] || e;
+                html += `<span class="sd-wk-event-tag">${name}</span>`;
+            });
+            html += '</div>';
+        }
+
+        if (wyckoff.support_price || wyckoff.resistance_price) {
+            html += '<div class="sd-wk-prices">';
+            if (wyckoff.support_price) html += `<span>支撑: ${wyckoff.support_price.toFixed(2)}</span>`;
+            if (wyckoff.resistance_price) html += `<span>阻力: ${wyckoff.resistance_price.toFixed(2)}</span>`;
+            html += '</div>';
+        }
+
+        if (wyckoff.analysis_date) {
+            html += `<div class="sd-wk-time">分析: ${wyckoff.analysis_date}</div>`;
+        }
+
+        html += '</div>';
+        content.innerHTML = html;
+
+        document.getElementById('sdWkHistorySection').classList.remove('d-none');
+        this.loadWyckoffHistory(this.currentCode);
+    }
+
+    static async runWyckoffAnalysis() {
+        if (!this.currentCode) return;
+        const btn = document.getElementById('sdWkAnalyzeBtn');
+        const content = document.getElementById('sdWyckoffContent');
+
+        btn.disabled = true;
+        btn.textContent = '分析中...';
+
+        try {
+            const resp = await fetch(`/api/stock-detail/${encodeURIComponent(this.currentCode)}/wyckoff/analyze`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                signal: this.abortController?.signal
+            });
+            const result = await resp.json();
+            if (result.error) throw new Error(result.error);
+            if (result.status === 'failed') throw new Error(result.error_msg || '分析失败');
+
+            if (this.currentCode) {
+                this.renderWyckoff(result);
+            }
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+            console.error('威科夫分析失败:', e);
+            content.innerHTML = `<div style="color:#dc3545;font-size:0.8rem">分析失败: ${e.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '分析';
+        }
+    }
+
+    static async runWyckoffBacktest() {
+        if (!this.currentCode) return;
+        const btn = document.getElementById('sdWkBacktestBtn');
+        const container = document.getElementById('sdWkBacktestResult');
+
+        btn.disabled = true;
+        btn.textContent = '回测中...';
+        container.classList.remove('d-none');
+        container.innerHTML = '<div style="color:#888;font-size:0.8rem;text-align:center;padding:8px">回测中...</div>';
+
+        try {
+            const resp = await fetch(`/api/stock-detail/${encodeURIComponent(this.currentCode)}/wyckoff/backtest`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({days: 180}),
+                signal: this.abortController?.signal
+            });
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+
+            this.renderBacktest(data);
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+            console.error('回测失败:', e);
+            container.innerHTML = `<div style="color:#dc3545;font-size:0.8rem;padding:8px">回测失败: ${e.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '回测';
+        }
+    }
+
+    static renderBacktest(data) {
+        const container = document.getElementById('sdWkBacktestResult');
+        const w = data.wyckoff || {};
+        const s = data.signals || {};
+
+        let html = '<div class="sd-wk-backtest">';
+        html += '<div class="sd-wk-backtest-title">回测验证结果</div>';
+        html += '<div class="sd-wk-backtest-grid">';
+
+        if (w.accuracy) {
+            for (const [days, acc] of Object.entries(w.accuracy)) {
+                if (acc !== null) {
+                    html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">${days}日准确率</span><span class="sd-wk-backtest-value">${acc}%</span></div>`;
+                }
+            }
+        }
+
+        if (s.buy && s.buy.win_rates) {
+            const wr10 = s.buy.win_rates[10];
+            if (wr10 !== undefined) {
+                html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">买入信号胜率</span><span class="sd-wk-backtest-value">${wr10}%</span></div>`;
+            }
+        }
+        if (s.sell && s.sell.win_rates) {
+            const wr10 = s.sell.win_rates[10];
+            if (wr10 !== undefined) {
+                html += `<div class="sd-wk-backtest-item"><span class="sd-wk-backtest-label">卖出信号胜率</span><span class="sd-wk-backtest-value">${wr10}%</span></div>`;
+            }
+        }
+
+        if (w.total === 0 && s.total === 0) {
+            html += '<div class="sd-wk-backtest-item" style="grid-column:1/-1"><span class="sd-wk-backtest-label">暂无足够历史数据</span></div>';
+        }
+
+        html += '</div></div>';
+        container.innerHTML = html;
+    }
+
+    static async loadWyckoffHistory(code) {
+        const list = document.getElementById('sdWkHistoryList');
+
+        try {
+            const resp = await fetch(`/api/stock-detail/${encodeURIComponent(code)}/wyckoff/history`, {
+                signal: this.abortController?.signal
+            });
+            const data = await resp.json();
+            if (this.currentCode !== code) return;
+
+            const history = data.history || [];
+            if (history.length === 0) {
+                document.getElementById('sdWkHistorySection').classList.add('d-none');
+                return;
+            }
+
+            list.innerHTML = history.slice(0, 10).map(item => {
+                const phase = this.PHASE_MAP[item.phase] || {text: item.phase, bg: '#6c757d'};
+                const advice = this.ADVICE_MAP[item.advice] || {text: item.advice, bg: '#6c757d'};
+                return `<div class="sd-wk-history-item">
+                    <span class="sd-wk-history-date">${item.analysis_date}</span>
+                    <span class="sd-wk-phase-badge" style="background:${phase.bg};font-size:0.7rem;padding:1px 6px">${phase.text}</span>
+                    <span class="sd-wk-advice-badge" style="background:${advice.bg};font-size:0.65rem;padding:1px 6px">${advice.text}</span>
+                </div>`;
+            }).join('');
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+            console.error('加载威科夫历史失败:', e);
+        }
+    }
+
+    static toggleWyckoffHistory() {
+        const list = document.getElementById('sdWkHistoryList');
+        const icon = document.querySelector('.sd-wk-toggle-icon');
+        list.classList.toggle('d-none');
+        icon?.classList.toggle('open');
+    }
+
+    static showReference(phase) {
+        if (!this.currentCode) return;
+
+        const url = `/api/stock-detail/${encodeURIComponent(this.currentCode)}/wyckoff/reference/${encodeURIComponent(phase)}`;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1100;display:flex;align-items:center;justify-content:center;cursor:pointer';
+        modal.onclick = () => modal.remove();
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.cssText = 'max-width:90%;max-height:90%;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.3)';
+        img.onerror = () => {
+            modal.remove();
+            alert('暂无该阶段的参考图');
+        };
+        modal.appendChild(img);
+
+        document.body.appendChild(modal);
     }
 
     // ====== AI 方法 ======

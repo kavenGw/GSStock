@@ -1,8 +1,9 @@
 """股票详情抽屉 - 聚合数据API"""
+import os
 import logging
 from datetime import date, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from flask import jsonify, request, current_app
+from flask import jsonify, request, current_app, send_file
 from app.routes import stock_detail_bp
 
 logger = logging.getLogger(__name__)
@@ -283,4 +284,69 @@ def ai_batch():
         return jsonify({'results': results})
     except Exception as e:
         logger.error(f"批量AI分析失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@stock_detail_bp.route('/<code>/wyckoff/analyze', methods=['POST'])
+def wyckoff_analyze(code):
+    """单股威科夫实时分析"""
+    from app.services.wyckoff import WyckoffAutoService
+    from app.models.stock import Stock
+
+    try:
+        stock = Stock.query.filter_by(stock_code=code).first()
+        stock_name = stock.stock_name if stock else ''
+        result = WyckoffAutoService.analyze_single(code, stock_name)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"威科夫分析 {code} 失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@stock_detail_bp.route('/<code>/wyckoff/backtest', methods=['POST'])
+def wyckoff_backtest(code):
+    """单股回测验证"""
+    from app.services.backtest import BacktestService
+
+    data = request.get_json() or {}
+    days = data.get('days', 180)
+
+    try:
+        service = BacktestService()
+        wyckoff_result = service.backtest_wyckoff(code, days)
+        signal_result = service.backtest_signals(code, days)
+        return jsonify({'wyckoff': wyckoff_result, 'signals': signal_result})
+    except Exception as e:
+        logger.error(f"威科夫回测 {code} 失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@stock_detail_bp.route('/<code>/wyckoff/reference/<phase>')
+def wyckoff_reference(code, phase):
+    """获取阶段参考图（直接返回图片文件）"""
+    from app.models.wyckoff import WyckoffReference
+
+    try:
+        ref = WyckoffReference.query.filter_by(phase=phase)\
+            .order_by(WyckoffReference.created_at.desc()).first()
+        if not ref or not ref.image_path or not os.path.exists(ref.image_path):
+            return jsonify({'error': '暂无参考图'}), 404
+        return send_file(ref.image_path)
+    except Exception as e:
+        logger.error(f"获取参考图失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@stock_detail_bp.route('/<code>/wyckoff/history')
+def wyckoff_history(code):
+    """股票威科夫历史"""
+    from app.models.wyckoff import WyckoffAutoResult
+
+    try:
+        records = WyckoffAutoResult.query.filter_by(
+            stock_code=code, status='success'
+        ).order_by(WyckoffAutoResult.analysis_date.desc()).limit(20).all()
+        return jsonify({'history': [r.to_dict() for r in records]})
+    except Exception as e:
+        logger.error(f"获取威科夫历史失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500

@@ -66,7 +66,32 @@
                 </div>
             </div>
 
-            <!-- 4. 投资建议区（有建议时显示） -->
+            <!-- 4. 威科夫量价分析区 -->
+            <div class="sd-section" id="sdWyckoffSection">
+                <div class="sd-section-header">
+                    <span class="sd-section-title">威科夫量价分析</span>
+                    <div class="sd-wyckoff-btns">
+                        <button class="sd-wk-btn" id="sdWkAnalyzeBtn">分析</button>
+                        <button class="sd-wk-btn sd-wk-btn-secondary" id="sdWkBacktestBtn">回测</button>
+                    </div>
+                </div>
+                <div id="sdWyckoffContent">
+                    <div class="sd-skeleton-rows">
+                        <div class="skeleton skeleton-text w-80"></div>
+                        <div class="skeleton skeleton-text w-60"></div>
+                    </div>
+                </div>
+                <div class="sd-wk-collapse d-none" id="sdWkBacktestResult"></div>
+                <div class="sd-wk-collapse d-none" id="sdWkHistorySection">
+                    <div class="sd-wk-history-title" id="sdWkHistoryToggle">
+                        <i class="bi bi-clock-history"></i> 历史记录
+                        <i class="bi bi-chevron-down sd-wk-toggle-icon"></i>
+                    </div>
+                    <div class="sd-wk-history-list d-none" id="sdWkHistoryList"></div>
+                </div>
+            </div>
+
+            <!-- 5. 投资建议区（有建议时显示） -->
             <div class="sd-section d-none" id="sdAdviceSection">
                 <div class="sd-section-header">
                     <span class="sd-section-title">投资建议</span>
@@ -74,7 +99,7 @@
                 <div class="sd-advice-content" id="sdAdviceContent"></div>
             </div>
 
-            <!-- 5. AI分析区（AI启用时显示） -->
+            <!-- 6. AI分析区（AI启用时显示） -->
             <div class="sd-section d-none" id="sdAISection">
                 <div class="sd-section-header">
                     <span class="sd-section-title">AI 分析</span>
