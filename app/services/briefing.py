@@ -10,6 +10,7 @@ import logging
 from datetime import datetime, date, timedelta
 from typing import Optional
 
+from app import db
 from app.config.sector_ratings import SECTOR_RATING_CONFIG
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,7 @@ class BriefingService:
                     prices.update(fetched)
         except Exception as e:
             logger.error(f"获取股票价格失败: {e}")
+            db.session.rollback()
 
         from app.services.stock_meta import StockMetaService
         advice_map = {}
@@ -130,6 +132,7 @@ class BriefingService:
             advice_map = {s['stock_code']: s['investment_advice'] for s in meta_stocks if s.get('stock_code') and s.get('investment_advice')}
         except Exception as e:
             logger.warning(f"获取投资建议失败: {e}")
+            db.session.rollback()
 
         for stock_info in BRIEFING_STOCKS:
             code = stock_info['code']
