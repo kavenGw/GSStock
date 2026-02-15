@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stock-detail.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -56,6 +57,9 @@
     <script src="{{ url_for('static', filename='js/profit_charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="{{ url_for('static', filename='js/stock-detail.js') }}"></script>
+    {% include 'partials/stock_detail_drawer.html' %}
     <!-- 推送设置模态框 -->
     <div class="modal fade" id="notifySettingsModal" tabindex="-1">
         <div class="modal-dialog">

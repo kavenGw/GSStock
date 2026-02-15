@@ -152,7 +152,7 @@ def create_app(config_class=None):
         stock_db_path, _ = get_db_paths(app)
         cleanup_legacy_tables(stock_db_path)
 
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, wyckoff_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, preload_bp, alert_bp, briefing_bp, strategy_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, wyckoff_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, preload_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
@@ -168,6 +168,7 @@ def create_app(config_class=None):
     app.register_blueprint(alert_bp)
     app.register_blueprint(briefing_bp)
     app.register_blueprint(strategy_bp)
+    app.register_blueprint(stock_detail_bp)
 
     with app.app_context():
         from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, PreloadStatus, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution

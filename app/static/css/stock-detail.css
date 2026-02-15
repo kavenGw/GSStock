@@ -1,0 +1,374 @@
+/* 遮罩层 */
+.stock-detail-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1050;
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+}
+.stock-detail-overlay.active {
+    opacity: 1;
+}
+
+/* 抽屉主体 */
+.stock-detail-drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 420px;
+    background: #fff;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 300ms ease-out;
+    border-radius: 12px 0 0 12px;
+}
+.stock-detail-overlay.active .stock-detail-drawer {
+    transform: translateX(0);
+}
+
+/* 头部 */
+.sd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+.sd-header-info { flex: 1; }
+.sd-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #333;
+}
+.sd-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+    font-size: 0.8rem;
+    color: #888;
+}
+.sd-market-badge {
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: #6c757d;
+    color: #fff;
+    font-weight: 500;
+}
+.sd-close {
+    border: none;
+    background: none;
+    font-size: 1.8rem;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+}
+.sd-close:hover { color: #333; }
+
+/* 可滚动主体 */
+.sd-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+/* 区块 */
+.sd-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.sd-section:last-child {
+    border-bottom: none;
+}
+.sd-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.sd-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+}
+
+/* 行情区 */
+.sd-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+.sd-current-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+.sd-change, .sd-change-pct {
+    font-size: 1rem;
+    font-weight: 600;
+}
+.sd-volume {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* 持仓信息 */
+.sd-position {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+.sd-position-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+.sd-pos-label {
+    color: #999;
+    font-size: 0.75rem;
+}
+
+/* 走势图 */
+.sd-period-btns {
+    display: flex;
+    gap: 4px;
+}
+.sd-period-btn {
+    border: 1px solid #dee2e6;
+    background: #fff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.15s;
+}
+.sd-period-btn:hover {
+    background: #f0f0f0;
+}
+.sd-period-btn.active {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+.sd-chart-container {
+    height: 260px;
+    position: relative;
+}
+.sd-chart-skeleton {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 技术指标 */
+.sd-tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.sd-tech-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+.sd-tech-label { color: #888; }
+.sd-tech-value { font-weight: 600; }
+
+/* 威科夫分析 */
+.sd-wyckoff {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f8f7fc;
+    border-radius: 6px;
+    border: 1px solid #e8e0f0;
+}
+.sd-wyckoff-phase {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+.sd-wyckoff-advice {
+    font-size: 0.8rem;
+    color: #666;
+}
+.sd-wyckoff-prices {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+/* 投资建议 */
+.sd-advice-content {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-wrap;
+}
+
+/* AI分析按钮 */
+.sd-ai-btn {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid #6f42c1;
+    color: #6f42c1;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.sd-ai-btn:hover { background: #6f42c1; color: #fff; }
+.sd-ai-btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* AI分析结果 */
+.sd-ai-result {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8f7fc;
+    border-radius: 8px;
+    border: 1px solid #e8e0f0;
+}
+.sd-ai-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.sd-ai-signal {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #fff;
+}
+.sd-ai-score {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.sd-ai-conclusion {
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+.sd-ai-details {
+    color: #666;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+}
+.sd-ai-plan {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+/* AI历史 */
+.sd-ai-history {
+    margin-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+.sd-ai-history-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 8px;
+}
+.sd-ai-history-item {
+    padding: 8px 10px;
+    border: 1px solid #e8e0f0;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.sd-ai-history-item:hover {
+    background: #f8f7fc;
+}
+.sd-ai-history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+.sd-ai-history-date {
+    font-size: 0.7rem;
+    color: #888;
+}
+.sd-ai-history-signal {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.65rem;
+    color: #fff;
+}
+.sd-ai-history-conclusion {
+    font-size: 0.75rem;
+    color: #555;
+}
+.sd-ai-history-empty {
+    color: #aaa;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 12px;
+}
+
+/* 骨架屏占位 */
+.sd-skeleton-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 颜色工具类 */
+.sd-text-up { color: #dc3545 !important; }
+.sd-text-down { color: #28a745 !important; }
+.sd-text-flat { color: #6c757d !important; }
+
+/* 错误提示 */
+.sd-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #dc3545;
+}
+.sd-error-btn {
+    margin-top: 12px;
+    padding: 6px 16px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.sd-error-btn:hover {
+    background: #f0f0f0;
+}
+
+/* 移动端适配 */
+@media (max-width: 576px) {
+    .stock-detail-drawer {
+        width: 100%;
+        border-radius: 0;
+    }
+}

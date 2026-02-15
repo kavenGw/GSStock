@@ -1,0 +1,93 @@
+<!-- 股票详情抽屉 -->
+<div id="stockDetailOverlay" class="stock-detail-overlay" style="display:none">
+    <div class="stock-detail-drawer">
+        <!-- 头部 -->
+        <div class="sd-header">
+            <div class="sd-header-info">
+                <h5 class="sd-title" id="sdTitle">--</h5>
+                <div class="sd-subtitle">
+                    <span id="sdCode">--</span>
+                    <span class="sd-market-badge" id="sdMarket"></span>
+                </div>
+            </div>
+            <button class="sd-close" id="sdClose">&times;</button>
+        </div>
+
+        <!-- 可滚动内容区 -->
+        <div class="sd-body">
+            <!-- 1. 行情区 -->
+            <div class="sd-section" id="sdPriceSection">
+                <div class="sd-price-row">
+                    <span class="sd-current-price" id="sdPrice">--</span>
+                    <span class="sd-change" id="sdChange">--</span>
+                    <span class="sd-change-pct" id="sdChangePct">--</span>
+                </div>
+                <div class="sd-volume" id="sdVolume"></div>
+                <!-- 持仓信息（有持仓时显示） -->
+                <div class="sd-position d-none" id="sdPosition">
+                    <div class="sd-position-row">
+                        <span class="sd-pos-label">持仓</span>
+                        <span id="sdPosQuantity">--</span>
+                        <span class="sd-pos-label">成本</span>
+                        <span id="sdPosCost">--</span>
+                        <span class="sd-pos-label">盈亏</span>
+                        <span id="sdPosProfit">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 走势图区 -->
+            <div class="sd-section">
+                <div class="sd-section-header">
+                    <span class="sd-section-title">走势图</span>
+                    <div class="sd-period-btns" id="sdPeriodBtns">
+                        <button class="sd-period-btn" data-days="30">30日</button>
+                        <button class="sd-period-btn active" data-days="60">60日</button>
+                        <button class="sd-period-btn" data-days="90">90日</button>
+                    </div>
+                </div>
+                <div class="sd-chart-container" id="sdChartContainer">
+                    <div class="sd-chart-skeleton">
+                        <div class="skeleton skeleton-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 技术指标区 -->
+            <div class="sd-section" id="sdTechnicalSection">
+                <div class="sd-section-header">
+                    <span class="sd-section-title">技术分析</span>
+                </div>
+                <div id="sdTechnicalContent">
+                    <div class="sd-skeleton-rows">
+                        <div class="skeleton skeleton-text w-80"></div>
+                        <div class="skeleton skeleton-text w-60"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 投资建议区（有建议时显示） -->
+            <div class="sd-section d-none" id="sdAdviceSection">
+                <div class="sd-section-header">
+                    <span class="sd-section-title">投资建议</span>
+                </div>
+                <div class="sd-advice-content" id="sdAdviceContent"></div>
+            </div>
+
+            <!-- 5. AI分析区（AI启用时显示） -->
+            <div class="sd-section d-none" id="sdAISection">
+                <div class="sd-section-header">
+                    <span class="sd-section-title">AI 分析</span>
+                </div>
+                <button class="sd-ai-btn" id="sdAIBtn">
+                    <i class="bi bi-robot"></i> AI 智能分析
+                </button>
+                <div id="sdAIResult"></div>
+                <div class="sd-ai-history" id="sdAIHistory">
+                    <div class="sd-ai-history-title"><i class="bi bi-clock-history"></i> 历史分析记录</div>
+                    <div id="sdAIHistoryList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

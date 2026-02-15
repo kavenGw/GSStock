@@ -20,6 +20,9 @@
         </select>
     </td>
     <td>
+        <button class="btn btn-sm btn-outline-info detail-btn" onclick="event.stopPropagation(); StockDetailDrawer.open('{{ stock.stock_code }}', '{{ stock.stock_name }}')" title="查看详情">
+            <i class="bi bi-info-circle"></i>
+        </button>
         <button class="btn btn-sm btn-outline-danger delete-btn">删除</button>
     </td>
 </tr>

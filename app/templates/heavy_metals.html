@@ -104,6 +104,23 @@
     opacity: 0.4;
 }
 
+.wyckoff-toggle-btn {
+    border: none;
+    background: none;
+    color: #adb5bd;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 14px;
+    transition: color 0.2s;
+    margin-left: auto;
+}
+.wyckoff-toggle-btn:hover {
+    color: #0d6efd;
+}
+.wyckoff-card.hidden-line .wyckoff-toggle-btn {
+    color: #dee2e6;
+}
+
 .wyckoff-card-header {
     display: flex;
     align-items: center;
@@ -1403,6 +1420,7 @@
                             <span class="wyckoff-score-badge ${scoreClass}">${scoreText}</span>
                             <span class="stock-name">${stock.name}</span>
                             ${adviceBtnHtml}
+                            <button class="wyckoff-toggle-btn" title="切换图表显示"><i class="bi bi-eye"></i></button>
                         </div>
                     `;
 
@@ -1444,19 +1462,13 @@
 
                     // 点击切换图表显示
                     card.addEventListener('click', function(e) {
-                        if (e.target.classList.contains('analysis-btn')) {
-                            return;
-                        }
-                        // 投资建议点击显示弹窗
+                        if (e.target.classList.contains('analysis-btn')) return;
                         if (e.target.classList.contains('advice-icon-btn')) {
                             e.stopPropagation();
                             const advice = e.target.dataset.advice;
-                            if (advice) {
-                                self.showAdvicePopover(e.target, advice);
-                            }
+                            if (advice) self.showAdvicePopover(e.target, advice);
                             return;
                         }
-                        // 标签点击显示分析
                         if (e.target.classList.contains('clickable-label')) {
                             e.stopPropagation();
                             const data = JSON.parse(card.dataset.analysisData);
@@ -1464,7 +1476,12 @@
                             self.showLabelAnalysisModal(data, labelType);
                             return;
                         }
-                        self.toggleChartLine(stock.name, this);
+                        if (e.target.closest('.wyckoff-toggle-btn')) {
+                            e.stopPropagation();
+                            self.toggleChartLine(stock.name, card);
+                            return;
+                        }
+                        StockDetailDrawer.open(stock.code, stock.name);
                     });
 
                     // 分析按钮点击事件

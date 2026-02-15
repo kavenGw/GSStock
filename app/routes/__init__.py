@@ -15,5 +15,6 @@ preload_bp = Blueprint('preload', __name__)
 alert_bp = Blueprint('alert', __name__, url_prefix='/alert')
 briefing_bp = Blueprint('briefing', __name__, url_prefix='/briefing')
 strategy_bp = Blueprint('strategy', __name__, url_prefix='/strategies')
+stock_detail_bp = Blueprint('stock_detail', __name__, url_prefix='/api/stock-detail')
 
-from app.routes import main, position, advice, category, trade, wyckoff, stock, daily_record, profit, rebalance, heavy_metals, preload, alert, briefing, strategy
+from app.routes import main, position, advice, category, trade, wyckoff, stock, daily_record, profit, rebalance, heavy_metals, preload, alert, briefing, strategy, stock_detail

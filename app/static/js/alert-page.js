@@ -998,7 +998,7 @@ const AlertPage = {
         const states = this.getStockIndicatorStates(stock.code);
 
         let cells = `
-            <td class="stock-info-cell">
+            <td class="stock-info-cell" style="cursor:pointer" onclick="StockDetailDrawer.open('${stock.code}', '${stock.name}')">
                 <div class="stock-name-cell" title="${stock.name}">${stock.name}</div>
                 <div class="stock-code-cell">${stock.code}</div>
             </td>
@@ -1378,7 +1378,7 @@ const AlertPage = {
         return `
             <div class="alert-card ${highestLevel ? 'has-alert level-' + highestLevel : ''}"
                  data-stock-code="${stock.code}"
-                 onclick="AlertPage.showDetail('${stock.code}')">
+                 onclick="StockDetailDrawer.open('${stock.code}', '${this.escapeHtml(stock.name)}')">
                 <div class="alert-card-header">
                     <div class="stock-info">
                         <div class="stock-name">${stock.name} ${adviceBtn}</div>
