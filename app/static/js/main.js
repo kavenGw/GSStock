@@ -52,30 +52,34 @@ const Skeleton = {
 
 window.Skeleton = Skeleton;
 
-// 股票元数据缓存工具
+// 股票元数据缓存工具（本地优先，每会话仅同步一次）
 const StockMeta = {
     KEY: 'stock_meta',
+    SYNCED_KEY: 'stock_meta_synced',
 
     async load(serverVersion) {
+        const cached = this._getCache();
+
+        // 本次会话已同步过，直接用本地缓存
+        if (sessionStorage.getItem(this.SYNCED_KEY)) return cached;
+
+        sessionStorage.setItem(this.SYNCED_KEY, '1');
+        this._syncInBackground(serverVersion, cached);
+        return cached;
+    },
+
+    async _syncInBackground(serverVersion, cached) {
         try {
-            const cached = this._getCache();
             const v = serverVersion ?? cached?.version;
-            if (v != null) {
-                const resp = await fetch(`/api/stock-meta?v=${v}`);
-                if (!resp.ok) return cached;
-                const data = await resp.json();
-                if (!data.changed && cached) return cached;
-                localStorage.setItem(this.KEY, JSON.stringify(data));
-                return data;
-            }
-            const resp = await fetch('/api/stock-meta');
-            if (!resp.ok) return null;
+            const url = v != null ? `/api/stock-meta?v=${v}` : '/api/stock-meta';
+            const resp = await fetch(url);
+            if (!resp.ok) return;
             const data = await resp.json();
-            localStorage.setItem(this.KEY, JSON.stringify(data));
-            return data;
+            if (data.changed !== false) {
+                localStorage.setItem(this.KEY, JSON.stringify(data));
+            }
         } catch (e) {
-            console.error('[StockMeta] load failed:', e);
-            return this._getCache();
+            console.error('[StockMeta] sync failed:', e);
         }
     },
 
@@ -86,7 +90,10 @@ const StockMeta = {
 
     getSync() { return this._getCache(); },
 
-    invalidate() { localStorage.removeItem(this.KEY); }
+    invalidate() {
+        localStorage.removeItem(this.KEY);
+        sessionStorage.removeItem(this.SYNCED_KEY);
+    }
 };
 
 window.StockMeta = StockMeta;
