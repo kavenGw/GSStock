@@ -22,7 +22,7 @@ def get_stocks():
         data = BriefingService.get_stocks_basic_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取股票数据失败: {e}", exc_info=True)
+        logger.error(f"[简报.股票数据] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -34,7 +34,7 @@ def get_stocks_pe():
         data = BriefingService.get_stocks_pe_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取PE数据失败: {e}", exc_info=True)
+        logger.error(f"[简报.PE] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -46,7 +46,7 @@ def get_stocks_earnings():
         data = BriefingService.get_stocks_earnings_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取财报日期失败: {e}", exc_info=True)
+        logger.error(f"[简报.财报] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -58,7 +58,7 @@ def get_indices():
         data = BriefingService.get_indices_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取指数数据失败: {e}", exc_info=True)
+        logger.error(f"[简报.指数] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -70,7 +70,7 @@ def get_futures():
         data = BriefingService.get_futures_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取期货数据失败: {e}", exc_info=True)
+        logger.error(f"[简报.期货] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -82,7 +82,7 @@ def get_etf():
         data = BriefingService.get_etf_premium_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取ETF数据失败: {e}", exc_info=True)
+        logger.error(f"[简报.ETF] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -100,7 +100,7 @@ def get_sectors():
             'sector_ratings': ratings
         })
     except Exception as e:
-        logger.error(f"获取板块数据失败: {e}", exc_info=True)
+        logger.error(f"[简报.板块] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -112,7 +112,7 @@ def get_stocks_technical():
         data = BriefingService.get_stocks_technical_data(force)
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取技术指标失败: {e}", exc_info=True)
+        logger.error(f"[简报.技术指标] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -123,7 +123,7 @@ def get_earnings_alerts():
         data = BriefingService.get_earnings_alert_data()
         return jsonify(data)
     except Exception as e:
-        logger.error(f"获取财报预警失败: {e}", exc_info=True)
+        logger.error(f"[简报.财报预警] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -143,7 +143,7 @@ def notification_push():
         results = NotificationService.push_daily_report(include_ai=include_ai)
         return jsonify(results)
     except Exception as e:
-        logger.error(f"推送报告失败: {e}", exc_info=True)
+        logger.error(f"[简报.推送] 失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -165,5 +165,5 @@ def notification_test():
 
         return jsonify(results)
     except Exception as e:
-        logger.error(f"测试推送失败: {e}", exc_info=True)
+        logger.error(f"[简报.测试推送] 失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500

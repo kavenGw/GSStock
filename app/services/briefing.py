@@ -123,7 +123,7 @@ class BriefingService:
                     fetched = unified_stock_data_service.get_realtime_prices(stale_codes)
                     prices.update(fetched)
         except Exception as e:
-            logger.error(f"获取股票价格失败: {e}")
+            logger.error(f"[简报服务.股票] 获取股票价格失败: {e}", exc_info=True)
             db.session.rollback()
 
         from app.services.stock_meta import StockMetaService
@@ -132,7 +132,7 @@ class BriefingService:
             meta_stocks = StockMetaService.get_meta().get('stocks', [])
             advice_map = {s['stock_code']: s['investment_advice'] for s in meta_stocks if s.get('stock_code') and s.get('investment_advice')}
         except Exception as e:
-            logger.warning(f"获取投资建议失败: {e}")
+            logger.warning(f"[简报服务.股票] 获取投资建议失败: {e}")
             db.session.rollback()
 
         for stock_info in BRIEFING_STOCKS:
@@ -190,7 +190,7 @@ class BriefingService:
         try:
             pe_data = unified_stock_data_service.get_pe_data(stock_codes, force_refresh)
         except Exception as e:
-            logger.warning(f"获取PE数据失败: {e}")
+            logger.warning(f"[简报服务.PE] 获取PE数据失败: {e}")
 
         result = {}
         for code in stock_codes:
@@ -214,7 +214,7 @@ class BriefingService:
         try:
             earnings_data = EarningsService.get_earnings_dates(stock_codes, force_refresh)
         except Exception as e:
-            logger.warning(f"获取财报日期失败: {e}")
+            logger.warning(f"[简报服务.财报] 获取财报日期失败: {e}")
 
         result = {}
         for code in stock_codes:
@@ -262,7 +262,7 @@ class BriefingService:
             cache_date = today - timedelta(days=days_ago)
             cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
             if cached and isinstance(cached, dict) and 'regions' in cached:
-                logger.info(f"[指数数据] 使用{days_ago}天前的缓存")
+                logger.info(f"[简报服务.指数] 使用{days_ago}天前的缓存")
                 return cached
 
         # 按地区组织结果
@@ -375,7 +375,7 @@ class BriefingService:
             cache_date = today - timedelta(days=days_ago)
             cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
             if cached and isinstance(cached, list):
-                logger.info(f"[期货数据] 使用{days_ago}天前的缓存")
+                logger.info(f"[简报服务.期货] 使用{days_ago}天前的缓存")
                 return cached
 
         # 使用缓存的单项数据
@@ -485,7 +485,7 @@ class BriefingService:
             cache_date = today - timedelta(days=days_ago)
             cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, cache_date)
             if cached and isinstance(cached, list):
-                logger.info(f"[美股板块] 使用{days_ago}天前的缓存")
+                logger.info(f"[简报服务.美股板块] 使用{days_ago}天前的缓存")
                 return cached
 
         # 使用缓存的单项数据
@@ -713,7 +713,7 @@ class BriefingService:
             }
 
         except Exception as e:
-            logger.warning(f"获取财报预警数据失败: {e}")
+            logger.warning(f"[简报服务.财报预警] 获取财报预警数据失败: {e}")
             return {'earnings_alerts': [], 'has_alerts': False}
 
     @staticmethod
@@ -727,7 +727,7 @@ class BriefingService:
         try:
             trend_result = unified_stock_data_service.get_trend_data(stock_codes, days=60, force_refresh=force_refresh)
         except Exception as e:
-            logger.warning(f"获取走势数据失败: {e}")
+            logger.warning(f"[简报服务.技术指标] 获取走势数据失败: {e}")
             return {}
 
         result = {}

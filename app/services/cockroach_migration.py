@@ -32,7 +32,7 @@ def check_local_db_exists(local_db_path: str) -> bool:
         conn.close()
         return len(tables) > 0
     except Exception as e:
-        logger.error(f"检查本地数据库时出错: {e}")
+        logger.error(f"[CockroachDB迁移] 检查本地数据库失败: {e}", exc_info=True)
         return False
 
 
@@ -53,7 +53,7 @@ def get_table_data(conn: sqlite3.Connection, table_name: str) -> tuple:
 
         return columns, rows
     except Exception as e:
-        logger.warning(f"获取表 {table_name} 数据时出错: {e}")
+        logger.warning(f"[CockroachDB迁移] 获取表 {table_name} 数据失败: {e}")
         return [], []
 
 
@@ -85,7 +85,7 @@ def migrate_table_to_cockroach(sqlite_conn: sqlite3.Connection, pg_engine, table
     columns, rows = get_table_data(sqlite_conn, table_name)
 
     if not columns or not rows:
-        logger.info(f"表 {table_name} 为空或不存在，跳过")
+        logger.info(f"[CockroachDB迁移] 表 {table_name} 为空或不存在，跳过")
         return 0
 
     # 查询目标表的布尔类型列（SQLite 存 0/1，CockroachDB 需要 bool）
@@ -119,10 +119,10 @@ def migrate_table_to_cockroach(sqlite_conn: sqlite3.Connection, pg_engine, table
                 conn.commit()
             migrated += 1
         except Exception as e:
-            logger.warning(f"插入记录到 {table_name} 时出错: {e}")
+            logger.warning(f"[CockroachDB迁移] 插入记录到 {table_name} 失败: {e}")
             continue
 
-    logger.info(f"表 {table_name} 迁移完成，共 {migrated}/{len(rows)} 条记录")
+    logger.info(f"[CockroachDB迁移] 表 {table_name} 完成 {migrated}/{len(rows)} 条")
     return migrated
 
 
@@ -136,16 +136,16 @@ def migrate_local_to_cockroach(app) -> bool:
     from app import db
 
     if not is_cockroach_configured():
-        logger.info("未配置 CockroachDB，跳过迁移")
+        logger.info("[CockroachDB迁移] 未配置 CockroachDB，跳过")
         return False
 
     local_db_path = get_local_stock_db_path()
 
     if not check_local_db_exists(local_db_path):
-        logger.info("本地数据库不存在或为空，无需迁移")
+        logger.info("[CockroachDB迁移] 本地数据库不存在或为空，无需迁移")
         return True
 
-    logger.info(f"开始将本地数据库迁移到 CockroachDB: {local_db_path}")
+    logger.info(f"[CockroachDB迁移] 开始迁移: {local_db_path}")
 
     try:
         # 连接本地 SQLite 数据库
@@ -168,19 +168,19 @@ def migrate_local_to_cockroach(app) -> bool:
 
         sqlite_conn.close()
 
-        logger.info(f"数据迁移完成，共迁移 {total_migrated} 条记录")
+        logger.info(f"[CockroachDB迁移] 完成，共 {total_migrated} 条记录")
 
         # 删除本地数据库
         try:
             os.remove(local_db_path)
-            logger.info(f"已删除本地数据库: {local_db_path}")
+            logger.info(f"[CockroachDB迁移] 已删除本地数据库: {local_db_path}")
         except Exception as e:
-            logger.warning(f"删除本地数据库时出错: {e}")
+            logger.warning(f"[CockroachDB迁移] 删除本地数据库失败: {e}")
 
         return True
 
     except Exception as e:
-        logger.error(f"迁移过程中发生错误: {e}")
+        logger.error(f"[CockroachDB迁移] 迁移失败: {e}", exc_info=True)
         return False
 
 

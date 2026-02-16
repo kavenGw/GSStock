@@ -52,7 +52,7 @@ class WyckoffService:
     @staticmethod
     def save_reference(file, phase, description=None):
         """保存参考图"""
-        logger.info(f"保存参考图: phase={phase}")
+        logger.debug(f"[威科夫.参考图] 保存参考图: phase={phase}")
 
         valid, error = WyckoffService.validate_file(file)
         if not valid:
@@ -76,7 +76,7 @@ class WyckoffService:
         db.session.add(ref)
         db.session.commit()
 
-        logger.info(f"参考图保存成功: id={ref.id}")
+        logger.debug(f"[威科夫.参考图] 保存成功: id={ref.id}")
         return ref, None
 
     @staticmethod
@@ -100,13 +100,13 @@ class WyckoffService:
 
         db.session.delete(ref)
         db.session.commit()
-        logger.info(f"参考图删除成功: id={ref_id}")
+        logger.debug(f"[威科夫.参考图] 删除成功: id={ref_id}")
         return True, None
 
     @staticmethod
     def save_analysis(stock_code, analysis_date, file, phase, event=None, notes=None):
         """保存分析记录"""
-        logger.info(f"保存分析记录: stock={stock_code}, date={analysis_date}, phase={phase}")
+        logger.debug(f"[威科夫.分析] 保存分析记录: stock={stock_code}, date={analysis_date}, phase={phase}")
 
         valid, error = WyckoffService.validate_file(file)
         if not valid:
@@ -134,7 +134,7 @@ class WyckoffService:
         db.session.add(analysis)
         db.session.commit()
 
-        logger.info(f"分析记录保存成功: id={analysis.id}")
+        logger.debug(f"[威科夫.分析] 保存成功: id={analysis.id}")
         return analysis, None
 
     @staticmethod
@@ -174,7 +174,7 @@ class WyckoffService:
 
         db.session.delete(analysis)
         db.session.commit()
-        logger.info(f"分析记录删除成功: id={analysis_id}")
+        logger.debug(f"[威科夫.分析] 删除成功: id={analysis_id}")
         return True, None
 
 
@@ -241,7 +241,7 @@ class WyckoffAutoService:
             stocks_data = result.get('stocks', [])
 
             if not stocks_data:
-                logger.warning(f"{stock_code} 未获取到数据")
+                logger.warning(f"[威科夫.数据] {stock_code} 未获取到数据")
                 return []
 
             stock_trend = stocks_data[0]
@@ -259,7 +259,7 @@ class WyckoffAutoService:
             return data
 
         except Exception as e:
-            logger.error(f"获取 {stock_code} OHLCV数据失败: {e}")
+            logger.error(f"[威科夫.数据] 获取 {stock_code} OHLCV数据失败: {e}", exc_info=True)
             return []
 
     @staticmethod
@@ -385,7 +385,7 @@ class WyckoffAutoService:
             from app.services.earnings import EarningsService
             return EarningsService.get_pe_ratios(stock_codes)
         except Exception as e:
-            logger.warning(f"批量获取PE数据失败: {e}")
+            logger.warning(f"[威科夫.PE] 批量获取PE数据失败: {e}")
             return {}
 
     @staticmethod
@@ -407,7 +407,7 @@ class WyckoffAutoService:
             else:
                 result['pe_data'] = {'pe_ttm': None, 'pe_status': 'na', 'pe_display': '暂无数据'}
         except Exception as e:
-            logger.warning(f"获取 {stock_code} PE数据失败: {e}")
+            logger.warning(f"[威科夫.PE] 获取 {stock_code} PE数据失败: {e}")
             result['pe_data'] = {'pe_ttm': None, 'pe_status': 'na', 'pe_display': '暂无数据'}
         return result
 

@@ -75,7 +75,7 @@ class PreloadService:
         if record.status == 'running' and record.started_at:
             elapsed = datetime.now() - record.started_at
             if elapsed.total_seconds() > 600:  # 10分钟超时
-                logger.warning(f"预加载任务超时: date={target_date}")
+                logger.warning(f"[预加载] 任务超时: date={target_date}")
                 record.status = 'failed'
                 db.session.commit()
 
@@ -156,7 +156,7 @@ class PreloadService:
             db.session.add(record)
 
         db.session.commit()
-        logger.info(f"预加载启动: date={target_date}, stocks={total_count}")
+        logger.info(f"[预加载.持仓] 启动: stocks={total_count}")
 
         # 逐个处理股票（便于更新进度）
         success_count = 0
@@ -184,7 +184,7 @@ class PreloadService:
         final_status = 'completed' if failed_count == 0 else 'completed'  # 即使有失败也标记完成
         PreloadService._mark_completed(target_date, final_status)
 
-        logger.info(f"预加载完成: date={target_date}, success={success_count}, failed={failed_count}")
+        logger.info(f"[预加载.持仓] 完成: success={success_count}, failed={failed_count}")
 
         return {
             'success': True,
@@ -258,10 +258,10 @@ class PreloadService:
                     'change_pct': data.get('change_percent', 0),
                 }
                 success_count += 1
-                logger.info(f"指数 {local_code} 预加载成功")
+                logger.debug(f"[预加载.指数] {local_code} 成功")
 
         except Exception as e:
-            logger.error(f"指数预加载失败: {e}")
+            logger.error(f"[预加载.指数] 失败: {e}", exc_info=True)
             failed_count = len(INDEX_CODES)
 
         return {
@@ -311,12 +311,12 @@ class PreloadService:
                         'price': latest['close'],
                     }
                     success_count += 1
-                    logger.info(f"金属 {local_code} 预加载成功")
+                    logger.debug(f"[预加载.金属] {local_code} 成功")
                 else:
                     failed_count += 1
 
         except Exception as e:
-            logger.error(f"金属预加载失败: {e}")
+            logger.error(f"[预加载.金属] 失败: {e}", exc_info=True)
             failed_count = len(METAL_CODES)
 
         return {
@@ -376,7 +376,7 @@ class PreloadService:
                 'metals': { success_count, failed_count },
             }
         """
-        logger.info(f"开始全量预加载: date={target_date}")
+        logger.info(f"[预加载.全量] 开始: date={target_date}")
 
         # 预加载指数
         indices_result = PreloadService.preload_indices(target_date)
@@ -491,7 +491,7 @@ class PreloadService:
             db.session.add(record)
 
         db.session.commit()
-        logger.info(f"扩展预加载启动: date={target_date}, stocks={total_count}, workers={max_workers}")
+        logger.info(f"[预加载.扩展] 启动: date={target_date}, stocks={total_count}, workers={max_workers}")
 
         # 使用线程池并发处理
         success_count = 0
@@ -537,7 +537,7 @@ class PreloadService:
         # 标记完成
         PreloadService._mark_completed(target_date, 'completed')
 
-        logger.info(f"扩展预加载完成: date={target_date}, success={success_count}, failed={failed_count}")
+        logger.info(f"[预加载.扩展] 完成: date={target_date}, success={success_count}, failed={failed_count}")
 
         return {
             'success': True,

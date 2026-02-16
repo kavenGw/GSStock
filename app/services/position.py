@@ -27,14 +27,14 @@ class PositionService:
         from app.models.stock import Stock
         from app.models.stock_alias import StockAlias
 
-        logger.info(f"[merge] 开始合并持仓，输入{len(positions)}条记录")
+        logger.info(f"[持仓.合并] 开始合并持仓，输入{len(positions)}条记录")
         merged = {}
 
         for pos in positions:
             stock_code = pos.get('stock_code', '')
             stock_name = pos.get('stock_name', '')
             original_name = stock_name  # 保存原始名称用于 merge_info
-            logger.info(f"[merge] 处理: code='{stock_code}', name='{stock_name}'")
+            logger.debug(f"[持仓.合并] 处理: code='{stock_code}', name='{stock_name}'")
 
             matched_from = None
             alias_matched = False
@@ -47,9 +47,9 @@ class PositionService:
                     stock_code = stock.stock_code
                     pos['stock_code'] = stock_code
                     matched_from = 'stock'
-                    logger.info(f"[merge] 名称匹配成功: '{stock_name}' -> '{stock_code}'")
+                    logger.debug(f"[持仓.合并] 名称匹配成功: '{stock_name}' -> '{stock_code}'")
                 else:
-                    logger.info(f"[merge] 名称匹配失败: '{stock_name}', 尝试别名查询...")
+                    logger.debug(f"[持仓.合并] 名称匹配失败: '{stock_name}', 尝试别名查询...")
                     # 再按别名查询
                     alias = StockAlias.query.filter_by(alias_name=stock_name).first()
                     if alias:
@@ -62,16 +62,16 @@ class PositionService:
                         if standard_stock:
                             pos['stock_name'] = standard_stock.stock_name
                             stock_name = standard_stock.stock_name
-                            logger.info(f"[merge] 别名匹配成功: '{original_name}' -> '{stock_code}' (标准名称: '{stock_name}')")
+                            logger.debug(f"[持仓.合并] 别名匹配成功: '{original_name}' -> '{stock_code}' (标准名称: '{stock_name}')")
                         else:
-                            logger.info(f"[merge] 别名匹配成功: '{stock_name}' -> '{stock_code}'")
+                            logger.debug(f"[持仓.合并] 别名匹配成功: '{stock_name}' -> '{stock_code}'")
                     else:
-                        logger.info(f"[merge] 别名匹配失败: '{stock_name}'")
+                        logger.debug(f"[持仓.合并] 别名匹配失败: '{stock_name}'")
 
             key = stock_code if stock_code else stock_name
-            logger.info(f"[merge] 使用合并key: '{key}'")
+            logger.debug(f"[持仓.合并] 使用合并key: '{key}'")
             if not key:
-                logger.warning(f"[merge] 跳过无效记录: code='{stock_code}', name='{stock_name}'")
+                logger.warning(f"[持仓.合并] 跳过无效记录: code='{stock_code}', name='{stock_name}'")
                 continue
 
             unmatched = not stock_code
@@ -88,7 +88,7 @@ class PositionService:
                 if alias_matched:
                     existing['merge_info']['alias_matched'] = True
                     existing['merge_info']['matched_from'] = 'alias'
-                logger.info(f"[merge] 合并到已有记录: key='{key}', qty: {old_qty} + {pos['quantity']} = {existing['quantity']}")
+                logger.debug(f"[持仓.合并] 合并到已有记录: key='{key}', qty: {old_qty} + {pos['quantity']} = {existing['quantity']}")
             else:
                 merged_record = pos.copy()
                 merged_record['merge_info'] = {
@@ -99,7 +99,7 @@ class PositionService:
                 }
                 merged_record['unmatched'] = unmatched
                 merged[key] = merged_record
-                logger.info(f"[merge] 新增记录: key='{key}', qty={pos['quantity']}")
+                logger.debug(f"[持仓.合并] 新增记录: key='{key}', qty={pos['quantity']}")
 
         result = list(merged.values())
 
@@ -108,7 +108,7 @@ class PositionService:
             if record['quantity'] > 0:
                 record['current_price'] = round(record['total_amount'] / record['quantity'], 2)
 
-        logger.info(f"[merge] 合并完成，输出{len(result)}条记录")
+        logger.info(f"[持仓.合并] 合并完成，输出{len(result)}条记录")
         return result
 
     @staticmethod
@@ -121,7 +121,7 @@ class PositionService:
     @staticmethod
     def save_snapshot(target_date: date, positions: list[dict], overwrite: bool = True) -> bool:
         """保存持仓快照"""
-        logger.info(f"保存持仓快照: date={target_date}, count={len(positions)}, overwrite={overwrite}")
+        logger.info(f"[持仓] 保存持仓快照: date={target_date}, count={len(positions)}, overwrite={overwrite}")
         if overwrite:
             Position.query.filter_by(date=target_date).delete()
         else:
@@ -145,7 +145,7 @@ class PositionService:
             db.session.add(position)
 
         db.session.commit()
-        logger.info(f"持仓快照保存成功: date={target_date}")
+        logger.info(f"[持仓] 持仓快照保存成功: date={target_date}")
         return True
 
     @staticmethod
@@ -194,7 +194,7 @@ class PositionService:
                         'close': dp['close']
                     })
         except Exception as e:
-            logger.warning(f"获取股票 {stock_code} OHLC数据失败: {e}")
+            logger.warning(f"[持仓] 获取股票 {stock_code} OHLC数据失败: {e}")
 
         history = []
         for p in positions:

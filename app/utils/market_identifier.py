@@ -37,7 +37,7 @@ class MarketIdentifier:
             None - 无法识别
         """
         if not code or not isinstance(code, str):
-            logger.warning(f"无效的股票代码: {code}")
+            logger.warning(f"[市场识别] 无效代码: {code}")
             return None
 
         code = code.strip()
@@ -75,7 +75,7 @@ class MarketIdentifier:
                 return 'A'
             return 'US'
 
-        logger.warning(f"无法识别市场类型: {code}")
+        logger.warning(f"[市场识别] 无法识别: {code}")
         return None
 
     @staticmethod

@@ -107,10 +107,10 @@ class EarningsService:
 
             if cache and cache.data_json:
                 import json
-                logger.info(f"使用过期缓存数据: {stock_code} (earnings)")
+                logger.info(f"[财报] 使用过期缓存数据: {stock_code}")
                 return json.loads(cache.data_json)
         except Exception as e:
-            logger.warning(f"获取过期缓存失败 {stock_code}: {e}")
+            logger.warning(f"[财报] 获取过期缓存失败 {stock_code}: {e}")
         return None
 
     @staticmethod
@@ -120,7 +120,7 @@ class EarningsService:
 
         # 熔断检查
         if not circuit_breaker.is_available('yfinance'):
-            logger.info(f'[earnings] yfinance已熔断，{stock_code} 尝试过期缓存')
+            logger.info(f'[财报] yfinance已熔断，{stock_code} 尝试过期缓存')
             return EarningsService._get_expired_cache(stock_code)
 
         yf_code = MarketIdentifier.to_yfinance(stock_code)
@@ -150,7 +150,7 @@ class EarningsService:
                                 else:
                                     next_earnings_date = str(val)[:10]
                 except Exception as e:
-                    logger.debug(f"获取 {stock_code} calendar 失败: {e}")
+                    logger.debug(f"[财报] 获取 {stock_code} calendar 失败: {e}")
 
                 try:
                     earnings_dates = ticker.earnings_dates
@@ -172,7 +172,7 @@ class EarningsService:
                         if future_dates and not next_earnings_date:
                             next_earnings_date = min(future_dates).isoformat()
                 except Exception as e:
-                    logger.debug(f"获取 {stock_code} earnings_dates 失败: {e}")
+                    logger.debug(f"[财报] 获取 {stock_code} earnings_dates 失败: {e}")
 
                 pe_ttm = None
                 try:
@@ -182,7 +182,7 @@ class EarningsService:
                         if pe_ttm is not None:
                             pe_ttm = round(float(pe_ttm), 2)
                 except Exception as e:
-                    logger.warning(f"[earnings/pe] {stock_code} yfinance获取PE失败: {e}")
+                    logger.warning(f"[财报.PE] {stock_code} yfinance获取PE失败: {e}")
 
                 circuit_breaker.record_success('yfinance')
                 return {
@@ -197,16 +197,16 @@ class EarningsService:
                 last_error = e
                 error_msg = str(e).lower()
                 if 'delisted' in error_msg or 'no data found' in error_msg:
-                    logger.debug(f"股票 {stock_code} 可能已退市或无数据: {e}")
+                    logger.debug(f"[财报] 股票 {stock_code} 可能已退市或无数据: {e}")
                     return None
 
                 if attempt < MAX_RETRIES - 1:
-                    logger.debug(f"获取 {stock_code} 财报数据失败，第{attempt + 1}次重试: {e}")
+                    logger.debug(f"[财报] 获取 {stock_code} 财报数据失败，第{attempt + 1}次重试: {e}")
                     time.sleep(RETRY_DELAY)
 
         circuit_breaker.record_failure('yfinance')
         if last_error:
-            logger.warning(f"获取 {stock_code} 财报数据重试{MAX_RETRIES}次后失败: {last_error}")
+            logger.warning(f"[财报] 获取 {stock_code} 财报数据重试{MAX_RETRIES}次后失败: {last_error}")
         return None
 
     @staticmethod
@@ -234,7 +234,7 @@ class EarningsService:
             }
 
         except Exception as e:
-            logger.warning(f"[earnings/pe] {stock_code} 获取A股数据失败: {e}")
+            logger.warning(f"[财报.PE] {stock_code} 获取A股数据失败: {e}")
             return None
 
     @staticmethod
@@ -350,9 +350,9 @@ class EarningsService:
                     expired = EarningsService._get_expired_cache(code)
                     if expired:
                         result[code] = expired
-                        logger.info(f'[earnings/pe] {code} API失败，使用过期缓存')
+                        logger.info(f'[财报.PE] {code} API失败，使用过期缓存')
                     else:
-                        logger.warning(f'[earnings/pe] {code} API失败且无过期缓存')
+                        logger.warning(f'[财报.PE] {code} API失败且无过期缓存')
 
         return result
 

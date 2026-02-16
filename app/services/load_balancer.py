@@ -117,7 +117,7 @@ class LoadBalancer:
 
         healthy_sources = self.get_healthy_sources(sources)
         if not healthy_sources:
-            logger.warning("所有数据源都已熔断")
+            logger.warning("[负载均衡] 所有数据源都已熔断")
             return {}
 
         result = {s: [] for s in healthy_sources}
@@ -316,7 +316,7 @@ class LoadBalancer:
                     distribution[source].append(code)
 
             dist_info = ', '.join([f"{s}:{len(codes)}" for s, codes in distribution.items() if codes])
-            logger.info(f"[优先级负载] 主数据源分配 {len(stock_codes)} 只: {dist_info}")
+            logger.info(f"[负载均衡.优先级] 主数据源分配 {len(stock_codes)} 只: {dist_info}")
 
             with ThreadPoolExecutor(max_workers=len(healthy_primary)) as executor:
                 futures = {}
@@ -335,19 +335,19 @@ class LoadBalancer:
                             failed_codes = [c for c in failed_codes if c not in source_result]
                         else:
                             circuit_breaker.record_failure(source)
-                            logger.warning(f"[优先级负载] 主数据源 {source} 返回空结果")
+                            logger.warning(f"[负载均衡.优先级] 主数据源 {source} 返回空结果")
                     except Exception as e:
-                        logger.warning(f"[优先级负载] 主数据源 {source} 执行异常: {e}")
+                        logger.warning(f"[负载均衡.优先级] 主数据源 {source} 执行异常: {e}")
                         circuit_breaker.record_failure(source)
         else:
-            logger.warning("[优先级负载] 所有主数据源都已熔断")
+            logger.warning("[负载均衡.优先级] 所有主数据源都已熔断")
 
         # ============ 第二阶段：备用数据源（东方财富）获取失败的 ============
         if failed_codes:
             healthy_secondary = [s for s in secondary_sources if circuit_breaker.is_available(s)]
 
             if healthy_secondary:
-                logger.info(f"[优先级负载] 备用数据源获取剩余 {len(failed_codes)} 只: {', '.join(healthy_secondary)}")
+                logger.info(f"[负载均衡.优先级] 备用数据源获取剩余 {len(failed_codes)} 只: {', '.join(healthy_secondary)}")
 
                 for source in healthy_secondary:
                     if not failed_codes:
@@ -361,25 +361,25 @@ class LoadBalancer:
                             result.update(source_result)
                             circuit_breaker.record_success(source)
                             failed_codes = [c for c in failed_codes if c not in source_result]
-                            logger.info(f"[优先级负载] 备用数据源 {source} 获取成功 {len(source_result)} 只")
+                            logger.info(f"[负载均衡.优先级] 备用数据源 {source} 获取成功 {len(source_result)} 只")
                         else:
                             circuit_breaker.record_failure(source)
-                            logger.warning(f"[优先级负载] 备用数据源 {source} 返回空结果")
+                            logger.warning(f"[负载均衡.优先级] 备用数据源 {source} 返回空结果")
                     except Exception as e:
-                        logger.warning(f"[优先级负载] 备用数据源 {source} 执行异常: {e}")
+                        logger.warning(f"[负载均衡.优先级] 备用数据源 {source} 执行异常: {e}")
                         circuit_breaker.record_failure(source)
             else:
-                logger.warning("[优先级负载] 所有备用数据源都已熔断")
+                logger.warning("[负载均衡.优先级] 所有备用数据源都已熔断")
 
         # ============ 第三阶段：yfinance 兜底 ============
         if failed_codes and fallback_func:
-            logger.info(f"[优先级负载] yfinance 兜底获取 {len(failed_codes)} 只")
+            logger.info(f"[负载均衡.优先级] yfinance 兜底获取 {len(failed_codes)} 只")
             try:
                 fallback_result = fallback_func(failed_codes)
                 if fallback_result:
                     result.update(fallback_result)
             except Exception as e:
-                logger.warning(f"[优先级负载] yfinance 兜底异常: {e}")
+                logger.warning(f"[负载均衡.优先级] yfinance 兜底异常: {e}")
 
         return result
 

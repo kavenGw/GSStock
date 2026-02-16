@@ -189,7 +189,7 @@ class DataFetchOrchestrator:
                                 if isinstance(item, dict) and 'stock_code' in item:
                                     results[item['stock_code']] = item
                 except Exception as e:
-                    logger.warning(f"数据源 {source} 获取失败: {e}")
+                    logger.warning(f"[数据服务.负载均衡] 数据源 {source} 获取失败: {e}")
 
         return results
 
@@ -300,15 +300,15 @@ class UnifiedStockDataService:
                 error_msg = str(e).lower()
                 # 退市或无数据的情况不需要重试
                 if 'delisted' in error_msg or 'no data found' in error_msg:
-                    logger.debug(f"股票 {stock_code} 可能已退市或无数据: {e}")
+                    logger.debug(f"[数据服务.重试] {stock_code} 可能已退市或无数据: {e}")
                     return {'error': 'delisted'}
 
                 if attempt < max_retries - 1:
-                    logger.debug(f"股票 {stock_code} 获取失败，第{attempt + 1}次重试: {e}")
+                    logger.debug(f"[数据服务.重试] {stock_code} 获取失败，第{attempt + 1}次重试: {e}")
                     time.sleep(delay)
 
         if last_error:
-            logger.warning(f"股票 {stock_code} 重试{max_retries}次后仍失败: {last_error}, 时间: {datetime.now().isoformat()}")
+            logger.warning(f"[数据服务.重试] {stock_code} 重试{max_retries}次后仍失败: {last_error}, 时间: {datetime.now().isoformat()}")
         return None
 
     @staticmethod
@@ -379,10 +379,10 @@ class UnifiedStockDataService:
                 cache_date_str = cache.cache_date.isoformat() if cache.cache_date else '未知'
                 fetch_time_str = cache.last_fetch_time.strftime('%m-%d %H:%M') if cache.last_fetch_time else '未知'
                 reason_str = f" 原因: {reason}" if reason else ""
-                logger.info(f"[降级] {stock_code} {stock_name} 使用过期缓存 ({cache_type}) 数据日期: {cache_date_str}, 获取时间: {fetch_time_str}{reason_str}")
+                logger.info(f"[数据服务.降级] {stock_code} {stock_name} 使用过期缓存 ({cache_type}) 数据日期: {cache_date_str}, 获取时间: {fetch_time_str}{reason_str}")
                 return data
         except Exception as e:
-            logger.warning(f"获取过期缓存失败 {stock_code}: {e}")
+            logger.warning(f"[数据服务.降级] 获取过期缓存失败 {stock_code}: {e}")
         return None
 
     # ============ 实时价格获取 ============
@@ -409,7 +409,7 @@ class UnifiedStockDataService:
         # 入口日志：统计各市场股票数量
         a_count = sum(1 for c in stock_codes if self._identify_market(c) == 'A')
         other_count = len(stock_codes) - a_count
-        logger.info(f"[实时价格] 开始获取: A股 {a_count}只, 其他 {other_count}只")
+        logger.info(f"[数据服务.实时价格] 开始获取: A股 {a_count}只, 其他 {other_count}只")
 
         result = {}
         remaining_codes = list(stock_codes)
@@ -425,10 +425,10 @@ class UnifiedStockDataService:
             remaining_codes = [c for c in remaining_codes if c not in memory_cached]
 
             if memory_hit_count > 0:
-                logger.debug(f"[内存缓存] 命中 {memory_hit_count}只")
+                logger.debug(f"[数据服务.缓存] 命中 {memory_hit_count}只")
 
         if not remaining_codes:
-            logger.info(f"[实时价格] 完成: 请求 {len(stock_codes)}只, 全部内存缓存命中")
+            logger.info(f"[数据服务.实时价格] 完成: 请求 {len(stock_codes)}只, 全部内存缓存命中")
             return result
 
         # 按市场获取有效缓存日期（基于市场时区，非北京时间）
@@ -454,7 +454,7 @@ class UnifiedStockDataService:
             effective_date = effective_dates[code]
 
             if force_refresh:
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 强制刷新")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 强制刷新")
                 need_refresh.append(code)
                 continue
 
@@ -466,7 +466,7 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 完整数据")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 完整数据")
                     continue
 
             # 非交易时间使用缓存（仅当有效日期有数据时才使用）
@@ -476,10 +476,10 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间 (date={effective_date})")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 非交易时间 (date={effective_date})")
                     continue
                 # 有效日期无缓存，需要获取最新数据
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 有效日期 {effective_date} 无缓存")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 有效日期 {effective_date} 无缓存")
                 need_refresh.append(code)
                 continue
 
@@ -491,11 +491,11 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: TTL内")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: TTL内")
                     continue
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: TTL过期")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: TTL过期")
             else:
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 无缓存")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 无缓存")
 
             need_refresh.append(code)
 
@@ -503,7 +503,7 @@ class UnifiedStockDataService:
         if need_refresh:
             # 只读模式下不从外部 API 获取，尝试使用过期缓存
             if is_readonly_mode():
-                logger.info(f"[只读模式] 跳过 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                logger.info(f"[数据服务.只读] 跳过 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
                     expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
@@ -514,8 +514,8 @@ class UnifiedStockDataService:
                 result.update(fetched)
                 memory_cache.set_batch(fetched, cache_type)
 
-        readonly_msg = " [只读模式]" if is_readonly_mode() else ""
-        logger.info(f"[实时价格] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (内存命中 {memory_hit_count}, DB命中 {db_hit_count})")
+        readonly_msg = " [数据服务.只读]" if is_readonly_mode() else ""
+        logger.info(f"[数据服务.实时价格] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (内存命中 {memory_hit_count}, DB命中 {db_hit_count})")
 
         return result
 
@@ -538,7 +538,7 @@ class UnifiedStockDataService:
             else:
                 other_codes.append(code)
 
-        logger.debug(f"[实时价格] 分离股票: A股 {len(a_share_codes)}只, 其他 {len(other_codes)}只")
+        logger.debug(f"[数据服务.实时价格] 分离股票: A股 {len(a_share_codes)}只, 其他 {len(other_codes)}只")
 
         # A股获取（东方财富优先，yfinance备用）
         if a_share_codes:
@@ -590,9 +590,9 @@ class UnifiedStockDataService:
                 except Exception as e:
                     error_msg = str(e).lower()
                     if 'rate limit' in error_msg or 'too many requests' in error_msg:
-                        logger.debug(f"[获取] {code} 失败 (yfinance): 限流")
+                        logger.debug(f"[数据服务.获取] {code} 失败 (yfinance): 限流")
                         return code, {'rate_limited': True}
-                    logger.debug(f"[获取] {code} 失败 (yfinance): {e}")
+                    logger.debug(f"[数据服务.获取] {code} 失败 (yfinance): {e}")
                     return code, None
 
             fetched_other = []
@@ -608,12 +608,12 @@ class UnifiedStockDataService:
                             result[code] = data
                             fetched_other.append((code, data))
                             stock_name = self._get_stock_name(code, data)
-                            logger.debug(f"[获取] {code} {stock_name} 成功 (yfinance)")
+                            logger.debug(f"[数据服务.获取] {code} {stock_name} 成功 (yfinance)")
 
             yf_success = len(fetched_other)
             if yf_success > 0:
                 names = ', '.join(d.get('name', code) for code, d in fetched_other)
-                logger.info(f"[实时价格] yfinance → {names} ({yf_success}只)")
+                logger.info(f"[数据服务.实时价格] yfinance → {names} ({yf_success}只)")
 
             # 对于被限流的股票，尝试使用过期缓存
             for code in rate_limited_codes:
@@ -652,9 +652,9 @@ class UnifiedStockDataService:
                         for _, row in stock_df.iterrows():
                             stock_map[row['代码']] = row
                         self._set_source_snapshot('eastmoney_stock', stock_map)
-                        logger.info(f"[快照] 东方财富A股数据已缓存: {len(stock_map)}只")
+                        logger.info(f"[数据服务.快照] 东方财富A股数据已缓存: {len(stock_map)}只")
                     else:
-                        logger.info(f"[快照命中] 东方财富A股数据: {len(stock_map)}只")
+                        logger.info(f"[数据服务.快照] 东方财富A股数据: {len(stock_map)}只")
 
                     etf_map = self._get_source_snapshot('eastmoney_etf')
                     if etf_map is None:
@@ -692,11 +692,11 @@ class UnifiedStockDataService:
 
                 if result:
                     names = ', '.join(d.get('name', code) for code, d in result.items())
-                    logger.info(f"[实时价格] {today} 东方财富 → {names} ({len(result)}只)")
+                    logger.info(f"[数据服务.实时价格] {today} 东方财富 → {names} ({len(result)}只)")
                 return result
 
             except Exception as e:
-                logger.warning(f"[实时价格] 东方财富失败: {e}")
+                logger.warning(f"[数据服务.实时价格] 东方财富失败: {e}")
                 raise
 
         def fetch_from_sina(codes: list) -> dict:
@@ -712,9 +712,9 @@ class UnifiedStockDataService:
                         for _, row in stock_df.iterrows():
                             stock_map[row['代码']] = row
                         self._set_source_snapshot('sina_stock', stock_map)
-                        logger.info(f"[快照] 新浪A股数据已缓存: {len(stock_map)}只")
+                        logger.info(f"[数据服务.快照] 新浪A股数据已缓存: {len(stock_map)}只")
                     else:
-                        logger.info(f"[快照命中] 新浪A股数据: {len(stock_map)}只")
+                        logger.info(f"[数据服务.快照] 新浪A股数据: {len(stock_map)}只")
                     _source_cache['sina'] = stock_map
                 else:
                     stock_map = _source_cache['sina']
@@ -739,11 +739,11 @@ class UnifiedStockDataService:
 
                 if result:
                     names = ', '.join(d.get('name', code) for code, d in result.items())
-                    logger.info(f"[实时价格] {today} 新浪财经 → {names} ({len(result)}只)")
+                    logger.info(f"[数据服务.实时价格] {today} 新浪财经 → {names} ({len(result)}只)")
                 return result
 
             except Exception as e:
-                logger.warning(f"[实时价格] 新浪财经失败: {e}")
+                logger.warning(f"[数据服务.实时价格] 新浪财经失败: {e}")
                 raise
 
         def fetch_from_tencent(codes: list) -> dict:
@@ -752,10 +752,10 @@ class UnifiedStockDataService:
                 result = self._fetch_from_tencent(codes, now_str)
                 if result:
                     names = ', '.join(d.get('name', code) for code, d in result.items())
-                    logger.info(f"[实时价格] {today} 腾讯财经 → {names} ({len(result)}只)")
+                    logger.info(f"[数据服务.实时价格] {today} 腾讯财经 → {names} ({len(result)}只)")
                 return result
             except Exception as e:
-                logger.warning(f"[实时价格] 腾讯财经失败: {e}")
+                logger.warning(f"[数据服务.实时价格] 腾讯财经失败: {e}")
                 raise
 
         def fetch_from_yfinance(codes: list) -> dict:
@@ -792,7 +792,7 @@ class UnifiedStockDataService:
                         'market': 'A',
                     }
                 except Exception as e:
-                    logger.debug(f"[获取] {code} 失败 (yfinance): {e}")
+                    logger.debug(f"[数据服务.获取] {code} 失败 (yfinance): {e}")
                     return code, None
 
             with ThreadPoolExecutor(max_workers=5) as executor:
@@ -804,7 +804,7 @@ class UnifiedStockDataService:
 
             if result:
                 names = ', '.join(d.get('name', code) for code, d in result.items())
-                logger.info(f"[实时价格] {today} yfinance(A股兜底) → {names} ({len(result)}只)")
+                logger.info(f"[数据服务.实时价格] {today} yfinance(A股兜底) → {names} ({len(result)}只)")
             return result
 
         # 使用优先级负载均衡器分配任务
@@ -890,7 +890,7 @@ class UnifiedStockDataService:
                         'market': 'A',
                     }
                 except (ValueError, IndexError) as e:
-                    logger.debug(f"腾讯数据解析失败 {original_code}: {e}")
+                    logger.debug(f"[数据服务.获取] 腾讯数据解析失败 {original_code}: {e}")
 
         return result
 
@@ -922,7 +922,7 @@ class UnifiedStockDataService:
         cache_type = f'ohlc_{days}'
 
         # 入口日志
-        logger.info(f"[走势数据] 开始获取: {len(stock_codes)}只股票, {days}天")
+        logger.info(f"[数据服务.走势] 开始获取: {len(stock_codes)}只股票, {days}天")
 
         remaining_codes = list(stock_codes)
         memory_hit_stocks = []
@@ -937,7 +937,7 @@ class UnifiedStockDataService:
             remaining_codes = [c for c in remaining_codes if c not in memory_cached]
 
             if memory_hit_count > 0:
-                logger.debug(f"[内存缓存] 走势数据命中 {memory_hit_count}只")
+                logger.debug(f"[数据服务.缓存] 走势数据命中 {memory_hit_count}只")
 
         if not remaining_codes:
             all_dates = set()
@@ -945,7 +945,7 @@ class UnifiedStockDataService:
                 for dp in stock.get('data', []):
                     all_dates.add(dp['date'])
             sorted_dates = sorted(all_dates)
-            logger.info(f"[走势数据] 完成: 全部内存缓存命中 {memory_hit_count}只")
+            logger.info(f"[数据服务.走势] 完成: 全部内存缓存命中 {memory_hit_count}只")
             return {
                 'stocks': memory_hit_stocks,
                 'date_range': {'start': sorted_dates[0] if sorted_dates else None,
@@ -977,7 +977,7 @@ class UnifiedStockDataService:
             effective_date = effective_dates[code]
 
             if force_refresh:
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 强制刷新")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 强制刷新")
                 need_refresh.append(code)
                 continue
 
@@ -990,7 +990,7 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 完整数据")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 完整数据")
                     continue
 
             # 非交易时间使用缓存（不做增量）
@@ -1000,14 +1000,14 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 非交易时间")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 非交易时间")
                     continue
                 expired_data = self._get_expired_cache(code, cache_type, '非交易时间无有效缓存')
                 if expired_data:
                     cached_stocks.append(expired_data)
                     memory_cache.set(code, cache_type, expired_data, stable=True)
                     continue
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 无缓存")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 无缓存")
                 need_refresh.append(code)
                 continue
 
@@ -1018,7 +1018,7 @@ class UnifiedStockDataService:
                     market, data_end + timedelta(days=1), effective_date
                 )
                 if missing_days:
-                    logger.debug(f"[缓存] {code} {stock_name} 需增量: 缺少{len(missing_days)}个交易日")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 需增量: 缺少{len(missing_days)}个交易日")
                     incremental_codes.append((code, len(missing_days) + 5, cache_info['data']))
                     continue
                 else:
@@ -1026,7 +1026,7 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'], stable=True)
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: 无缺失交易日")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 无缺失交易日")
                     continue
 
             # 交易时间内，使用智能TTL判断
@@ -1037,17 +1037,17 @@ class UnifiedStockDataService:
                     memory_cache.set(code, cache_type, cache_info['data'])
                     self._hit_count += 1
                     db_hit_count += 1
-                    logger.debug(f"[DB缓存] {code} {stock_name} 命中: TTL内")
+                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: TTL内")
                     continue
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: TTL过期")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: TTL过期")
             else:
-                logger.debug(f"[缓存] {code} {stock_name} 未命中: 无缓存")
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 无缓存")
 
             # 情况C: 无缓存 → 全量获取
             need_refresh.append(code)
 
         # 缓存决策汇总日志
-        logger.info(f"[走势数据] 内存命中 {memory_hit_count}, DB命中 {db_hit_count}, 需刷新 {len(need_refresh)}, 需增量 {len(incremental_codes)}")
+        logger.info(f"[数据服务.走势] 内存命中 {memory_hit_count}, DB命中 {db_hit_count}, 需刷新 {len(need_refresh)}, 需增量 {len(incremental_codes)}")
 
         # 全量获取
         fetched_stocks = []
@@ -1056,7 +1056,7 @@ class UnifiedStockDataService:
         if need_refresh:
             if readonly:
                 # 只读模式下不从外部 API 获取，尝试使用过期缓存
-                logger.info(f"[只读模式] 跳过走势数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                logger.info(f"[数据服务.只读] 跳过走势数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
                     expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
@@ -1073,7 +1073,7 @@ class UnifiedStockDataService:
         if incremental_codes:
             if readonly:
                 # 只读模式下跳过增量获取，使用现有缓存
-                logger.info(f"[只读模式] 跳过增量获取 {len(incremental_codes)}只，使用现有缓存")
+                logger.info(f"[数据服务.只读] 跳过增量获取 {len(incremental_codes)}只，使用现有缓存")
                 for code, fetch_days, cached_stock_data in incremental_codes:
                     cached_stocks.append(cached_stock_data)
             else:
@@ -1121,10 +1121,10 @@ class UnifiedStockDataService:
                             )
                             memory_cache.set(code, cache_type, merged_stock)
                             stock_name = cached_stock_data.get('stock_name', code)
-                            logger.debug(f"[增量] {code} {stock_name}: 获取{fetch_days_val}天, 合并后{len(merged_data)}天")
+                            logger.debug(f"[数据服务.增量] {code} {stock_name}: 获取{fetch_days_val}天, 合并后{len(merged_data)}天")
                         else:
                             stock_name = cached_stock_data.get('stock_name', code)
-                            logger.debug(f"[增量] {code} {stock_name}: 获取失败, 使用缓存")
+                            logger.debug(f"[数据服务.增量] {code} {stock_name}: 获取失败, 使用缓存")
                             cached_stocks.append(cached_stock_data)
 
         # 合并结果（内存缓存命中 + DB缓存命中 + 新获取）
@@ -1142,8 +1142,8 @@ class UnifiedStockDataService:
             'end': sorted_dates[-1] if sorted_dates else None
         }
 
-        readonly_msg = " [只读模式]" if readonly else ""
-        logger.info(f"[走势数据] 完成{readonly_msg}: 成功 {len(all_stocks)}只 (内存 {memory_hit_count}, DB {db_hit_count})")
+        readonly_msg = " [数据服务.只读]" if readonly else ""
+        logger.info(f"[数据服务.走势] 完成{readonly_msg}: 成功 {len(all_stocks)}只 (内存 {memory_hit_count}, DB {db_hit_count})")
 
         return {
             'stocks': all_stocks,
@@ -1182,7 +1182,7 @@ class UnifiedStockDataService:
             else:
                 other_codes.append(code)
 
-        logger.debug(f"[走势数据] 分类: ETF {len(etf_codes)}只, A股 {len(a_share_codes)}只, 其他 {len(other_codes)}只")
+        logger.debug(f"[数据服务.走势] 分类: ETF {len(etf_codes)}只, A股 {len(a_share_codes)}只, 其他 {len(other_codes)}只")
 
         results = []
 
@@ -1265,7 +1265,7 @@ class UnifiedStockDataService:
                 first_date = data_points[0].get('date', '')
                 if not self._is_valid_date_format(first_date):
                     stock_name = result.get('stock_name', code)
-                    logger.warning(f"[走势数据] {code} {stock_name} 数据日期格式异常，跳过缓存: first_date={first_date}")
+                    logger.warning(f"[数据服务.走势] {code} {stock_name} 数据日期格式异常，跳过缓存: first_date={first_date}")
                     continue
 
             market = self._identify_market(code)
@@ -1285,7 +1285,7 @@ class UnifiedStockDataService:
                 data_end_date=data_end
             )
 
-        logger.debug(f"[走势数据] _fetch_trend_data: 请求 {len(stock_codes)}, 成功 {len(results)}")
+        logger.debug(f"[数据服务.走势] _fetch_trend_data: 请求 {len(stock_codes)}, 成功 {len(results)}")
         return results
 
     def _fetch_incremental_trend_data(self, stock_code: str, fetch_days: int, total_days: int) -> dict | None:
@@ -1335,14 +1335,14 @@ class UnifiedStockDataService:
                             'change_pct': 0,
                             'volume': int(row['成交量']) if row.get('成交量') else 0
                         })
-                    logger.debug(f"增量获取 {stock_code} (ETF): {len(data_points)}天")
+                    logger.debug(f"[数据服务.增量] {stock_code} (ETF): {len(data_points)}天")
                     return {
                         'stock_code': stock_code,
                         'stock_name': stock_name,
                         'data': data_points
                     }
             except Exception as e:
-                logger.debug(f"增量获取 {stock_code} (ETF) 失败: {e}")
+                logger.debug(f"[数据服务.增量] {stock_code} (ETF) 失败: {e}")
             # ETF 不 fallback 到 yfinance
             return None
 
@@ -1442,7 +1442,7 @@ class UnifiedStockDataService:
                     data_points = fetch_func()
                     if data_points:
                         circuit_breaker.record_success(source_key)
-                        logger.debug(f"增量获取 {stock_code} ({source_name}): {len(data_points)}天")
+                        logger.debug(f"[数据服务.增量] {stock_code} ({source_name}): {len(data_points)}天")
                         return {
                             'stock_code': stock_code,
                             'stock_name': stock_name,
@@ -1450,7 +1450,7 @@ class UnifiedStockDataService:
                         }
                 except Exception as e:
                     circuit_breaker.record_failure(source_key)
-                    logger.debug(f"增量获取 {stock_code} ({source_name}) 失败: {e}")
+                    logger.debug(f"[数据服务.增量] {stock_code} ({source_name}) 失败: {e}")
 
         # yfinance 兜底
         try:
@@ -1483,14 +1483,14 @@ class UnifiedStockDataService:
                 })
 
             if data_points:
-                logger.debug(f"增量获取 {stock_code} (yfinance): {len(data_points)}天")
+                logger.debug(f"[数据服务.增量] {stock_code} (yfinance): {len(data_points)}天")
                 return {
                     'stock_code': stock_code,
                     'stock_name': stock_name,
                     'data': data_points
                 }
         except Exception as e:
-            logger.debug(f"增量获取 {stock_code} (yfinance) 失败: {e}")
+            logger.debug(f"[数据服务.增量] {stock_code} (yfinance) 失败: {e}")
 
         return None
 
@@ -1503,7 +1503,7 @@ class UnifiedStockDataService:
 
         try:
             import akshare as ak
-            logger.debug(f"[走势数据] 获取ETF历史数据 ({len(etf_codes)}只)...")
+            logger.debug(f"[数据服务.走势] 获取ETF历史数据 ({len(etf_codes)}只)...")
 
             def _fetch_single_etf(etf_code):
                 try:
@@ -1516,7 +1516,7 @@ class UnifiedStockDataService:
                     )
                     if df is None or df.empty or len(df) < 2:
                         stock_name = stock_name_map.get(etf_code, etf_code)
-                        logger.debug(f"[获取] {etf_code} {stock_name} ETF数据为空")
+                        logger.debug(f"[数据服务.获取] {etf_code} {stock_name} ETF数据为空")
                         return None
 
                     df = df.tail(days)
@@ -1537,7 +1537,7 @@ class UnifiedStockDataService:
                     if len(data_points) >= 2:
                         sc = stock_categories.get(etf_code, {})
                         stock_name = stock_name_map.get(etf_code, etf_code)
-                        logger.debug(f"[获取] {etf_code} {stock_name} 成功 (etf_hist)")
+                        logger.debug(f"[数据服务.获取] {etf_code} {stock_name} 成功 (etf_hist)")
                         return {
                             'stock_code': etf_code,
                             'stock_name': stock_name,
@@ -1547,7 +1547,7 @@ class UnifiedStockDataService:
                     return None
                 except Exception as e:
                     stock_name = stock_name_map.get(etf_code, etf_code)
-                    logger.debug(f"[获取] {etf_code} {stock_name} 失败 (etf_hist): {e}")
+                    logger.debug(f"[数据服务.获取] {etf_code} {stock_name} 失败 (etf_hist): {e}")
                     return None
 
             with ThreadPoolExecutor(max_workers=5) as executor:
@@ -1559,10 +1559,10 @@ class UnifiedStockDataService:
 
             if results:
                 names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
-                logger.info(f"[走势数据] {today} ETF → {names} ({len(results)}只)")
+                logger.info(f"[数据服务.走势] {today} ETF → {names} ({len(results)}只)")
 
         except Exception as e:
-            logger.warning(f"[走势数据] ETF获取失败: {e}")
+            logger.warning(f"[数据服务.走势] ETF获取失败: {e}")
 
         return results
 
@@ -1572,7 +1572,7 @@ class UnifiedStockDataService:
         import akshare as ak
 
         results = []
-        logger.debug(f"[走势数据] 东方财富获取 ({len(stock_codes)}只)...")
+        logger.debug(f"[数据服务.走势] 东方财富获取 ({len(stock_codes)}只)...")
 
         for stock_code in stock_codes:
             try:
@@ -1610,14 +1610,14 @@ class UnifiedStockDataService:
                         'category_id': sc.get('category_id'),
                         'data': data_points
                     })
-                    logger.debug(f"[获取] {stock_code} {stock_name} 成功 (eastmoney_hist)")
+                    logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 成功 (eastmoney_hist)")
             except Exception as e:
                 stock_name = stock_name_map.get(stock_code, stock_code)
-                logger.debug(f"[获取] {stock_code} {stock_name} 失败 (eastmoney_hist): {e}")
+                logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 失败 (eastmoney_hist): {e}")
 
         if results:
             names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
-            logger.info(f"[走势数据] {today} 东方财富 → {names} ({len(results)}只)")
+            logger.info(f"[数据服务.走势] {today} 东方财富 → {names} ({len(results)}只)")
 
         return results
 
@@ -1627,7 +1627,7 @@ class UnifiedStockDataService:
         import akshare as ak
 
         results = []
-        logger.debug(f"[走势数据] 新浪获取 ({len(stock_codes)}只)...")
+        logger.debug(f"[数据服务.走势] 新浪获取 ({len(stock_codes)}只)...")
 
         for stock_code in stock_codes:
             try:
@@ -1670,14 +1670,14 @@ class UnifiedStockDataService:
                         'category_id': sc.get('category_id'),
                         'data': data_points
                     })
-                    logger.debug(f"[获取] {stock_code} {stock_name} 成功 (sina_hist)")
+                    logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 成功 (sina_hist)")
             except Exception as e:
                 stock_name = stock_name_map.get(stock_code, stock_code)
-                logger.debug(f"[获取] {stock_code} {stock_name} 失败 (sina_hist): {e}")
+                logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 失败 (sina_hist): {e}")
 
         if results:
             names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
-            logger.info(f"[走势数据] {today} 新浪 → {names} ({len(results)}只)")
+            logger.info(f"[数据服务.走势] {today} 新浪 → {names} ({len(results)}只)")
 
         return results
 
@@ -1687,7 +1687,7 @@ class UnifiedStockDataService:
         import requests
 
         results = []
-        logger.debug(f"[走势数据] 腾讯获取 ({len(stock_codes)}只)...")
+        logger.debug(f"[数据服务.走势] 腾讯获取 ({len(stock_codes)}只)...")
 
         headers = {'User-Agent': 'Mozilla/5.0'}
 
@@ -1744,15 +1744,15 @@ class UnifiedStockDataService:
                         'category_id': sc.get('category_id'),
                         'data': data_points
                     })
-                    logger.debug(f"[获取] {stock_code} {stock_name} 成功 (tencent_hist)")
+                    logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 成功 (tencent_hist)")
 
             except Exception as e:
                 stock_name = stock_name_map.get(stock_code, stock_code)
-                logger.debug(f"[获取] {stock_code} {stock_name} 失败 (tencent_hist): {e}")
+                logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 失败 (tencent_hist): {e}")
 
         if results:
             names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
-            logger.info(f"[走势数据] {today} 腾讯 → {names} ({len(results)}只)")
+            logger.info(f"[数据服务.走势] {today} 腾讯 → {names} ({len(results)}只)")
 
         return results
 
@@ -1762,7 +1762,7 @@ class UnifiedStockDataService:
         """从yfinance获取历史K线"""
         import yfinance as yf
 
-        logger.debug(f"[走势数据] 尝试yfinance ({len(stock_codes)}只)...")
+        logger.debug(f"[数据服务.走势] 尝试yfinance ({len(stock_codes)}只)...")
 
         def fetch_single(stock_code: str) -> dict | None:
             yf_code = self._get_yfinance_symbol(stock_code)
@@ -1815,12 +1815,12 @@ class UnifiedStockDataService:
                 error_msg = str(e).lower()
                 stock_name = stock_name_map.get(stock_code, stock_code)
                 if 'delisted' in error_msg or 'no timezone found' in error_msg or 'no data found' in error_msg:
-                    logger.debug(f"[获取] {stock_code} {stock_name} 失败 (yfinance): 退市或无数据")
+                    logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 失败 (yfinance): 退市或无数据")
                 elif 'rate limit' in error_msg or 'too many requests' in error_msg:
-                    logger.debug(f"[获取] {stock_code} {stock_name} 失败 (yfinance): 限流")
+                    logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 失败 (yfinance): 限流")
                     return {'stock_code': stock_code, 'rate_limited': True}
                 else:
-                    logger.debug(f"[获取] {stock_code} {stock_name} 失败 (yfinance): {e}")
+                    logger.debug(f"[数据服务.获取] {stock_code} {stock_name} 失败 (yfinance): {e}")
                 return None
 
         results = []
@@ -1835,7 +1835,7 @@ class UnifiedStockDataService:
                     else:
                         results.append(result)
                         stock_name = result.get('stock_name', result['stock_code'])
-                        logger.debug(f"[获取] {result['stock_code']} {stock_name} 成功 (yfinance)")
+                        logger.debug(f"[数据服务.获取] {result['stock_code']} {stock_name} 成功 (yfinance)")
 
         for code in rate_limited_codes:
             expired_data = self._get_expired_cache(code, cache_type, 'API限流')
@@ -1844,7 +1844,7 @@ class UnifiedStockDataService:
 
         if results:
             names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
-            logger.info(f"[走势数据] {today} yfinance → {names} ({len(results)}只)")
+            logger.info(f"[数据服务.走势] {today} yfinance → {names} ({len(results)}只)")
         return results
 
     # ============ 指数数据 ============
@@ -1933,7 +1933,7 @@ class UnifiedStockDataService:
         if need_refresh:
             # 只读模式下不从外部 API 获取，尝试使用过期缓存
             if is_readonly_mode():
-                logger.info(f"[只读模式] 跳过指数数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                logger.info(f"[数据服务.只读] 跳过指数数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
                     expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
@@ -1953,7 +1953,7 @@ class UnifiedStockDataService:
                     etf_prev = etf_hist.iloc[-2]
                     chinext_etf_change_pct = (float(etf_latest['Close']) - float(etf_prev['Close'])) / float(etf_prev['Close']) * 100
             except Exception as e:
-                logger.warning(f"创业板ETF数据获取失败: {e}")
+                logger.warning(f"[数据服务.A股指数] 创业板ETF数据获取失败: {e}")
 
             for local_code in need_refresh:
                 yf_code = INDEX_CODES.get(local_code)
@@ -2040,7 +2040,7 @@ class UnifiedStockDataService:
                             )
 
                 except Exception as e:
-                    logger.warning(f"获取指数 {local_code} 数据失败: {e}")
+                    logger.warning(f"[数据服务.A股指数] 获取指数 {local_code} 数据失败: {e}")
 
         return results
 
@@ -2068,7 +2068,7 @@ class UnifiedStockDataService:
         cache_type = 'pe'
         now_str = datetime.now().isoformat()
 
-        logger.info(f"[PE数据] 开始获取: 美股/港股 {len(stock_codes)}只")
+        logger.info(f"[数据服务.PE] 开始获取: 美股/港股 {len(stock_codes)}只")
 
         # 检查缓存（PE缓存24小时有效）
         result = {}
@@ -2093,7 +2093,7 @@ class UnifiedStockDataService:
                         cache_hit_count += 1
                         self._hit_count += 1
                         stock_name = cached.get('name', code)
-                        logger.debug(f"[缓存] {code} {stock_name} 命中: PE缓存有效")
+                        logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: PE缓存有效")
                         continue
 
             need_refresh.append(code)
@@ -2101,7 +2101,7 @@ class UnifiedStockDataService:
         # 获取需要刷新的数据
         if need_refresh:
             if is_readonly_mode():
-                logger.info(f"[只读模式] 跳过 PE 数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                logger.info(f"[数据服务.只读] 跳过 PE 数据 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
                     expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
@@ -2111,8 +2111,8 @@ class UnifiedStockDataService:
                 fetched = self._fetch_pe_data(need_refresh, effective_dates, now_str)
                 result.update(fetched)
 
-        readonly_msg = " [只读模式]" if is_readonly_mode() else ""
-        logger.info(f"[PE数据] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
+        readonly_msg = " [数据服务.只读]" if is_readonly_mode() else ""
+        logger.info(f"[数据服务.PE] 完成{readonly_msg}: 请求 {len(stock_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
         return result
 
     def _fetch_pe_data(self, stock_codes: list, effective_dates: dict, now_str: str) -> dict:
@@ -2159,7 +2159,7 @@ class UnifiedStockDataService:
                     return code, data
 
                 except Exception as e:
-                    logger.debug(f"[获取] {code} PE失败 (yfinance): {e}")
+                    logger.debug(f"[数据服务.获取] {code} PE失败 (yfinance): {e}")
                     return code, None
 
             yf_success = 0
@@ -2171,14 +2171,14 @@ class UnifiedStockDataService:
                         result[code] = data
                         yf_success += 1
                         UnifiedStockCache.set_cached_data(code, 'pe', data, effective_dates[code])
-                        logger.debug(f"[获取] {code} {data['name']} PE成功 (yfinance)")
+                        logger.debug(f"[数据服务.获取] {code} {data['name']} PE成功 (yfinance)")
                     else:
                         expired = self._get_expired_cache(code, 'pe', 'yfinance获取失败')
                         if expired:
                             result[code] = expired
 
             if yf_success > 0:
-                logger.info(f"[PE数据] yfinance: 成功 {yf_success}只")
+                logger.info(f"[数据服务.PE] yfinance: 成功 {yf_success}只")
 
         return result
 
@@ -2243,7 +2243,7 @@ class UnifiedStockDataService:
 
         # yfinance 熔断检查
         if not circuit_breaker.is_available('yfinance'):
-            logger.info(f"[yfinance批量] yfinance已熔断，尝试过期缓存")
+            logger.info(f"[数据服务.yfinance批量] yfinance已熔断，尝试过期缓存")
             for sym in need_fetch:
                 expired = self._get_expired_cache(sym, cache_type, 'yfinance熔断')
                 if expired:
@@ -2274,7 +2274,7 @@ class UnifiedStockDataService:
                     'last_fetch_time': now_str,
                 }
             except Exception as e:
-                logger.debug(f"[yfinance批量] {sym} 获取失败: {e}")
+                logger.debug(f"[数据服务.yfinance批量] {sym} 获取失败: {e}")
                 return sym, None
 
         success_count = 0
@@ -2293,10 +2293,10 @@ class UnifiedStockDataService:
 
         if success_count > 0:
             circuit_breaker.record_success('yfinance')
-            logger.info(f"[yfinance批量] 成功 {success_count}/{len(need_fetch)}只 (cache_type={cache_type})")
+            logger.info(f"[数据服务.yfinance批量] 成功 {success_count}/{len(need_fetch)}只 (cache_type={cache_type})")
         elif need_fetch:
             circuit_breaker.record_failure('yfinance')
-            logger.warning(f"[yfinance批量] 全部失败 {len(need_fetch)}只")
+            logger.warning(f"[数据服务.yfinance批量] 全部失败 {len(need_fetch)}只")
 
         return result
 
@@ -2371,9 +2371,9 @@ class UnifiedStockDataService:
                         res[code] = data
 
                 if res:
-                    logger.info(f"[A股指数] 东方财富: 成功 {len(res)}只")
+                    logger.info(f"[数据服务.A股指数] 东方财富: 成功 {len(res)}只")
             except Exception as e:
-                logger.warning(f"[A股指数] 东方财富失败: {e}")
+                logger.warning(f"[数据服务.A股指数] 东方财富失败: {e}")
                 raise
             return res
 
@@ -2412,9 +2412,9 @@ class UnifiedStockDataService:
                         res[code] = data
 
                 if res:
-                    logger.info(f"[A股指数] 新浪: 成功 {len(res)}只")
+                    logger.info(f"[数据服务.A股指数] 新浪: 成功 {len(res)}只")
             except Exception as e:
-                logger.warning(f"[A股指数] 新浪失败: {e}")
+                logger.warning(f"[数据服务.A股指数] 新浪失败: {e}")
                 raise
             return res
 
@@ -2440,7 +2440,7 @@ class UnifiedStockDataService:
                         'last_fetch_time': now_str,
                     }
                 except Exception as e:
-                    logger.debug(f"[A股指数] yfinance兜底 {code} 失败: {e}")
+                    logger.debug(f"[数据服务.A股指数] yfinance兜底 {code} 失败: {e}")
             return res
 
         fetch_funcs = {
@@ -2484,7 +2484,7 @@ class UnifiedStockDataService:
                     age = datetime.now() - cache_record.last_fetch_time
                     if age < timedelta(hours=8):
                         self._hit_count += 1
-                        logger.debug("[A股板块] 缓存命中")
+                        logger.debug("[数据服务.A股板块] 缓存命中")
                         return cached
 
         self._miss_count += 1
@@ -2502,7 +2502,7 @@ class UnifiedStockDataService:
         for source_name, api_func in sources:
             # 熔断检查
             if not circuit_breaker.is_available(source_name):
-                logger.info(f"[A股板块] 数据源 {source_name} 已熔断，跳过")
+                logger.info(f"[数据服务.A股板块] 数据源 {source_name} 已熔断，跳过")
                 tried_sources.append(f"{source_name}(熔断)")
                 continue
 
@@ -2510,10 +2510,10 @@ class UnifiedStockDataService:
                 import akshare as ak
 
                 if source_name == 'eastmoney':
-                    logger.debug(f"[A股板块] 尝试数据源: {source_name} ({api_func})")
+                    logger.debug(f"[数据服务.A股板块] 尝试数据源: {source_name} ({api_func})")
                     df = ak.stock_board_industry_name_em()
                     if df is None or df.empty:
-                        logger.warning(f"[A股板块] {source_name} ({api_func}) 返回空数据")
+                        logger.warning(f"[数据服务.A股板块] {source_name} ({api_func}) 返回空数据")
                         circuit_breaker.record_failure(source_name)
                         tried_sources.append(f"{source_name}(空数据)")
                         continue
@@ -2531,13 +2531,13 @@ class UnifiedStockDataService:
                     # 注意: akshare的stock_sector_spot存在已知bug
                     # 当网络请求失败时，会触发 UnboundLocalError: local variable 'r' referenced before assignment
                     # 这是akshare库的内部错误，非本代码问题
-                    logger.debug(f"[A股板块] 尝试数据源: {source_name} ({api_func})")
+                    logger.debug(f"[数据服务.A股板块] 尝试数据源: {source_name} ({api_func})")
                     try:
                         df = ak.stock_sector_spot(indicator="行业板块")
                     except UnboundLocalError as ule:
                         # akshare库内部bug：网络请求失败时变量未赋值
                         logger.warning(
-                            f"[A股板块] {source_name} akshare内部错误 | "
+                            f"[数据服务.A股板块] {source_name} akshare内部错误 | "
                             f"error_type=UnboundLocalError | "
                             f"error_msg={str(ule)} | "
                             f"suggestion=akshare库bug，建议升级akshare版本"
@@ -2546,7 +2546,7 @@ class UnifiedStockDataService:
                         tried_sources.append(f"{source_name}(akshare内部错误)")
                         continue
                     if df is None or df.empty:
-                        logger.warning(f"[A股板块] {source_name} ({api_func}) 返回空数据")
+                        logger.warning(f"[数据服务.A股板块] {source_name} ({api_func}) 返回空数据")
                         circuit_breaker.record_failure(source_name)
                         tried_sources.append(f"{source_name}(空数据)")
                         continue
@@ -2564,7 +2564,7 @@ class UnifiedStockDataService:
                     # 保存缓存
                     UnifiedStockCache.set_cached_data(cache_key, cache_type, result, today)
                     tried_info = f" (已尝试: {', '.join(tried_sources)})" if tried_sources else ""
-                    logger.info(f"[A股板块] {source_name} 获取成功: {len(result)}个板块{tried_info}")
+                    logger.info(f"[数据服务.A股板块] {source_name} 获取成功: {len(result)}个板块{tried_info}")
                     return result
 
             except Exception as e:
@@ -2576,7 +2576,7 @@ class UnifiedStockDataService:
 
                 # 详细错误日志
                 logger.warning(
-                    f"[A股板块] 数据源获取失败 | "
+                    f"[数据服务.A股板块] 数据源获取失败 | "
                     f"source={source_name} | "
                     f"api={api_func} | "
                     f"error_type={error_type} | "
@@ -2585,7 +2585,7 @@ class UnifiedStockDataService:
 
         # 所有数据源都失败，尝试过期缓存
         tried_info = ', '.join(tried_sources) if tried_sources else '无可用数据源'
-        logger.warning(f"[A股板块] 所有数据源获取失败 (已尝试: {tried_info})")
+        logger.warning(f"[数据服务.A股板块] 所有数据源获取失败 (已尝试: {tried_info})")
 
         expired = self._get_expired_cache(cache_key, cache_type, f'所有数据源失败: {tried_info}')
         if expired and isinstance(expired, list):
@@ -2611,7 +2611,7 @@ class UnifiedStockDataService:
         cache_type = 'etf_nav'
         now_str = datetime.now().isoformat()
 
-        logger.info(f"[ETF净值] 开始获取: {len(etf_codes)}只")
+        logger.info(f"[数据服务.ETF净值] 开始获取: {len(etf_codes)}只")
 
         result = {}
         need_refresh = []
@@ -2627,7 +2627,7 @@ class UnifiedStockDataService:
                 result[code] = cached
                 cache_hit_count += 1
                 self._hit_count += 1
-                logger.debug(f"[缓存] {code} 命中: ETF净值缓存")
+                logger.debug(f"[数据服务.缓存] {code} 命中: ETF净值缓存")
                 continue
 
             need_refresh.append(code)
@@ -2636,7 +2636,7 @@ class UnifiedStockDataService:
         if need_refresh:
             # 只读模式下不从外部 API 获取，尝试使用过期缓存
             if is_readonly_mode():
-                logger.info(f"[只读模式] 跳过 ETF 净值 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
+                logger.info(f"[数据服务.只读] 跳过 ETF 净值 API 获取 {len(need_refresh)}只，尝试使用过期缓存")
                 for code in need_refresh:
                     expired_data = self._get_expired_cache(code, cache_type, '只读模式')
                     if expired_data:
@@ -2646,8 +2646,8 @@ class UnifiedStockDataService:
                 fetched = self._fetch_etf_nav(need_refresh, today, now_str)
                 result.update(fetched)
 
-        readonly_msg = " [只读模式]" if is_readonly_mode() else ""
-        logger.info(f"[ETF净值] 完成{readonly_msg}: 请求 {len(etf_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
+        readonly_msg = " [数据服务.只读]" if is_readonly_mode() else ""
+        logger.info(f"[数据服务.ETF净值] 完成{readonly_msg}: 请求 {len(etf_codes)}只, 成功 {len(result)}只 (缓存命中 {cache_hit_count}只)")
         return result
 
     def _fetch_etf_nav(self, etf_codes: list, today: date, now_str: str) -> dict:
@@ -2679,10 +2679,10 @@ class UnifiedStockDataService:
                                 'nav': round(nav, 4),
                                 'last_fetch_time': now_str,
                             }
-                            logger.debug(f"[etf_fund_info] {code} 净值={nav}")
+                            logger.debug(f"[数据服务.ETF净值] {code} 净值={nav}")
                     time.sleep(0.3)
                 except Exception as e:
-                    logger.debug(f"[etf_fund_info] {code} 失败: {e}")
+                    logger.debug(f"[数据服务.ETF净值] {code} 失败: {e}")
 
             return result
 
@@ -2698,9 +2698,9 @@ class UnifiedStockDataService:
                         return result
                     etf_map = {str(row.get('代码', '')): row for _, row in df.iterrows()}
                     self._set_source_snapshot('eastmoney_etf', etf_map)
-                    logger.info(f"[快照] ETF数据已缓存: {len(etf_map)}只")
+                    logger.info(f"[数据服务.快照] ETF数据已缓存: {len(etf_map)}只")
                 else:
-                    logger.info(f"[快照命中] ETF数据: {len(etf_map)}只")
+                    logger.info(f"[数据服务.快照] ETF数据: {len(etf_map)}只")
 
                 for code in codes:
                     row = etf_map.get(code)
@@ -2732,10 +2732,10 @@ class UnifiedStockDataService:
                             'nav': nav,
                             'last_fetch_time': now_str,
                         }
-                        logger.debug(f"[etf_spot] {code} {name} 净值={nav}")
+                        logger.debug(f"[数据服务.ETF净值] {code} {name} 净值={nav}")
 
             except Exception as e:
-                logger.warning(f"[etf_spot] 获取失败: {e}")
+                logger.warning(f"[数据服务.ETF净值] 获取失败: {e}")
 
             return result
 
@@ -2778,7 +2778,7 @@ class UnifiedStockDataService:
         result = {}
 
         # 入口日志
-        logger.info(f"[收盘价] 开始获取(仅缓存): {len(stock_codes)}只")
+        logger.info(f"[数据服务.收盘价] 开始获取(仅缓存): {len(stock_codes)}只")
 
         # 第一层：内存缓存
         memory_cached = memory_cache.get_batch(stock_codes, cache_type)
@@ -2787,7 +2787,7 @@ class UnifiedStockDataService:
         remaining_codes = [c for c in stock_codes if c not in memory_cached]
 
         if not remaining_codes:
-            logger.info(f"[收盘价] 完成: 全部内存缓存命中 {len(result)}只")
+            logger.info(f"[数据服务.收盘价] 完成: 全部内存缓存命中 {len(result)}只")
             return result
 
         # 按市场获取有效缓存日期（基于市场时区）
@@ -2818,12 +2818,12 @@ class UnifiedStockDataService:
                     cached['_is_degraded'] = True
                     result[code] = cached
                     stock_name = self._get_stock_name(code, cached)
-                    logger.debug(f"[收盘价] {code} {stock_name} 使用{days_ago}天前的缓存")
+                    logger.debug(f"[数据服务.收盘价] {code} {stock_name} 使用{days_ago}天前的缓存")
                     break
 
         cache_hit = len(result)
         cache_miss = len(stock_codes) - cache_hit
-        logger.info(f"[收盘价] 完成(仅缓存): 请求 {len(stock_codes)}只, 命中 {cache_hit}只, 未命中 {cache_miss}只")
+        logger.info(f"[数据服务.收盘价] 完成(仅缓存): 请求 {len(stock_codes)}只, 命中 {cache_hit}只, 未命中 {cache_miss}只")
 
         return result
 
@@ -2845,7 +2845,7 @@ class UnifiedStockDataService:
         result = {}
 
         # 入口日志
-        logger.info(f"[缓存报价] 开始获取: {len(symbols)}只 (cache_type={cache_type})")
+        logger.info(f"[数据服务.缓存报价] 开始获取: {len(symbols)}只 (cache_type={cache_type})")
 
         # 按市场获取有效缓存日期
         effective_dates = self._get_effective_cache_dates(symbols)
@@ -2866,12 +2866,12 @@ class UnifiedStockDataService:
                 if cached:
                     cached['_is_degraded'] = True
                     result[sym] = cached
-                    logger.debug(f"[缓存报价] {sym} 使用{days_ago}天前的缓存")
+                    logger.debug(f"[数据服务.缓存报价] {sym} 使用{days_ago}天前的缓存")
                     break
 
         cache_hit = len(result)
         cache_miss = len(symbols) - cache_hit
-        logger.info(f"[缓存报价] 完成: 请求 {len(symbols)}只, 命中 {cache_hit}只, 未命中 {cache_miss}只")
+        logger.info(f"[数据服务.缓存报价] 完成: 请求 {len(symbols)}只, 命中 {cache_hit}只, 未命中 {cache_miss}只")
 
         return result
 
@@ -2921,7 +2921,7 @@ class UnifiedStockDataService:
         else:
             memory_cache.invalidate(None, cache_type)
 
-        logger.info(f"清除缓存: {count} 条记录 (DB), 内存缓存已同步清除")
+        logger.info(f"[数据服务.缓存] 清除: {count} 条记录 (DB), 内存缓存已同步清除")
         return count
 
     def reset_stats(self):

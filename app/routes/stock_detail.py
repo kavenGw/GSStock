@@ -133,7 +133,7 @@ def get_detail(code):
                 try:
                     results[key] = future.result()
                 except Exception as e:
-                    logger.error(f"获取 {key} 数据失败: {e}", exc_info=True)
+                    logger.error(f"[股票详情] 获取 {key} 数据失败: {e}", exc_info=True)
                     results[key] = None
 
         basic = results.get('basic') or {'code': code, 'name': '', 'market': '', 'price': 0, 'change': 0, 'change_pct': 0, 'volume': 0}
@@ -159,7 +159,7 @@ def get_detail(code):
                         'trend_state': technical.get('trend', {}).get('state'),
                     }
         except Exception as e:
-            logger.error(f"计算技术指标失败: {e}", exc_info=True)
+            logger.error(f"[股票详情.技术指标] 计算失败: {e}", exc_info=True)
 
         # 计算盈亏
         position = results.get('position')
@@ -179,7 +179,7 @@ def get_detail(code):
             'ai_enabled': AIAnalyzerService.is_available(),
         })
     except Exception as e:
-        logger.error(f"获取股票详情失败: {e}", exc_info=True)
+        logger.error(f"[股票详情] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -198,7 +198,7 @@ def get_ohlc(code):
             ohlc = _normalize_ohlc(raw)
         return jsonify({'ohlc': ohlc})
     except Exception as e:
-        logger.error(f"获取OHLC数据失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.OHLC] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -243,7 +243,7 @@ def ai_history():
 
         return jsonify({'history': history})
     except Exception as e:
-        logger.error(f"获取AI历史失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.AI历史] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -266,7 +266,7 @@ def ai_analyze():
         result = AIAnalyzerService.analyze_stock(stock_code, stock_name, force)
         return jsonify(result)
     except Exception as e:
-        logger.error(f"AI分析 {stock_code} 失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.AI分析] {stock_code} 失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -286,7 +286,7 @@ def ai_batch():
         results = AIAnalyzerService.analyze_batch(stocks)
         return jsonify({'results': results})
     except Exception as e:
-        logger.error(f"批量AI分析失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.AI分析] 批量失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -309,7 +309,7 @@ def wyckoff_analyze(code):
             result = WyckoffAutoService.analyze_single(code, stock_name, timeframe)
         return jsonify(result)
     except Exception as e:
-        logger.error(f"威科夫分析 {code} 失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.威科夫] {code} 分析失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -327,7 +327,7 @@ def wyckoff_backtest(code):
         signal_result = service.backtest_signals(code, days)
         return jsonify({'wyckoff': wyckoff_result, 'signals': signal_result})
     except Exception as e:
-        logger.error(f"威科夫回测 {code} 失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.威科夫] {code} 回测失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -343,7 +343,7 @@ def wyckoff_reference(code, phase):
             return jsonify({'error': '暂无参考图'}), 404
         return send_file(ref.image_path)
     except Exception as e:
-        logger.error(f"获取参考图失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.参考图] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -357,5 +357,5 @@ def wyckoff_history(code):
         ).order_by(WyckoffAutoResult.analysis_date.desc()).limit(20).all()
         return jsonify({'history': [r.to_dict() for r in records]})
     except Exception as e:
-        logger.error(f"获取威科夫历史失败: {e}", exc_info=True)
+        logger.error(f"[股票详情.威科夫历史] 获取失败: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500

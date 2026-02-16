@@ -107,13 +107,13 @@ class BacktestService:
             try:
                 wyckoff_results[code] = self.backtest_wyckoff(code)
             except Exception as e:
-                logger.warning(f'[Backtest] 威科夫回测失败 {code}: {e}')
+                logger.warning(f'[回测] 威科夫回测失败 {code}: {e}')
                 wyckoff_results[code] = {'stock_code': code, 'total': 0, 'message': str(e)}
 
             try:
                 signal_results[code] = self.backtest_signals(code)
             except Exception as e:
-                logger.warning(f'[Backtest] 信号回测失败 {code}: {e}')
+                logger.warning(f'[回测] 信号回测失败 {code}: {e}')
                 signal_results[code] = {'stock_code': code, 'total': 0, 'message': str(e)}
 
         return {

@@ -41,7 +41,7 @@ def with_db_retry(func):
                 return func(*args, **kwargs)
             except OperationalError as e:
                 if is_retryable_error(e) and attempt < MAX_RETRIES - 1:
-                    logger.warning(f"[CockroachDB] {func.__name__} 序列化冲突，重试 {attempt + 1}/{MAX_RETRIES}")
+                    logger.warning(f"[DB重试] {func.__name__} 序列化冲突，重试 {attempt + 1}/{MAX_RETRIES}")
                     db.session.rollback()
                     time.sleep(RETRY_DELAY * (2 ** attempt))
                     continue
@@ -73,12 +73,12 @@ def setup_db_retry(db, app):
                         self.rollback()
                         if has_pending:
                             raise
-                        logger.warning(f"[CockroachDB] 读查询序列化冲突，自动重试 {attempt + 1}/{MAX_RETRIES}")
+                        logger.warning(f"[DB重试] 读查询序列化冲突，自动重试 {attempt + 1}/{MAX_RETRIES}")
                         time.sleep(RETRY_DELAY * (2 ** attempt))
                         continue
                     raise
 
         session_cls.execute = _execute_with_retry
-        logger.info("[CockroachDB] Session.execute 自动读重试已启用")
+        logger.info("[DB重试] Session.execute 自动读重试已启用")
     except Exception as e:
-        logger.warning(f"[CockroachDB] 无法启用Session级自动重试: {e}")
+        logger.warning(f"[DB重试] 无法启用Session级自动重试: {e}")

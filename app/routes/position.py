@@ -174,7 +174,7 @@ def combined_trend_data():
             for stock in stocks_data['stocks']:
                 stock['source'] = 'stock'
         except Exception as e:
-            logger.warning(f"获取股票走势数据失败: {e}")
+            logger.warning(f"[持仓路由] 获取股票走势数据失败: {e}")
 
     # 获取期货走势
     try:
@@ -182,7 +182,7 @@ def combined_trend_data():
         for future in futures_data['stocks']:
             future['source'] = 'futures'
     except Exception as e:
-        logger.warning(f"获取期货走势数据失败: {e}")
+        logger.warning(f"[持仓路由] 获取期货走势数据失败: {e}")
 
     # 合并数据
     combined_stocks = stocks_data['stocks'] + futures_data['stocks']

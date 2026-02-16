@@ -65,7 +65,7 @@ def upload_single():
             StockService.fill_missing_codes(trades)
             return jsonify({'success': True, 'trades': trades})
     except Exception as e:
-        logger.error(f"图片识别失败: {file.filename} - {e}")
+        logger.error(f"[每日记录.OCR] 识别失败: {file.filename} - {e}", exc_info=True)
         return jsonify({'success': False, 'error': f'识别失败: {str(e)}'})
     finally:
         if os.path.exists(filepath):
@@ -139,7 +139,7 @@ def save():
     target_date = date.fromisoformat(target_date_str)
     errors = {}
 
-    logger.info(f"保存每日记录: date={target_date_str}, "
+    logger.info(f"[每日记录] 保存: date={target_date_str}, "
                 f"positions={len(positions)}, trades={len(trades)}, "
                 f"account={account}, transfer={transfer}")
 
@@ -148,7 +148,7 @@ def save():
         try:
             PositionService.save_snapshot(target_date, positions, overwrite=overwrite)
         except Exception as e:
-            logger.error(f"保存持仓数据失败: {e}")
+            logger.error(f"[每日记录.持仓] 保存失败: {e}", exc_info=True)
             errors['positions'] = str(e)
 
     # 保存交易数据
@@ -160,14 +160,14 @@ def save():
 
             for trade_data in trades:
                 trade_data['trade_date'] = target_date_str
-                logger.info(f"保存交易: {trade_data.get('stock_code')} "
-                            f"{trade_data.get('trade_type')} "
-                            f"qty={trade_data.get('quantity')} "
-                            f"price={trade_data.get('price')} "
-                            f"fee={trade_data.get('fee')}")
+                logger.debug(f"[每日记录.交易] 保存: {trade_data.get('stock_code')} "
+                             f"{trade_data.get('trade_type')} "
+                             f"qty={trade_data.get('quantity')} "
+                             f"price={trade_data.get('price')} "
+                             f"fee={trade_data.get('fee')}")
                 TradeService.save_trade(trade_data)
         except Exception as e:
-            logger.error(f"保存交易数据失败: {e}")
+            logger.error(f"[每日记录.交易] 保存失败: {e}", exc_info=True)
             errors['trades'] = str(e)
 
     # 保存银证转账数据
@@ -179,9 +179,9 @@ def save():
                 amount=float(transfer['amount']),
                 note=transfer.get('note')
             )
-            logger.info(f"保存银证转账: {transfer}")
+            logger.debug(f"[每日记录.银证转账] 保存: {transfer}")
         except Exception as e:
-            logger.error(f"保存银证转账失败: {e}")
+            logger.error(f"[每日记录.银证转账] 保存失败: {e}", exc_info=True)
             errors['transfer'] = str(e)
 
     # 保存账户快照数据（总资产、当日盈亏、手续费）
@@ -193,9 +193,9 @@ def save():
                 daily_profit=account.get('daily_profit'),
                 daily_profit_pct=account.get('daily_profit_pct'),
             )
-            logger.info(f"保存账户快照: {account}")
+            logger.debug(f"[每日记录.账户快照] 保存: {account}")
         except Exception as e:
-            logger.error(f"保存账户快照失败: {e}")
+            logger.error(f"[每日记录.账户快照] 保存失败: {e}", exc_info=True)
             errors['account'] = str(e)
 
     if errors:

@@ -1,5 +1,6 @@
 import os
 import logging
+from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -108,17 +109,19 @@ def setup_logging(app):
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    # app.log - 所有日志
-    file_handler = logging.FileHandler(
+    # app.log - 所有日志（5MB轮转，保留3份）
+    file_handler = RotatingFileHandler(
         os.path.join(log_dir, 'app.log'),
+        maxBytes=5*1024*1024, backupCount=3,
         encoding='utf-8'
     )
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
 
-    # error.log - 仅错误
-    error_handler = logging.FileHandler(
+    # error.log - 仅错误（2MB轮转，保留3份）
+    error_handler = RotatingFileHandler(
         os.path.join(log_dir, 'error.log'),
+        maxBytes=2*1024*1024, backupCount=3,
         encoding='utf-8'
     )
     error_handler.setLevel(logging.ERROR)
@@ -136,8 +139,10 @@ def setup_logging(app):
     root_logger.addHandler(error_handler)
     root_logger.addHandler(console_handler)
 
-    # 抑制 yfinance 关于退市股票的错误日志
+    # 抑制第三方库噪音
     logging.getLogger('yfinance').setLevel(logging.CRITICAL)
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 
 def create_app(config_class=None):

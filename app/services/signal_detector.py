@@ -21,7 +21,7 @@ class SignalDetector:
             dict: {buy_signals: [...], sell_signals: [...]}
         """
         if not ohlc_data or len(ohlc_data) < 5:
-            logger.warning(f'[SignalDetector] 数据不足: {len(ohlc_data) if ohlc_data else 0}条')
+            logger.warning(f'[信号检测] 数据不足: {len(ohlc_data) if ohlc_data else 0}条')
             return {'buy_signals': [], 'sell_signals': []}
 
         all_signals = []
@@ -50,7 +50,7 @@ class SignalDetector:
         buy_signals = [s for s in all_signals if s['type'] == 'buy']
         sell_signals = [s for s in all_signals if s['type'] == 'sell']
 
-        logger.info(f'[SignalDetector] 检测完成: 买点{len(buy_signals)}个, 卖点{len(sell_signals)}个')
+        logger.info(f'[信号检测] 检测完成: 买点{len(buy_signals)}个, 卖点{len(sell_signals)}个')
 
         return {'buy_signals': buy_signals, 'sell_signals': sell_signals}
 

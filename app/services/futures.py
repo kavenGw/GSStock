@@ -308,7 +308,7 @@ class FuturesService:
 
             return code, data_points
         except Exception as e:
-            logger.warning(f"获取 {code} 数据失败: {e}")
+            logger.warning(f"[期货] 获取 {code} 数据失败: {e}")
             return code, None
 
     @staticmethod

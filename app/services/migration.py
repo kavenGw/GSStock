@@ -49,12 +49,12 @@ def check_migration_needed(app):
 
         for table in PRIVATE_TABLES:
             if table in existing_tables:
-                logger.info(f"检测到 stock.db 包含私有表 {table}，需要迁移")
+                logger.info(f"[数据迁移] 检测到 stock.db 包含私有表 {table}，需要迁移")
                 return True
 
         return False
     except Exception as e:
-        logger.error(f"检查迁移状态时出错: {e}")
+        logger.error(f"[数据迁移] 检查迁移状态失败: {e}", exc_info=True)
         return False
 
 
@@ -69,7 +69,7 @@ def backup_database(db_path):
     """
     backup_path = db_path + '.backup'
     shutil.copy2(db_path, backup_path)
-    logger.info(f"已备份数据库: {db_path} -> {backup_path}")
+    logger.info(f"[数据迁移] 已备份: {db_path} -> {backup_path}")
     return backup_path
 
 
@@ -84,7 +84,7 @@ def migrate_to_dual_db(app):
 
     try:
         backup_path = backup_database(stock_db_path)
-        logger.info("开始数据迁移...")
+        logger.info("[数据迁移] 开始迁移...")
 
         os.makedirs(os.path.dirname(private_db_path), exist_ok=True)
 
@@ -104,7 +104,7 @@ def migrate_to_dual_db(app):
             if table not in existing_tables:
                 continue
 
-            logger.info(f"迁移表: {table}")
+            logger.info(f"[数据迁移] 迁移表: {table}")
 
             stock_cursor.execute(f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table}'")
             create_sql = stock_cursor.fetchone()[0]
@@ -124,7 +124,7 @@ def migrate_to_dual_db(app):
                     f"INSERT INTO {table} ({columns_str}) VALUES ({placeholders})",
                     rows
                 )
-                logger.info(f"  迁移了 {len(rows)} 条记录")
+                logger.info(f"[数据迁移] 迁移了 {len(rows)} 条记录")
 
             stock_cursor.execute(f"SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='{table}'")
             for idx_row in stock_cursor.fetchall():
@@ -140,26 +140,26 @@ def migrate_to_dual_db(app):
         for table in PRIVATE_TABLES:
             if table in existing_tables:
                 stock_cursor.execute(f"DROP TABLE IF EXISTS {table}")
-                logger.info(f"从 stock.db 删除表: {table}")
+                logger.info(f"[数据迁移] 从 stock.db 删除表: {table}")
 
         stock_conn.commit()
         stock_conn.close()
 
         cleanup_legacy_tables(stock_db_path)
 
-        logger.info("数据迁移完成")
+        logger.info("[数据迁移] 完成")
         return True
 
     except Exception as e:
-        logger.error(f"迁移过程中发生错误: {e}")
+        logger.error(f"[数据迁移] 迁移失败: {e}", exc_info=True)
 
         if backup_path and os.path.exists(backup_path):
             shutil.copy2(backup_path, stock_db_path)
-            logger.info("已从备份恢复 stock.db")
+            logger.info("[数据迁移] 已从备份恢复 stock.db")
 
         if os.path.exists(private_db_path):
             os.remove(private_db_path)
-            logger.info("已删除不完整的 private.db")
+            logger.info("[数据迁移] 已删除不完整的 private.db")
 
         raise
 
@@ -178,9 +178,9 @@ def cleanup_legacy_tables(stock_db_path):
         for table in LEGACY_TABLES:
             if table in existing_tables:
                 cursor.execute(f"DROP TABLE {table}")
-                logger.info(f"清理遗留表: {table}")
+                logger.info(f"[数据迁移] 清理遗留表: {table}")
 
         conn.commit()
         conn.close()
     except Exception as e:
-        logger.error(f"清理遗留表时出错: {e}")
+        logger.error(f"[数据迁移] 清理遗留表失败: {e}", exc_info=True)

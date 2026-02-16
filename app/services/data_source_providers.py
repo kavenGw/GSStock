@@ -48,7 +48,7 @@ class DataSourceProvider(ABC):
                 if data:
                     result[symbol] = data
             except Exception as e:
-                logger.debug(f"[{self.name}] {symbol} 获取失败: {e}")
+                logger.debug(f"[数据源.{self.name}] {symbol} 获取失败: {e}")
         return result
 
 
@@ -94,7 +94,7 @@ class YFinanceProvider(DataSourceProvider):
                 'source': 'yfinance',
             }
         except Exception as e:
-            logger.debug(f"[yfinance] {symbol} 获取失败: {e}")
+            logger.debug(f"[数据源.yfinance] {symbol} 获取失败: {e}")
             return None
 
     def get_historical_data(self, symbol: str, days: int) -> Optional[dict]:
@@ -135,7 +135,7 @@ class YFinanceProvider(DataSourceProvider):
                 'source': 'yfinance',
             }
         except Exception as e:
-            logger.debug(f"[yfinance] {symbol} 历史数据获取失败: {e}")
+            logger.debug(f"[数据源.yfinance] {symbol} 历史数据获取失败: {e}")
             return None
 
     def get_batch_prices(self, symbols: list) -> dict:
@@ -183,12 +183,12 @@ class TwelveDataProvider(DataSourceProvider):
             data = resp.json()
 
             if data.get('status') == 'error':
-                logger.debug(f"[twelvedata] API错误: {data.get('message', '')}")
+                logger.debug(f"[数据源.twelvedata] API错误: {data.get('message', '')}")
                 return None
 
             return data
         except Exception as e:
-            logger.debug(f"[twelvedata] 请求失败: {e}")
+            logger.debug(f"[数据源.twelvedata] 请求失败: {e}")
             return None
 
     def get_realtime_price(self, symbol: str) -> Optional[dict]:
@@ -217,7 +217,7 @@ class TwelveDataProvider(DataSourceProvider):
                 'source': 'twelvedata',
             }
         except Exception as e:
-            logger.debug(f"[twelvedata] {symbol} 解析失败: {e}")
+            logger.debug(f"[数据源.twelvedata] {symbol} 解析失败: {e}")
             return None
 
     def get_historical_data(self, symbol: str, days: int) -> Optional[dict]:
@@ -286,7 +286,7 @@ class PolygonProvider(DataSourceProvider):
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
-            logger.debug(f"[polygon] 请求失败: {e}")
+            logger.debug(f"[数据源.polygon] 请求失败: {e}")
             return None
 
     def get_realtime_price(self, symbol: str) -> Optional[dict]:
@@ -314,7 +314,7 @@ class PolygonProvider(DataSourceProvider):
                 'source': 'polygon',
             }
         except Exception as e:
-            logger.debug(f"[polygon] {symbol} 解析失败: {e}")
+            logger.debug(f"[数据源.polygon] {symbol} 解析失败: {e}")
             return None
 
     def get_historical_data(self, symbol: str, days: int) -> Optional[dict]:

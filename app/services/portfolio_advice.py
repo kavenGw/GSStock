@@ -608,7 +608,7 @@ class PortfolioAdviceBatchService:
                     logger.warning(f"[持仓建议] {code} 数据不足")
             except Exception as e:
                 result['failed'].append(code)
-                logger.error(f"[持仓建议] {code} 计算失败: {e}")
+                logger.error(f"[持仓建议] {code} 计算失败: {e}", exc_info=True)
 
         logger.info(f"[持仓建议] 完成: 成功{len(result['data'])}只, 失败{len(result['failed'])}只")
         return result

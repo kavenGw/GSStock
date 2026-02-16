@@ -28,7 +28,7 @@ def start_background_preload(app):
 
     t = threading.Thread(target=_run, daemon=True, name='heavy-metals-preload')
     t.start()
-    logger.info('[预加载] 走势看板后台预加载线程已启动')
+    logger.info('[走势预加载] 走势看板后台预加载线程已启动')
 
 
 def _do_preload():
@@ -36,18 +36,18 @@ def _do_preload():
     from app.services.futures import FuturesService
 
     categories = [k for k in CATEGORY_NAMES if k not in SKIP_CATEGORIES]
-    logger.info(f'[预加载] 开始预加载走势数据: {len(categories)} 个分类')
+    logger.info(f'[走势预加载] 开始预加载走势数据: {len(categories)} 个分类')
 
     for category in categories:
         try:
             FuturesService.get_category_trend_data(category, 30, False)
-            logger.debug(f'[预加载] {category} 完成')
+            logger.debug(f'[走势预加载] {category} 完成')
         except Exception as e:
             from app import db
             db.session.rollback()
-            logger.warning(f'[预加载] {category} 失败: {e}')
+            logger.warning(f'[走势预加载] {category} 失败: {e}')
 
-    logger.info('[预加载] 走势看板数据预加载完成')
+    logger.info('[走势预加载] 走势看板数据预加载完成')
 
 
 def _schedule_refresh(app):
@@ -62,4 +62,4 @@ def _schedule_refresh(app):
                 with app.app_context():
                     _do_preload()
             except Exception as e:
-                logger.warning(f'[预加载] 定时刷新失败: {e}')
+                logger.warning(f'[走势预加载] 定时刷新失败: {e}')

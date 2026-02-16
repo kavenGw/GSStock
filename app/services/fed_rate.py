@@ -156,7 +156,7 @@ class FedRateService:
                 cls._cache_time = now
                 return result
         except Exception as e:
-            logger.error(f"获取美联储利率概率失败: {e}")
+            logger.error(f"[美联储利率] 获取利率概率失败: {e}", exc_info=True)
 
         # 如果获取失败，返回缓存或模拟数据
         if cls._cache:
@@ -176,17 +176,17 @@ class FedRateService:
             response = requests.get(cls.CME_API_URL, headers=headers, timeout=10)
 
             if response.status_code != 200:
-                logger.warning(f"CME API 返回状态码: {response.status_code}")
+                logger.warning(f"[美联储利率] CME API 返回状态码: {response.status_code}")
                 return None
 
             data = response.json()
             return cls._parse_cme_data(data)
 
         except requests.RequestException as e:
-            logger.warning(f"请求 CME API 失败: {e}")
+            logger.warning(f"[美联储利率] 请求 CME API 失败: {e}")
             return None
         except Exception as e:
-            logger.warning(f"解析 CME 数据失败: {e}")
+            logger.warning(f"[美联储利率] 解析 CME 数据失败: {e}")
             return None
 
     @classmethod
@@ -238,7 +238,7 @@ class FedRateService:
                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
         except Exception as e:
-            logger.error(f"解析 CME 数据异常: {e}")
+            logger.error(f"[美联储利率] 解析 CME 数据异常: {e}", exc_info=True)
             return None
 
     @classmethod

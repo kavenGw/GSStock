@@ -61,7 +61,7 @@ class OcrResultParser:
             elif hasattr(result, 'data'):
                 result = result.data
             else:
-                logger.warning(f"未知的 OCR 结果类型: {type(result)}")
+                logger.warning(f"[OCR] 未知的 OCR 结果类型: {type(result)}")
                 return []
 
         if not result:
@@ -75,7 +75,7 @@ class OcrResultParser:
                 if parsed:
                     normalized.append(parsed)
             except Exception as e:
-                logger.warning(f"解析 OCR 结果项失败: {e}, item={item}")
+                logger.warning(f"[OCR] 解析 OCR 结果项失败: {e}, item={item}")
                 continue
 
         return normalized
@@ -132,7 +132,7 @@ class ImagePreprocessor:
             new_width = int(width * scale)
             new_height = int(height * scale)
 
-            logger.info(f"图片缩放: {width}x{height} -> {new_width}x{new_height}")
+            logger.debug(f"[OCR] 图片缩放: {width}x{height} -> {new_width}x{new_height}")
 
             resized = img.resize((new_width, new_height), Image.LANCZOS)
 
@@ -173,7 +173,7 @@ class OcrBackend:
             if 'DmlExecutionProvider' in providers:
                 return 'directml'
         except Exception as e:
-            logger.warning(f"GPU 检测失败: {e}")
+            logger.warning(f"[OCR] GPU 检测失败: {e}")
 
         return 'cpu'
 
@@ -190,7 +190,7 @@ class OcrBackend:
 
         # 记录版本信息
         version = get_rapidocr_version()
-        logger.info(f"OCR 后端: {backend.upper()}, rapidocr-onnxruntime 版本: {version}")
+        logger.info(f"[OCR] OCR 后端: {backend.upper()}, rapidocr-onnxruntime 版本: {version}")
 
         # 根据后端配置 providers
         if backend == 'cuda':
@@ -345,13 +345,13 @@ class OcrLogger:
 
 def preload_model():
     """应用启动时预加载 OCR 模型"""
-    logger.info("预加载 OCR 模型...")
+    logger.info("[OCR] 预加载 OCR 模型...")
     try:
         OcrBackend.get_ocr_instance()
         backend = OcrBackend.get_backend_type()
-        logger.info(f"OCR 模型加载完成，后端: {backend.upper()}")
+        logger.info(f"[OCR] OCR 模型加载完成，后端: {backend.upper()}")
     except Exception as e:
-        logger.warning(f"OCR 模型预加载失败: {e}")
+        logger.warning(f"[OCR] OCR 模型预加载失败: {e}")
 
 
 class OcrService:
@@ -368,7 +368,7 @@ class OcrService:
             }
         }
         """
-        logger.info(f"开始OCR识别: {image_path}")
+        logger.info(f"[OCR] 开始OCR识别: {image_path}")
 
         ocr_logger = None
         temp_path = None
@@ -376,7 +376,7 @@ class OcrService:
         try:
             ocr_logger = OcrLogger(image_path)
         except Exception as e:
-            logger.warning(f"创建OCR日志失败: {e}")
+            logger.warning(f"[OCR] 创建OCR日志失败: {e}")
 
         try:
             # 预处理图片
@@ -394,7 +394,7 @@ class OcrService:
                 ocr_logger.log_raw_result(result)
 
             if not result:
-                logger.info("OCR识别完成，未识别到数据")
+                logger.info("[OCR] 识别完成，未识别到数据")
                 if ocr_logger:
                     ocr_logger.log_final_result([])
                     ocr_logger.close()
@@ -429,11 +429,11 @@ class OcrService:
                 ocr_logger.log_final_result(positions)
                 ocr_logger.close()
 
-            logger.info(f"OCR识别完成，识别到{len(positions)}条记录，账户数据: {account_data}")
+            logger.info(f"[OCR] 识别完成，识别到{len(positions)}条记录，账户数据: {account_data}")
             return {'positions': positions, 'account': account_data}
 
         except Exception as e:
-            logger.error(f"OCR识别异常: {e}")
+            logger.error(f"[OCR] 识别异常: {e}", exc_info=True)
             if ocr_logger:
                 ocr_logger.log_error(e)
                 ocr_logger.close()
@@ -662,7 +662,7 @@ class OcrService:
     @staticmethod
     def recognize_trade(image_path: str) -> list[dict]:
         """识别交易截图，返回交易数据列表"""
-        logger.info(f"开始OCR识别交易截图: {image_path}")
+        logger.info(f"[OCR.交易] 开始识别交易截图: {image_path}")
 
         ocr_logger = None
         temp_path = None
@@ -670,7 +670,7 @@ class OcrService:
         try:
             ocr_logger = OcrLogger(image_path)
         except Exception as e:
-            logger.warning(f"创建OCR日志失败: {e}")
+            logger.warning(f"[OCR.交易] 创建OCR日志失败: {e}")
 
         try:
             # 预处理图片
@@ -688,7 +688,7 @@ class OcrService:
                 ocr_logger.log_raw_result(result)
 
             if not result:
-                logger.info("OCR识别完成，未识别到交易数据")
+                logger.info("[OCR.交易] 识别完成，未识别到交易数据")
                 if ocr_logger:
                     ocr_logger.log_final_result([])
                     ocr_logger.close()
@@ -718,11 +718,11 @@ class OcrService:
                 ocr_logger.log_final_result(results)
                 ocr_logger.close()
 
-            logger.info(f"交易截图识别完成，识别到{len(results)}条记录")
+            logger.info(f"[OCR.交易] 识别完成，识别到{len(results)}条记录")
             return results
 
         except Exception as e:
-            logger.error(f"交易截图OCR识别异常: {e}")
+            logger.error(f"[OCR.交易] 识别异常: {e}", exc_info=True)
             if ocr_logger:
                 ocr_logger.log_error(e)
                 ocr_logger.close()

@@ -15,7 +15,7 @@ class TradeService:
     @staticmethod
     def save_trade(data: dict) -> Trade:
         """保存单条交易记录"""
-        logger.info(f"保存交易记录: {data.get('stock_code')} {data.get('trade_type')}")
+        logger.debug(f"[交易] 保存交易记录: {data.get('stock_code')} {data.get('trade_type')}")
         trade = Trade(
             trade_date=date.fromisoformat(data['trade_date']) if isinstance(data['trade_date'], str) else data['trade_date'],
             trade_time=data.get('trade_time'),
@@ -29,7 +29,7 @@ class TradeService:
         )
         db.session.add(trade)
         db.session.commit()
-        logger.info(f"交易记录保存成功: id={trade.id}")
+        logger.debug(f"[交易] 交易记录保存成功: id={trade.id}")
         return trade
 
     @staticmethod
@@ -55,14 +55,14 @@ class TradeService:
             return False
 
         stock_code = trade.stock_code
-        logger.info(f"删除交易记录: id={trade_id}, stock={stock_code}")
+        logger.debug(f"[交易] 删除交易记录: id={trade_id}, stock={stock_code}")
 
         db.session.delete(trade)
 
         # 删除该股票的结算记录
         settlement = Settlement.query.filter_by(stock_code=stock_code).first()
         if settlement:
-            logger.info(f"同步删除结算记录: stock={stock_code}")
+            logger.debug(f"[交易] 同步删除结算记录: stock={stock_code}")
             db.session.delete(settlement)
 
         db.session.commit()
@@ -75,7 +75,7 @@ class TradeService:
         if not trade:
             return None
 
-        logger.info(f"更新交易记录: id={trade_id}")
+        logger.debug(f"[交易] 更新交易记录: id={trade_id}")
         stock_code = trade.stock_code
 
         if 'trade_date' in data:
@@ -94,7 +94,7 @@ class TradeService:
         # 删除该股票的结算记录
         settlement = Settlement.query.filter_by(stock_code=stock_code).first()
         if settlement:
-            logger.info(f"因交易更新删除结算记录: stock={stock_code}")
+            logger.debug(f"[交易] 因交易更新删除结算记录: stock={stock_code}")
             db.session.delete(settlement)
 
         db.session.commit()
@@ -128,7 +128,7 @@ class TradeService:
         """结算股票"""
         check = TradeService.check_settlement(stock_code)
         if not check['can_settle']:
-            logger.warning(f"结算失败: {stock_code} - {check['reason']}")
+            logger.warning(f"[交易.结算] 结算失败: {stock_code} - {check['reason']}")
             return None
 
         trades = Trade.query.filter_by(stock_code=stock_code).all()
@@ -166,7 +166,7 @@ class TradeService:
         db.session.add(settlement)
         db.session.commit()
 
-        logger.info(f"结算成功: {stock_code}, 盈亏={profit:.2f}")
+        logger.info(f"[交易.结算] 结算成功: {stock_code}, 盈亏={profit:.2f}")
         return settlement
 
     @staticmethod
@@ -356,7 +356,7 @@ class TradeService:
                 stock_trend = trend_result['stocks'][0]
                 ohlc_data = stock_trend.get('data', [])
         except Exception as e:
-            logger.warning(f"获取K线数据失败: {stock_code}, {e}")
+            logger.warning(f"[交易] 获取K线数据失败: {stock_code}, {e}")
 
         return {
             'stock_code': stock_code,

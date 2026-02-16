@@ -33,7 +33,7 @@ class NotificationService:
     def send_slack(message: str) -> bool:
         """推送到 Slack（Incoming Webhook）"""
         if not SLACK_ENABLED:
-            logger.warning('[Notification] Slack 未配置')
+            logger.warning('[通知.Slack] Slack 未配置')
             return False
 
         try:
@@ -42,14 +42,14 @@ class NotificationService:
             with urlopen(req, timeout=10) as resp:
                 return resp.status == 200
         except Exception as e:
-            logger.error(f'[Notification] Slack 推送失败: {e}')
+            logger.error(f'[通知.Slack] 推送失败: {e}', exc_info=True)
             return False
 
     @staticmethod
     def send_email(subject: str, html_body: str) -> bool:
         """推送邮件（SMTP/SSL）"""
         if not EMAIL_ENABLED:
-            logger.warning('[Notification] 邮件未配置')
+            logger.warning('[通知.邮件] 邮件未配置')
             return False
 
         try:
@@ -65,7 +65,7 @@ class NotificationService:
                 server.sendmail(SMTP_USER, NOTIFY_EMAIL_TO, msg.as_string())
             return True
         except Exception as e:
-            logger.error(f'[Notification] 邮件推送失败: {e}')
+            logger.error(f'[通知.邮件] 推送失败: {e}', exc_info=True)
             return False
 
     @staticmethod
@@ -269,7 +269,7 @@ class NotificationService:
                             text_parts.append(ai_report['text'])
                             html_parts.append(ai_report['html'])
             except Exception as e:
-                logger.warning(f'[Notification] AI分析报告生成失败: {e}')
+                logger.warning(f'[通知.AI报告] 生成失败: {e}')
 
         full_text = '\n---\n'.join(text_parts)
         full_html = '<hr>'.join(html_parts)

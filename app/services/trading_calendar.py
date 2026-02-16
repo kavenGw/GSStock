@@ -51,12 +51,12 @@ class TradingCalendarService:
         if market not in cls._calendars:
             calendar_name = cls.MARKET_CALENDARS.get(market)
             if not calendar_name:
-                logger.warning(f"未知市场 {market}，使用纽约交易所日历")
+                logger.warning(f"[交易日历] 未知市场 {market}，使用纽约交易所日历")
                 calendar_name = 'XNYS'
             try:
                 cls._calendars[market] = xcals.get_calendar(calendar_name)
             except Exception as e:
-                logger.error(f"获取日历 {calendar_name} 失败: {e}")
+                logger.error(f"[交易日历] 获取日历 {calendar_name} 失败: {e}", exc_info=True)
                 cls._calendars[market] = xcals.get_calendar('XNYS')
         return cls._calendars[market]
 
@@ -91,7 +91,7 @@ class TradingCalendarService:
             return calendar.is_session(dt)
         except Exception as e:
             # 如果日期超出日历范围，使用简单判断
-            logger.debug(f"日历查询失败 {market} {dt}: {e}")
+            logger.debug(f"[交易日历] 查询失败 {market} {dt}: {e}")
             return dt.weekday() < 5  # 周一到周五
 
     @classmethod
@@ -130,7 +130,7 @@ class TradingCalendarService:
             prev_session = calendar.previous_session(before)
             return prev_session.date() if hasattr(prev_session, 'date') else prev_session
         except Exception as e:
-            logger.debug(f"获取前一交易日失败 {market} {before}: {e}")
+            logger.debug(f"[交易日历] 获取前一交易日失败 {market} {before}: {e}")
             # 回退方案：简单往前找
             check_date = before - timedelta(days=1)
             for _ in range(10):
@@ -158,7 +158,7 @@ class TradingCalendarService:
             next_session = calendar.next_session(after)
             return next_session.date() if hasattr(next_session, 'date') else next_session
         except Exception as e:
-            logger.debug(f"获取下一交易日失败 {market} {after}: {e}")
+            logger.debug(f"[交易日历] 获取下一交易日失败 {market} {after}: {e}")
             check_date = after + timedelta(days=1)
             for _ in range(10):
                 if check_date.weekday() < 5:
@@ -301,7 +301,7 @@ class TradingCalendarService:
             sessions = calendar.sessions_in_range(start, end)
             return [s.date() if hasattr(s, 'date') else s for s in sessions]
         except Exception as e:
-            logger.debug(f"获取交易日范围失败 {market} {start}-{end}: {e}")
+            logger.debug(f"[交易日历] 获取交易日范围失败 {market} {start}-{end}: {e}")
             # 回退方案
             result = []
             current = start

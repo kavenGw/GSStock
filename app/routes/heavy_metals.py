@@ -101,7 +101,7 @@ def category_data():
     days = int(request.args.get('days', 30))
     force = request.args.get('force', '0') == '1'
 
-    logger.info(f'[category-data] 请求分类={category}, 天数={days}')
+    logger.info(f'[走势看板.分类数据] 请求分类={category}, 天数={days}')
 
     if category not in CATEGORY_NAMES:
         return jsonify({'error': 'Invalid category'}), 400
@@ -112,7 +112,7 @@ def category_data():
     if not data or not data.get('stocks'):
         return jsonify(data or {'stocks': [], 'date_range': {}})
 
-    logger.info(f'[category-data] 获取到 {len(data["stocks"])} 只股票数据')
+    logger.info(f'[走势看板.分类数据] 获取到 {len(data["stocks"])} 只股票数据')
 
     stock_codes = [s['stock_code'] for s in data['stocks']]
     stock_name_map = {s['stock_code']: s['stock_name'] for s in data['stocks']}
@@ -126,9 +126,9 @@ def category_data():
                 year_data = FuturesService.get_category_trend_data(category, 365, False)
                 if year_data and year_data.get('stocks'):
                     SignalCacheService.update_signals_from_trend_data(year_data, stock_name_map)
-                    logger.info(f'[category-data] 后台信号缓存更新完成: {category}')
+                    logger.info(f'[走势看板.分类数据] 后台信号缓存更新完成: {category}')
         except Exception as e:
-            logger.error(f'[category-data] 后台信号更新失败: {e}')
+            logger.error(f'[走势看板.分类数据] 后台信号更新失败: {e}', exc_info=True)
 
     threading.Thread(target=_update_signals_background, daemon=True).start()
 
@@ -164,7 +164,7 @@ def category_data():
             stocks_with_advice = Stock.query.filter(Stock.stock_code.in_(codes)).all()
             advice_map = {s.stock_code: s.investment_advice for s in stocks_with_advice if s.investment_advice}
         except Exception as e:
-            logger.warning(f"获取投资建议失败: {e}")
+            logger.warning(f"[走势看板.建议] 获取失败: {e}")
 
         try:
             from app.models.wyckoff import WyckoffAutoResult
@@ -214,7 +214,7 @@ def category_data():
                 stock['valuation'] = valuation_map.get(code)
                 stock['investment_advice'] = advice_map.get(code)
         except Exception as e:
-            logger.error(f"威科夫评分失败: {e}")
+            logger.error(f"[走势看板.威科夫] 评分失败: {e}", exc_info=True)
             for stock in advice['stocks']:
                 stock['wyckoff_score'] = None
                 stock['score_details'] = None
@@ -245,7 +245,7 @@ def category_data():
         stock_codes, stock_name_map, start_date, end_date
     )
     data['signals'] = all_signals
-    logger.info(f'[category-data] 完成: 技术指标={len(technical_result)}, 建议={len(advice_result.get("stocks", []))}')
+    logger.info(f'[走势看板.分类数据] 完成: 技术指标={len(technical_result)}, 建议={len(advice_result.get("stocks", []))}')
 
     return jsonify(data)
 
@@ -266,7 +266,7 @@ def category_trend_data():
     days = int(request.args.get('days', 30))
     force = request.args.get('force', '0') == '1'
 
-    logger.info(f'[category-trend-data] 请求分类={category}, 天数={days}')
+    logger.info(f'[走势看板.走势数据] 请求分类={category}, 天数={days}')
 
     # 验证分类
     if category not in CATEGORY_NAMES:
@@ -277,7 +277,7 @@ def category_trend_data():
 
     # 信号检测：始终使用年数据计算并缓存
     if data and data.get('stocks'):
-        logger.info(f'[category-trend-data] 获取到 {len(data["stocks"])} 只股票数据')
+        logger.info(f'[走势看板.走势数据] 获取到 {len(data["stocks"])} 只股票数据')
 
         # 获取股票代码和名称映射
         stock_codes = [s['stock_code'] for s in data['stocks']]
@@ -298,7 +298,7 @@ def category_trend_data():
         )
 
         data['signals'] = all_signals
-        logger.info(f'[信号检测] 总计: 买点={len(all_signals["buy_signals"])}, 卖点={len(all_signals["sell_signals"])}')
+        logger.info(f'[走势看板.信号检测] 总计: 买点={len(all_signals["buy_signals"])}, 卖点={len(all_signals["sell_signals"])}')
 
     # 附加技术指标数据
     if data and data.get('stocks'):
@@ -366,7 +366,7 @@ def trading_advice():
         stocks_with_advice = Stock.query.filter(Stock.stock_code.in_(stock_codes)).all()
         advice_map = {s.stock_code: s.investment_advice for s in stocks_with_advice if s.investment_advice}
     except Exception as e:
-        logger.warning(f"获取投资建议失败: {e}")
+        logger.warning(f"[走势看板.建议] 获取失败: {e}")
 
     try:
         from app.models.wyckoff import WyckoffAutoResult
@@ -416,7 +416,7 @@ def trading_advice():
             stock['valuation'] = valuation_map.get(code)
             stock['investment_advice'] = advice_map.get(code)
     except Exception as e:
-        logger.error(f"计算威科夫评分失败: {e}")
+        logger.error(f"[走势看板.威科夫] 计算失败: {e}", exc_info=True)
         for stock in advice['stocks']:
             stock['wyckoff_score'] = None
             stock['score_details'] = None

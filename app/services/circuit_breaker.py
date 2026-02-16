@@ -63,7 +63,7 @@ class CircuitBreaker:
                 # 检查是否冷却结束
                 if p['open_time'] and datetime.now() - p['open_time'] >= timedelta(seconds=self.COOLDOWN_SECONDS):
                     p['state'] = CircuitState.HALF_OPEN
-                    logger.info(f"{platform} 冷却结束，进入试探状态")
+                    logger.info(f"[熔断器] {platform} 冷却结束，进入试探状态")
                     return True
                 return False
 
@@ -84,7 +84,7 @@ class CircuitBreaker:
             p['open_time'] = None
 
             if was_half_open:
-                logger.info(f"{platform} 恢复正常")
+                logger.info(f"[熔断器] {platform} 恢复正常")
 
     def record_failure(self, platform: str) -> bool:
         """记录失败，返回是否触发熔断"""
@@ -97,14 +97,14 @@ class CircuitBreaker:
             if p['state'] == CircuitState.HALF_OPEN:
                 p['state'] = CircuitState.OPEN
                 p['open_time'] = datetime.now()
-                logger.warning(f"{platform} 试探失败，重新熔断，冷却{self.COOLDOWN_SECONDS // 60}分钟")
+                logger.warning(f"[熔断器] {platform} 试探失败，重新熔断，冷却{self.COOLDOWN_SECONDS // 60}分钟")
                 return True
 
             # CLOSED 状态下连续失败达到阈值
             if p['failure_count'] >= self.FAILURE_THRESHOLD:
                 p['state'] = CircuitState.OPEN
                 p['open_time'] = datetime.now()
-                logger.warning(f"{platform} 连续失败{p['failure_count']}次，熔断，冷却{self.COOLDOWN_SECONDS // 60}分钟")
+                logger.warning(f"[熔断器] {platform} 连续失败{p['failure_count']}次，熔断，冷却{self.COOLDOWN_SECONDS // 60}分钟")
                 return True
 
             return False
@@ -132,10 +132,10 @@ class CircuitBreaker:
                         'last_failure_time': None,
                         'open_time': None,
                     }
-                    logger.info(f"{platform} 状态已重置")
+                    logger.info(f"[熔断器] {platform} 状态已重置")
             else:
                 self._platforms.clear()
-                logger.info("所有平台状态已重置")
+                logger.info("[熔断器] 所有平台状态已重置")
 
 
 # 单例实例

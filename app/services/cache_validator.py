@@ -83,7 +83,7 @@ class CacheValidator:
             需要刷新的股票代码列表
         """
         if force:
-            logger.debug(f"强制刷新 {len(stock_codes)} 只股票")
+            logger.debug(f"[缓存验证] 强制刷新 {len(stock_codes)} 只股票")
             return list(stock_codes)
 
         if cache_date is None:
@@ -103,7 +103,7 @@ class CacheValidator:
             if last_fetch is None or (now - last_fetch) >= ttl:
                 need_refresh.append(code)
 
-        logger.debug(f"缓存检查: 共 {len(stock_codes)} 只, 需刷新 {len(need_refresh)} 只")
+        logger.debug(f"[缓存验证] 共 {len(stock_codes)} 只, 需刷新 {len(need_refresh)} 只")
         return need_refresh
 
     @staticmethod

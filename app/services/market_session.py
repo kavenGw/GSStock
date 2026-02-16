@@ -193,7 +193,7 @@ class SmartCacheStrategy:
         should_fetch, reason = TradingCalendarService.should_fetch_data(market)
         if not should_fetch:
             if last_fetch_time is not None:
-                logger.debug(f"{stock_code} 不需要刷新: {reason}")
+                logger.debug(f"[市场时段] {stock_code} 不需要刷新: {reason}")
                 return False
 
         # 没有缓存，需要刷新

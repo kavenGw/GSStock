@@ -89,7 +89,7 @@ class AIAnalyzerService:
                 result = AIAnalyzerService.analyze_stock(code, name)
                 results.append(result)
             except Exception as e:
-                logger.error(f"AI分析 {code} 失败: {e}")
+                logger.error(f"[AI分析] {code} 失败: {e}", exc_info=True)
                 results.append({
                     'stock_code': code,
                     'stock_name': name,
@@ -198,7 +198,7 @@ class AIAnalyzerService:
                 pass
 
         except Exception as e:
-            logger.error(f"收集 {stock_code} 数据失败: {e}", exc_info=True)
+            logger.error(f"[AI分析] 收集 {stock_code} 数据失败: {e}", exc_info=True)
 
         return data if data.get('price') or data.get('indicators') else None
 
@@ -330,13 +330,13 @@ class AIAnalyzerService:
         except httpx.TimeoutException:
             return {'error': 'AI分析超时，请稍后重试'}
         except httpx.HTTPStatusError as e:
-            logger.error(f"AI API 错误: {e.response.status_code} {e.response.text}")
+            logger.error(f"[AI分析] API 错误: {e.response.status_code} {e.response.text}", exc_info=True)
             return {'error': f'AI API 错误: {e.response.status_code}'}
         except json.JSONDecodeError:
-            logger.error(f"AI返回非JSON格式: {content[:200] if 'content' in dir() else 'N/A'}")
+            logger.error(f"[AI分析] 返回非JSON格式: {content[:200] if 'content' in dir() else 'N/A'}", exc_info=True)
             return {'error': 'AI返回格式错误'}
         except Exception as e:
-            logger.error(f"AI分析失败: {e}", exc_info=True)
+            logger.error(f"[AI分析] 分析失败: {e}", exc_info=True)
             return {'error': f'AI分析失败: {str(e)}'}
 
     @staticmethod
@@ -358,4 +358,4 @@ class AIAnalyzerService:
                 date.today(), is_complete=True
             )
         except Exception as e:
-            logger.warning(f"缓存AI分析结果失败: {e}")
+            logger.warning(f"[AI分析] 缓存结果失败: {e}")

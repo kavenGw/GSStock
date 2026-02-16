@@ -101,7 +101,7 @@ class SignalCacheService:
             {'buy_signals': [...], 'sell_signals': [...]}
         """
         if not ohlc_data or len(ohlc_data) < 5:
-            logger.debug(f'[SignalCache] {stock_code} 数据不足: {len(ohlc_data) if ohlc_data else 0}条')
+            logger.debug(f'[信号缓存] {stock_code} 数据不足: {len(ohlc_data) if ohlc_data else 0}条')
             return {'buy_signals': [], 'sell_signals': []}
 
         # 检测信号
@@ -115,7 +115,7 @@ class SignalCacheService:
             try:
                 sig_date = datetime.strptime(sig['date'], '%Y-%m-%d').date() if sig.get('date') else None
             except ValueError:
-                logger.warning(f'[SignalCache] {stock_code} 买点日期格式错误: {sig.get("date")}')
+                logger.warning(f'[信号缓存] {stock_code} 买点日期格式错误: {sig.get("date")}')
                 continue
             if sig_date:
                 cache = SignalCache(
@@ -132,7 +132,7 @@ class SignalCacheService:
             try:
                 sig_date = datetime.strptime(sig['date'], '%Y-%m-%d').date() if sig.get('date') else None
             except ValueError:
-                logger.warning(f'[SignalCache] {stock_code} 卖点日期格式错误: {sig.get("date")}')
+                logger.warning(f'[信号缓存] {stock_code} 卖点日期格式错误: {sig.get("date")}')
                 continue
             if sig_date:
                 cache = SignalCache(
@@ -147,7 +147,7 @@ class SignalCacheService:
 
         db.session.commit()
 
-        logger.info(f'[SignalCache] {stock_code} 更新完成: 买点{len(signals["buy_signals"])}个, 卖点{len(signals["sell_signals"])}个')
+        logger.info(f'[信号缓存] {stock_code} 更新完成: 买点{len(signals["buy_signals"])}个, 卖点{len(signals["sell_signals"])}个')
         return signals
 
     @staticmethod
