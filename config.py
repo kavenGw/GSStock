@@ -40,6 +40,15 @@ class Config:
     }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # CockroachDB/PostgreSQL 连接池配置（防止空闲连接被关闭后报 SSL SYSCALL error）
+    if is_cockroach_configured():
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_pre_ping': True,      # 每次使用前检测连接是否存活
+            'pool_recycle': 300,         # 5分钟回收连接，避免长时间空闲
+            'pool_size': 5,
+            'pool_timeout': 10,
+        }
+
     # CockroachDB 配置
     COCKROACH_CONFIGURED = is_cockroach_configured()
     LOCAL_STOCK_DB_PATH = get_local_stock_db_path()
