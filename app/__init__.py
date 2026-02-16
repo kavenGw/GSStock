@@ -172,14 +172,15 @@ def create_app(config_class=None):
     from app.utils.db_retry import setup_db_retry
     setup_db_retry(db, app)
 
-    from app.services.migration import check_migration_needed, migrate_to_dual_db, cleanup_legacy_tables, get_db_paths
-    if check_migration_needed(app):
-        logging.info("检测到需要数据迁移，开始执行...")
-        migrate_to_dual_db(app)
-        logging.info("数据迁移完成")
-    else:
-        stock_db_path, _ = get_db_paths(app)
-        cleanup_legacy_tables(stock_db_path)
+    if db_uri.startswith('sqlite:///'):
+        from app.services.migration import check_migration_needed, migrate_to_dual_db, cleanup_legacy_tables, get_db_paths
+        if check_migration_needed(app):
+            logging.info("检测到需要数据迁移，开始执行...")
+            migrate_to_dual_db(app)
+            logging.info("数据迁移完成")
+        else:
+            stock_db_path, _ = get_db_paths(app)
+            cleanup_legacy_tables(stock_db_path)
 
     from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, preload_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
     app.register_blueprint(main_bp)
