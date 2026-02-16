@@ -8,7 +8,7 @@ class PositionPlan(db.Model):
     __tablename__ = 'position_plans'
 
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String(6), nullable=False, index=True)
+    stock_code = db.Column(db.String(20), nullable=False, index=True)
     stock_name = db.Column(db.String(20), nullable=True)
     target_value = db.Column(db.Float, nullable=False)
     current_value = db.Column(db.Float, nullable=False, default=0)

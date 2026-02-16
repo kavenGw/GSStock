@@ -13,7 +13,7 @@ class Trade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     trade_date = db.Column(db.Date, nullable=False)
     trade_time = db.Column(db.Time, nullable=True)
-    stock_code = db.Column(db.String(6), nullable=False)
+    stock_code = db.Column(db.String(20), nullable=False)
     stock_name = db.Column(db.String(50), nullable=False)
     trade_type = db.Column(db.String(4), nullable=False)  # 'buy' 或 'sell'
     quantity = db.Column(db.Integer, nullable=False)

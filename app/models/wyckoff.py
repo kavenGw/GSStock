@@ -83,7 +83,7 @@ class WyckoffAnalysis(db.Model):
     __tablename__ = 'wyckoff_analysis'
 
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String(6), nullable=False, index=True)
+    stock_code = db.Column(db.String(20), nullable=False, index=True)
     analysis_date = db.Column(db.Date, nullable=False)
     phase = db.Column(db.String(20), nullable=False)  # accumulation/markup/distribution/markdown
     event = db.Column(db.String(20), nullable=True)  # spring/shakeout/breakout/utad

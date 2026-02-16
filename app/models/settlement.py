@@ -7,7 +7,7 @@ class Settlement(db.Model):
     __tablename__ = 'settlements'
 
     id = db.Column(db.Integer, primary_key=True)
-    stock_code = db.Column(db.String(6), nullable=False, unique=True)
+    stock_code = db.Column(db.String(20), nullable=False, unique=True)
     stock_name = db.Column(db.String(50), nullable=False)
     total_buy_amount = db.Column(db.Float, nullable=False)
     total_sell_amount = db.Column(db.Float, nullable=False)

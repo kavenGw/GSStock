@@ -12,7 +12,7 @@ class Advice(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
-    stock_code = db.Column(db.String(6), nullable=False)
+    stock_code = db.Column(db.String(20), nullable=False)
     support_price = db.Column(db.Float, nullable=True)
     resistance_price = db.Column(db.Float, nullable=True)
     strategy = db.Column(db.String(500), nullable=True)

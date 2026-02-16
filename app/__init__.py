@@ -206,9 +206,17 @@ def create_app(config_class=None):
         # CockroachDB 需要 ALTER 已有列宽度（db.create_all 不会修改已有列）
         if app.config.get('COCKROACH_CONFIGURED'):
             from sqlalchemy import text
+            alter_stmts = [
+                'ALTER TABLE stock_categories ALTER COLUMN stock_code TYPE VARCHAR(20)',
+                'ALTER TABLE wyckoff_auto_result ALTER COLUMN stock_code TYPE VARCHAR(20)',
+            ]
             try:
                 with db.engine.connect() as conn:
-                    conn.execute(text('ALTER TABLE stock_categories ALTER COLUMN stock_code TYPE VARCHAR(20)'))
+                    for stmt in alter_stmts:
+                        try:
+                            conn.execute(text(stmt))
+                        except Exception:
+                            pass
                     conn.commit()
             except Exception:
                 pass

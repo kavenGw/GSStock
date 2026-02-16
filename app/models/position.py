@@ -12,7 +12,7 @@ class Position(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
-    stock_code = db.Column(db.String(6), nullable=False)
+    stock_code = db.Column(db.String(20), nullable=False)
     stock_name = db.Column(db.String(50), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)  # 总金额
