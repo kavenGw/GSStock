@@ -1,4 +1,3 @@
-import re
 import logging
 from datetime import datetime, date, time, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -9,7 +8,6 @@ from app.models.index_trend_cache import IndexTrendCache
 from app.models.metal_trend_cache import MetalTrendCache
 from app.models.category import StockCategory
 from app.models.stock import Stock
-from app.services.position import PositionService
 from app.services.wyckoff import WyckoffAutoService
 
 logger = logging.getLogger(__name__)
@@ -113,29 +111,20 @@ class PreloadService:
 
     @staticmethod
     def start_preload(target_date: date) -> dict:
-        """启动预加载流程
+        """启动预加载流程 — 批量预热缓存 + 并发分析"""
+        from flask import current_app
+        from app.services.unified_stock_data import unified_stock_data_service
 
-        Returns:
-            {
-                'success': bool,
-                'message': str,
-                'total': int,
-            }
-        """
-        # 检查是否已在运行
         existing = PreloadStatus.query.filter_by(preload_date=target_date).first()
         if existing and existing.status == 'running':
             return {'success': False, 'message': '预加载正在进行中', 'total': existing.total_count}
 
-        # 获取所有需要预加载的股票（持仓 + 分类）
         stock_list = PreloadService.get_all_stock_codes()
-
         if not stock_list:
-            return {'success': False, 'message': '无有效股票代码', 'total': 0}
+            return {'success': False, 'message': '无有效股票代码（请在板块管理中开启预加载）', 'total': 0}
 
         total_count = len(stock_list)
 
-        # 创建或更新预加载状态记录
         if existing:
             existing.status = 'running'
             existing.total_count = total_count
@@ -146,44 +135,53 @@ class PreloadService:
             existing.completed_at = None
         else:
             record = PreloadStatus(
-                preload_date=target_date,
-                status='running',
-                total_count=total_count,
-                success_count=0,
-                failed_count=0,
+                preload_date=target_date, status='running',
+                total_count=total_count, success_count=0, failed_count=0,
                 started_at=datetime.now(),
             )
             db.session.add(record)
-
         db.session.commit()
         logger.info(f"[预加载.持仓] 启动: stocks={total_count}")
 
-        # 逐个处理股票（便于更新进度）
+        # 阶段1: 批量获取走势数据
+        all_codes = [item['code'] for item in stock_list]
+        PreloadService._update_current_stock(target_date, '批量获取走势数据...')
+        try:
+            unified_stock_data_service.get_trend_data(all_codes, 60, force_refresh=True)
+        except Exception as e:
+            logger.error(f"[预加载.持仓] 走势数据批量获取失败: {e}")
+
+        # 阶段2: 批量获取实时价格
+        PreloadService._update_current_stock(target_date, '批量获取实时价格...')
+        try:
+            unified_stock_data_service.get_realtime_prices(all_codes, force_refresh=True)
+        except Exception as e:
+            logger.error(f"[预加载.持仓] 实时价格批量获取失败: {e}")
+
+        # 阶段3: 并发威科夫分析（数据已在缓存）
         success_count = 0
         failed_count = 0
+        app = current_app._get_current_object()
 
-        for item in stock_list:
-            code = item['code']
-            name = item['name']
+        with ThreadPoolExecutor(max_workers=15) as executor:
+            futures = {
+                executor.submit(WyckoffAutoService.analyze_single, item['code'], item['name'], app): item
+                for item in stock_list
+            }
+            for future in as_completed(futures):
+                item = futures[future]
+                PreloadService._update_current_stock(target_date, f"{item['name']}({item['code']})")
+                try:
+                    result = future.result()
+                    if result.get('status') == 'success':
+                        success_count += 1
+                    else:
+                        failed_count += 1
+                except Exception:
+                    failed_count += 1
+                PreloadService._update_progress(target_date, success_count, failed_count)
 
-            # 更新当前处理的股票
-            PreloadService._update_current_stock(target_date, f"{name}({code})")
-
-            # 执行分析
-            result = WyckoffAutoService.analyze_single(code, name)
-
-            if result.get('status') == 'success':
-                success_count += 1
-            else:
-                failed_count += 1
-
-            # 更新进度
-            PreloadService._update_progress(target_date, success_count, failed_count)
-
-        # 标记完成
-        final_status = 'completed' if failed_count == 0 else 'completed'  # 即使有失败也标记完成
-        PreloadService._mark_completed(target_date, final_status)
-
+        PreloadService._mark_completed(target_date, 'completed')
         logger.info(f"[预加载.持仓] 完成: success={success_count}, failed={failed_count}")
 
         return {
@@ -421,21 +419,28 @@ class PreloadService:
 
     @staticmethod
     def get_all_stock_codes() -> list:
-        """获取所有需要预加载的股票代码（持仓 + 所有分类）"""
-        stock_map = {}  # code -> name
+        """获取所有需要预加载的股票代码（仅 preload_enabled=True 的板块）"""
+        from app.models.category import Category
 
-        # 获取持仓股票
-        latest_date = PositionService.get_latest_date()
-        if latest_date:
-            positions = PositionService.get_snapshot(latest_date)
-            for p in positions:
-                if p.stock_code and re.match(r'^[0-9]{6}$', p.stock_code):
-                    stock_map[p.stock_code] = p.stock_name
+        enabled_categories = Category.query.filter_by(preload_enabled=True).all()
+        if not enabled_categories:
+            return []
 
-        # 获取所有分类中的A股
-        stock_cats = StockCategory.query.all()
+        # 收集所有启用板块的 ID（含子板块）
+        category_ids = set()
+        for cat in enabled_categories:
+            category_ids.add(cat.id)
+            for child in cat.children:
+                category_ids.add(child.id)
+
+        # 查询这些板块下的所有股票
+        stock_cats = StockCategory.query.filter(
+            StockCategory.category_id.in_(category_ids)
+        ).all()
+
+        stock_map = {}
         for sc in stock_cats:
-            if sc.stock_code and re.match(r'^[0-9]{6}$', sc.stock_code) and sc.stock_code not in stock_map:
+            if sc.stock_code and sc.stock_code not in stock_map:
                 stock = Stock.query.filter_by(stock_code=sc.stock_code).first()
                 stock_map[sc.stock_code] = stock.stock_name if stock else sc.stock_code
 
@@ -443,34 +448,20 @@ class PreloadService:
 
     @staticmethod
     def start_preload_extended(target_date: date, max_workers: int = 15) -> dict:
-        """扩展版预加载（更高并发）
-
-        Returns:
-            {
-                'success': bool,
-                'message': str,
-                'total': int,
-                'success_count': int,
-                'failed_count': int,
-                'failed_stocks': list,
-            }
-        """
+        """扩展版预加载（批量预热 + 并发分析）"""
         from flask import current_app
+        from app.services.unified_stock_data import unified_stock_data_service
 
-        # 检查是否已在运行
         existing = PreloadStatus.query.filter_by(preload_date=target_date).first()
         if existing and existing.status == 'running':
             return {'success': False, 'message': '预加载正在进行中', 'total': existing.total_count}
 
-        # 获取所有股票（持仓+自选）
         stock_list = PreloadService.get_all_stock_codes()
-
         if not stock_list:
-            return {'success': False, 'message': '无股票需要预加载', 'total': 0}
+            return {'success': False, 'message': '无股票需要预加载（请在板块管理中开启预加载）', 'total': 0}
 
         total_count = len(stock_list)
 
-        # 创建或更新预加载状态记录
         if existing:
             existing.status = 'running'
             existing.total_count = total_count
@@ -481,19 +472,26 @@ class PreloadService:
             existing.completed_at = None
         else:
             record = PreloadStatus(
-                preload_date=target_date,
-                status='running',
-                total_count=total_count,
-                success_count=0,
-                failed_count=0,
+                preload_date=target_date, status='running',
+                total_count=total_count, success_count=0, failed_count=0,
                 started_at=datetime.now(),
             )
             db.session.add(record)
-
         db.session.commit()
         logger.info(f"[预加载.扩展] 启动: date={target_date}, stocks={total_count}, workers={max_workers}")
 
-        # 使用线程池并发处理
+        # 批量预热缓存
+        all_codes = [item['code'] for item in stock_list]
+        try:
+            unified_stock_data_service.get_trend_data(all_codes, 60, force_refresh=True)
+        except Exception as e:
+            logger.error(f"[预加载.扩展] 走势数据批量获取失败: {e}")
+        try:
+            unified_stock_data_service.get_realtime_prices(all_codes, force_refresh=True)
+        except Exception as e:
+            logger.error(f"[预加载.扩展] 实时价格批量获取失败: {e}")
+
+        # 并发分析
         success_count = 0
         failed_count = 0
         failed_stocks = []
@@ -501,15 +499,9 @@ class PreloadService:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
-                executor.submit(
-                    WyckoffAutoService.analyze_single,
-                    item['code'],
-                    item.get('name', ''),
-                    app
-                ): item
+                executor.submit(WyckoffAutoService.analyze_single, item['code'], item.get('name', ''), app): item
                 for item in stock_list
             }
-
             for future in as_completed(futures):
                 item = futures[future]
                 try:
@@ -519,24 +511,18 @@ class PreloadService:
                     else:
                         failed_count += 1
                         failed_stocks.append({
-                            'code': item['code'],
-                            'name': item.get('name', ''),
+                            'code': item['code'], 'name': item.get('name', ''),
                             'error': result.get('error_msg', '未知错误'),
                         })
                 except Exception as e:
                     failed_count += 1
                     failed_stocks.append({
-                        'code': item['code'],
-                        'name': item.get('name', ''),
+                        'code': item['code'], 'name': item.get('name', ''),
                         'error': str(e),
                     })
-
-                # 更新进度
                 PreloadService._update_progress(target_date, success_count, failed_count)
 
-        # 标记完成
         PreloadService._mark_completed(target_date, 'completed')
-
         logger.info(f"[预加载.扩展] 完成: date={target_date}, success={success_count}, failed={failed_count}")
 
         return {

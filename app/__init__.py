@@ -99,6 +99,21 @@ def migrate_wyckoff_table():
     logging.info("wyckoff_auto_result 迁移完成")
 
 
+def migrate_category_table():
+    """为 Category 表添加 preload_enabled 列"""
+    from sqlalchemy import text, inspect
+    try:
+        inspector = inspect(db.engine)
+        columns = [c['name'] for c in inspector.get_columns('categories')]
+        if 'preload_enabled' not in columns:
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN preload_enabled BOOLEAN DEFAULT false NOT NULL"))
+                conn.commit()
+            logging.info("已添加 categories.preload_enabled 列")
+    except Exception as e:
+        logging.debug(f"categories 表迁移检查: {e}")
+
+
 def setup_logging(app):
     """配置应用日志系统"""
     log_dir = app.config.get('LOG_DIR', 'data/logs')
@@ -239,6 +254,7 @@ def create_app(config_class=None):
         migrate_daily_snapshot_table()
         migrate_trades_table()
         migrate_wyckoff_table()
+        migrate_category_table()
 
         # 初始化默认交易策略
         from app.services.trading_strategy import TradingStrategyService

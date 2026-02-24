@@ -8,6 +8,7 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    preload_enabled = db.Column(db.Boolean, default=False, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('categories.id', ondelete='CASCADE'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -19,6 +20,7 @@ class Category(db.Model):
             'name': self.name,
             'description': self.description,
             'parent_id': self.parent_id,
+            'preload_enabled': self.preload_enabled,
             'full_name': f"{self.parent.name} - {self.name}" if self.parent else self.name
         }
 

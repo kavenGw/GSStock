@@ -131,3 +131,13 @@ class CategoryService:
         category.description = description
         db.session.commit()
         return category, None
+
+    @staticmethod
+    def toggle_preload(category_id, enabled):
+        """切换板块预加载开关"""
+        category = Category.query.get(category_id)
+        if not category:
+            return None, '板块不存在'
+        category.preload_enabled = enabled
+        db.session.commit()
+        return category, None
