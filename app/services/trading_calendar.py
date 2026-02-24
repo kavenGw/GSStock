@@ -6,6 +6,7 @@
 - 港股 (香港)
 - 韩股 (首尔)
 - 台股 (台湾)
+- 日股 (东京)
 - 期货 (芝加哥商品交易所)
 """
 import logging
@@ -29,6 +30,7 @@ class TradingCalendarService:
         'HK': 'XHKG',   # 香港交易所
         'KR': 'XKRX',   # 韩国交易所
         'TW': 'XTAI',   # 台湾证券交易所
+        'JP': 'XTKS',   # 东京证券交易所
         'COMEX': 'XCME', # 芝加哥商品交易所
     }
 
@@ -39,6 +41,7 @@ class TradingCalendarService:
         'HK': 'Asia/Hong_Kong',
         'KR': 'Asia/Seoul',
         'TW': 'Asia/Taipei',
+        'JP': 'Asia/Tokyo',
         'COMEX': 'America/Chicago',
     }
 
@@ -187,6 +190,7 @@ class TradingCalendarService:
             'HK': (time(9, 30), time(16, 0)),
             'KR': (time(9, 0), time(15, 30)),
             'TW': (time(9, 0), time(13, 30)),
+            'JP': (time(9, 0), time(15, 0)),  # 东京证券交易所（有午休 11:30-12:30）
             'COMEX': (time(8, 30), time(13, 30)),  # 电子盘时间更长，这里用核心时段
         }
 
@@ -227,6 +231,12 @@ class TradingCalendarService:
         if market == 'A':
             morning_session = (time(9, 30) <= current_time <= time(11, 30))
             afternoon_session = (time(13, 0) <= current_time <= time(15, 0))
+            return morning_session or afternoon_session
+
+        # 日股有午休 (11:30-12:30)
+        if market == 'JP':
+            morning_session = (time(9, 0) <= current_time <= time(11, 30))
+            afternoon_session = (time(12, 30) <= current_time <= time(15, 0))
             return morning_session or afternoon_session
 
         return open_time <= current_time <= close_time
