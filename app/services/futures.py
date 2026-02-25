@@ -534,7 +534,7 @@ class FuturesService:
         }
 
     @staticmethod
-    def get_custom_trend_data(codes: list[str], days: int = 30) -> dict:
+    def get_custom_trend_data(codes: list[str], days: int = 30, cached_only: bool = False) -> dict:
         """获取自定义走势数据（通过统一服务）"""
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.stock import Stock
@@ -559,8 +559,14 @@ class FuturesService:
                 name_map[code] = stock.stock_name if stock else code
                 yf_codes.append(code)
 
-        # 通过统一服务获取数据
-        result = unified_stock_data_service.get_trend_data(yf_codes, days)
+        partial = False
+        missing_codes = []
+        if cached_only:
+            cached_stocks, missing_codes = unified_stock_data_service.get_trend_cached_only(yf_codes, days)
+            result = {'stocks': cached_stocks}
+            partial = len(missing_codes) > 0
+        else:
+            result = unified_stock_data_service.get_trend_data(yf_codes, days)
 
         # 转换结果格式
         results = []
@@ -601,13 +607,17 @@ class FuturesService:
             })
 
         sorted_dates = sorted(all_dates)
-        return {
+        ret = {
             'stocks': results,
             'date_range': {
                 'start': sorted_dates[0] if sorted_dates else None,
                 'end': sorted_dates[-1] if sorted_dates else None
             }
         }
+        if cached_only:
+            ret['partial'] = partial
+            ret['missing_codes'] = missing_codes
+        return ret
 
     @staticmethod
     def get_available_codes() -> dict:
@@ -663,16 +673,7 @@ class FuturesService:
         }
 
     @staticmethod
-    def get_category_trend_data(category: str, days: int = 30, force_refresh: bool = False) -> dict:
-        """获取特定分类的走势数据
-
-        Args:
-            category: 分类标识符 ('heavy_metals', 'gold', 'copper', 'aluminum', 'silver')
-            days: 历史数据天数
-            force_refresh: 强制刷新（即使有缓存也从 API 获取）
-
-        Returns:
-            与 get_trend_data() 相同格式: {stocks: [...], date_range: {...}, cache_info: {...}}
-        """
+    def get_category_trend_data(category: str, days: int = 30, force_refresh: bool = False, cached_only: bool = False) -> dict:
+        """获取特定分类的走势数据"""
         codes = CategoryCodeResolver.get_codes_for_category(category)
-        return FuturesService.get_custom_trend_data(codes, days)
+        return FuturesService.get_custom_trend_data(codes, days, cached_only=cached_only)

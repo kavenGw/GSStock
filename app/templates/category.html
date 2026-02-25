@@ -27,10 +27,12 @@
         <div class="card mb-2 category-card" data-id="{{ parent.id }}">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="category-name fw-bold">{{ parent.name }}</span>
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-success add-child-btn" title="添加子板块">+ 子板块</button>
-                    <button class="btn btn-outline-primary edit-btn" title="编辑">编辑</button>
-                    <button class="btn btn-outline-danger delete-btn" title="删除">删除</button>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-success add-child-btn" title="添加子板块">+ 子板块</button>
+                        <button class="btn btn-outline-primary edit-btn" title="编辑">编辑</button>
+                        <button class="btn btn-outline-danger delete-btn" title="删除">删除</button>
+                    </div>
                 </div>
             </div>
             {% if parent.children %}
@@ -141,5 +143,6 @@ categoryTree.addEventListener('click', async (e) => {
         }
     }
 });
+
 </script>
 {% endblock %}

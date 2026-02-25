@@ -111,17 +111,19 @@ class BriefingService:
         stocks_by_category = {k: [] for k, _ in sorted_categories}
 
         prices = {}
+        partial = False
         try:
             if force_refresh:
                 prices = unified_stock_data_service.get_realtime_prices(stock_codes, force_refresh=True)
             else:
                 prices = unified_stock_data_service.get_closing_prices(stock_codes)
-                # 缓存未命中或降级数据的股票，回退到API获取
                 stale_codes = [c for c in stock_codes
                                if c not in prices or prices.get(c, {}).get('_is_degraded')]
                 if stale_codes:
-                    fetched = unified_stock_data_service.get_realtime_prices(stale_codes)
-                    prices.update(fetched)
+                    partial = True
+                    from flask import current_app
+                    app = current_app._get_current_object()
+                    unified_stock_data_service.refresh_async(stale_codes, 'price', app=app)
         except Exception as e:
             logger.error(f"[简报服务.股票] 获取股票价格失败: {e}", exc_info=True)
             db.session.rollback()
@@ -177,7 +179,8 @@ class BriefingService:
         return {
             'categories': categories,
             'stocks': stocks_by_category,
-            'last_update': last_update.strftime('%Y-%m-%d %H:%M:%S')
+            'last_update': last_update.strftime('%Y-%m-%d %H:%M:%S'),
+            'partial': partial
         }
 
     @staticmethod

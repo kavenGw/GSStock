@@ -1168,6 +1168,35 @@
                         this.renderCustomRelativeStrength(data);
                     }
 
+                    if (data.partial) {
+                        setTimeout(() => {
+                            const forceUrl = url + (url.includes('?') ? '&' : '?') + 'force=1';
+                            this.cancelPendingRequest();
+                            const ctrl = new AbortController();
+                            this.pendingFetch = ctrl;
+                            fetch(forceUrl, { signal: ctrl.signal })
+                                .then(r => r.ok ? r.json() : null)
+                                .then(fullData => {
+                                    if (!fullData || !fullData.stocks || fullData.stocks.length === 0) return;
+                                    Charts.trendData = fullData;
+                                    chartWrapper.innerHTML = '<canvas id="categoryTrendChart"></canvas>';
+                                    volumeWrapper.innerHTML = '<canvas id="categoryVolumeChart"></canvas>';
+                                    const c = Charts.renderTrendChart(fullData, 'all', 'categoryTrendChart');
+                                    Charts.renderVolumeChart(fullData, 'categoryVolumeChart');
+                                    if (fullData.technical && c) {
+                                        Charts.renderMACDChart(fullData.technical, c, 'macdChart');
+                                        Charts.renderRSIChart(fullData.technical, c, 'rsiChart');
+                                    }
+                                    if (fullData.advice) {
+                                        this.currentAdviceData = fullData.advice;
+                                        this.displayWyckoffPanel(fullData.advice);
+                                    }
+                                })
+                                .catch(e => { if (e.name !== 'AbortError') console.error('Partial reload failed:', e); })
+                                .finally(() => { if (this.pendingFetch === ctrl) this.pendingFetch = null; });
+                        }, 3000);
+                    }
+
                     return data;
 
                 } catch (error) {

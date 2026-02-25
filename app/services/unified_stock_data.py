@@ -1847,6 +1847,102 @@ class UnifiedStockDataService:
             logger.info(f"[数据服务.走势] {today} yfinance → {names} ({len(results)}只)")
         return results
 
+    def _fetch_trend_batch_yfinance(self, stock_codes: list, days: int,
+                                     stock_name_map: dict, stock_categories: dict) -> list:
+        """使用 yf.download() 批量获取多只股票走势数据"""
+        import yfinance as yf
+
+        if not stock_codes:
+            return []
+
+        yf_codes = [self._get_yfinance_symbol(c) for c in stock_codes]
+        code_map = dict(zip(yf_codes, stock_codes))
+
+        logger.info(f"[数据服务.走势] yf.download 批量获取 {len(yf_codes)} 只...")
+
+        try:
+            df = yf.download(
+                tickers=yf_codes,
+                period=f"{days + 10}d",
+                group_by='ticker',
+                threads=True,
+                progress=False
+            )
+        except Exception as e:
+            logger.error(f"[数据服务.走势] yf.download 批量失败: {e}")
+            return self._fetch_trend_from_yfinance(
+                stock_codes, days,
+                date.today() - timedelta(days=days + 10), date.today(),
+                stock_name_map, stock_categories, f'ohlc_{days}'
+            )
+
+        results = []
+        if len(yf_codes) == 1:
+            yf_code = yf_codes[0]
+            original_code = code_map[yf_code]
+            result = self._parse_yf_dataframe(df, original_code, days, stock_name_map, stock_categories)
+            if result:
+                results.append(result)
+        else:
+            for yf_code in yf_codes:
+                original_code = code_map[yf_code]
+                try:
+                    ticker_df = df[yf_code] if yf_code in df.columns.get_level_values(0) else None
+                    if ticker_df is None or ticker_df.empty:
+                        continue
+                    result = self._parse_yf_dataframe(ticker_df, original_code, days, stock_name_map, stock_categories)
+                    if result:
+                        results.append(result)
+                except Exception as e:
+                    logger.debug(f"[数据服务.走势] {original_code} 批量解析失败: {e}")
+
+        if results:
+            names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+            logger.info(f"[数据服务.走势] yf.download 批量完成 → {names} ({len(results)}只)")
+        return results
+
+    def _parse_yf_dataframe(self, df, stock_code: str, days: int,
+                             stock_name_map: dict, stock_categories: dict) -> dict | None:
+        """解析 yfinance DataFrame 为统一格式"""
+        df = df.dropna(subset=['Close']).tail(days)
+        if len(df) < 2:
+            return None
+
+        base_price = float(df['Close'].iloc[0])
+        data_points = []
+        for idx, row in df.iterrows():
+            close_p = row.get('Close')
+            if pd.isna(close_p):
+                continue
+
+            open_p = row.get('Open')
+            high_p = row.get('High')
+            low_p = row.get('Low')
+            volume = row.get('Volume', 0)
+
+            change_pct = (float(close_p) - base_price) / base_price * 100
+            trade_date = idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else str(idx)[:10]
+            data_points.append({
+                'date': trade_date,
+                'open': round(float(open_p), 2) if not pd.isna(open_p) else 0,
+                'high': round(float(high_p), 2) if not pd.isna(high_p) else 0,
+                'low': round(float(low_p), 2) if not pd.isna(low_p) else 0,
+                'close': round(float(close_p), 2),
+                'change_pct': round(change_pct, 2),
+                'volume': int(volume) if not pd.isna(volume) else 0
+            })
+
+        if len(data_points) < 2:
+            return None
+
+        sc = stock_categories.get(stock_code, {})
+        return {
+            'stock_code': stock_code,
+            'stock_name': stock_name_map.get(stock_code, stock_code),
+            'category_id': sc.get('category_id'),
+            'data': data_points
+        }
+
     # ============ 指数数据 ============
 
     def get_indices_data(self, target_date: date = None,
@@ -2929,6 +3025,115 @@ class UnifiedStockDataService:
         self._hit_count = 0
         self._miss_count = 0
         memory_cache.reset_stats()
+
+    def get_prices_cached_only(self, stock_codes: list) -> tuple:
+        """只查缓存获取实时价格，不触发API"""
+        if not stock_codes:
+            return {}, []
+
+        cache_type = 'price'
+        result = {}
+        remaining_codes = list(stock_codes)
+
+        # 第一层：内存缓存
+        memory_cached = memory_cache.get_batch(remaining_codes, cache_type)
+        for code, data in memory_cached.items():
+            result[code] = data
+        remaining_codes = [c for c in remaining_codes if c not in memory_cached]
+
+        if not remaining_codes:
+            return result, []
+
+        # 第二层：DB缓存（忽略TTL，有数据就用）
+        effective_dates = self._get_effective_cache_dates(remaining_codes)
+        date_groups = {}
+        for code in remaining_codes:
+            d = effective_dates[code]
+            date_groups.setdefault(d, []).append(code)
+        cached_data = {}
+        for cache_date, codes in date_groups.items():
+            cached_data.update(UnifiedStockCache.get_cache_with_status(codes, cache_type, cache_date))
+
+        still_missing = []
+        for code in remaining_codes:
+            cache_info = cached_data.get(code)
+            if cache_info and cache_info.get('data'):
+                result[code] = cache_info['data']
+                memory_cache.set(code, cache_type, cache_info['data'])
+            else:
+                expired_data = self._get_expired_cache(code, cache_type, '缓存降级')
+                if expired_data:
+                    result[code] = expired_data
+                else:
+                    still_missing.append(code)
+
+        return result, still_missing
+
+    def get_trend_cached_only(self, stock_codes: list, days: int = 60) -> tuple:
+        """只查缓存获取走势数据，不触发API"""
+        if not stock_codes:
+            return [], []
+
+        cache_type = f'ohlc_{days}'
+        cached_stocks = []
+        remaining_codes = list(stock_codes)
+
+        # 第一层：内存缓存
+        memory_cached = memory_cache.get_batch(remaining_codes, cache_type)
+        for code, data in memory_cached.items():
+            cached_stocks.append(data)
+        remaining_codes = [c for c in remaining_codes if c not in memory_cached]
+
+        if not remaining_codes:
+            return cached_stocks, []
+
+        # 第二层：DB缓存（忽略TTL，有数据就用）
+        effective_dates = self._get_effective_cache_dates(remaining_codes)
+        date_groups = {}
+        for code in remaining_codes:
+            d = effective_dates[code]
+            date_groups.setdefault(d, []).append(code)
+        cached_data = {}
+        for cache_date, codes in date_groups.items():
+            cached_data.update(UnifiedStockCache.get_cache_with_status(codes, cache_type, cache_date))
+
+        still_missing = []
+        for code in remaining_codes:
+            cache_info = cached_data.get(code)
+            if cache_info and cache_info.get('data'):
+                cached_stocks.append(cache_info['data'])
+                memory_cache.set(code, cache_type, cache_info['data'])
+            else:
+                expired_data = self._get_expired_cache(code, cache_type, '缓存降级')
+                if expired_data:
+                    cached_stocks.append(expired_data)
+                else:
+                    still_missing.append(code)
+
+        return cached_stocks, still_missing
+
+    def refresh_async(self, stock_codes: list, data_type: str = 'price', days: int = 60, app=None):
+        """在后台线程中获取数据并写入缓存"""
+        if not stock_codes:
+            return
+
+        def _do_refresh():
+            try:
+                if app:
+                    with app.app_context():
+                        self._do_refresh_inner(stock_codes, data_type, days)
+                else:
+                    self._do_refresh_inner(stock_codes, data_type, days)
+            except Exception as e:
+                logger.error(f"[数据服务.异步刷新] 失败: {data_type}, {e}")
+
+        threading.Thread(target=_do_refresh, daemon=True).start()
+
+    def _do_refresh_inner(self, stock_codes: list, data_type: str, days: int):
+        if data_type == 'price':
+            self.get_realtime_prices(stock_codes, force_refresh=True)
+        elif data_type == 'trend':
+            self.get_trend_data(stock_codes, days, force_refresh=True)
 
 
 # 创建单例实例

@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from flask import render_template, jsonify, request, current_app
 from app.routes import heavy_metals_bp
 from app.services.futures import FuturesService, CATEGORY_CODES, CATEGORY_NAMES, TradingAdviceCalculator, CategoryCodeResolver
+from app.services.unified_stock_data import unified_stock_data_service
 from app.services.wyckoff import WyckoffAutoService
 from app.services.fed_rate import FedRateService
 from app.services.signal_cache import SignalCacheService
@@ -106,8 +107,14 @@ def category_data():
     if category not in CATEGORY_NAMES:
         return jsonify({'error': 'Invalid category'}), 400
 
-    # 获取走势数据（只调一次）
-    data = FuturesService.get_category_trend_data(category, days, force)
+    # 非强制时先尝试缓存模式，缺失数据后台异步获取
+    if not force:
+        data = FuturesService.get_category_trend_data(category, days, cached_only=True)
+        if data.get('partial') and data.get('missing_codes'):
+            app_obj = current_app._get_current_object()
+            unified_stock_data_service.refresh_async(data['missing_codes'], 'trend', days=days, app=app_obj)
+    else:
+        data = FuturesService.get_category_trend_data(category, days, force)
 
     if not data or not data.get('stocks'):
         return jsonify(data or {'stocks': [], 'date_range': {}})
