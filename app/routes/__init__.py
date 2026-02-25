@@ -10,10 +10,9 @@ daily_record_bp = Blueprint('daily_record', __name__, url_prefix='/daily-record'
 profit_bp = Blueprint('profit', __name__, url_prefix='/profit')
 rebalance_bp = Blueprint('rebalance', __name__, url_prefix='/rebalance')
 heavy_metals_bp = Blueprint('heavy_metals', __name__, url_prefix='/heavy-metals')
-preload_bp = Blueprint('preload', __name__)
 alert_bp = Blueprint('alert', __name__, url_prefix='/alert')
 briefing_bp = Blueprint('briefing', __name__, url_prefix='/briefing')
 strategy_bp = Blueprint('strategy', __name__, url_prefix='/strategies')
 stock_detail_bp = Blueprint('stock_detail', __name__, url_prefix='/api/stock-detail')
 
-from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, preload, alert, briefing, strategy, stock_detail
+from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, strategy, stock_detail

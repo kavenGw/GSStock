@@ -127,6 +127,10 @@ class BriefingPage {
             if (data.last_update) {
                 document.getElementById('lastUpdate').textContent = `更新时间: ${data.last_update}`;
             }
+
+            if (data.partial && !force) {
+                setTimeout(() => this.loadStocks(true), 3000);
+            }
         } catch (e) {
             console.error('加载股票数据失败:', e);
             document.getElementById('stocksContainer').innerHTML = `<div class="text-warning-dark">股票数据加载失败</div>`;

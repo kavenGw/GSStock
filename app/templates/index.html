@@ -441,106 +441,6 @@
         }
     };
 
-    // 预加载管理器
-    const PreloadManager = {
-        overlay: null,
-        pollTimer: null,
-
-        showOverlay(title, status, current, total, currentStock) {
-            if (!this.overlay) {
-                this.overlay = document.createElement('div');
-                this.overlay.className = 'preload-overlay';
-                this.overlay.innerHTML = `
-                    <div class="preload-modal">
-                        <div class="preload-title"></div>
-                        <div class="preload-progress-container">
-                            <div class="preload-progress-bar" style="width: 0%"></div>
-                        </div>
-                        <div class="preload-status"></div>
-                        <div class="preload-current"></div>
-                    </div>
-                `;
-                document.body.appendChild(this.overlay);
-            }
-            this.updateOverlay(title, status, current, total, currentStock);
-            this.overlay.style.display = 'flex';
-        },
-
-        updateOverlay(title, status, current, total, currentStock) {
-            if (!this.overlay) return;
-            const pct = total > 0 ? Math.round(current / total * 100) : 0;
-            this.overlay.querySelector('.preload-title').textContent = title;
-            this.overlay.querySelector('.preload-progress-bar').style.width = pct + '%';
-            this.overlay.querySelector('.preload-status').textContent = status || `${current} / ${total}`;
-            this.overlay.querySelector('.preload-current').textContent = currentStock || '';
-        },
-
-        hideOverlay() {
-            if (this.overlay) {
-                this.overlay.style.display = 'none';
-            }
-            if (this.pollTimer) {
-                clearInterval(this.pollTimer);
-                this.pollTimer = null;
-            }
-        },
-
-        async checkAndStart() {
-            if (!window.currentPositions || window.currentPositions.length === 0) {
-                return;
-            }
-
-            const resp = await fetch('/api/preload/status');
-            const data = await resp.json();
-
-            if (data.status === 'none') {
-                this.startPreload();
-            } else if (data.status === 'running') {
-                this.showOverlay('数据预加载中', null, 0, data.total_count, null);
-                this.pollProgress();
-            }
-        },
-
-        async startPreload() {
-            this.showOverlay('数据预加载中', '正在启动...', 0, 0, null);
-
-            const resp = await fetch('/api/preload/start', { method: 'POST' });
-            const data = await resp.json();
-
-            if (data.success) {
-                this.hideOverlay();
-            } else if (data.message === '预加载正在进行中') {
-                this.pollProgress();
-            } else {
-                this.hideOverlay();
-            }
-        },
-
-        pollProgress() {
-            if (this.pollTimer) return;
-
-            this.pollTimer = setInterval(async () => {
-                const resp = await fetch('/api/preload/progress');
-                const data = await resp.json();
-
-                if (data.status === 'completed' || data.status === 'failed') {
-                    this.hideOverlay();
-                    return;
-                }
-
-                if (data.status === 'running') {
-                    this.updateOverlay(
-                        '数据预加载中',
-                        `正在分析 ${data.current} / ${data.total}`,
-                        data.current,
-                        data.total,
-                        data.current_stock
-                    );
-                }
-            }, 1000);
-        }
-    };
-
     document.addEventListener('DOMContentLoaded', function() {
         if (window.Charts && window.currentPositions && window.currentPositions.length > 0) {
             Charts.renderPositionPieChart(window.currentPositions);
@@ -553,9 +453,6 @@
             // 加载操作建议
             AdviceManager.loadAdvice();
         }
-
-        // 检查并启动预加载
-        PreloadManager.checkAndStart();
     });
 </script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>

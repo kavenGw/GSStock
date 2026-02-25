@@ -3026,6 +3026,115 @@ class UnifiedStockDataService:
         self._miss_count = 0
         memory_cache.reset_stats()
 
+    def get_prices_cached_only(self, stock_codes: list) -> tuple:
+        """只查缓存获取实时价格，不触发API"""
+        if not stock_codes:
+            return {}, []
+
+        cache_type = 'price'
+        result = {}
+        remaining_codes = list(stock_codes)
+
+        # 第一层：内存缓存
+        memory_cached = memory_cache.get_batch(remaining_codes, cache_type)
+        for code, data in memory_cached.items():
+            result[code] = data
+        remaining_codes = [c for c in remaining_codes if c not in memory_cached]
+
+        if not remaining_codes:
+            return result, []
+
+        # 第二层：DB缓存（忽略TTL，有数据就用）
+        effective_dates = self._get_effective_cache_dates(remaining_codes)
+        date_groups = {}
+        for code in remaining_codes:
+            d = effective_dates[code]
+            date_groups.setdefault(d, []).append(code)
+        cached_data = {}
+        for cache_date, codes in date_groups.items():
+            cached_data.update(UnifiedStockCache.get_cache_with_status(codes, cache_type, cache_date))
+
+        still_missing = []
+        for code in remaining_codes:
+            cache_info = cached_data.get(code)
+            if cache_info and cache_info.get('data'):
+                result[code] = cache_info['data']
+                memory_cache.set(code, cache_type, cache_info['data'])
+            else:
+                expired_data = self._get_expired_cache(code, cache_type, '缓存降级')
+                if expired_data:
+                    result[code] = expired_data
+                else:
+                    still_missing.append(code)
+
+        return result, still_missing
+
+    def get_trend_cached_only(self, stock_codes: list, days: int = 60) -> tuple:
+        """只查缓存获取走势数据，不触发API"""
+        if not stock_codes:
+            return [], []
+
+        cache_type = f'ohlc_{days}'
+        cached_stocks = []
+        remaining_codes = list(stock_codes)
+
+        # 第一层：内存缓存
+        memory_cached = memory_cache.get_batch(remaining_codes, cache_type)
+        for code, data in memory_cached.items():
+            cached_stocks.append(data)
+        remaining_codes = [c for c in remaining_codes if c not in memory_cached]
+
+        if not remaining_codes:
+            return cached_stocks, []
+
+        # 第二层：DB缓存（忽略TTL，有数据就用）
+        effective_dates = self._get_effective_cache_dates(remaining_codes)
+        date_groups = {}
+        for code in remaining_codes:
+            d = effective_dates[code]
+            date_groups.setdefault(d, []).append(code)
+        cached_data = {}
+        for cache_date, codes in date_groups.items():
+            cached_data.update(UnifiedStockCache.get_cache_with_status(codes, cache_type, cache_date))
+
+        still_missing = []
+        for code in remaining_codes:
+            cache_info = cached_data.get(code)
+            if cache_info and cache_info.get('data'):
+                cached_stocks.append(cache_info['data'])
+                memory_cache.set(code, cache_type, cache_info['data'])
+            else:
+                expired_data = self._get_expired_cache(code, cache_type, '缓存降级')
+                if expired_data:
+                    cached_stocks.append(expired_data)
+                else:
+                    still_missing.append(code)
+
+        return cached_stocks, still_missing
+
+    def refresh_async(self, stock_codes: list, data_type: str = 'price', days: int = 60, app=None):
+        """在后台线程中获取数据并写入缓存"""
+        if not stock_codes:
+            return
+
+        def _do_refresh():
+            try:
+                if app:
+                    with app.app_context():
+                        self._do_refresh_inner(stock_codes, data_type, days)
+                else:
+                    self._do_refresh_inner(stock_codes, data_type, days)
+            except Exception as e:
+                logger.error(f"[数据服务.异步刷新] 失败: {data_type}, {e}")
+
+        threading.Thread(target=_do_refresh, daemon=True).start()
+
+    def _do_refresh_inner(self, stock_codes: list, data_type: str, days: int):
+        if data_type == 'price':
+            self.get_realtime_prices(stock_codes, force_refresh=True)
+        elif data_type == 'trend':
+            self.get_trend_data(stock_codes, days, force_refresh=True)
+
 
 # 创建单例实例
 unified_stock_data_service = UnifiedStockDataService()

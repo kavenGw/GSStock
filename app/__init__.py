@@ -99,21 +99,6 @@ def migrate_wyckoff_table():
     logging.info("wyckoff_auto_result 迁移完成")
 
 
-def migrate_category_table():
-    """为 Category 表添加 preload_enabled 列"""
-    from sqlalchemy import text, inspect
-    try:
-        inspector = inspect(db.engine)
-        columns = [c['name'] for c in inspector.get_columns('categories')]
-        if 'preload_enabled' not in columns:
-            with db.engine.connect() as conn:
-                conn.execute(text("ALTER TABLE categories ADD COLUMN preload_enabled BOOLEAN DEFAULT false NOT NULL"))
-                conn.commit()
-            logging.info("已添加 categories.preload_enabled 列")
-    except Exception as e:
-        logging.debug(f"categories 表迁移检查: {e}")
-
-
 def setup_logging(app):
     """配置应用日志系统"""
     log_dir = app.config.get('LOG_DIR', 'data/logs')
@@ -197,7 +182,7 @@ def create_app(config_class=None):
             stock_db_path, _ = get_db_paths(app)
             cleanup_legacy_tables(stock_db_path)
 
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, preload_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
@@ -208,14 +193,13 @@ def create_app(config_class=None):
     app.register_blueprint(profit_bp)
     app.register_blueprint(rebalance_bp)
     app.register_blueprint(heavy_metals_bp)
-    app.register_blueprint(preload_bp)
     app.register_blueprint(alert_bp)
     app.register_blueprint(briefing_bp)
     app.register_blueprint(strategy_bp)
     app.register_blueprint(stock_detail_bp)
 
     with app.app_context():
-        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, PreloadStatus, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution
+        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution
 
         # 检查是否需要执行 CockroachDB 迁移
         from app.services.cockroach_migration import check_cockroach_migration_needed, migrate_local_to_cockroach
@@ -254,7 +238,6 @@ def create_app(config_class=None):
         migrate_daily_snapshot_table()
         migrate_trades_table()
         migrate_wyckoff_table()
-        migrate_category_table()
 
         # 初始化默认交易策略
         from app.services.trading_strategy import TradingStrategyService
@@ -263,14 +246,6 @@ def create_app(config_class=None):
     # 预加载 OCR 模型，避免首次识别时卡顿
     from app.services.ocr import preload_model
     preload_model()
-
-    # 预加载数据（简报优先，走势看板其次）
-    if not app.config.get('READONLY_MODE'):
-        from app.services.briefing_preload import start_background_preload as start_briefing_preload
-        start_briefing_preload(app)
-
-        from app.services.heavy_metals_preload import start_background_preload as start_heavy_metals_preload
-        start_heavy_metals_preload(app)
 
     # 添加只读模式上下文处理器
     @app.context_processor

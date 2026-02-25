@@ -28,12 +28,6 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="category-name fw-bold">{{ parent.name }}</span>
                 <div class="d-flex align-items-center gap-2">
-                    <div class="form-check form-switch mb-0" title="预加载开关">
-                        <input class="form-check-input preload-toggle" type="checkbox"
-                               data-id="{{ parent.id }}"
-                               {{ 'checked' if parent.preload_enabled else '' }}>
-                        <label class="form-check-label small text-muted">预加载</label>
-                    </div>
                     <div class="btn-group btn-group-sm">
                         <button class="btn btn-outline-success add-child-btn" title="添加子板块">+ 子板块</button>
                         <button class="btn btn-outline-primary edit-btn" title="编辑">编辑</button>
@@ -150,20 +144,5 @@ categoryTree.addEventListener('click', async (e) => {
     }
 });
 
-document.querySelectorAll('.preload-toggle').forEach(toggle => {
-    toggle.addEventListener('change', async (e) => {
-        const id = e.target.dataset.id;
-        const enabled = e.target.checked;
-        const res = await fetch(`/categories/${id}/preload`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({enabled})
-        });
-        if (!res.ok) {
-            e.target.checked = !enabled;
-            alert('操作失败');
-        }
-    });
-});
 </script>
 {% endblock %}

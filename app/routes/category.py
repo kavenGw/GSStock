@@ -81,14 +81,3 @@ def update_description(category_id):
         return jsonify({'error': error}), 404
     StockMetaService.bump_version()
     return jsonify(category.to_dict())
-
-
-@category_bp.route('/<int:category_id>/preload', methods=['PUT'])
-def toggle_preload(category_id):
-    """切换板块预加载开关"""
-    data = request.get_json()
-    enabled = data.get('enabled', False) if data else False
-    category, error = CategoryService.toggle_preload(category_id, enabled)
-    if error:
-        return jsonify({'error': error}), 404
-    return jsonify({'success': True, 'preload_enabled': category.preload_enabled})
