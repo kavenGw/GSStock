@@ -1,3 +1,9 @@
+// Chart.js 暗色主题默认配置
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.color = '#8b949e';
+    Chart.defaults.borderColor = 'rgba(48, 54, 61, 0.6)';
+}
+
 // 骨架屏工具
 const Skeleton = {
     show(containerId, type, count = 3) {

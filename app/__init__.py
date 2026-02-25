@@ -256,4 +256,19 @@ def create_app(config_class=None):
     if app.config.get('READONLY_MODE'):
         logging.info("应用运行在只读模式：不从服务器获取数据，stock.db 只读")
 
+    # 策略插件系统 + 调度引擎
+    from app.strategies.registry import registry
+    from app.scheduler.engine import SchedulerEngine
+    from app.scheduler.event_bus import event_bus
+    from app.notifications.manager import notification_manager
+
+    registry.discover()
+    notification_manager.init_channels()
+    event_bus.subscribe(notification_manager.dispatch)
+
+    import os as _os
+    if not app.debug or _os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        scheduler = SchedulerEngine()
+        scheduler.init_app(app)
+
     return app

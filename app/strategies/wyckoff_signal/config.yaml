@@ -1,0 +1,8 @@
+timeframes:
+  - daily
+  - weekly
+  - monthly
+min_confidence: 0.6
+strong_signals:
+  - strong_buy
+  - strong_sell
