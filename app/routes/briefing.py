@@ -155,13 +155,10 @@ def notification_test():
 
     try:
         test_msg = '测试消息 - 股票分析系统推送配置验证'
-        test_html = '<h3>测试消息</h3><p>股票分析系统推送配置验证成功</p>'
         results = {}
 
         if channel in ('slack', 'all'):
             results['slack'] = NotificationService.send_slack(test_msg)
-        if channel in ('email', 'all'):
-            results['email'] = NotificationService.send_email('推送测试', test_html)
 
         return jsonify(results)
     except Exception as e:
