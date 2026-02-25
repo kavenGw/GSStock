@@ -17,7 +17,7 @@
 - **再平衡** — 持仓配置建议
 - **利润统计** — 交易利润分析
 - **策略插件** — 自动发现注册，Cron 定时执行，内置四种策略（涨跌预警/价格预警/每日简报/威科夫信号）
-- **通知推送** — Slack / Email 多渠道推送，与策略引擎集成
+- **通知推送** — Slack 推送，与策略引擎集成
 - **AI 分析** — 智谱 GLM 分层路由（Flash/Premium），日预算控制
 
 ## 环境要求
@@ -57,7 +57,6 @@ cp .env.sample .env
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
 | `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | `5.0` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
-| `SMTP_HOST` | SMTP 邮件服务器（可选） | 空 |
 
 ### 3. GPU 加速（可选）
 
@@ -160,17 +159,7 @@ LLM_DAILY_BUDGET=5.0    # 日预算上限（美元），默认 5.0
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
 ```
 
-### Email
-
-```env
-SMTP_HOST=smtp.example.com
-SMTP_PORT=465
-SMTP_USER=your_email
-SMTP_PASSWORD=your_password
-NOTIFY_EMAIL_TO=target@example.com
-```
-
-配置对应环境变量后自动启用。
+配置后自动启用。
 
 ## 技术栈
 

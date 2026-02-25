@@ -31,7 +31,7 @@ app/
 ├── routes/            # Flask Blueprint 路由（14 个模块）
 ├── services/          # 业务逻辑层（数据、分析、交易等）
 ├── llm/               # LLM 路由和提供者（智谱 GLM）
-├── notifications/     # 多渠道通知系统（Slack/Email）
+├── notifications/     # 通知系统（Slack）
 ├── strategies/        # 策略插件系统（自动发现注册）
 ├── scheduler/         # APScheduler 后台调度 + 事件总线
 ├── middleware/        # Flask 中间件

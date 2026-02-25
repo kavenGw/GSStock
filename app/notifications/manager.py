@@ -19,8 +19,7 @@ class NotificationManager:
         if self._initialized:
             return
         from app.notifications.channels.slack import SlackNotifier
-        from app.notifications.channels.email import EmailNotifier
-        self._channels = [SlackNotifier(), EmailNotifier()]
+        self._channels = [SlackNotifier()]
         self._initialized = True
 
     def dispatch(self, signal: Signal):
