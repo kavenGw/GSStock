@@ -57,6 +57,7 @@ cp .env.sample .env
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
 | `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | `5.0` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
+| `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
 
 ### 3. GPU 加速（可选）
 

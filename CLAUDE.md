@@ -166,6 +166,12 @@ PreloadService.get_indices_data()
     └── UnifiedStockDataService.get_indices_data()
 ```
 
+## 盯盘助手配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
+
 ## 技术栈
 
 - Flask + SQLAlchemy + SQLite
