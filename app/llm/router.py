@@ -11,6 +11,7 @@ TASK_LAYER_MAP = {
     'sentiment': LLMLayer.FLASH,
     'analysis': LLMLayer.PREMIUM,
     'advice': LLMLayer.PREMIUM,
+    'watch_analysis': LLMLayer.FLASH,
 }
 
 

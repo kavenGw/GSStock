@@ -14,5 +14,6 @@ alert_bp = Blueprint('alert', __name__, url_prefix='/alert')
 briefing_bp = Blueprint('briefing', __name__, url_prefix='/briefing')
 strategy_bp = Blueprint('strategy', __name__, url_prefix='/strategies')
 stock_detail_bp = Blueprint('stock_detail', __name__, url_prefix='/api/stock-detail')
+watch_bp = Blueprint('watch', __name__, url_prefix='/watch')
 
-from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, strategy, stock_detail
+from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, strategy, stock_detail, watch

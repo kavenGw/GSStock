@@ -1,0 +1,2 @@
+default_volatility_threshold: 0.02
+notification_cooldown_minutes: 30

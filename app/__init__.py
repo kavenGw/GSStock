@@ -182,7 +182,7 @@ def create_app(config_class=None):
             stock_db_path, _ = get_db_paths(app)
             cleanup_legacy_tables(stock_db_path)
 
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp, watch_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
@@ -197,9 +197,10 @@ def create_app(config_class=None):
     app.register_blueprint(briefing_bp)
     app.register_blueprint(strategy_bp)
     app.register_blueprint(stock_detail_bp)
+    app.register_blueprint(watch_bp)
 
     with app.app_context():
-        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution
+        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis
 
         # 检查是否需要执行 CockroachDB 迁移
         from app.services.cockroach_migration import check_cockroach_migration_needed, migrate_local_to_cockroach

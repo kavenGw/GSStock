@@ -2,6 +2,7 @@
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +17,20 @@ class SchedulerEngine:
         from app.strategies.registry import registry
         from app.scheduler.event_bus import event_bus
 
+        from app.config.watch_config import WATCH_INTERVAL_MINUTES
+
         for strategy in registry.active:
-            if not strategy.schedule:
+            # watch_assistant 使用 IntervalTrigger，其余用 CronTrigger
+            if strategy.name == 'watch_assistant':
+                trigger = IntervalTrigger(minutes=WATCH_INTERVAL_MINUTES)
+                schedule_desc = f'every {WATCH_INTERVAL_MINUTES}min'
+            elif not strategy.schedule:
                 continue
-            try:
+            else:
                 trigger = CronTrigger.from_crontab(strategy.schedule)
+                schedule_desc = strategy.schedule
+
+            try:
                 self.scheduler.add_job(
                     self._run_strategy,
                     trigger=trigger,
@@ -28,7 +38,7 @@ class SchedulerEngine:
                     id=f'strategy_{strategy.name}',
                     replace_existing=True,
                 )
-                logger.info(f'[调度器] 注册 {strategy.name}: {strategy.schedule}')
+                logger.info(f'[调度器] 注册 {strategy.name}: {schedule_desc}')
             except Exception as e:
                 logger.error(f'[调度器] 注册 {strategy.name} 失败: {e}')
 
