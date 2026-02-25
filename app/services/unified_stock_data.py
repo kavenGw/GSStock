@@ -3134,6 +3134,12 @@ class UnifiedStockDataService:
             self.get_realtime_prices(stock_codes, force_refresh=True)
         elif data_type == 'trend':
             self.get_trend_data(stock_codes, days, force_refresh=True)
+        elif data_type == 'a_index':
+            self.get_a_share_index_quotes(stock_codes, force_refresh=True)
+        elif data_type == 'yf_index':
+            self.get_yfinance_batch_quotes(stock_codes, 'briefing_index_yf', force_refresh=True)
+        elif data_type == 'yf_futures':
+            self.get_yfinance_batch_quotes(stock_codes, 'briefing_futures_yf', force_refresh=True)
 
 
 # 创建单例实例

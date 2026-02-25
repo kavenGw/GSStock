@@ -190,6 +190,9 @@ class BriefingPage {
             const data = await resp.json();
             if (data.error) throw new Error(data.error);
             this.renderIndices(data);
+            if (data.partial && !force) {
+                setTimeout(() => this.loadIndices(true), 3000);
+            }
         } catch (e) {
             console.error('加载指数数据失败:', e);
             document.getElementById('indicesContainer').innerHTML = `<div class="text-warning-dark">指数数据加载失败</div>`;
@@ -203,7 +206,10 @@ class BriefingPage {
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             if (data.error) throw new Error(data.error);
-            this.renderFutures(data);
+            this.renderFutures(data.futures || data);
+            if (data.partial && !force) {
+                setTimeout(() => this.loadFutures(true), 3000);
+            }
         } catch (e) {
             console.error('加载期货数据失败:', e);
             document.getElementById('futuresContainer').innerHTML = `<div class="text-warning-dark">期货数据加载失败</div>`;
@@ -217,7 +223,10 @@ class BriefingPage {
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             if (data.error) throw new Error(data.error);
-            this.renderETFPremium(data);
+            this.renderETFPremium(data.etfs || data);
+            if (data.partial && !force) {
+                setTimeout(() => this.loadETF(true), 3000);
+            }
         } catch (e) {
             console.error('加载ETF数据失败:', e);
             document.getElementById('etfContainer').innerHTML = `<div class="text-warning-dark">ETF数据加载失败</div>`;
