@@ -5,13 +5,20 @@
 ## 功能
 
 - **持仓管理** — 上传持仓截图 OCR 自动识别，多账户合并（数量相加、成本加权平均）
-- **实时行情** — A股(akshare) + 美股/港股(yfinance)，统一数据接口，8小时缓存
-- **威科夫分析** — 自动识别市场阶段，生成交易信号
+- **实时行情** — A股(akshare) + 美股/港股(yfinance)，统一数据接口，多源负载均衡
+- **威科夫分析** — 自动识别市场阶段，多周期信号检测
 - **操作建议** — 记录支撑位、压力位、交易策略
 - **每日记录** — 持仓快照、盈亏统计、资产走势
+- **每日简报** — 市场概况、持仓分析、预警汇总
 - **板块管理** — 股票分类、板块评级
-- **预警系统** — 信号检测与提醒
+- **预警系统** — 涨跌幅预警、价格突破预警、威科夫信号
 - **期货/贵金属** — 指数、期货、贵金属走势追踪
+- **交易策略** — 策略记录与管理
+- **再平衡** — 持仓配置建议
+- **利润统计** — 交易利润分析
+- **策略插件** — 自动发现注册，Cron 定时执行，内置四种策略（涨跌预警/价格预警/每日简报/威科夫信号）
+- **通知推送** — Slack / Email 多渠道推送，与策略引擎集成
+- **AI 分析** — 智谱 GLM 分层路由（Flash/Premium），日预算控制
 
 ## 环境要求
 
@@ -36,24 +43,21 @@ pip install -r requirements.txt
 cp .env.sample .env
 ```
 
-编辑 `.env` 文件配置选项：
+编辑 `.env` 文件，完整配置项见 `.env.sample` 注释。核心配置：
 
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
-| `READONLY_MODE` | 只读模式，不从服务器获取数据，不修改 stock.db | `false` |
+| `READONLY_MODE` | 只读模式，不从服务器获取数据 | `false` |
 | `SECRET_KEY` | Flask 密钥，留空则自动生成 | 自动生成 |
 | `DATABASE_URL` | 公共数据库路径 | `sqlite:///data/stock.db` |
 | `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
+| `COCKROACH_URL` | CockroachDB 云数据库（可选） | 空 |
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
-| `AI_API_KEY` | AI 分析 API 密钥（可选） | 空 |
-| `AI_BASE_URL` | AI API 地址（可选） | `https://api.openai.com/v1` |
-| `AI_MODEL` | AI 模型名称（可选） | `gpt-4o-mini` |
-
-**只读模式**适用于：
-- 无网络环境
-- 仅查看历史数据
-- 共享 stock.db 给其他用户使用
+| `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
+| `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | `5.0` |
+| `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
+| `SMTP_HOST` | SMTP 邮件服务器（可选） | 空 |
 
 ### 3. GPU 加速（可选）
 
@@ -77,18 +81,9 @@ python run.py
 
 访问 http://127.0.0.1:5000
 
-启动时会显示 OCR 后端类型（CUDA/DIRECTML/CPU）。
+启动时会自动加载策略插件、初始化通知渠道、启动调度引擎。
 
 Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
-
-## 功能说明
-
-| 功能 | 说明 |
-|------|------|
-| 上传持仓 | 上传截图自动识别或手动输入 |
-| 持仓列表 | 查看当日持仓及盈亏 |
-| 操作建议 | 记录支撑位、压力位、策略 |
-| 历史查询 | 切换日期查看历史数据 |
 
 ## 数据存储
 
@@ -109,20 +104,20 @@ Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
 
 | 数据源 | 说明 | 密钥 |
 |--------|------|------|
-| 新浪财经 | 实时行情，权重 40% | 无需 |
-| 腾讯财经 | 实时行情，批量获取效率高，权重 35% | 无需 |
-| 东方财富 | 实时行情 + 历史K线，权重 25% | 无需 |
+| 新浪财经 | 实时行情 | 无需 |
+| 腾讯财经 | 实时行情，批量获取 | 无需 |
+| 东方财富 | 实时行情 + 历史K线 | 无需 |
 | yfinance | 兜底数据源 | 无需 |
 
 ### 美股
 
-默认使用 yfinance（无需密钥）。配置额外密钥可启用多数据源负载均衡，提升稳定性。
+默认使用 yfinance（无需密钥）。配置额外密钥可启用多数据源负载均衡。
 
-| 数据源 | 免费额度 | 环境变量 | 支持功能 |
-|--------|---------|---------|---------|
-| Yahoo Finance | 无限制 | 无需 | 实时 + 历史 + 信息 |
-| Twelve Data | 8请求/分钟, 800请求/天 | `TWELVE_DATA_API_KEY` | 实时 + 历史 |
-| Polygon.io | 5请求/分钟 | `POLYGON_API_KEY` | 实时 + 历史 |
+| 数据源 | 免费额度 | 环境变量 |
+|--------|---------|---------|
+| Yahoo Finance | 无限制 | 无需 |
+| Twelve Data | 8请求/分钟, 800请求/天 | `TWELVE_DATA_API_KEY` |
+| Polygon.io | 5请求/分钟 | `POLYGON_API_KEY` |
 
 ### 港股
 
@@ -137,28 +132,45 @@ Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
 
 ### 数据源配置
 
-在 `.env` 中添加对应的 API 密钥即可启用（详见 `.env.sample`）：
+在 `.env` 中添加对应的 API 密钥即可启用。数据源配置文件：`app/config/data_sources.py`
 
-```env
-TWELVE_DATA_API_KEY=your_key_here
-POLYGON_API_KEY=your_key_here
-```
+## AI 分析（可选）
 
-数据源配置文件：`app/config/data_sources.py`（权重、优先级、市场映射）
+集成智谱 GLM 大模型，为持仓股票生成结构化分析建议。
 
-### AI 分析（可选）
-
-支持 OpenAI 兼容 API（OpenAI、DeepSeek、本地模型等），为持仓股票生成结构化分析建议。
+- **Flash 层** (glm-4-flash) — 快速任务：每日简报、情绪分析
+- **Premium 层** (glm-4) — 高质量分析：深度分析、操作建议
 
 在 `.env` 中配置：
 
 ```env
-AI_API_KEY=sk-xxx
-AI_BASE_URL=https://api.openai.com/v1   # 可选，默认 OpenAI
-AI_MODEL=gpt-4o-mini                     # 可选，默认 gpt-4o-mini
+ZHIPU_API_KEY=your_key_here
+LLM_DAILY_BUDGET=5.0    # 日预算上限（美元），默认 5.0
 ```
 
-配置 `AI_API_KEY` 后自动启用 AI 分析功能。
+配置 `ZHIPU_API_KEY` 后自动启用 AI 分析功能。预算用尽时自动降级到 Flash 层。
+
+## 通知系统（可选）
+
+策略引擎检测到信号后，通过事件总线推送到已配置的通知渠道。
+
+### Slack
+
+```env
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
+```
+
+### Email
+
+```env
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_USER=your_email
+SMTP_PASSWORD=your_password
+NOTIFY_EMAIL_TO=target@example.com
+```
+
+配置对应环境变量后自动启用。
 
 ## 技术栈
 
@@ -166,15 +178,23 @@ AI_MODEL=gpt-4o-mini                     # 可选，默认 gpt-4o-mini
 - **前端** — Bootstrap 5 + 原生 JavaScript
 - **数据源** — akshare + yfinance + Twelve Data + Polygon（多源负载均衡）
 - **OCR** — RapidOCR (ONNX Runtime)
+- **AI** — 智谱 GLM（Flash/Premium 分层路由）
+- **调度** — APScheduler（Cron 策略执行）
 
 ## 项目结构
 
 ```
 app/
-├── config/       # 股票代码、期货指数配置
-├── models/       # SQLAlchemy 数据模型
-├── routes/       # Flask Blueprint 路由
-├── services/     # 业务逻辑（OCR、行情、分析）
-├── templates/    # Jinja2 页面模板
-└── static/       # CSS/JS 静态资源
+├── config/           # 配置（股票代码、数据源、通知）
+├── models/           # SQLAlchemy 数据模型
+├── routes/           # Flask Blueprint 路由
+├── services/         # 业务逻辑服务
+├── templates/        # Jinja2 页面模板
+├── static/           # CSS/JS 静态资源
+├── llm/              # LLM 路由和提供者（智谱 GLM）
+├── notifications/    # 多渠道通知系统
+├── strategies/       # 策略插件系统
+├── scheduler/        # APScheduler 后台调度
+├── middleware/       # Flask 中间件
+└── utils/            # 工具函数
 ```

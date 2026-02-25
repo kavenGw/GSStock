@@ -25,30 +25,19 @@ start.bat
 
 ```
 app/
-├── __init__.py      # Flask 工厂模式 create_app()
-├── config/          # 配置模块
-│   └── stock_codes.py  # 统一股票代码配置
-├── models/          # SQLAlchemy 模型
-│   ├── position.py  # 持仓模型 (date+stock_code 唯一)
-│   ├── advice.py    # 操作建议模型
-│   └── unified_cache.py  # 统一缓存模型
-├── routes/          # Flask Blueprint
-│   ├── main.py      # 首页 /
-│   ├── position.py  # 持仓管理 /positions/*
-│   ├── advice.py    # 操作建议 /advices/*
-│   └── alert.py     # 预警 /alert/*
-├── services/        # 业务逻辑层
-│   ├── ocr.py       # Tesseract OCR 识别
-│   ├── position.py  # 持仓数据处理、合并
-│   ├── unified_stock_data.py  # 统一数据服务（唯一数据入口）
-│   ├── cache_validator.py     # 缓存有效期验证
-│   ├── wyckoff.py   # 威科夫分析服务
-│   ├── futures.py   # 期货/指数/走势数据服务
-│   └── preload.py   # 数据预加载服务
-├── utils/           # 工具类
-│   └── market_identifier.py  # 市场识别工具
-├── templates/       # Jinja2 模板
-└── static/          # CSS/JS 静态资源
+├── __init__.py        # Flask 工厂模式 create_app()
+├── config/            # 配置模块（股票代码、数据源、通知）
+├── models/            # SQLAlchemy 模型
+├── routes/            # Flask Blueprint 路由（14 个模块）
+├── services/          # 业务逻辑层（数据、分析、交易等）
+├── llm/               # LLM 路由和提供者（智谱 GLM）
+├── notifications/     # 多渠道通知系统（Slack/Email）
+├── strategies/        # 策略插件系统（自动发现注册）
+├── scheduler/         # APScheduler 后台调度 + 事件总线
+├── middleware/        # Flask 中间件
+├── utils/             # 工具函数
+├── templates/         # Jinja2 模板
+└── static/            # CSS/JS 静态资源
 ```
 
 ## 核心设计
@@ -180,9 +169,11 @@ PreloadService.get_indices_data()
 ## 技术栈
 
 - Flask + SQLAlchemy + SQLite
-- Tesseract OCR（可选，不安装则手动输入）
+- RapidOCR (ONNX Runtime)
 - Bootstrap 5 + 原生 JavaScript
-- akshare（A股数据）+ yfinance（美股/港股/期货数据）
+- akshare（A股数据）+ yfinance（美股/港股/期货数据）+ Twelve Data + Polygon
+- 智谱 GLM（AI 分析，Flash/Premium 分层路由）
+- APScheduler（策略调度）
 
 ## 股票代码配置
 
@@ -203,3 +194,7 @@ PreloadService.get_indices_data()
 - 数据库：`data/stock.db`
 - 内存缓存持久化：`data/memory_cache/{stock_code}/{cache_type}.pkl`
 - 上传图片：`uploads/`
+
+## 开发规范
+
+**配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
