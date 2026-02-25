@@ -1,0 +1,235 @@
+/* 暗色主题 — glassmorphism + cyan 强调色 */
+:root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #1c2128;
+    --bg-card: rgba(22, 27, 34, 0.8);
+    --bg-card-hover: rgba(30, 37, 46, 0.9);
+    --border-color: rgba(48, 54, 61, 0.6);
+    --border-light: rgba(255, 255, 255, 0.06);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --accent: #00d4aa;
+    --accent-hover: #00e6b8;
+    --accent-bg: rgba(0, 212, 170, 0.12);
+    --profit: #3fb950;
+    --loss: #f85149;
+    --warning: #d29922;
+    --info: #58a6ff;
+    --glass-bg: rgba(22, 27, 34, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: 12px;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ── 全局 ── */
+body {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+a { color: var(--accent); }
+a:hover { color: var(--accent-hover); }
+hr { border-color: var(--border-color); }
+
+/* ── 导航栏 ── */
+.navbar {
+    background: rgba(13, 17, 23, 0.95) !important;
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.navbar-brand, .nav-link { color: var(--text-primary) !important; }
+.nav-link:hover { color: var(--accent) !important; }
+.nav-link.active { color: var(--accent) !important; }
+
+/* ── Glassmorphism 卡片 ── */
+.module-card,
+.card {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: 12px !important;
+    box-shadow: var(--shadow);
+    color: var(--text-primary);
+}
+.card-header {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+.card-body { color: var(--text-primary); }
+
+.module-header {
+    border-bottom-color: var(--border-color) !important;
+}
+.module-header h5 { color: var(--text-primary) !important; }
+
+/* ── 表格 ── */
+.table {
+    color: var(--text-primary) !important;
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: var(--bg-card-hover);
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+    --bs-table-border-color: var(--border-color);
+}
+.table thead th {
+    background: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+    border-bottom: 2px solid var(--border-color) !important;
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.table tbody tr:hover {
+    background: var(--bg-card-hover) !important;
+}
+
+/* ── 表单控件 ── */
+.form-control,
+.form-select {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 0.2rem var(--accent-bg) !important;
+}
+.form-control::placeholder { color: var(--text-muted) !important; }
+.form-label { color: var(--text-secondary); }
+
+/* ── 按钮 ── */
+.btn-primary {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #0d1117 !important;
+}
+.btn-primary:hover {
+    background: var(--accent-hover) !important;
+    border-color: var(--accent-hover) !important;
+}
+.btn-outline-primary {
+    color: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+.btn-outline-primary:hover {
+    background: var(--accent) !important;
+    color: #0d1117 !important;
+}
+.btn-secondary {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+.btn-outline-secondary {
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* ── 模态框 ── */
+.modal-content {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow);
+}
+.modal-header { border-bottom-color: var(--border-color) !important; }
+.modal-footer { border-top-color: var(--border-color) !important; }
+.btn-close { filter: invert(1); }
+
+/* ── 下拉菜单 ── */
+.dropdown-menu {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow);
+}
+.dropdown-item { color: var(--text-primary) !important; }
+.dropdown-item:hover { background: var(--bg-card-hover) !important; }
+.dropdown-divider { border-color: var(--border-color) !important; }
+
+/* ── Badge ── */
+.badge.bg-success { background: var(--profit) !important; }
+.badge.bg-danger { background: var(--loss) !important; }
+.badge.bg-warning { background: var(--warning) !important; color: #0d1117 !important; }
+.badge.bg-info { background: var(--info) !important; }
+.badge.bg-secondary { background: var(--bg-tertiary) !important; }
+
+/* ── Alert ── */
+.alert { border: 1px solid var(--border-color); }
+.alert-info { background: rgba(88, 166, 255, 0.1) !important; color: var(--info) !important; }
+.alert-warning { background: rgba(210, 153, 34, 0.1) !important; color: var(--warning) !important; }
+.alert-danger { background: rgba(248, 81, 73, 0.1) !important; color: var(--loss) !important; }
+.alert-success { background: rgba(63, 185, 80, 0.1) !important; color: var(--profit) !important; }
+
+/* ── 盈亏颜色 ── */
+.text-success, .profit { color: var(--profit) !important; }
+.text-danger, .loss { color: var(--loss) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-info { color: var(--info) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
+/* ── 统计数值 ── */
+.stat-label { color: var(--text-secondary) !important; }
+.stat-value { color: var(--text-primary) !important; }
+.stat-value.profit { color: var(--profit) !important; }
+.stat-value.loss { color: var(--loss) !important; }
+
+/* ── 骨架屏暗色适配 ── */
+.skeleton-line,
+.skeleton-card,
+.skeleton-text,
+.skeleton-block {
+    background: linear-gradient(90deg,
+        var(--bg-secondary) 25%,
+        rgba(48, 54, 61, 0.5) 50%,
+        var(--bg-secondary) 75%) !important;
+    background-size: 200% 100% !important;
+}
+
+/* ── 分页 ── */
+.page-link {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+.page-link:hover { background: var(--bg-card-hover) !important; }
+.page-item.active .page-link {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #0d1117 !important;
+}
+
+/* ── Tooltip/Popover ── */
+.tooltip-inner { background: var(--bg-secondary); }
+.popover {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* ── 列表组 ── */
+.list-group-item {
+    background: transparent !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+.list-group-item:hover { background: var(--bg-card-hover) !important; }
+
+/* ── 进度条 ── */
+.progress {
+    background: var(--bg-tertiary) !important;
+}
+
+/* ── 滚动条 ── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── 选择文本 ── */
+::selection { background: var(--accent-bg); color: var(--accent); }

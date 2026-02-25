@@ -1,0 +1,7 @@
+schedule: "30 8 * * 1-5"
+include_sections:
+  - stocks
+  - indices
+  - futures
+  - sectors
+  - technical

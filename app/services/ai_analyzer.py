@@ -1,25 +1,28 @@
 """AI股票分析服务
 
-接入OpenAI兼容API，整合技术面数据为每只股票生成结构化决策建议。
+通过 LLMRouter 路由到智谱 GLM，整合技术面数据为每只股票生成结构化决策建议。
 分析结果缓存到 UnifiedStockCache（cache_type='ai_analysis'），每日有效。
 
 配置通过环境变量：
-- AI_API_KEY: API密钥（必需）
-- AI_BASE_URL: API地址（默认 https://api.openai.com/v1）
-- AI_MODEL: 模型名称（默认 gpt-4o-mini）
+- ZHIPU_API_KEY: 智谱API密钥（必需）
+- LLM_DAILY_BUDGET: 日预算上限（默认5.0）
 """
 import json
 import logging
-import os
 from datetime import date
 
 logger = logging.getLogger(__name__)
 
-# AI配置 - 直接从环境变量读取
-AI_API_KEY = os.environ.get('AI_API_KEY', '')
-AI_BASE_URL = os.environ.get('AI_BASE_URL', 'https://api.openai.com/v1')
-AI_MODEL = os.environ.get('AI_MODEL', 'gpt-4o-mini')
-AI_ENABLED = bool(AI_API_KEY)
+
+def _check_ai_enabled() -> bool:
+    try:
+        from app.llm.router import llm_router
+        return llm_router.is_available
+    except Exception:
+        return False
+
+
+AI_ENABLED = _check_ai_enabled()
 
 
 class AIAnalyzerService:
@@ -27,7 +30,7 @@ class AIAnalyzerService:
 
     @staticmethod
     def is_available() -> bool:
-        return AI_ENABLED
+        return _check_ai_enabled()
 
     @staticmethod
     def analyze_stock(stock_code: str, stock_name: str = '', force: bool = False) -> dict:
@@ -294,31 +297,20 @@ class AIAnalyzerService:
 
     @staticmethod
     def _call_llm(prompt: str) -> dict:
-        """调用LLM API"""
-        import httpx
+        """通过 LLMRouter 调用智谱 GLM"""
+        from app.llm.router import llm_router
 
         try:
-            response = httpx.post(
-                f"{AI_BASE_URL.rstrip('/')}/chat/completions",
-                headers={
-                    'Authorization': f'Bearer {AI_API_KEY}',
-                    'Content-Type': 'application/json',
-                },
-                json={
-                    'model': AI_MODEL,
-                    'messages': [
-                        {'role': 'system', 'content': '你是专业的股票技术分析师，只输出JSON格式结果。'},
-                        {'role': 'user', 'content': prompt},
-                    ],
-                    'temperature': 0.3,
-                    'max_tokens': 500,
-                },
-                timeout=30,
-            )
-            response.raise_for_status()
-            data = response.json()
+            provider = llm_router.route('analysis')
+            if not provider:
+                return {'error': 'LLM 未配置，请设置 ZHIPU_API_KEY'}
 
-            content = data['choices'][0]['message']['content'].strip()
+            messages = [
+                {'role': 'system', 'content': '你是专业的股票技术分析师，只输出JSON格式结果。'},
+                {'role': 'user', 'content': prompt},
+            ]
+            content = provider.chat(messages, temperature=0.3, max_tokens=500)
+
             # 提取JSON（可能被```包裹）
             if '```' in content:
                 start = content.find('{')
@@ -327,13 +319,8 @@ class AIAnalyzerService:
 
             return json.loads(content)
 
-        except httpx.TimeoutException:
-            return {'error': 'AI分析超时，请稍后重试'}
-        except httpx.HTTPStatusError as e:
-            logger.error(f"[AI分析] API 错误: {e.response.status_code} {e.response.text}", exc_info=True)
-            return {'error': f'AI API 错误: {e.response.status_code}'}
         except json.JSONDecodeError:
-            logger.error(f"[AI分析] 返回非JSON格式: {content[:200] if 'content' in dir() else 'N/A'}", exc_info=True)
+            logger.error(f"[AI分析] 返回非JSON格式: {content[:200] if 'content' in dir() else 'N/A'}")
             return {'error': 'AI返回格式错误'}
         except Exception as e:
             logger.error(f"[AI分析] 分析失败: {e}", exc_info=True)
