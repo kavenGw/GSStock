@@ -1184,7 +1184,7 @@ class UnifiedStockDataService:
                 continue
 
             cache_date = effective_dates[code]
-            cached = UnifiedStockCache.get_cache(code, cache_type, cache_date)
+            cached = UnifiedStockCache.get_cache_with_status([code], cache_type, cache_date).get(code)
             if cached:
                 last_fetch = cached.get('last_fetch_time')
                 if last_fetch and not SmartCacheStrategy.should_refresh(code, last_fetch, cache_date):
@@ -1201,7 +1201,7 @@ class UnifiedStockDataService:
                     result_stocks.append(data)
                     cache_date = effective_dates.get(code, SmartCacheStrategy.get_effective_cache_date(code))
                     memory_cache.set(code, cache_type, data)
-                    UnifiedStockCache.save_cache(code, cache_type, data, cache_date)
+                    UnifiedStockCache.set_cached_data(code, cache_type, data, cache_date)
             except Exception as e:
                 logger.warning(f"[数据服务.分时] {code} 获取失败: {e}")
 
