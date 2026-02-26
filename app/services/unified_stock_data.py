@@ -2555,33 +2555,21 @@ class UnifiedStockDataService:
 
         return result
 
-    def get_cn_sector_data(self, force_refresh: bool = False) -> list:
+    def get_cn_sector_data(self) -> list:
         """A股板块数据获取（负载均衡+熔断保护+过期缓存降级）
 
-        支持多数据源负载均衡：
-        - eastmoney (东方财富): akshare.stock_board_industry_name_em
-        - sina (新浪财经): akshare.stock_sector_spot (备用)
-
-        Returns:
-            板块列表 [{'name': str, 'change_percent': float, 'leader': str}]
+        当天永久缓存：有数据直接返回，无数据才从API获取。
         """
         today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'cn_sector'
         cache_key = 'CN_SECTOR_ALL'
 
-        # 缓存检查
-        if not force_refresh:
-            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
-            if cached and isinstance(cached, list):
-                cache_record = UnifiedStockCache.query.filter_by(
-                    stock_code=cache_key, cache_type=cache_type, cache_date=today
-                ).first()
-                if cache_record and cache_record.last_fetch_time:
-                    age = datetime.now() - cache_record.last_fetch_time
-                    if age < timedelta(hours=8):
-                        self._hit_count += 1
-                        logger.debug("[数据服务.A股板块] 缓存命中")
-                        return cached
+        # 当天有数据直接返回
+        cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
+        if cached and isinstance(cached, list):
+            self._hit_count += 1
+            logger.debug("[数据服务.A股板块] 缓存命中")
+            return cached
 
         self._miss_count += 1
 

@@ -211,11 +211,10 @@ class BriefingService:
         return result
 
     @staticmethod
-    def get_indices_data(force_refresh: bool = False) -> dict:
+    def get_indices_data() -> dict:
         """获取指数数据（按地区分类）
 
-        当 force_refresh=False 时，使用缓存数据，缺失/降级时异步刷新。
-        当 force_refresh=True 时，从API获取数据并缓存。
+        当天永久缓存：首次获取后缓存，同一天内不再重新获取。
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
@@ -223,27 +222,26 @@ class BriefingService:
 
         today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'briefing_index'
+        cache_key = 'BRIEFING_INDICES_V2'
 
-        # 非强制刷新时检查整体缓存
-        if not force_refresh:
-            cache_key = 'BRIEFING_INDICES_V2'
-            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
+        # 检查当天缓存
+        cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
+        if cached and isinstance(cached, dict) and 'regions' in cached:
+            return cached
+
+        # 7天回溯查找历史缓存
+        for days_ago in range(1, 8):
+            cache_date = today - timedelta(days=days_ago)
+            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
             if cached and isinstance(cached, dict) and 'regions' in cached:
+                logger.info(f"[简报服务.指数] 使用{days_ago}天前的缓存")
                 return cached
 
-            for days_ago in range(1, 8):
-                cache_date = today - timedelta(days=days_ago)
-                cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
-                if cached and isinstance(cached, dict) and 'regions' in cached:
-                    logger.info(f"[简报服务.指数] 使用{days_ago}天前的缓存")
-                    return cached
-
-        # 按地区组织结果
+        # 无缓存，从API获取
         sorted_regions = sorted(INDEX_CATEGORIES.items(), key=lambda x: x[1]['order'])
         regions = [{'key': k, 'name': v['name']} for k, v in sorted_regions]
         indices_by_region = {k: [] for k, _ in sorted_regions}
 
-        # 分离A股指数(.SZ/.SS)和其他指数
         a_share_indices = [idx for idx in BRIEFING_INDICES
                            if idx['code'].endswith('.SZ') or idx['code'].endswith('.SS')]
         other_indices = [idx for idx in BRIEFING_INDICES
@@ -254,16 +252,7 @@ class BriefingService:
         # A股指数
         if a_share_indices:
             a_codes = [idx['code'] for idx in a_share_indices]
-            if force_refresh:
-                a_data = unified_stock_data_service.get_a_share_index_quotes(a_codes, force_refresh=True)
-            else:
-                a_data = unified_stock_data_service.get_cached_quotes(a_codes, 'a_index_quote')
-                stale = [c for c in a_codes if c not in a_data or a_data.get(c, {}).get('_is_degraded')]
-                if stale:
-                    partial = True
-                    from flask import current_app
-                    app = current_app._get_current_object()
-                    unified_stock_data_service.refresh_async(stale, 'a_index', app=app)
+            a_data = unified_stock_data_service.get_a_share_index_quotes(a_codes)
 
             for idx_info in a_share_indices:
                 code = idx_info['code']
@@ -286,16 +275,7 @@ class BriefingService:
         # 其他指数（yfinance）
         if other_indices:
             yf_codes = [idx['code'] for idx in other_indices]
-            if force_refresh:
-                yf_data = unified_stock_data_service.get_yfinance_batch_quotes(yf_codes, 'briefing_index_yf', force_refresh=True)
-            else:
-                yf_data = unified_stock_data_service.get_cached_quotes(yf_codes, 'briefing_index_yf')
-                stale = [c for c in yf_codes if c not in yf_data or yf_data.get(c, {}).get('_is_degraded')]
-                if stale:
-                    partial = True
-                    from flask import current_app
-                    app = current_app._get_current_object()
-                    unified_stock_data_service.refresh_async(stale, 'yf_index', app=app)
+            yf_data = unified_stock_data_service.get_yfinance_batch_quotes(yf_codes, 'briefing_index_yf')
 
             for idx_info in other_indices:
                 code = idx_info['code']
@@ -315,7 +295,6 @@ class BriefingService:
                         'region': region, 'error': '无缓存数据'
                     })
 
-        # 移除空地区
         indices_by_region = {k: v for k, v in indices_by_region.items() if v}
         regions = [r for r in regions if r['key'] in indices_by_region]
 
@@ -325,14 +304,17 @@ class BriefingService:
             'partial': partial
         }
 
+        # 保存整体缓存（当天永久有效）
+        if not partial:
+            UnifiedStockCache.set_cached_data(cache_key, cache_type, result, today)
+
         return result
 
     @staticmethod
-    def get_futures_data(force_refresh: bool = False) -> dict:
+    def get_futures_data() -> dict:
         """获取期货数据
 
-        当 force_refresh=False 时，使用缓存数据，缺失/降级时异步刷新。
-        当 force_refresh=True 时，从API获取数据并缓存。
+        当天永久缓存：首次获取后缓存，同一天内不再重新获取。
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
@@ -340,35 +322,26 @@ class BriefingService:
 
         today = SmartCacheStrategy.get_effective_cache_date('NQ=F')
         cache_type = 'briefing_futures'
+        cache_key = 'BRIEFING_FUTURES'
 
-        # 非强制刷新时检查整体缓存
-        if not force_refresh:
-            cache_key = 'BRIEFING_FUTURES'
-            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
+        # 检查当天缓存
+        cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
+        if cached and isinstance(cached, dict) and 'futures' in cached:
+            return cached
+
+        # 7天回溯
+        for days_ago in range(1, 8):
+            cache_date = today - timedelta(days=days_ago)
+            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
             if cached and isinstance(cached, dict) and 'futures' in cached:
+                logger.info(f"[简报服务.期货] 使用{days_ago}天前的缓存")
                 return cached
 
-            for days_ago in range(1, 8):
-                cache_date = today - timedelta(days=days_ago)
-                cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
-                if cached and isinstance(cached, dict) and 'futures' in cached:
-                    logger.info(f"[简报服务.期货] 使用{days_ago}天前的缓存")
-                    return cached
-
+        # 无缓存，从API获取
         futures_codes = [f['code'] for f in BRIEFING_FUTURES]
+        yf_data = unified_stock_data_service.get_yfinance_batch_quotes(futures_codes, 'briefing_futures_yf')
+
         partial = False
-
-        if force_refresh:
-            yf_data = unified_stock_data_service.get_yfinance_batch_quotes(futures_codes, 'briefing_futures_yf', force_refresh=True)
-        else:
-            yf_data = unified_stock_data_service.get_cached_quotes(futures_codes, 'briefing_futures_yf')
-            stale = [c for c in futures_codes if c not in yf_data or yf_data.get(c, {}).get('_is_degraded')]
-            if stale:
-                partial = True
-                from flask import current_app
-                app = current_app._get_current_object()
-                unified_stock_data_service.refresh_async(stale, 'yf_futures', app=app)
-
         futures_list = []
         for futures_info in BRIEFING_FUTURES:
             code = futures_info['code']
@@ -387,43 +360,45 @@ class BriefingService:
                     'error': '无缓存数据'
                 })
 
-        return {'futures': futures_list, 'partial': partial}
+        result = {'futures': futures_list, 'partial': partial}
+
+        # 保存整体缓存
+        if not partial:
+            UnifiedStockCache.set_cached_data(cache_key, cache_type, result, today)
+
+        return result
 
     @staticmethod
-    def get_cn_sectors_data(force_refresh: bool = False) -> list:
+    def get_cn_sectors_data() -> list:
         """获取A股行业板块涨幅前5
 
-        通过 unified 服务获取板块数据（熔断保护+降级）。
-
-        Returns:
-            板块数据列表，每项包含：
-            - name: 板块名称
-            - change_percent: 涨跌幅
-            - leader: 领涨股票
-            - error: 错误信息（如有）
+        当天永久缓存：首次获取后缓存，同一天内不再重新获取。
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
-        from app.services.cache_validator import CacheValidator
         from app.services.market_session import SmartCacheStrategy
 
         today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'sector_cn'
         stock_code = 'SECTOR_CN'
 
-        # 检查缓存
-        if not force_refresh:
-            need_refresh = CacheValidator.should_refresh([stock_code], cache_type, False, today)
-            if stock_code not in need_refresh:
-                cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, today)
-                if cached and isinstance(cached, list):
-                    return cached
+        # 检查当天缓存
+        cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, today)
+        if cached and isinstance(cached, list):
+            return cached
 
-        all_sectors = unified_stock_data_service.get_cn_sector_data(force_refresh)
+        # 7天回溯
+        for days_ago in range(1, 8):
+            cache_date = today - timedelta(days=days_ago)
+            cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, cache_date)
+            if cached and isinstance(cached, list):
+                logger.info(f"[简报服务.A股板块] 使用{days_ago}天前的缓存")
+                return cached
+
+        all_sectors = unified_stock_data_service.get_cn_sector_data()
         if not all_sectors:
             return []
 
-        # 按涨跌幅降序排序，取前5
         all_sectors.sort(key=lambda x: x.get('change_percent', 0), reverse=True)
         result = []
         for s in all_sectors[:5]:
@@ -434,22 +409,14 @@ class BriefingService:
                 'error': None
             })
 
-        # 保存缓存
         UnifiedStockCache.set_cached_data(stock_code, cache_type, result, today)
         return result
 
     @staticmethod
-    def get_us_sectors_data(force_refresh: bool = False) -> list:
+    def get_us_sectors_data() -> list:
         """获取美股行业板块涨幅前5
 
-        使用缓存的收盘价数据，不发起实时API请求。
-
-        Returns:
-            板块数据列表，每项包含：
-            - code: ETF代码
-            - name: 板块名称（中文）
-            - change_percent: 涨跌幅
-            - error: 错误信息（如有）
+        当天永久缓存：首次获取后缓存，同一天内不再重新获取。
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.models.unified_cache import UnifiedStockCache
@@ -488,117 +455,95 @@ class BriefingService:
                     'error': None
                 })
 
-        # 按涨跌幅降序排序，取前5
         all_sectors.sort(key=lambda x: x['change_percent'], reverse=True)
         result = all_sectors[:5]
+
+        # 保存当天缓存
+        if result:
+            UnifiedStockCache.set_cached_data(stock_code, cache_type, result, today)
 
         return result
 
     @staticmethod
-    def get_etf_nav(etf_code: str, force_refresh: bool = False) -> Optional[float]:
-        """获取ETF净值
-
-        通过 UnifiedStockDataService 获取 ETF 净值。
-
-        Args:
-            etf_code: ETF代码
-            force_refresh: 是否强制刷新
-
-        Returns:
-            ETF净值，获取失败返回 None
-        """
+    def get_etf_nav(etf_code: str) -> Optional[float]:
+        """获取ETF净值"""
         from app.services.unified_stock_data import unified_stock_data_service
 
-        result = unified_stock_data_service.get_etf_nav([etf_code], force_refresh)
+        result = unified_stock_data_service.get_etf_nav([etf_code])
         if etf_code in result:
             return result[etf_code].get('nav')
         return None
 
     @staticmethod
-    def get_etf_premium_data(force_refresh: bool = False) -> dict:
+    def get_etf_premium_data() -> dict:
         """获取ETF溢价率数据
 
-        获取 ETF 收盘价和净值，计算溢价率并生成买卖信号。
-        使用缓存的收盘价数据，不发起实时API请求。
+        当天永久缓存：首次获取后缓存，同一天内不再重新获取。
         溢价率 = (价格 / 净值 - 1) × 100%
-        ≤3% 建议买入，≥6% 建议卖出，其他为正常区间。
-
-        Returns:
-            ETF溢价数据列表，每项包含：
-            - code: ETF代码
-            - name: ETF名称
-            - price: 收盘价格
-            - nav: 净值
-            - premium_rate: 溢价率
-            - signal: buy/sell/normal
-            - error: 错误信息（如有）
         """
         from app.services.unified_stock_data import unified_stock_data_service
+        from app.models.unified_cache import UnifiedStockCache
+        from app.services.market_session import SmartCacheStrategy
 
+        today = SmartCacheStrategy.get_effective_cache_date('159941')
+        cache_type = 'briefing_etf'
+        cache_key = 'BRIEFING_ETF_PREMIUM'
+
+        # 检查当天缓存
+        cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
+        if cached and isinstance(cached, dict) and 'etfs' in cached:
+            return cached
+
+        # 7天回溯
+        for days_ago in range(1, 8):
+            cache_date = today - timedelta(days=days_ago)
+            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
+            if cached and isinstance(cached, dict) and 'etfs' in cached:
+                logger.info(f"[简报服务.ETF] 使用{days_ago}天前的缓存")
+                return cached
+
+        # 无缓存，获取数据
         result = []
         etf_codes = [etf['code'] for etf in BRIEFING_ETFS]
+        prices = unified_stock_data_service.get_closing_prices(etf_codes)
 
         partial = False
-        if force_refresh:
-            prices = unified_stock_data_service.get_realtime_prices(etf_codes, force_refresh=True)
-        else:
-            prices = unified_stock_data_service.get_closing_prices(etf_codes)
-            stale = [c for c in etf_codes if c not in prices or prices.get(c, {}).get('_is_degraded')]
-            if stale:
-                partial = True
-                from flask import current_app
-                app = current_app._get_current_object()
-                unified_stock_data_service.refresh_async(stale, 'price', app=app)
-
         for etf_info in BRIEFING_ETFS:
             code = etf_info['code']
             price_data = prices.get(code)
 
-            # 检查数据有效且非降级
             if not price_data or price_data.get('_is_degraded'):
+                partial = True
                 result.append({
-                    'code': code,
-                    'name': etf_info['name'],
-                    'price': None,
-                    'nav': None,
-                    'premium_rate': None,
-                    'signal': None,
-                    'error': '价格获取失败'
+                    'code': code, 'name': etf_info['name'],
+                    'price': None, 'nav': None, 'premium_rate': None,
+                    'signal': None, 'error': '价格获取失败'
                 })
                 continue
 
             price = price_data.get('current_price')
             if not price:
+                partial = True
                 result.append({
-                    'code': code,
-                    'name': etf_info['name'],
-                    'price': None,
-                    'nav': None,
-                    'premium_rate': None,
-                    'signal': None,
-                    'error': '价格数据无效'
+                    'code': code, 'name': etf_info['name'],
+                    'price': None, 'nav': None, 'premium_rate': None,
+                    'signal': None, 'error': '价格数据无效'
                 })
                 continue
 
-            # 获取净值
-            nav = BriefingService.get_etf_nav(code, force_refresh)
+            nav = BriefingService.get_etf_nav(code)
 
             if not nav:
+                partial = True
                 result.append({
-                    'code': code,
-                    'name': etf_info['name'],
-                    'price': round(price, 3),
-                    'nav': None,
-                    'premium_rate': None,
-                    'signal': None,
-                    'error': '无法计算溢价率'
+                    'code': code, 'name': etf_info['name'],
+                    'price': round(price, 3), 'nav': None, 'premium_rate': None,
+                    'signal': None, 'error': '无法计算溢价率'
                 })
                 continue
 
-            # 计算溢价率
             premium_rate = (price / nav - 1) * 100
 
-            # 判断信号
             if premium_rate <= BUY_THRESHOLD:
                 signal = 'buy'
             elif premium_rate >= SELL_THRESHOLD:
@@ -607,16 +552,19 @@ class BriefingService:
                 signal = 'normal'
 
             result.append({
-                'code': code,
-                'name': etf_info['name'],
-                'price': round(price, 3),
-                'nav': round(nav, 3),
+                'code': code, 'name': etf_info['name'],
+                'price': round(price, 3), 'nav': round(nav, 3),
                 'premium_rate': round(premium_rate, 2),
-                'signal': signal,
-                'error': None
+                'signal': signal, 'error': None
             })
 
-        return {'etfs': result, 'partial': partial}
+        data = {'etfs': result, 'partial': partial}
+
+        # 保存整体缓存
+        if not partial:
+            UnifiedStockCache.set_cached_data(cache_key, cache_type, data, today)
+
+        return data
 
     @staticmethod
     def get_cache_update_time() -> Optional[datetime]:
@@ -752,26 +700,12 @@ class BriefingService:
         return result
 
     @staticmethod
-    def get_sector_ratings(stocks_data: dict = None, force_refresh: bool = False) -> dict:
+    def get_sector_ratings(stocks_data: dict = None) -> dict:
         """获取板块评级数据
 
         根据存储板块（WDC、MU、SNDK、铠侠）的表现，计算综合评分并生成评级。
         评分算法：涨跌幅(60%) + 一致性(30%) + 成交量(10%)
-
-        Args:
-            stocks_data: 已获取的股票数据，避免重复请求
-            force_refresh: 是否强制刷新
-
-        Returns:
-            {
-                'storage': {
-                    'name': '存储板块',
-                    'rating': 'bullish/neutral/bearish',
-                    'score': 75,
-                    'details': {...},
-                    'stocks': [...]
-                }
-            }
+        仅使用缓存数据，不触发API调用。
         """
         from app.services.unified_stock_data import unified_stock_data_service
 
@@ -782,10 +716,8 @@ class BriefingService:
             weights = config['weights']
             thresholds = config['thresholds']
 
-            # 获取股票数据
             stock_list = []
             if stocks_data and 'stocks' in stocks_data:
-                # 从已有数据中提取
                 for cat_stocks in stocks_data['stocks'].values():
                     for s in cat_stocks:
                         if s['code'] in sector_stocks:
@@ -796,13 +728,8 @@ class BriefingService:
                                 'volume': s.get('volume')
                             })
             else:
-                # 使用缓存的收盘价，检测降级数据并刷新
+                # 仅使用缓存的收盘价，不触发API调用
                 prices = unified_stock_data_service.get_closing_prices(sector_stocks)
-                stale_codes = [c for c in sector_stocks
-                               if c not in prices or prices.get(c, {}).get('_is_degraded')]
-                if stale_codes:
-                    fetched = unified_stock_data_service.get_realtime_prices(stale_codes)
-                    prices.update(fetched)
                 for code in sector_stocks:
                     price_data = prices.get(code, {})
                     stock_list.append({

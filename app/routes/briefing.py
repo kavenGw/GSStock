@@ -50,10 +50,9 @@ def get_stocks_earnings():
 
 @briefing_bp.route('/api/indices')
 def get_indices():
-    """指数数据"""
+    """指数数据（当天永久缓存）"""
     try:
-        force = request.args.get('force', 'false') == 'true'
-        data = BriefingService.get_indices_data(force)
+        data = BriefingService.get_indices_data()
         return jsonify(data)
     except Exception as e:
         logger.error(f"[简报.指数] 获取失败: {e}", exc_info=True)
@@ -62,10 +61,9 @@ def get_indices():
 
 @briefing_bp.route('/api/futures')
 def get_futures():
-    """期货数据"""
+    """期货数据（当天永久缓存）"""
     try:
-        force = request.args.get('force', 'false') == 'true'
-        data = BriefingService.get_futures_data(force)
+        data = BriefingService.get_futures_data()
         return jsonify(data)
     except Exception as e:
         logger.error(f"[简报.期货] 获取失败: {e}", exc_info=True)
@@ -74,10 +72,9 @@ def get_futures():
 
 @briefing_bp.route('/api/etf')
 def get_etf():
-    """ETF溢价数据"""
+    """ETF溢价数据（当天永久缓存）"""
     try:
-        force = request.args.get('force', 'false') == 'true'
-        data = BriefingService.get_etf_premium_data(force)
+        data = BriefingService.get_etf_premium_data()
         return jsonify(data)
     except Exception as e:
         logger.error(f"[简报.ETF] 获取失败: {e}", exc_info=True)
@@ -86,12 +83,11 @@ def get_etf():
 
 @briefing_bp.route('/api/sectors')
 def get_sectors():
-    """板块数据（涨幅+评级）"""
+    """板块数据（当天永久缓存）"""
     try:
-        force = request.args.get('force', 'false') == 'true'
-        cn = BriefingService.get_cn_sectors_data(force)
-        us = BriefingService.get_us_sectors_data(force)
-        ratings = BriefingService.get_sector_ratings(None, force)
+        cn = BriefingService.get_cn_sectors_data()
+        us = BriefingService.get_us_sectors_data()
+        ratings = BriefingService.get_sector_ratings()
         return jsonify({
             'cn_sectors': cn,
             'us_sectors': us,
