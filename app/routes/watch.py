@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 from flask import render_template, request, jsonify
 
 from app.routes import watch_bp
@@ -39,11 +40,42 @@ def remove_stock(stock_code):
 @watch_bp.route('/prices')
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
+    from app.strategies.registry import registry
+
     codes = WatchService.get_watch_codes()
     if not codes:
         return jsonify({'success': True, 'prices': []})
+
     result = unified_stock_data_service.get_realtime_prices(codes)
-    return jsonify({'success': True, 'prices': result.get('prices', [])})
+    price_list = result.get('prices', [])
+
+    analyses = WatchService.get_all_today_analyses()
+
+    strategy = registry.get('watch_assistant')
+    strategy_config = strategy.get_config() if strategy else {}
+    cooldown_minutes = strategy_config.get('notification_cooldown_minutes', 30)
+    default_threshold = strategy_config.get('default_volatility_threshold', 0.02)
+    last_notified = getattr(strategy, '_last_notified', {}) if strategy else {}
+
+    now = datetime.now()
+    for item in price_list:
+        code = item.get('code', '')
+        analysis = analyses.get(code, {})
+
+        cooldown_remaining = 0
+        if code in last_notified:
+            elapsed = (now - last_notified[code]).total_seconds()
+            cooldown_remaining = max(0, int(cooldown_minutes * 60 - elapsed))
+
+        item['notification'] = {
+            'threshold': analysis.get('volatility_threshold', default_threshold),
+            'cooldown_remaining': cooldown_remaining,
+            'support_levels': analysis.get('support_levels', []),
+            'resistance_levels': analysis.get('resistance_levels', []),
+            'summary': analysis.get('summary', ''),
+        }
+
+    return jsonify({'success': True, 'prices': price_list})
 
 
 @watch_bp.route('/analyze', methods=['POST'])
@@ -127,3 +159,51 @@ def search_stocks():
     return jsonify({'success': True, 'data': [
         {'stock_code': s.stock_code, 'stock_name': s.stock_name} for s in stocks
     ]})
+
+
+@watch_bp.route('/market-status')
+def market_status():
+    from app.services.trading_calendar import TradingCalendarService
+
+    markets = [
+        {'key': 'A', 'name': 'A股', 'icon': '🇨🇳'},
+        {'key': 'US', 'name': '美股', 'icon': '🇺🇸'},
+        {'key': 'HK', 'name': '港股', 'icon': '🇭🇰'},
+    ]
+
+    from datetime import time as dtime
+
+    result = {}
+    for m in markets:
+        key = m['key']
+        tz = TradingCalendarService.MARKET_TIMEZONES.get(key)
+        now = TradingCalendarService.get_market_now(key)
+        time_str = now.strftime('%H:%M')
+
+        is_trading_day = TradingCalendarService.is_trading_day(key, now.date())
+        is_open = TradingCalendarService.is_market_open(key)
+        # A股午休：is_market_open 返回 false，需要单独判断
+        is_lunch = (is_trading_day and not is_open
+                    and key == 'A' and dtime(11, 30) <= now.time() < dtime(13, 0))
+
+        if not is_trading_day:
+            status, status_text = 'holiday', '休市'
+        elif is_open:
+            status, status_text = 'trading', '交易中'
+        elif is_lunch:
+            status, status_text = 'lunch', '午休'
+        elif TradingCalendarService.is_after_close(key, now):
+            status, status_text = 'closed', '已收盘'
+        else:
+            status, status_text = 'pre_open', '未开盘'
+
+        result[key] = {
+            'name': m['name'],
+            'icon': m['icon'],
+            'timezone': str(tz),
+            'time': time_str,
+            'status': status,
+            'status_text': status_text,
+        }
+
+    return jsonify({'success': True, 'data': result})
