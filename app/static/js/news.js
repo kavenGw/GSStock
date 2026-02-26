@@ -1,5 +1,5 @@
 const News = {
-    REFRESH_INTERVAL: 60,
+    REFRESH_INTERVAL: 600,
     currentTab: 'all',
     items: [],
     countdown: 0,
@@ -167,7 +167,10 @@ const News = {
         this.countdownTimer = setInterval(() => {
             this.countdown--;
             const status = document.getElementById('newsStatus');
-            status.textContent = `${this.items.length} 条快讯 · ${this.countdown}s 后刷新`;
+            const min = Math.floor(this.countdown / 60);
+            const sec = this.countdown % 60;
+            const timeStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+            status.textContent = `${this.items.length} 条快讯 · ${timeStr} 后刷新`;
             if (this.countdown <= 0) {
                 this.countdown = this.REFRESH_INTERVAL;
                 this.refreshItems();
