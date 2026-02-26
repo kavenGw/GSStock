@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
@@ -248,9 +249,10 @@ def create_app(config_class=None):
         from app.services.trading_strategy import TradingStrategyService
         TradingStrategyService.init_default_strategies()
 
-        # 初始化市场状态缓存
-        from app.services.market_status import market_status_service
-        market_status_service.initialize()
+        # 初始化市场状态缓存（仅 reloader 子进程，父进程不处理请求）
+        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or 'werkzeug' not in sys.modules:
+            from app.services.market_status import market_status_service
+            market_status_service.initialize()
 
     # 预加载 OCR 模型，避免首次识别时卡顿
     from app.services.ocr import preload_model
