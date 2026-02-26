@@ -49,4 +49,8 @@ def _call_zhipu(model: str, messages: list[dict], temperature: float, max_tokens
     )
     response.raise_for_status()
     data = response.json()
-    return data['choices'][0]['message']['content'].strip()
+    content = data['choices'][0]['message']['content'].strip()
+    if not content:
+        logger.warning(f"[智谱API] {model} 返回空内容, finish_reason={data['choices'][0].get('finish_reason')}")
+        raise ValueError('智谱API返回空内容')
+    return content

@@ -141,7 +141,11 @@ def analyze():
                 {'role': 'system', 'content': SYSTEM_PROMPT},
                 {'role': 'user', 'content': prompt},
             ])
-            parsed = json.loads(response)
+            # 清理可能的 markdown 代码块包裹
+            cleaned = response.strip()
+            if cleaned.startswith('```'):
+                cleaned = cleaned.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
+            parsed = json.loads(cleaned)
             WatchService.save_analysis(
                 stock_code=code,
                 support_levels=parsed.get('support_levels', []),
