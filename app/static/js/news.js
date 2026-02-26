@@ -43,6 +43,8 @@ const News = {
             this.showContent();
         } catch (e) {
             console.error('加载失败:', e);
+            this.items = [];
+            this.showContent();
         }
     },
 
@@ -52,11 +54,13 @@ const News = {
             const data = await resp.json();
             if (data.success) {
                 this.items = data.items;
-                this.renderItems();
-                this.showContent();
             }
+            this.renderItems();
+            this.showContent();
         } catch (e) {
             console.error('加载快讯失败:', e);
+            this.items = [];
+            this.showContent();
         }
     },
 
