@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 ZHIPU_API_KEY = os.environ.get('ZHIPU_API_KEY', '')
 ZHIPU_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4'
-LLM_REQUEST_TIMEOUT = int(os.environ.get('LLM_REQUEST_TIMEOUT', '60'))
+LLM_REQUEST_TIMEOUT = int(os.environ.get('LLM_REQUEST_TIMEOUT', '300'))
 
 
 class ZhipuFlashProvider(LLMProvider):
