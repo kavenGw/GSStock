@@ -344,7 +344,9 @@ class OcrLogger:
             self.file = None
 
 def preload_model():
-    """应用启动时预加载 OCR 模型"""
+    """应用启动时预加载 OCR 模型（已加载则跳过）"""
+    if OcrBackend._instance is not None:
+        return
     logger.info("[OCR] 预加载 OCR 模型...")
     try:
         OcrBackend.get_ocr_instance()

@@ -20,6 +20,7 @@ class SchedulerEngine:
         from app.config.watch_config import WATCH_INTERVAL_MINUTES
         from app.config.news_config import NEWS_INTERVAL_MINUTES
 
+        registered = []
         for strategy in registry.active:
             if strategy.name == 'watch_assistant':
                 trigger = IntervalTrigger(minutes=WATCH_INTERVAL_MINUTES)
@@ -41,12 +42,12 @@ class SchedulerEngine:
                     id=f'strategy_{strategy.name}',
                     replace_existing=True,
                 )
-                logger.info(f'[调度器] 注册 {strategy.name}: {schedule_desc}')
+                registered.append(f'{strategy.name}({schedule_desc})')
             except Exception as e:
                 logger.error(f'[调度器] 注册 {strategy.name} 失败: {e}')
 
         self.scheduler.start()
-        logger.info(f'[调度器] 启动完成，{len(self.scheduler.get_jobs())} 个任务')
+        logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
 
     def _run_strategy(self, strategy_name: str):
         """在 app context 内执行策略扫描"""

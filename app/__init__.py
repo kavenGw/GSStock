@@ -100,7 +100,11 @@ def migrate_wyckoff_table():
 
 
 def setup_logging(app):
-    """配置应用日志系统"""
+    """配置应用日志系统（幂等，重复调用不会叠加 handler）"""
+    root_logger = logging.getLogger()
+    if root_logger.handlers:
+        return
+
     log_dir = app.config.get('LOG_DIR', 'data/logs')
     os.makedirs(log_dir, exist_ok=True)
 
@@ -132,8 +136,6 @@ def setup_logging(app):
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
 
-    # 配置根日志器
-    root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
     root_logger.addHandler(error_handler)
@@ -143,6 +145,7 @@ def setup_logging(app):
     logging.getLogger('yfinance').setLevel(logging.CRITICAL)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    logging.getLogger('apscheduler').setLevel(logging.WARNING)
 
 
 def create_app(config_class=None):

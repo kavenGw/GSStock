@@ -29,13 +29,14 @@ def main():
         sys.exit(1)
 
 
-# 为了兼容 Flask 的 flask run 命令
+# 兼容 flask run（作为模块导入时创建 app，python run.py 走 main()）
 app = None
-try:
-    app = create_app()
-except Exception as e:
-    print(f"应用创建失败: {e}")
-    traceback.print_exc()
+if __name__ != '__main__':
+    try:
+        app = create_app()
+    except Exception as e:
+        print(f"应用创建失败: {e}")
+        traceback.print_exc()
 
 if __name__ == '__main__':
     main()
