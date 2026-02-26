@@ -49,6 +49,14 @@ class WatchService:
         return [w.stock_code for w in items]
 
     @staticmethod
+    def get_watched_markets() -> list[str]:
+        """获取盯盘列表涉及的市场（按优先级排序）"""
+        priority = ['A', 'US', 'HK', 'KR', 'TW', 'JP']
+        items = WatchList.query.with_entities(WatchList.market).distinct().all()
+        markets = {m[0] for m in items if m[0]}
+        return [m for m in priority if m in markets] + [m for m in markets if m not in priority]
+
+    @staticmethod
     def get_today_analysis(stock_code: str) -> dict | None:
         """获取今日AI分析结果"""
         today = date.today()
