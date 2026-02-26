@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 ZHIPU_API_KEY = os.environ.get('ZHIPU_API_KEY', '')
 ZHIPU_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4'
+LLM_REQUEST_TIMEOUT = int(os.environ.get('LLM_REQUEST_TIMEOUT', '60'))
 
 
 class ZhipuFlashProvider(LLMProvider):
@@ -45,7 +46,7 @@ def _call_zhipu(model: str, messages: list[dict], temperature: float, max_tokens
             'temperature': temperature,
             'max_tokens': max_tokens,
         },
-        timeout=30,
+        timeout=LLM_REQUEST_TIMEOUT,
     )
     response.raise_for_status()
     data = response.json()
