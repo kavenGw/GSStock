@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}新闻看板{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1"><i class="bi bi-newspaper"></i> 新闻看板</h4>
+            <small class="text-muted" id="newsStatus">加载中...</small>
+        </div>
+        <button class="btn btn-outline-primary btn-sm" id="btnRefresh">
+            <i class="bi bi-arrow-clockwise"></i> 刷新
+        </button>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" id="newsTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-tab="all" href="#">全部</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-tab="interest" href="#">兴趣</a>
+        </li>
+    </ul>
+
+    <div id="loadingState">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="skeleton-card mb-2" style="height:60px"></div>
+                <div class="skeleton-card mb-2" style="height:60px"></div>
+                <div class="skeleton-card mb-2" style="height:60px"></div>
+                <div class="skeleton-card mb-2" style="height:60px"></div>
+            </div>
+            <div class="col-md-5">
+                <div class="skeleton-card" style="height:300px"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="contentArea" style="display:none">
+        <div class="row">
+            <div class="col-md-7">
+                <div id="newsList"></div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-secondary btn-sm" id="btnLoadMore" style="display:none">
+                        加载更多
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-robot"></i> AI 简报</span>
+                        <small class="text-muted" id="briefingTime"></small>
+                    </div>
+                    <div class="card-body" id="briefingContent">
+                        <p class="text-muted">暂无简报</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="emptyState" style="display:none">
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-newspaper" style="font-size:3rem"></i>
+            <p class="mt-3">暂无新闻数据，点击刷新获取</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/news.js') }}"></script>
+{% endblock %}

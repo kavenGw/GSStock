@@ -172,6 +172,12 @@ PreloadService.get_indices_data()
 |---------|------|-------|
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
 
+## 新闻看板配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `NEWS_INTERVAL_MINUTES` | 新闻刷新间隔（分钟） | `10` |
+
 ## 技术栈
 
 - Flask + SQLAlchemy + SQLite
