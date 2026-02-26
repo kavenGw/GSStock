@@ -10,6 +10,8 @@ const Watch = {
     _analysisTimer: null,
     ANALYSIS_INTERVAL: 30 * 60,
     analysisCountdown: 0,
+    chartInstances: {},
+    chartPeriods: {},
 
     async init() {
         await this.loadList();
@@ -265,6 +267,9 @@ const Watch = {
     // --- 渲染 ---
 
     renderGroups() {
+        Object.values(this.chartInstances).forEach(chart => chart.dispose());
+        this.chartInstances = {};
+
         const pricesMap = {};
         this.prices.forEach(p => { pricesMap[p.code] = p; });
 
@@ -347,8 +352,9 @@ const Watch = {
 
         return `<div class="list-group-item" id="watch-row-${code}">
             <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1">
+                <div class="flex-grow-1" style="cursor:pointer" onclick="Watch.toggleChart('${code}')">
                     <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-chevron-right small text-muted me-1 chart-toggle-icon" id="chart-icon-${code}"></i>
                         <span class="fw-bold me-2">${name}</span>
                         <small class="text-muted me-3">${code}</small>
                         <span class="fs-5 fw-bold me-2" data-field="price" data-code="${code}">${priceDisplay}</span>
@@ -363,9 +369,22 @@ const Watch = {
                         ${cooldownText}
                     </div>
                 </div>
-                <button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="Watch.removeStock('${code}')" title="移除">
+                <button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="event.stopPropagation(); Watch.removeStock('${code}')" title="移除">
                     <i class="bi bi-x-lg"></i>
                 </button>
+            </div>
+            <div class="chart-section mt-2 d-none" id="chart-section-${code}">
+                <div class="d-flex align-items-center mb-1">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary btn-xs active" onclick="event.stopPropagation(); Watch.switchChartPeriod('${code}', 'intraday', this)">分时</button>
+                        <button type="button" class="btn btn-outline-secondary btn-xs" onclick="event.stopPropagation(); Watch.switchChartPeriod('${code}', '7d', this)">7天</button>
+                        <button type="button" class="btn btn-outline-secondary btn-xs" onclick="event.stopPropagation(); Watch.switchChartPeriod('${code}', '30d', this)">30天</button>
+                        <button type="button" class="btn btn-outline-secondary btn-xs" onclick="event.stopPropagation(); Watch.switchChartPeriod('${code}', '90d', this)">90天</button>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-${code}" style="height: 160px;">
+                    <div class="skeleton skeleton-card" style="height:100%;"></div>
+                </div>
             </div>
         </div>`;
     },
@@ -382,6 +401,205 @@ const Watch = {
             parts.push(`<span class="text-danger">阻力: ${resistances.join(' / ')}</span>`);
         }
         return parts.join('<span class="text-muted mx-1">|</span>');
+    },
+
+    toggleChart(code) {
+        const section = document.getElementById(`chart-section-${code}`);
+        const icon = document.getElementById(`chart-icon-${code}`);
+        if (!section) return;
+
+        const isHidden = section.classList.contains('d-none');
+        if (isHidden) {
+            section.classList.remove('d-none');
+            if (icon) icon.classList.replace('bi-chevron-right', 'bi-chevron-down');
+            if (!this.chartInstances[code]) {
+                this.loadChartData(code, 'intraday');
+            }
+        } else {
+            section.classList.add('d-none');
+            if (icon) icon.classList.replace('bi-chevron-down', 'bi-chevron-right');
+        }
+    },
+
+    async loadChartData(code, period) {
+        const container = document.getElementById(`chart-${code}`);
+        if (!container) return;
+
+        container.innerHTML = '<div class="skeleton skeleton-card" style="height:100%;"></div>';
+
+        try {
+            const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(code)}&period=${period}`);
+            const result = await resp.json();
+            if (!result.success || !result.data?.length) {
+                container.innerHTML = '<div class="text-muted text-center small py-4">暂无数据</div>';
+                return;
+            }
+            this.chartPeriods[code] = period;
+            this.renderChart(code, result);
+        } catch (e) {
+            console.error(`[Watch] chart load failed for ${code}:`, e);
+            container.innerHTML = '<div class="text-muted text-center small py-4">加载失败</div>';
+        }
+    },
+
+    switchChartPeriod(code, period, btn) {
+        const group = btn.parentElement;
+        group.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.loadChartData(code, period);
+    },
+
+    renderChart(code, result) {
+        const container = document.getElementById(`chart-${code}`);
+        container.innerHTML = '';
+
+        if (this.chartInstances[code]) {
+            this.chartInstances[code].dispose();
+        }
+
+        const chart = echarts.init(container);
+        this.chartInstances[code] = chart;
+
+        const option = result.chart_type === 'line'
+            ? this.buildIntradayOption(result)
+            : this.buildCandlestickOption(result);
+
+        chart.setOption(option);
+        new ResizeObserver(() => chart.resize()).observe(container);
+    },
+
+    buildIntradayOption(result) {
+        const data = result.data;
+        const times = data.map(d => d.time);
+        const prices = data.map(d => d.close);
+        const support = result.support_levels || [];
+        const resistance = result.resistance_levels || [];
+
+        const markLines = [];
+        support.forEach(level => {
+            markLines.push({
+                yAxis: level,
+                lineStyle: { color: '#28a745', type: 'dashed', width: 1 },
+                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#28a745' },
+            });
+        });
+        resistance.forEach(level => {
+            markLines.push({
+                yAxis: level,
+                lineStyle: { color: '#dc3545', type: 'dashed', width: 1 },
+                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#dc3545' },
+            });
+        });
+
+        return {
+            grid: { left: 8, right: 55, top: 8, bottom: 20, containLabel: false },
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const p = params[0];
+                    return `${p.axisValue}<br/>${p.value.toFixed(2)}`;
+                },
+            },
+            xAxis: {
+                type: 'category',
+                data: times,
+                axisLabel: { fontSize: 9, interval: Math.floor(times.length / 4) },
+                axisLine: { lineStyle: { color: '#ddd' } },
+            },
+            yAxis: {
+                type: 'value',
+                scale: true,
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                axisLabel: { fontSize: 9 },
+            },
+            series: [{
+                type: 'line',
+                data: prices,
+                smooth: true,
+                symbol: 'none',
+                lineStyle: { width: 1.5, color: '#1890ff' },
+                areaStyle: { color: 'rgba(24,144,255,0.08)' },
+                markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
+            }],
+        };
+    },
+
+    buildCandlestickOption(result) {
+        const data = result.data;
+        const bollinger = result.bollinger || [];
+        const support = result.support_levels || [];
+        const resistance = result.resistance_levels || [];
+
+        const dates = data.map(d => d.date);
+        const ohlc = data.map(d => [d.open, d.close, d.low, d.high]);
+
+        const markLines = [];
+        support.forEach(level => {
+            markLines.push({
+                yAxis: level,
+                lineStyle: { color: '#28a745', type: 'dashed', width: 1 },
+                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#28a745' },
+            });
+        });
+        resistance.forEach(level => {
+            markLines.push({
+                yAxis: level,
+                lineStyle: { color: '#dc3545', type: 'dashed', width: 1 },
+                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#dc3545' },
+            });
+        });
+
+        const series = [
+            {
+                type: 'candlestick',
+                data: ohlc,
+                itemStyle: {
+                    color: '#ef5350',
+                    color0: '#26a69a',
+                    borderColor: '#ef5350',
+                    borderColor0: '#26a69a',
+                },
+                markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
+            },
+        ];
+
+        const bbUpper = bollinger.map(b => b ? b.upper : null);
+        const bbMiddle = bollinger.map(b => b ? b.middle : null);
+        const bbLower = bollinger.map(b => b ? b.lower : null);
+
+        if (bollinger.some(b => b !== null)) {
+            series.push(
+                { type: 'line', data: bbUpper, smooth: true, symbol: 'none', lineStyle: { width: 1, color: 'rgba(150,150,150,0.5)', type: 'dotted' }, z: 0 },
+                { type: 'line', data: bbMiddle, smooth: true, symbol: 'none', lineStyle: { width: 1, color: 'rgba(150,150,150,0.7)' }, z: 0 },
+                { type: 'line', data: bbLower, smooth: true, symbol: 'none', lineStyle: { width: 1, color: 'rgba(150,150,150,0.5)', type: 'dotted' }, z: 0 },
+            );
+        }
+
+        return {
+            grid: { left: 8, right: 55, top: 8, bottom: 20, containLabel: false },
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const candle = params.find(p => p.seriesType === 'candlestick');
+                    if (!candle) return '';
+                    const [open, close, low, high] = candle.value;
+                    return `${candle.axisValue}<br/>开:${open} 高:${high}<br/>低:${low} 收:${close}`;
+                },
+            },
+            xAxis: {
+                type: 'category',
+                data: dates,
+                axisLabel: { fontSize: 9, interval: Math.floor(dates.length / 4) },
+                axisLine: { lineStyle: { color: '#ddd' } },
+            },
+            yAxis: {
+                type: 'value',
+                scale: true,
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                axisLabel: { fontSize: 9 },
+            },
+            series,
+        };
     },
 
     // --- 实时更新 ---

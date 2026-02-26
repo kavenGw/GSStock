@@ -249,3 +249,56 @@ def market_status():
         result[key] = entry
 
     return jsonify({'success': True, 'data': result})
+
+
+@watch_bp.route('/chart-data')
+def chart_data():
+    """获取图表数据"""
+    from app.services.unified_stock_data import unified_stock_data_service
+
+    code = request.args.get('code', '').strip()
+    period = request.args.get('period', 'intraday')
+
+    if not code:
+        return jsonify({'success': False, 'message': '缺少股票代码'})
+
+    result = {'success': True, 'code': code, 'period': period}
+
+    if period == 'intraday':
+        intraday = unified_stock_data_service.get_intraday_data([code])
+        stocks = intraday.get('stocks', [])
+        result['data'] = stocks[0]['data'] if stocks else []
+        result['chart_type'] = 'line'
+    else:
+        days_map = {'7d': 7, '30d': 30, '90d': 90}
+        days = days_map.get(period, 30)
+        fetch_days = days + 20
+        trend = unified_stock_data_service.get_trend_data([code], days=fetch_days)
+        stocks = trend.get('stocks', [])
+        ohlc_data = stocks[0]['data'] if stocks else []
+
+        bollinger = []
+        if len(ohlc_data) >= 20:
+            closes = [d['close'] for d in ohlc_data]
+            for i in range(len(closes)):
+                if i < 19:
+                    bollinger.append(None)
+                    continue
+                window = closes[i-19:i+1]
+                ma = sum(window) / 20
+                std = (sum((x - ma) ** 2 for x in window) / 20) ** 0.5
+                bollinger.append({
+                    'upper': round(ma + 2 * std, 2),
+                    'middle': round(ma, 2),
+                    'lower': round(ma - 2 * std, 2),
+                })
+
+        result['data'] = ohlc_data[-days:]
+        result['bollinger'] = bollinger[-days:]
+        result['chart_type'] = 'candlestick'
+
+    analysis = WatchService.get_today_analysis(code)
+    result['support_levels'] = analysis.get('support_levels', []) if analysis else []
+    result['resistance_levels'] = analysis.get('resistance_levels', []) if analysis else []
+
+    return jsonify(result)

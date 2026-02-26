@@ -1150,6 +1150,131 @@ class UnifiedStockDataService:
             'date_range': date_range
         }
 
+    def get_intraday_data(self, stock_codes: list, interval: str = '1m',
+                          force_refresh: bool = False) -> dict:
+        if not stock_codes:
+            return {'stocks': []}
+
+        cache_type = f'intraday_{interval}'
+        logger.info(f"[数据服务.分时] 开始获取: {len(stock_codes)}只股票, 间隔{interval}")
+
+        remaining_codes = list(stock_codes)
+        result_stocks = []
+
+        # 第一层：内存缓存
+        if not force_refresh:
+            memory_cached = memory_cache.get_batch(remaining_codes, cache_type)
+            for code, data in memory_cached.items():
+                result_stocks.append(data)
+            remaining_codes = [c for c in remaining_codes if c not in memory_cached]
+            if memory_cached:
+                logger.debug(f"[数据服务.缓存] 分时数据内存命中 {len(memory_cached)}只")
+
+        if not remaining_codes:
+            logger.info(f"[数据服务.分时] 完成: 全部内存缓存命中")
+            return {'stocks': result_stocks}
+
+        # 第二层：DB缓存
+        effective_dates = self._get_effective_cache_dates(remaining_codes)
+        need_fetch = []
+
+        for code in remaining_codes:
+            if force_refresh:
+                need_fetch.append(code)
+                continue
+
+            cache_date = effective_dates[code]
+            cached = UnifiedStockCache.get_cache(code, cache_type, cache_date)
+            if cached:
+                last_fetch = cached.get('last_fetch_time')
+                if last_fetch and not SmartCacheStrategy.should_refresh(code, last_fetch, cache_date):
+                    result_stocks.append(cached['data'])
+                    memory_cache.set(code, cache_type, cached['data'])
+                    continue
+            need_fetch.append(code)
+
+        # 第三层：API获取
+        for code in need_fetch:
+            try:
+                data = self._fetch_intraday(code, interval)
+                if data and data.get('data'):
+                    result_stocks.append(data)
+                    cache_date = effective_dates.get(code, SmartCacheStrategy.get_effective_cache_date(code))
+                    memory_cache.set(code, cache_type, data)
+                    UnifiedStockCache.save_cache(code, cache_type, data, cache_date)
+            except Exception as e:
+                logger.warning(f"[数据服务.分时] {code} 获取失败: {e}")
+
+        logger.info(f"[数据服务.分时] 完成: 成功 {len(result_stocks)}只")
+        return {'stocks': result_stocks}
+
+    def _fetch_intraday(self, code: str, interval: str = '1m') -> dict:
+        market = MarketIdentifier.identify(code)
+        if market == 'A':
+            return self._fetch_intraday_a_share(code, interval)
+        else:
+            return self._fetch_intraday_yfinance(code, interval)
+
+    def _fetch_intraday_a_share(self, code: str, interval: str = '1m') -> dict:
+        import akshare as ak
+        period_map = {'1m': '1', '5m': '5', '15m': '15'}
+        period = period_map.get(interval, '1')
+
+        try:
+            df = ak.stock_zh_a_hist_min_em(symbol=code, period=period, adjust='qfq')
+            if df is None or df.empty:
+                return {'stock_code': code, 'stock_name': '', 'data': []}
+
+            today_str = date.today().strftime('%Y-%m-%d')
+            df['时间'] = df['时间'].astype(str)
+            df = df[df['时间'].str.startswith(today_str)]
+
+            data = []
+            for _, row in df.iterrows():
+                time_str = str(row['时间'])
+                if ' ' in time_str:
+                    time_str = time_str.split(' ')[1][:5]
+                data.append({
+                    'time': time_str,
+                    'open': float(row['开盘']),
+                    'high': float(row['最高']),
+                    'low': float(row['最低']),
+                    'close': float(row['收盘']),
+                    'volume': int(row['成交量'])
+                })
+
+            return {'stock_code': code, 'stock_name': '', 'data': data}
+        except Exception as e:
+            logger.warning(f"[数据服务.分时] A股 {code} akshare获取失败: {e}")
+            return {'stock_code': code, 'stock_name': '', 'data': []}
+
+    def _fetch_intraday_yfinance(self, code: str, interval: str = '1m') -> dict:
+        import yfinance as yf
+        yf_code = MarketIdentifier.to_yfinance(code)
+
+        try:
+            ticker = yf.Ticker(yf_code)
+            df = ticker.history(period='1d', interval=interval)
+            if df is None or df.empty:
+                return {'stock_code': code, 'stock_name': '', 'data': []}
+
+            data = []
+            for idx, row in df.iterrows():
+                time_str = idx.strftime('%H:%M')
+                data.append({
+                    'time': time_str,
+                    'open': float(row['Open']),
+                    'high': float(row['High']),
+                    'low': float(row['Low']),
+                    'close': float(row['Close']),
+                    'volume': int(row['Volume'])
+                })
+
+            return {'stock_code': code, 'stock_name': '', 'data': data}
+        except Exception as e:
+            logger.warning(f"[数据服务.分时] {code} yfinance获取失败: {e}")
+            return {'stock_code': code, 'stock_name': '', 'data': []}
+
     def _fetch_trend_data(self, stock_codes: list, days: int) -> list:
         """获取OHLC数据（负载均衡模式：ETF专用接口 / 东方财富/新浪轮询 / yfinance兜底）"""
         import yfinance as yf

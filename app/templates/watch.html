@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}盯盘助手{% endblock %}
 
+{% block extra_css %}
+<style>
+.btn-xs { padding: 0.1rem 0.4rem; font-size: 0.7rem; }
+.chart-container { border-radius: 4px; background: #fafafa; }
+.chart-toggle-icon { transition: transform 0.2s; font-size: 0.65rem; }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- 页面标题 -->
 <div class="page-header mb-4">
