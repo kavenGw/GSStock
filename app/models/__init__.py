@@ -18,5 +18,6 @@ from app.models.unified_cache import UnifiedStockCache
 from app.models.bank_transfer import BankTransfer
 from app.models.trading_strategy import TradingStrategy, StrategyExecution
 from app.models.watch_list import WatchList, WatchAnalysis
+from app.models.news import NewsItem, NewsBriefing
 
-__all__ = ['Position', 'Advice', 'Config', 'Category', 'StockCategory', 'Trade', 'Settlement', 'WyckoffReference', 'WyckoffAnalysis', 'Stock', 'StockAlias', 'StockWeight', 'MetalTrendCache', 'IndexTrendCache', 'DailySnapshot', 'PositionPlan', 'RebalanceConfig', 'SignalCache', 'UnifiedStockCache', 'BankTransfer', 'TradingStrategy', 'StrategyExecution', 'WatchList', 'WatchAnalysis']
+__all__ = ['Position', 'Advice', 'Config', 'Category', 'StockCategory', 'Trade', 'Settlement', 'WyckoffReference', 'WyckoffAnalysis', 'Stock', 'StockAlias', 'StockWeight', 'MetalTrendCache', 'IndexTrendCache', 'DailySnapshot', 'PositionPlan', 'RebalanceConfig', 'SignalCache', 'UnifiedStockCache', 'BankTransfer', 'TradingStrategy', 'StrategyExecution', 'WatchList', 'WatchAnalysis', 'NewsItem', 'NewsBriefing']
