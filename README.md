@@ -56,7 +56,7 @@ cp .env.sample .env
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
 | `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | `5.0` |
-| `LLM_REQUEST_TIMEOUT` | LLM API 请求超时（秒） | `60` |
+| `LLM_REQUEST_TIMEOUT` | LLM API 请求超时（秒） | `300` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
 
@@ -147,7 +147,7 @@ Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
 ```env
 ZHIPU_API_KEY=your_key_here
 LLM_DAILY_BUDGET=5.0      # 日预算上限（美元），默认 5.0
-LLM_REQUEST_TIMEOUT=60    # API 请求超时（秒），默认 60
+LLM_REQUEST_TIMEOUT=300    # API 请求超时（秒），默认 300
 ```
 
 配置 `ZHIPU_API_KEY` 后自动启用 AI 分析功能。预算用尽时自动降级到 Flash 层。
