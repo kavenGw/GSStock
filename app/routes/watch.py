@@ -165,13 +165,27 @@ def search_stocks():
 def market_status():
     from app.services.trading_calendar import TradingCalendarService
 
+    MARKET_INFO = {
+        'A':  {'name': 'A股', 'icon': '🇨🇳'},
+        'US': {'name': '美股', 'icon': '🇺🇸'},
+        'HK': {'name': '港股', 'icon': '🇭🇰'},
+        'KR': {'name': '韩股', 'icon': '🇰🇷'},
+        'TW': {'name': '台股', 'icon': '🇹🇼'},
+        'JP': {'name': '日股', 'icon': '🇯🇵'},
+    }
+
+    # 动态获取用户盯盘列表中涉及的市场
+    watched_markets = WatchService.get_watched_markets()
     markets = [
-        {'key': 'A', 'name': 'A股', 'icon': '🇨🇳'},
-        {'key': 'US', 'name': '美股', 'icon': '🇺🇸'},
-        {'key': 'HK', 'name': '港股', 'icon': '🇭🇰'},
+        {'key': m, **MARKET_INFO.get(m, {'name': m, 'icon': '🏳️'})}
+        for m in watched_markets
+        if m in MARKET_INFO
     ]
 
     from datetime import time as dtime
+
+    # 午休窗口：(开始, 下午开盘)
+    LUNCH_WINDOWS = {'A': (dtime(11, 30), dtime(13, 0)), 'JP': (dtime(11, 30), dtime(12, 30))}
 
     result = {}
     for m in markets:
@@ -182,9 +196,9 @@ def market_status():
 
         is_trading_day = TradingCalendarService.is_trading_day(key, now.date())
         is_open = TradingCalendarService.is_market_open(key)
-        # A股午休：is_market_open 返回 false，需要单独判断
+        lunch = LUNCH_WINDOWS.get(key)
         is_lunch = (is_trading_day and not is_open
-                    and key == 'A' and dtime(11, 30) <= now.time() < dtime(13, 0))
+                    and lunch and lunch[0] <= now.time() < lunch[1])
 
         if not is_trading_day:
             status, status_text = 'holiday', '休市'
@@ -197,7 +211,7 @@ def market_status():
         else:
             status, status_text = 'pre_open', '未开盘'
 
-        result[key] = {
+        entry = {
             'name': m['name'],
             'icon': m['icon'],
             'timezone': str(tz),
@@ -205,5 +219,12 @@ def market_status():
             'status': status,
             'status_text': status_text,
         }
+
+        if is_lunch:
+            now_secs = now.hour * 3600 + now.minute * 60 + now.second
+            open_secs = lunch[1].hour * 3600 + lunch[1].minute * 60
+            entry['seconds_to_open'] = max(0, open_secs - now_secs)
+
+        result[key] = entry
 
     return jsonify({'success': True, 'data': result})

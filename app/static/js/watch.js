@@ -1,6 +1,6 @@
 const Watch = {
-    countdownTimer: null,
-    countdown: 60,
+    countdownTimers: {},
+    countdowns: {},
     REFRESH_INTERVAL: 60,
     searchDebounce: null,
     stocks: [],
@@ -9,7 +9,6 @@ const Watch = {
 
     async init() {
         await this.loadList();
-        this.startAutoRefresh();
     },
 
     async loadList() {
@@ -35,6 +34,7 @@ const Watch = {
 
             this.renderGroups();
             this.updateStatus(`${this.stocks.length} 只股票`);
+            this.startAllCountdowns();
         } catch (e) {
             console.error('[Watch] loadList failed:', e);
             this.updateStatus('加载失败');
@@ -169,14 +169,15 @@ const Watch = {
         const pricesMap = {};
         this.prices.forEach(p => { pricesMap[p.code] = p; });
 
-        // 按市场分组
+        // 动态收集市场，按优先级排序
+        const priority = ['A', 'US', 'HK', 'KR', 'TW', 'JP'];
         const groups = {};
-        const marketOrder = ['A', 'US', 'HK'];
         this.stocks.forEach(stock => {
             const market = stock.market || 'A';
             if (!groups[market]) groups[market] = [];
             groups[market].push(stock);
         });
+        const marketOrder = [...priority.filter(m => groups[m]), ...Object.keys(groups).filter(m => !priority.includes(m))];
 
         const container = document.getElementById('watchGroups');
         let html = '';
@@ -187,13 +188,23 @@ const Watch = {
 
             const ms = this.marketStatus[market] || {};
             const statusIcon = this.getStatusIcon(ms.status);
+            const isTrading = ms.status === 'trading';
+            const isLunch = ms.status === 'lunch';
+
+            let countdownHtml = '';
+            if (isTrading) {
+                countdownHtml = `<span class="badge bg-secondary bg-opacity-50 text-light" data-market-countdown="${market}" title="下次刷新">--s</span>`;
+            } else if (isLunch) {
+                countdownHtml = `<span class="badge bg-warning bg-opacity-25 text-warning" data-market-countdown="${market}" title="距下午开盘">⏳ --:-- 后开盘</span>`;
+            }
 
             html += `<div class="mb-4" data-market-group="${market}">
                 <div class="d-flex align-items-center mb-2 pb-2 border-bottom">
                     <span class="me-2">${ms.icon || ''}</span>
                     <strong class="me-2">${ms.name || market}</strong>
                     <span class="text-muted small me-2" data-market-time="${market}">${ms.time || '--:--'}</span>
-                    <span class="badge ${this.getStatusBadgeClass(ms.status)}">${statusIcon} ${ms.status_text || '--'}</span>
+                    <span class="badge ${this.getStatusBadgeClass(ms.status)} me-2">${statusIcon} ${ms.status_text || '--'}</span>
+                    ${countdownHtml}
                 </div>
                 <div class="list-group">
                     ${stocks.map(stock => this.renderStockRow(stock, pricesMap[stock.stock_code] || {})).join('')}
@@ -224,12 +235,10 @@ const Watch = {
         const amtSign = changeAmt > 0 ? '+' : '';
         const amtDisplay = changeAmt !== null ? `${amtSign}${changeAmt.toFixed(2)}` : '';
 
-        // 支撑/阻力位
         const supports = notification.support_levels || [];
         const resistances = notification.resistance_levels || [];
         const levelsHtml = this.renderLevels(supports, resistances);
 
-        // 通知状态
         const threshold = notification.threshold || 0.02;
         const cooldown = notification.cooldown_remaining || 0;
         const thresholdText = `阈值 ${(threshold * 100).toFixed(1)}%`;
@@ -336,41 +345,113 @@ const Watch = {
             const timeEl = group.querySelector(`[data-market-time="${market}"]`);
             if (timeEl) timeEl.textContent = ms.time || '--:--';
 
-            const badge = group.querySelector('.badge');
+            const badge = group.querySelector('.badge:not([data-market-countdown])');
             if (badge) {
-                badge.className = `badge ${this.getStatusBadgeClass(ms.status)}`;
+                badge.className = `badge ${this.getStatusBadgeClass(ms.status)} me-2`;
                 badge.innerHTML = `${this.getStatusIcon(ms.status)} ${ms.status_text || '--'}`;
+            }
+
+            const isTrading = ms.status === 'trading';
+            const isLunch = ms.status === 'lunch';
+            const cdEl = group.querySelector(`[data-market-countdown="${market}"]`);
+
+            if (isTrading && !this.countdownTimers[market]) {
+                if (!cdEl) {
+                    badge?.insertAdjacentHTML('afterend',
+                        `<span class="badge bg-secondary bg-opacity-50 text-light" data-market-countdown="${market}" title="下次刷新">--s</span>`);
+                }
+                this.startCountdown(market);
+            } else if (isLunch && !this.countdownTimers[market]) {
+                const secs = ms.seconds_to_open;
+                if (!cdEl) {
+                    badge?.insertAdjacentHTML('afterend',
+                        `<span class="badge bg-warning bg-opacity-25 text-warning" data-market-countdown="${market}" title="距下午开盘">⏳ --:-- 后开盘</span>`);
+                }
+                if (secs > 0) this.startLunchCountdown(market, secs);
+            } else if (!isTrading && !isLunch && cdEl) {
+                cdEl.remove();
+                this.stopCountdown(market);
             }
         });
     },
 
-    // --- 倒计时与自动刷新 ---
+    // --- 每市场独立倒计时 ---
 
-    startAutoRefresh() {
-        this.stopAutoRefresh();
-        this.countdown = this.REFRESH_INTERVAL;
-        this.updateCountdownDisplay();
+    startAllCountdowns() {
+        this.stopAllCountdowns();
+        this.getActiveMarkets().forEach(market => this.startCountdown(market));
+        this.getLunchMarkets().forEach(market => {
+            const secs = this.marketStatus[market]?.seconds_to_open;
+            if (secs > 0) this.startLunchCountdown(market, secs);
+        });
+    },
 
-        this.countdownTimer = setInterval(() => {
-            this.countdown--;
-            if (this.countdown <= 0) {
-                this.countdown = this.REFRESH_INTERVAL;
+    startCountdown(market) {
+        this.stopCountdown(market);
+        this.countdowns[market] = this.REFRESH_INTERVAL;
+        this.updateCountdownDisplay(market);
+
+        this.countdownTimers[market] = setInterval(() => {
+            this.countdowns[market]--;
+            if (this.countdowns[market] <= 0) {
+                this.countdowns[market] = this.REFRESH_INTERVAL;
                 this.refreshPrices();
             }
-            this.updateCountdownDisplay();
+            this.updateCountdownDisplay(market);
         }, 1000);
     },
 
-    stopAutoRefresh() {
-        if (this.countdownTimer) {
-            clearInterval(this.countdownTimer);
-            this.countdownTimer = null;
+    startLunchCountdown(market, seconds) {
+        this.stopCountdown(market);
+        this.countdowns[market] = seconds;
+        this.updateCountdownDisplay(market);
+
+        this.countdownTimers[market] = setInterval(() => {
+            this.countdowns[market]--;
+            if (this.countdowns[market] <= 0) {
+                this.stopCountdown(market);
+                this.loadList();
+                return;
+            }
+            this.updateCountdownDisplay(market);
+        }, 1000);
+    },
+
+    stopCountdown(market) {
+        if (this.countdownTimers[market]) {
+            clearInterval(this.countdownTimers[market]);
+            delete this.countdownTimers[market];
         }
     },
 
-    updateCountdownDisplay() {
-        const el = document.getElementById('refreshCountdown');
-        if (el) el.textContent = `${this.countdown}s`;
+    stopAllCountdowns() {
+        Object.keys(this.countdownTimers).forEach(m => this.stopCountdown(m));
+    },
+
+    updateCountdownDisplay(market) {
+        const el = document.querySelector(`[data-market-countdown="${market}"]`);
+        if (!el) return;
+        const secs = this.countdowns[market];
+        const isLunch = this.marketStatus[market]?.status === 'lunch';
+        if (isLunch) {
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            el.textContent = `⏳ ${m}:${String(s).padStart(2, '0')} 后开盘`;
+        } else {
+            el.textContent = `${secs}s`;
+        }
+    },
+
+    getActiveMarkets() {
+        return Object.keys(this.marketStatus).filter(m => {
+            return this.marketStatus[m]?.status === 'trading';
+        });
+    },
+
+    getLunchMarkets() {
+        return Object.keys(this.marketStatus).filter(m => {
+            return this.marketStatus[m]?.status === 'lunch';
+        });
     },
 
     // --- 工具函数 ---
@@ -390,6 +471,9 @@ const Watch = {
         const val = price.toFixed(2);
         if (market === 'US') return `$${val}`;
         if (market === 'HK') return `HK$${val}`;
+        if (market === 'KR') return `₩${Math.round(price).toLocaleString()}`;
+        if (market === 'JP') return `¥${Math.round(price).toLocaleString()}`;
+        if (market === 'TW') return `NT$${val}`;
         return `¥${val}`;
     },
 
