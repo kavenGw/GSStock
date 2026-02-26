@@ -178,6 +178,14 @@ PreloadService.get_indices_data()
 |---------|------|-------|
 | `NEWS_INTERVAL_MINUTES` | 新闻刷新间隔（分钟） | `10` |
 
+## LLM 配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `ZHIPU_API_KEY` | 智谱 GLM API 密钥 | 空 |
+| `LLM_DAILY_BUDGET` | 日预算上限（美元） | `5.0` |
+| `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `60` |
+
 ## 技术栈
 
 - Flask + SQLAlchemy + SQLite
