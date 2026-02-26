@@ -96,36 +96,20 @@ class BriefingService:
     """每日简报服务"""
 
     @staticmethod
-    def get_stocks_basic_data(force_refresh: bool = False) -> dict:
-        """获取基础股票数据（价格+投资建议，不含PE和财报）
-
-        当 force_refresh=False 时，使用缓存的收盘价数据，不发起实时API请求。
-        当 force_refresh=True 时，从API获取数据并缓存。
-        """
+    def get_stocks_basic_data() -> dict:
+        """获取基础股票数据（最近收盘价+投资建议）"""
         from app.services.unified_stock_data import unified_stock_data_service
-
-        stock_codes = [s['code'] for s in BRIEFING_STOCKS]
 
         sorted_categories = sorted(STOCK_CATEGORIES.items(), key=lambda x: x[1]['order'])
         categories = [{'key': k, 'name': v['name']} for k, v in sorted_categories if k != 'other']
         stocks_by_category = {k: [] for k, _ in sorted_categories}
 
+        stock_codes = [s['code'] for s in BRIEFING_STOCKS]
         prices = {}
-        partial = False
         try:
-            if force_refresh:
-                prices = unified_stock_data_service.get_realtime_prices(stock_codes, force_refresh=True)
-            else:
-                prices = unified_stock_data_service.get_closing_prices(stock_codes)
-                stale_codes = [c for c in stock_codes
-                               if c not in prices or prices.get(c, {}).get('_is_degraded')]
-                if stale_codes:
-                    partial = True
-                    from flask import current_app
-                    app = current_app._get_current_object()
-                    unified_stock_data_service.refresh_async(stale_codes, 'price', app=app)
+            prices = unified_stock_data_service.get_closing_prices(stock_codes)
         except Exception as e:
-            logger.error(f"[简报服务.股票] 获取股票价格失败: {e}", exc_info=True)
+            logger.error(f"[简报服务.股票] 获取收盘价失败: {e}", exc_info=True)
             db.session.rollback()
 
         from app.services.stock_meta import StockMetaService
@@ -173,14 +157,9 @@ class BriefingService:
 
         categories = [c for c in categories if c['key'] in stocks_by_category]
 
-        cache_time = BriefingService.get_cache_update_time()
-        last_update = cache_time if cache_time else datetime.now()
-
         return {
             'categories': categories,
             'stocks': stocks_by_category,
-            'last_update': last_update.strftime('%Y-%m-%d %H:%M:%S'),
-            'partial': partial
         }
 
     @staticmethod

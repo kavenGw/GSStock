@@ -109,9 +109,9 @@ class BriefingPage {
 
     // ========== 数据加载 ==========
 
-    static async loadStocks(force = false) {
+    static async loadStocks() {
         try {
-            const url = '/briefing/api/stocks' + (force ? '?force=true' : '');
+            const url = '/briefing/api/stocks';
             const resp = await fetch(url);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
@@ -124,22 +124,15 @@ class BriefingPage {
             this.applyEarningsData();
             this.applyTechnicalData();
 
-            if (data.last_update) {
-                document.getElementById('lastUpdate').textContent = `更新时间: ${data.last_update}`;
-            }
-
-            if (data.partial && !force) {
-                setTimeout(() => this.loadStocks(true), 3000);
-            }
         } catch (e) {
             console.error('加载股票数据失败:', e);
             document.getElementById('stocksContainer').innerHTML = `<div class="text-warning-dark">股票数据加载失败</div>`;
         }
     }
 
-    static async loadStocksPE(force = false) {
+    static async loadStocksPE() {
         try {
-            const url = '/briefing/api/stocks/pe' + (force ? '?force=true' : '');
+            const url = '/briefing/api/stocks/pe';
             const resp = await fetch(url);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
@@ -152,9 +145,9 @@ class BriefingPage {
         }
     }
 
-    static async loadStocksEarnings(force = false) {
+    static async loadStocksEarnings() {
         try {
-            const url = '/briefing/api/stocks/earnings' + (force ? '?force=true' : '');
+            const url = '/briefing/api/stocks/earnings';
             const resp = await fetch(url);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
@@ -167,9 +160,9 @@ class BriefingPage {
         }
     }
 
-    static async loadStocksTechnical(force = false) {
+    static async loadStocksTechnical() {
         try {
-            const url = '/briefing/api/stocks/technical' + (force ? '?force=true' : '');
+            const url = '/briefing/api/stocks/technical';
             const resp = await fetch(url);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
@@ -182,60 +175,48 @@ class BriefingPage {
         }
     }
 
-    static async loadIndices(force = false) {
+    static async loadIndices() {
         try {
-            const url = '/briefing/api/indices' + (force ? '?force=true' : '');
-            const resp = await fetch(url);
+            const resp = await fetch('/briefing/api/indices');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             if (data.error) throw new Error(data.error);
             this.renderIndices(data);
-            if (data.partial && !force) {
-                setTimeout(() => this.loadIndices(true), 3000);
-            }
         } catch (e) {
             console.error('加载指数数据失败:', e);
             document.getElementById('indicesContainer').innerHTML = `<div class="text-warning-dark">指数数据加载失败</div>`;
         }
     }
 
-    static async loadFutures(force = false) {
+    static async loadFutures() {
         try {
-            const url = '/briefing/api/futures' + (force ? '?force=true' : '');
-            const resp = await fetch(url);
+            const resp = await fetch('/briefing/api/futures');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             if (data.error) throw new Error(data.error);
             this.renderFutures(data.futures || data);
-            if (data.partial && !force) {
-                setTimeout(() => this.loadFutures(true), 3000);
-            }
         } catch (e) {
             console.error('加载期货数据失败:', e);
             document.getElementById('futuresContainer').innerHTML = `<div class="text-warning-dark">期货数据加载失败</div>`;
         }
     }
 
-    static async loadETF(force = false) {
+    static async loadETF() {
         try {
-            const url = '/briefing/api/etf' + (force ? '?force=true' : '');
-            const resp = await fetch(url);
+            const resp = await fetch('/briefing/api/etf');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
             if (data.error) throw new Error(data.error);
             this.renderETFPremium(data.etfs || data);
-            if (data.partial && !force) {
-                setTimeout(() => this.loadETF(true), 3000);
-            }
         } catch (e) {
             console.error('加载ETF数据失败:', e);
             document.getElementById('etfContainer').innerHTML = `<div class="text-warning-dark">ETF数据加载失败</div>`;
         }
     }
 
-    static async loadSectors(force = false) {
+    static async loadSectors() {
         try {
-            const url = '/briefing/api/sectors' + (force ? '?force=true' : '');
+            const url = '/briefing/api/sectors';
             const resp = await fetch(url);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
@@ -258,75 +239,6 @@ class BriefingPage {
             this.renderEarningsAlerts(data.earnings_alerts, data.has_alerts);
         } catch (e) {
             console.error('加载财报预警失败:', e);
-        }
-    }
-
-    // ========== 刷新 ==========
-
-    static async refresh() {
-        const btn = document.getElementById('refreshBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 刷新中...';
-
-        this.stocksRendered = false;
-        this.peData = null;
-        this.earningsData = null;
-        this.technicalData = null;
-        this.setLoadingPlaceholders();
-
-        try {
-            await Promise.all([
-                this.loadStocks(true),
-                this.loadStocksPE(true),
-                this.loadStocksEarnings(true),
-                this.loadStocksTechnical(true),
-                this.loadIndices(true),
-                this.loadFutures(true),
-                this.loadETF(true),
-                this.loadSectors(true),
-                this.loadEarningsAlerts(),
-            ]);
-        } catch (e) {
-            console.error('刷新失败:', e);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> 刷新';
-        }
-    }
-
-    // ========== 推送报告 ==========
-
-    static async pushReport(btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 推送中...';
-
-        try {
-            // 先检查推送状态
-            const statusResp = await fetch('/briefing/api/notification/status');
-            const status = await statusResp.json();
-
-            if (!status.slack && !status.email) {
-                alert('未配置推送渠道。请设置环境变量：\n- Slack: SLACK_WEBHOOK_URL\n- 邮件: SMTP_HOST, SMTP_USER, SMTP_PASSWORD, NOTIFY_EMAIL_TO');
-                return;
-            }
-
-            const resp = await fetch('/briefing/api/notification/push', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({include_ai: false})
-            });
-            const result = await resp.json();
-
-            const parts = [];
-            if (result.slack !== undefined) parts.push(`Slack: ${result.slack ? '成功' : '失败'}`);
-            if (result.email !== undefined) parts.push(`邮件: ${result.email ? '成功' : '失败'}`);
-            alert('推送结果: ' + (parts.join(', ') || '无可用渠道'));
-        } catch (e) {
-            console.error('推送失败:', e);
-            alert('推送请求失败');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-send"></i> 推送';
         }
     }
 

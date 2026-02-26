@@ -244,6 +244,10 @@ def create_app(config_class=None):
         from app.services.trading_strategy import TradingStrategyService
         TradingStrategyService.init_default_strategies()
 
+        # 初始化市场状态缓存
+        from app.services.market_status import market_status_service
+        market_status_service.initialize()
+
     # 预加载 OCR 模型，避免首次识别时卡顿
     from app.services.ocr import preload_model
     preload_model()
