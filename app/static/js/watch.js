@@ -6,9 +6,15 @@ const Watch = {
     stocks: [],
     prices: [],
     marketStatus: {},
+    analyses: {},
+    _analysisTimer: null,
+    ANALYSIS_INTERVAL: 30 * 60,
+    analysisCountdown: 0,
 
     async init() {
         await this.loadList();
+        await this.loadAnalysis();
+        this.startAnalysisCountdown();
     },
 
     async loadList() {
@@ -74,6 +80,8 @@ const Watch = {
             const data = await resp.json();
             if (data.success) {
                 await this.refreshPrices();
+                await this.loadAnalysis();
+                this.resetAnalysisCountdown();
             }
         } catch (e) {
             console.error('[Watch] triggerAnalysis failed:', e);
@@ -161,6 +169,97 @@ const Watch = {
                 console.error('[Watch] searchStocks failed:', e);
             }
         }, 300);
+    },
+
+    async loadAnalysis() {
+        try {
+            const resp = await fetch('/watch/analysis');
+            const data = await resp.json();
+            if (!data.success) return;
+            this.analyses = data.data || {};
+            this.renderAnalysisPanel();
+        } catch (e) {
+            console.error('[Watch] loadAnalysis failed:', e);
+        }
+    },
+
+    renderAnalysisPanel() {
+        const panel = document.getElementById('analysisPanel');
+        const cardsEl = document.getElementById('analysisCards');
+        const summaryEl = document.getElementById('analysisSummary');
+        const summaryContent = document.getElementById('summaryContent');
+        const timeEl = document.getElementById('analysisTime');
+
+        const codes = Object.keys(this.analyses);
+        if (codes.length === 0) {
+            panel.classList.add('d-none');
+            return;
+        }
+
+        panel.classList.remove('d-none');
+        timeEl.textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}`;
+
+        const pricesMap = {};
+        this.prices.forEach(p => { pricesMap[p.code] = p; });
+
+        let cardsHtml = '';
+        const summaries = [];
+
+        this.stocks.forEach(stock => {
+            const code = stock.stock_code;
+            const a = this.analyses[code];
+            if (!a) return;
+
+            const name = stock.stock_name || code;
+            const p = pricesMap[code] || {};
+            const supports = a.support_levels || [];
+            const resistances = a.resistance_levels || [];
+            const threshold = a.volatility_threshold || 0.02;
+            const summary = a.summary || '';
+
+            if (summary) summaries.push(`${name}: ${summary}`);
+
+            const currentPrice = p.price;
+            let proximityHtml = '';
+            if (currentPrice && supports.length > 0) {
+                const nearest = supports.reduce((a, b) => Math.abs(b - currentPrice) < Math.abs(a - currentPrice) ? b : a);
+                const dist = ((currentPrice - nearest) / nearest * 100).toFixed(1);
+                proximityHtml += `<span class="text-success small">距支撑 ${nearest}: ${dist}%</span> `;
+            }
+            if (currentPrice && resistances.length > 0) {
+                const nearest = resistances.reduce((a, b) => Math.abs(b - currentPrice) < Math.abs(a - currentPrice) ? b : a);
+                const dist = ((currentPrice - nearest) / nearest * 100).toFixed(1);
+                proximityHtml += `<span class="text-danger small">距阻力 ${nearest}: ${dist}%</span>`;
+            }
+
+            cardsHtml += `<div class="card mb-2">
+            <div class="card-body py-2 px-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="small">${name}</strong>
+                    <span class="text-muted small">${code}</span>
+                </div>
+                <div class="small mb-1">
+                    ${supports.length > 0 ? `<span class="text-success">支撑: ${supports.join(' / ')}</span>` : ''}
+                    ${supports.length > 0 && resistances.length > 0 ? '<span class="text-muted mx-1">|</span>' : ''}
+                    ${resistances.length > 0 ? `<span class="text-danger">阻力: ${resistances.join(' / ')}</span>` : ''}
+                </div>
+                ${proximityHtml ? `<div class="mb-1">${proximityHtml}</div>` : ''}
+                <div class="d-flex justify-content-between small text-muted">
+                    <span>阈值: ${(threshold * 100).toFixed(1)}%</span>
+                </div>
+                ${summary ? `<div class="small text-muted mt-1 fst-italic">${summary}</div>` : ''}
+            </div>
+        </div>`;
+        });
+
+        cardsEl.innerHTML = cardsHtml || '<p class="text-muted small">暂无分析数据，点击 AI 分析开始</p>';
+
+        if (summaries.length > 0) {
+            summaryEl.classList.remove('d-none');
+            summaryContent.innerHTML = summaries.map(s => `<div>• ${s}</div>`).join('');
+        } else {
+            summaryEl.classList.add('d-none');
+        }
     },
 
     // --- 渲染 ---
@@ -300,18 +399,18 @@ const Watch = {
             const notification = p.notification || {};
 
             const priceEl = document.querySelector(`[data-field="price"][data-code="${code}"]`);
-            if (priceEl) priceEl.textContent = this.formatPrice(p.price, market);
+            if (priceEl && p.price != null) priceEl.textContent = this.formatPrice(p.price, market);
 
             const pctClass = p.change_pct > 0 ? 'text-danger' : p.change_pct < 0 ? 'text-success' : 'text-muted';
             const pctSign = p.change_pct > 0 ? '+' : '';
             const pctEl = document.querySelector(`[data-field="change_pct"][data-code="${code}"]`);
-            if (pctEl) {
+            if (pctEl && p.change_pct != null) {
                 pctEl.textContent = `${pctSign}${p.change_pct.toFixed(2)}%`;
                 pctEl.className = `${pctClass} fw-bold me-1`;
             }
             const amtEl = document.querySelector(`[data-field="change"][data-code="${code}"]`);
-            const amtSign = p.change > 0 ? '+' : '';
-            if (amtEl) {
+            if (amtEl && p.change != null) {
+                const amtSign = p.change > 0 ? '+' : '';
                 amtEl.textContent = `${amtSign}${p.change.toFixed(2)}`;
                 amtEl.className = `${pctClass} small`;
             }
@@ -426,6 +525,37 @@ const Watch = {
 
     stopAllCountdowns() {
         Object.keys(this.countdownTimers).forEach(m => this.stopCountdown(m));
+    },
+
+    // --- AI 分析定时 ---
+
+    startAnalysisCountdown() {
+        this.analysisCountdown = this.ANALYSIS_INTERVAL;
+        if (this._analysisTimer) clearInterval(this._analysisTimer);
+        this._analysisTimer = setInterval(() => {
+            this.analysisCountdown--;
+            this.updateAnalysisCountdownDisplay();
+            if (this.analysisCountdown <= 0) {
+                if (this.getActiveMarkets().length > 0) {
+                    this.triggerAnalysis(true);
+                }
+                this.analysisCountdown = this.ANALYSIS_INTERVAL;
+            }
+        }, 1000);
+        this.updateAnalysisCountdownDisplay();
+    },
+
+    resetAnalysisCountdown() {
+        this.analysisCountdown = this.ANALYSIS_INTERVAL;
+        this.updateAnalysisCountdownDisplay();
+    },
+
+    updateAnalysisCountdownDisplay() {
+        const el = document.getElementById('analysisCountdown');
+        if (!el) return;
+        const m = Math.floor(this.analysisCountdown / 60);
+        const s = this.analysisCountdown % 60;
+        el.textContent = `下次分析 ${m}:${String(s).padStart(2, '0')}`;
     },
 
     updateCountdownDisplay(market) {

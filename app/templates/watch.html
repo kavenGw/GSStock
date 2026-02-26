@@ -2,7 +2,7 @@
 {% block title %}盯盘助手{% endblock %}
 
 {% block content %}
-<!-- 页面标题 + 操作按钮 + 倒计时 -->
+<!-- 页面标题 -->
 <div class="page-header mb-4">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -10,7 +10,7 @@
             <small class="text-muted" id="watchStatus">加载中...</small>
         </div>
         <div class="d-flex align-items-center gap-2">
-<button class="btn btn-outline-primary btn-sm" id="btnAnalyze" onclick="Watch.triggerAnalysis()">
+            <button class="btn btn-outline-primary btn-sm" id="btnAnalyze" onclick="Watch.triggerAnalysis(true)">
                 <i class="bi bi-robot"></i> AI 分析
             </button>
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStockModal">
@@ -20,26 +20,62 @@
     </div>
 </div>
 
-<!-- 骨架屏加载状态 -->
-<div id="loadingState" class="py-3">
-    <div class="mb-4">
-        <div class="skeleton skeleton-text w-25 mb-3" style="height:24px;"></div>
-        <div class="skeleton-card skeleton mb-2" style="height:80px;"></div>
-        <div class="skeleton-card skeleton mb-2" style="height:80px;"></div>
+<div class="row">
+    <!-- 左侧：股票列表 -->
+    <div class="col-lg-7">
+        <!-- 骨架屏 -->
+        <div id="loadingState" class="py-3">
+            <div class="mb-4">
+                <div class="skeleton skeleton-text w-25 mb-3" style="height:24px;"></div>
+                <div class="skeleton-card skeleton mb-2" style="height:80px;"></div>
+                <div class="skeleton-card skeleton mb-2" style="height:80px;"></div>
+            </div>
+        </div>
+        <!-- 空状态 -->
+        <div id="emptyState" class="text-center py-5 d-none">
+            <i class="bi bi-eye-slash text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">暂无盯盘股票</p>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                <i class="bi bi-plus-lg"></i> 添加股票
+            </button>
+        </div>
+        <!-- 市场分组列表 -->
+        <div id="watchGroups" class="d-none"></div>
+    </div>
+
+    <!-- 右侧：AI 分析面板 -->
+    <div class="col-lg-5">
+        <div id="analysisPanel" class="d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div>
+                    <strong><i class="bi bi-graph-up"></i> AI 分析</strong>
+                    <small class="text-muted ms-2" id="analysisTime"></small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <small class="text-muted" id="analysisCountdown"></small>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="Watch.triggerAnalysis(true)">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- 逐股分析卡片 -->
+            <div id="analysisCards"></div>
+            <!-- 综合摘要 -->
+            <div id="analysisSummary" class="mt-3 d-none">
+                <div class="border-top pt-3">
+                    <strong class="small text-muted">综合摘要</strong>
+                    <div id="summaryContent" class="small mt-1"></div>
+                </div>
+            </div>
+        </div>
+        <!-- 分析面板骨架屏 -->
+        <div id="analysisLoading" class="d-none">
+            <div class="skeleton skeleton-text w-50 mb-3" style="height:20px;"></div>
+            <div class="skeleton-card skeleton mb-2" style="height:100px;"></div>
+            <div class="skeleton-card skeleton mb-2" style="height:100px;"></div>
+        </div>
     </div>
 </div>
-
-<!-- 空状态 -->
-<div id="emptyState" class="text-center py-5 d-none">
-    <i class="bi bi-eye-slash text-muted" style="font-size: 3rem;"></i>
-    <p class="mt-3 text-muted">暂无盯盘股票</p>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStockModal">
-        <i class="bi bi-plus-lg"></i> 添加股票
-    </button>
-</div>
-
-<!-- 市场分组列表 -->
-<div id="watchGroups" class="d-none"></div>
 
 <!-- 添加股票 Modal -->
 <div class="modal fade" id="addStockModal" tabindex="-1">

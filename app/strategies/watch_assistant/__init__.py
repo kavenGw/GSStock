@@ -39,8 +39,17 @@ class WatchAssistantStrategy(Strategy):
         if not active_codes:
             return []
 
-        result = unified_stock_data_service.get_realtime_prices(active_codes)
-        prices = result.get('prices', [])
+        raw_prices = unified_stock_data_service.get_realtime_prices(active_codes)
+        prices = []
+        for code, data in raw_prices.items():
+            prices.append({
+                'code': code,
+                'name': data.get('name', code),
+                'price': data.get('current_price'),
+                'change': data.get('change'),
+                'change_pct': data.get('change_percent'),
+                'market': data.get('market', ''),
+            })
 
         analyses = WatchService.get_all_today_analyses()
         config = self.get_config()
@@ -63,8 +72,33 @@ class WatchAssistantStrategy(Strategy):
             change_pct = abs(current_price - last_price) / last_price
             analysis = analyses.get(code, {})
             threshold = analysis.get('volatility_threshold') or default_threshold
+            level_proximity = config.get('level_proximity_pct', 0.01)
 
-            if change_pct < threshold:
+            # 触发条件1：波动超阈值
+            volatility_triggered = change_pct >= threshold
+
+            # 触发条件2：触及关键点位
+            level_triggered = False
+            trigger_reason = ""
+            support = analysis.get('support_levels', [])
+            resistance = analysis.get('resistance_levels', [])
+
+            nearest_support = min(support, key=lambda x: abs(x - current_price)) if support else None
+            nearest_resist = min(resistance, key=lambda x: abs(x - current_price)) if resistance else None
+
+            if nearest_support:
+                dist = abs(current_price - nearest_support) / nearest_support
+                if dist < level_proximity:
+                    level_triggered = True
+                    trigger_reason = f"接近支撑位 {nearest_support}"
+
+            if not level_triggered and nearest_resist:
+                dist = abs(current_price - nearest_resist) / nearest_resist
+                if dist < level_proximity:
+                    level_triggered = True
+                    trigger_reason = f"接近阻力位 {nearest_resist}"
+
+            if not volatility_triggered and not level_triggered:
                 continue
 
             # 通知冷却检查
@@ -78,14 +112,10 @@ class WatchAssistantStrategy(Strategy):
             pct_display = (current_price - last_price) / last_price * 100
             detail_parts = [f"当前价: {current_price:.2f} | 变动: {pct_display:+.2f}%"]
 
-            support = analysis.get('support_levels', [])
-            resistance = analysis.get('resistance_levels', [])
-            if support:
-                nearest_support = min(support, key=lambda x: abs(x - current_price))
+            if nearest_support:
                 dist = (current_price - nearest_support) / nearest_support * 100
                 detail_parts.append(f"距支撑位 {nearest_support}: {dist:+.2f}%")
-            if resistance:
-                nearest_resist = min(resistance, key=lambda x: abs(x - current_price))
+            if nearest_resist:
                 dist = (current_price - nearest_resist) / nearest_resist * 100
                 detail_parts.append(f"距阻力位 {nearest_resist}: {dist:+.2f}%")
 
@@ -93,10 +123,16 @@ class WatchAssistantStrategy(Strategy):
             if summary:
                 detail_parts.append(f"AI: {summary}")
 
+            title_parts = [f"盯盘提醒 | {p.get('name', code)}({code})"]
+            if volatility_triggered:
+                title_parts.append(f"{direction} {pct_display:+.2f}%")
+            if level_triggered:
+                title_parts.append(trigger_reason)
+
             signals.append(Signal(
                 strategy=self.name,
-                priority="HIGH" if change_pct >= threshold * 2 else "MEDIUM",
-                title=f"盯盘提醒 | {p.get('name', code)}({code}) {direction} {pct_display:+.2f}%",
+                priority="HIGH" if change_pct >= threshold * 2 or level_triggered else "MEDIUM",
+                title=" ".join(title_parts),
                 detail="\n".join(detail_parts),
                 data={'stock_code': code, 'price': current_price, 'change_pct': pct_display},
             ))

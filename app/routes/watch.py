@@ -46,8 +46,18 @@ def prices():
     if not codes:
         return jsonify({'success': True, 'prices': []})
 
-    result = unified_stock_data_service.get_realtime_prices(codes)
-    price_list = result.get('prices', [])
+    raw_prices = unified_stock_data_service.get_realtime_prices(codes)
+    price_list = []
+    for code, data in raw_prices.items():
+        price_list.append({
+            'code': code,
+            'name': data.get('name', code),
+            'price': data.get('current_price'),
+            'change': data.get('change'),
+            'change_pct': data.get('change_percent'),
+            'volume': data.get('volume'),
+            'market': data.get('market', ''),
+        })
 
     analyses = WatchService.get_all_today_analyses()
 
@@ -104,8 +114,15 @@ def analyze():
     trend_result = unified_stock_data_service.get_trend_data(uncalculated, days=30)
     stocks_data = {s['stock_code']: s for s in trend_result.get('stocks', [])}
 
-    price_result = unified_stock_data_service.get_realtime_prices(uncalculated)
-    prices_map = {p['code']: p for p in price_result.get('prices', [])}
+    raw_prices = unified_stock_data_service.get_realtime_prices(uncalculated)
+    prices_map = {}
+    for code, price_data in raw_prices.items():
+        prices_map[code] = {
+            'code': code,
+            'name': price_data.get('name', code),
+            'price': price_data.get('current_price'),
+            'change_pct': price_data.get('change_percent'),
+        }
 
     provider = llm_router.route('watch_analysis')
     for code in uncalculated:
