@@ -107,9 +107,9 @@ class BriefingService:
         stock_codes = [s['code'] for s in BRIEFING_STOCKS]
         prices = {}
         try:
-            prices = unified_stock_data_service.get_closing_prices(stock_codes)
+            prices = unified_stock_data_service.get_realtime_prices(stock_codes)
         except Exception as e:
-            logger.error(f"[简报服务.股票] 获取收盘价失败: {e}", exc_info=True)
+            logger.error(f"[简报服务.股票] 获取实时价格失败: {e}", exc_info=True)
             db.session.rollback()
 
         from app.services.stock_meta import StockMetaService
@@ -229,14 +229,6 @@ class BriefingService:
         if cached and isinstance(cached, dict) and 'regions' in cached:
             return cached
 
-        # 7天回溯查找历史缓存
-        for days_ago in range(1, 8):
-            cache_date = today - timedelta(days=days_ago)
-            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
-            if cached and isinstance(cached, dict) and 'regions' in cached:
-                logger.info(f"[简报服务.指数] 使用{days_ago}天前的缓存")
-                return cached
-
         # 无缓存，从API获取
         sorted_regions = sorted(INDEX_CATEGORIES.items(), key=lambda x: x[1]['order'])
         regions = [{'key': k, 'name': v['name']} for k, v in sorted_regions]
@@ -329,14 +321,6 @@ class BriefingService:
         if cached and isinstance(cached, dict) and 'futures' in cached:
             return cached
 
-        # 7天回溯
-        for days_ago in range(1, 8):
-            cache_date = today - timedelta(days=days_ago)
-            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
-            if cached and isinstance(cached, dict) and 'futures' in cached:
-                logger.info(f"[简报服务.期货] 使用{days_ago}天前的缓存")
-                return cached
-
         # 无缓存，从API获取
         futures_codes = [f['code'] for f in BRIEFING_FUTURES]
         yf_data = unified_stock_data_service.get_yfinance_batch_quotes(futures_codes, 'briefing_futures_yf')
@@ -387,14 +371,6 @@ class BriefingService:
         if cached and isinstance(cached, list):
             return cached
 
-        # 7天回溯
-        for days_ago in range(1, 8):
-            cache_date = today - timedelta(days=days_ago)
-            cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, cache_date)
-            if cached and isinstance(cached, list):
-                logger.info(f"[简报服务.A股板块] 使用{days_ago}天前的缓存")
-                return cached
-
         all_sectors = unified_stock_data_service.get_cn_sector_data()
         if not all_sectors:
             return []
@@ -431,17 +407,8 @@ class BriefingService:
         if cached and isinstance(cached, list):
             return cached
 
-        # 尝试获取过期缓存（最近7天）
-        for days_ago in range(1, 8):
-            cache_date = today - timedelta(days=days_ago)
-            cached = UnifiedStockCache.get_cached_data(stock_code, cache_type, cache_date)
-            if cached and isinstance(cached, list):
-                logger.info(f"[简报服务.美股板块] 使用{days_ago}天前的缓存")
-                return cached
-
-        # 使用缓存的单项数据
         etf_codes = [etf['code'] for etf in US_SECTOR_ETFS]
-        yf_data = unified_stock_data_service.get_cached_quotes(etf_codes, 'sector_us_yf')
+        yf_data = unified_stock_data_service.get_yfinance_batch_quotes(etf_codes, 'sector_us_yf')
 
         all_sectors = []
         for etf in US_SECTOR_ETFS:
@@ -494,18 +461,9 @@ class BriefingService:
         if cached and isinstance(cached, dict) and 'etfs' in cached:
             return cached
 
-        # 7天回溯
-        for days_ago in range(1, 8):
-            cache_date = today - timedelta(days=days_ago)
-            cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, cache_date)
-            if cached and isinstance(cached, dict) and 'etfs' in cached:
-                logger.info(f"[简报服务.ETF] 使用{days_ago}天前的缓存")
-                return cached
-
-        # 无缓存，获取数据
         result = []
         etf_codes = [etf['code'] for etf in BRIEFING_ETFS]
-        prices = unified_stock_data_service.get_closing_prices(etf_codes)
+        prices = unified_stock_data_service.get_realtime_prices(etf_codes)
 
         partial = False
         for etf_info in BRIEFING_ETFS:
