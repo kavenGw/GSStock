@@ -1,13 +1,14 @@
 const News = {
-    POLL_INTERVAL: 180000, // 3分钟
+    POLL_SECONDS: 180,
     currentTab: 'all',
     items: [],
-    pollTimer: null,
+    countdown: 0,
+    countdownTimer: null,
 
     async init() {
         this.bindEvents();
         await this.loadData();
-        this.startPolling();
+        this.resetCountdown();
     },
 
     bindEvents() {
@@ -87,9 +88,22 @@ const News = {
         }
     },
 
-    startPolling() {
-        if (this.pollTimer) clearInterval(this.pollTimer);
-        this.pollTimer = setInterval(() => this.poll(), this.POLL_INTERVAL);
+    resetCountdown() {
+        this.countdown = this.POLL_SECONDS;
+        if (this.countdownTimer) clearInterval(this.countdownTimer);
+        this.updateStatus();
+        this.countdownTimer = setInterval(() => this.tick(), 1000);
+    },
+
+    async tick() {
+        this.countdown--;
+        if (this.countdown <= 0) {
+            clearInterval(this.countdownTimer);
+            await this.poll();
+            this.resetCountdown();
+            return;
+        }
+        this.updateStatus();
     },
 
     async poll() {
@@ -276,7 +290,10 @@ const News = {
     },
 
     updateStatus() {
-        document.getElementById('newsStatus').textContent = `${this.items.length} 条快讯`;
+        const min = Math.floor(this.countdown / 60);
+        const sec = this.countdown % 60;
+        const cd = min > 0 ? `${min}:${String(sec).padStart(2, '0')}` : `${sec}s`;
+        document.getElementById('newsStatus').textContent = `${this.items.length} 条快讯 · ${cd} 后刷新`;
     },
 };
 
