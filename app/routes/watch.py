@@ -45,7 +45,8 @@ def prices():
     if not codes:
         return jsonify({'success': True, 'prices': []})
 
-    raw_prices = unified_stock_data_service.get_realtime_prices(codes)
+    cache_only = request.args.get('cache_only', 'false').lower() == 'true'
+    raw_prices = unified_stock_data_service.get_realtime_prices(codes, cache_only=cache_only)
     price_list = []
     for code, data in raw_prices.items():
         price_list.append({
@@ -270,12 +271,18 @@ def chart_data():
         stocks = intraday.get('stocks', [])
         all_data = stocks[0]['data'] if stocks else []
 
+        from app.services.market_session import SmartCacheStrategy
+        effective_date = SmartCacheStrategy.get_effective_cache_date(code)
+        trading_date = effective_date.strftime('%Y-%m-%d')
+
         if last_timestamp and all_data:
             all_data = [d for d in all_data if d.get('time', '') > last_timestamp]
 
         result['data'] = all_data
         result['chart_type'] = 'line'
         result['is_open'] = is_open
+        result['is_trading'] = is_open
+        result['trading_date'] = trading_date
     else:
         days_map = {'7d': 7, '30d': 30, '90d': 90}
         days = days_map.get(period, 30)

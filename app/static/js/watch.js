@@ -1,5 +1,6 @@
 const Watch = {
     REFRESH_INTERVAL: 60,
+    ANALYSIS_INTERVAL: 15 * 60,
     searchDebounce: null,
     stocks: [],
     prices: [],
@@ -7,18 +8,43 @@ const Watch = {
     analyses: {},
     chartInstances: {},
     chartData: {},
+    chartMeta: {},
     refreshTimer: null,
+    analysisTimer: null,
 
     async init() {
-        await this.loadList();
-        await this.loadAnalysis();
+        await this.loadList(true);
+        this.autoAnalyze();
+        this.startRefreshLoop();
+        this.startAnalysisLoop();
     },
 
-    async loadList() {
+    async autoAnalyze() {
         try {
+            await Promise.all([
+                fetch('/watch/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ period: '7d', force: false }),
+                }),
+                fetch('/watch/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ period: '30d', force: false }),
+                }),
+            ]);
+            await this.loadAnalysis();
+        } catch (e) {
+            console.error('[Watch] autoAnalyze failed:', e);
+        }
+    },
+
+    async loadList(cacheOnly = false) {
+        try {
+            const priceUrl = cacheOnly ? '/watch/prices?cache_only=true' : '/watch/prices';
             const [listResp, priceResp, marketResp] = await Promise.all([
                 fetch('/watch/list'),
-                fetch('/watch/prices'),
+                fetch(priceUrl),
                 fetch('/watch/market-status'),
             ]);
             const listData = await listResp.json();
@@ -35,11 +61,9 @@ const Watch = {
                 return;
             }
 
-            this.renderMarketBar();
             this.renderCards();
             this.updateStatus(`${this.stocks.length} 只股票`);
             await this.loadAllCharts();
-            this.startRefreshLoop();
         } catch (e) {
             console.error('[Watch] loadList failed:', e);
             this.updateStatus('加载失败');
@@ -61,6 +85,10 @@ const Watch = {
             if (!result.success) return;
 
             this.chartData[code] = result.data || [];
+            this.chartMeta[code] = {
+                tradingDate: result.trading_date,
+                isTrading: result.is_trading,
+            };
             this.renderChart(code);
         } catch (e) {
             console.error(`[Watch] chart load failed ${code}:`, e);
@@ -82,7 +110,6 @@ const Watch = {
                 this.updateAllPrices();
             }
             this.marketStatus = marketData.data || {};
-            this.renderMarketBar();
 
             for (const stock of this.stocks) {
                 const market = stock.market || 'A';
@@ -104,6 +131,14 @@ const Watch = {
                     console.error(`[Watch] incremental update failed ${stock.stock_code}:`, e);
                 }
             }
+
+            const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
+            if (!hasActiveMarket) {
+                this.stopRefreshLoop();
+                this.stopAnalysisLoop();
+            } else if (!this.analysisTimer) {
+                this.startAnalysisLoop();
+            }
         } catch (e) {
             console.error('[Watch] refresh failed:', e);
         }
@@ -120,6 +155,37 @@ const Watch = {
         if (this.refreshTimer) {
             clearInterval(this.refreshTimer);
             this.refreshTimer = null;
+        }
+    },
+
+    startAnalysisLoop() {
+        this.stopAnalysisLoop();
+        const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
+        if (!hasActiveMarket) return;
+
+        this.analysisTimer = setInterval(async () => {
+            const hasActive = Object.values(this.marketStatus).some(m => m.status === 'trading');
+            if (!hasActive) {
+                this.stopAnalysisLoop();
+                return;
+            }
+            try {
+                await fetch('/watch/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ period: 'realtime', force: true }),
+                });
+                await this.loadAnalysis();
+            } catch (e) {
+                console.error('[Watch] analysis loop failed:', e);
+            }
+        }, this.ANALYSIS_INTERVAL * 1000);
+    },
+
+    stopAnalysisLoop() {
+        if (this.analysisTimer) {
+            clearInterval(this.analysisTimer);
+            this.analysisTimer = null;
         }
     },
 
@@ -233,20 +299,57 @@ const Watch = {
         }, 300);
     },
 
-    renderMarketBar() {
-        const bar = document.getElementById('marketBar');
-        const markets = Object.entries(this.marketStatus);
-        if (markets.length === 0) { bar.classList.add('d-none'); return; }
+    renderStockCard(stock, pricesMap) {
+        const code = stock.stock_code;
+        const name = stock.stock_name || code;
+        const market = stock.market || 'A';
+        const p = pricesMap[code] || {};
 
-        bar.classList.remove('d-none');
-        bar.innerHTML = markets.map(([key, ms]) => {
-            const icon = this.getStatusIcon(ms.status);
-            return `<span class="me-3">
-                ${ms.icon || ''} <strong>${ms.name}</strong>
-                <small class="text-muted">${ms.time}</small>
-                <span class="badge ${this.getStatusBadgeClass(ms.status)} ms-1">${icon} ${ms.status_text}</span>
-            </span>`;
-        }).join('');
+        const priceDisplay = p.price != null ? this.formatPrice(p.price, market) : '--';
+        const pctClass = p.change_pct > 0 ? 'price-up' : p.change_pct < 0 ? 'price-down' : 'price-flat';
+        const pctSign = p.change_pct > 0 ? '+' : '';
+        const pctDisplay = p.change_pct != null ? `${pctSign}${p.change_pct.toFixed(2)}%` : '--';
+        const changeDisplay = p.change != null ? `${p.change > 0 ? '+' : ''}${p.change.toFixed(2)}` : '';
+
+        return `<div class="card stock-card mb-3" id="card-${code}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <span class="fw-bold fs-6">${name}</span>
+                        <small class="text-muted ms-2">${code}</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end">
+                            <span class="fs-5 fw-bold" data-field="price" data-code="${code}">${priceDisplay}</span>
+                            <span class="${pctClass} fw-bold ms-2" data-field="change_pct" data-code="${code}">${pctDisplay}</span>
+                            <span class="${pctClass} small ms-1" data-field="change" data-code="${code}">${changeDisplay}</span>
+                        </div>
+                        <button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="移除">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container mb-2" id="chart-${code}">
+                    <div class="skeleton skeleton-card" style="height:100%;"></div>
+                </div>
+                <div class="analysis-section" id="analysis-${code}">
+                    <ul class="nav nav-tabs analysis-tab mb-2" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-period="realtime" onclick="Watch.switchAnalysisTab('${code}', 'realtime', this)">实时</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-period="7d" onclick="Watch.switchAnalysisTab('${code}', '7d', this)">7天</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-period="30d" onclick="Watch.switchAnalysisTab('${code}', '30d', this)">30天</button>
+                        </li>
+                    </ul>
+                    <div class="analysis-content" id="analysis-content-${code}">
+                        <span class="text-muted small">点击「AI 分析」获取分析结果</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
     },
 
     renderCards() {
@@ -256,60 +359,46 @@ const Watch = {
         const pricesMap = {};
         this.prices.forEach(p => { pricesMap[p.code] = p; });
 
-        const container = document.getElementById('stockCards');
-        container.innerHTML = this.stocks.map(stock => {
-            const code = stock.stock_code;
-            const name = stock.stock_name || code;
+        const groups = {};
+        this.stocks.forEach(stock => {
             const market = stock.market || 'A';
-            const p = pricesMap[code] || {};
+            if (!groups[market]) groups[market] = [];
+            groups[market].push(stock);
+        });
 
-            const priceDisplay = p.price != null ? this.formatPrice(p.price, market) : '--';
-            const pctClass = p.change_pct > 0 ? 'price-up' : p.change_pct < 0 ? 'price-down' : 'price-flat';
-            const pctSign = p.change_pct > 0 ? '+' : '';
-            const pctDisplay = p.change_pct != null ? `${pctSign}${p.change_pct.toFixed(2)}%` : '--';
-            const changeDisplay = p.change != null ? `${p.change > 0 ? '+' : ''}${p.change.toFixed(2)}` : '';
+        const marketOrder = Object.keys(this.marketStatus);
+        const sortedMarkets = Object.keys(groups).sort((a, b) => {
+            const ai = marketOrder.indexOf(a);
+            const bi = marketOrder.indexOf(b);
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        });
 
-            return `<div class="card stock-card mb-3" id="card-${code}">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <span class="fw-bold fs-6">${name}</span>
-                            <small class="text-muted ms-2">${code}</small>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="text-end">
-                                <span class="fs-5 fw-bold" data-field="price" data-code="${code}">${priceDisplay}</span>
-                                <span class="${pctClass} fw-bold ms-2" data-field="change_pct" data-code="${code}">${pctDisplay}</span>
-                                <span class="${pctClass} small ms-1" data-field="change" data-code="${code}">${changeDisplay}</span>
-                            </div>
-                            <button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="移除">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="chart-container mb-2" id="chart-${code}">
-                        <div class="skeleton skeleton-card" style="height:100%;"></div>
-                    </div>
-                    <div class="analysis-section" id="analysis-${code}">
-                        <ul class="nav nav-tabs analysis-tab mb-2" role="tablist">
-                            <li class="nav-item">
-                                <button class="nav-link active" data-period="realtime" onclick="Watch.switchAnalysisTab('${code}', 'realtime', this)">实时</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" data-period="7d" onclick="Watch.switchAnalysisTab('${code}', '7d', this)">7天</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" data-period="30d" onclick="Watch.switchAnalysisTab('${code}', '30d', this)">30天</button>
-                            </li>
-                        </ul>
-                        <div class="analysis-content" id="analysis-content-${code}">
-                            <span class="text-muted small">点击「AI 分析」获取分析结果</span>
-                        </div>
-                    </div>
+        const container = document.getElementById('stockCards');
+        let html = '';
+
+        for (const market of sortedMarkets) {
+            const ms = this.marketStatus[market] || {};
+            const icon = ms.icon || '';
+            const name = ms.name || market;
+            const statusText = ms.status_text || '';
+            const statusBadge = this.getStatusBadgeClass(ms.status || 'closed');
+            const statusIcon = this.getStatusIcon(ms.status || 'closed');
+
+            html += `<div class="market-group mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="fw-bold">${icon} ${name}</span>
+                    <span class="badge ${statusBadge} ms-2">${statusIcon} ${statusText}</span>
                 </div>
-            </div>`;
-        }).join('');
+                <div class="market-stocks">`;
 
+            for (const stock of groups[market]) {
+                html += this.renderStockCard(stock, pricesMap);
+            }
+
+            html += `</div></div>`;
+        }
+
+        container.innerHTML = html;
         document.getElementById('loadingState').classList.add('d-none');
         document.getElementById('emptyState').classList.add('d-none');
         container.classList.remove('d-none');
@@ -323,6 +412,19 @@ const Watch = {
         if (data.length === 0) {
             container.innerHTML = '<div class="text-muted text-center small py-4">暂无分时数据</div>';
             return;
+        }
+
+        const meta = this.chartMeta[code] || {};
+        if (meta.isTrading === false && meta.tradingDate) {
+            const hintId = `chart-hint-${code}`;
+            let hintEl = document.getElementById(hintId);
+            if (!hintEl) {
+                hintEl = document.createElement('div');
+                hintEl.id = hintId;
+                hintEl.className = 'text-muted text-center small';
+                container.parentNode.insertBefore(hintEl, container);
+            }
+            hintEl.textContent = `${meta.tradingDate} 分时数据`;
         }
 
         const times = data.map(d => d.time);
@@ -469,7 +571,6 @@ const Watch = {
     showEmpty() {
         document.getElementById('loadingState').classList.add('d-none');
         document.getElementById('stockCards').classList.add('d-none');
-        document.getElementById('marketBar').classList.add('d-none');
         document.getElementById('emptyState').classList.remove('d-none');
         this.updateStatus('暂无盯盘股票');
     },

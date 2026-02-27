@@ -387,7 +387,7 @@ class UnifiedStockDataService:
 
     # ============ 实时价格获取 ============
 
-    def get_realtime_prices(self, stock_codes: list, force_refresh: bool = False) -> dict:
+    def get_realtime_prices(self, stock_codes: list, force_refresh: bool = False, cache_only: bool = False) -> dict:
         """获取实时价格数据
 
         多级缓存策略：内存缓存 → 数据库缓存 → API获取
@@ -498,6 +498,10 @@ class UnifiedStockDataService:
                 logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 无缓存")
 
             need_refresh.append(code)
+
+        if cache_only:
+            logger.info(f"[数据服务.实时价格] cache_only模式: 返回 {len(result)}只缓存数据, 跳过 {len(need_refresh)}只")
+            return result
 
         # 第三层：API获取
         if need_refresh:
