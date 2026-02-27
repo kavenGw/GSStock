@@ -17,15 +17,11 @@ class SchedulerEngine:
         from app.strategies.registry import registry
         from app.scheduler.event_bus import event_bus
 
-        from app.config.watch_config import WATCH_INTERVAL_MINUTES
         from app.config.news_config import NEWS_INTERVAL_MINUTES
 
         registered = []
         for strategy in registry.active:
-            if strategy.name == 'watch_assistant':
-                trigger = IntervalTrigger(minutes=WATCH_INTERVAL_MINUTES)
-                schedule_desc = f'every {WATCH_INTERVAL_MINUTES}min'
-            elif strategy.name == 'news_monitor':
+            if strategy.name == 'news_monitor':
                 trigger = IntervalTrigger(minutes=NEWS_INTERVAL_MINUTES)
                 schedule_desc = f'every {NEWS_INTERVAL_MINUTES}min'
             elif not strategy.schedule:

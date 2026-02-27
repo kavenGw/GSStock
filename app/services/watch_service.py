@@ -57,41 +57,54 @@ class WatchService:
         return [m for m in priority if m in markets] + [m for m in markets if m not in priority]
 
     @staticmethod
-    def get_today_analysis(stock_code: str) -> dict | None:
+    def get_today_analysis(stock_code: str, period: str = None) -> dict | None:
         """获取今日AI分析结果"""
         today = date.today()
-        analysis = WatchAnalysis.query.filter_by(
-            stock_code=stock_code, analysis_date=today
-        ).first()
-        if not analysis:
-            return None
-        return {
-            'stock_code': analysis.stock_code,
-            'support_levels': json.loads(analysis.support_levels) if analysis.support_levels else [],
-            'resistance_levels': json.loads(analysis.resistance_levels) if analysis.resistance_levels else [],
-            'volatility_threshold': analysis.volatility_threshold,
-            'summary': analysis.analysis_summary,
-        }
+        if period:
+            analysis = WatchAnalysis.query.filter_by(
+                stock_code=stock_code, analysis_date=today, period=period
+            ).first()
+            if not analysis:
+                return None
+            return {
+                'stock_code': analysis.stock_code,
+                'period': analysis.period,
+                'support_levels': json.loads(analysis.support_levels) if analysis.support_levels else [],
+                'resistance_levels': json.loads(analysis.resistance_levels) if analysis.resistance_levels else [],
+                'summary': analysis.analysis_summary,
+            }
+        else:
+            analyses = WatchAnalysis.query.filter_by(
+                stock_code=stock_code, analysis_date=today
+            ).all()
+            if not analyses:
+                return None
+            result = {}
+            for a in analyses:
+                result[a.period] = {
+                    'support_levels': json.loads(a.support_levels) if a.support_levels else [],
+                    'resistance_levels': json.loads(a.resistance_levels) if a.resistance_levels else [],
+                    'summary': a.analysis_summary,
+                }
+            return result
 
     @staticmethod
-    def save_analysis(stock_code: str, support_levels: list, resistance_levels: list,
-                      volatility_threshold: float, summary: str):
+    def save_analysis(stock_code: str, period: str, support_levels: list,
+                      resistance_levels: list, summary: str):
         """保存AI分析结果"""
         today = date.today()
         existing = WatchAnalysis.query.filter_by(
-            stock_code=stock_code, analysis_date=today
+            stock_code=stock_code, analysis_date=today, period=period
         ).first()
         if existing:
             existing.support_levels = json.dumps(support_levels)
             existing.resistance_levels = json.dumps(resistance_levels)
-            existing.volatility_threshold = volatility_threshold
             existing.analysis_summary = summary
         else:
             analysis = WatchAnalysis(
-                stock_code=stock_code, analysis_date=today,
+                stock_code=stock_code, analysis_date=today, period=period,
                 support_levels=json.dumps(support_levels),
                 resistance_levels=json.dumps(resistance_levels),
-                volatility_threshold=volatility_threshold,
                 analysis_summary=summary,
             )
             db.session.add(analysis)
@@ -104,10 +117,11 @@ class WatchService:
         analyses = WatchAnalysis.query.filter_by(analysis_date=today).all()
         result = {}
         for a in analyses:
-            result[a.stock_code] = {
+            if a.stock_code not in result:
+                result[a.stock_code] = {}
+            result[a.stock_code][a.period] = {
                 'support_levels': json.loads(a.support_levels) if a.support_levels else [],
                 'resistance_levels': json.loads(a.resistance_levels) if a.resistance_levels else [],
-                'volatility_threshold': a.volatility_threshold,
                 'summary': a.analysis_summary,
             }
         return result
