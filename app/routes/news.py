@@ -21,12 +21,3 @@ def items():
 def briefing():
     data = NewsService.get_latest_briefing()
     return jsonify({'success': True, 'briefing': data})
-
-
-@news_bp.route('/refresh', methods=['POST'])
-def refresh():
-    from app.strategies.registry import registry
-    strategy = registry.get('news_monitor')
-    if strategy:
-        strategy.scan()
-    return jsonify({'success': True})

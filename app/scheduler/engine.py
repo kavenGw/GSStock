@@ -2,7 +2,6 @@
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.triggers.interval import IntervalTrigger
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +16,12 @@ class SchedulerEngine:
         from app.strategies.registry import registry
         from app.scheduler.event_bus import event_bus
 
-        from app.config.news_config import NEWS_INTERVAL_MINUTES
-
         registered = []
         for strategy in registry.active:
-            if strategy.name == 'news_monitor':
-                trigger = IntervalTrigger(minutes=NEWS_INTERVAL_MINUTES)
-                schedule_desc = f'every {NEWS_INTERVAL_MINUTES}min'
-            elif not strategy.schedule:
+            if not strategy.schedule:
                 continue
-            else:
-                trigger = CronTrigger.from_crontab(strategy.schedule)
-                schedule_desc = strategy.schedule
+            trigger = CronTrigger.from_crontab(strategy.schedule)
+            schedule_desc = strategy.schedule
 
             try:
                 self.scheduler.add_job(
