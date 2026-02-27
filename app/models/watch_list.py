@@ -17,14 +17,14 @@ class WatchAnalysis(db.Model):
     """盯盘AI分析结果"""
     __tablename__ = 'watch_analysis'
     __table_args__ = (
-        db.UniqueConstraint('stock_code', 'analysis_date', name='uq_watch_analysis_code_date'),
+        db.UniqueConstraint('stock_code', 'analysis_date', 'period', name='uq_watch_analysis_code_date_period'),
     )
 
     id = db.Column(db.Integer, primary_key=True)
     stock_code = db.Column(db.String(20), nullable=False)
     analysis_date = db.Column(db.Date, nullable=False)
-    support_levels = db.Column(db.Text)  # JSON
-    resistance_levels = db.Column(db.Text)  # JSON
-    volatility_threshold = db.Column(db.Float)
+    period = db.Column(db.String(10), nullable=False, default='30d')
+    support_levels = db.Column(db.Text)
+    resistance_levels = db.Column(db.Text)
     analysis_summary = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

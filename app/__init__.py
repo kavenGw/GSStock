@@ -245,6 +245,16 @@ def create_app(config_class=None):
         migrate_trades_table()
         migrate_wyckoff_table()
 
+        # watch_analysis 表迁移：新增 period 字段
+        from sqlalchemy import inspect as sa_inspect, text
+        inspector = sa_inspect(db.engine)
+        if 'watch_analysis' in inspector.get_table_names():
+            columns = [c['name'] for c in inspector.get_columns('watch_analysis')]
+            if 'period' not in columns:
+                db.session.execute(text("ALTER TABLE watch_analysis ADD COLUMN period VARCHAR(10) NOT NULL DEFAULT '30d'"))
+                db.session.commit()
+                logging.info('[迁移] watch_analysis 新增 period 字段')
+
         # 初始化默认交易策略
         from app.services.trading_strategy import TradingStrategyService
         TradingStrategyService.init_default_strategies()

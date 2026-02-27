@@ -1,6 +1,5 @@
 import json
 import logging
-from datetime import datetime
 from flask import render_template, request, jsonify
 
 from app.routes import watch_bp
@@ -40,7 +39,6 @@ def remove_stock(stock_code):
 @watch_bp.route('/prices')
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
-    from app.strategies.registry import registry
 
     codes = WatchService.get_watch_codes()
     if not codes:
@@ -59,102 +57,98 @@ def prices():
             'market': data.get('market', ''),
         })
 
-    analyses = WatchService.get_all_today_analyses()
-
-    strategy = registry.get('watch_assistant')
-    strategy_config = strategy.get_config() if strategy else {}
-    cooldown_minutes = strategy_config.get('notification_cooldown_minutes', 30)
-    default_threshold = strategy_config.get('default_volatility_threshold', 0.02)
-    last_notified = getattr(strategy, '_last_notified', {}) if strategy else {}
-
-    now = datetime.now()
-    for item in price_list:
-        code = item.get('code', '')
-        analysis = analyses.get(code, {})
-
-        cooldown_remaining = 0
-        if code in last_notified:
-            elapsed = (now - last_notified[code]).total_seconds()
-            cooldown_remaining = max(0, int(cooldown_minutes * 60 - elapsed))
-
-        item['notification'] = {
-            'threshold': analysis.get('volatility_threshold', default_threshold),
-            'cooldown_remaining': cooldown_remaining,
-            'support_levels': analysis.get('support_levels', []),
-            'resistance_levels': analysis.get('resistance_levels', []),
-            'summary': analysis.get('summary', ''),
-        }
-
     return jsonify({'success': True, 'prices': price_list})
 
 
 @watch_bp.route('/analyze', methods=['POST'])
 def analyze():
-    """触发AI分析"""
     from app.services.unified_stock_data import unified_stock_data_service
     from app.llm.router import llm_router
-    from app.llm.prompts.watch_analysis import SYSTEM_PROMPT, build_watch_analysis_prompt
+    from app.llm.prompts.watch_analysis import (
+        SYSTEM_PROMPT, build_realtime_analysis_prompt,
+        build_7d_analysis_prompt, build_30d_analysis_prompt,
+    )
 
     data = request.get_json() or {}
+    period = data.get('period', '30d')
     force = data.get('force', False)
 
     codes = WatchService.get_watch_codes()
     if not codes:
         return jsonify({'success': True, 'data': {}, 'message': '盯盘列表为空'})
 
-    existing = WatchService.get_all_today_analyses()
-    if not force:
-        uncalculated = [c for c in codes if c not in existing]
-    else:
-        uncalculated = codes
+    if period != 'realtime' and not force:
+        existing = WatchService.get_all_today_analyses()
+        all_cached = all(existing.get(c, {}).get(period) for c in codes)
+        if all_cached:
+            return jsonify({'success': True, 'data': existing, 'message': f'{period} 使用今日缓存'})
 
-    if not uncalculated:
-        return jsonify({'success': True, 'data': existing, 'message': '使用今日缓存'})
+    intraday_map = {}
+    trend_map = {}
+    if period == 'realtime':
+        intraday = unified_stock_data_service.get_intraday_data(codes)
+        intraday_map = {s['stock_code']: s for s in intraday.get('stocks', [])}
 
-    trend_result = unified_stock_data_service.get_trend_data(uncalculated, days=30)
-    stocks_data = {s['stock_code']: s for s in trend_result.get('stocks', [])}
+    if period in ('7d', '30d'):
+        days = 7 if period == '7d' else 30
+        trend = unified_stock_data_service.get_trend_data(codes, days=days)
+        trend_map = {s['stock_code']: s for s in trend.get('stocks', [])}
 
-    raw_prices = unified_stock_data_service.get_realtime_prices(uncalculated)
-    prices_map = {}
-    for code, price_data in raw_prices.items():
-        prices_map[code] = {
-            'code': code,
-            'name': price_data.get('name', code),
-            'price': price_data.get('current_price'),
-            'change_pct': price_data.get('change_percent'),
-        }
+    raw_prices = unified_stock_data_service.get_realtime_prices(codes)
 
     provider = llm_router.route('watch_analysis')
-    for code in uncalculated:
-        stock = stocks_data.get(code, {})
-        price_info = prices_map.get(code, {})
-        ohlc = stock.get('data', [])
-        current_price = price_info.get('price', 0)
-        stock_name = stock.get('stock_name', '') or price_info.get('name', code)
+    if not provider:
+        return jsonify({'success': False, 'message': 'LLM 不可用'})
 
-        if not ohlc or not current_price or not provider:
+    for code in codes:
+        price_data = raw_prices.get(code, {})
+        current_price = price_data.get('current_price', 0)
+        stock_name = price_data.get('name', code)
+        if not current_price:
             continue
 
+        if period != 'realtime' and not force:
+            existing_analysis = WatchService.get_today_analysis(code, period)
+            if existing_analysis:
+                continue
+
         try:
-            prompt = build_watch_analysis_prompt(stock_name, code, ohlc, current_price)
+            if period == 'realtime':
+                intraday_stock = intraday_map.get(code, {})
+                intraday_data = intraday_stock.get('data', [])
+                if not intraday_data:
+                    continue
+                prompt = build_realtime_analysis_prompt(stock_name, code, intraday_data, current_price)
+            elif period == '7d':
+                trend_stock = trend_map.get(code, {})
+                ohlc = trend_stock.get('data', [])
+                if not ohlc:
+                    continue
+                prompt = build_7d_analysis_prompt(stock_name, code, ohlc, current_price)
+            else:
+                trend_stock = trend_map.get(code, {})
+                ohlc = trend_stock.get('data', [])
+                if not ohlc:
+                    continue
+                prompt = build_30d_analysis_prompt(stock_name, code, ohlc, current_price)
+
             response = provider.chat([
                 {'role': 'system', 'content': SYSTEM_PROMPT},
                 {'role': 'user', 'content': prompt},
             ])
-            # 清理可能的 markdown 代码块包裹
             cleaned = response.strip()
             if cleaned.startswith('```'):
                 cleaned = cleaned.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
             parsed = json.loads(cleaned)
             WatchService.save_analysis(
                 stock_code=code,
+                period=period,
                 support_levels=parsed.get('support_levels', []),
                 resistance_levels=parsed.get('resistance_levels', []),
-                volatility_threshold=parsed.get('volatility_threshold', 0.02),
                 summary=parsed.get('summary', ''),
             )
         except Exception as e:
-            logger.error(f"[盯盘AI] {code} 分析失败: {e}")
+            logger.error(f"[盯盘AI] {code} {period}分析失败: {e}")
 
     all_analyses = WatchService.get_all_today_analyses()
     return jsonify({'success': True, 'data': all_analyses})
@@ -253,11 +247,13 @@ def market_status():
 
 @watch_bp.route('/chart-data')
 def chart_data():
-    """获取图表数据"""
     from app.services.unified_stock_data import unified_stock_data_service
+    from app.services.trading_calendar import TradingCalendarService
+    from app.utils.market_identifier import MarketIdentifier
 
     code = request.args.get('code', '').strip()
     period = request.args.get('period', 'intraday')
+    last_timestamp = request.args.get('last_timestamp', '').strip()
 
     if not code:
         return jsonify({'success': False, 'message': '缺少股票代码'})
@@ -265,10 +261,19 @@ def chart_data():
     result = {'success': True, 'code': code, 'period': period}
 
     if period == 'intraday':
+        market = MarketIdentifier.identify(code) or 'A'
+        is_open = TradingCalendarService.is_market_open(market)
+
         intraday = unified_stock_data_service.get_intraday_data([code])
         stocks = intraday.get('stocks', [])
-        result['data'] = stocks[0]['data'] if stocks else []
+        all_data = stocks[0]['data'] if stocks else []
+
+        if last_timestamp and all_data:
+            all_data = [d for d in all_data if d.get('time', '') > last_timestamp]
+
+        result['data'] = all_data
         result['chart_type'] = 'line'
+        result['is_open'] = is_open
     else:
         days_map = {'7d': 7, '30d': 30, '90d': 90}
         days = days_map.get(period, 30)
@@ -297,8 +302,18 @@ def chart_data():
         result['bollinger'] = bollinger[-days:]
         result['chart_type'] = 'candlestick'
 
-    analysis = WatchService.get_today_analysis(code)
-    result['support_levels'] = analysis.get('support_levels', []) if analysis else []
-    result['resistance_levels'] = analysis.get('resistance_levels', []) if analysis else []
+    analysis_data = WatchService.get_today_analysis(code)
+    if analysis_data and isinstance(analysis_data, dict):
+        all_supports = []
+        all_resistances = []
+        for p_data in analysis_data.values():
+            if isinstance(p_data, dict):
+                all_supports.extend(p_data.get('support_levels', []))
+                all_resistances.extend(p_data.get('resistance_levels', []))
+        result['support_levels'] = sorted(set(all_supports))
+        result['resistance_levels'] = sorted(set(all_resistances))
+    else:
+        result['support_levels'] = []
+        result['resistance_levels'] = []
 
     return jsonify(result)
