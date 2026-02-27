@@ -123,6 +123,31 @@ class NewsService:
         return str(latest.source_id) if latest else None
 
     @staticmethod
+    def summarize_items(item_ids: list[int]) -> str | None:
+        """使用LLM整理多条快讯为一段摘要"""
+        items = NewsItem.query.filter(NewsItem.id.in_(item_ids)).all()
+        if not items:
+            return None
+
+        from app.llm.router import llm_router
+        from app.llm.prompts.news_briefing import SUMMARIZE_SYSTEM_PROMPT, build_summarize_prompt
+
+        provider = llm_router.route('news_briefing')
+        if not provider:
+            return None
+
+        items_data = [{'content': n.content} for n in items]
+        try:
+            response = provider.chat([
+                {'role': 'system', 'content': SUMMARIZE_SYSTEM_PROMPT},
+                {'role': 'user', 'content': build_summarize_prompt(items_data)},
+            ], temperature=0.3, max_tokens=200)
+            return response.strip()
+        except Exception as e:
+            logger.error(f'AI摘要失败: {e}')
+            return None
+
+    @staticmethod
     def poll_news() -> tuple[list[dict], int]:
         """拉取最新快讯并返回新增条目"""
         cursor = NewsService.get_polling_cursor()

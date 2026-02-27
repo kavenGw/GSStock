@@ -27,3 +27,15 @@ def briefing():
 def poll():
     items, count = NewsService.poll_news()
     return jsonify({'success': True, 'new_items': items, 'new_count': count})
+
+
+@news_bp.route('/summarize', methods=['POST'])
+def summarize():
+    data = request.get_json()
+    item_ids = data.get('item_ids', [])
+    if not item_ids:
+        return jsonify({'success': False, 'error': 'missing item_ids'})
+    summary = NewsService.summarize_items(item_ids)
+    if not summary:
+        return jsonify({'success': False, 'error': 'summarize failed'})
+    return jsonify({'success': True, 'summary': summary})
