@@ -80,12 +80,6 @@ class NewsService:
         } for n in items]
 
     @staticmethod
-    def get_polling_cursor() -> str | None:
-        """获取最新快讯的 source_id 作为 polling cursor"""
-        latest = NewsItem.query.order_by(NewsItem.display_time.desc()).first()
-        return str(latest.source_id) if latest else None
-
-    @staticmethod
     def summarize_items(item_ids: list[int]) -> str | None:
         """使用LLM整理多条快讯为一段摘要"""
         items = NewsItem.query.filter(NewsItem.id.in_(item_ids)).all()
@@ -113,8 +107,7 @@ class NewsService:
     @staticmethod
     def poll_news() -> tuple[list[dict], int]:
         """拉取最新快讯并返回新增条目"""
-        cursor = NewsService.get_polling_cursor()
-        raw_items = NewsService.fetch_latest_news(cursor=cursor)
+        raw_items = NewsService.fetch_latest_news()
         if not raw_items:
             return [], 0
 
