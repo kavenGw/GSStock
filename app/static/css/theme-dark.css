@@ -40,6 +40,7 @@ hr { border-color: var(--border-color); }
     border-bottom: 1px solid var(--border-color);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    z-index: 1030;
 }
 .navbar-brand, .nav-link { color: var(--text-primary) !important; }
 .nav-link:hover { color: var(--accent) !important; }
@@ -84,6 +85,9 @@ hr { border-color: var(--border-color); }
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+.table tbody td {
+    color: var(--text-primary) !important;
 }
 .table tbody tr:hover {
     background: var(--bg-card-hover) !important;
