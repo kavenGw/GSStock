@@ -134,16 +134,15 @@ class NewsService:
         if not new_items:
             return [], 0
 
-        if new_items:
-            try:
-                from app.services.notification import NotificationService
-                titles = [n.content[:50] for n in new_items[:3]]
-                msg = f"📰 新增 {len(new_items)} 条快讯\n" + "\n".join(f"• {t}" for t in titles)
-                if len(new_items) > 3:
-                    msg += f"\n...等{len(new_items)}条"
-                NotificationService.send_slack(msg)
-            except Exception:
-                pass
+        try:
+            from app.services.notification import NotificationService
+            titles = [n.content[:50] for n in new_items[:3]]
+            msg = f"📰 新增 {len(new_items)} 条快讯\n" + "\n".join(f"• {t}" for t in titles)
+            if len(new_items) > 3:
+                msg += f"\n...等{len(new_items) - 3}条"
+            NotificationService.send_slack(msg)
+        except Exception:
+            pass
 
         items_data = [{
             'id': n.id,
