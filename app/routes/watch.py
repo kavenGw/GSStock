@@ -2,6 +2,7 @@ import json
 import logging
 from flask import render_template, request, jsonify
 
+from app import db
 from app.routes import watch_bp
 from app.services.watch_service import WatchService
 
@@ -148,6 +149,7 @@ def analyze():
                 summary=parsed.get('summary', ''),
             )
         except Exception as e:
+            db.session.rollback()
             logger.error(f"[盯盘AI] {code} {period}分析失败: {e}")
 
     all_analyses = WatchService.get_all_today_analyses()

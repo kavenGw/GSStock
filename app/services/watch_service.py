@@ -91,7 +91,7 @@ class WatchService:
     @staticmethod
     def save_analysis(stock_code: str, period: str, support_levels: list,
                       resistance_levels: list, summary: str):
-        """保存AI分析结果"""
+        """保存AI分析结果（upsert，处理并发竞争）"""
         today = date.today()
         existing = WatchAnalysis.query.filter_by(
             stock_code=stock_code, analysis_date=today, period=period
@@ -100,7 +100,9 @@ class WatchService:
             existing.support_levels = json.dumps(support_levels)
             existing.resistance_levels = json.dumps(resistance_levels)
             existing.analysis_summary = summary
-        else:
+            db.session.commit()
+            return
+        try:
             analysis = WatchAnalysis(
                 stock_code=stock_code, analysis_date=today, period=period,
                 support_levels=json.dumps(support_levels),
@@ -108,7 +110,17 @@ class WatchService:
                 analysis_summary=summary,
             )
             db.session.add(analysis)
-        db.session.commit()
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            existing = WatchAnalysis.query.filter_by(
+                stock_code=stock_code, analysis_date=today, period=period
+            ).first()
+            if existing:
+                existing.support_levels = json.dumps(support_levels)
+                existing.resistance_levels = json.dumps(resistance_levels)
+                existing.analysis_summary = summary
+                db.session.commit()
 
     @staticmethod
     def get_all_today_analyses() -> dict:
