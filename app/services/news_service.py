@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 
 from app import db
-from app.models.news import NewsItem, NewsBriefing
+from app.models.news import NewsItem
 from app.config.news_config import WALLSTREETCN_API, WALLSTREETCN_CHANNEL
 
 logger = logging.getLogger(__name__)
@@ -78,43 +78,6 @@ class NewsService:
             'score': n.score,
             'category': n.category or 'other',
         } for n in items]
-
-    @staticmethod
-    def get_latest_briefing() -> dict | None:
-        """获取最新AI简报"""
-        briefing = NewsBriefing.query.order_by(NewsBriefing.created_at.desc()).first()
-        if not briefing:
-            return None
-        return {
-            'id': briefing.id,
-            'content': briefing.content,
-            'news_count': briefing.news_count,
-            'period_start': briefing.period_start.strftime('%H:%M') if briefing.period_start else '',
-            'period_end': briefing.period_end.strftime('%H:%M') if briefing.period_end else '',
-            'created_at': briefing.created_at.strftime('%Y-%m-%d %H:%M') if briefing.created_at else '',
-        }
-
-    @staticmethod
-    def save_briefing(content: str, news_count: int, period_start: datetime, period_end: datetime) -> NewsBriefing:
-        """保存AI简报"""
-        briefing = NewsBriefing(
-            content=content,
-            news_count=news_count,
-            period_start=period_start,
-            period_end=period_end,
-        )
-        db.session.add(briefing)
-        db.session.commit()
-        return briefing
-
-    @staticmethod
-    def update_categories(category_map: dict):
-        """批量更新快讯分类 {source_id: category}"""
-        for source_id, category in category_map.items():
-            item = NewsItem.query.filter_by(source_id=int(source_id)).first()
-            if item:
-                item.category = category
-        db.session.commit()
 
     @staticmethod
     def get_polling_cursor() -> str | None:

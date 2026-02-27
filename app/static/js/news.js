@@ -1,18 +1,16 @@
 const News = {
-    REFRESH_INTERVAL: 600,
+    POLL_INTERVAL: 180000, // 3分钟
     currentTab: 'all',
     items: [],
-    countdown: 0,
-    countdownTimer: null,
+    pollTimer: null,
 
     async init() {
         this.bindEvents();
         await this.loadData();
-        this.startCountdown();
+        this.startPolling();
     },
 
     bindEvents() {
-        document.getElementById('btnRefresh').addEventListener('click', () => this.manualRefresh());
         document.getElementById('btnLoadMore').addEventListener('click', () => this.loadMore());
         document.querySelectorAll('#newsTabs .nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
@@ -28,23 +26,33 @@ const News = {
 
     async loadData() {
         try {
-            const [itemsResp, briefingResp] = await Promise.all([
+            const [itemsResp, pollResp] = await Promise.all([
                 fetch(`/news/items?tab=${this.currentTab}&limit=30`),
-                fetch('/news/briefing'),
+                fetch('/news/poll'),
             ]);
             const itemsData = await itemsResp.json();
-            const briefingData = await briefingResp.json();
+            const pollData = await pollResp.json();
 
             if (itemsData.success) {
                 this.items = itemsData.items;
             }
+            if (pollData.success && pollData.new_count > 0) {
+                this.mergeNewItems(pollData.new_items);
+            }
             this.renderItems();
-            this.renderBriefing(briefingData.briefing);
             this.showContent();
         } catch (e) {
             console.error('加载失败:', e);
             this.items = [];
             this.showContent();
+        }
+    },
+
+    mergeNewItems(newItems) {
+        const existingIds = new Set(this.items.map(i => i.id));
+        const unique = newItems.filter(i => !existingIds.has(i.id));
+        if (unique.length) {
+            this.items = [...unique, ...this.items];
         }
     },
 
@@ -79,17 +87,137 @@ const News = {
         }
     },
 
-    async manualRefresh() {
-        const btn = document.getElementById('btnRefresh');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> 刷新中...';
+    startPolling() {
+        if (this.pollTimer) clearInterval(this.pollTimer);
+        this.pollTimer = setInterval(() => this.poll(), this.POLL_INTERVAL);
+    },
+
+    async poll() {
         try {
-            await fetch('/news/refresh', { method: 'POST' });
-            await this.loadData();
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> 刷新';
+            const resp = await fetch('/news/poll');
+            const data = await resp.json();
+            if (!data.success || data.new_count === 0) return;
+
+            if (data.new_count <= 3) {
+                this.insertNewItems(data.new_items);
+            } else {
+                await this.insertSummaryCard(data.new_items);
+            }
+            this.updateStatus();
+        } catch (e) {
+            console.error('轮询失败:', e);
         }
+    },
+
+    insertNewItems(newItems) {
+        this.mergeNewItems(newItems);
+        const container = document.getElementById('newsList');
+        const fragment = document.createDocumentFragment();
+
+        for (const item of newItems) {
+            const el = this.createItemElement(item);
+            el.classList.add('news-item-new');
+            fragment.appendChild(el);
+        }
+
+        const firstChild = container.firstChild;
+        container.insertBefore(fragment, firstChild);
+
+        setTimeout(() => {
+            container.querySelectorAll('.news-item-new').forEach(el => {
+                el.classList.remove('news-item-new');
+            });
+        }, 3000);
+    },
+
+    async insertSummaryCard(newItems) {
+        this.mergeNewItems(newItems);
+
+        const ids = newItems.map(i => i.id);
+        let summary = null;
+
+        try {
+            const resp = await fetch('/news/summarize', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({item_ids: ids}),
+            });
+            const data = await resp.json();
+            if (data.success) {
+                summary = data.summary;
+            }
+        } catch (e) {
+            console.error('AI摘要失败:', e);
+        }
+
+        if (!summary) {
+            this.insertNewItems(newItems);
+            return;
+        }
+
+        const container = document.getElementById('newsList');
+        const card = document.createElement('div');
+        card.className = 'news-summary-card mb-2 p-3 border rounded bg-light news-item-new';
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold text-primary">
+                    <i class="bi bi-clipboard-data"></i> ${newItems.length}条新快讯整理
+                </span>
+                <button class="btn btn-sm btn-link text-muted p-0 summary-toggle"
+                        onclick="News.toggleSummaryDetail(this)">
+                    展开 ▼
+                </button>
+            </div>
+            <div class="summary-text">${summary}</div>
+            <div class="summary-detail" style="display:none">
+                ${newItems.map(i => `
+                    <div class="small text-muted border-top pt-1 mt-1">
+                        <span class="me-1">${i.display_time}</span> ${i.content}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        container.insertBefore(card, container.firstChild);
+        setTimeout(() => card.classList.remove('news-item-new'), 3000);
+    },
+
+    toggleSummaryDetail(btn) {
+        const card = btn.closest('.news-summary-card');
+        const detail = card.querySelector('.summary-detail');
+        const isHidden = detail.style.display === 'none';
+        detail.style.display = isHidden ? '' : 'none';
+        btn.textContent = isHidden ? '收起 ▲' : '展开 ▼';
+    },
+
+    createItemElement(item) {
+        const categoryConfig = {
+            stock: { label: '股票', color: 'primary' },
+            metal: { label: '商品', color: 'warning' },
+            ai: { label: 'AI', color: 'info' },
+            other: { label: '', color: 'secondary' },
+        };
+        const cat = categoryConfig[item.category] || categoryConfig.other;
+        const scoreIcon = item.score >= 2
+            ? '<span class="text-danger me-1">●</span>'
+            : '<span class="text-muted me-1">○</span>';
+        const catBadge = cat.label
+            ? `<span class="badge bg-${cat.color} ms-1">${cat.label}</span>`
+            : '';
+
+        const div = document.createElement('div');
+        div.className = 'd-flex align-items-start py-2 border-bottom news-item';
+        div.dataset.id = item.id;
+        div.innerHTML = `
+            <div class="me-2 text-nowrap">
+                ${scoreIcon}
+                <small class="text-muted">${item.display_time}</small>
+            </div>
+            <div class="flex-grow-1">
+                <span>${item.content}</span>${catBadge}
+            </div>
+        `;
+        return div;
     },
 
     renderItems() {
@@ -100,13 +228,6 @@ const News = {
             return;
         }
 
-        const categoryConfig = {
-            stock: { label: '股票', color: 'primary' },
-            metal: { label: '商品', color: 'warning' },
-            ai: { label: 'AI', color: 'info' },
-            other: { label: '', color: 'secondary' },
-        };
-
         let html = '';
         let lastDate = '';
         for (const item of this.items) {
@@ -114,9 +235,18 @@ const News = {
                 lastDate = item.display_date;
                 html += `<div class="text-muted small fw-bold mt-3 mb-2 border-bottom pb-1">${lastDate}</div>`;
             }
-            const cat = categoryConfig[item.category] || categoryConfig.other;
-            const scoreIcon = item.score >= 2 ? '<span class="text-danger me-1">●</span>' : '<span class="text-muted me-1">○</span>';
-            const catBadge = cat.label ? `<span class="badge bg-${cat.color} ms-1">${cat.label}</span>` : '';
+            const cat = {
+                stock: { label: '股票', color: 'primary' },
+                metal: { label: '商品', color: 'warning' },
+                ai: { label: 'AI', color: 'info' },
+                other: { label: '', color: 'secondary' },
+            }[item.category] || { label: '', color: 'secondary' };
+            const scoreIcon = item.score >= 2
+                ? '<span class="text-danger me-1">●</span>'
+                : '<span class="text-muted me-1">○</span>';
+            const catBadge = cat.label
+                ? `<span class="badge bg-${cat.color} ms-1">${cat.label}</span>`
+                : '';
 
             html += `
                 <div class="d-flex align-items-start py-2 border-bottom news-item" data-id="${item.id}">
@@ -133,21 +263,6 @@ const News = {
         document.getElementById('btnLoadMore').style.display = 'inline-block';
     },
 
-    renderBriefing(briefing) {
-        const content = document.getElementById('briefingContent');
-        const time = document.getElementById('briefingTime');
-
-        if (!briefing) {
-            content.innerHTML = '<p class="text-muted">暂无简报，等待下次刷新生成</p>';
-            time.textContent = '';
-            return;
-        }
-
-        time.textContent = briefing.created_at;
-        const lines = briefing.content.split('\n').filter(l => l.trim());
-        content.innerHTML = lines.map(line => `<p class="mb-2">${line}</p>`).join('');
-    },
-
     showContent() {
         document.getElementById('loadingState').style.display = 'none';
         if (this.items.length) {
@@ -161,44 +276,7 @@ const News = {
     },
 
     updateStatus() {
-        const status = document.getElementById('newsStatus');
-        status.textContent = `${this.items.length} 条快讯`;
-    },
-
-    startCountdown() {
-        this.countdown = this.REFRESH_INTERVAL;
-        if (this.countdownTimer) clearInterval(this.countdownTimer);
-        this.countdownTimer = setInterval(() => {
-            this.countdown--;
-            const status = document.getElementById('newsStatus');
-            const min = Math.floor(this.countdown / 60);
-            const sec = this.countdown % 60;
-            const timeStr = min > 0 ? `${min}m ${sec}s` : `${sec}s`;
-            status.textContent = `${this.items.length} 条快讯 · ${timeStr} 后刷新`;
-            if (this.countdown <= 0) {
-                this.countdown = this.REFRESH_INTERVAL;
-                this.refreshItems();
-            }
-        }, 1000);
-    },
-
-    async refreshItems() {
-        try {
-            const [itemsResp, briefingResp] = await Promise.all([
-                fetch(`/news/items?tab=${this.currentTab}&limit=30`),
-                fetch('/news/briefing'),
-            ]);
-            const itemsData = await itemsResp.json();
-            const briefingData = await briefingResp.json();
-            if (itemsData.success) {
-                this.items = itemsData.items;
-                this.renderItems();
-            }
-            this.renderBriefing(briefingData.briefing);
-            this.updateStatus();
-        } catch (e) {
-            console.error('刷新失败:', e);
-        }
+        document.getElementById('newsStatus').textContent = `${this.items.length} 条快讯`;
     },
 };
 

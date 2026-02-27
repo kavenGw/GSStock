@@ -1,7 +1,4 @@
 """新闻看板配置"""
-import os
-
-NEWS_INTERVAL_MINUTES = int(os.environ.get('NEWS_INTERVAL_MINUTES', '10'))
 
 WALLSTREETCN_API = 'https://api-prod.wallstreetcn.com/apiv1/content/lives'
 WALLSTREETCN_CHANNEL = 'global-channel'
