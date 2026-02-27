@@ -121,3 +121,38 @@ class NewsService:
         """获取最新快讯的 source_id 作为 polling cursor"""
         latest = NewsItem.query.order_by(NewsItem.display_time.desc()).first()
         return str(latest.source_id) if latest else None
+
+    @staticmethod
+    def poll_news() -> tuple[list[dict], int]:
+        """拉取最新快讯并返回新增条目"""
+        cursor = NewsService.get_polling_cursor()
+        raw_items = NewsService.fetch_latest_news(cursor=cursor)
+        if not raw_items:
+            return [], 0
+
+        new_items = NewsService.save_news_items(raw_items)
+        if not new_items:
+            return [], 0
+
+        if new_items:
+            try:
+                from app.services.notification import NotificationService
+                titles = [n.content[:50] for n in new_items[:3]]
+                msg = f"📰 新增 {len(new_items)} 条快讯\n" + "\n".join(f"• {t}" for t in titles)
+                if len(new_items) > 3:
+                    msg += f"\n...等{len(new_items)}条"
+                NotificationService.send_slack(msg)
+            except Exception:
+                pass
+
+        items_data = [{
+            'id': n.id,
+            'source_id': n.source_id,
+            'content': n.content,
+            'display_time': n.display_time.strftime('%H:%M') if n.display_time else '',
+            'display_date': n.display_time.strftime('%Y-%m-%d') if n.display_time else '',
+            'score': n.score,
+            'category': n.category or 'other',
+        } for n in new_items]
+
+        return items_data, len(new_items)

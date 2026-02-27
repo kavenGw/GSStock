@@ -21,3 +21,9 @@ def items():
 def briefing():
     data = NewsService.get_latest_briefing()
     return jsonify({'success': True, 'briefing': data})
+
+
+@news_bp.route('/poll')
+def poll():
+    items, count = NewsService.poll_news()
+    return jsonify({'success': True, 'new_items': items, 'new_count': count})
