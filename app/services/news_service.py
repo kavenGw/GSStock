@@ -114,6 +114,7 @@ class NewsService:
             return [], 0
 
         new_items = NewsService.save_news_items(raw_items)
+        logger.info(f'[新闻] 新增 {len(new_items)} 条（共获取 {len(raw_items)} 条）')
         if not new_items:
             return [], 0
 

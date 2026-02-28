@@ -5,10 +5,17 @@ from app.services.news_sources.base import NewsSourceBase
 
 logger = logging.getLogger(__name__)
 
-CLS_API = 'https://www.cls.cn/nodeapi/updateTelegraph'
+CLS_API = 'https://www.cls.cn/nodeapi/telegraphList'
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    'Referer': 'https://www.cls.cn/',
+    'Referer': 'https://www.cls.cn/telegraph',
+}
+PARAMS = {
+    'app': 'CailianpressWeb',
+    'os': 'web',
+    'sv': '8.4.6',
+    'refresh_type': '1',
+    'rn': '20',
 }
 
 
@@ -17,7 +24,7 @@ class CLSSource(NewsSourceBase):
 
     def fetch_latest(self) -> list[dict]:
         try:
-            resp = requests.get(CLS_API, headers=HEADERS, timeout=10)
+            resp = requests.get(CLS_API, params=PARAMS, headers=HEADERS, timeout=10)
             resp.raise_for_status()
             data = resp.json()
             items = data.get('data', {}).get('roll_data', [])

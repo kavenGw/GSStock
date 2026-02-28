@@ -1,6 +1,7 @@
 """新闻兴趣流水线：分类打分 → 关键词匹配 → 衍生搜索"""
 import json
 import logging
+import re
 
 from app import db
 from app.models.news import NewsItem, InterestKeyword
@@ -49,14 +50,27 @@ class InterestPipeline:
             response = provider.chat([
                 {'role': 'system', 'content': CLASSIFY_SYSTEM_PROMPT},
                 {'role': 'user', 'content': build_classify_prompt(items_data)},
-            ], temperature=0.1, max_tokens=500)
+            ], temperature=0.1, max_tokens=2000)
 
-            results = json.loads(response.strip())
+            text = response.strip()
+            # GLM 有时返回 ```json ... ``` 包裹的内容
+            m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+            if m:
+                text = m.group(1).strip()
+            # 尝试提取JSON数组
+            if not text.startswith('['):
+                arr_match = re.search(r'\[[\s\S]*\]', text)
+                if arr_match:
+                    text = arr_match.group(0)
+            results = json.loads(text)
             for r in results:
                 idx = r.get('index', -1)
                 if 0 <= idx < len(items):
                     items[idx].importance = r.get('importance', 0)
             return results
+        except json.JSONDecodeError:
+            logger.error(f'GLM分类打分JSON解析失败, 原始返回: {response[:200]}')
+            return []
         except Exception as e:
             logger.error(f'GLM分类打分失败: {e}')
             return []
@@ -130,7 +144,11 @@ class InterestPipeline:
                     {'role': 'user', 'content': build_recommend_prompt(contents, existing_kws)},
                 ], temperature=0.3, max_tokens=200)
 
-                suggestions = json.loads(response.strip())
+                text = response.strip()
+                m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+                if m:
+                    text = m.group(1).strip()
+                suggestions = json.loads(text)
                 for kw in suggestions:
                     if isinstance(kw, str) and kw not in existing_kws:
                         db.session.add(InterestKeyword(

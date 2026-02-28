@@ -126,10 +126,15 @@ const News = {
     },
 
     insertNewItems(newItems) {
-        this.mergeNewItems(newItems);
+        // 兴趣 tab 下只插入兴趣条目
+        const visible = this.currentTab === 'interest'
+            ? newItems.filter(i => i.is_interest)
+            : newItems;
+        this.mergeNewItems(visible);
+        if (!visible.length) return;
         const container = document.getElementById('newsList');
         const fragment = document.createDocumentFragment();
-        for (const item of newItems) {
+        for (const item of visible) {
             const el = this.createItemElement(item);
             el.classList.add('news-item-new');
             fragment.appendChild(el);
@@ -141,8 +146,12 @@ const News = {
     },
 
     async insertSummaryCard(newItems) {
-        this.mergeNewItems(newItems);
-        const ids = newItems.map(i => i.id);
+        const visible = this.currentTab === 'interest'
+            ? newItems.filter(i => i.is_interest)
+            : newItems;
+        this.mergeNewItems(visible);
+        if (!visible.length) return;
+        const ids = visible.map(i => i.id);
         let summary = null;
         try {
             const resp = await fetch('/news/summarize', {
@@ -155,7 +164,7 @@ const News = {
         } catch (e) {
             console.error('AI摘要失败:', e);
         }
-        if (!summary) { this.insertNewItems(newItems); return; }
+        if (!summary) { this.insertNewItems(visible); return; }
 
         const container = document.getElementById('newsList');
         const card = document.createElement('div');
@@ -163,13 +172,13 @@ const News = {
         card.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-bold text-primary">
-                    <i class="bi bi-clipboard-data"></i> ${newItems.length}条新快讯整理
+                    <i class="bi bi-clipboard-data"></i> ${visible.length}条新快讯整理
                 </span>
                 <button class="btn btn-sm btn-link text-muted p-0" onclick="News.toggleDetail(this)">展开 ▼</button>
             </div>
             <div class="summary-text">${summary}</div>
             <div class="summary-detail" style="display:none">
-                ${newItems.map(i => `
+                ${visible.map(i => `
                     <div class="small text-muted border-top pt-1 mt-1">
                         <span class="me-1">${i.display_time}</span> ${i.content}
                     </div>

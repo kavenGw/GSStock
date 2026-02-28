@@ -55,7 +55,11 @@ class DerivationService:
                 {'role': 'system', 'content': SEARCH_SYSTEM_PROMPT},
                 {'role': 'user', 'content': item.content},
             ], temperature=0.1, max_tokens=100)
-            search_terms = json.loads(resp.strip())
+            text = resp.strip()
+            m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+            if m:
+                text = m.group(1).strip()
+            search_terms = json.loads(text)
             search_query = search_terms.get('zh', item.content[:50])
         except Exception:
             search_query = item.content[:50]
