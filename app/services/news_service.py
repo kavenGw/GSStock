@@ -72,7 +72,7 @@ class NewsService:
     @staticmethod
     def _item_to_dict(n: NewsItem) -> dict:
         return {
-            'id': n.id,
+            'id': str(n.id),
             'source_id': n.source_id,
             'source_name': n.source_name or 'wallstreetcn',
             'content': n.content,

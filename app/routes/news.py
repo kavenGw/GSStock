@@ -28,7 +28,7 @@ def poll():
 @news_bp.route('/summarize', methods=['POST'])
 def summarize():
     data = request.get_json()
-    item_ids = data.get('item_ids', [])
+    item_ids = [int(i) for i in data.get('item_ids', [])]
     if not item_ids:
         return jsonify({'success': False, 'error': 'missing item_ids'})
     summary = NewsService.summarize_items(item_ids)
@@ -43,7 +43,7 @@ def get_keywords():
     return jsonify({
         'success': True,
         'keywords': [{
-            'id': kw.id,
+            'id': str(kw.id),
             'keyword': kw.keyword,
             'source': kw.source,
             'is_active': kw.is_active,
@@ -62,11 +62,11 @@ def add_keyword():
         existing.is_active = True
         existing.source = 'user'
         db.session.commit()
-        return jsonify({'success': True, 'id': existing.id})
+        return jsonify({'success': True, 'id': str(existing.id)})
     kw = InterestKeyword(keyword=keyword, source='user')
     db.session.add(kw)
     db.session.commit()
-    return jsonify({'success': True, 'id': kw.id})
+    return jsonify({'success': True, 'id': str(kw.id)})
 
 
 @news_bp.route('/keywords/<int:kw_id>', methods=['DELETE'])
@@ -94,7 +94,7 @@ def get_companies():
     companies = CompanyKeyword.query.filter_by(is_active=True).order_by(CompanyKeyword.created_at.desc()).all()
     return jsonify({
         'success': True,
-        'companies': [{'id': c.id, 'name': c.name} for c in companies]
+        'companies': [{'id': str(c.id), 'name': c.name} for c in companies]
     })
 
 
@@ -108,11 +108,11 @@ def add_company():
     if existing:
         existing.is_active = True
         db.session.commit()
-        return jsonify({'success': True, 'id': existing.id})
+        return jsonify({'success': True, 'id': str(existing.id)})
     c = CompanyKeyword(name=name)
     db.session.add(c)
     db.session.commit()
-    return jsonify({'success': True, 'id': c.id})
+    return jsonify({'success': True, 'id': str(c.id)})
 
 
 @news_bp.route('/companies/<int:company_id>', methods=['DELETE'])

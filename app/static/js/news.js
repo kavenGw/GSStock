@@ -231,7 +231,7 @@ const News = {
                </div>`
             : '';
         const derivToggle = hasDerivation
-            ? `<button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="News.toggleDerivation(${item.id}, this)">${item.importance >= 5 ? '收起 ▲' : '▸ 查看衍生'}</button>`
+            ? `<button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="News.toggleDerivation('${item.id}', this)">${item.importance >= 5 ? '收起 ▲' : '▸ 查看衍生'}</button>`
             : '';
 
         const div = document.createElement('div');
@@ -356,7 +356,7 @@ const News = {
                     ? userKws.map(k => `
                         <span class="kw-manage-tag kw-user">
                             ${k.keyword}
-                            <button class="kw-delete" onclick="News.deleteKeyword(${k.id})">-</button>
+                            <button class="kw-delete" onclick="News.deleteKeyword('${k.id}')">-</button>
                         </span>
                     `).join('')
                     : '<span class="text-muted">暂无关键词</span>';
@@ -367,8 +367,8 @@ const News = {
                     document.getElementById('aiKeywords').innerHTML = aiKws.map(k => `
                         <span class="kw-manage-tag kw-ai">
                             ${k.keyword}
-                            <button class="btn btn-sm btn-outline-success py-0 px-1 ms-1" onclick="News.acceptKeyword(${k.id})" title="接受">✓</button>
-                            <button class="btn btn-sm btn-outline-danger py-0 px-1 ms-1" onclick="News.deleteKeyword(${k.id})" title="拒绝">✕</button>
+                            <button class="btn btn-sm btn-outline-success py-0 px-1 ms-1" onclick="News.acceptKeyword('${k.id}')" title="接受">✓</button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-1 ms-1" onclick="News.deleteKeyword('${k.id}')" title="拒绝">✕</button>
                         </span>
                     `).join('');
                 } else {
@@ -381,7 +381,7 @@ const News = {
                     ? compData.companies.map(c => `
                         <span class="kw-manage-tag kw-company">
                             ${c.name}
-                            <button class="kw-delete" onclick="News.deleteCompany(${c.id})">-</button>
+                            <button class="kw-delete" onclick="News.deleteCompany('${c.id}')">-</button>
                         </span>
                     `).join('')
                     : '<span class="text-muted">暂无公司</span>';
