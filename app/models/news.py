@@ -33,6 +33,15 @@ class InterestKeyword(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
 
 
+class CompanyKeyword(db.Model):
+    __tablename__ = 'company_keyword'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
+
 class NewsDerivation(db.Model):
     __tablename__ = 'news_derivation'
 

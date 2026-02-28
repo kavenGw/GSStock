@@ -36,12 +36,35 @@
 .kw-manage-tag {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
-    margin: 3px;
-    border-radius: 16px;
+    position: relative;
+    padding: 6px 14px;
+    margin: 4px;
+    border-radius: 20px;
     font-size: 0.85rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #e0e0e0;
 }
-.kw-user { background: #e7f1ff; color: #0d6efd; }
+.kw-manage-tag .kw-delete {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+    display: none;
+    padding: 0;
+}
+.kw-manage-tag:hover .kw-delete { display: block; }
+.kw-user { background: rgba(13,110,253,0.15); color: #6db3f8; border-color: rgba(13,110,253,0.3); }
+.kw-company { background: rgba(25,135,84,0.15); color: #5dbb8a; border-color: rgba(25,135,84,0.3); }
 .kw-ai { background: #f0f0f0; color: #6c757d; }
 </style>
 <div class="container-fluid mt-3">
@@ -105,7 +128,17 @@
                     <strong>我的关键词</strong>
                     <div id="userKeywords" class="mt-2"></div>
                 </div>
+                <hr>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="newCompanyInput" placeholder="输入公司名...">
+                    <button class="btn btn-success" onclick="News.addCompany()">添加</button>
+                </div>
+                <div class="mb-3">
+                    <strong>我的公司</strong>
+                    <div id="companyKeywords" class="mt-2"></div>
+                </div>
                 <div id="aiRecommendSection" style="display:none">
+                    <hr>
                     <strong>AI 推荐</strong>
                     <small class="text-muted">（基于你最近关注的新闻）</small>
                     <div id="aiKeywords" class="mt-2"></div>

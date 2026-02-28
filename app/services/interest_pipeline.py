@@ -4,7 +4,7 @@ import logging
 import re
 
 from app import db
-from app.models.news import NewsItem, InterestKeyword
+from app.models.news import NewsItem, InterestKeyword, CompanyKeyword
 
 logger = logging.getLogger(__name__)
 
@@ -77,12 +77,15 @@ class InterestPipeline:
 
     @staticmethod
     def _match_keywords(items: list[NewsItem], classified: list[dict]):
-        """将 GLM 提取的关键词与用户兴趣关键词匹配"""
+        """将 GLM 提取的关键词与用户兴趣关键词+公司名匹配"""
         user_keywords = InterestKeyword.query.filter_by(is_active=True).all()
-        if not user_keywords:
-            return
+        company_keywords = CompanyKeyword.query.filter_by(is_active=True).all()
 
         kw_set = {kw.keyword.lower() for kw in user_keywords}
+        kw_set.update(c.name.lower() for c in company_keywords)
+
+        if not kw_set:
+            return
 
         for r in classified:
             idx = r.get('index', -1)
@@ -99,7 +102,6 @@ class InterestPipeline:
                         matched.append(user_kw)
                         break
 
-            # 正文包含匹配兜底
             if not matched:
                 content_lower = item.content.lower()
                 for user_kw in kw_set:

@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request
 from app.routes import news_bp
 from app.services.news_service import NewsService
-from app.models.news import InterestKeyword, NewsDerivation
+from app.models.news import InterestKeyword, CompanyKeyword, NewsDerivation
 from app import db
 
 
@@ -84,6 +84,41 @@ def accept_keyword(kw_id):
     if kw:
         kw.is_active = True
         kw.source = 'user'
+        db.session.commit()
+    return jsonify({'success': True})
+
+
+@news_bp.route('/companies')
+def get_companies():
+    companies = CompanyKeyword.query.filter_by(is_active=True).order_by(CompanyKeyword.created_at.desc()).all()
+    return jsonify({
+        'success': True,
+        'companies': [{'id': c.id, 'name': c.name} for c in companies]
+    })
+
+
+@news_bp.route('/companies', methods=['POST'])
+def add_company():
+    data = request.get_json()
+    name = data.get('name', '').strip()
+    if not name:
+        return jsonify({'success': False, 'error': 'name required'})
+    existing = CompanyKeyword.query.filter_by(name=name).first()
+    if existing:
+        existing.is_active = True
+        db.session.commit()
+        return jsonify({'success': True, 'id': existing.id})
+    c = CompanyKeyword(name=name)
+    db.session.add(c)
+    db.session.commit()
+    return jsonify({'success': True, 'id': c.id})
+
+
+@news_bp.route('/companies/<int:company_id>', methods=['DELETE'])
+def delete_company(company_id):
+    c = CompanyKeyword.query.get(company_id)
+    if c:
+        db.session.delete(c)
         db.session.commit()
     return jsonify({'success': True})
 

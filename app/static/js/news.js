@@ -35,6 +35,9 @@ const News = {
         document.getElementById('newKeywordInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.addKeyword();
         });
+        document.getElementById('newCompanyInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addCompany();
+        });
     },
 
     async loadData() {
@@ -338,34 +341,50 @@ const News = {
 
     async loadKeywords() {
         try {
-            const resp = await fetch('/news/keywords');
-            const data = await resp.json();
-            if (!data.success) return;
+            const [kwResp, compResp] = await Promise.all([
+                fetch('/news/keywords'),
+                fetch('/news/companies'),
+            ]);
+            const kwData = await kwResp.json();
+            const compData = await compResp.json();
 
-            const userKws = data.keywords.filter(k => k.source === 'user' || k.is_active);
-            const aiKws = data.keywords.filter(k => k.source === 'ai' && !k.is_active);
+            if (kwData.success) {
+                const userKws = kwData.keywords.filter(k => k.source === 'user' || k.is_active);
+                const aiKws = kwData.keywords.filter(k => k.source === 'ai' && !k.is_active);
 
-            document.getElementById('userKeywords').innerHTML = userKws.length
-                ? userKws.map(k => `
-                    <span class="kw-manage-tag kw-user">
-                        ${k.keyword}
-                        <button class="btn-close btn-close-sm ms-1" style="font-size:0.6rem" onclick="News.deleteKeyword(${k.id})"></button>
-                    </span>
-                `).join('')
-                : '<span class="text-muted">暂无关键词，添加你感兴趣的主题</span>';
+                document.getElementById('userKeywords').innerHTML = userKws.length
+                    ? userKws.map(k => `
+                        <span class="kw-manage-tag kw-user">
+                            ${k.keyword}
+                            <button class="kw-delete" onclick="News.deleteKeyword(${k.id})">-</button>
+                        </span>
+                    `).join('')
+                    : '<span class="text-muted">暂无关键词</span>';
 
-            const aiSection = document.getElementById('aiRecommendSection');
-            if (aiKws.length) {
-                aiSection.style.display = '';
-                document.getElementById('aiKeywords').innerHTML = aiKws.map(k => `
-                    <span class="kw-manage-tag kw-ai">
-                        ${k.keyword}
-                        <button class="btn btn-sm btn-outline-success py-0 px-1 ms-1" onclick="News.acceptKeyword(${k.id})" title="接受">✓</button>
-                        <button class="btn btn-sm btn-outline-danger py-0 px-1 ms-1" onclick="News.deleteKeyword(${k.id})" title="拒绝">✕</button>
-                    </span>
-                `).join('');
-            } else {
-                aiSection.style.display = 'none';
+                const aiSection = document.getElementById('aiRecommendSection');
+                if (aiKws.length) {
+                    aiSection.style.display = '';
+                    document.getElementById('aiKeywords').innerHTML = aiKws.map(k => `
+                        <span class="kw-manage-tag kw-ai">
+                            ${k.keyword}
+                            <button class="btn btn-sm btn-outline-success py-0 px-1 ms-1" onclick="News.acceptKeyword(${k.id})" title="接受">✓</button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-1 ms-1" onclick="News.deleteKeyword(${k.id})" title="拒绝">✕</button>
+                        </span>
+                    `).join('');
+                } else {
+                    aiSection.style.display = 'none';
+                }
+            }
+
+            if (compData.success) {
+                document.getElementById('companyKeywords').innerHTML = compData.companies.length
+                    ? compData.companies.map(c => `
+                        <span class="kw-manage-tag kw-company">
+                            ${c.name}
+                            <button class="kw-delete" onclick="News.deleteCompany(${c.id})">-</button>
+                        </span>
+                    `).join('')
+                    : '<span class="text-muted">暂无公司</span>';
             }
         } catch (e) {
             console.error('加载关键词失败:', e);
@@ -404,6 +423,32 @@ const News = {
             await this.loadKeywords();
         } catch (e) {
             console.error('接受关键词失败:', e);
+        }
+    },
+
+    async addCompany() {
+        const input = document.getElementById('newCompanyInput');
+        const name = input.value.trim();
+        if (!name) return;
+        try {
+            await fetch('/news/companies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+            });
+            input.value = '';
+            await this.loadKeywords();
+        } catch (e) {
+            console.error('添加公司失败:', e);
+        }
+    },
+
+    async deleteCompany(id) {
+        try {
+            await fetch(`/news/companies/${id}`, { method: 'DELETE' });
+            await this.loadKeywords();
+        } catch (e) {
+            console.error('删除公司失败:', e);
         }
     },
 };
