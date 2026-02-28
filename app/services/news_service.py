@@ -1,6 +1,6 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app import db
 from app.models.news import NewsItem
@@ -9,6 +9,7 @@ from app.services.news_sources import ALL_SOURCES
 logger = logging.getLogger(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=4)
+_last_company_news_time = None
 
 
 class NewsService:
@@ -132,8 +133,13 @@ class NewsService:
         item_ids = [n.id for n in new_items]
         _executor.submit(InterestPipeline.process_new_items, item_ids)
 
-        from app.services.company_news_service import CompanyNewsService
-        _executor.submit(CompanyNewsService.fetch_company_news)
+        global _last_company_news_time
+        from app.config.news_config import COMPANY_NEWS_INTERVAL_MINUTES
+        now = datetime.now(timezone.utc)
+        if _last_company_news_time is None or (now - _last_company_news_time).total_seconds() >= COMPANY_NEWS_INTERVAL_MINUTES * 60:
+            _last_company_news_time = now
+            from app.services.company_news_service import CompanyNewsService
+            _executor.submit(CompanyNewsService.fetch_company_news)
 
         _executor.submit(NewsService._notify_slack, [n.content for n in new_items])
 

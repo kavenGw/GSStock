@@ -10,7 +10,7 @@ NEWS_SOURCE_LABELS = {
     'cls': {'label': '财联社', 'color': 'primary'},
     '36kr': {'label': '36kr', 'color': 'warning'},
     'google_news': {'label': 'Google', 'color': 'danger'},
-    'xueqiu': {'label': '雪球', 'color': 'success'},
+    'eastmoney_stock': {'label': '东财', 'color': 'success'},
 }
 
 MAX_DERIVATION_PER_POLL = 2
@@ -20,5 +20,6 @@ DERIVATION_TOTAL_TIMEOUT = 120
 # 公司新闻爬取配置
 COMPANY_NEWS_MAX_COMPANIES = int(os.getenv('COMPANY_NEWS_MAX_COMPANIES', '3'))
 COMPANY_NEWS_MAX_ARTICLES = int(os.getenv('COMPANY_NEWS_MAX_ARTICLES', '5'))
+COMPANY_NEWS_INTERVAL_MINUTES = int(os.getenv('COMPANY_NEWS_INTERVAL_MINUTES', '30'))
 COMPANY_NEWS_CRAWL_TIMEOUT = 30
 COMPANY_NEWS_TOTAL_TIMEOUT = 120
