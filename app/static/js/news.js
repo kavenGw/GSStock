@@ -113,8 +113,16 @@ const News = {
         try {
             const resp = await fetch('/news/poll');
             const data = await resp.json();
-            if (!data.success || data.new_count === 0) return;
-            if (data.new_count <= 3) {
+            if (!data.success || data.new_count === 0) {
+                // 无新条目时，兴趣tab仍需刷新（pipeline异步标记可能刚完成）
+                if (this.currentTab === 'interest') await this.loadItems();
+                return;
+            }
+            if (this.currentTab === 'interest') {
+                // 兴趣tab：pipeline异步处理，poll返回时is_interest可能未标记
+                // 直接从DB重新加载以获取最新兴趣标记
+                await this.loadItems();
+            } else if (data.new_count <= 3) {
                 this.insertNewItems(data.new_items);
             } else {
                 await this.insertSummaryCard(data.new_items);
