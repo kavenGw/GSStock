@@ -30,10 +30,12 @@ class InterestPipeline:
 
             db.session.commit()
 
-            # Step 3: 高分兴趣条目触发衍生搜索
-            from app.services.derivation_service import DerivationService
-            interest_items = [n for n in items if n.is_interest and n.importance >= 4]
-            DerivationService.process_batch(interest_items[:2])
+            # Step 3: 高分兴趣条目触发衍生搜索（需 NEWS_DERIVATION_ENABLED=true）
+            import os
+            if os.getenv('NEWS_DERIVATION_ENABLED', 'false').lower() == 'true':
+                from app.services.derivation_service import DerivationService
+                interest_items = [n for n in items if n.is_interest and n.importance >= 4]
+                DerivationService.process_batch(interest_items[:2])
 
     @staticmethod
     def _classify_items(items: list[NewsItem]) -> list[dict]:
