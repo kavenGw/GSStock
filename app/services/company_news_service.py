@@ -8,6 +8,8 @@ from urllib.parse import quote
 
 from app import db
 from app.models.news import NewsItem, CompanyKeyword
+from app.models.stock import Stock
+from app.utils.market_identifier import MarketIdentifier
 from app.config.news_config import (
     COMPANY_NEWS_MAX_COMPANIES, COMPANY_NEWS_MAX_ARTICLES,
     COMPANY_NEWS_CRAWL_TIMEOUT, COMPANY_NEWS_TOTAL_TIMEOUT,
@@ -22,7 +24,6 @@ class CompanyNewsService:
 
     @staticmethod
     def fetch_company_news():
-        """批量爬取公司新闻（后台线程调用）"""
         from app import create_app
         app = create_app()
         with app.app_context():
@@ -63,19 +64,46 @@ class CompanyNewsService:
         return all_results
 
     @staticmethod
+    def _resolve_market(company_name: str) -> tuple:
+        stock = Stock.query.filter_by(stock_name=company_name).first()
+        if not stock:
+            return (None, None)
+        market = MarketIdentifier.identify(stock.stock_code)
+        return (market, stock.stock_code)
+
+    @staticmethod
+    def _fetch_eastmoney_news(stock_code: str, company_name: str) -> list[dict]:
+        try:
+            import akshare as ak
+            symbol = stock_code.split('.')[0]
+            df = ak.stock_news_em(symbol=symbol)
+            articles = []
+            for _, row in df.head(COMPANY_NEWS_MAX_ARTICLES).iterrows():
+                articles.append({
+                    'url': row['新闻链接'],
+                    'content': f"{row['新闻标题']}：{row['新闻内容']}",
+                    'source_name': 'eastmoney_stock',
+                    'company': company_name,
+                })
+            return articles
+        except Exception as e:
+            logger.error(f'[公司新闻] 东方财富获取失败 {company_name}: {e}')
+            return []
+
+    @staticmethod
     async def _fetch_single_company(crawler, company_name: str) -> list[dict]:
-        google_task = CompanyNewsService._search_google_news(crawler, company_name)
-        xueqiu_task = CompanyNewsService._search_xueqiu(crawler, company_name)
-        google_results, xueqiu_results = await asyncio.gather(
-            google_task, xueqiu_task, return_exceptions=True,
-        )
+        market, stock_code = CompanyNewsService._resolve_market(company_name)
 
-        combined = []
-        for r in (google_results, xueqiu_results):
-            if isinstance(r, list):
-                combined.extend(r)
+        if market == 'A' and stock_code:
+            loop = asyncio.get_event_loop()
+            results = await loop.run_in_executor(
+                None, CompanyNewsService._fetch_eastmoney_news, stock_code, company_name
+            )
+            if results:
+                return results
+            logger.info(f'[公司新闻] {company_name} 东方财富无结果，降级到 Google News')
 
-        return combined[:COMPANY_NEWS_MAX_ARTICLES]
+        return await CompanyNewsService._search_google_news(crawler, company_name)
 
     @staticmethod
     async def _search_google_news(crawler, company_name: str) -> list[dict]:
@@ -99,29 +127,6 @@ class CompanyNewsService:
         return articles
 
     @staticmethod
-    async def _search_xueqiu(crawler, company_name: str) -> list[dict]:
-        search_url = f"https://xueqiu.com/k?q={company_name}"
-        search_result = await crawler.arun(url=search_url, timeout=COMPANY_NEWS_CRAWL_TIMEOUT)
-
-        xueqiu_pattern = re.compile(r'https://xueqiu\.com/\d+/\d+')
-        urls = list(dict.fromkeys(xueqiu_pattern.findall(search_result.markdown)))[:3]
-
-        articles = []
-        for url in urls:
-            try:
-                result = await crawler.arun(url=url, timeout=COMPANY_NEWS_CRAWL_TIMEOUT)
-                if result.markdown:
-                    articles.append({
-                        'url': url,
-                        'content': result.markdown[:2000],
-                        'source_name': 'xueqiu',
-                        'company': company_name,
-                    })
-            except Exception:
-                continue
-        return articles
-
-    @staticmethod
     def _save_results(results: list[dict]):
         from app.llm.router import llm_router
 
@@ -138,7 +143,7 @@ class CompanyNewsService:
                 continue
 
             content = item['content']
-            if provider:
+            if provider and item['source_name'] != 'eastmoney_stock':
                 try:
                     content = provider.chat([
                         {'role': 'system', 'content': SUMMARY_PROMPT},
