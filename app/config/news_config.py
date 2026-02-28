@@ -3,9 +3,13 @@
 WALLSTREETCN_API = 'https://api-prod.wallstreetcn.com/apiv1/content/lives'
 WALLSTREETCN_CHANNEL = 'global-channel'
 
-INTEREST_CATEGORIES = {
-    'stock': '股票',
-    'metal': '重金属/商品',
-    'ai': 'AI/科技',
-    'other': '其他',
+NEWS_SOURCE_LABELS = {
+    'wallstreetcn': {'label': '华尔街', 'color': 'secondary'},
+    'smolai': {'label': 'SmolAI', 'color': 'info'},
+    'cls': {'label': '财联社', 'color': 'primary'},
+    '36kr': {'label': '36kr', 'color': 'warning'},
 }
+
+MAX_DERIVATION_PER_POLL = 2
+DERIVATION_URL_TIMEOUT = 30
+DERIVATION_TOTAL_TIMEOUT = 120

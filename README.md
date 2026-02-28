@@ -158,6 +158,12 @@ LLM_REQUEST_TIMEOUT=300    # API 请求超时（秒），默认 300
 
 ### Slack
 
+1. 打开 [Slack API: Applications](https://api.slack.com/apps)，点击 **Create New App** → **From scratch**
+2. 输入应用名称（如 `Stock Alert`），选择目标 Workspace，点击 **Create App**
+3. 左侧菜单选择 **Incoming Webhooks**，开启 **Activate Incoming Webhooks**
+4. 页面底部点击 **Add New Webhook to Workspace**，选择接收通知的频道，点击 **Allow**
+5. 复制生成的 Webhook URL，填入 `.env`：
+
 ```env
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
 ```

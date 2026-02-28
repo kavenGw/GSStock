@@ -1,11 +1,20 @@
+const NEWS_SOURCE_LABELS = {
+    wallstreetcn: { label: '华尔街', color: 'secondary' },
+    smolai: { label: 'SmolAI', color: 'info' },
+    cls: { label: '财联社', color: 'primary' },
+    '36kr': { label: '36kr', color: 'warning' },
+};
+
 const News = {
     POLL_SECONDS: 180,
     currentTab: 'all',
     items: [],
     countdown: 0,
     countdownTimer: null,
+    keywordModal: null,
 
     async init() {
+        this.keywordModal = new bootstrap.Modal(document.getElementById('keywordModal'));
         this.bindEvents();
         await this.loadData();
         this.resetCountdown();
@@ -23,6 +32,9 @@ const News = {
                 this.loadItems();
             });
         });
+        document.getElementById('newKeywordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addKeyword();
+        });
     },
 
     async loadData() {
@@ -33,13 +45,8 @@ const News = {
             ]);
             const itemsData = await itemsResp.json();
             const pollData = await pollResp.json();
-
-            if (itemsData.success) {
-                this.items = itemsData.items;
-            }
-            if (pollData.success && pollData.new_count > 0) {
-                this.mergeNewItems(pollData.new_items);
-            }
+            if (itemsData.success) this.items = itemsData.items;
+            if (pollData.success && pollData.new_count > 0) this.mergeNewItems(pollData.new_items);
             this.renderItems();
             this.showContent();
         } catch (e) {
@@ -52,18 +59,14 @@ const News = {
     mergeNewItems(newItems) {
         const existingIds = new Set(this.items.map(i => i.id));
         const unique = newItems.filter(i => !existingIds.has(i.id));
-        if (unique.length) {
-            this.items = [...unique, ...this.items];
-        }
+        if (unique.length) this.items = [...unique, ...this.items];
     },
 
     async loadItems() {
         try {
             const resp = await fetch(`/news/items?tab=${this.currentTab}&limit=30`);
             const data = await resp.json();
-            if (data.success) {
-                this.items = data.items;
-            }
+            if (data.success) this.items = data.items;
             this.renderItems();
             this.showContent();
         } catch (e) {
@@ -110,9 +113,16 @@ const News = {
         try {
             const resp = await fetch('/news/poll');
             const data = await resp.json();
-            if (!data.success || data.new_count === 0) return;
-
-            if (data.new_count <= 3) {
+            if (!data.success || data.new_count === 0) {
+                // 无新条目时，兴趣tab仍需刷新（pipeline异步标记可能刚完成）
+                if (this.currentTab === 'interest') await this.loadItems();
+                return;
+            }
+            if (this.currentTab === 'interest') {
+                // 兴趣tab：pipeline异步处理，poll返回时is_interest可能未标记
+                // 直接从DB重新加载以获取最新兴趣标记
+                await this.loadItems();
+            } else if (data.new_count <= 3) {
                 this.insertNewItems(data.new_items);
             } else {
                 await this.insertSummaryCard(data.new_items);
@@ -124,50 +134,45 @@ const News = {
     },
 
     insertNewItems(newItems) {
-        this.mergeNewItems(newItems);
+        // 兴趣 tab 下只插入兴趣条目
+        const visible = this.currentTab === 'interest'
+            ? newItems.filter(i => i.is_interest)
+            : newItems;
+        this.mergeNewItems(visible);
+        if (!visible.length) return;
         const container = document.getElementById('newsList');
         const fragment = document.createDocumentFragment();
-
-        for (const item of newItems) {
+        for (const item of visible) {
             const el = this.createItemElement(item);
             el.classList.add('news-item-new');
             fragment.appendChild(el);
         }
-
-        const firstChild = container.firstChild;
-        container.insertBefore(fragment, firstChild);
-
+        container.insertBefore(fragment, container.firstChild);
         setTimeout(() => {
-            container.querySelectorAll('.news-item-new').forEach(el => {
-                el.classList.remove('news-item-new');
-            });
+            container.querySelectorAll('.news-item-new').forEach(el => el.classList.remove('news-item-new'));
         }, 3000);
     },
 
     async insertSummaryCard(newItems) {
-        this.mergeNewItems(newItems);
-
-        const ids = newItems.map(i => i.id);
+        const visible = this.currentTab === 'interest'
+            ? newItems.filter(i => i.is_interest)
+            : newItems;
+        this.mergeNewItems(visible);
+        if (!visible.length) return;
+        const ids = visible.map(i => i.id);
         let summary = null;
-
         try {
             const resp = await fetch('/news/summarize', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({item_ids: ids}),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_ids: ids }),
             });
             const data = await resp.json();
-            if (data.success) {
-                summary = data.summary;
-            }
+            if (data.success) summary = data.summary;
         } catch (e) {
             console.error('AI摘要失败:', e);
         }
-
-        if (!summary) {
-            this.insertNewItems(newItems);
-            return;
-        }
+        if (!summary) { this.insertNewItems(visible); return; }
 
         const container = document.getElementById('newsList');
         const card = document.createElement('div');
@@ -175,48 +180,55 @@ const News = {
         card.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="fw-bold text-primary">
-                    <i class="bi bi-clipboard-data"></i> ${newItems.length}条新快讯整理
+                    <i class="bi bi-clipboard-data"></i> ${visible.length}条新快讯整理
                 </span>
-                <button class="btn btn-sm btn-link text-muted p-0 summary-toggle"
-                        onclick="News.toggleSummaryDetail(this)">
-                    展开 ▼
-                </button>
+                <button class="btn btn-sm btn-link text-muted p-0" onclick="News.toggleDetail(this)">展开 ▼</button>
             </div>
             <div class="summary-text">${summary}</div>
             <div class="summary-detail" style="display:none">
-                ${newItems.map(i => `
+                ${visible.map(i => `
                     <div class="small text-muted border-top pt-1 mt-1">
                         <span class="me-1">${i.display_time}</span> ${i.content}
                     </div>
                 `).join('')}
             </div>
         `;
-
         container.insertBefore(card, container.firstChild);
         setTimeout(() => card.classList.remove('news-item-new'), 3000);
     },
 
-    toggleSummaryDetail(btn) {
-        const card = btn.closest('.news-summary-card');
-        const detail = card.querySelector('.summary-detail');
+    toggleDetail(btn) {
+        const card = btn.closest('.news-summary-card, .news-item');
+        const detail = card.querySelector('.summary-detail, .derivation-wrap');
+        if (!detail) return;
         const isHidden = detail.style.display === 'none';
         detail.style.display = isHidden ? '' : 'none';
         btn.textContent = isHidden ? '收起 ▲' : '展开 ▼';
     },
 
     createItemElement(item) {
-        const categoryConfig = {
-            stock: { label: '股票', color: 'primary' },
-            metal: { label: '商品', color: 'warning' },
-            ai: { label: 'AI', color: 'info' },
-            other: { label: '', color: 'secondary' },
-        };
-        const cat = categoryConfig[item.category] || categoryConfig.other;
+        const src = NEWS_SOURCE_LABELS[item.source_name] || { label: '', color: 'secondary' };
         const scoreIcon = item.score >= 2
             ? '<span class="text-danger me-1">●</span>'
             : '<span class="text-muted me-1">○</span>';
-        const catBadge = cat.label
-            ? `<span class="badge bg-${cat.color} ms-1">${cat.label}</span>`
+        const srcBadge = src.label
+            ? `<span class="badge bg-${src.color} keyword-tag">${src.label}</span>`
+            : '';
+        const stars = item.importance > 0
+            ? `<span class="importance-stars">${'★'.repeat(item.importance)}${'☆'.repeat(5 - item.importance)}</span>`
+            : '';
+        const kwTags = item.matched_keywords
+            ? item.matched_keywords.split(',').map(k => `<span class="badge bg-success keyword-tag">${k.trim()}</span>`).join('')
+            : '';
+
+        const hasDerivation = item.is_interest && item.importance >= 4;
+        const derivationArea = hasDerivation
+            ? `<div class="derivation-wrap" style="display:${item.importance >= 5 ? '' : 'none'}" id="deriv-${item.id}">
+                   <div class="derivation-card"><span class="text-muted">加载衍生内容...</span></div>
+               </div>`
+            : '';
+        const derivToggle = hasDerivation
+            ? `<button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="News.toggleDerivation(${item.id}, this)">${item.importance >= 5 ? '收起 ▲' : '▸ 查看衍生'}</button>`
             : '';
 
         const div = document.createElement('div');
@@ -228,10 +240,54 @@ const News = {
                 <small class="text-muted">${item.display_time}</small>
             </div>
             <div class="flex-grow-1">
-                <span>${item.content}</span>${catBadge}
+                <div>
+                    <span>${item.content}</span>${srcBadge}${stars}${kwTags}${derivToggle}
+                </div>
+                ${derivationArea}
             </div>
         `;
+
+        if (hasDerivation && item.importance >= 5) {
+            this.loadDerivation(item.id, div.querySelector('.derivation-card'));
+        }
         return div;
+    },
+
+    async toggleDerivation(newsId, btn) {
+        const wrap = document.getElementById(`deriv-${newsId}`);
+        if (!wrap) return;
+        const isHidden = wrap.style.display === 'none';
+        wrap.style.display = isHidden ? '' : 'none';
+        btn.textContent = isHidden ? '收起 ▲' : '▸ 查看衍生';
+        if (isHidden) {
+            const card = wrap.querySelector('.derivation-card');
+            if (card && card.dataset.loaded !== 'true') {
+                await this.loadDerivation(newsId, card);
+            }
+        }
+    },
+
+    async loadDerivation(newsId, container) {
+        try {
+            const resp = await fetch(`/news/derivations/${newsId}`);
+            const data = await resp.json();
+            if (!data.success) {
+                container.innerHTML = '<span class="text-muted">暂无衍生内容</span>';
+                return;
+            }
+            const d = data.derivation;
+            const sources = (d.sources || []).map(s => {
+                try { return `<a href="${s}" target="_blank" class="me-2">${new URL(s).hostname}</a>`; }
+                catch { return ''; }
+            }).join('');
+            container.innerHTML = `
+                <div>${d.summary.replace(/\n/g, '<br>')}</div>
+                ${sources ? `<div class="derivation-sources">来源: ${sources}</div>` : ''}
+            `;
+            container.dataset.loaded = 'true';
+        } catch (e) {
+            container.innerHTML = '<span class="text-muted">加载失败</span>';
+        }
     },
 
     renderItems() {
@@ -241,39 +297,18 @@ const News = {
             document.getElementById('btnLoadMore').style.display = 'none';
             return;
         }
-
-        let html = '';
+        container.innerHTML = '';
         let lastDate = '';
         for (const item of this.items) {
             if (item.display_date && item.display_date !== lastDate) {
                 lastDate = item.display_date;
-                html += `<div class="text-muted small fw-bold mt-3 mb-2 border-bottom pb-1">${lastDate}</div>`;
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'text-muted small fw-bold mt-3 mb-2 border-bottom pb-1';
+                dateDiv.textContent = lastDate;
+                container.appendChild(dateDiv);
             }
-            const cat = {
-                stock: { label: '股票', color: 'primary' },
-                metal: { label: '商品', color: 'warning' },
-                ai: { label: 'AI', color: 'info' },
-                other: { label: '', color: 'secondary' },
-            }[item.category] || { label: '', color: 'secondary' };
-            const scoreIcon = item.score >= 2
-                ? '<span class="text-danger me-1">●</span>'
-                : '<span class="text-muted me-1">○</span>';
-            const catBadge = cat.label
-                ? `<span class="badge bg-${cat.color} ms-1">${cat.label}</span>`
-                : '';
-
-            html += `
-                <div class="d-flex align-items-start py-2 border-bottom news-item" data-id="${item.id}">
-                    <div class="me-2 text-nowrap">
-                        ${scoreIcon}
-                        <small class="text-muted">${item.display_time}</small>
-                    </div>
-                    <div class="flex-grow-1">
-                        <span>${item.content}</span>${catBadge}
-                    </div>
-                </div>`;
+            container.appendChild(this.createItemElement(item));
         }
-        container.innerHTML = html;
         document.getElementById('btnLoadMore').style.display = 'inline-block';
     },
 
@@ -294,6 +329,82 @@ const News = {
         const sec = this.countdown % 60;
         const cd = min > 0 ? `${min}:${String(sec).padStart(2, '0')}` : `${sec}s`;
         document.getElementById('newsStatus').textContent = `${this.items.length} 条快讯 · ${cd} 后刷新`;
+    },
+
+    async showKeywordModal() {
+        this.keywordModal.show();
+        await this.loadKeywords();
+    },
+
+    async loadKeywords() {
+        try {
+            const resp = await fetch('/news/keywords');
+            const data = await resp.json();
+            if (!data.success) return;
+
+            const userKws = data.keywords.filter(k => k.source === 'user' || k.is_active);
+            const aiKws = data.keywords.filter(k => k.source === 'ai' && !k.is_active);
+
+            document.getElementById('userKeywords').innerHTML = userKws.length
+                ? userKws.map(k => `
+                    <span class="kw-manage-tag kw-user">
+                        ${k.keyword}
+                        <button class="btn-close btn-close-sm ms-1" style="font-size:0.6rem" onclick="News.deleteKeyword(${k.id})"></button>
+                    </span>
+                `).join('')
+                : '<span class="text-muted">暂无关键词，添加你感兴趣的主题</span>';
+
+            const aiSection = document.getElementById('aiRecommendSection');
+            if (aiKws.length) {
+                aiSection.style.display = '';
+                document.getElementById('aiKeywords').innerHTML = aiKws.map(k => `
+                    <span class="kw-manage-tag kw-ai">
+                        ${k.keyword}
+                        <button class="btn btn-sm btn-outline-success py-0 px-1 ms-1" onclick="News.acceptKeyword(${k.id})" title="接受">✓</button>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-1 ms-1" onclick="News.deleteKeyword(${k.id})" title="拒绝">✕</button>
+                    </span>
+                `).join('');
+            } else {
+                aiSection.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('加载关键词失败:', e);
+        }
+    },
+
+    async addKeyword() {
+        const input = document.getElementById('newKeywordInput');
+        const keyword = input.value.trim();
+        if (!keyword) return;
+        try {
+            await fetch('/news/keywords', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyword }),
+            });
+            input.value = '';
+            await this.loadKeywords();
+        } catch (e) {
+            console.error('添加关键词失败:', e);
+        }
+    },
+
+    async deleteKeyword(id) {
+        try {
+            await fetch(`/news/keywords/${id}`, { method: 'DELETE' });
+            await this.loadKeywords();
+        } catch (e) {
+            console.error('删除关键词失败:', e);
+        }
+    },
+
+    async acceptKeyword(id) {
+        try {
+            await fetch(`/news/keywords/${id}/accept`, { method: 'POST' });
+            await this.loadKeywords();
+        } catch (e) {
+            console.error('接受关键词失败:', e);
+        }
     },
 };
 

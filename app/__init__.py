@@ -205,7 +205,7 @@ def create_app(config_class=None):
     app.register_blueprint(news_bp)
 
     with app.app_context():
-        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, NewsBriefing
+        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, InterestKeyword, NewsDerivation
 
         # 检查是否需要执行 CockroachDB 迁移
         from app.services.cockroach_migration import check_cockroach_migration_needed, migrate_local_to_cockroach
@@ -245,9 +245,23 @@ def create_app(config_class=None):
         migrate_trades_table()
         migrate_wyckoff_table()
 
-        # watch_analysis 表迁移：新增 period 字段
+        # news 表重建：source_id 列类型从 INT 改为 VARCHAR
         from sqlalchemy import inspect as sa_inspect, text
         inspector = sa_inspect(db.engine)
+        if 'news_item' in inspector.get_table_names():
+            cols = {c['name']: c for c in inspector.get_columns('news_item')}
+            source_id_type = str(cols.get('source_id', {}).get('type', ''))
+            if 'INT' in source_id_type.upper() or 'source_name' not in cols:
+                logging.info('[迁移] 重建 news 相关表（修复 source_id 类型）')
+                with db.engine.connect() as conn:
+                    conn.execute(text('DROP TABLE IF EXISTS news_derivation'))
+                    conn.execute(text('DROP TABLE IF EXISTS interest_keyword'))
+                    conn.execute(text('DROP TABLE IF EXISTS news_item'))
+                    conn.commit()
+                db.create_all()
+                logging.info('[迁移] news 相关表重建完成')
+
+        # watch_analysis 表迁移：新增 period 字段
         if 'watch_analysis' in inspector.get_table_names():
             columns = [c['name'] for c in inspector.get_columns('watch_analysis')]
             if 'period' not in columns:
