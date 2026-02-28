@@ -3,6 +3,8 @@ const NEWS_SOURCE_LABELS = {
     smolai: { label: 'SmolAI', color: 'info' },
     cls: { label: '财联社', color: 'primary' },
     '36kr': { label: '36kr', color: 'warning' },
+    google_news: { label: 'Google', color: 'danger' },
+    xueqiu: { label: '雪球', color: 'success' },
 };
 
 const News = {
@@ -121,7 +123,7 @@ const News = {
                 if (this.currentTab === 'interest') await this.loadItems();
                 return;
             }
-            if (this.currentTab === 'interest') {
+            if (this.currentTab === 'interest' || this.currentTab === 'company') {
                 // 兴趣tab：pipeline异步处理，poll返回时is_interest可能未标记
                 // 直接从DB重新加载以获取最新兴趣标记
                 await this.loadItems();

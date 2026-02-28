@@ -64,6 +64,15 @@ class NewsService:
         query = NewsItem.query
         if tab == 'interest':
             query = query.filter(NewsItem.is_interest == True)
+        elif tab == 'company':
+            from app.models.news import CompanyKeyword
+            from sqlalchemy import or_
+            companies = CompanyKeyword.query.filter_by(is_active=True).all()
+            if companies:
+                conditions = [NewsItem.matched_keywords.contains(c.name) for c in companies]
+                query = query.filter(or_(*conditions))
+            else:
+                return []
         if before_id:
             query = query.filter(NewsItem.id < before_id)
         items = query.order_by(NewsItem.display_time.desc()).limit(limit).all()
@@ -122,6 +131,9 @@ class NewsService:
         from app.services.interest_pipeline import InterestPipeline
         item_ids = [n.id for n in new_items]
         _executor.submit(InterestPipeline.process_new_items, item_ids)
+
+        from app.services.company_news_service import CompanyNewsService
+        _executor.submit(CompanyNewsService.fetch_company_news)
 
         _executor.submit(NewsService._notify_slack, [n.content for n in new_items])
 

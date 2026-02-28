@@ -172,6 +172,13 @@ PreloadService.get_indices_data()
 |---------|------|-------|
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
 
+## 公司新闻配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `COMPANY_NEWS_MAX_COMPANIES` | 每次轮询最多处理的公司数 | `3` |
+| `COMPANY_NEWS_MAX_ARTICLES` | 每个公司最多爬取文章数 | `5` |
+
 ## LLM 配置
 
 | 环境变量 | 说明 | 默认值 |
