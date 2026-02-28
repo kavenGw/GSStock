@@ -410,7 +410,9 @@ const News = {
 
     async deleteKeyword(id) {
         try {
-            await fetch(`/news/keywords/${id}`, { method: 'DELETE' });
+            const resp = await fetch(`/news/keywords/${id}`, { method: 'DELETE' });
+            const data = await resp.json();
+            if (!data.success) console.error('删除关键词失败:', data.error);
             await this.loadKeywords();
         } catch (e) {
             console.error('删除关键词失败:', e);
@@ -445,7 +447,9 @@ const News = {
 
     async deleteCompany(id) {
         try {
-            await fetch(`/news/companies/${id}`, { method: 'DELETE' });
+            const resp = await fetch(`/news/companies/${id}`, { method: 'DELETE' });
+            const data = await resp.json();
+            if (!data.success) console.error('删除公司失败:', data.error);
             await this.loadKeywords();
         } catch (e) {
             console.error('删除公司失败:', e);

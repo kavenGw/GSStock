@@ -71,16 +71,17 @@ def add_keyword():
 
 @news_bp.route('/keywords/<int:kw_id>', methods=['DELETE'])
 def delete_keyword(kw_id):
-    kw = InterestKeyword.query.get(kw_id)
-    if kw:
-        db.session.delete(kw)
-        db.session.commit()
+    kw = db.session.get(InterestKeyword, kw_id)
+    if not kw:
+        return jsonify({'success': False, 'error': 'not found'})
+    db.session.delete(kw)
+    db.session.commit()
     return jsonify({'success': True})
 
 
 @news_bp.route('/keywords/<int:kw_id>/accept', methods=['POST'])
 def accept_keyword(kw_id):
-    kw = InterestKeyword.query.get(kw_id)
+    kw = db.session.get(InterestKeyword, kw_id)
     if kw:
         kw.is_active = True
         kw.source = 'user'
@@ -116,10 +117,11 @@ def add_company():
 
 @news_bp.route('/companies/<int:company_id>', methods=['DELETE'])
 def delete_company(company_id):
-    c = CompanyKeyword.query.get(company_id)
-    if c:
-        db.session.delete(c)
-        db.session.commit()
+    c = db.session.get(CompanyKeyword, company_id)
+    if not c:
+        return jsonify({'success': False, 'error': 'not found'})
+    db.session.delete(c)
+    db.session.commit()
     return jsonify({'success': True})
 
 
