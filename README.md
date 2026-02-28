@@ -55,7 +55,7 @@ cp .env.sample .env
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
-| `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | `5.0` |
+| `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | LLM API 请求超时（秒） | `300` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |

@@ -177,7 +177,7 @@ PreloadService.get_indices_data()
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
 | `ZHIPU_API_KEY` | 智谱 GLM API 密钥 | 空 |
-| `LLM_DAILY_BUDGET` | 日预算上限（美元） | `5.0` |
+| `LLM_DAILY_BUDGET` | 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `300` |
 
 ## 技术栈

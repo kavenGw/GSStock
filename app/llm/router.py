@@ -29,7 +29,8 @@ class LLMRouter:
             cls._instance._providers = {}
             cls._instance._daily_cost = 0.0
             cls._instance._cost_date = None
-            cls._instance._daily_budget = float(os.environ.get('LLM_DAILY_BUDGET', '5.0'))
+            _raw = os.environ.get('LLM_DAILY_BUDGET')
+            cls._instance._daily_budget = float(_raw) if _raw else None
         return cls._instance
 
     def init_providers(self):
@@ -55,15 +56,16 @@ class LLMRouter:
 
         target_layer = TASK_LAYER_MAP.get(task_type, LLMLayer.FLASH)
 
-        if self._daily_cost >= self._daily_budget:
-            logger.warning(f'[LLM路由] 日预算已用尽 ({self._daily_cost:.2f}/{self._daily_budget:.2f})')
-            if LLMLayer.FLASH in self._providers:
-                return self._providers[LLMLayer.FLASH]
-            return None
+        if self._daily_budget is not None:
+            if self._daily_cost >= self._daily_budget:
+                logger.warning(f'[LLM路由] 日预算已用尽 ({self._daily_cost:.2f}/{self._daily_budget:.2f})')
+                if LLMLayer.FLASH in self._providers:
+                    return self._providers[LLMLayer.FLASH]
+                return None
 
-        if self._daily_cost >= self._daily_budget * 0.8 and target_layer == LLMLayer.PREMIUM:
-            logger.info('[LLM路由] 预算紧张，降级到 Flash')
-            target_layer = LLMLayer.FLASH
+            if self._daily_cost >= self._daily_budget * 0.8 and target_layer == LLMLayer.PREMIUM:
+                logger.info('[LLM路由] 预算紧张，降级到 Flash')
+                target_layer = LLMLayer.FLASH
 
         return self._providers.get(target_layer)
 
@@ -82,7 +84,7 @@ class LLMRouter:
         return self._daily_cost
 
     @property
-    def daily_budget(self) -> float:
+    def daily_budget(self) -> float | None:
         return self._daily_budget
 
 
