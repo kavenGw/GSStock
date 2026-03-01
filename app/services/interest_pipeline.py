@@ -77,7 +77,7 @@ class InterestPipeline:
             response = provider.chat([
                 {'role': 'system', 'content': CLASSIFY_SYSTEM_PROMPT},
                 {'role': 'user', 'content': build_classify_prompt(items_data)},
-            ], temperature=0.1, max_tokens=2000)
+            ], temperature=0.1, max_tokens=4000)
 
             text = response.strip()
             # GLM 有时返回 ```json ... ``` 包裹的内容
