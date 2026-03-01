@@ -42,6 +42,26 @@ class InterestPipeline:
                 interest_items = [n for n in items if n.is_interest and n.importance >= 4]
                 DerivationService.process_batch(interest_items[:2])
 
+            # Step 3b: 财报新闻触发对比分析
+            earnings_classified = [
+                (items[r['index']], r) for r in classified
+                if r.get('is_earnings') and r.get('stock_code')
+                and 0 <= r.get('index', -1) < len(items)
+            ]
+            if earnings_classified:
+                from app.services.earnings_compare_service import EarningsCompareService
+                for item, info in earnings_classified:
+                    try:
+                        report_type = info.get('report_type')
+                        if not report_type:
+                            logger.warning(f'[财报对比] 缺少 report_type, news_id={item.id}')
+                            continue
+                        EarningsCompareService.process(
+                            item, info['stock_code'], report_type
+                        )
+                    except Exception as e:
+                        logger.error(f'[财报对比] 触发失败 news_id={item.id}: {e}')
+
     @staticmethod
     def _classify_items(items: list[NewsItem]) -> list[dict]:
         """GLM 批量分类打分"""
@@ -74,6 +94,8 @@ class InterestPipeline:
                 idx = r.get('index', -1)
                 if 0 <= idx < len(items):
                     items[idx].importance = r.get('importance', 0)
+                    if r.get('is_earnings') and r.get('stock_code'):
+                        items[idx].category = 'earnings'
             return results
         except json.JSONDecodeError:
             logger.error(f'GLM分类打分JSON解析失败, 原始返回: {response[:200]}')

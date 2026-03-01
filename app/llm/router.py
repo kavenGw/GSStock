@@ -17,6 +17,7 @@ TASK_LAYER_MAP = {
     'news_derivation': LLMLayer.FLASH,
     'news_derivation_deep': LLMLayer.PREMIUM,
     'news_recommend': LLMLayer.FLASH,
+    'earnings_compare': LLMLayer.FLASH,
 }
 
 
