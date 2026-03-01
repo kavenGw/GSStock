@@ -23,9 +23,9 @@
 ## 环境要求
 
 - Python 3.10+
-- Windows 系统（OCR 功能依赖 DirectML/CUDA，其他功能跨平台可用）
+- 支持 Windows / Debian (Linux)
 
-## 安装步骤
+## 安装步骤（Windows）
 
 ### 1. 安装 Python 依赖
 
@@ -85,6 +85,73 @@ python run.py
 启动时会自动加载策略插件、初始化通知渠道、启动调度引擎。
 
 Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
+
+## 部署步骤（Debian / Ubuntu）
+
+### 1. 安装系统依赖
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip git
+```
+
+### 2. 创建用户和目录
+
+```bash
+sudo useradd -r -s /bin/false gsstock
+sudo mkdir -p /opt/gsstock
+sudo chown gsstock:gsstock /opt/gsstock
+```
+
+### 3. 拉取代码并创建虚拟环境
+
+```bash
+sudo -u gsstock git clone <your-repo-url> /opt/gsstock
+cd /opt/gsstock
+sudo -u gsstock python3 -m venv venv
+sudo -u gsstock venv/bin/pip install -r requirements.txt
+```
+
+如需新闻爬取功能（crawl4ai），还需安装 Playwright 浏览器：
+
+```bash
+sudo apt install -y libglib2.0-0 libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
+  libcups2 libdrm2 libdbus-1-3 libxcomposite1 libxdamage1 libxrandr2 \
+  libgbm1 libpango-1.0-0 libcairo2 libasound2 libxshmfence1
+sudo -u gsstock venv/bin/playwright install chromium
+```
+
+### 4. 环境配置
+
+```bash
+sudo -u gsstock cp .env.sample .env
+sudo -u gsstock nano .env
+```
+
+### 5. 初始化数据目录
+
+```bash
+sudo -u gsstock mkdir -p data
+```
+
+### 6. 安装 systemd 服务
+
+```bash
+sudo cp gsstock.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable gsstock
+sudo systemctl start gsstock
+```
+
+### 7. 管理服务
+
+```bash
+sudo systemctl status gsstock    # 查看状态
+sudo systemctl restart gsstock   # 重启
+sudo journalctl -u gsstock -f    # 查看日志
+```
+
+访问 http://<server-ip>:5000
 
 ## 数据存储
 
