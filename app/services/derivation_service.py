@@ -130,6 +130,9 @@ class DerivationService:
                     url=search_url,
                     timeout=DERIVATION_URL_TIMEOUT,
                 )
+                if not search_result or not search_result.markdown:
+                    logger.warning(f'[衍生新闻] Google搜索无结果: {search_url}')
+                    return []
                 urls = DerivationService._extract_urls(search_result.markdown, max_urls)
 
                 for url in urls:

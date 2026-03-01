@@ -113,6 +113,9 @@ class CompanyNewsService:
     async def _search_google_news(crawler, company_name: str) -> list[dict]:
         search_url = f"https://www.google.com/search?q={quote(company_name)}+新闻&tbm=nws"
         search_result = await crawler.arun(url=search_url, timeout=COMPANY_NEWS_CRAWL_TIMEOUT)
+        if not search_result or not search_result.markdown:
+            logger.warning(f'[公司新闻] {company_name} Google搜索无结果')
+            return []
 
         urls = CompanyNewsService._extract_urls(search_result.markdown, 3)
         articles = []
