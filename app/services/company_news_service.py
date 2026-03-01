@@ -27,14 +27,18 @@ class CompanyNewsService:
         from app import create_app
         app = create_app()
         with app.app_context():
-            companies = CompanyKeyword.query.filter_by(is_active=True).limit(
-                COMPANY_NEWS_MAX_COMPANIES
-            ).all()
+            companies = CompanyKeyword.query.filter_by(is_active=True).order_by(
+                CompanyKeyword.last_fetched_at.asc().nullsfirst()
+            ).limit(COMPANY_NEWS_MAX_COMPANIES).all()
             if not companies:
                 return
 
             company_names = [c.name for c in companies]
             logger.info(f'[公司新闻] 开始爬取: {company_names}')
+
+            for c in companies:
+                c.last_fetched_at = datetime.now()
+            db.session.commit()
 
             try:
                 results = asyncio.run(CompanyNewsService._fetch_all(company_names))
