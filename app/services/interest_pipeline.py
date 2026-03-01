@@ -30,6 +30,11 @@ class InterestPipeline:
 
             db.session.commit()
 
+            # Slack 推送兴趣新闻
+            interest_items = [n for n in items if n.is_interest]
+            if interest_items:
+                InterestPipeline._notify_interest_slack(interest_items)
+
             # Step 3: 高分兴趣条目触发衍生搜索（需 NEWS_DERIVATION_ENABLED=true）
             import os
             if os.getenv('NEWS_DERIVATION_ENABLED', 'false').lower() == 'true':
@@ -162,3 +167,12 @@ class InterestPipeline:
                 logger.info(f'[兴趣] AI推荐 {len(suggestions)} 个关键词')
             except Exception as e:
                 logger.error(f'AI关键词推荐失败: {e}')
+
+    @staticmethod
+    def _notify_interest_slack(items: list[NewsItem]):
+        from app.services.notification import NotificationService
+        try:
+            for n in items:
+                NotificationService.send_slack(f"📰 {n.content}")
+        except Exception as e:
+            logger.error(f'[兴趣] Slack通知失败: {e}')

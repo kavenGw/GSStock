@@ -131,6 +131,7 @@ class CompanyNewsService:
         from app.llm.router import llm_router
 
         provider = llm_router.route('news_classify')
+        new_items = []
 
         for item in results:
             source_id = hashlib.md5(item['url'].encode()).hexdigest()[:16]
@@ -162,12 +163,24 @@ class CompanyNewsService:
                 matched_keywords=item['company'],
             )
             db.session.add(news)
+            new_items.append((item['company'], content))
 
         try:
             db.session.commit()
+            if new_items:
+                CompanyNewsService._notify_company_slack(new_items)
         except Exception as e:
             db.session.rollback()
             logger.error(f'[公司新闻] 保存失败: {e}')
+
+    @staticmethod
+    def _notify_company_slack(items: list[tuple[str, str]]):
+        from app.services.notification import NotificationService
+        try:
+            for company, content in items:
+                NotificationService.send_slack(f"🏢 [{company}] {content}")
+        except Exception as e:
+            logger.error(f'[公司新闻] Slack通知失败: {e}')
 
     @staticmethod
     def _extract_urls(markdown: str, max_count: int) -> list[str]:
