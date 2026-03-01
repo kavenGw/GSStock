@@ -3,8 +3,11 @@
 """
 import json
 import logging
+import ssl
 from datetime import date
 from urllib.request import urlopen, Request
+
+import certifi
 
 from app.config.notification_config import SLACK_WEBHOOK_URL, SLACK_ENABLED
 
@@ -31,7 +34,8 @@ class NotificationService:
         try:
             payload = json.dumps({'text': message}).encode('utf-8')
             req = Request(SLACK_WEBHOOK_URL, data=payload, headers={'Content-Type': 'application/json'})
-            with urlopen(req, timeout=10) as resp:
+            ctx = ssl.create_default_context(cafile=certifi.where())
+            with urlopen(req, timeout=10, context=ctx) as resp:
                 return resp.status == 200
         except Exception as e:
             logger.error(f'[通知.Slack] 推送失败: {e}', exc_info=True)
