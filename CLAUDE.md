@@ -179,6 +179,7 @@ PreloadService.get_indices_data()
 | `COMPANY_NEWS_MAX_COMPANIES` | 每次轮询最多处理的公司数 | `3` |
 | `COMPANY_NEWS_MAX_ARTICLES` | 每个公司最多爬取文章数 | `5` |
 | `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
+| `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 
 ## LLM 配置
 

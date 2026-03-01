@@ -1,4 +1,5 @@
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=4)
 _last_company_news_time = None
+NEWS_FETCH_TIMEOUT = int(os.environ.get('NEWS_FETCH_TIMEOUT', '15'))
 
 
 class NewsService:
@@ -19,14 +21,18 @@ class NewsService:
         """并行获取所有新闻源"""
         all_items = []
         futures = {_executor.submit(src.fetch_latest): src.name for src in ALL_SOURCES}
-        for future in as_completed(futures, timeout=15):
-            source_name = futures[future]
-            try:
-                items = future.result()
-                all_items.extend(items)
-                logger.info(f'[新闻] {source_name} 获取 {len(items)} 条')
-            except Exception as e:
-                logger.error(f'[新闻] {source_name} 获取失败: {e}')
+        try:
+            for future in as_completed(futures, timeout=NEWS_FETCH_TIMEOUT):
+                source_name = futures[future]
+                try:
+                    items = future.result()
+                    all_items.extend(items)
+                    logger.info(f'[新闻] {source_name} 获取 {len(items)} 条')
+                except Exception as e:
+                    logger.error(f'[新闻] {source_name} 获取失败: {e}')
+        except TimeoutError:
+            timed_out = [name for f, name in futures.items() if not f.done()]
+            logger.warning(f'[新闻] 超时未完成的源: {timed_out}')
         return all_items
 
     @staticmethod
