@@ -24,6 +24,7 @@ class BriefingPage {
         this.loadStocksTechnical();
         this.loadIndices();
         this.loadFutures();
+        this.loadDram();
         this.loadETF();
         this.loadSectors();
         this.loadEarningsAlerts();
@@ -34,6 +35,7 @@ class BriefingPage {
             Skeleton.show('stocksContainer', 'card', 6);
             Skeleton.show('indicesContainer', 'card', 4);
             Skeleton.show('futuresContainer', 'card', 4);
+            Skeleton.show('dramContainer', 'card', 3);
             Skeleton.show('etfContainer', 'card', 4);
             Skeleton.show('sectorRatingsContainer', 'card', 3);
             Skeleton.show('cnSectorsContainer', 'table-row', 3);
@@ -199,6 +201,108 @@ class BriefingPage {
             console.error('加载期货数据失败:', e);
             document.getElementById('futuresContainer').innerHTML = `<div class="text-warning-dark">期货数据加载失败</div>`;
         }
+    }
+
+    static async loadDram() {
+        try {
+            const resp = await fetch('/briefing/api/dram');
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+            this.renderDram(data);
+        } catch (e) {
+            console.error('加载DRAM数据失败:', e);
+            document.getElementById('dramContainer').innerHTML = `<div class="text-warning-dark">DRAM数据加载失败</div>`;
+        }
+    }
+
+    static renderDram(data) {
+        const container = document.getElementById('dramContainer');
+        const today = data.today || [];
+
+        if (today.length === 0 || today.every(d => d.avg_price === null)) {
+            container.innerHTML = '<div class="text-muted">暂无数据</div>';
+            return;
+        }
+
+        container.innerHTML = today.map(item => {
+            if (item.avg_price === null) {
+                return `<div class="briefing-card has-error" style="text-align:center">
+                    <div class="bc-name">${item.label}</div>
+                    <div class="text-warning-dark" style="font-size:0.75rem">数据获取失败</div>
+                </div>`;
+            }
+            const changeClass = this.getChangeClassNew(item.change_pct);
+            const changeText = item.change_pct !== null
+                ? `${item.change_pct > 0 ? '+' : ''}${item.change_pct.toFixed(2)}%`
+                : '--';
+            const highLow = (item.high_price !== null && item.low_price !== null)
+                ? `<div class="bc-secondary">高 $${item.high_price.toFixed(2)} / 低 $${item.low_price.toFixed(2)}</div>`
+                : '';
+            return `
+                <div class="briefing-card" style="text-align:center">
+                    <div class="bc-name">${item.label}</div>
+                    <div class="bc-price">$${item.avg_price.toFixed(2)}</div>
+                    <div class="bc-change ${changeClass}">${changeText}</div>
+                    ${highLow}
+                </div>
+            `;
+        }).join('');
+
+        const history = data.history || [];
+        if (history.length >= 2) {
+            this.renderDramTrend(history);
+        }
+    }
+
+    static renderDramTrend(history) {
+        const canvas = document.getElementById('dramTrendChart');
+        if (!canvas) return;
+        canvas.classList.remove('d-none');
+
+        const labels = history.map(h => h.date.slice(5));
+        const specs = [
+            { key: 'DDR5_16Gb', label: 'DDR5 16Gb', color: '#0d6efd' },
+            { key: 'DDR4_8Gb', label: 'DDR4 8Gb', color: '#20c997' },
+            { key: 'DDR4_16Gb', label: 'DDR4 16Gb', color: '#fd7e14' },
+        ];
+
+        const datasets = specs
+            .filter(s => history.some(h => h[s.key] !== undefined))
+            .map(s => ({
+                label: s.label,
+                data: history.map(h => h[s.key] ?? null),
+                borderColor: s.color,
+                backgroundColor: s.color + '20',
+                borderWidth: 2,
+                pointRadius: 1,
+                tension: 0.3,
+                spanGaps: true,
+            }));
+
+        if (datasets.length === 0) return;
+
+        new Chart(canvas, {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y?.toFixed(2) ?? '--'}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 10 }, maxRotation: 0 } },
+                    y: { ticks: { font: { size: 10 }, callback: v => '$' + v } }
+                }
+            }
+        });
     }
 
     static async loadETF() {

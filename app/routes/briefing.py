@@ -81,6 +81,18 @@ def get_etf():
         return jsonify({'error': str(e)}), 500
 
 
+@briefing_bp.route('/api/dram')
+def get_dram():
+    """DRAM现货价格数据（当天永久缓存）"""
+    try:
+        from app.services.dram_price import DramPriceService
+        data = DramPriceService.get_dram_data()
+        return jsonify(data)
+    except Exception as e:
+        logger.error(f"[简报.DRAM] 获取失败: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
 @briefing_bp.route('/api/sectors')
 def get_sectors():
     """板块数据（当天永久缓存）"""
