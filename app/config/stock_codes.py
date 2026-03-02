@@ -62,3 +62,10 @@ CATEGORY_NAMES = {
     'positions': '持仓',
     'custom': '自定义'
 }
+
+# 盯盘助手预置基准标的
+BENCHMARK_CODES = [
+    {'code': 'GC=F', 'name': 'COMEX黄金', 'market': 'US'},
+    {'code': 'SI=F', 'name': 'COMEX白银', 'market': 'US'},
+    {'code': '^NDX', 'name': '纳指100', 'market': 'US'},
+]

@@ -4,6 +4,7 @@ const Watch = {
     searchDebounce: null,
     stocks: [],
     prices: [],
+    benchmarks: [],
     marketStatus: {},
     analyses: {},
     chartInstances: {},
@@ -13,7 +14,7 @@ const Watch = {
     analysisTimer: null,
 
     async init() {
-        await this.loadList(true);
+        await Promise.all([this.loadList(true), this.loadBenchmarks()]);
         this.autoAnalyze();
         this.startRefreshLoop();
         this.startAnalysisLoop();
@@ -70,6 +71,39 @@ const Watch = {
         }
     },
 
+    async loadBenchmarks() {
+        try {
+            const resp = await fetch('/watch/benchmarks');
+            const data = await resp.json();
+            if (data.success) {
+                this.benchmarks = data.data || [];
+                this.renderBenchmarks();
+            }
+        } catch (e) {
+            console.error('[Watch] loadBenchmarks failed:', e);
+        }
+    },
+
+    renderBenchmarks() {
+        const container = document.getElementById('benchmarkCards');
+        if (!container || this.benchmarks.length === 0) return;
+
+        container.innerHTML = this.benchmarks.map(b => {
+            const price = b.price != null ? b.price.toFixed(2) : '--';
+            const pctClass = b.change_pct > 0 ? 'price-up' : b.change_pct < 0 ? 'price-down' : 'price-flat';
+            const pctSign = b.change_pct > 0 ? '+' : '';
+            const pctDisplay = b.change_pct != null ? `${pctSign}${b.change_pct.toFixed(2)}%` : '--';
+
+            return `<div class="card px-3 py-2" style="min-width:140px;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold small">${b.name}</span>
+                    <span class="small" data-bench-price="${b.code}">${price}</span>
+                    <span class="${pctClass} small fw-bold" data-bench-pct="${b.code}">${pctDisplay}</span>
+                </div>
+            </div>`;
+        }).join('');
+    },
+
     async loadAllCharts() {
         const promises = this.stocks.map(s => this.loadChartData(s.stock_code));
         await Promise.all(promises);
@@ -98,18 +132,24 @@ const Watch = {
 
     async refreshIncrementalData() {
         try {
-            const [priceResp, marketResp] = await Promise.all([
+            const [priceResp, marketResp, benchResp] = await Promise.all([
                 fetch('/watch/prices'),
                 fetch('/watch/market-status'),
+                fetch('/watch/benchmarks'),
             ]);
             const priceData = await priceResp.json();
             const marketData = await marketResp.json();
+            const benchData = await benchResp.json();
 
             if (priceData.success) {
                 this.prices = priceData.prices || [];
                 this.updateAllPrices();
             }
             this.marketStatus = marketData.data || {};
+            if (benchData.success) {
+                this.benchmarks = benchData.data || [];
+                this.renderBenchmarks();
+            }
 
             for (const stock of this.stocks) {
                 const market = stock.market || 'A';

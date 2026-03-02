@@ -14,6 +14,29 @@ def index():
     return render_template('watch.html')
 
 
+@watch_bp.route('/benchmarks')
+def benchmarks():
+    from app.services.unified_stock_data import unified_stock_data_service
+    from app.config.stock_codes import BENCHMARK_CODES
+
+    codes = [b['code'] for b in BENCHMARK_CODES]
+    raw_prices = unified_stock_data_service.get_realtime_prices(codes)
+
+    result = []
+    for b in BENCHMARK_CODES:
+        data = raw_prices.get(b['code'], {})
+        result.append({
+            'code': b['code'],
+            'name': b['name'],
+            'market': b['market'],
+            'price': data.get('current_price'),
+            'change': data.get('change'),
+            'change_pct': data.get('change_percent'),
+        })
+
+    return jsonify({'success': True, 'data': result})
+
+
 @watch_bp.route('/list')
 def watch_list():
     items = WatchService.get_watch_list()
