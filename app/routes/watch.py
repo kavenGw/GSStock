@@ -14,29 +14,6 @@ def index():
     return render_template('watch.html')
 
 
-@watch_bp.route('/benchmarks')
-def benchmarks():
-    from app.services.unified_stock_data import unified_stock_data_service
-    from app.config.stock_codes import BENCHMARK_CODES
-
-    codes = [b['code'] for b in BENCHMARK_CODES]
-    raw_prices = unified_stock_data_service.get_realtime_prices(codes)
-
-    result = []
-    for b in BENCHMARK_CODES:
-        data = raw_prices.get(b['code'], {})
-        result.append({
-            'code': b['code'],
-            'name': b['name'],
-            'market': b['market'],
-            'price': data.get('current_price'),
-            'change': data.get('change'),
-            'change_pct': data.get('change_percent'),
-        })
-
-    return jsonify({'success': True, 'data': result})
-
-
 @watch_bp.route('/list')
 def watch_list():
     items = WatchService.get_watch_list()
@@ -63,26 +40,42 @@ def remove_stock(stock_code):
 @watch_bp.route('/prices')
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
+    from app.config.stock_codes import BENCHMARK_CODES
 
     codes = WatchService.get_watch_codes()
-    if not codes:
-        return jsonify({'success': True, 'prices': []})
-
     cache_only = request.args.get('cache_only', 'false').lower() == 'true'
-    raw_prices = unified_stock_data_service.get_realtime_prices(codes, cache_only=cache_only)
+
+    # 盯盘股票报价
     price_list = []
-    for code, data in raw_prices.items():
-        price_list.append({
-            'code': code,
-            'name': data.get('name', code),
+    if codes:
+        raw_prices = unified_stock_data_service.get_realtime_prices(codes, cache_only=cache_only)
+        for code, data in raw_prices.items():
+            price_list.append({
+                'code': code,
+                'name': data.get('name', code),
+                'price': data.get('current_price'),
+                'change': data.get('change'),
+                'change_pct': data.get('change_percent'),
+                'volume': data.get('volume'),
+                'market': data.get('market', ''),
+            })
+
+    # 基准标的报价
+    bench_codes = [b['code'] for b in BENCHMARK_CODES]
+    bench_raw = unified_stock_data_service.get_realtime_prices(bench_codes, cache_only=cache_only)
+    benchmark_list = []
+    for b in BENCHMARK_CODES:
+        data = bench_raw.get(b['code'], {})
+        benchmark_list.append({
+            'code': b['code'],
+            'name': b['name'],
+            'market': b['market'],
             'price': data.get('current_price'),
             'change': data.get('change'),
             'change_pct': data.get('change_percent'),
-            'volume': data.get('volume'),
-            'market': data.get('market', ''),
         })
 
-    return jsonify({'success': True, 'prices': price_list})
+    return jsonify({'success': True, 'prices': price_list, 'benchmarks': benchmark_list})
 
 
 @watch_bp.route('/analyze', methods=['POST'])

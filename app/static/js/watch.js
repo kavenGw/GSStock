@@ -1,6 +1,69 @@
+const WatchCache = {
+    KEY: 'watch_cache',
+    _saveTimer: null,
+
+    _today() {
+        return new Date().toISOString().slice(0, 10);
+    },
+
+    load() {
+        try {
+            const raw = sessionStorage.getItem(this.KEY);
+            if (!raw) return null;
+            const cache = JSON.parse(raw);
+            if (cache.date !== this._today()) {
+                sessionStorage.removeItem(this.KEY);
+                return null;
+            }
+            return cache;
+        } catch {
+            sessionStorage.removeItem(this.KEY);
+            return null;
+        }
+    },
+
+    save(data) {
+        clearTimeout(this._saveTimer);
+        this._saveTimer = setTimeout(() => {
+            try {
+                data.date = this._today();
+                sessionStorage.setItem(this.KEY, JSON.stringify(data));
+            } catch (e) {
+                console.warn('[WatchCache] save failed:', e);
+            }
+        }, 500);
+    },
+
+    clear() {
+        sessionStorage.removeItem(this.KEY);
+    },
+
+    snapshot(watch) {
+        return {
+            date: this._today(),
+            prices: watch.prices,
+            benchmarks: watch.benchmarks,
+            intradayData: watch.chartData,
+            chartMeta: watch.chartMeta,
+            analyses: watch.analyses,
+            marketStatus: watch.marketStatus,
+        };
+    },
+
+    restore(watch, cache) {
+        watch.prices = cache.prices || [];
+        watch.benchmarks = cache.benchmarks || [];
+        watch.chartData = cache.intradayData || {};
+        watch.chartMeta = cache.chartMeta || {};
+        watch.analyses = cache.analyses || {};
+        watch.marketStatus = cache.marketStatus || {};
+    },
+};
+
 const Watch = {
     REFRESH_INTERVAL: 60,
     ANALYSIS_INTERVAL: 15 * 60,
+    MARKET_STATUS_INTERVAL: 5 * 60,
     searchDebounce: null,
     stocks: [],
     prices: [],
@@ -12,12 +75,36 @@ const Watch = {
     chartMeta: {},
     refreshTimer: null,
     analysisTimer: null,
+    marketStatusTimer: null,
 
     async init() {
-        await Promise.all([this.loadList(true), this.loadBenchmarks()]);
+        // 阶段1：从缓存恢复（立即渲染）
+        const cache = WatchCache.load();
+        if (cache && cache.prices && cache.prices.length > 0) {
+            WatchCache.restore(this, cache);
+            try {
+                const listResp = await fetch('/watch/list');
+                const listData = await listResp.json();
+                if (listData.success) this.stocks = listData.data || [];
+            } catch (e) {
+                console.error('[Watch] list fetch failed:', e);
+            }
+            if (this.stocks.length > 0) {
+                this.renderCards();
+                this.renderBenchmarks();
+                this.loadAllChartsFromCache();
+                this.updateStatus(`${this.stocks.length} 只股票`);
+            }
+        }
+
+        // 阶段2：后台更新真实数据
+        await this.loadList(true);
+
+        // 阶段3：自动触发分析 + 启动定时器
         this.autoAnalyze();
         this.startRefreshLoop();
         this.startAnalysisLoop();
+        this.startMarketStatusLoop();
     },
 
     async autoAnalyze() {
@@ -55,7 +142,10 @@ const Watch = {
             if (!listData.success) return;
             this.stocks = listData.data || [];
             this.prices = priceData.prices || [];
+            this.benchmarks = priceData.benchmarks || [];
             this.marketStatus = marketData.data || {};
+
+            this.renderBenchmarks();
 
             if (this.stocks.length === 0) {
                 this.showEmpty();
@@ -65,22 +155,11 @@ const Watch = {
             this.renderCards();
             this.updateStatus(`${this.stocks.length} 只股票`);
             await this.loadAllCharts();
+
+            WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
             console.error('[Watch] loadList failed:', e);
             this.updateStatus('加载失败');
-        }
-    },
-
-    async loadBenchmarks() {
-        try {
-            const resp = await fetch('/watch/benchmarks');
-            const data = await resp.json();
-            if (data.success) {
-                this.benchmarks = data.data || [];
-                this.renderBenchmarks();
-            }
-        } catch (e) {
-            console.error('[Watch] loadBenchmarks failed:', e);
         }
     },
 
@@ -109,6 +188,15 @@ const Watch = {
         await Promise.all(promises);
     },
 
+    loadAllChartsFromCache() {
+        for (const stock of this.stocks) {
+            const code = stock.stock_code;
+            if (this.chartData[code] && this.chartData[code].length > 0) {
+                this.renderChart(code);
+            }
+        }
+    },
+
     async loadChartData(code) {
         const container = document.getElementById(`chart-${code}`);
         if (!container) return;
@@ -124,6 +212,7 @@ const Watch = {
                 isTrading: result.is_trading,
             };
             this.renderChart(code);
+            WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
             console.error(`[Watch] chart load failed ${code}:`, e);
             container.innerHTML = '<div class="text-muted text-center small py-4">图表加载失败</div>';
@@ -132,44 +221,15 @@ const Watch = {
 
     async refreshIncrementalData() {
         try {
-            const [priceResp, marketResp, benchResp] = await Promise.all([
-                fetch('/watch/prices'),
-                fetch('/watch/market-status'),
-                fetch('/watch/benchmarks'),
-            ]);
+            const priceResp = await fetch('/watch/prices');
             const priceData = await priceResp.json();
-            const marketData = await marketResp.json();
-            const benchData = await benchResp.json();
 
             if (priceData.success) {
                 this.prices = priceData.prices || [];
+                this.benchmarks = priceData.benchmarks || [];
                 this.updateAllPrices();
-            }
-            this.marketStatus = marketData.data || {};
-            if (benchData.success) {
-                this.benchmarks = benchData.data || [];
                 this.renderBenchmarks();
-            }
-
-            for (const stock of this.stocks) {
-                const market = stock.market || 'A';
-                const ms = this.marketStatus[market];
-                if (!ms || ms.status !== 'trading') continue;
-
-                const existing = this.chartData[stock.stock_code] || [];
-                const lastTime = existing.length > 0 ? existing[existing.length - 1].time : '';
-
-                try {
-                    const url = `/watch/chart-data?code=${encodeURIComponent(stock.stock_code)}&period=intraday&last_timestamp=${encodeURIComponent(lastTime)}`;
-                    const resp = await fetch(url);
-                    const result = await resp.json();
-                    if (result.success && result.data && result.data.length > 0) {
-                        this.chartData[stock.stock_code] = [...existing, ...result.data];
-                        this.renderChart(stock.stock_code);
-                    }
-                } catch (e) {
-                    console.error(`[Watch] incremental update failed ${stock.stock_code}:`, e);
-                }
+                this.appendPricesToCharts();
             }
 
             const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
@@ -179,8 +239,39 @@ const Watch = {
             } else if (!this.analysisTimer) {
                 this.startAnalysisLoop();
             }
+
+            WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
             console.error('[Watch] refresh failed:', e);
+        }
+    },
+
+    appendPricesToCharts() {
+        const now = new Date();
+        const timeKey = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const pricesMap = {};
+        this.prices.forEach(p => { pricesMap[p.code] = p; });
+
+        for (const stock of this.stocks) {
+            const code = stock.stock_code;
+            const market = stock.market || 'A';
+            const ms = this.marketStatus[market];
+            if (!ms || ms.status !== 'trading') continue;
+
+            const p = pricesMap[code];
+            if (!p || p.price == null) continue;
+
+            const data = this.chartData[code] || [];
+            const newPoint = { time: timeKey, close: p.price };
+
+            if (data.length > 0 && data[data.length - 1].time === timeKey) {
+                data[data.length - 1].close = p.price;
+            } else {
+                data.push(newPoint);
+            }
+            this.chartData[code] = data;
+            this.renderChart(code);
         }
     },
 
@@ -229,6 +320,33 @@ const Watch = {
         }
     },
 
+    startMarketStatusLoop() {
+        this.stopMarketStatusLoop();
+        this.marketStatusTimer = setInterval(async () => {
+            try {
+                const resp = await fetch('/watch/market-status');
+                const data = await resp.json();
+                if (data.success) {
+                    this.marketStatus = data.data || {};
+                    this.updateMarketStatusBadges();
+                    const hasActive = Object.values(this.marketStatus).some(m => m.status === 'trading');
+                    if (hasActive && !this.refreshTimer) {
+                        this.startRefreshLoop();
+                    }
+                }
+            } catch (e) {
+                console.error('[Watch] market status update failed:', e);
+            }
+        }, this.MARKET_STATUS_INTERVAL * 1000);
+    },
+
+    stopMarketStatusLoop() {
+        if (this.marketStatusTimer) {
+            clearInterval(this.marketStatusTimer);
+            this.marketStatusTimer = null;
+        }
+    },
+
     async loadAnalysis() {
         try {
             const resp = await fetch('/watch/analysis');
@@ -236,6 +354,7 @@ const Watch = {
             if (data.success) {
                 this.analyses = data.data || {};
                 this.updateAllAnalysisPanels();
+                WatchCache.save(WatchCache.snapshot(this));
             }
         } catch (e) {
             console.error('[Watch] loadAnalysis failed:', e);
@@ -606,6 +725,25 @@ const Watch = {
                 amtEl.textContent = `${p.change > 0 ? '+' : ''}${p.change.toFixed(2)}`;
                 amtEl.className = `${pctClass} small ms-1`;
             }
+        });
+    },
+
+    updateMarketStatusBadges() {
+        document.querySelectorAll('.market-group').forEach(group => {
+            const badge = group.querySelector('.badge');
+            const marketName = group.querySelector('.fw-bold');
+            if (!badge || !marketName) return;
+
+            const marketEntry = Object.entries(this.marketStatus).find(([_, ms]) =>
+                marketName.textContent.includes(ms.name)
+            );
+            if (!marketEntry) return;
+
+            const [, ms] = marketEntry;
+            const statusBadge = this.getStatusBadgeClass(ms.status || 'closed');
+            const statusIcon = this.getStatusIcon(ms.status || 'closed');
+            badge.className = `badge ${statusBadge} ms-2`;
+            badge.textContent = `${statusIcon} ${ms.status_text || ''}`;
         });
     },
 
