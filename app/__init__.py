@@ -212,7 +212,14 @@ def create_app(config_class=None):
         cockroach_migration_needed = check_cockroach_migration_needed(app)
 
         # 创建所有表
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            from config import is_cockroach_configured
+            if is_cockroach_configured():
+                logging.error("CockroachDB 连接失败: %s", e)
+                raise SystemExit(1)
+            raise
 
         # CockroachDB 需要 ALTER 已有列宽度（db.create_all 不会修改已有列）
         if app.config.get('COCKROACH_CONFIGURED'):
