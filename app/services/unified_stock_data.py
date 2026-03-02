@@ -1221,20 +1221,30 @@ class UnifiedStockDataService:
 
     def _fetch_intraday_a_share(self, code: str, interval: str = '1m') -> dict:
         import akshare as ak
+        from app.services.market_session import SmartCacheStrategy
         period_map = {'1m': '1', '5m': '5', '15m': '15'}
         period = period_map.get(interval, '1')
 
         try:
             df = ak.stock_zh_a_hist_min_em(symbol=code, period=period, adjust='qfq')
             if df is None or df.empty:
-                return {'stock_code': code, 'stock_name': '', 'data': []}
+                return {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
 
-            today_str = date.today().strftime('%Y-%m-%d')
             df['时间'] = df['时间'].astype(str)
-            df = df[df['时间'].str.startswith(today_str)]
+
+            # 优先用 effective_cache_date 过滤
+            effective_date = SmartCacheStrategy.get_effective_cache_date(code)
+            target_str = effective_date.strftime('%Y-%m-%d')
+            df_filtered = df[df['时间'].str.startswith(target_str)]
+
+            # 兜底：取最近一天的数据
+            if df_filtered.empty:
+                df['date_part'] = df['时间'].str[:10]
+                target_str = df['date_part'].max()
+                df_filtered = df[df['date_part'] == target_str]
 
             data = []
-            for _, row in df.iterrows():
+            for _, row in df_filtered.iterrows():
                 time_str = str(row['时间'])
                 if ' ' in time_str:
                     time_str = time_str.split(' ')[1][:5]
@@ -1247,10 +1257,10 @@ class UnifiedStockDataService:
                     'volume': int(row['成交量'])
                 })
 
-            return {'stock_code': code, 'stock_name': '', 'data': data}
+            return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': target_str}
         except Exception as e:
             logger.warning(f"[数据服务.分时] A股 {code} akshare获取失败: {e}")
-            return {'stock_code': code, 'stock_name': '', 'data': []}
+            return {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
 
     def _fetch_intraday_yfinance(self, code: str, interval: str = '1m') -> dict:
         import yfinance as yf
@@ -1260,8 +1270,9 @@ class UnifiedStockDataService:
             ticker = yf.Ticker(yf_code)
             df = ticker.history(period='1d', interval=interval)
             if df is None or df.empty:
-                return {'stock_code': code, 'stock_name': '', 'data': []}
+                return {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
 
+            trading_date = df.index[0].strftime('%Y-%m-%d') if len(df) > 0 else ''
             data = []
             for idx, row in df.iterrows():
                 time_str = idx.strftime('%H:%M')
@@ -1274,10 +1285,10 @@ class UnifiedStockDataService:
                     'volume': int(row['Volume'])
                 })
 
-            return {'stock_code': code, 'stock_name': '', 'data': data}
+            return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': trading_date}
         except Exception as e:
             logger.warning(f"[数据服务.分时] {code} yfinance获取失败: {e}")
-            return {'stock_code': code, 'stock_name': '', 'data': []}
+            return {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
 
     def _fetch_trend_data(self, stock_codes: list, days: int) -> list:
         """获取OHLC数据（负载均衡模式：ETF专用接口 / 东方财富/新浪轮询 / yfinance兜底）"""

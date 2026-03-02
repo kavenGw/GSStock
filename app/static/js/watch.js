@@ -415,7 +415,7 @@ const Watch = {
         }
 
         const meta = this.chartMeta[code] || {};
-        if (meta.isTrading === false && meta.tradingDate) {
+        if (meta.tradingDate) {
             const hintId = `chart-hint-${code}`;
             let hintEl = document.getElementById(hintId);
             if (!hintEl) {
@@ -424,7 +424,8 @@ const Watch = {
                 hintEl.className = 'text-muted text-center small';
                 container.parentNode.insertBefore(hintEl, container);
             }
-            hintEl.textContent = `${meta.tradingDate} 分时数据`;
+            const label = meta.isTrading ? '今日分时' : `${meta.tradingDate} 分时`;
+            hintEl.textContent = label;
         }
 
         const times = data.map(d => d.time);

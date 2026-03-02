@@ -269,11 +269,15 @@ def chart_data():
 
         intraday = unified_stock_data_service.get_intraday_data([code])
         stocks = intraday.get('stocks', [])
-        all_data = stocks[0]['data'] if stocks else []
+        stock_data = stocks[0] if stocks else {}
+        all_data = stock_data.get('data', [])
 
-        from app.services.market_session import SmartCacheStrategy
-        effective_date = SmartCacheStrategy.get_effective_cache_date(code)
-        trading_date = effective_date.strftime('%Y-%m-%d')
+        # 优先使用数据自带的 trading_date，兜底用 effective_cache_date
+        trading_date = stock_data.get('trading_date', '')
+        if not trading_date:
+            from app.services.market_session import SmartCacheStrategy
+            effective_date = SmartCacheStrategy.get_effective_cache_date(code)
+            trading_date = effective_date.strftime('%Y-%m-%d')
 
         if last_timestamp and all_data:
             all_data = [d for d in all_data if d.get('time', '') > last_timestamp]
