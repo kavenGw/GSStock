@@ -95,6 +95,38 @@ class CompanyNewsService:
             return []
 
     @staticmethod
+    def _fetch_yahoo_news(stock_code: str, company_name: str) -> list[dict]:
+        try:
+            import yfinance as yf
+            ticker_symbol = MarketIdentifier.to_yfinance(stock_code)
+            ticker = yf.Ticker(ticker_symbol)
+            news = ticker.news
+            if not news:
+                return []
+            articles = []
+            for item in news[:COMPANY_NEWS_MAX_ARTICLES]:
+                content = item.get('content') or {}
+                if not isinstance(content, dict):
+                    continue
+                title = content.get('title', '')
+                summary = content.get('summary', '')
+                canonical = content.get('canonicalUrl') or {}
+                url = canonical.get('url', '') if isinstance(canonical, dict) else ''
+                if not title or not url:
+                    continue
+                text = f"{title}：{summary}" if summary else title
+                articles.append({
+                    'url': url,
+                    'content': text,
+                    'source_name': 'yahoo_finance',
+                    'company': company_name,
+                })
+            return articles
+        except Exception as e:
+            logger.error(f'[公司新闻] Yahoo Finance获取失败 {company_name}: {e}')
+            return []
+
+    @staticmethod
     async def _fetch_single_company(crawler, company_name: str) -> list[dict]:
         market, stock_code = CompanyNewsService._resolve_market(company_name)
 
@@ -106,6 +138,15 @@ class CompanyNewsService:
             if results:
                 return results
             logger.info(f'[公司新闻] {company_name} 东方财富无结果，降级到 Google News')
+
+        elif market and stock_code:
+            loop = asyncio.get_event_loop()
+            results = await loop.run_in_executor(
+                None, CompanyNewsService._fetch_yahoo_news, stock_code, company_name
+            )
+            if results:
+                return results
+            logger.info(f'[公司新闻] {company_name} Yahoo Finance无结果，降级到 Google News')
 
         return await CompanyNewsService._search_google_news(crawler, company_name)
 
@@ -151,7 +192,7 @@ class CompanyNewsService:
                 continue
 
             content = item['content']
-            if provider and item['source_name'] != 'eastmoney_stock':
+            if provider and item['source_name'] not in ('eastmoney_stock', 'yahoo_finance'):
                 try:
                     content = provider.chat([
                         {'role': 'system', 'content': SUMMARY_PROMPT},

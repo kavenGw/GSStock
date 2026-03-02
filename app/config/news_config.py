@@ -11,6 +11,7 @@ NEWS_SOURCE_LABELS = {
     '36kr': {'label': '36kr', 'color': 'warning'},
     'google_news': {'label': 'Google', 'color': 'danger'},
     'eastmoney_stock': {'label': '东财', 'color': 'success'},
+    'yahoo_finance': {'label': 'Yahoo', 'color': 'dark'},
 }
 
 MAX_DERIVATION_PER_POLL = 2
