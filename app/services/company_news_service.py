@@ -18,6 +18,7 @@ from app.config.news_config import (
 logger = logging.getLogger(__name__)
 
 SUMMARY_PROMPT = "将以下新闻文章压缩为50-100字的中文摘要，保留核心事实。直接返回摘要文本。"
+TRANSLATE_PROMPT = "将以下英文财经新闻翻译为中文，保持简洁专业，保留关键数据和公司名称。直接返回翻译文本。"
 
 
 class CompanyNewsService:
@@ -192,7 +193,15 @@ class CompanyNewsService:
                 continue
 
             content = item['content']
-            if provider and item['source_name'] not in ('eastmoney_stock', 'yahoo_finance'):
+            if provider and item['source_name'] == 'yahoo_finance':
+                try:
+                    content = provider.chat([
+                        {'role': 'system', 'content': TRANSLATE_PROMPT},
+                        {'role': 'user', 'content': item['content']},
+                    ], temperature=0.1, max_tokens=500).strip()
+                except Exception as e:
+                    logger.error(f'[公司新闻] AI翻译失败: {e}')
+            elif provider and item['source_name'] not in ('eastmoney_stock',):
                 try:
                     content = provider.chat([
                         {'role': 'system', 'content': SUMMARY_PROMPT},
