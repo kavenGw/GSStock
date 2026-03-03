@@ -13,6 +13,8 @@ class ChangeAlertStrategy(Strategy):
     def scan(self) -> list[Signal]:
         from app.services.unified_stock_data import unified_stock_data_service
         from app.services.position import PositionService
+        from app.services.trading_calendar import TradingCalendarService
+        from app.utils.market_identifier import MarketIdentifier
 
         signals = []
         try:
@@ -23,6 +25,15 @@ class ChangeAlertStrategy(Strategy):
             positions = PositionService.get_snapshot(latest_date)
             codes = [p.stock_code for p in positions]
             if not codes:
+                return signals
+
+            # 检查是否有任何持仓市场在交易中
+            markets = set()
+            for code in codes:
+                m = MarketIdentifier.identify(code)
+                if m:
+                    markets.add(m)
+            if not any(TradingCalendarService.is_market_open(m) for m in markets):
                 return signals
 
             config = self.get_config()

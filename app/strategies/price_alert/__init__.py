@@ -1,5 +1,6 @@
 """价格预警策略 — 基于 SignalDetector 的4种信号"""
 import logging
+from datetime import date
 from app.strategies.base import Strategy, Signal
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ class PriceAlertStrategy(Strategy):
     def scan(self) -> list[Signal]:
         from app.services.position import PositionService
         from app.services.signal_cache import SignalCacheService
+        from app.services.trading_calendar import TradingCalendarService
         from app.models.stock import Stock
         from app.utils.market_identifier import MarketIdentifier
 
@@ -23,7 +25,20 @@ class PriceAlertStrategy(Strategy):
                 return signals
 
             positions = PositionService.get_snapshot(latest_date)
-            a_share_codes = [p.stock_code for p in positions if MarketIdentifier.is_a_share(p.stock_code)]
+            codes = [p.stock_code for p in positions]
+            if not codes:
+                return signals
+
+            # 检查是否有任何持仓市场在交易中
+            markets = set()
+            for code in codes:
+                m = MarketIdentifier.identify(code)
+                if m:
+                    markets.add(m)
+            if not any(TradingCalendarService.is_market_open(m) for m in markets):
+                return signals
+
+            a_share_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
             if not a_share_codes:
                 return signals
 
@@ -32,7 +47,11 @@ class PriceAlertStrategy(Strategy):
             for s in stocks:
                 name_map[s.stock_code] = s.stock_name
 
-            cached = SignalCacheService.get_cached_signals_with_names(a_share_codes, name_map)
+            # 只取当天信号，避免重复推送历史信号
+            today = date.today()
+            cached = SignalCacheService.get_cached_signals_with_names(
+                a_share_codes, name_map, start_date=today, end_date=today
+            )
 
             for sig_type in ['buy_signals', 'sell_signals']:
                 for sig in cached.get(sig_type, []):
