@@ -30,7 +30,7 @@ class WyckoffSignalStrategy(Strategy):
             strong_signals = config.get('strong_signals', ['strong_buy', 'strong_sell'])
 
             service = WyckoffAutoService()
-            results = service.analyze_batch(stock_list, timeframe='daily')
+            results = service.analyze_batch(stock_list)
 
             for r in results:
                 if r.get('status') != 'success':
