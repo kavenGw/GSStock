@@ -62,9 +62,11 @@ class InterestPipeline:
                     except Exception as e:
                         logger.error(f'[财报对比] 触发失败 news_id={item.id}: {e}')
 
+    CLASSIFY_BATCH_SIZE = 10
+
     @staticmethod
     def _classify_items(items: list[NewsItem]) -> list[dict]:
-        """GLM 批量分类打分"""
+        """GLM 批量分类打分（自动分批，每批最多 CLASSIFY_BATCH_SIZE 条）"""
         from app.llm.router import llm_router
         from app.llm.prompts.news_classify import CLASSIFY_SYSTEM_PROMPT, build_classify_prompt
 
@@ -72,37 +74,60 @@ class InterestPipeline:
         if not provider:
             return []
 
-        items_data = [{'content': n.content} for n in items]
-        try:
-            response = provider.chat([
-                {'role': 'system', 'content': CLASSIFY_SYSTEM_PROMPT},
-                {'role': 'user', 'content': build_classify_prompt(items_data)},
-            ], temperature=0.1, max_tokens=4000)
+        all_results = []
+        batch_size = InterestPipeline.CLASSIFY_BATCH_SIZE
+        for batch_start in range(0, len(items), batch_size):
+            batch = items[batch_start:batch_start + batch_size]
+            batch_data = [{'content': n.content} for n in batch]
+            try:
+                response = provider.chat([
+                    {'role': 'system', 'content': CLASSIFY_SYSTEM_PROMPT},
+                    {'role': 'user', 'content': build_classify_prompt(batch_data)},
+                ], temperature=0.1, max_tokens=4000)
 
-            text = response.strip()
-            # GLM 有时返回 ```json ... ``` 包裹的内容
-            m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
-            if m:
-                text = m.group(1).strip()
-            # 尝试提取JSON数组
-            if not text.startswith('['):
-                arr_match = re.search(r'\[[\s\S]*\]', text)
-                if arr_match:
-                    text = arr_match.group(0)
-            results = json.loads(text)
-            for r in results:
-                idx = r.get('index', -1)
-                if 0 <= idx < len(items):
-                    items[idx].importance = r.get('importance', 0)
-                    if r.get('is_earnings') and r.get('stock_code'):
-                        items[idx].category = 'earnings'
-            return results
+                results = InterestPipeline._parse_classify_response(response)
+                # 将批内 index 映射回全局 index
+                for r in results:
+                    local_idx = r.get('index', -1)
+                    if 0 <= local_idx < len(batch):
+                        global_idx = batch_start + local_idx
+                        r['index'] = global_idx
+                        items[global_idx].importance = r.get('importance', 0)
+                        if r.get('is_earnings') and r.get('stock_code'):
+                            items[global_idx].category = 'earnings'
+                all_results.extend(results)
+            except Exception as e:
+                logger.error(f'GLM分类打分失败(batch {batch_start}~{batch_start + len(batch) - 1}): {e}')
+
+        return all_results
+
+    @staticmethod
+    def _parse_classify_response(response: str) -> list[dict]:
+        """解析 GLM 分类响应，支持截断 JSON 容错恢复"""
+        text = response.strip()
+        m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+        if m:
+            text = m.group(1).strip()
+        if not text.startswith('['):
+            arr_match = re.search(r'\[[\s\S]*\]', text)
+            if arr_match:
+                text = arr_match.group(0)
+
+        try:
+            return json.loads(text)
         except json.JSONDecodeError:
-            logger.error(f'GLM分类打分JSON解析失败, 原始返回: {response[:200]}')
-            return []
-        except Exception as e:
-            logger.error(f'GLM分类打分失败: {e}')
-            return []
+            pass
+
+        # 截断容错：尝试补全不完整的 JSON 数组
+        repaired = text.rstrip().rstrip(',')
+        for suffix in ['}]', ']']:
+            try:
+                return json.loads(repaired + suffix)
+            except json.JSONDecodeError:
+                continue
+
+        logger.error(f'GLM分类打分JSON解析失败, 响应长度={len(response)}, 末尾: ...{response[-200:]}')
+        return []
 
     @staticmethod
     def _match_keywords(items: list[NewsItem], classified: list[dict]):
