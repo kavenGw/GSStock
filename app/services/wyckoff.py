@@ -6,7 +6,7 @@ import logging
 from datetime import datetime, date
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from werkzeug.utils import secure_filename
-from flask import current_app
+from flask import current_app, has_app_context
 from app import db
 from app.models.wyckoff import WyckoffReference, WyckoffAnalysis, WyckoffAutoResult
 from app.services.wyckoff_analyzer import WyckoffAnalyzer
@@ -224,12 +224,13 @@ class WyckoffAutoService:
         return code
 
     @staticmethod
-    def _fetch_ohlcv(stock_code: str, days: int = 120) -> list:
+    def _fetch_ohlcv(stock_code: str, days: int = 120, app=None) -> list:
         """获取 OHLCV 数据（通过统一服务）
 
         Args:
             stock_code: 股票代码
             days: 获取天数
+            app: 可选 Flask app 对象（用于线程内补充应用上下文）
 
         Returns:
             OHLCV 数据列表，每项包含 date, open, high, low, close, volume
@@ -237,7 +238,11 @@ class WyckoffAutoService:
         from app.services.unified_stock_data import unified_stock_data_service
 
         try:
-            result = unified_stock_data_service.get_trend_data([stock_code], days)
+            if app and not has_app_context():
+                with app.app_context():
+                    result = unified_stock_data_service.get_trend_data([stock_code], days)
+            else:
+                result = unified_stock_data_service.get_trend_data([stock_code], days)
             stocks_data = result.get('stocks', [])
 
             if not stocks_data:
@@ -270,7 +275,7 @@ class WyckoffAutoService:
 
         days_map = {'daily': 120, 'weekly': 400, 'monthly': 400}
         days = days_map.get(timeframe, 120)
-        ohlcv_data = WyckoffAutoService._fetch_ohlcv(stock_code, days)
+        ohlcv_data = WyckoffAutoService._fetch_ohlcv(stock_code, days, app=app)
 
         if not ohlcv_data:
             return {'stock_code': stock_code, 'stock_name': stock_name, 'status': 'failed', 'error_msg': '数据获取失败'}
