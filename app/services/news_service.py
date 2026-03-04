@@ -1,6 +1,6 @@
 import logging
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, as_completed
 from datetime import datetime, timezone
 
 from app import db
@@ -30,7 +30,7 @@ class NewsService:
                     logger.info(f'[新闻] {source_name} 获取 {len(items)} 条')
                 except Exception as e:
                     logger.error(f'[新闻] {source_name} 获取失败: {e}')
-        except TimeoutError:
+        except FuturesTimeoutError:
             timed_out = [name for f, name in futures.items() if not f.done()]
             logger.warning(f'[新闻] 超时未完成的源: {timed_out}')
         return all_items
