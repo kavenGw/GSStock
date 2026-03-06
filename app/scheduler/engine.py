@@ -35,6 +35,17 @@ class SchedulerEngine:
             except Exception as e:
                 logger.error(f'[调度器] 注册 {strategy.name} 失败: {e}')
 
+        from apscheduler.triggers.interval import IntervalTrigger
+        from app.config.news_config import NEWS_INTERVAL_MINUTES
+
+        self.scheduler.add_job(
+            self._poll_news,
+            trigger=IntervalTrigger(minutes=NEWS_INTERVAL_MINUTES),
+            id='news_poll',
+            replace_existing=True,
+        )
+        registered.append(f'news_poll(every {NEWS_INTERVAL_MINUTES}min)')
+
         self.scheduler.start()
         logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
 
@@ -57,6 +68,18 @@ class SchedulerEngine:
                     logger.info(f'[调度器] {strategy_name} 产出 {len(signals)} 个信号')
             except Exception as e:
                 logger.error(f'[调度器] {strategy_name} 执行失败: {e}')
+
+    def _poll_news(self):
+        if not self.app:
+            return
+        with self.app.app_context():
+            try:
+                from app.services.news_service import NewsService
+                items, count = NewsService.poll_news()
+                if count:
+                    logger.info(f'[调度器] 新闻轮询完成，新增 {count} 条')
+            except Exception as e:
+                logger.error(f'[调度器] 新闻轮询失败: {e}')
 
     def shutdown(self):
         if self.scheduler.running:

@@ -19,9 +19,11 @@ def items():
     return jsonify({'success': True, 'items': data})
 
 
-@news_bp.route('/poll')
-def poll():
-    items, count = NewsService.poll_news()
+
+@news_bp.route('/latest')
+def latest():
+    since_id = request.args.get('since_id', 0, type=int)
+    items, count = NewsService.get_latest_count(since_id)
     return jsonify({'success': True, 'new_items': items, 'new_count': count})
 
 

@@ -149,3 +149,11 @@ class NewsService:
 
         items_data = [NewsService._item_to_dict(n) for n in new_items]
         return items_data, len(new_items)
+
+    @staticmethod
+    def get_latest_count(since_id: int) -> tuple[list[dict], int]:
+        items = NewsItem.query.filter(
+            NewsItem.id > since_id
+        ).order_by(NewsItem.display_time.desc()).limit(50).all()
+        items_data = [NewsService._item_to_dict(n) for n in items]
+        return items_data, len(items_data)

@@ -3,6 +3,7 @@ import os
 
 WALLSTREETCN_API = 'https://api-prod.wallstreetcn.com/apiv1/content/lives'
 WALLSTREETCN_CHANNEL = 'global-channel'
+NEWS_INTERVAL_MINUTES = int(os.getenv('NEWS_INTERVAL_MINUTES', '3'))
 
 NEWS_SOURCE_LABELS = {
     'wallstreetcn': {'label': '华尔街', 'color': 'secondary'},

@@ -8,18 +8,17 @@ const NEWS_SOURCE_LABELS = {
 };
 
 const News = {
-    POLL_SECONDS: 180,
+    CHECK_SECONDS: 30,
     currentTab: 'all',
     items: [],
-    countdown: 0,
-    countdownTimer: null,
+    checkTimer: null,
     keywordModal: null,
 
     async init() {
         this.keywordModal = new bootstrap.Modal(document.getElementById('keywordModal'));
         this.bindEvents();
         await this.loadData();
-        this.resetCountdown();
+        this.startCheck();
     },
 
     bindEvents() {
@@ -44,14 +43,9 @@ const News = {
 
     async loadData() {
         try {
-            const [itemsResp, pollResp] = await Promise.all([
-                fetch(`/news/items?tab=${this.currentTab}&limit=30`),
-                fetch('/news/poll'),
-            ]);
-            const itemsData = await itemsResp.json();
-            const pollData = await pollResp.json();
-            if (itemsData.success) this.items = itemsData.items;
-            if (pollData.success && pollData.new_count > 0) this.mergeNewItems(pollData.new_items);
+            const resp = await fetch(`/news/items?tab=${this.currentTab}&limit=30`);
+            const data = await resp.json();
+            if (data.success) this.items = data.items;
             this.renderItems();
             this.showContent();
         } catch (e) {
@@ -96,36 +90,21 @@ const News = {
         }
     },
 
-    resetCountdown() {
-        this.countdown = this.POLL_SECONDS;
-        if (this.countdownTimer) clearInterval(this.countdownTimer);
-        this.updateStatus();
-        this.countdownTimer = setInterval(() => this.tick(), 1000);
+    startCheck() {
+        if (this.checkTimer) clearInterval(this.checkTimer);
+        this.checkTimer = setInterval(() => this.check(), this.CHECK_SECONDS * 1000);
     },
 
-    async tick() {
-        this.countdown--;
-        if (this.countdown <= 0) {
-            clearInterval(this.countdownTimer);
-            await this.poll();
-            this.resetCountdown();
-            return;
-        }
-        this.updateStatus();
-    },
-
-    async poll() {
+    async check() {
+        const maxId = this.items.length ? Math.max(...this.items.map(i => parseInt(i.id))) : 0;
         try {
-            const resp = await fetch('/news/poll');
+            const resp = await fetch(`/news/latest?since_id=${maxId}`);
             const data = await resp.json();
             if (!data.success || data.new_count === 0) {
-                // 无新条目时，兴趣tab仍需刷新（pipeline异步标记可能刚完成）
                 if (this.currentTab === 'interest') await this.loadItems();
                 return;
             }
             if (this.currentTab === 'interest' || this.currentTab === 'company') {
-                // 兴趣tab：pipeline异步处理，poll返回时is_interest可能未标记
-                // 直接从DB重新加载以获取最新兴趣标记
                 await this.loadItems();
             } else if (data.new_count <= 3) {
                 this.insertNewItems(data.new_items);
@@ -134,7 +113,7 @@ const News = {
             }
             this.updateStatus();
         } catch (e) {
-            console.error('轮询失败:', e);
+            console.error('检查新闻失败:', e);
         }
     },
 
@@ -330,10 +309,7 @@ const News = {
     },
 
     updateStatus() {
-        const min = Math.floor(this.countdown / 60);
-        const sec = this.countdown % 60;
-        const cd = min > 0 ? `${min}:${String(sec).padStart(2, '0')}` : `${sec}s`;
-        document.getElementById('newsStatus').textContent = `${this.items.length} 条快讯 · ${cd} 后刷新`;
+        document.getElementById('newsStatus').textContent = `${this.items.length} 条快讯`;
     },
 
     async showKeywordModal() {
