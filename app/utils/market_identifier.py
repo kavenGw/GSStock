@@ -65,7 +65,7 @@ class MarketIdentifier:
         # A股：6位纯数字，或数字开头带.SS/.SZ后缀
         if code.isdigit() and len(code) == 6:
             return 'A'
-        if re.match(r'^\d{6}\.(SS|SZ)$', code):
+        if re.match(r'^\d{6}\.(SS|SH|SZ)$', code):
             return 'A'
 
         # 美股：字母开头（可包含数字），不含点号或以特殊后缀结尾
@@ -90,6 +90,10 @@ class MarketIdentifier:
         """
         if not code:
             return code
+
+        # .SH → .SS（Wind/通达信格式转yfinance格式）
+        if code.upper().endswith('.SH'):
+            return code[:-3] + '.SS'
 
         # 已有后缀，直接返回
         if '.' in code or code.startswith('^'):

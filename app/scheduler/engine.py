@@ -21,10 +21,17 @@ class SchedulerEngine:
         for strategy in registry.active:
             if not strategy.schedule:
                 continue
-            trigger = CronTrigger.from_crontab(strategy.schedule)
-            schedule_desc = strategy.schedule
 
             try:
+                if strategy.schedule.startswith('interval_minutes:'):
+                    from apscheduler.triggers.interval import IntervalTrigger as StrategyInterval
+                    minutes = int(strategy.schedule.split(':')[1])
+                    trigger = StrategyInterval(minutes=minutes)
+                    schedule_desc = f'every {minutes}min'
+                else:
+                    trigger = CronTrigger.from_crontab(strategy.schedule)
+                    schedule_desc = strategy.schedule
+
                 self.scheduler.add_job(
                     self._run_strategy,
                     trigger=trigger,

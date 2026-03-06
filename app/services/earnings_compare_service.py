@@ -1,5 +1,6 @@
 """财报对比分析服务：识别财报新闻后获取两期数据并生成对比分析"""
 import logging
+import re
 from datetime import date
 
 from app import db
@@ -99,6 +100,9 @@ class EarningsCompareService:
         if not dates:
             return None, None
 
+        # akshare 用6位纯数字代码，剥离 .SS/.SH/.SZ 后缀
+        pure_code = re.sub(r'\.(SS|SH|SZ)$', '', stock_code)
+
         current_date, previous_date = dates
         current_data = None
         previous_data = None
@@ -111,9 +115,9 @@ class EarningsCompareService:
                     logger.warning(f'[财报对比] akshare {label}数据为空: {target_date}')
                     continue
 
-                row = df[df['股票代码'] == stock_code]
+                row = df[df['股票代码'] == pure_code]
                 if row.empty:
-                    row = df[df['股票代码'] == stock_code.zfill(6)]
+                    row = df[df['股票代码'] == pure_code.zfill(6)]
 
                 if row.empty:
                     logger.warning(f'[财报对比] 未找到 {stock_code} 的{label}数据: {target_date}')
