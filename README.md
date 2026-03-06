@@ -16,9 +16,10 @@
 - **交易策略** — 策略记录与管理
 - **再平衡** — 持仓配置建议
 - **利润统计** — 交易利润分析
-- **策略插件** — 自动发现注册，Cron 定时执行，内置四种策略（涨跌预警/价格预警/每日简报/威科夫信号）
+- **策略插件** — 自动发现注册，Cron 定时执行，内置五种策略（涨跌预警/价格预警/每日简报/威科夫信号/AI走势信号）
 - **通知推送** — Slack 推送，与策略引擎集成
-- **AI 分析** — 智谱 GLM 分层路由（Flash/Premium），日预算控制
+- **AI 分析** — 智谱 GLM 分层路由（Flash/Premium），支持本地 LLM（llama-server）替代 Flash 层
+- **AI 走势预测** — PyTorch 时序 Transformer，基于 OHLCV + 技术指标生成买/卖/持有信号（GPU 训练推理）
 
 ## 环境要求
 
@@ -57,6 +58,8 @@ cp .env.sample .env
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
 | `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | LLM API 请求超时（秒） | `300` |
+| `LLAMA_SERVER_ENABLED` | 启用本地 llama-server（可选） | `false` |
+| `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
 
@@ -204,12 +207,12 @@ sudo journalctl -u gsstock -f    # 查看日志
 
 ## AI 分析（可选）
 
-集成智谱 GLM 大模型，为持仓股票生成结构化分析建议。
+集成智谱 GLM 大模型，为持仓股票生成结构化分析建议。支持本地 LLM 替代云端 Flash 层。
 
-- **Flash 层** (glm-4-flash) — 快速任务：每日简报、情绪分析
+- **Flash 层** — 本地 llama-server（优先）或 智谱 glm-4-flash，处理快速任务：每日简报、新闻分类、情绪分析
 - **Premium 层** (glm-4) — 高质量分析：深度分析、操作建议
 
-在 `.env` 中配置：
+### 云端 AI（智谱 GLM）
 
 ```env
 ZHIPU_API_KEY=your_key_here
@@ -218,6 +221,49 @@ LLM_REQUEST_TIMEOUT=300    # API 请求超时（秒），默认 300
 ```
 
 配置 `ZHIPU_API_KEY` 后自动启用 AI 分析功能。预算用尽时自动降级到 Flash 层。
+
+### 本地 LLM（llama-server）
+
+用本地模型替代云端 Flash 层，零 API 费用，无网络依赖。推荐 Qwen3.5-9B（Q4_K_M 量化，约 6.5GB VRAM）。
+
+1. 安装 llama.cpp（Windows 可通过 `winget install ggml.llamacpp`）
+2. 下载 GGUF 模型：
+
+```bash
+pip install huggingface-hub
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download('bartowski/Qwen_Qwen3.5-9B-GGUF', 'Qwen_Qwen3.5-9B-Q4_K_M.gguf', local_dir='D:/Models')"
+```
+
+3. 启动 llama-server：
+
+```bash
+llama-server -m D:\Models\Qwen_Qwen3.5-9B-Q4_K_M.gguf -ngl 99 -c 4096 --port 8080
+```
+
+4. 在 `.env` 中启用：
+
+```env
+LLAMA_SERVER_ENABLED=true
+LLAMA_SERVER_URL=http://127.0.0.1:8080
+```
+
+本地可用时自动作为 Flash 层；不可用时 fallback 到智谱 Flash（如已配置）。
+
+> **注意**：winget 安装的 llama.cpp 默认使用 Vulkan 后端。如需 CUDA 后端（性能更好），需从源码编译或下载 CUDA 版本的 release。
+
+## AI 走势预测（可选）
+
+基于 PyTorch 时序 Transformer 模型，利用历史 OHLCV + 技术指标（MA/RSI/MACD/布林带等 19 维特征）训练交易信号模型，输出买入/卖出/持有信号及置信度。
+
+- 需要 NVIDIA GPU（推荐 RTX 4070 级别以上）
+- 模型存储在 `data/models/{stock_code}/`
+- 作为策略插件自动注册，定时扫描并推送信号
+
+安装 PyTorch（CUDA 版本）：
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cu124
+```
 
 ## 通知系统（可选）
 
@@ -243,7 +289,8 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
 - **前端** — Bootstrap 5 + 原生 JavaScript
 - **数据源** — akshare + yfinance + Twelve Data + Polygon（多源负载均衡）
 - **OCR** — RapidOCR (ONNX Runtime)
-- **AI** — 智谱 GLM（Flash/Premium 分层路由）
+- **AI** — 智谱 GLM（Flash/Premium 分层路由） + 本地 LLM（llama-server）
+- **走势预测** — PyTorch 时序 Transformer（GPU 训练推理）
 - **调度** — APScheduler（Cron 策略执行）
 
 ## 项目结构
@@ -256,7 +303,8 @@ app/
 ├── services/         # 业务逻辑服务
 ├── templates/        # Jinja2 页面模板
 ├── static/           # CSS/JS 静态资源
-├── llm/              # LLM 路由和提供者（智谱 GLM）
+├── llm/              # LLM 路由和提供者（智谱 GLM / 本地 llama-server）
+├── ml/               # 走势预测（Transformer 模型、特征工程、训练推理）
 ├── notifications/    # 多渠道通知系统
 ├── strategies/       # 策略插件系统
 ├── scheduler/        # APScheduler 后台调度

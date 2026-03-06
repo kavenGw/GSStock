@@ -35,14 +35,24 @@ class LLMRouter:
         return cls._instance
 
     def init_providers(self):
-        """延迟初始化 providers"""
+        """延迟初始化 providers — 本地优先"""
         if self._providers:
             return
+
+        # 本地 llama-server 优先作为 FLASH 层
+        from app.llm.providers.llamacpp import LlamaServerProvider, is_llama_server_available
+        if is_llama_server_available():
+            self._providers[LLMLayer.FLASH] = LlamaServerProvider()
+            logger.info('[LLM路由] llama-server 本地模型已加载 (FLASH)')
+
+        # 智谱 GLM
         from app.llm.providers.zhipu import ZhipuFlashProvider, ZhipuPremiumProvider, ZHIPU_API_KEY
         if ZHIPU_API_KEY:
-            self._providers[LLMLayer.FLASH] = ZhipuFlashProvider()
+            if LLMLayer.FLASH not in self._providers:
+                self._providers[LLMLayer.FLASH] = ZhipuFlashProvider()
+                logger.info('[LLM路由] 智谱 Flash 已加载 (FLASH)')
             self._providers[LLMLayer.PREMIUM] = ZhipuPremiumProvider()
-            logger.info('[LLM路由] 智谱 GLM-4/Flash 已加载')
+            logger.info('[LLM路由] 智谱 GLM-4 已加载 (PREMIUM)')
 
     def route(self, task_type: str) -> LLMProvider | None:
         """按任务类型路由到合适的 LLM"""

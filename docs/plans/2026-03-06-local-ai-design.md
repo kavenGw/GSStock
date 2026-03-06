@@ -2,11 +2,11 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** 引入本地 LLM（llama-server + Qwen2.5-7B）替代云端 Flash 层，并构建 PyTorch 时序 Transformer 生成交易信号。
+**Goal:** 引入本地 LLM（llama-server + Qwen3.5-9B）替代云端 Flash 层，并构建 PyTorch 时序 Transformer 生成交易信号。
 
 **Architecture:** llama-server 作为独立进程提供 OpenAI 兼容 API，新增 `LlamaServerProvider` 接入现有 `LLMRouter`；走势预测模块 `app/ml/` 独立于 LLM 体系，通过 `SignalService` 对外暴露，可接入盯盘助手和策略插件系统。
 
-**Tech Stack:** llama-server (llama.cpp), Qwen2.5-7B-Instruct GGUF, PyTorch (CUDA), RTX 4070 Super 12GB
+**Tech Stack:** llama-server (llama.cpp), Qwen3.5-9B-Instruct GGUF (Q4_K_M, ~6.5GB VRAM), PyTorch (CUDA), RTX 4070 Super 12GB
 
 ---
 

@@ -27,3 +27,6 @@ beautifulsoup4>=4.12.0
 # NVIDIA GPU: pip install onnxruntime-gpu>=1.19.0
 # Windows DirectML: pip install onnxruntime-directml>=1.19.0
 # CPU-only: 已包含在 rapidocr-onnxruntime 中，无需额外安装
+
+# AI 走势预测（需要 CUDA 版本: pip install torch --index-url https://download.pytorch.org/whl/cu124）
+# torch>=2.0.0
