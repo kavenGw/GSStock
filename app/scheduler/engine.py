@@ -1,5 +1,6 @@
 """APScheduler 调度引擎"""
 import logging
+from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -43,6 +44,7 @@ class SchedulerEngine:
             trigger=IntervalTrigger(minutes=NEWS_INTERVAL_MINUTES),
             id='news_poll',
             replace_existing=True,
+            next_run_time=datetime.now(),
         )
         registered.append(f'news_poll(every {NEWS_INTERVAL_MINUTES}min)')
 
