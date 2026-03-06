@@ -13,10 +13,12 @@
 - **板块管理** — 股票分类、板块评级
 - **预警系统** — 涨跌幅预警、价格突破预警、威科夫信号
 - **期货/贵金属** — 指数、期货、贵金属走势追踪
+- **新闻看板** — 财经快讯、兴趣关键词过滤、公司新闻聚合、财报对比分析、AI 摘要
+- **盯盘助手** — 实时分时走势、日K+布林带、支撑阻力位标注、三维度 AI 分析、预置商品/指数监控
 - **交易策略** — 策略记录与管理
 - **再平衡** — 持仓配置建议
 - **利润统计** — 交易利润分析
-- **策略插件** — 自动发现注册，Cron 定时执行，内置五种策略（涨跌预警/价格预警/每日简报/威科夫信号/AI走势信号）
+- **策略插件** — 自动发现注册，Cron 定时执行，内置六种策略（涨跌预警/价格预警/每日简报/威科夫信号/AI走势信号/盯盘助手）
 - **通知推送** — Slack 推送，与策略引擎集成
 - **AI 分析** — 智谱 GLM 分层路由（Flash/Premium），支持本地 LLM（llama-server）替代 Flash 层
 - **AI 走势预测** — PyTorch 时序 Transformer，基于 OHLCV + 技术指标生成买/卖/持有信号（GPU 训练推理）
@@ -62,6 +64,12 @@ cp .env.sample .env
 | `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
+| `NEWS_INTERVAL_MINUTES` | 新闻后台轮询间隔（分钟） | `10` |
+| `NEWS_DERIVATION_ENABLED` | 启用衍生搜索（crawl4ai 爬取+AI 摘要） | `false` |
+| `COMPANY_NEWS_MAX_COMPANIES` | 每次轮询最多处理的公司数 | `3` |
+| `COMPANY_NEWS_MAX_ARTICLES` | 每个公司最多爬取文章数 | `5` |
+| `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
+| `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 
 ### 3. GPU 加速（可选）
 
@@ -227,12 +235,13 @@ LLM_REQUEST_TIMEOUT=300    # API 请求超时（秒），默认 300
 用本地模型替代云端 Flash 层，零 API 费用，无网络依赖。推荐 Qwen3.5-9B（Q4_K_M 量化，约 6.5GB VRAM）。
 
 1. 安装 llama.cpp（Windows 可通过 `winget install ggml.llamacpp`）
-2. 下载 GGUF 模型：
+2. 下载 GGUF 模型（约 5.9GB）：
 
 ```bash
-pip install huggingface-hub
-python -c "from huggingface_hub import hf_hub_download; hf_hub_download('bartowski/Qwen_Qwen3.5-9B-GGUF', 'Qwen_Qwen3.5-9B-Q4_K_M.gguf', local_dir='D:/Models')"
+curl.exe -L -C - -o "D:/Models/Qwen_Qwen3.5-9B-Q4_K_M.gguf" "https://huggingface.co/bartowski/Qwen_Qwen3.5-9B-GGUF/resolve/main/Qwen_Qwen3.5-9B-Q4_K_M.gguf"
 ```
+
+`-C -` 支持断点续传，中断后重新运行即可继续。Windows PowerShell 用户需使用 `curl.exe` 替代 `curl`。
 
 3. 启动 llama-server：
 
