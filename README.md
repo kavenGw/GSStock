@@ -243,13 +243,7 @@ curl.exe -L -C - -o "D:/Models/Qwen_Qwen3.5-9B-Q4_K_M.gguf" "https://huggingface
 
 `-C -` 支持断点续传，中断后重新运行即可继续。Windows PowerShell 用户需使用 `curl.exe` 替代 `curl`。
 
-3. 启动 llama-server：
-
-```bash
-llama-server -m D:\Models\Qwen_Qwen3.5-9B-Q4_K_M.gguf -ngl 99 -c 4096 --port 8080
-```
-
-4. 在 `.env` 中启用：
+3. 在 `.env` 中启用：
 
 ```env
 LLAMA_SERVER_ENABLED=true
