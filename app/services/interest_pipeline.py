@@ -65,8 +65,17 @@ class InterestPipeline:
     CLASSIFY_BATCH_SIZE = 10
 
     @staticmethod
+    def _is_local_provider(provider) -> bool:
+        """检测 provider 是否为本地 llama-server（含 FallbackProvider 包装）"""
+        name = getattr(provider, 'name', '')
+        if name == 'llama-server':
+            return True
+        primary = getattr(provider, 'primary', None)
+        return getattr(primary, 'name', '') == 'llama-server'
+
+    @staticmethod
     def _classify_items(items: list[NewsItem]) -> list[dict]:
-        """GLM 批量分类打分（自动分批，每批最多 CLASSIFY_BATCH_SIZE 条）"""
+        """GLM 批量分类打分（本地模型逐条，云端批量）"""
         from app.llm.router import llm_router
         from app.llm.prompts.news_classify import CLASSIFY_SYSTEM_PROMPT, build_classify_prompt
 
@@ -74,8 +83,11 @@ class InterestPipeline:
         if not provider:
             return []
 
+        is_local = InterestPipeline._is_local_provider(provider)
+        batch_size = 1 if is_local else InterestPipeline.CLASSIFY_BATCH_SIZE
+        max_tok = 500 if is_local else 4000
+
         all_results = []
-        batch_size = InterestPipeline.CLASSIFY_BATCH_SIZE
         for batch_start in range(0, len(items), batch_size):
             batch = items[batch_start:batch_start + batch_size]
             batch_data = [{'content': n.content} for n in batch]
@@ -83,7 +95,7 @@ class InterestPipeline:
                 response = provider.chat([
                     {'role': 'system', 'content': CLASSIFY_SYSTEM_PROMPT},
                     {'role': 'user', 'content': build_classify_prompt(batch_data)},
-                ], temperature=0.1, max_tokens=4000)
+                ], temperature=0.1, max_tokens=max_tok)
 
                 results = InterestPipeline._parse_classify_response(response)
                 # 将批内 index 映射回全局 index
@@ -114,7 +126,10 @@ class InterestPipeline:
                 text = arr_match.group(0)
 
         try:
-            return json.loads(text)
+            result = json.loads(text)
+            if isinstance(result, dict):
+                return [result]
+            return result
         except json.JSONDecodeError:
             pass
 
@@ -193,7 +208,10 @@ class InterestPipeline:
             if not provider:
                 return
 
+            is_local = InterestPipeline._is_local_provider(provider)
             contents = [n.content for n in recent]
+            if is_local:
+                contents = contents[:10]
             try:
                 response = provider.chat([
                     {'role': 'system', 'content': RECOMMEND_SYSTEM_PROMPT},

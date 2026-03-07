@@ -196,6 +196,7 @@ PreloadService.get_indices_data()
 | `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `300` |
 | `LLAMA_SERVER_ENABLED` | 启用本地 llama-server | `false` |
 | `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
+| `LLAMA_MAX_CONTEXT` | llama-server 上下文窗口大小 | `4096` |
 
 ## 技术栈
 

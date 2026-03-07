@@ -18,7 +18,7 @@ class Kr36Source(NewsSourceBase):
         try:
             feed = feedparser.parse(KR36_RSS_URL)
             if feed.bozo and not feed.entries:
-                logger.warning(f'36kr RSS解析异常: {feed.bozo_exception}')
+                logger.error(f'36kr RSS解析失败: {feed.bozo_exception}')
                 return []
             results = []
             for entry in feed.entries[:20]:

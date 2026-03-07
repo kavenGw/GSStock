@@ -21,6 +21,24 @@ TASK_LAYER_MAP = {
 }
 
 
+class FallbackProvider(LLMProvider):
+    """主 Provider 失败时自动降级到备用 Provider"""
+
+    def __init__(self, primary: LLMProvider, fallback: LLMProvider):
+        self.primary = primary
+        self.fallback = fallback
+        self.name = primary.name
+        self.model = primary.model
+        self.cost_per_1k_tokens = primary.cost_per_1k_tokens
+
+    def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
+        try:
+            return self.primary.chat(messages, temperature, max_tokens)
+        except Exception as e:
+            logger.warning(f'[{self.primary.name}] 失败，降级到 {self.fallback.name}: {e}')
+            return self.fallback.chat(messages, temperature, max_tokens)
+
+
 class LLMRouter:
     _instance = None
 
@@ -35,24 +53,26 @@ class LLMRouter:
         return cls._instance
 
     def init_providers(self):
-        """延迟初始化 providers — 本地优先"""
+        """延迟初始化 providers — 本地优先，云端兜底"""
         if self._providers:
             return
 
-        # 本地 llama-server 优先作为 FLASH 层
-        from app.llm.providers.llamacpp import LlamaServerProvider, is_llama_server_available
-        if is_llama_server_available():
-            self._providers[LLMLayer.FLASH] = LlamaServerProvider()
-            logger.info('[LLM路由] llama-server 本地模型已加载 (FLASH)')
+        from app.llm.providers.llamacpp import LlamaServerProvider, LLAMA_SERVER_ENABLED
 
-        # 智谱 GLM
         from app.llm.providers.zhipu import ZhipuFlashProvider, ZhipuPremiumProvider, ZHIPU_API_KEY
         if ZHIPU_API_KEY:
-            if LLMLayer.FLASH not in self._providers:
-                self._providers[LLMLayer.FLASH] = ZhipuFlashProvider()
-                logger.info('[LLM路由] 智谱 Flash 已加载 (FLASH)')
+            zhipu_flash = ZhipuFlashProvider()
+            if LLAMA_SERVER_ENABLED:
+                self._providers[LLMLayer.FLASH] = FallbackProvider(LlamaServerProvider(), zhipu_flash)
+                logger.info('[LLM路由] FLASH = llama-server → 智谱 Flash (降级)')
+            else:
+                self._providers[LLMLayer.FLASH] = zhipu_flash
+                logger.info('[LLM路由] FLASH = 智谱 Flash')
             self._providers[LLMLayer.PREMIUM] = ZhipuPremiumProvider()
-            logger.info('[LLM路由] 智谱 GLM-4 已加载 (PREMIUM)')
+            logger.info('[LLM路由] PREMIUM = 智谱 GLM-4')
+        elif LLAMA_SERVER_ENABLED:
+            self._providers[LLMLayer.FLASH] = LlamaServerProvider()
+            logger.info('[LLM路由] FLASH = llama-server (无云端兜底)')
 
     def route(self, task_type: str) -> LLMProvider | None:
         """按任务类型路由到合适的 LLM"""

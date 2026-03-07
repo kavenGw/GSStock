@@ -2,7 +2,6 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 
-:: 读取 .env 中的 LLAMA_SERVER_ENABLED
 set LLAMA_SERVER_ENABLED=false
 if exist .env (
     for /f "usebackq tokens=1,* delims==" %%a in (".env") do (
@@ -10,16 +9,15 @@ if exist .env (
     )
 )
 
-:: 启动 llama-server
 if /i "%LLAMA_SERVER_ENABLED%"=="true" (
     if exist llama-server.bat (
-        echo 正在启动 llama-server...
-        start "" cmd /k llama-server.bat
+        echo Starting llama-server...
+        start "llama-server" llama-server.bat
     ) else (
-        echo [警告] LLAMA_SERVER_ENABLED=true 但未找到 llama-server.bat
+        echo [WARN] LLAMA_SERVER_ENABLED=true but llama-server.bat not found
     )
 )
 
 title GSStock Server
-echo 正在启动股票管理工具...
+echo Starting stock server...
 python run.py
