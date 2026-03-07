@@ -98,7 +98,7 @@ class InterestPipeline:
                 ], temperature=0.1, max_tokens=max_tok)
 
                 results = InterestPipeline._parse_classify_response(response)
-                # 将批内 index 映射回全局 index
+                results = [r for r in results if isinstance(r, dict)]
                 for r in results:
                     local_idx = r.get('index', -1)
                     if 0 <= local_idx < len(batch):
