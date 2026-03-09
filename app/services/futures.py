@@ -276,6 +276,50 @@ class FuturesService:
         db.session.commit()
 
     @staticmethod
+    def _forward_fill_missing_dates(results: list[dict]) -> list[dict]:
+        """对多股票数据做 forward-fill，填充因市场休市导致的缺失日期"""
+        if len(results) <= 1:
+            return results
+
+        all_dates = set()
+        for stock in results:
+            for dp in stock.get('data', []):
+                all_dates.add(dp['date'])
+
+        if not all_dates:
+            return results
+
+        sorted_dates = sorted(all_dates)
+
+        for stock in results:
+            data = stock.get('data', [])
+            if not data:
+                continue
+
+            data = sorted(data, key=lambda x: x['date'])
+            date_map = {dp['date']: dp for dp in data}
+            first_date = data[0]['date']
+
+            filled_data = []
+            last_known = None
+
+            for d in sorted_dates:
+                if d in date_map:
+                    last_known = {**date_map[d]}
+                    filled_data.append(last_known)
+                elif last_known is not None and d >= first_date:
+                    filled_data.append({
+                        'date': d,
+                        'price': last_known['price'],
+                        'change_pct': last_known['change_pct'],
+                        'volume': 0
+                    })
+
+            stock['data'] = filled_data
+
+        return results
+
+    @staticmethod
     def _fetch_from_api(code: str, info: dict, start_date: date, end_date: date, days: int) -> tuple[str, list[dict] | None]:
         """通过统一服务获取数据"""
         from app.services.unified_stock_data import unified_stock_data_service
@@ -400,6 +444,8 @@ class FuturesService:
                 'data': data_points,
                 'valuation': valuation
             })
+
+        results = FuturesService._forward_fill_missing_dates(results)
 
         # 获取日期范围
         all_dates = set()
@@ -601,6 +647,14 @@ class FuturesService:
                 'stock_name': name_map.get(stock_code, stock_code),
                 'data': data_points
             })
+
+        results = FuturesService._forward_fill_missing_dates(results)
+
+        # forward-fill 后重新收集日期
+        all_dates = set()
+        for r in results:
+            for dp in r['data']:
+                all_dates.add(dp['date'])
 
         sorted_dates = sorted(all_dates)
         ret = {
