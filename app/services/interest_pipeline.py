@@ -133,13 +133,16 @@ class InterestPipeline:
         except json.JSONDecodeError:
             pass
 
-        # 截断容错：尝试补全不完整的 JSON 数组
-        repaired = text.rstrip().rstrip(',')
-        for suffix in ['}]', ']']:
+        # 截断容错：找最后一个完整对象，截断后闭合数组，恢复已解析的条目
+        last_brace = text.rfind('}')
+        if last_brace > 0:
+            repaired = text[:last_brace + 1].rstrip(',') + ']'
             try:
-                return json.loads(repaired + suffix)
+                result = json.loads(repaired)
+                logger.warning(f'GLM分类JSON截断容错，恢复 {len(result)} 条')
+                return result if isinstance(result, list) else [result]
             except json.JSONDecodeError:
-                continue
+                pass
 
         logger.error(f'GLM分类打分JSON解析失败, 响应长度={len(response)}, 末尾: ...{response[-200:]}')
         return []

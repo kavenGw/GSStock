@@ -51,6 +51,13 @@ class LlamaServerProvider(LLMProvider):
         input_tokens = sum(_estimate_tokens(m.get('content', '')) for m in messages)
         available = LLAMA_MAX_CONTEXT - input_tokens - _CONTEXT_RESERVE
 
+        # 预检：推理模型需要足够空间（reasoning + content），不足则跳过让 FallbackProvider 走云端
+        min_required = max_tokens * _REASONING_MULTIPLIER
+        if available < min_required:
+            raise ValueError(
+                f'上下文不足(可用 {available}，需 {min_required})，跳过本地'
+            )
+
         if available < max_tokens:
             if available > 100:
                 logger.warning(f'[llama-server] 输入约 {input_tokens} tokens，max_tokens {max_tokens}→{available}')
