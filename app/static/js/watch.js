@@ -210,6 +210,8 @@ const Watch = {
             this.chartMeta[code] = {
                 tradingDate: result.trading_date,
                 isTrading: result.is_trading,
+                tradingSessions: result.trading_sessions || [],
+                prevDayData: result.prev_day_data || [],
             };
             this.renderChart(code);
             WatchCache.save(WatchCache.snapshot(this));
@@ -563,6 +565,29 @@ const Watch = {
         container.classList.remove('d-none');
     },
 
+    _generateFullTimeAxis(sessions) {
+        const times = [];
+        for (const [start, end] of sessions) {
+            const [sh, sm] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            let mins = sh * 60 + sm;
+            const endMins = eh * 60 + em;
+            while (mins <= endMins) {
+                times.push(`${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`);
+                mins++;
+            }
+        }
+        return times;
+    },
+
+    _mapDataToTimeAxis(rawData, fullAxis) {
+        const timeMap = {};
+        for (const d of rawData) {
+            timeMap[d.time] = d.close;
+        }
+        return fullAxis.map(t => timeMap[t] != null ? timeMap[t] : null);
+    },
+
     renderChart(code) {
         const container = document.getElementById(`chart-${code}`);
         if (!container) return;
@@ -587,13 +612,20 @@ const Watch = {
             hintEl.textContent = label;
         }
 
-        const times = data.map(d => d.time);
-        const prices = data.map(d => d.close);
+        const sessions = meta.tradingSessions || [];
+        const fullAxis = sessions.length > 0 ? this._generateFullTimeAxis(sessions) : data.map(d => d.time);
+        const prices = sessions.length > 0 ? this._mapDataToTimeAxis(data, fullAxis) : data.map(d => d.close);
+
+        const prevData = meta.prevDayData || [];
+        const prevPrices = sessions.length > 0 && prevData.length > 0
+            ? this._mapDataToTimeAxis(prevData, fullAxis) : [];
 
         if (this.chartInstances[code]) {
+            const seriesUpdate = [{ data: prices }];
+            if (prevPrices.length > 0) seriesUpdate.push({ data: prevPrices });
             this.chartInstances[code].setOption({
-                xAxis: { data: times },
-                series: [{ data: prices }],
+                xAxis: { data: fullAxis },
+                series: seriesUpdate,
             });
             return;
         }
@@ -625,16 +657,49 @@ const Watch = {
             });
         });
 
+        const seriesList = [{
+            type: 'line',
+            data: prices,
+            smooth: true,
+            symbol: 'none',
+            connectNulls: false,
+            lineStyle: { width: 1.5, color: '#1890ff' },
+            areaStyle: { color: 'rgba(24,144,255,0.08)' },
+            markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
+        }];
+
+        if (prevPrices.length > 0) {
+            seriesList.push({
+                type: 'line',
+                data: prevPrices,
+                smooth: true,
+                symbol: 'none',
+                connectNulls: false,
+                lineStyle: { width: 1, color: '#888', type: 'dashed' },
+                opacity: 0.4,
+            });
+        }
+
         chart.setOption({
             grid: { left: 8, right: 55, top: 8, bottom: 20, containLabel: false },
             tooltip: {
                 trigger: 'axis',
-                formatter: params => `${params[0].axisValue}<br/>${params[0].value.toFixed(2)}`,
+                formatter: params => {
+                    let html = params[0].axisValue;
+                    params.forEach(p => {
+                        if (p.value != null) {
+                            const label = p.seriesIndex === 0 ? '' : '昨日 ';
+                            html += `<br/>${label}${Number(p.value).toFixed(2)}`;
+                        }
+                    });
+                    return html;
+                },
             },
             xAxis: {
                 type: 'category',
-                data: times,
-                axisLabel: { fontSize: 9, interval: Math.floor(times.length / 4) },
+                data: fullAxis,
+                boundaryGap: false,
+                axisLabel: { fontSize: 9, interval: Math.floor(fullAxis.length / 5) },
                 axisLine: { lineStyle: { color: '#ddd' } },
             },
             yAxis: {
@@ -643,15 +708,7 @@ const Watch = {
                 splitLine: { lineStyle: { color: '#f0f0f0' } },
                 axisLabel: { fontSize: 9 },
             },
-            series: [{
-                type: 'line',
-                data: prices,
-                smooth: true,
-                symbol: 'none',
-                lineStyle: { width: 1.5, color: '#1890ff' },
-                areaStyle: { color: 'rgba(24,144,255,0.08)' },
-                markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
-            }],
+            series: seriesList,
         });
 
         new ResizeObserver(() => chart.resize()).observe(container);

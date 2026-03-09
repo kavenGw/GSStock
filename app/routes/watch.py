@@ -303,6 +303,31 @@ def chart_data():
         result['is_open'] = is_open
         result['is_trading'] = is_open
         result['trading_date'] = trading_date
+
+        TRADING_SESSIONS = {
+            'A': [['09:30', '11:30'], ['13:00', '15:00']],
+            'KR': [['09:00', '15:30']],
+            'US': [['09:30', '16:00']],
+            'HK': [['09:30', '16:00']],
+            'JP': [['09:00', '11:30'], ['12:30', '15:00']],
+            'TW': [['09:00', '13:30']],
+        }
+        result['trading_sessions'] = TRADING_SESSIONS.get(market, [['09:30', '16:00']])
+
+        prev_day_data = []
+        try:
+            from datetime import datetime as dt_cls
+            trading_date_obj = dt_cls.strptime(trading_date, '%Y-%m-%d').date() if trading_date else None
+            if trading_date_obj:
+                prev_date = TradingCalendarService.get_last_trading_day(market, trading_date_obj)
+                from app.models.unified_cache import UnifiedStockCache
+                cached = UnifiedStockCache.get_cache_with_status([code], 'intraday_1m', prev_date).get(code)
+                if cached and cached.get('data'):
+                    prev_day_data = cached['data'].get('data', [])
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug(f"[盯盘] 前日分时缓存读取失败 {code}: {e}")
+        result['prev_day_data'] = prev_day_data
     else:
         days_map = {'7d': 7, '30d': 30, '90d': 90}
         days = days_map.get(period, 30)
