@@ -19,3 +19,4 @@ venv/
 *.swo
 nul
 data/memory_cache
+data
