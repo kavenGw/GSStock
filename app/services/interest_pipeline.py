@@ -241,6 +241,7 @@ class InterestPipeline:
         from app.services.notification import NotificationService
         try:
             for n in items:
-                NotificationService.send_slack(f"📰 {n.content}")
+                tag = f" [{n.matched_keywords}]" if n.matched_keywords else ""
+                NotificationService.send_slack(f"📰{tag} {n.content}")
         except Exception as e:
             logger.error(f'[兴趣] Slack通知失败: {e}')
