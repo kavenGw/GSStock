@@ -47,6 +47,8 @@ const WatchCache = {
             chartMeta: watch.chartMeta,
             analyses: watch.analyses,
             marketStatus: watch.marketStatus,
+            tdSequential: watch.tdSequential,
+            earnings: watch.earnings,
         };
     },
 
@@ -57,6 +59,8 @@ const WatchCache = {
         watch.chartMeta = cache.chartMeta || {};
         watch.analyses = cache.analyses || {};
         watch.marketStatus = cache.marketStatus || {};
+        watch.tdSequential = cache.tdSequential || {};
+        watch.earnings = cache.earnings || {};
     },
 };
 
@@ -73,6 +77,8 @@ const Watch = {
     chartInstances: {},
     chartData: {},
     chartMeta: {},
+    tdSequential: {},
+    earnings: {},
     refreshTimer: null,
     analysisTimer: null,
     marketStatusTimer: null,
@@ -93,6 +99,7 @@ const Watch = {
                 this.renderCards();
                 this.renderBenchmarks();
                 this.loadAllChartsFromCache();
+                this.stocks.forEach(s => this.renderEarnings(s.stock_code));
                 this.updateStatus(`${this.stocks.length} 只股票`);
             }
         }
@@ -135,6 +142,7 @@ const Watch = {
             this.renderCards();
             this.updateStatus(`${this.stocks.length} 只股票`);
             await this.loadAllCharts();
+            this.stocks.forEach(s => this.loadEarnings(s.stock_code));
 
             WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
@@ -193,6 +201,9 @@ const Watch = {
                 tradingSessions: result.trading_sessions || [],
                 prevDayData: result.prev_day_data || [],
             };
+            if (result.td_sequential) {
+                this.tdSequential[code] = result.td_sequential;
+            }
             this.renderChart(code);
             WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
@@ -409,12 +420,23 @@ const Watch = {
         const pctDisplay = p.change_pct != null ? `${pctSign}${p.change_pct.toFixed(2)}%` : '--';
         const changeDisplay = p.change != null ? `${p.change > 0 ? '+' : ''}${p.change.toFixed(2)}` : '';
 
+        const td = this.tdSequential[code] || {};
+        let tdBadgeHtml = '';
+        if (td.direction && td.count > 0) {
+            const tdClass = td.direction === 'buy' ? 'td-badge-buy' : 'td-badge-sell';
+            const warn = td.count >= 7 ? ' td-badge-warn' : '';
+            const check = td.completed ? ' \u2713' : '';
+            const label = td.direction === 'buy' ? '\u4e70' : '\u5356';
+            tdBadgeHtml = `<span class="td-badge ${tdClass}${warn}">${label}${td.count}${check}</span>`;
+        }
+
         return `<div class="card stock-card mb-3" id="card-${code}">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold fs-6">${name}</span>
-                        <small class="text-muted ms-2">${code}</small>
+                        <small class="text-muted">${code}</small>
+                        ${tdBadgeHtml}
                     </div>
                     <div class="d-flex align-items-center gap-3">
                         <div class="text-end">
@@ -422,35 +444,30 @@ const Watch = {
                             <span class="${pctClass} fw-bold ms-2" data-field="change_pct" data-code="${code}">${pctDisplay}</span>
                             <span class="${pctClass} small ms-1" data-field="change" data-code="${code}">${changeDisplay}</span>
                         </div>
-                        <button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="移除">
+                        <button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="\u79fb\u9664">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                 </div>
-                <div class="chart-analysis-row mb-2">
-                    <div class="chart-side">
-                        <div class="chart-container" id="chart-${code}">
-                            <div class="skeleton skeleton-card" style="height:100%;"></div>
+                <div class="chart-container mb-2" id="chart-${code}">
+                    <div class="skeleton skeleton-card" style="height:100%;"></div>
+                </div>
+                <div class="bottom-panel">
+                    <div class="panel-left">
+                        <ul class="nav nav-tabs analysis-tab mb-2" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-period="realtime" onclick="Watch.switchAnalysisTab('${code}','realtime',this)">\u5b9e\u65f6</button></li>
+                            <li class="nav-item"><button class="nav-link" data-period="7d" onclick="Watch.switchAnalysisTab('${code}','7d',this)">7\u5929</button></li>
+                            <li class="nav-item"><button class="nav-link" data-period="30d" onclick="Watch.switchAnalysisTab('${code}','30d',this)">30\u5929</button></li>
+                        </ul>
+                        <div class="analysis-content" id="analysis-content-${code}">
+                            <span class="text-muted small">\u7b49\u5f85\u5206\u6790\u6570\u636e...</span>
                         </div>
                     </div>
-                    <div class="analysis-sidebar" id="analysis-sidebar-${code}">
-                        <div class="text-muted small text-center py-3">等待AI分析...</div>
-                    </div>
-                </div>
-                <div class="analysis-section" id="analysis-${code}">
-                    <ul class="nav nav-tabs analysis-tab mb-2" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" data-period="realtime" onclick="Watch.switchAnalysisTab('${code}', 'realtime', this)">实时</button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-period="7d" onclick="Watch.switchAnalysisTab('${code}', '7d', this)">7天</button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-period="30d" onclick="Watch.switchAnalysisTab('${code}', '30d', this)">30天</button>
-                        </li>
-                    </ul>
-                    <div class="analysis-content" id="analysis-content-${code}">
-                        <span class="text-muted small">等待分析数据...</span>
+                    <div class="panel-right">
+                        <div class="small fw-bold text-muted mb-1">\u8d22\u62a5\u6570\u636e</div>
+                        <div id="earnings-${code}">
+                            <span class="text-muted small">\u52a0\u8f7d\u4e2d...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -571,6 +588,7 @@ const Watch = {
                 xAxis: { data: fullAxis },
                 series: seriesUpdate,
             });
+            this._renderTDGraphic(code, this.chartInstances[code]);
             return;
         }
 
@@ -678,12 +696,46 @@ const Watch = {
             series: seriesList,
         });
 
+        this._renderTDGraphic(code, chart);
+
         new ResizeObserver(() => chart.resize()).observe(container);
     },
 
+    _renderTDGraphic(code, chart) {
+        const td = this.tdSequential[code] || {};
+        if (td.direction && td.count > 0) {
+            const label = td.direction === 'buy' ? 'TD\u4e70\u5165' : 'TD\u5356\u51fa';
+            const color = td.direction === 'buy' ? '#16a34a' : '#dc2626';
+            const check = td.completed ? ' \u2713' : '';
+            chart.setOption({
+                graphic: [{
+                    type: 'group',
+                    left: 15,
+                    bottom: 25,
+                    children: [{
+                        type: 'rect',
+                        shape: { width: 90, height: 22, r: 3 },
+                        style: { fill: 'rgba(255,255,255,0.85)', stroke: color, lineWidth: 1 },
+                    }, {
+                        type: 'text',
+                        style: {
+                            text: `${label} ${td.count}/9${check}`,
+                            x: 8, y: 4,
+                            fill: color,
+                            font: 'bold 11px sans-serif',
+                        },
+                    }],
+                }],
+            });
+        } else {
+            chart.setOption({ graphic: [] });
+        }
+    },
+
     switchAnalysisTab(code, period, btn) {
-        const section = document.getElementById(`analysis-${code}`);
-        section.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+        const card = document.getElementById(`card-${code}`);
+        if (!card) return;
+        card.querySelectorAll('.analysis-tab .nav-link').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.renderAnalysisContent(code, period);
     },
@@ -691,68 +743,12 @@ const Watch = {
     updateAllAnalysisPanels() {
         this.stocks.forEach(stock => {
             const code = stock.stock_code;
-            this.renderAnalysisSidebar(code);
-            const section = document.getElementById(`analysis-${code}`);
-            if (!section) return;
-            const activeBtn = section.querySelector('.nav-link.active');
+            const card = document.getElementById(`card-${code}`);
+            if (!card) return;
+            const activeBtn = card.querySelector('.analysis-tab .nav-link.active');
             const activePeriod = activeBtn ? activeBtn.dataset.period : 'realtime';
             this.renderAnalysisContent(code, activePeriod);
         });
-    },
-
-    renderAnalysisSidebar(code) {
-        const sidebar = document.getElementById(`analysis-sidebar-${code}`);
-        if (!sidebar) return;
-
-        const codeAnalysis = this.analyses[code] || {};
-        const entries = [];
-
-        const realtimeData = codeAnalysis['realtime'];
-        if (realtimeData) {
-            entries.push(this._buildSidebarEntry(realtimeData.created_at || '实时', realtimeData));
-        }
-
-        for (const p of ['7d', '30d']) {
-            const pData = codeAnalysis[p];
-            if (pData) {
-                entries.push(this._buildSidebarEntry(p, pData));
-            }
-        }
-
-        if (entries.length === 0) {
-            sidebar.innerHTML = '<div class="text-muted small text-center py-3">等待AI分析...</div>';
-            return;
-        }
-
-        sidebar.innerHTML = entries.join('');
-    },
-
-    _buildSidebarEntry(timeLabel, data) {
-        const signal = data.signal || 'watch';
-        const detail = data.detail || {};
-        const signalText = detail.signal_text || this._signalTextMap(signal);
-        const summary = data.summary || '';
-        const maLevels = detail.ma_levels || {};
-        const priceRange = detail.price_range || {};
-
-        let detailHtml = '';
-        const maParts = [];
-        if (maLevels.ma5) maParts.push(`MA5:${maLevels.ma5}`);
-        if (maLevels.ma20) maParts.push(`MA20:${maLevels.ma20}`);
-        if (maLevels.ma60) maParts.push(`MA60:${maLevels.ma60}`);
-        if (maParts.length > 0) {
-            detailHtml += `<div class="entry-detail">${maParts.join(' ')}</div>`;
-        }
-        if (priceRange.low || priceRange.high) {
-            detailHtml += `<div class="entry-detail">区间: ${priceRange.low || '?'} - ${priceRange.high || '?'}</div>`;
-        }
-
-        return `<div class="analysis-entry">
-            <span class="entry-time">${timeLabel}</span>
-            <span class="entry-signal signal-${signal}">${signalText}</span>
-            <div class="entry-summary">${summary}</div>
-            ${detailHtml}
-        </div>`;
     },
 
     _signalTextMap(signal) {
@@ -789,6 +785,53 @@ const Watch = {
         if (resistances.length > 0) html += `<span class="text-danger small">阻力: ${resistances.join(' / ')}</span>`;
         html += '</div>';
         el.innerHTML = html || '<span class="text-muted small">暂无分析数据</span>';
+    },
+
+    async loadEarnings(code) {
+        try {
+            const resp = await fetch(`/watch/earnings?code=${encodeURIComponent(code)}`);
+            const data = await resp.json();
+            if (data.success) {
+                this.earnings[code] = data.data || [];
+                this.renderEarnings(code);
+            }
+        } catch (e) {
+            console.error(`[Watch] earnings load failed ${code}:`, e);
+        }
+    },
+
+    renderEarnings(code) {
+        const el = document.getElementById(`earnings-${code}`);
+        if (!el) return;
+        const items = this.earnings[code] || [];
+        if (items.length === 0) {
+            el.innerHTML = '<span class="text-muted small">\u6682\u65e0\u8d22\u62a5\u6570\u636e</span>';
+            return;
+        }
+        let html = `<table class="table table-sm table-borderless earnings-table mb-0">
+            <thead><tr><th>\u5b63\u5ea6</th><th>\u8425\u6536</th><th>\u5229\u6da6</th><th>\u80a1\u4ef7\u533a\u95f4</th></tr></thead><tbody>`;
+        for (const item of items) {
+            const rev = this._formatLargeNumber(item.revenue);
+            const prof = this._formatLargeNumber(item.profit);
+            let priceRange = '--';
+            if (item.price_high != null && item.price_low != null) {
+                priceRange = `${item.price_low}-${item.price_high}`;
+            }
+            html += `<tr><td>${item.quarter}</td><td>${rev}</td><td>${prof}</td><td>${priceRange}</td></tr>`;
+        }
+        html += '</tbody></table>';
+        el.innerHTML = html;
+    },
+
+    _formatLargeNumber(num) {
+        if (num == null || num === 0) return '--';
+        const abs = Math.abs(num);
+        const sign = num < 0 ? '-' : '';
+        if (abs >= 1e12) return sign + (abs / 1e12).toFixed(1) + 'T';
+        if (abs >= 1e9) return sign + (abs / 1e9).toFixed(1) + 'B';
+        if (abs >= 1e8) return sign + (abs / 1e8).toFixed(1) + '\u4ebf';
+        if (abs >= 1e4) return sign + (abs / 1e4).toFixed(0) + '\u4e07';
+        return sign + abs.toFixed(0);
     },
 
     updateAllPrices() {

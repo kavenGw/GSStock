@@ -12,37 +12,12 @@
 .price-up { color: #dc3545; }
 .price-down { color: #28a745; }
 .price-flat { color: #6c757d; }
-.chart-analysis-row {
-    display: flex;
-    gap: 0;
-}
-.chart-analysis-row .chart-side {
-    flex: 7;
-    min-width: 0;
-}
-.chart-analysis-row .analysis-sidebar {
-    flex: 3;
-    border-left: 1px solid #eee;
-    max-height: 230px;
-    overflow-y: auto;
-    padding: 0.5rem;
-    background: #fafbfc;
-    border-radius: 0 0 4px 0;
-}
-.analysis-sidebar .analysis-entry {
-    padding: 0.4rem 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.78rem;
-}
-.analysis-sidebar .analysis-entry:last-child {
-    border-bottom: none;
-}
-.analysis-entry .entry-time {
-    font-size: 0.7rem;
-    color: #999;
-    margin-right: 0.3rem;
-}
-.analysis-entry .entry-signal {
+.bottom-panel { display: flex; gap: 12px; }
+.bottom-panel .panel-left,
+.bottom-panel .panel-right { flex: 1; min-width: 0; }
+.panel-right table { font-size: 0.78rem; }
+.panel-right th { font-weight: 600; color: #6b7280; }
+.entry-signal {
     display: inline-block;
     padding: 0 0.4rem;
     border-radius: 3px;
@@ -53,16 +28,18 @@
 .entry-signal.signal-sell { background: #fef2f2; color: #dc2626; }
 .entry-signal.signal-hold { background: #fef9c3; color: #ca8a04; }
 .entry-signal.signal-watch { background: #f3f4f6; color: #6b7280; }
-.analysis-entry .entry-summary {
-    margin-top: 0.2rem;
-    color: #374151;
-    line-height: 1.4;
-}
-.analysis-entry .entry-detail {
-    margin-top: 0.15rem;
+.td-badge {
+    display: inline-block;
+    padding: 0 0.5rem;
+    border-radius: 3px;
     font-size: 0.72rem;
-    color: #6b7280;
+    font-weight: 700;
 }
+.td-badge-buy { background: #dcfce7; color: #16a34a; }
+.td-badge-sell { background: #fef2f2; color: #dc2626; }
+.td-badge-warn { animation: td-pulse 1s ease-in-out infinite; }
+@keyframes td-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.earnings-table td, .earnings-table th { padding: 0.25rem 0.4rem; white-space: nowrap; }
 </style>
 {% endblock %}
 

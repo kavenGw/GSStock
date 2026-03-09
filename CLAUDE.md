@@ -90,6 +90,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 | 实时价格 | `price` | 交易时段30分钟 / 收盘后8小时 |
 | OHLC走势 | `ohlc_{days}` | 交易时段30分钟 / 收盘后8小时 |
 | 指数数据 | `index` | 交易时段30分钟 / 收盘后8小时 |
+| 季度财报 | `quarterly_earnings` | 7天 |
 
 ### 核心组件
 
@@ -174,9 +175,21 @@ DailyBriefingStrategy.scan()
 
 WatchRealtimeStrategy.scan()
     └── WatchAnalysisService.analyze_stocks('realtime')
+
+QuarterlyEarningsService.get_earnings()
+    └── UnifiedStockDataService.get_trend_data() (季末股价)
+
+TDSequentialService.calculate()
+    ← watch.py chart-data 接口调用（复用60日趋势数据）
 ```
 
 ## 盯盘助手配置
+
+**盯盘助手前端架构**：
+- 图表：ECharts 分时线图，全宽，支撑/阻力标线，九转信号浮动标注
+- 下方双栏：左=AI分析（realtime/7d/30d标签页），右=季度财报表格
+- 缓存：sessionStorage（WatchCache），防抖500ms持久化
+- 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
@@ -241,6 +254,10 @@ WatchRealtimeStrategy.scan()
 - 数据库：`data/stock.db`
 - 内存缓存持久化：`data/memory_cache/{stock_code}/{cache_type}.pkl`
 - 上传图片：`uploads/`
+
+## 设计文档
+
+设计和实施计划保存在 `docs/plans/` 目录，格式 `YYYY-MM-DD-<topic>-design.md`
 
 ## 开发规范
 

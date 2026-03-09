@@ -274,6 +274,7 @@ def chart_data():
     # 算法支撑/压力（基于60日OHLC）
     from app.utils.support_resistance import calculate_support_resistance
     algo_sr = {'support': [], 'resistance': []}
+    stocks_60d = []
     try:
         trend_60d = unified_stock_data_service.get_trend_data([code], days=60)
         stocks_60d = trend_60d.get('stocks', [])
@@ -300,4 +301,26 @@ def chart_data():
     result['support_levels'] = sorted(set(algo_sr['support'] + ai_supports))
     result['resistance_levels'] = sorted(set(algo_sr['resistance'] + ai_resistances))
 
+    # 九转序列信号（复用60日趋势数据）
+    from app.services.td_sequential import TDSequentialService
+    td_result = {'direction': None, 'count': 0, 'completed': False, 'history': []}
+    try:
+        if stocks_60d and stocks_60d[0].get('data'):
+            td_result = TDSequentialService.calculate(stocks_60d[0]['data'])
+    except Exception as e:
+        logger.debug(f"[盯盘] 九转信号计算失败 {code}: {e}")
+    result['td_sequential'] = td_result
+
     return jsonify(result)
+
+
+@watch_bp.route('/earnings')
+def earnings():
+    from app.services.earnings_service import QuarterlyEarningsService
+
+    code = request.args.get('code', '').strip()
+    if not code:
+        return jsonify({'success': False, 'message': '缺少股票代码'})
+
+    data = QuarterlyEarningsService.get_earnings(code)
+    return jsonify({'success': True, 'data': data})
