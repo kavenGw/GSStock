@@ -4,7 +4,7 @@
 import json
 import logging
 import ssl
-from datetime import date
+from datetime import date, timedelta
 from urllib.request import urlopen, Request
 
 import certifi
@@ -19,14 +19,12 @@ class NotificationService:
 
     @staticmethod
     def get_status() -> dict:
-        """获取推送渠道状态"""
         return {
             'slack': SLACK_ENABLED,
         }
 
     @staticmethod
     def send_slack(message: str) -> bool:
-        """推送到 Slack（Incoming Webhook）"""
         if not SLACK_ENABLED:
             logger.warning('[通知.Slack] Slack 未配置')
             return False
@@ -43,11 +41,38 @@ class NotificationService:
 
     @staticmethod
     def send_all(subject: str, text_content: str) -> dict:
-        """推送到所有已配置渠道"""
         results = {}
         if SLACK_ENABLED:
             results['slack'] = NotificationService.send_slack(text_content)
         return results
+
+    @staticmethod
+    def _get_all_watched_codes() -> tuple[list[str], dict[str, str]]:
+        """收集所有关注的股票代码（持仓+分类），返回 (codes, name_map)"""
+        from app.services.position import PositionService
+        from app.models.stock import Stock
+        from app.models.category import StockCategory
+
+        name_map = {}
+        code_set = set()
+
+        latest_date = PositionService.get_latest_date()
+        if latest_date:
+            positions = PositionService.get_snapshot(latest_date)
+            for p in positions:
+                code_set.add(p.stock_code)
+                name_map[p.stock_code] = p.stock_name
+
+        all_sc = StockCategory.query.all()
+        sc_codes = [sc.stock_code for sc in all_sc if sc.stock_code not in code_set]
+        if sc_codes:
+            stocks = Stock.query.filter(Stock.stock_code.in_(sc_codes)).all()
+            for s in stocks:
+                code_set.add(s.stock_code)
+                name_map[s.stock_code] = s.stock_name
+
+        codes = list(code_set)
+        return codes, name_map
 
     @staticmethod
     def format_briefing_summary() -> dict:
@@ -114,30 +139,17 @@ class NotificationService:
         return {'text': text}
 
     @staticmethod
-    def format_alert_signals() -> dict:
-        """生成预警信号摘要"""
+    def format_alert_signals(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
+        """生成预警信号摘要（所有关注股票）"""
         from app.services.signal_cache import SignalCacheService
-        from app.services.position import PositionService
-        from app.models.stock import Stock
         from app.utils.market_identifier import MarketIdentifier
 
-        latest_date = PositionService.get_latest_date()
-        if not latest_date:
-            return {'text': ''}
-
-        positions = PositionService.get_snapshot(latest_date)
-        a_share_codes = [p.stock_code for p in positions if MarketIdentifier.is_a_share(p.stock_code)]
+        if codes is None or name_map is None:
+            codes, name_map = NotificationService._get_all_watched_codes()
+        a_share_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
 
         if not a_share_codes:
             return {'text': ''}
-
-        name_map = {}
-        stocks = Stock.query.filter(Stock.stock_code.in_(a_share_codes)).all()
-        for s in stocks:
-            name_map[s.stock_code] = s.stock_name
-        for p in positions:
-            if p.stock_code not in name_map:
-                name_map[p.stock_code] = p.stock_name
 
         signals = SignalCacheService.get_cached_signals_with_names(a_share_codes, name_map)
 
@@ -152,20 +164,74 @@ class NotificationService:
         if sell_signals:
             text += "\n卖出信号:\n"
             for sig in sell_signals[:10]:
-                line = f"{sig.get('stock_name', '')}({sig.get('stock_code', '')}) - {sig.get('name', '')}"
-                text += f"  {line}\n"
+                text += f"  {sig.get('stock_name', '')}({sig.get('stock_code', '')}) - {sig.get('name', '')}\n"
 
         if buy_signals:
             text += "\n买入信号:\n"
             for sig in buy_signals[:10]:
-                line = f"{sig.get('stock_name', '')}({sig.get('stock_code', '')}) - {sig.get('name', '')}"
-                text += f"  {line}\n"
+                text += f"  {sig.get('stock_name', '')}({sig.get('stock_code', '')}) - {sig.get('name', '')}\n"
 
         return {'text': text}
 
     @staticmethod
+    def format_earnings_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
+        """生成财报日期提醒（未来7天）"""
+        from app.services.earnings import EarningsService
+        from app.utils.market_identifier import MarketIdentifier
+
+        if codes is None or name_map is None:
+            codes, name_map = NotificationService._get_all_watched_codes()
+        non_a_codes = [c for c in codes if not MarketIdentifier.is_a_share(c)]
+
+        if not non_a_codes:
+            return {'text': ''}
+
+        upcoming = EarningsService.get_upcoming_earnings(non_a_codes, days=7)
+        if not upcoming:
+            return {'text': ''}
+
+        text = "财报提醒（未来7天）\n"
+        for item in upcoming:
+            name = name_map.get(item['code'], item['code'])
+            if item['is_today']:
+                text += f"  {name}({item['code']}) - 今天发布财报\n"
+            else:
+                text += f"  {name}({item['code']}) - {item['days_until']}天后({item['earnings_date']})\n"
+
+        return {'text': text}
+
+    @staticmethod
+    def format_pe_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
+        """生成PE估值预警（偏高/偏低）"""
+        from app.services.earnings import EarningsService
+        from app.utils.market_identifier import MarketIdentifier
+
+        if codes is None or name_map is None:
+            codes, name_map = NotificationService._get_all_watched_codes()
+        non_a_codes = [c for c in codes if not MarketIdentifier.is_a_share(c)]
+
+        if not non_a_codes:
+            return {'text': ''}
+
+        pe_data = EarningsService.get_pe_ratios(non_a_codes)
+
+        alerts = []
+        for code, data in pe_data.items():
+            status = data.get('pe_status', 'na')
+            if status in ('high', 'very_high', 'low'):
+                name = name_map.get(code, code)
+                pe_display = data.get('pe_display', '?')
+                label = {'high': '偏高', 'very_high': '极高', 'low': '偏低'}[status]
+                alerts.append(f"  {name}({code}) PE={pe_display} {label}")
+
+        if not alerts:
+            return {'text': ''}
+
+        text = "PE估值预警\n" + "\n".join(alerts) + "\n"
+        return {'text': text}
+
+    @staticmethod
     def format_ai_report(analyses: list) -> dict:
-        """格式化AI分析报告"""
         if not analyses:
             return {'text': ''}
 
@@ -186,17 +252,25 @@ class NotificationService:
 
     @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
-        """一键推送每日报告（简报+预警+AI分析）"""
+        """一键推送每日报告（简报+预警信号+财报提醒+PE预警+AI分析）"""
         today = date.today()
         subject = f'每日股票分析报告 - {today}'
 
+        codes, name_map = NotificationService._get_all_watched_codes()
+
         briefing = NotificationService.format_briefing_summary()
-        alerts = NotificationService.format_alert_signals()
+        alerts = NotificationService.format_alert_signals(codes, name_map)
+        earnings = NotificationService.format_earnings_alerts(codes, name_map)
+        pe = NotificationService.format_pe_alerts(codes, name_map)
 
         text_parts = [briefing['text']]
 
-        if alerts['text']:
+        if alerts.get('text'):
             text_parts.append(alerts['text'])
+        if earnings.get('text'):
+            text_parts.append(earnings['text'])
+        if pe.get('text'):
+            text_parts.append(pe['text'])
 
         if include_ai:
             try:
@@ -217,6 +291,45 @@ class NotificationService:
 
         full_text = '\n---\n'.join(text_parts)
 
+        NotificationService._mark_daily_push(today)
+
         results = NotificationService.send_all(subject, full_text)
         results['content_preview'] = full_text[:500]
         return results
+
+    @staticmethod
+    def _mark_daily_push(push_date: date) -> None:
+        import os
+        try:
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+            os.makedirs(data_dir, exist_ok=True)
+            flag_path = os.path.join(data_dir, f'daily_push_{push_date.isoformat()}.flag')
+            with open(flag_path, 'w') as f:
+                f.write('')
+            NotificationService.cleanup_old_flags()
+        except OSError as e:
+            logger.warning(f'[通知] 写入推送标记失败: {e}')
+
+    @staticmethod
+    def has_daily_push(push_date: date) -> bool:
+        import os
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+        flag_path = os.path.join(data_dir, f'daily_push_{push_date.isoformat()}.flag')
+        return os.path.exists(flag_path)
+
+    @staticmethod
+    def cleanup_old_flags(keep_days: int = 7) -> None:
+        import os
+        import glob as glob_mod
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+        cutoff = date.today() - timedelta(days=keep_days)
+        pattern = os.path.join(data_dir, 'daily_push_*.flag')
+        for f in glob_mod.glob(pattern):
+            basename = os.path.basename(f)
+            try:
+                date_str = basename.replace('daily_push_', '').replace('.flag', '')
+                flag_date = date.fromisoformat(date_str)
+                if flag_date < cutoff:
+                    os.remove(f)
+            except (ValueError, OSError):
+                pass

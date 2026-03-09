@@ -9,33 +9,18 @@ class DailyBriefingStrategy(Strategy):
     name = "daily_briefing"
     description = "每日简报（市场概况+持仓+预警）"
     schedule = "30 8 * * 1-5"
-    needs_llm = True
+    needs_llm = False
 
     def scan(self) -> list[Signal]:
         from app.services.notification import NotificationService
 
-        signals = []
         try:
-            briefing = NotificationService.format_briefing_summary()
-            alerts = NotificationService.format_alert_signals()
-
-            parts = [briefing.get('text', '')]
-            if alerts.get('text'):
-                parts.append(alerts['text'])
-
-            detail = '\n---\n'.join(parts)
-
-            signals.append(Signal(
-                strategy=self.name,
-                priority="MEDIUM",
-                title="每日简报",
-                detail=detail,
-                data={
-                    'briefing_html': briefing.get('html', ''),
-                    'alerts_html': alerts.get('html', ''),
-                },
-            ))
+            results = NotificationService.push_daily_report()
+            if results.get('slack'):
+                logger.info('[每日简报] 推送成功')
+            else:
+                logger.warning('[每日简报] 推送失败或未配置')
         except Exception as e:
-            logger.error(f'[每日简报] 生成失败: {e}')
+            logger.error(f'[每日简报] 推送失败: {e}')
 
-        return signals
+        return []

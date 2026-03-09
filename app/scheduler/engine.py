@@ -1,6 +1,6 @@
 """APScheduler 调度引擎"""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -57,6 +57,49 @@ class SchedulerEngine:
 
         self.scheduler.start()
         logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
+        self._check_daily_push_catchup(app)
+
+    def _check_daily_push_catchup(self, app):
+        """检查是否需要补发每日推送"""
+        from datetime import date, time
+
+        now = datetime.now()
+        today = date.today()
+
+        if today.weekday() >= 5:
+            return
+        if now.time() < time(8, 30):
+            return
+
+        from app.services.notification import NotificationService
+        if NotificationService.has_daily_push(today):
+            logger.info('[调度器] 今日已推送，跳过补发')
+            return
+
+        from apscheduler.triggers.date import DateTrigger
+        run_time = datetime.now() + timedelta(seconds=30)
+
+        self.scheduler.add_job(
+            self._run_daily_push_catchup,
+            trigger=DateTrigger(run_date=run_time),
+            id='daily_push_catchup',
+            replace_existing=True,
+        )
+        logger.info('[调度器] 今日未推送，将在30秒后补发')
+
+    def _run_daily_push_catchup(self):
+        if not self.app:
+            return
+        with self.app.app_context():
+            try:
+                from app.services.notification import NotificationService
+                results = NotificationService.push_daily_report()
+                if results.get('slack'):
+                    logger.info('[调度器] 每日推送补发成功')
+                else:
+                    logger.warning('[调度器] 每日推送补发失败或未配置')
+            except Exception as e:
+                logger.error(f'[调度器] 每日推送补发失败: {e}')
 
     def _run_strategy(self, strategy_name: str):
         """在 app context 内执行策略扫描"""
