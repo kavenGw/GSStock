@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 from app import db
 from app.models.signal_cache import SignalCache
 from app.services.signal_detector import SignalDetector
+from app.utils.db_retry import with_db_retry
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,7 @@ class SignalCacheService:
         return {'buy_signals': buy_signals, 'sell_signals': sell_signals}
 
     @staticmethod
+    @with_db_retry
     def update_signals_for_stock(stock_code: str, stock_name: str, ohlc_data: list) -> dict:
         """更新单只股票的信号缓存
 
@@ -229,6 +231,7 @@ class SignalCacheService:
         return count > 0
 
     @staticmethod
+    @with_db_retry
     def clear_cache(stock_code: str = None):
         """清除缓存
 
