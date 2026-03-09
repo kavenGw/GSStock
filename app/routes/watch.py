@@ -95,6 +95,9 @@ def analyze():
     if not codes:
         return jsonify({'success': True, 'data': {}, 'message': '盯盘列表为空'})
 
+    trend_60d = unified_stock_data_service.get_trend_data(codes, days=60)
+    trend_60d_map = {s['stock_code']: s for s in trend_60d.get('stocks', [])}
+
     if period != 'realtime' and not force:
         existing = WatchService.get_all_today_analyses()
         all_cached = all(existing.get(c, {}).get(period) for c in codes)
@@ -136,7 +139,8 @@ def analyze():
                 intraday_data = intraday_stock.get('data', [])
                 if not intraday_data:
                     continue
-                prompt = build_realtime_analysis_prompt(stock_name, code, intraday_data, current_price)
+                ohlc_60d = trend_60d_map.get(code, {}).get('data', [])
+                prompt = build_realtime_analysis_prompt(stock_name, code, intraday_data, current_price, ohlc_60d)
             elif period == '7d':
                 trend_stock = trend_map.get(code, {})
                 ohlc = trend_stock.get('data', [])
@@ -164,6 +168,12 @@ def analyze():
                 support_levels=parsed.get('support_levels', []),
                 resistance_levels=parsed.get('resistance_levels', []),
                 summary=parsed.get('summary', ''),
+                signal=parsed.get('signal', ''),
+                detail={
+                    'signal_text': parsed.get('signal_text', ''),
+                    'ma_levels': parsed.get('ma_levels', {}),
+                    'price_range': parsed.get('price_range', {}),
+                },
             )
         except Exception as e:
             db.session.rollback()
@@ -356,18 +366,33 @@ def chart_data():
         result['bollinger'] = bollinger[-days:]
         result['chart_type'] = 'candlestick'
 
+    # 算法支撑/压力（基于60日OHLC）
+    from app.utils.support_resistance import calculate_support_resistance
+    algo_sr = {'support': [], 'resistance': []}
+    try:
+        trend_60d = unified_stock_data_service.get_trend_data([code], days=60)
+        stocks_60d = trend_60d.get('stocks', [])
+        if stocks_60d and stocks_60d[0].get('data') and len(stocks_60d[0]['data']) >= 20:
+            ohlc = stocks_60d[0]['data']
+            highs = [d['high'] for d in ohlc]
+            lows = [d['low'] for d in ohlc]
+            closes = [d['close'] for d in ohlc]
+            algo_sr = calculate_support_resistance(highs, lows, closes)
+    except Exception as e:
+        logger.debug(f"[盯盘] 算法支撑/压力计算失败 {code}: {e}")
+
+    # AI分析的支撑/压力
+    ai_supports = []
+    ai_resistances = []
     analysis_data = WatchService.get_today_analysis(code)
     if analysis_data and isinstance(analysis_data, dict):
-        all_supports = []
-        all_resistances = []
         for p_data in analysis_data.values():
             if isinstance(p_data, dict):
-                all_supports.extend(p_data.get('support_levels', []))
-                all_resistances.extend(p_data.get('resistance_levels', []))
-        result['support_levels'] = sorted(set(all_supports))
-        result['resistance_levels'] = sorted(set(all_resistances))
-    else:
-        result['support_levels'] = []
-        result['resistance_levels'] = []
+                ai_supports.extend(p_data.get('support_levels', []))
+                ai_resistances.extend(p_data.get('resistance_levels', []))
+
+    # 合并去重
+    result['support_levels'] = sorted(set(algo_sr['support'] + ai_supports))
+    result['resistance_levels'] = sorted(set(algo_sr['resistance'] + ai_resistances))
 
     return jsonify(result)

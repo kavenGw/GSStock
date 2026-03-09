@@ -72,6 +72,9 @@ class WatchService:
                 'support_levels': json.loads(analysis.support_levels) if analysis.support_levels else [],
                 'resistance_levels': json.loads(analysis.resistance_levels) if analysis.resistance_levels else [],
                 'summary': analysis.analysis_summary,
+                'signal': analysis.signal or '',
+                'detail': json.loads(analysis.analysis_detail) if analysis.analysis_detail else {},
+                'created_at': analysis.created_at.strftime('%H:%M') if analysis.created_at else '',
             }
         else:
             analyses = WatchAnalysis.query.filter_by(
@@ -85,14 +88,19 @@ class WatchService:
                     'support_levels': json.loads(a.support_levels) if a.support_levels else [],
                     'resistance_levels': json.loads(a.resistance_levels) if a.resistance_levels else [],
                     'summary': a.analysis_summary,
+                    'signal': a.signal or '',
+                    'detail': json.loads(a.analysis_detail) if a.analysis_detail else {},
+                    'created_at': a.created_at.strftime('%H:%M') if a.created_at else '',
                 }
             return result
 
     @staticmethod
     def save_analysis(stock_code: str, period: str, support_levels: list,
-                      resistance_levels: list, summary: str):
+                      resistance_levels: list, summary: str,
+                      signal: str = '', detail: dict = None):
         """保存AI分析结果（upsert，处理并发竞争）"""
         today = date.today()
+        detail_json = json.dumps(detail, ensure_ascii=False) if detail else None
         existing = WatchAnalysis.query.filter_by(
             stock_code=stock_code, analysis_date=today, period=period
         ).first()
@@ -100,6 +108,8 @@ class WatchService:
             existing.support_levels = json.dumps(support_levels)
             existing.resistance_levels = json.dumps(resistance_levels)
             existing.analysis_summary = summary
+            existing.signal = signal
+            existing.analysis_detail = detail_json
             db.session.commit()
             return
         try:
@@ -108,6 +118,8 @@ class WatchService:
                 support_levels=json.dumps(support_levels),
                 resistance_levels=json.dumps(resistance_levels),
                 analysis_summary=summary,
+                signal=signal,
+                analysis_detail=detail_json,
             )
             db.session.add(analysis)
             db.session.commit()
@@ -120,6 +132,8 @@ class WatchService:
                 existing.support_levels = json.dumps(support_levels)
                 existing.resistance_levels = json.dumps(resistance_levels)
                 existing.analysis_summary = summary
+                existing.signal = signal
+                existing.analysis_detail = detail_json
                 db.session.commit()
 
     @staticmethod
@@ -135,5 +149,8 @@ class WatchService:
                 'support_levels': json.loads(a.support_levels) if a.support_levels else [],
                 'resistance_levels': json.loads(a.resistance_levels) if a.resistance_levels else [],
                 'summary': a.analysis_summary,
+                'signal': a.signal or '',
+                'detail': json.loads(a.analysis_detail) if a.analysis_detail else {},
+                'created_at': a.created_at.strftime('%H:%M') if a.created_at else '',
             }
         return result

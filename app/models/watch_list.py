@@ -27,4 +27,6 @@ class WatchAnalysis(db.Model):
     support_levels = db.Column(db.Text)
     resistance_levels = db.Column(db.Text)
     analysis_summary = db.Column(db.Text)
+    signal = db.Column(db.String(10))  # buy/sell/hold/watch
+    analysis_detail = db.Column(db.Text)  # JSON: {signal_text, ma_levels, price_range}
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

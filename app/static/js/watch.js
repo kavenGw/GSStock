@@ -490,8 +490,15 @@ const Watch = {
                         </button>
                     </div>
                 </div>
-                <div class="chart-container mb-2" id="chart-${code}">
-                    <div class="skeleton skeleton-card" style="height:100%;"></div>
+                <div class="chart-analysis-row mb-2">
+                    <div class="chart-side">
+                        <div class="chart-container" id="chart-${code}">
+                            <div class="skeleton skeleton-card" style="height:100%;"></div>
+                        </div>
+                    </div>
+                    <div class="analysis-sidebar" id="analysis-sidebar-${code}">
+                        <div class="text-muted small text-center py-3">等待AI分析...</div>
+                    </div>
                 </div>
                 <div class="analysis-section" id="analysis-${code}">
                     <ul class="nav nav-tabs analysis-tab mb-2" role="tablist">
@@ -681,7 +688,7 @@ const Watch = {
         }
 
         chart.setOption({
-            grid: { left: 8, right: 55, top: 8, bottom: 20, containLabel: false },
+            grid: { left: 10, right: 60, top: 8, bottom: 20, containLabel: true },
             tooltip: {
                 trigger: 'axis',
                 formatter: params => {
@@ -699,14 +706,37 @@ const Watch = {
                 type: 'category',
                 data: fullAxis,
                 boundaryGap: false,
-                axisLabel: { fontSize: 9, interval: Math.floor(fullAxis.length / 5) },
+                axisLabel: {
+                    fontSize: 9,
+                    interval: 0,
+                    formatter: value => {
+                        const m = value.split(':')[1];
+                        return (m === '00' || m === '30') ? value : '';
+                    },
+                },
+                axisTick: {
+                    alignWithLabel: true,
+                    interval: (idx) => {
+                        const t = fullAxis[idx];
+                        if (!t) return false;
+                        const m = t.split(':')[1];
+                        return m === '00' || m === '30';
+                    },
+                },
                 axisLine: { lineStyle: { color: '#ddd' } },
             },
             yAxis: {
                 type: 'value',
                 scale: true,
                 splitLine: { lineStyle: { color: '#f0f0f0' } },
-                axisLabel: { fontSize: 9 },
+                axisLabel: {
+                    fontSize: 9,
+                    formatter: value => {
+                        if (value >= 10000) return (value / 10000).toFixed(1) + '万';
+                        if (value >= 1000) return value.toFixed(0);
+                        return value.toFixed(2);
+                    },
+                },
             },
             series: seriesList,
         });
@@ -724,12 +754,73 @@ const Watch = {
     updateAllAnalysisPanels() {
         this.stocks.forEach(stock => {
             const code = stock.stock_code;
+            this.renderAnalysisSidebar(code);
             const section = document.getElementById(`analysis-${code}`);
             if (!section) return;
             const activeBtn = section.querySelector('.nav-link.active');
             const activePeriod = activeBtn ? activeBtn.dataset.period : 'realtime';
             this.renderAnalysisContent(code, activePeriod);
         });
+    },
+
+    renderAnalysisSidebar(code) {
+        const sidebar = document.getElementById(`analysis-sidebar-${code}`);
+        if (!sidebar) return;
+
+        const codeAnalysis = this.analyses[code] || {};
+        const entries = [];
+
+        const realtimeData = codeAnalysis['realtime'];
+        if (realtimeData) {
+            entries.push(this._buildSidebarEntry(realtimeData.created_at || '实时', realtimeData));
+        }
+
+        for (const p of ['7d', '30d']) {
+            const pData = codeAnalysis[p];
+            if (pData) {
+                entries.push(this._buildSidebarEntry(p, pData));
+            }
+        }
+
+        if (entries.length === 0) {
+            sidebar.innerHTML = '<div class="text-muted small text-center py-3">等待AI分析...</div>';
+            return;
+        }
+
+        sidebar.innerHTML = entries.join('');
+    },
+
+    _buildSidebarEntry(timeLabel, data) {
+        const signal = data.signal || 'watch';
+        const detail = data.detail || {};
+        const signalText = detail.signal_text || this._signalTextMap(signal);
+        const summary = data.summary || '';
+        const maLevels = detail.ma_levels || {};
+        const priceRange = detail.price_range || {};
+
+        let detailHtml = '';
+        const maParts = [];
+        if (maLevels.ma5) maParts.push(`MA5:${maLevels.ma5}`);
+        if (maLevels.ma20) maParts.push(`MA20:${maLevels.ma20}`);
+        if (maLevels.ma60) maParts.push(`MA60:${maLevels.ma60}`);
+        if (maParts.length > 0) {
+            detailHtml += `<div class="entry-detail">${maParts.join(' ')}</div>`;
+        }
+        if (priceRange.low || priceRange.high) {
+            detailHtml += `<div class="entry-detail">区间: ${priceRange.low || '?'} - ${priceRange.high || '?'}</div>`;
+        }
+
+        return `<div class="analysis-entry">
+            <span class="entry-time">${timeLabel}</span>
+            <span class="entry-signal signal-${signal}">${signalText}</span>
+            <div class="entry-summary">${summary}</div>
+            ${detailHtml}
+        </div>`;
+    },
+
+    _signalTextMap(signal) {
+        const map = { buy: '买入', sell: '卖出', hold: '持有', watch: '观望' };
+        return map[signal] || '观望';
     },
 
     renderAnalysisContent(code, period) {
@@ -747,11 +838,19 @@ const Watch = {
         const supports = periodData.support_levels || [];
         const resistances = periodData.resistance_levels || [];
         const summary = periodData.summary || '';
+        const signal = periodData.signal || '';
+        const detail = periodData.detail || {};
 
         let html = '';
-        if (summary) html += `<div class="mb-1">${summary}</div>`;
+        if (signal) {
+            const signalText = detail.signal_text || this._signalTextMap(signal);
+            html += `<span class="entry-signal signal-${signal} me-2">${signalText}</span>`;
+        }
+        if (summary) html += `<span class="small">${summary}</span>`;
+        html += '<div class="mt-1">';
         if (supports.length > 0) html += `<span class="text-success small me-2">支撑: ${supports.join(' / ')}</span>`;
         if (resistances.length > 0) html += `<span class="text-danger small">阻力: ${resistances.join(' / ')}</span>`;
+        html += '</div>';
         el.innerHTML = html || '<span class="text-muted small">暂无分析数据</span>';
     },
 
