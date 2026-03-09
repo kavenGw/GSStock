@@ -20,7 +20,7 @@ class NewsService:
     def fetch_all_sources() -> list[dict]:
         """并行获取所有新闻源"""
         all_items = []
-        futures = {_executor.submit(src.fetch_latest): src.name for src in ALL_SOURCES}
+        futures = {_executor.submit(src.fetch): src.name for src in ALL_SOURCES}
         try:
             for future in as_completed(futures, timeout=NEWS_FETCH_TIMEOUT):
                 source_name = futures[future]
