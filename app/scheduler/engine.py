@@ -1,4 +1,5 @@
 """APScheduler 调度引擎"""
+import atexit
 import logging
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -56,6 +57,7 @@ class SchedulerEngine:
         registered.append(f'news_poll(every {NEWS_INTERVAL_MINUTES}min)')
 
         self.scheduler.start()
+        atexit.register(self.shutdown)
         logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
         self._check_daily_push_catchup(app)
 
