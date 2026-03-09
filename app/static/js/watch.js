@@ -100,31 +100,11 @@ const Watch = {
         // 阶段2：后台更新真实数据
         await this.loadList(true);
 
-        // 阶段3：自动触发分析 + 启动定时器
-        this.autoAnalyze();
+        // 阶段3：读取分析缓存 + 启动定时器
+        this.loadAnalysis();
         this.startRefreshLoop();
         this.startAnalysisLoop();
         this.startMarketStatusLoop();
-    },
-
-    async autoAnalyze() {
-        try {
-            await Promise.all([
-                fetch('/watch/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ period: '7d', force: false }),
-                }),
-                fetch('/watch/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ period: '30d', force: false }),
-                }),
-            ]);
-            await this.loadAnalysis();
-        } catch (e) {
-            console.error('[Watch] autoAnalyze failed:', e);
-        }
     },
 
     async loadList(cacheOnly = false) {
@@ -293,25 +273,8 @@ const Watch = {
 
     startAnalysisLoop() {
         this.stopAnalysisLoop();
-        const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
-        if (!hasActiveMarket) return;
-
         this.analysisTimer = setInterval(async () => {
-            const hasActive = Object.values(this.marketStatus).some(m => m.status === 'trading');
-            if (!hasActive) {
-                this.stopAnalysisLoop();
-                return;
-            }
-            try {
-                await fetch('/watch/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ period: 'realtime', force: true }),
-                });
-                await this.loadAnalysis();
-            } catch (e) {
-                console.error('[Watch] analysis loop failed:', e);
-            }
+            await this.loadAnalysis();
         }, this.ANALYSIS_INTERVAL * 1000);
     },
 
@@ -360,32 +323,6 @@ const Watch = {
             }
         } catch (e) {
             console.error('[Watch] loadAnalysis failed:', e);
-        }
-    },
-
-    async triggerAllAnalysis() {
-        const btn = document.getElementById('btnAnalyze');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 分析中...';
-
-        try {
-            const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
-            const periods = hasActiveMarket ? ['realtime', '7d', '30d'] : ['7d', '30d'];
-
-            await Promise.all(periods.map(period =>
-                fetch('/watch/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ period, force: period === 'realtime' }),
-                }).then(r => r.json())
-            ));
-
-            await this.loadAnalysis();
-        } catch (e) {
-            console.error('[Watch] triggerAllAnalysis failed:', e);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-robot"></i> AI 分析';
         }
     },
 
@@ -513,7 +450,7 @@ const Watch = {
                         </li>
                     </ul>
                     <div class="analysis-content" id="analysis-content-${code}">
-                        <span class="text-muted small">点击「AI 分析」获取分析结果</span>
+                        <span class="text-muted small">等待分析数据...</span>
                     </div>
                 </div>
             </div>

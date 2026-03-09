@@ -164,6 +164,16 @@ PreloadService.preload_metals()
 
 PreloadService.get_indices_data()
     └── UnifiedStockDataService.get_indices_data()
+
+WatchAnalysisService.analyze_stocks()
+    └── UnifiedStockDataService.get_trend_data() / get_intraday_data() / get_realtime_prices()
+
+DailyBriefingStrategy.scan()
+    └── NotificationService.push_daily_report()
+        └── WatchAnalysisService.analyze_stocks('7d' / '30d')
+
+WatchRealtimeStrategy.scan()
+    └── WatchAnalysisService.analyze_stocks('realtime')
 ```
 
 ## 盯盘助手配置
@@ -171,6 +181,11 @@ PreloadService.get_indices_data()
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
+
+**AI分析调度**：
+- realtime：`watch_realtime` 策略，开盘时段每15分钟（`*/15 9-23 * * 1-5`，内部检查市场状态）
+- 7d/30d：每日简报推送时自动计算（8:30am），结果包含在 Slack 消息中
+- 分析入口：`WatchAnalysisService.analyze_stocks(period, force)`
 
 ## 新闻轮询配置
 

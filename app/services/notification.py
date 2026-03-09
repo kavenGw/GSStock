@@ -251,6 +251,38 @@ class NotificationService:
         return {'text': text}
 
     @staticmethod
+    def format_watch_analysis(analyses: dict) -> dict:
+        """格式化盯盘AI分析结果用于推送"""
+        if not analyses:
+            return {'text': ''}
+
+        from app.services.watch_service import WatchService
+        watch_list = WatchService.get_watch_list()
+        name_map = {w['stock_code']: w['stock_name'] for w in watch_list}
+
+        signal_map = {'buy': '买入', 'sell': '卖出', 'hold': '持有', 'watch': '观望'}
+        lines = []
+
+        for code, periods in analyses.items():
+            name = name_map.get(code, code)
+            parts = []
+            for period in ('7d', '30d'):
+                data = periods.get(period)
+                if not data:
+                    continue
+                signal = signal_map.get(data.get('signal', ''), '观望')
+                summary = data.get('summary', '')
+                parts.append(f"[{period}]{signal} {summary}")
+            if parts:
+                lines.append(f"  {name}({code}): {' | '.join(parts)}")
+
+        if not lines:
+            return {'text': ''}
+
+        text = "盯盘分析\n" + "\n".join(lines) + "\n"
+        return {'text': text}
+
+    @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（简报+预警信号+财报提醒+PE预警+AI分析）"""
         today = date.today()
@@ -288,6 +320,19 @@ class NotificationService:
                             text_parts.append(ai_report['text'])
             except Exception as e:
                 logger.warning(f'[通知.AI报告] 生成失败: {e}')
+
+        # 盯盘分析（7d + 30d）
+        try:
+            from app.services.watch_analysis_service import WatchAnalysisService
+            WatchAnalysisService.analyze_stocks('7d')
+            WatchAnalysisService.analyze_stocks('30d')
+            from app.services.watch_service import WatchService
+            watch_analyses = WatchService.get_all_today_analyses()
+            watch_report = NotificationService.format_watch_analysis(watch_analyses)
+            if watch_report['text']:
+                text_parts.append(watch_report['text'])
+        except Exception as e:
+            logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
 
         full_text = '\n---\n'.join(text_parts)
 
