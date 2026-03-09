@@ -172,10 +172,6 @@ def create_app(config_class=None):
 
     db.init_app(app)
 
-    # CockroachDB: patch Session.execute 自动重试读查询
-    from app.utils.db_retry import setup_db_retry
-    setup_db_retry(db, app)
-
     if db_uri.startswith('sqlite:///'):
         from app.services.migration import check_migration_needed, migrate_to_dual_db, cleanup_legacy_tables, get_db_paths
         if check_migration_needed(app):
@@ -207,45 +203,7 @@ def create_app(config_class=None):
     with app.app_context():
         from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, InterestKeyword, NewsDerivation
 
-        # 检查是否需要执行 CockroachDB 迁移
-        from app.services.cockroach_migration import check_cockroach_migration_needed, migrate_local_to_cockroach
-        cockroach_migration_needed = check_cockroach_migration_needed(app)
-
-        # 创建所有表
-        try:
-            db.create_all()
-        except Exception as e:
-            from config import is_cockroach_configured
-            if is_cockroach_configured():
-                logging.error("CockroachDB 连接失败: %s", e)
-                raise SystemExit(1)
-            raise
-
-        # CockroachDB 需要 ALTER 已有列宽度（db.create_all 不会修改已有列）
-        if app.config.get('COCKROACH_CONFIGURED'):
-            from sqlalchemy import text
-            alter_stmts = [
-                'ALTER TABLE stock_categories ALTER COLUMN stock_code TYPE VARCHAR(20)',
-                'ALTER TABLE wyckoff_auto_result ALTER COLUMN stock_code TYPE VARCHAR(20)',
-            ]
-            try:
-                with db.engine.connect() as conn:
-                    for stmt in alter_stmts:
-                        try:
-                            conn.execute(text(stmt))
-                        except Exception:
-                            pass
-                    conn.commit()
-            except Exception:
-                pass
-
-        # 如果配置了 CockroachDB 且本地数据库存在，执行迁移
-        if cockroach_migration_needed:
-            logging.info("检测到 CockroachDB 配置，开始将本地数据迁移到云端...")
-            if migrate_local_to_cockroach(app):
-                logging.info("本地数据已成功迁移到 CockroachDB")
-            else:
-                logging.warning("CockroachDB 迁移未完成，请检查日志")
+        db.create_all()
 
         migrate_position_table()
         migrate_daily_snapshot_table()

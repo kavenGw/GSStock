@@ -58,7 +58,7 @@ GSStock 是一个功能完善的个人股票投资组合管理系统，基于 Fl
 |------|----------|----------|
 | **Web 框架** | Flask | 3.0+ |
 | **ORM** | Flask-SQLAlchemy | 3.1+ |
-| **数据库** | SQLite (本地) / CockroachDB (云端) | - |
+| **数据库** | SQLite (本地双库: stock.db + private.db) | - |
 | **OCR 引擎** | RapidOCR (ONNX Runtime) | 1.3-1.4.x |
 | **A股数据** | akshare | 最新版 |
 | **美股/港股数据** | yfinance | 最新版 |
@@ -742,8 +742,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 
     # 数据库配置
-    # 优先级: CockroachDB (COCKROACH_URL) → SQLite (本地)
-    SQLALCHEMY_DATABASE_URI = get_database_uri()
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///data/stock.db'
     SQLALCHEMY_BINDS = {
         'private': 'sqlite:///data/private.db'
     }
@@ -812,7 +811,6 @@ MARKET_DATA_SOURCES = {
 
 ```bash
 # 数据库 (可选)
-COCKROACH_URL=<云数据库URL>
 PRIVATE_DATABASE_URL=<私有数据库URL>
 
 # 应用配置
@@ -1077,12 +1075,10 @@ def create_app(config_class=Config):
 ### 11.5 装饰器模式
 
 **使用场景**:
-- `@with_db_retry` - CockroachDB 重试逻辑
 - `@circuit_breaker` - 熔断保护
 - `@lru_cache` - 查询结果缓存
 
 ```python
-@with_db_retry(max_retries=3)
 def save_position(position):
     db.session.add(position)
     db.session.commit()
@@ -1092,25 +1088,7 @@ def save_position(position):
 
 ## 12. 错误处理
 
-### 12.1 数据库错误 (CockroachDB)
-
-```python
-@with_db_retry(max_retries=3)
-def database_operation():
-    """
-    自动检测序列化失败
-    指数退避重试
-    最多3次尝试
-    """
-    try:
-        # 数据库操作
-        db.session.commit()
-    except SerializationError:
-        db.session.rollback()
-        raise  # 触发重试
-```
-
-### 12.2 API 错误
+### 12.1 API 错误
 
 ```python
 def fetch_with_fallback(stock_code):
@@ -1341,7 +1319,7 @@ data/logs/
 | OCR 识别失败 | 图片过大/格式不支持 | 压缩图片/转换格式 |
 | 数据获取超时 | API 服务不可用 | 检查网络/等待熔断恢复 |
 | 缓存未命中 | 首次访问/缓存过期 | 等待数据加载/强制刷新 |
-| 数据库锁定 | 并发写入冲突 | 重试/使用 CockroachDB |
+| 数据库锁定 | 并发写入冲突 | 检查 SQLite WAL 模式 |
 
 ---
 

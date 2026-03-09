@@ -54,7 +54,6 @@ cp .env.sample .env
 | `SECRET_KEY` | Flask 密钥，留空则自动生成 | 自动生成 |
 | `DATABASE_URL` | 公共数据库路径 | `sqlite:///data/stock.db` |
 | `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
-| `COCKROACH_URL` | CockroachDB 云数据库（可选） | 空 |
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |

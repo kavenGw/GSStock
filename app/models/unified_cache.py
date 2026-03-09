@@ -6,11 +6,7 @@
 import json
 import logging
 from datetime import datetime, date
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.dialects.postgresql import insert
 from app import db
-from app.utils.db_retry import is_retryable_error, with_db_retry, MAX_RETRIES, _get_retry_delay
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -107,62 +103,42 @@ class UnifiedStockCache(db.Model):
     def set_cached_data(cls, stock_code: str, cache_type: str, data: dict | list,
                         cache_date: date = None, is_complete: bool = False,
                         data_end_date: date = None) -> 'UnifiedStockCache':
-        """设置缓存数据（使用UPSERT避免序列化冲突）"""
+        """设置缓存数据"""
         if cache_date is None:
             cache_date = date.today()
 
         now = datetime.now()
         data_json = json.dumps(data, ensure_ascii=False)
 
-        # 使用 INSERT ... ON CONFLICT DO UPDATE (UPSERT) 避免读-写竞态
-        values = {
-            'stock_code': stock_code,
-            'cache_type': cache_type,
-            'cache_date': cache_date,
-            'data_json': data_json,
-            'last_fetch_time': now,
-            'is_complete': is_complete,
-            'data_end_date': data_end_date,
-            'created_at': now,
-            'updated_at': now,
-        }
+        cache = cls.query.filter_by(
+            stock_code=stock_code,
+            cache_type=cache_type,
+            cache_date=cache_date
+        ).first()
 
-        stmt = insert(cls.__table__).values(**values)
+        if cache:
+            cache.data_json = data_json
+            cache.last_fetch_time = now
+            cache.is_complete = is_complete
+            if data_end_date:
+                cache.data_end_date = data_end_date
+            cache.updated_at = now
+        else:
+            cache = cls(
+                stock_code=stock_code,
+                cache_type=cache_type,
+                cache_date=cache_date,
+                data_json=data_json,
+                last_fetch_time=now,
+                is_complete=is_complete,
+                data_end_date=data_end_date,
+                created_at=now,
+                updated_at=now,
+            )
+            db.session.add(cache)
 
-        # 冲突时更新这些列
-        upsert_stmt = stmt.on_conflict_do_update(
-            index_elements=['stock_code', 'cache_type', 'cache_date'],
-            set_={
-                'data_json': stmt.excluded.data_json,
-                'last_fetch_time': stmt.excluded.last_fetch_time,
-                'is_complete': stmt.excluded.is_complete,
-                'data_end_date': stmt.excluded.data_end_date,
-                'updated_at': stmt.excluded.updated_at,
-            }
-        )
-
-        last_error = None
-        for attempt in range(MAX_RETRIES):
-            try:
-                db.session.execute(upsert_stmt)
-                db.session.commit()
-                # 返回缓存对象以保持API兼容
-                return cls.query.filter_by(
-                    stock_code=stock_code,
-                    cache_type=cache_type,
-                    cache_date=cache_date
-                ).first()
-            except OperationalError as e:
-                last_error = e
-                if is_retryable_error(e) and attempt < MAX_RETRIES - 1:
-                    delay = _get_retry_delay(attempt)
-                    logger.warning(f"[DB重试] set_cached_data UPSERT 操作失败，重试 {attempt + 1}/{MAX_RETRIES}，延迟 {delay:.3f}s: {type(e).__name__}")
-                    db.session.rollback()
-                    time.sleep(delay)
-                    continue
-                raise
-        if last_error:
-            raise last_error
+        db.session.commit()
+        return cache
 
     @classmethod
     def get_batch_cached_data(cls, stock_codes: list, cache_type: str,
@@ -234,7 +210,6 @@ class UnifiedStockCache(db.Model):
         return {cache.stock_code: cache.last_fetch_time for cache in caches}
 
     @classmethod
-    @with_db_retry
     def clear_cache(cls, stock_codes: list = None, cache_type: str = None,
                     cache_date: date = None) -> int:
         """清除缓存
@@ -296,8 +271,6 @@ class UnifiedStockCache(db.Model):
                       cache_date: date = None, data_end_date: date = None) -> bool:
         """标记缓存数据为完整
 
-        使用原子UPDATE避免序列化冲突。
-
         Args:
             stock_code: 股票代码
             cache_type: 缓存类型
@@ -311,8 +284,6 @@ class UnifiedStockCache(db.Model):
             cache_date = date.today()
 
         now = datetime.now()
-
-        # 使用原子UPDATE避免读-写竞态
         update_values = {
             'is_complete': True,
             'updated_at': now,
@@ -320,27 +291,13 @@ class UnifiedStockCache(db.Model):
         if data_end_date:
             update_values['data_end_date'] = data_end_date
 
-        last_error = None
-        for attempt in range(MAX_RETRIES):
-            try:
-                result = cls.query.filter_by(
-                    stock_code=stock_code,
-                    cache_type=cache_type,
-                    cache_date=cache_date
-                ).update(update_values)
-                db.session.commit()
-                return result > 0
-            except OperationalError as e:
-                last_error = e
-                if is_retryable_error(e) and attempt < MAX_RETRIES - 1:
-                    delay = _get_retry_delay(attempt)
-                    logger.warning(f"[DB重试] mark_complete 操作失败，重试 {attempt + 1}/{MAX_RETRIES}，延迟 {delay:.3f}s: {type(e).__name__}")
-                    db.session.rollback()
-                    time.sleep(delay)
-                    continue
-                raise
-        if last_error:
-            raise last_error
+        result = cls.query.filter_by(
+            stock_code=stock_code,
+            cache_type=cache_type,
+            cache_date=cache_date
+        ).update(update_values)
+        db.session.commit()
+        return result > 0
 
     @classmethod
     def get_data_end_dates(cls, stock_codes: list, cache_type: str,
