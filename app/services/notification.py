@@ -125,16 +125,18 @@ class NotificationService:
         text += f"持仓: {len(positions)}只 | 盈利: {up_count} | 亏损: {down_count}\n"
 
         sorted_items = sorted(items, key=lambda x: x['profit_pct'], reverse=True)
-        if sorted_items:
-            text += "\n盈利 Top3:\n"
-            for item in sorted_items[:3]:
-                s = '+' if item['profit_pct'] >= 0 else ''
-                text += f"  {item['name']}({item['code']}): {s}{item['profit_pct']:.1f}%\n"
+        gainers = [i for i in sorted_items if i['profit_pct'] > 0]
+        losers = [i for i in sorted_items if i['profit_pct'] < 0]
 
+        if gainers:
+            text += "\n盈利 Top3:\n"
+            for item in gainers[:3]:
+                text += f"  {item['name']}({item['code']}): +{item['profit_pct']:.1f}%\n"
+
+        if losers:
             text += "\n亏损 Top3:\n"
-            for item in sorted_items[-3:]:
-                s = '+' if item['profit_pct'] >= 0 else ''
-                text += f"  {item['name']}({item['code']}): {s}{item['profit_pct']:.1f}%\n"
+            for item in losers[:3]:
+                text += f"  {item['name']}({item['code']}): {item['profit_pct']:.1f}%\n"
 
         return {'text': text}
 
@@ -158,6 +160,18 @@ class NotificationService:
 
         if not buy_signals and not sell_signals:
             return {'text': ''}
+
+        # 按 (stock_code, signal_name) 去重，保留最近一条
+        def dedup(sigs):
+            seen = {}
+            for sig in sigs:
+                key = (sig.get('stock_code', ''), sig.get('name', ''))
+                if key not in seen or (sig.get('date', '') > seen[key].get('date', '')):
+                    seen[key] = sig
+            return list(seen.values())
+
+        sell_signals = dedup(sell_signals)
+        buy_signals = dedup(buy_signals)
 
         text = "预警信号\n"
 
@@ -286,6 +300,11 @@ class NotificationService:
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（简报+预警信号+财报提醒+PE预警+AI分析）"""
         today = date.today()
+
+        if NotificationService.has_daily_push(today):
+            logger.info('[通知] 今日已推送，跳过')
+            return {'skipped': True}
+
         subject = f'每日股票分析报告 - {today}'
 
         codes, name_map = NotificationService._get_all_watched_codes()
