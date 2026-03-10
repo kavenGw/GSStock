@@ -2375,14 +2375,23 @@ const Charts = {
                 if (labels.length === 0) return;
 
                 labels.sort((a, b) => a.y - b.y);
+                const maxY = chartArea.bottom - 8;
+                const minY = chartArea.top + 8;
+                // 向下推移保证间距
                 for (let i = 1; i < labels.length; i++) {
                     if (labels[i].y - labels[i - 1].y < minGap) {
                         labels[i].y = labels[i - 1].y + minGap;
                     }
                 }
-
-                const maxY = chartArea.bottom - 8;
-                const minY = chartArea.top + 8;
+                // 如果底部超界，从下往上回推
+                if (labels.length > 0 && labels[labels.length - 1].y > maxY) {
+                    labels[labels.length - 1].y = maxY;
+                    for (let i = labels.length - 2; i >= 0; i--) {
+                        if (labels[i + 1].y - labels[i].y < minGap) {
+                            labels[i].y = labels[i + 1].y - minGap;
+                        }
+                    }
+                }
                 labels.forEach(l => {
                     l.y = Math.max(minY, Math.min(maxY, l.y));
                 });
