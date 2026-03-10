@@ -157,6 +157,19 @@ class InterestPipeline:
             except json.JSONDecodeError:
                 pass
 
+        # 逐个提取 JSON 对象（处理 LLM 返回 "[0]\n{...}" 等非标准格式）
+        objects = re.findall(r'\{[^{}]*\}', text)
+        if objects:
+            results = []
+            for obj_str in objects:
+                try:
+                    results.append(json.loads(obj_str))
+                except json.JSONDecodeError:
+                    continue
+            if results:
+                logger.warning(f'GLM分类JSON格式异常，逐对象提取恢复 {len(results)} 条')
+                return results
+
         logger.error(f'GLM分类打分JSON解析失败, 响应长度={len(response)}, 末尾: ...{response[-200:]}')
         return []
 
