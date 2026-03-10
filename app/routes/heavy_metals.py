@@ -124,10 +124,11 @@ def category_data():
     stock_codes = [s['stock_code'] for s in data['stocks']]
     stock_name_map = {s['stock_code']: s['stock_name'] for s in data['stocks']}
 
+    app = current_app._get_current_object()
+
     # 后台线程更新信号缓存（365天数据），今日已更新则跳过
     needs_update = not all(SignalCacheService.has_recent_cache(c) for c in stock_codes)
     if needs_update:
-        app = current_app._get_current_object()
 
         def _update_signals_background():
             try:
