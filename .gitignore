@@ -4,6 +4,7 @@ data/private.db
 data/*.backup
 logs/
 .worktrees/
+.superpowers/
 
 __pycache__/
 *.pyc
