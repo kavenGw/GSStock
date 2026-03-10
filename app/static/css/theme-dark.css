@@ -235,5 +235,27 @@ hr { border-color: var(--border-color); }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+/* ── Bootstrap 边框暗色适配 ── */
+.border-top, .border-bottom, .border {
+    border-color: var(--border-color) !important;
+}
+
+/* ── Bootstrap 工具类暗色适配 ── */
+.bg-light {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+.table-light {
+    --bs-table-bg: var(--bg-secondary) !important;
+    --bs-table-color: var(--text-secondary) !important;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-bg-type: rgba(255, 255, 255, 0.02) !important;
+    color: var(--text-primary) !important;
+}
+.editable:hover {
+    background-color: var(--bg-card-hover) !important;
+}
+
 /* ── 选择文本 ── */
 ::selection { background: var(--accent-bg); color: var(--accent); }
