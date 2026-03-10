@@ -12,7 +12,7 @@
 APScheduler (interval_minutes:1)
   → WatchAlertStrategy.scan()
     → WatchAlertService.check_alerts()
-      ├─ get_realtime_prices() → 整数价格穿越检测
+      ├─ get_realtime_prices() → 取 current_price 字段 → 整数价格穿越检测
       ├─ WatchAnalysis 表 → 读支撑/压力位 → 接近/穿越检测
       ├─ 分时数据 → TDSequentialService.calculate() → 九转变化检测
       └─ _anchors → 锚点价格累计变动检测
@@ -21,10 +21,11 @@ APScheduler (interval_minutes:1)
   → EventBus.publish(signal)
     → NotificationManager → SlackNotifier
 
-APScheduler (每日开盘前)
+APScheduler ("0 9 * * 1-5")
   → WatchAnchorStrategy.scan()
-    → LLM 为每只股票计算波动阈值
-    → WatchAlertService 设置锚点
+    → 内部按市场判断是否即将开盘
+    → LLM 为每只股票计算波动阈值（失败则用默认值 3%）
+    → WatchAlertService 设置锚点并持久化
 ```
 
 ### 新增文件
@@ -32,8 +33,8 @@ APScheduler (每日开盘前)
 | 文件 | 用途 |
 |------|------|
 | `app/services/watch_alert_service.py` | 四类信号检测 + 冷却 + 状态管理 |
-| `app/strategies/watch_alert/__init__.py` | 60秒调度策略 |
-| `app/strategies/watch_anchor/__init__.py` | 每日锚点阈值AI计算策略 |
+| `app/strategies/watch_alert/__init__.py` | 60秒调度策略（`interval_minutes:1`） |
+| `app/strategies/watch_anchor/__init__.py` | 每日锚点阈值AI计算策略（`0 9 * * 1-5`） |
 | `app/llm/prompts/watch_anchor.py` | 锚点阈值AI prompt |
 
 ### 对现有代码的修改
@@ -43,6 +44,8 @@ APScheduler (每日开盘前)
 ## 四类信号检测逻辑
 
 ### 1. 整数价格穿越
+
+价格字段：使用 `get_realtime_prices()` 返回的 `current_price` 字段。
 
 根据当前价格确定整数档位：
 
@@ -72,8 +75,12 @@ APScheduler (每日开盘前)
 
 ### 3. 九转信号
 
-每次用最新分时数据调用 `TDSequentialService.calculate()`，与 `_prev_td_counts` 对比：
-- count 从 <7 变为 ≥7 → 预警推送（MEDIUM）
+数据来源：使用分时数据（`get_intraday_data`），与盯盘前端保持一致。数据点含 `close` 字段，直接传入 `TDSequentialService.calculate()`。
+
+稳定性确认：九转 count 需连续两个轮询周期（2分钟）保持 ≥7 才触发预警推送，避免分钟级数据的瞬时噪音。count=9 仍立即推送。
+
+检测逻辑：与 `_prev_td_counts` 对比：
+- count 连续两次 ≥7（且之前 <7）→ 预警推送（MEDIUM）
 - count 变为 9（completed）→ 确认推送（HIGH）
 
 推送示例：
@@ -83,10 +90,16 @@ APScheduler (每日开盘前)
 ### 4. 锚点价格模式
 
 流程：
-1. 每日开盘前，调用AI为每只盯盘股票计算波动阈值（基于近期走势、波动率等）
-2. 以当时价格设为锚点
-3. 每60秒检查价格相对锚点的累计变动，超过阈值则触发推送
-4. 触发后重置锚点为当前价格，阈值沿用当日AI计算值
+1. 每日 9:00（`0 9 * * 1-5`），`WatchAnchorStrategy` 运行，内部按市场判断是否即将开盘
+2. 调用 LLM 为每只股票计算波动阈值（基于近期走势、波动率等）
+3. 以当时价格设为锚点，阈值和锚点持久化到 memory_cache
+4. 每60秒检查价格相对锚点的累计变动，超过阈值则触发推送
+5. 触发后重置锚点为当前价格，阈值沿用当日AI计算值
+
+**LLM 降级策略**：
+- LLM 不可用时（API 故障、预算耗尽），使用默认阈值 3%
+- 阈值范围校验：0.5% ~ 10%，超出范围则回退到 3%
+- 新加入盯盘的股票如无锚点数据，使用默认阈值 3%，下次 anchor 策略运行时更新
 
 LLM 输出格式：
 ```json
@@ -118,11 +131,27 @@ LLM 输出格式：
 ```python
 _prev_prices = {}      # {code: price} 上一次价格
 _prev_td_counts = {}   # {code: {direction, count}} 上一次九转状态
+_prev_td_pending = {}  # {code: {direction, count}} 九转待确认状态（连续两次确认）
 _anchors = {}          # {code: {price: float, threshold_pct: float}} 锚点
 _cooldown = {}         # {key: datetime} 冷却时间戳
 ```
 
-首次运行时没有 `_prev_prices`，不产出信号，只建立基线。
+- 首次运行时没有 `_prev_prices`，不产出信号，只建立基线
+- `_anchors` 持久化到 `data/memory_cache/_watch_alert/anchors.pkl`，进程重启后自动恢复
+- `_prev_prices`、`_prev_td_counts`、`_cooldown` 不持久化，重启后重新建立基线
+
+## 与 NotificationManager 去重的交互
+
+`WatchAlertService` 产出的 Signal 的 `data` 字段设计为不包含 `name` 字段，使 `NotificationManager._make_signal_key` 返回空字符串，从而跳过 NM 层的方向去重。去重完全由 Service 层的冷却机制控制。
+
+Signal.data 结构：
+```python
+{
+    "stock_code": "600519",
+    "alert_type": "integer|approach|cross|td|anchor",
+    "detail": "具体触发描述"
+}
+```
 
 ## 冷却机制
 
@@ -147,3 +176,4 @@ _cooldown = {}         # {key: datetime} 冷却时间戳
 |---------|------|-------|
 | `WATCH_ALERT_COOLDOWN_SECONDS` | 同类信号冷却时间（秒） | `300` |
 | `WATCH_ALERT_APPROACH_PCT` | 接近支撑/压力位阈值（%） | `0.5` |
+| `WATCH_ALERT_DEFAULT_THRESHOLD_PCT` | 锚点默认阈值（LLM不可用时兜底） | `3.0` |
