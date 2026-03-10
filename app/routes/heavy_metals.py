@@ -124,20 +124,22 @@ def category_data():
     stock_codes = [s['stock_code'] for s in data['stocks']]
     stock_name_map = {s['stock_code']: s['stock_name'] for s in data['stocks']}
 
-    # 后台线程更新信号缓存（365天数据），不阻塞响应
-    app = current_app._get_current_object()
+    # 后台线程更新信号缓存（365天数据），今日已更新则跳过
+    needs_update = not all(SignalCacheService.has_recent_cache(c) for c in stock_codes)
+    if needs_update:
+        app = current_app._get_current_object()
 
-    def _update_signals_background():
-        try:
-            with app.app_context():
-                year_data = FuturesService.get_category_trend_data(category, 365, False)
-                if year_data and year_data.get('stocks'):
-                    SignalCacheService.update_signals_from_trend_data(year_data, stock_name_map)
-                    logger.info(f'[走势看板.分类数据] 后台信号缓存更新完成: {category}')
-        except Exception as e:
-            logger.error(f'[走势看板.分类数据] 后台信号更新失败: {e}', exc_info=True)
+        def _update_signals_background():
+            try:
+                with app.app_context():
+                    year_data = FuturesService.get_category_trend_data(category, 365, False)
+                    if year_data and year_data.get('stocks'):
+                        SignalCacheService.update_signals_from_trend_data(year_data, stock_name_map)
+                        logger.info(f'[走势看板.分类数据] 后台信号缓存更新完成: {category}')
+            except Exception as e:
+                logger.error(f'[走势看板.分类数据] 后台信号更新失败: {e}', exc_info=True)
 
-    threading.Thread(target=_update_signals_background, daemon=True).start()
+        threading.Thread(target=_update_signals_background, daemon=True).start()
 
     # 并行计算：技术指标 + 交易建议&威科夫评分
     technical_result = {}
@@ -290,12 +292,12 @@ def category_trend_data():
         stock_codes = [s['stock_code'] for s in data['stocks']]
         stock_name_map = {s['stock_code']: s['stock_name'] for s in data['stocks']}
 
-        # 获取年数据用于信号计算
-        year_data = FuturesService.get_category_trend_data(category, 365, False)
-
-        if year_data and year_data.get('stocks'):
-            # 更新信号缓存
-            SignalCacheService.update_signals_from_trend_data(year_data, stock_name_map)
+        # 今日未更新时才重新计算信号
+        needs_update = not all(SignalCacheService.has_recent_cache(c) for c in stock_codes)
+        if needs_update:
+            year_data = FuturesService.get_category_trend_data(category, 365, False)
+            if year_data and year_data.get('stocks'):
+                SignalCacheService.update_signals_from_trend_data(year_data, stock_name_map)
 
         # 从缓存获取当前日期范围内的信号
         end_date = date.today()

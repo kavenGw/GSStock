@@ -35,6 +35,7 @@ BRIEFING_STOCKS = [
     {'code': 'SNDK', 'name': '闪迪', 'market': 'US', 'category': 'storage'},
     {'code': 'TSM', 'name': '台积电', 'market': 'US', 'category': 'semiconductor'},
     {'code': '3037.TW', 'name': '欣兴电子', 'market': 'TW', 'category': 'semiconductor'},
+    {'code': 'LITE', 'name': 'Lumentum', 'market': 'US', 'category': 'semiconductor'},
     {'code': '005930.KS', 'name': '三星电子', 'market': 'KR', 'category': 'storage'},
     {'code': '000660.KS', 'name': 'SK海力士', 'market': 'KR', 'category': 'storage'},
     {'code': 'STX', 'name': '希捷', 'market': 'US', 'category': 'storage'},
