@@ -681,7 +681,7 @@ const Watch = {
         }
 
         chart.setOption({
-            grid: { left: 10, right: 60, top: 8, bottom: 20, containLabel: true },
+            grid: { left: 10, right: 60, top: 25, bottom: 20, containLabel: true },
             tooltip: {
                 trigger: 'axis',
                 formatter: params => {
