@@ -34,8 +34,11 @@ class FallbackProvider(LLMProvider):
     def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
         try:
             return self.primary.chat(messages, temperature, max_tokens)
+        except ValueError as e:
+            logger.info(f'[{self.primary.name}] {e}，转 {self.fallback.name}')
+            return self.fallback.chat(messages, temperature, max_tokens)
         except Exception as e:
-            logger.warning(f'[{self.primary.name}] 失败，降级到 {self.fallback.name}: {e}')
+            logger.warning(f'[{self.primary.name}] 异常，降级到 {self.fallback.name}: {e}')
             return self.fallback.chat(messages, temperature, max_tokens)
 
 
