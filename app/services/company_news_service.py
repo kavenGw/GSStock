@@ -178,10 +178,13 @@ class CompanyNewsService:
     @staticmethod
     def _save_results(results: list[dict]):
         from app.llm.router import llm_router
+        from app.llm.router import FallbackProvider
 
         provider = llm_router.route('news_classify')
         new_items = []
 
+        # 需要 LLM 处理的条目
+        need_llm = []
         for item in results:
             source_id = hashlib.md5(item['url'].encode()).hexdigest()[:16]
             source_name = item['source_name']
@@ -191,28 +194,37 @@ class CompanyNewsService:
             ).first()
             if existing:
                 continue
+            item['_source_id'] = source_id
+            needs_ai = provider and source_name != 'eastmoney_stock'
+            item['_needs_ai'] = needs_ai
+            need_llm.append(item)
 
+        # 本地模型只处理第1条需要AI的，其余走云端
+        local_used = False
+        for item in need_llm:
             content = item['content']
-            if provider and item['source_name'] == 'yahoo_finance':
+            if item['_needs_ai']:
+                if not local_used:
+                    prov = provider
+                    local_used = True
+                elif isinstance(provider, FallbackProvider):
+                    prov = provider.fallback
+                else:
+                    prov = provider
+
+                sys_prompt = TRANSLATE_PROMPT if item['source_name'] == 'yahoo_finance' else SUMMARY_PROMPT
+                max_tok = 500 if item['source_name'] == 'yahoo_finance' else 200
                 try:
-                    content = provider.chat([
-                        {'role': 'system', 'content': TRANSLATE_PROMPT},
+                    content = prov.chat([
+                        {'role': 'system', 'content': sys_prompt},
                         {'role': 'user', 'content': item['content']},
-                    ], temperature=0.1, max_tokens=500).strip()
+                    ], temperature=0.1, max_tokens=max_tok).strip()
                 except Exception as e:
-                    logger.error(f'[公司新闻] AI翻译失败: {e}')
-            elif provider and item['source_name'] not in ('eastmoney_stock',):
-                try:
-                    content = provider.chat([
-                        {'role': 'system', 'content': SUMMARY_PROMPT},
-                        {'role': 'user', 'content': item['content']},
-                    ], temperature=0.1, max_tokens=200).strip()
-                except Exception as e:
-                    logger.error(f'[公司新闻] AI摘要失败: {e}')
+                    logger.error(f'[公司新闻] AI处理失败: {e}')
 
             news = NewsItem(
-                source_id=source_id,
-                source_name=source_name,
+                source_id=item['_source_id'],
+                source_name=item['source_name'],
                 content=content,
                 display_time=datetime.now(),
                 score=1,

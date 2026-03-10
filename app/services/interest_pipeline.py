@@ -75,7 +75,7 @@ class InterestPipeline:
 
     @staticmethod
     def _classify_items(items: list[NewsItem]) -> list[dict]:
-        """GLM 批量分类打分（本地模型逐条，云端批量）"""
+        """GLM 批量分类打分（本地模型仅处理1条，其余走云端）"""
         from app.llm.router import llm_router
         from app.llm.prompts.news_classify import CLASSIFY_SYSTEM_PROMPT, build_classify_prompt
 
@@ -84,15 +84,28 @@ class InterestPipeline:
             return []
 
         is_local = InterestPipeline._is_local_provider(provider)
-        batch_size = 1 if is_local else InterestPipeline.CLASSIFY_BATCH_SIZE
-        max_tok = 500 if is_local else 4000
+
+        # 构建分批计划: (provider, start, end, max_tokens)
+        batches = []
+        if is_local and len(items) > 1 and hasattr(provider, 'fallback'):
+            # 本地模型串行慢，只让1条走本地，其余直接走云端
+            batches.append((provider, 0, 1, 500))
+            cloud = provider.fallback
+            for s in range(1, len(items), InterestPipeline.CLASSIFY_BATCH_SIZE):
+                batches.append((cloud, s, min(s + InterestPipeline.CLASSIFY_BATCH_SIZE, len(items)), 4000))
+            logger.info(f'[分类] {len(items)}条新闻: 1条→本地, {len(items)-1}条→云端')
+        else:
+            bs = 1 if is_local else InterestPipeline.CLASSIFY_BATCH_SIZE
+            mt = 500 if is_local else 4000
+            for s in range(0, len(items), bs):
+                batches.append((provider, s, min(s + bs, len(items)), mt))
 
         all_results = []
-        for batch_start in range(0, len(items), batch_size):
-            batch = items[batch_start:batch_start + batch_size]
+        for prov, batch_start, batch_end, max_tok in batches:
+            batch = items[batch_start:batch_end]
             batch_data = [{'content': n.content} for n in batch]
             try:
-                response = provider.chat([
+                response = prov.chat([
                     {'role': 'system', 'content': CLASSIFY_SYSTEM_PROMPT},
                     {'role': 'user', 'content': build_classify_prompt(batch_data)},
                 ], temperature=0.1, max_tokens=max_tok)
@@ -109,7 +122,7 @@ class InterestPipeline:
                             items[global_idx].category = 'earnings'
                 all_results.extend(results)
             except Exception as e:
-                logger.error(f'GLM分类打分失败(batch {batch_start}~{batch_start + len(batch) - 1}): {e}')
+                logger.error(f'GLM分类打分失败(batch {batch_start}~{batch_end - 1}): {e}')
 
         return all_results
 
