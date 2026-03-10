@@ -209,6 +209,8 @@ const Watch = {
                 tradingSessions: result.trading_sessions || [],
                 prevDayData: result.prev_day_data || [],
                 prevClose: result.prev_close || null,
+                supportLevels: result.support_levels || [],
+                resistanceLevels: result.resistance_levels || [],
             };
             if (result.td_sequential) {
                 this.tdSequential[code] = result.td_sequential;
@@ -625,8 +627,10 @@ const Watch = {
 
         if (this.chartInstances[code]) {
             const tdMark = this._buildTDIntradayMarkPoints(code, fullAxis);
+            const updatedMarkLines = this._buildMarkLines(code);
             const seriesUpdate = [{
                 data: prices,
+                markLine: updatedMarkLines.length > 0 ? { silent: true, symbol: 'none', data: updatedMarkLines } : { data: [] },
                 markPoint: tdMark.length > 0 ? { silent: true, data: tdMark } : { data: [] },
             }];
             if (prevPrices.length > 0) seriesUpdate.push({ data: prevPrices });
@@ -642,45 +646,7 @@ const Watch = {
         const chart = echarts.init(container);
         this.chartInstances[code] = chart;
 
-        const analysis = this.analyses[code] || {};
-        const markLines = [];
-        const allSupports = new Set();
-        const allResistances = new Set();
-        Object.values(analysis).forEach(a => {
-            (a.support_levels || []).forEach(l => allSupports.add(l));
-            (a.resistance_levels || []).forEach(l => allResistances.add(l));
-        });
-        allSupports.forEach(level => {
-            markLines.push({
-                yAxis: level,
-                lineStyle: { color: '#28a745', type: 'dashed', width: 1 },
-                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#28a745' },
-            });
-        });
-        allResistances.forEach(level => {
-            markLines.push({
-                yAxis: level,
-                lineStyle: { color: '#dc3545', type: 'dashed', width: 1 },
-                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#dc3545' },
-            });
-        });
-
-        const prevClose = this._getPrevClose(code);
-        if (prevClose != null) {
-            markLines.push({
-                yAxis: prevClose,
-                lineStyle: { color: '#FFA500', type: 'dashed', width: 1.5 },
-                label: {
-                    formatter: `昨收 ${prevClose}`,
-                    position: 'insideEndTop',
-                    fontSize: 10,
-                    color: '#fff',
-                    backgroundColor: 'rgba(255,165,0,0.85)',
-                    padding: [3, 6],
-                    borderRadius: 2,
-                },
-            });
-        }
+        const markLines = this._buildMarkLines(code);
 
         const keyTimes = sessions.length > 0 ? this._getKeyTimePoints(sessions) : new Set(fullAxis.filter(t => t.endsWith(':00')));
 
@@ -758,6 +724,46 @@ const Watch = {
         this._renderTDGraphic(code, chart);
 
         new ResizeObserver(() => chart.resize()).observe(container);
+    },
+
+    _buildMarkLines(code) {
+        const meta = this.chartMeta[code] || {};
+        const markLines = [];
+
+        (meta.supportLevels || []).forEach(level => {
+            markLines.push({
+                yAxis: level,
+                lineStyle: { color: '#28a745', type: 'dashed', width: 1 },
+                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#28a745' },
+            });
+        });
+
+        (meta.resistanceLevels || []).forEach(level => {
+            markLines.push({
+                yAxis: level,
+                lineStyle: { color: '#dc3545', type: 'dashed', width: 1 },
+                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#dc3545' },
+            });
+        });
+
+        const prevClose = this._getPrevClose(code);
+        if (prevClose != null) {
+            markLines.push({
+                yAxis: prevClose,
+                lineStyle: { color: '#FFA500', type: 'dashed', width: 1.5 },
+                label: {
+                    formatter: `昨收 ${prevClose}`,
+                    position: 'insideEndTop',
+                    fontSize: 10,
+                    color: '#fff',
+                    backgroundColor: 'rgba(255,165,0,0.85)',
+                    padding: [3, 6],
+                    borderRadius: 2,
+                },
+            });
+        }
+
+        return markLines;
     },
 
     _buildTDIntradayMarkPoints(code, fullAxis) {
