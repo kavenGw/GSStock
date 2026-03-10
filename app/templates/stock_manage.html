@@ -29,11 +29,13 @@ main.container {
     color: #0d6efd;
     font-style: italic;
 }
+#stockList table { table-layout: fixed; }
 #stockList th.col-code { width: 7%; }
 #stockList th.col-name { width: 8%; }
 #stockList th.col-alias { width: 8%; }
 #stockList th.col-category { width: 11%; }
 #stockList th.col-action { width: 80px; }
+#stockList .advice-cell { word-break: break-all; }
 </style>
 {% endblock %}
 
@@ -103,12 +105,12 @@ main.container {
                 <table class="table table-striped mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 120px;">股票代码</th>
-                            <th style="width: 150px;">股票名称</th>
-                            <th style="width: 150px;">别名</th>
-                            <th style="width: 200px;">投资建议</th>
-                            <th style="width: 150px;">分类</th>
-                            <th style="width: 80px;">操作</th>
+                            <th class="col-code">股票代码</th>
+                            <th class="col-name">股票名称</th>
+                            <th class="col-alias">别名</th>
+                            <th>投资建议</th>
+                            <th class="col-category">分类</th>
+                            <th class="col-action">操作</th>
                         </tr>
                     </thead>
                     <tbody>
