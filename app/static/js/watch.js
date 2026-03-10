@@ -50,6 +50,7 @@ const WatchCache = {
             tdSequential: watch.tdSequential,
             tdSequentialIntraday: watch.tdSequentialIntraday,
             earnings: watch.earnings,
+            lastRefreshTime: watch.lastRefreshTime,
         };
     },
 
@@ -63,6 +64,7 @@ const WatchCache = {
         watch.tdSequential = cache.tdSequential || {};
         watch.tdSequentialIntraday = cache.tdSequentialIntraday || {};
         watch.earnings = cache.earnings || {};
+        watch.lastRefreshTime = cache.lastRefreshTime || null;
     },
 };
 
@@ -82,6 +84,7 @@ const Watch = {
     tdSequential: {},
     tdSequentialIntraday: {},
     earnings: {},
+    lastRefreshTime: null,
     refreshTimer: null,
     analysisTimer: null,
     marketStatusTimer: null,
@@ -104,6 +107,7 @@ const Watch = {
                 this.loadAllChartsFromCache();
                 this.stocks.forEach(s => this.renderEarnings(s.stock_code));
                 this.updateStatus(`${this.stocks.length} 只股票`);
+                this.showRefreshTime();
             }
         }
 
@@ -144,6 +148,7 @@ const Watch = {
 
             this.renderCards();
             this.updateStatus(`${this.stocks.length} 只股票`);
+            this.recordRefreshTime();
             await this.loadAllCharts();
             this.stocks.forEach(s => this.loadEarnings(s.stock_code));
 
@@ -230,6 +235,7 @@ const Watch = {
                 this.updateAllPrices();
                 this.renderBenchmarks();
                 this.appendPricesToCharts();
+                this.recordRefreshTime();
             }
 
             const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
@@ -979,6 +985,19 @@ const Watch = {
 
     updateStatus(text) {
         document.getElementById('watchStatus').textContent = text;
+    },
+
+    showRefreshTime() {
+        const el = document.getElementById('lastRefreshTime');
+        if (el && this.lastRefreshTime) {
+            el.textContent = `· 最后刷新 ${this.lastRefreshTime}`;
+            el.style.display = '';
+        }
+    },
+
+    recordRefreshTime() {
+        this.lastRefreshTime = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+        this.showRefreshTime();
     },
 
     formatPrice(price, market) {
