@@ -81,6 +81,13 @@ class LlamaServerProvider(LLMProvider):
 
         effective_max_tokens = min(max_tokens * _REASONING_MULTIPLIER, available)
 
+        # 记录请求内容
+        for m in messages:
+            role, text = m.get('role', '?'), m.get('content', '')
+            preview = text[:200] + '...' if len(text) > 200 else text
+            logger.info(f'[llama-server] [{role}] {preview}')
+        logger.info(f'[llama-server] params: temp={temperature}, max_tokens={effective_max_tokens}, input≈{input_tokens}tok')
+
         # 串行化请求，避免并发竞争 llama-server 有限的 slot
         with self._lock:
             try:
