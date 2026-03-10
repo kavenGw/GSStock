@@ -48,6 +48,7 @@ const WatchCache = {
             analyses: watch.analyses,
             marketStatus: watch.marketStatus,
             tdSequential: watch.tdSequential,
+            tdSequentialIntraday: watch.tdSequentialIntraday,
             earnings: watch.earnings,
         };
     },
@@ -60,6 +61,7 @@ const WatchCache = {
         watch.analyses = cache.analyses || {};
         watch.marketStatus = cache.marketStatus || {};
         watch.tdSequential = cache.tdSequential || {};
+        watch.tdSequentialIntraday = cache.tdSequentialIntraday || {};
         watch.earnings = cache.earnings || {};
     },
 };
@@ -78,6 +80,7 @@ const Watch = {
     chartData: {},
     chartMeta: {},
     tdSequential: {},
+    tdSequentialIntraday: {},
     earnings: {},
     refreshTimer: null,
     analysisTimer: null,
@@ -200,9 +203,13 @@ const Watch = {
                 isTrading: result.is_trading,
                 tradingSessions: result.trading_sessions || [],
                 prevDayData: result.prev_day_data || [],
+                prevClose: result.prev_close || null,
             };
             if (result.td_sequential) {
                 this.tdSequential[code] = result.td_sequential;
+            }
+            if (result.td_sequential_intraday) {
+                this.tdSequentialIntraday[code] = result.td_sequential_intraday;
             }
             this.renderChart(code);
             WatchCache.save(WatchCache.snapshot(this));
@@ -541,6 +548,35 @@ const Watch = {
         return times;
     },
 
+    _getKeyTimePoints(sessions) {
+        const keys = new Set();
+        for (let i = 0; i < sessions.length; i++) {
+            const [start, end] = sessions[i];
+            keys.add(start);
+            if (i === sessions.length - 1) keys.add(end);
+            const [sh] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            for (let h = sh + 1; h <= eh; h++) {
+                if (h * 60 <= eh * 60 + em) {
+                    keys.add(`${String(h).padStart(2, '0')}:00`);
+                }
+            }
+        }
+        return keys;
+    },
+
+    _getPrevClose(code) {
+        const meta = this.chartMeta[code] || {};
+        if (meta.prevClose != null) return meta.prevClose;
+        const prevData = meta.prevDayData || [];
+        if (prevData.length > 0) return prevData[prevData.length - 1].close;
+        const p = this.prices.find(pr => pr.code === code);
+        if (p && p.price != null && p.change != null) {
+            return Math.round((p.price - p.change) * 100) / 100;
+        }
+        return null;
+    },
+
     _mapDataToTimeAxis(rawData, fullAxis) {
         const timeMap = {};
         for (const d of rawData) {
@@ -582,7 +618,11 @@ const Watch = {
             ? this._mapDataToTimeAxis(prevData, fullAxis) : [];
 
         if (this.chartInstances[code]) {
-            const seriesUpdate = [{ data: prices }];
+            const tdMark = this._buildTDIntradayMarkPoints(code, fullAxis);
+            const seriesUpdate = [{
+                data: prices,
+                markPoint: tdMark.length > 0 ? { silent: true, data: tdMark } : { data: [] },
+            }];
             if (prevPrices.length > 0) seriesUpdate.push({ data: prevPrices });
             this.chartInstances[code].setOption({
                 xAxis: { data: fullAxis },
@@ -619,6 +659,27 @@ const Watch = {
             });
         });
 
+        const prevClose = this._getPrevClose(code);
+        if (prevClose != null) {
+            markLines.push({
+                yAxis: prevClose,
+                lineStyle: { color: '#FFA500', type: 'dashed', width: 1.5 },
+                label: {
+                    formatter: `昨收 ${prevClose}`,
+                    position: 'insideEndTop',
+                    fontSize: 10,
+                    color: '#fff',
+                    backgroundColor: 'rgba(255,165,0,0.85)',
+                    padding: [3, 6],
+                    borderRadius: 2,
+                },
+            });
+        }
+
+        const keyTimes = sessions.length > 0 ? this._getKeyTimePoints(sessions) : new Set(fullAxis.filter(t => t.endsWith(':00')));
+
+        const tdMarkPoints = this._buildTDIntradayMarkPoints(code, fullAxis);
+
         const seriesList = [{
             type: 'line',
             data: prices,
@@ -628,6 +689,7 @@ const Watch = {
             lineStyle: { width: 1.5, color: '#1890ff' },
             areaStyle: { color: 'rgba(24,144,255,0.08)' },
             markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
+            markPoint: tdMarkPoints.length > 0 ? { silent: true, data: tdMarkPoints } : undefined,
         }];
 
         if (prevPrices.length > 0) {
@@ -663,20 +725,11 @@ const Watch = {
                 boundaryGap: false,
                 axisLabel: {
                     fontSize: 9,
-                    interval: 0,
-                    formatter: value => {
-                        const m = value.split(':')[1];
-                        return (m === '00' || m === '30') ? value : '';
-                    },
+                    interval: (idx, value) => keyTimes.has(value),
                 },
                 axisTick: {
                     alignWithLabel: true,
-                    interval: (idx) => {
-                        const t = fullAxis[idx];
-                        if (!t) return false;
-                        const m = t.split(':')[1];
-                        return m === '00' || m === '30';
-                    },
+                    interval: (idx, value) => keyTimes.has(fullAxis[idx]),
                 },
                 axisLine: { lineStyle: { color: '#ddd' } },
             },
@@ -699,6 +752,40 @@ const Watch = {
         this._renderTDGraphic(code, chart);
 
         new ResizeObserver(() => chart.resize()).observe(container);
+    },
+
+    _buildTDIntradayMarkPoints(code, fullAxis) {
+        const tdIntraday = this.tdSequentialIntraday[code] || {};
+        const tdHistory = tdIntraday.history || [];
+        const markData = [];
+        if (tdHistory.length === 0 || fullAxis.length === 0) return markData;
+
+        for (const h of tdHistory) {
+            const idx = fullAxis.indexOf(h.time);
+            if (idx === -1) continue;
+            const isBuy = h.direction === 'buy';
+            markData.push({
+                coord: [idx, h.price],
+                value: h.count,
+                symbol: h.count === 9 ? 'circle' : 'none',
+                symbolSize: h.count === 9 ? 16 : 1,
+                itemStyle: h.count === 9 ? {
+                    color: isBuy ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)',
+                    borderColor: isBuy ? '#16a34a' : '#dc2626',
+                    borderWidth: 1,
+                } : undefined,
+                label: {
+                    show: true,
+                    formatter: String(h.count),
+                    position: isBuy ? 'bottom' : 'top',
+                    color: isBuy ? '#16a34a' : '#dc2626',
+                    fontSize: 11,
+                    fontWeight: h.count >= 7 ? 'bold' : 'normal',
+                    offset: isBuy ? [0, 4] : [0, -4],
+                },
+            });
+        }
+        return markData;
     },
 
     _renderTDGraphic(code, chart) {

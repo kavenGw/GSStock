@@ -12,13 +12,13 @@ class TDSequentialService:
             return {'direction': None, 'count': 0, 'completed': False, 'history': []}
 
         closes = []
-        dates = []
+        time_keys = []
         for d in ohlc_data:
             close = d.get('close') or d.get('price') or 0
             if close <= 0:
                 continue
             closes.append(close)
-            dates.append(d.get('date', ''))
+            time_keys.append(d.get('time') or d.get('date', ''))
 
         if len(closes) < 5:
             return {'direction': None, 'count': 0, 'completed': False, 'history': []}
@@ -47,11 +47,17 @@ class TDSequentialService:
                 count = 0
 
             if count > 0:
-                history.append({
-                    'date': dates[i],
+                entry = {
                     'direction': direction,
                     'count': min(count, 9),
-                })
+                    'price': closes[i],
+                }
+                tk = time_keys[i]
+                if ':' in str(tk):
+                    entry['time'] = tk
+                else:
+                    entry['date'] = tk
+                history.append(entry)
 
             if buy_count >= 9:
                 buy_count = 0

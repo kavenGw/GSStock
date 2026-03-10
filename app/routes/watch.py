@@ -243,6 +243,30 @@ def chart_data():
             import logging
             logging.getLogger(__name__).debug(f"[盯盘] 前日分时缓存读取失败 {code}: {e}")
         result['prev_day_data'] = prev_day_data
+
+        prev_close = None
+        if prev_day_data:
+            prev_close = prev_day_data[-1].get('close')
+        if prev_close is None:
+            try:
+                trend_2d = unified_stock_data_service.get_trend_data([code], days=5)
+                trend_stocks = trend_2d.get('stocks', [])
+                if trend_stocks and len(trend_stocks[0].get('data', [])) >= 2:
+                    prev_close = trend_stocks[0]['data'][-2].get('close')
+            except Exception:
+                pass
+        result['prev_close'] = prev_close
+
+        # 分钟级九转信号
+        from app.services.td_sequential import TDSequentialService
+        td_intraday = {'direction': None, 'count': 0, 'completed': False, 'history': []}
+        try:
+            intraday_ohlc = stock_data.get('data', [])
+            if len(intraday_ohlc) >= 5:
+                td_intraday = TDSequentialService.calculate(intraday_ohlc)
+        except Exception as e:
+            logger.debug(f"[盯盘] 分钟级九转信号计算失败 {code}: {e}")
+        result['td_sequential_intraday'] = td_intraday
     else:
         days_map = {'7d': 7, '30d': 30, '90d': 90}
         days = days_map.get(period, 30)
