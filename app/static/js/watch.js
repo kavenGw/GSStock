@@ -627,11 +627,13 @@ const Watch = {
 
         if (this.chartInstances[code]) {
             const tdMark = this._buildTDIntradayMarkPoints(code, fullAxis);
+            const hlMark = this._buildHighLowMarkPoints(prices, fullAxis);
+            const allMark = [...tdMark, ...hlMark];
             const updatedMarkLines = this._buildMarkLines(code);
             const seriesUpdate = [{
                 data: prices,
                 markLine: updatedMarkLines.length > 0 ? { silent: true, symbol: 'none', data: updatedMarkLines } : { data: [] },
-                markPoint: tdMark.length > 0 ? { silent: true, data: tdMark } : { data: [] },
+                markPoint: allMark.length > 0 ? { silent: true, data: allMark } : { data: [] },
             }];
             if (prevPrices.length > 0) seriesUpdate.push({ data: prevPrices });
             this.chartInstances[code].setOption({
@@ -651,6 +653,8 @@ const Watch = {
         const keyTimes = sessions.length > 0 ? this._getKeyTimePoints(sessions) : new Set(fullAxis.filter(t => t.endsWith(':00')));
 
         const tdMarkPoints = this._buildTDIntradayMarkPoints(code, fullAxis);
+        const hlMarkPoints = this._buildHighLowMarkPoints(prices, fullAxis);
+        const allMarkPoints = [...tdMarkPoints, ...hlMarkPoints];
 
         const seriesList = [{
             type: 'line',
@@ -661,7 +665,7 @@ const Watch = {
             lineStyle: { width: 1.5, color: '#1890ff' },
             areaStyle: { color: 'rgba(24,144,255,0.08)' },
             markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
-            markPoint: tdMarkPoints.length > 0 ? { silent: true, data: tdMarkPoints } : undefined,
+            markPoint: allMarkPoints.length > 0 ? { silent: true, data: allMarkPoints } : undefined,
         }];
 
         if (prevPrices.length > 0) {
@@ -797,6 +801,59 @@ const Watch = {
                 },
             });
         }
+        return markData;
+    },
+
+    _buildHighLowMarkPoints(prices, fullAxis) {
+        const markData = [];
+        let highVal = -Infinity, lowVal = Infinity;
+        let highIdx = -1, lowIdx = -1;
+
+        for (let i = 0; i < prices.length; i++) {
+            const p = prices[i];
+            if (p == null) continue;
+            if (p > highVal) { highVal = p; highIdx = i; }
+            if (p < lowVal) { lowVal = p; lowIdx = i; }
+        }
+
+        if (highIdx === -1) return markData;
+
+        const fmt = v => v >= 1000 ? v.toFixed(0) : v.toFixed(2);
+
+        markData.push({
+            coord: [highIdx, highVal],
+            symbol: 'circle',
+            symbolSize: 8,
+            itemStyle: { color: '#dc3545' },
+            label: {
+                show: true,
+                formatter: fmt(highVal),
+                position: 'top',
+                color: '#dc3545',
+                fontSize: 10,
+                fontWeight: 'bold',
+                offset: [0, -16],
+            },
+        });
+
+        if (lowIdx !== highIdx) {
+            markData.push({
+                coord: [lowIdx, lowVal],
+                symbol: 'circle',
+                symbolSize: 8,
+                itemStyle: { color: '#28a745' },
+                label: {
+                    show: true,
+                    formatter: fmt(lowVal),
+                    position: 'bottom',
+                    color: '#28a745',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    offset: [0, 2],
+                },
+            });
+        }
+
         return markData;
     },
 
