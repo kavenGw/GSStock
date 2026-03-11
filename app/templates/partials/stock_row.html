@@ -1,5 +1,5 @@
 <tr data-code="{{ stock.stock_code }}">
-    <td class="editable stock-code" data-field="code">{{ stock.stock_code }}</td>
+    <td class="stock-code clickable-stock" onclick="StockDetailDrawer.open('{{ stock.stock_code }}', '{{ stock.stock_name }}')">{{ stock.stock_code }}</td>
     <td class="editable stock-name" data-field="name">{{ stock.stock_name }}</td>
     <td class="editable alias-cell" data-field="alias">{{ alias_map.get(stock.stock_code, [])|join(', ') }}</td>
     <td class="editable advice-cell" data-field="advice">{{ stock.investment_advice or '' }}</td>
@@ -20,9 +20,6 @@
         </select>
     </td>
     <td>
-        <button class="btn btn-sm btn-outline-info detail-btn" onclick="event.stopPropagation(); StockDetailDrawer.open('{{ stock.stock_code }}', '{{ stock.stock_name }}')" title="查看详情">
-            <i class="bi bi-info-circle"></i>
-        </button>
         <button class="btn btn-sm btn-outline-danger delete-btn">删除</button>
     </td>
 </tr>
