@@ -135,9 +135,11 @@ class NewsService:
             return [], 0
 
         # 异步执行分类流水线（不阻塞返回）
+        from flask import current_app
         from app.services.interest_pipeline import InterestPipeline
+        app = current_app._get_current_object()
         item_ids = [n.id for n in new_items]
-        _executor.submit(InterestPipeline.process_new_items, item_ids)
+        _executor.submit(InterestPipeline.process_new_items, item_ids, app)
 
         global _last_company_news_time
         from app.config.news_config import COMPANY_NEWS_INTERVAL_MINUTES
@@ -145,7 +147,7 @@ class NewsService:
         if _last_company_news_time is None or (now - _last_company_news_time).total_seconds() >= COMPANY_NEWS_INTERVAL_MINUTES * 60:
             _last_company_news_time = now
             from app.services.company_news_service import CompanyNewsService
-            _executor.submit(CompanyNewsService.fetch_company_news)
+            _executor.submit(CompanyNewsService.fetch_company_news, app)
 
         items_data = [NewsService._item_to_dict(n) for n in new_items]
         return items_data, len(new_items)

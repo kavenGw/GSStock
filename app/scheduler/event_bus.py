@@ -16,7 +16,8 @@ class EventBus:
         return cls._instance
 
     def subscribe(self, handler: Callable[[Signal], None]):
-        self._handlers.append(handler)
+        if handler not in self._handlers:
+            self._handlers.append(handler)
 
     def publish(self, signal: Signal):
         for handler in self._handlers:

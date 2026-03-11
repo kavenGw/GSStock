@@ -24,9 +24,10 @@ TRANSLATE_PROMPT = "将以下英文财经新闻翻译为中文，保持简洁专
 class CompanyNewsService:
 
     @staticmethod
-    def fetch_company_news():
-        from app import create_app
-        app = create_app()
+    def fetch_company_news(app=None):
+        if app is None:
+            from flask import current_app
+            app = current_app._get_current_object()
         with app.app_context():
             companies = CompanyKeyword.query.filter_by(is_active=True).order_by(
                 CompanyKeyword.last_fetched_at.asc().nullsfirst()

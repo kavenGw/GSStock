@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 class InterestPipeline:
 
     @staticmethod
-    def process_new_items(item_ids: list[int]):
+    def process_new_items(item_ids: list[int], app=None):
         """处理新入库的新闻条目（在后台线程执行）"""
-        from app import create_app
-        app = create_app()
+        if app is None:
+            from flask import current_app
+            app = current_app._get_current_object()
 
         with app.app_context():
             items = NewsItem.query.filter(NewsItem.id.in_(item_ids)).all()
@@ -211,10 +212,11 @@ class InterestPipeline:
                 item.matched_keywords = ','.join(set(matched))
 
     @staticmethod
-    def recommend_keywords():
+    def recommend_keywords(app=None):
         """AI 推荐新关键词（每天调用一次）"""
-        from app import create_app
-        app = create_app()
+        if app is None:
+            from flask import current_app
+            app = current_app._get_current_object()
 
         with app.app_context():
             from app.llm.router import llm_router
