@@ -41,12 +41,11 @@ def prices():
     from app.config.stock_codes import BENCHMARK_CODES
 
     codes = WatchService.get_watch_codes()
-    cache_only = request.args.get('cache_only', 'false').lower() == 'true'
 
-    # 盯盘股票报价
+    # 纯缓存读取：价格由后端策略 (watch_alert) 驱动刷新
     price_list = []
     if codes:
-        raw_prices = unified_stock_data_service.get_realtime_prices(codes, cache_only=cache_only)
+        raw_prices = unified_stock_data_service.get_realtime_prices(codes, cache_only=True)
         for code, data in raw_prices.items():
             price_list.append({
                 'code': code,
@@ -58,9 +57,8 @@ def prices():
                 'market': data.get('market', ''),
             })
 
-    # 基准标的报价
     bench_codes = [b['code'] for b in BENCHMARK_CODES]
-    bench_raw = unified_stock_data_service.get_realtime_prices(bench_codes, cache_only=cache_only)
+    bench_raw = unified_stock_data_service.get_realtime_prices(bench_codes, cache_only=True)
     benchmark_list = []
     for b in BENCHMARK_CODES:
         data = bench_raw.get(b['code'], {})

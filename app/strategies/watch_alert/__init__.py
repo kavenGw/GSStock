@@ -1,4 +1,4 @@
-"""盯盘推送告警策略 — 每分钟检测价格信号"""
+"""盯盘推送告警策略 — 后端驱动价格获取 + 即时告警检测"""
 import logging
 from app.strategies.base import Strategy, Signal
 
@@ -16,6 +16,7 @@ class WatchAlertStrategy(Strategy):
         from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
         from app.services.watch_alert_service import WatchAlertService
+        from app.config.stock_codes import BENCHMARK_CODES
 
         codes = WatchService.get_watch_codes()
         if not codes:
@@ -28,13 +29,19 @@ class WatchAlertStrategy(Strategy):
 
         from app.services.unified_stock_data import UnifiedStockDataService
         data_service = UnifiedStockDataService()
-        prices = data_service.get_realtime_prices(codes)
 
+        # 后端唯一价格驱动：强制刷新，数据落入缓存供前端读取
+        bench_codes = [b['code'] for b in BENCHMARK_CODES]
+        all_codes = list(set(codes + bench_codes))
+        prices = data_service.get_realtime_prices(all_codes, force_refresh=True)
+
+        # 只对盯盘股票做告警检测
+        watch_prices = {c: prices[c] for c in codes if c in prices}
         items = WatchList.query.filter(WatchList.stock_code.in_(codes)).all()
         name_map = {w.stock_code: w.stock_name for w in items}
 
         service = WatchAlertService()
-        signals = service.check_alerts(prices, name_map)
+        signals = service.check_alerts(watch_prices, name_map)
 
         if signals:
             logger.info(f'[盯盘告警] 产出 {len(signals)} 个信号')

@@ -111,8 +111,8 @@ const Watch = {
             }
         }
 
-        // 阶段2：后台更新真实数据
-        await this.loadList(true);
+        // 阶段2：读取后端缓存数据
+        await this.loadList();
 
         // 阶段3：读取分析缓存 + 启动定时器
         this.loadAnalysis();
@@ -121,12 +121,11 @@ const Watch = {
         this.startMarketStatusLoop();
     },
 
-    async loadList(cacheOnly = false) {
+    async loadList() {
         try {
-            const priceUrl = cacheOnly ? '/watch/prices?cache_only=true' : '/watch/prices';
             const [listResp, priceResp, marketResp] = await Promise.all([
                 fetch('/watch/list'),
-                fetch(priceUrl),
+                fetch('/watch/prices'),
                 fetch('/watch/market-status'),
             ]);
             const listData = await listResp.json();
