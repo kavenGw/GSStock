@@ -234,3 +234,79 @@ class StockService:
             return None
         alias = StockAlias.query.filter_by(alias_name=name).first()
         return alias.stock_code if alias else None
+
+    @staticmethod
+    def generate_tags(stock_code, stock_name=None):
+        """调用 LLM 为单个股票生成标签，返回 (tags_str, error)"""
+        import json
+        import re
+
+        stock = Stock.query.get(stock_code)
+        if not stock:
+            return None, '股票代码不存在'
+
+        name = stock_name or stock.stock_name
+
+        from app.llm.router import llm_router
+        from app.llm.prompts.stock_tags import TAGS_SYSTEM_PROMPT, build_tags_prompt
+
+        provider = llm_router.route('stock_tags')
+        if not provider:
+            return None, 'LLM 不可用'
+
+        try:
+            response = provider.chat([
+                {'role': 'system', 'content': TAGS_SYSTEM_PROMPT},
+                {'role': 'user', 'content': build_tags_prompt(stock_code, name)},
+            ], temperature=0.3, max_tokens=500)
+
+            text = response.strip()
+            m = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+            if m:
+                text = m.group(1).strip()
+
+            tags_list = json.loads(text)
+            if not isinstance(tags_list, list):
+                return None, 'LLM 返回格式错误'
+
+            tags_str = ','.join(str(t) for t in tags_list if t)
+            stock.tags = tags_str
+            db.session.commit()
+            return tags_str, None
+        except Exception as e:
+            return None, f'标签生成失败: {e}'
+
+    @staticmethod
+    def batch_generate_tags(overwrite=False):
+        """批量为股票生成标签，返回 {code: tags_str} 或 {code: error}"""
+        import logging
+        logger = logging.getLogger(__name__)
+
+        stocks = Stock.query.all()
+        results = {}
+
+        for stock in stocks:
+            if not overwrite and stock.tags:
+                results[stock.stock_code] = stock.tags
+                continue
+
+            tags_str, error = StockService.generate_tags(stock.stock_code)
+            if error:
+                logger.warning(f'[标签生成] {stock.stock_code} 失败: {error}')
+                results[stock.stock_code] = f'ERROR: {error}'
+            else:
+                results[stock.stock_code] = tags_str
+                logger.info(f'[标签生成] {stock.stock_code}: {tags_str}')
+
+        return results
+
+    @staticmethod
+    def update_tags(code, tags):
+        """手动更新股票标签，返回 (stock, error)"""
+        stock = Stock.query.get(code)
+        if not stock:
+            return None, '股票代码不存在'
+
+        stock.tags = tags.strip() if tags else None
+        db.session.commit()
+        return stock, None

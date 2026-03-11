@@ -33,6 +33,8 @@ main.container {
 #stockList th.col-code { width: 7%; }
 #stockList th.col-name { width: 8%; }
 #stockList th.col-alias { width: 8%; }
+#stockList th.col-tags { width: 20%; }
+#stockList .tags-cell { word-break: break-all; font-size: 0.85em; color: #666; }
 #stockList th.col-category { width: 11%; }
 #stockList th.col-action { width: 60px; }
 #stockList .advice-cell { word-break: break-all; }
@@ -61,6 +63,11 @@ main.container {
 <h2 class="mb-4">股票代码管理</h2>
 
 <div class="row">
+    <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-outline-success" id="batchGenerateTags" title="为没有标签的股票自动生成">
+            批量生成标签
+        </button>
+    </div>
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">新增股票</div>
@@ -99,6 +106,7 @@ main.container {
                         <th class="col-code">股票代码</th>
                         <th class="col-name">股票名称</th>
                         <th class="col-alias">别名</th>
+                        <th class="col-tags">标签</th>
                         <th>投资建议</th>
                         <th class="col-category">分类</th>
                         <th class="col-action">操作</th>
@@ -159,6 +167,7 @@ main.container {
                         <th class="col-code">股票代码</th>
                         <th class="col-name">股票名称</th>
                         <th class="col-alias">别名</th>
+                        <th class="col-tags">标签</th>
                         <th>投资建议</th>
                         <th class="col-category">分类</th>
                         <th class="col-action">操作</th>
@@ -287,7 +296,7 @@ stockList.addEventListener('dblclick', (e) => {
     const input = document.createElement('input');
     input.type = 'text';
     input.value = oldValue;
-    input.maxLength = field === 'advice' ? 500 : (field === 'alias' ? 200 : (field === 'code' ? 20 : 50));
+    input.maxLength = field === 'tags' ? 500 : (field === 'advice' ? 500 : (field === 'alias' ? 200 : (field === 'code' ? 20 : 50)));
     if (field === 'alias') {
         input.placeholder = '多个别名用逗号分隔';
     }
@@ -304,12 +313,28 @@ stockList.addEventListener('dblclick', (e) => {
         const newValue = input.value.trim();
 
         // 别名和投资建议字段允许清空
-        if (field !== 'alias' && field !== 'advice' && !newValue) {
+        if (field !== 'alias' && field !== 'advice' && field !== 'tags' && !newValue) {
             cell.textContent = oldValue;
             return;
         }
         if (newValue === oldValue) {
             cell.textContent = oldValue;
+            return;
+        }
+
+        if (field === 'tags') {
+            const res = await fetch(`/stocks/${code}/tags`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({tags: newValue || null})
+            });
+            const data = await res.json();
+            if (data.error) {
+                alert(data.error);
+                cell.textContent = oldValue;
+                return;
+            }
+            cell.textContent = data.tags || '';
             return;
         }
 
@@ -525,6 +550,39 @@ document.getElementById('newCategoryModal').addEventListener('hidden.bs.modal', 
     document.getElementById('newCategoryName').value = '';
     document.getElementById('typeChild').checked = true;
     document.getElementById('parentSelectGroup').style.display = 'block';
+});
+
+// 批量生成标签
+document.getElementById('batchGenerateTags').addEventListener('click', async () => {
+    if (!confirm('将为所有没有标签的股票自动生成标签（需要 LLM），确定继续？')) return;
+
+    const btn = document.getElementById('batchGenerateTags');
+    btn.disabled = true;
+    btn.textContent = '生成中...';
+
+    try {
+        const res = await fetch('/stocks/batch-generate-tags', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({overwrite: false})
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            alert(data.error);
+        } else {
+            const results = data.results || {};
+            const total = Object.keys(results).length;
+            const errors = Object.values(results).filter(v => typeof v === 'string' && v.startsWith('ERROR:')).length;
+            alert(`完成！共处理 ${total} 只股票，${errors} 个失败`);
+            location.reload();
+        }
+    } catch (e) {
+        alert('请求失败: ' + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '批量生成标签';
+    }
 });
 
 </script>

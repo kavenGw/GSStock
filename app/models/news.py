@@ -18,6 +18,7 @@ class NewsItem(db.Model):
     importance = db.Column(db.Integer, default=0)
     is_interest = db.Column(db.Boolean, default=False)
     matched_keywords = db.Column(db.Text)
+    matched_stocks = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     derivations = db.relationship('NewsDerivation', backref='news_item', lazy='dynamic')

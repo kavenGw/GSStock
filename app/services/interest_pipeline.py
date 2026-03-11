@@ -175,41 +175,80 @@ class InterestPipeline:
         return []
 
     @staticmethod
+    def _build_stock_tag_index():
+        """构建股票标签反向索引 {tag_lower: [stock_code, ...]}"""
+        from app.models.stock import Stock
+        stock_tag_index = {}
+        all_stocks = Stock.query.filter(Stock.tags.isnot(None), Stock.tags != '').all()
+        for stock in all_stocks:
+            for tag in stock.tags.split(','):
+                tag = tag.strip().lower()
+                if tag and len(tag) >= 2:
+                    if tag not in stock_tag_index:
+                        stock_tag_index[tag] = []
+                    stock_tag_index[tag].append(stock.stock_code)
+        return stock_tag_index
+
+    @staticmethod
+    def _match_stocks_for_item(item: NewsItem, stock_tag_index: dict):
+        """对单条新闻做股票标签匹配"""
+        content_lower = item.content.lower()
+        matched_codes = set()
+        for tag, codes in stock_tag_index.items():
+            if tag in content_lower:
+                matched_codes.update(codes)
+        if matched_codes:
+            item.matched_stocks = ','.join(sorted(matched_codes))
+
+    @staticmethod
     def _match_keywords(items: list[NewsItem], classified: list[dict]):
-        """将 GLM 提取的关键词与用户兴趣关键词+公司名匹配"""
+        """将 GLM 提取的关键词与用户兴趣关键词+公司名匹配，同时做股票标签匹配"""
         user_keywords = InterestKeyword.query.filter_by(is_active=True).all()
         company_keywords = CompanyKeyword.query.filter_by(is_active=True).all()
 
         kw_set = {kw.keyword.lower() for kw in user_keywords}
         kw_set.update(c.name.lower() for c in company_keywords)
 
-        if not kw_set:
-            return
+        stock_tag_index = InterestPipeline._build_stock_tag_index()
 
+        classified_indices = set()
         for r in classified:
             idx = r.get('index', -1)
             if idx < 0 or idx >= len(items):
                 continue
+            classified_indices.add(idx)
             item = items[idx]
             extracted = r.get('keywords', [])
 
+            # 兴趣关键词匹配
             matched = []
-            for ext_kw in extracted:
-                ext_lower = ext_kw.lower()
-                for user_kw in kw_set:
-                    if user_kw in ext_lower or ext_lower in user_kw:
-                        matched.append(user_kw)
-                        break
+            if kw_set:
+                for ext_kw in extracted:
+                    ext_lower = ext_kw.lower()
+                    for user_kw in kw_set:
+                        if user_kw in ext_lower or ext_lower in user_kw:
+                            matched.append(user_kw)
+                            break
 
-            if not matched:
-                content_lower = item.content.lower()
-                for user_kw in kw_set:
-                    if user_kw in content_lower:
-                        matched.append(user_kw)
+                if not matched:
+                    content_lower = item.content.lower()
+                    for user_kw in kw_set:
+                        if user_kw in content_lower:
+                            matched.append(user_kw)
 
             if matched:
                 item.is_interest = True
                 item.matched_keywords = ','.join(set(matched))
+
+            # 股票标签匹配
+            if stock_tag_index:
+                InterestPipeline._match_stocks_for_item(item, stock_tag_index)
+
+        # 对未被 classified 覆盖的新闻也做标签匹配
+        if stock_tag_index:
+            for i, item in enumerate(items):
+                if i not in classified_indices:
+                    InterestPipeline._match_stocks_for_item(item, stock_tag_index)
 
     @staticmethod
     def recommend_keywords(app=None):
@@ -268,8 +307,27 @@ class InterestPipeline:
     def _notify_interest_slack(items: list[NewsItem]):
         from app.services.notification import NotificationService
         try:
+            # 预加载关联股票名称
+            all_codes = set()
+            for n in items:
+                if n.matched_stocks:
+                    all_codes.update(n.matched_stocks.split(','))
+
+            stock_name_map = {}
+            if all_codes:
+                from app.models.stock import Stock
+                stocks = Stock.query.filter(Stock.stock_code.in_(all_codes)).all()
+                stock_name_map = {s.stock_code: s.stock_name for s in stocks}
+
             for n in items:
                 tag = f" [{n.matched_keywords}]" if n.matched_keywords else ""
-                NotificationService.send_slack(f"📰{tag} {n.content}")
+                msg = f"📰{tag} {n.content}"
+
+                if n.matched_stocks:
+                    codes = n.matched_stocks.split(',')
+                    stock_labels = [f"{c}{stock_name_map.get(c, '')}" for c in codes]
+                    msg += f"\n→ 关联: {', '.join(stock_labels)}"
+
+                NotificationService.send_slack(msg)
         except Exception as e:
             logger.error(f'[兴趣] Slack通知失败: {e}')

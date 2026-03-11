@@ -86,6 +86,19 @@ def create():
     if error:
         return jsonify({'error': error}), 400
     StockMetaService.bump_version()
+
+    # 异步生成标签
+    import threading
+    from flask import current_app
+    def _gen_tags(app, stock_code):
+        with app.app_context():
+            StockService.generate_tags(stock_code)
+    threading.Thread(
+        target=_gen_tags,
+        args=(current_app._get_current_object(), code),
+        daemon=True
+    ).start()
+
     return jsonify(stock.to_dict()), 201
 
 
@@ -199,3 +212,35 @@ def get_advice_batch():
     stocks = Stock.query.filter(Stock.stock_code.in_(codes)).all()
     result = {s.stock_code: s.investment_advice for s in stocks if s.investment_advice}
     return jsonify(result)
+
+
+@stock_bp.route('/<code>/tags', methods=['PUT'])
+def update_tags(code):
+    """手动更新股票标签"""
+    data = request.get_json() or {}
+    tags = data.get('tags', '')
+
+    stock, error = StockService.update_tags(code, tags)
+    if error:
+        status = 404 if '不存在' in error else 400
+        return jsonify({'error': error}), status
+    return jsonify(stock.to_dict())
+
+
+@stock_bp.route('/<code>/generate-tags', methods=['POST'])
+def generate_tags(code):
+    """为单个股票生成标签"""
+    tags_str, error = StockService.generate_tags(code)
+    if error:
+        status = 404 if '不存在' in error else 500
+        return jsonify({'error': error}), status
+    return jsonify({'tags': tags_str})
+
+
+@stock_bp.route('/batch-generate-tags', methods=['POST'])
+def batch_generate_tags():
+    """批量生成所有股票标签"""
+    data = request.get_json() or {}
+    overwrite = data.get('overwrite', False)
+    results = StockService.batch_generate_tags(overwrite=overwrite)
+    return jsonify({'results': results})
