@@ -79,20 +79,13 @@ class WatchAlertService:
             name = name_map.get(code, code)
 
             # 用API日内最高/最低校准（应对服务重启/漏tick）
-            if api_high and api_high > ext['high']:
+            # 仅当 api 极值 ≠ 当前价 时才校准，否则留给突破检测处理
+            if api_high and api_high > ext['high'] and api_high > curr:
                 ext['high'] = api_high
-                if api_high > curr:
-                    ext['high_confirmed'] = True
-                else:
-                    ext['high_time'] = now
-                    ext['high_confirmed'] = False
-            if api_low and api_low < ext['low']:
+                ext['high_confirmed'] = True
+            if api_low and api_low < ext['low'] and api_low < curr:
                 ext['low'] = api_low
-                if api_low < curr:
-                    ext['low_confirmed'] = True
-                else:
-                    ext['low_time'] = now
-                    ext['low_confirmed'] = False
+                ext['low_confirmed'] = True
 
             if not ext['high_confirmed'] and (now - ext['high_time']).total_seconds() >= BREAKTHROUGH_CONFIRM_MINUTES * 60:
                 ext['high_confirmed'] = True
