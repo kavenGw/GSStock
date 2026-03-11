@@ -39,6 +39,8 @@ class SchedulerEngine:
                     args=[strategy.name],
                     id=f'strategy_{strategy.name}',
                     replace_existing=True,
+                    coalesce=True,
+                    misfire_grace_time=30,
                 )
                 registered.append(f'{strategy.name}({schedule_desc})')
             except Exception as e:
