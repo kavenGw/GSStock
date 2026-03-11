@@ -61,15 +61,38 @@ class WatchAlertService:
             if curr is None:
                 continue
 
+            api_high = data.get('high')
+            api_low = data.get('low')
+
             ext = self._intraday_extremes.get(code)
             if ext is None:
+                init_high = api_high if api_high else curr
+                init_low = api_low if api_low else curr
                 self._intraday_extremes[code] = {
-                    'high': curr, 'high_time': now, 'high_confirmed': False,
-                    'low': curr, 'low_time': now, 'low_confirmed': False,
+                    'high': init_high, 'high_time': now,
+                    'high_confirmed': bool(api_high and api_high > curr),
+                    'low': init_low, 'low_time': now,
+                    'low_confirmed': bool(api_low and api_low < curr),
                 }
                 continue
 
             name = name_map.get(code, code)
+
+            # 用API日内最高/最低校准（应对服务重启/漏tick）
+            if api_high and api_high > ext['high']:
+                ext['high'] = api_high
+                if api_high > curr:
+                    ext['high_confirmed'] = True
+                else:
+                    ext['high_time'] = now
+                    ext['high_confirmed'] = False
+            if api_low and api_low < ext['low']:
+                ext['low'] = api_low
+                if api_low < curr:
+                    ext['low_confirmed'] = True
+                else:
+                    ext['low_time'] = now
+                    ext['low_confirmed'] = False
 
             if not ext['high_confirmed'] and (now - ext['high_time']).total_seconds() >= BREAKTHROUGH_CONFIRM_MINUTES * 60:
                 ext['high_confirmed'] = True
