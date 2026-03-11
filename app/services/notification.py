@@ -4,6 +4,7 @@
 import json
 import logging
 import ssl
+import threading
 from datetime import date, timedelta
 from urllib.request import urlopen, Request
 
@@ -16,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 class NotificationService:
     """消息推送服务"""
+
+    _daily_push_lock = threading.Lock()
 
     @staticmethod
     def get_status() -> dict:
@@ -299,11 +302,15 @@ class NotificationService:
     @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（简报+预警信号+财报提醒+PE预警+AI分析）"""
-        today = date.today()
+        with NotificationService._daily_push_lock:
+            today = date.today()
 
-        if NotificationService.has_daily_push(today):
-            logger.info('[通知] 今日已推送，跳过')
-            return {'skipped': True}
+            if NotificationService.has_daily_push(today):
+                logger.info('[通知] 今日已推送，跳过')
+                return {'skipped': True}
+
+            # 先标记，防止并发重复推送
+            NotificationService._mark_daily_push(today)
 
         subject = f'每日股票分析报告 - {today}'
 
@@ -354,8 +361,6 @@ class NotificationService:
             logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
 
         full_text = '\n---\n'.join(text_parts)
-
-        NotificationService._mark_daily_push(today)
 
         results = NotificationService.send_all(subject, full_text)
         results['content_preview'] = full_text[:500]
