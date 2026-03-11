@@ -176,6 +176,34 @@ class NotificationService:
         sell_signals = dedup(sell_signals)
         buy_signals = dedup(buy_signals)
 
+        # 对立信号冲突消解：同一只股票的对立信号只保留日期最新的
+        conflict_pairs = [('突破5日均线', '跌破5日均线')]
+        for name_a, name_b in conflict_pairs:
+            pair = {name_a, name_b}
+            latest = {}  # stock_code -> (date, 'buy'|'sell')
+            for sig in buy_signals:
+                if sig.get('name') in pair:
+                    code = sig.get('stock_code', '')
+                    d = sig.get('date', '')
+                    if code not in latest or d > latest[code][0]:
+                        latest[code] = (d, 'buy')
+            for sig in sell_signals:
+                if sig.get('name') in pair:
+                    code = sig.get('stock_code', '')
+                    d = sig.get('date', '')
+                    if code not in latest or d > latest[code][0]:
+                        latest[code] = (d, 'sell')
+            buy_signals = [
+                s for s in buy_signals
+                if s.get('name') not in pair
+                or latest.get(s.get('stock_code', ''), (None, 'buy'))[1] == 'buy'
+            ]
+            sell_signals = [
+                s for s in sell_signals
+                if s.get('name') not in pair
+                or latest.get(s.get('stock_code', ''), (None, 'sell'))[1] == 'sell'
+            ]
+
         text = "预警信号\n"
 
         if sell_signals:
