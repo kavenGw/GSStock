@@ -76,9 +76,16 @@ class WatchAlertService:
             if not ext['low_confirmed'] and (now - ext['low_time']).total_seconds() >= BREAKTHROUGH_CONFIRM_MINUTES * 60:
                 ext['low_confirmed'] = True
 
+            # 价格回撤到前次告警突破位以下 → 解除前高告警抑制
+            if ext.get('high_alerted_level') and curr <= ext['high_alerted_level']:
+                ext.pop('high_alerted_level', None)
+            # 价格回升到前次告警突破位以上 → 解除前低告警抑制
+            if ext.get('low_alerted_level') and curr >= ext['low_alerted_level']:
+                ext.pop('low_alerted_level', None)
+
             # 突破前高
             if curr > ext['high']:
-                if ext['high_confirmed']:
+                if ext['high_confirmed'] and not ext.get('high_alerted_level'):
                     key = f"breakthrough:{code}:high"
                     if self._is_cooled_down(key):
                         level = ext['high']
@@ -96,13 +103,14 @@ class WatchAlertService:
                             },
                         ))
                         self._set_cooldown(key)
+                        ext['high_alerted_level'] = level
                 ext['high'] = curr
                 ext['high_time'] = now
                 ext['high_confirmed'] = False
 
             # 跌破前低
             if curr < ext['low']:
-                if ext['low_confirmed']:
+                if ext['low_confirmed'] and not ext.get('low_alerted_level'):
                     key = f"breakthrough:{code}:low"
                     if self._is_cooled_down(key):
                         level = ext['low']
@@ -120,6 +128,7 @@ class WatchAlertService:
                             },
                         ))
                         self._set_cooldown(key)
+                        ext['low_alerted_level'] = level
                 ext['low'] = curr
                 ext['low_time'] = now
                 ext['low_confirmed'] = False
