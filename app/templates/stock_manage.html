@@ -36,6 +36,17 @@ main.container {
 #stockList th.col-category { width: 11%; }
 #stockList th.col-action { width: 80px; }
 #stockList .advice-cell { word-break: break-all; }
+.subcategory-section {
+    margin-left: 24px;
+    border-left: 3px solid #0d6efd33;
+}
+.subcategory-section .subcategory-header {
+    padding: 6px 12px;
+    background-color: rgba(255,255,255,0.03);
+}
+.subcategory-section table {
+    margin-bottom: 0;
+}
 </style>
 {% endblock %}
 
@@ -97,9 +108,9 @@ main.container {
             <!-- 二级分类 -->
             {% for child_id, child_data in parent_data.children.items() %}
             {% if child_data.stocks %}
-            <div class="border-top">
-                <div class="bg-light px-3 py-2 border-bottom">
-                    <span class="text-muted">└</span> <strong>{{ child_data.name }}</strong>
+            <div class="subcategory-section border-top">
+                <div class="subcategory-header border-bottom">
+                    <span class="text-muted small">└</span> <strong>{{ child_data.name }}</strong>
                     <span class="badge bg-secondary ms-1">{{ child_data.stocks|length }}</span>
                 </div>
                 <table class="table table-striped mb-0">
