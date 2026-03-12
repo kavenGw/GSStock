@@ -1204,9 +1204,19 @@ class UnifiedStockDataService:
                 if data and data.get('data'):
                     result_stocks.append(data)
                     cache_date = effective_dates.get(code, SmartCacheStrategy.get_effective_cache_date(code))
+                    trading_date = data.get('trading_date')
+                    if trading_date:
+                        try:
+                            from datetime import date as _date
+                            trading_dt = _date.fromisoformat(trading_date)
+                            if trading_dt != cache_date:
+                                cache_date = trading_dt
+                        except ValueError:
+                            pass
                     memory_cache.set(code, cache_type, data)
                     UnifiedStockCache.set_cached_data(code, cache_type, data, cache_date)
             except Exception as e:
+
                 logger.warning(f"[数据服务.分时] {code} 获取失败: {e}")
 
         logger.info(f"[数据服务.分时] 完成: 成功 {len(result_stocks)}只")

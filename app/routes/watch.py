@@ -39,13 +39,35 @@ def remove_stock(stock_code):
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
     from app.config.stock_codes import BENCHMARK_CODES
+    from app.services.trading_calendar import TradingCalendarService
+    from app.utils.market_identifier import MarketIdentifier
 
     codes = WatchService.get_watch_codes()
 
-    # 纯缓存读取：价格由后端策略 (watch_alert) 驱动刷新
+    def _fetch_prices_with_cache(target_codes: list) -> dict:
+        if not target_codes:
+            return {}
+
+        cached, missing = unified_stock_data_service.get_prices_cached_only(target_codes)
+        stale = [code for code, data in cached.items()
+                 if isinstance(data, dict) and data.get('_is_degraded')]
+        refresh_candidates = set(missing) | set(stale)
+
+        # If market is open and cache is missing or degraded, force a refresh once.
+        if refresh_candidates:
+            refresh_codes = []
+            for code in refresh_candidates:
+                market = MarketIdentifier.identify(code) or 'A'
+                if TradingCalendarService.is_market_open(market):
+                    refresh_codes.append(code)
+            if refresh_codes:
+                fetched = unified_stock_data_service.get_realtime_prices(refresh_codes, force_refresh=True)
+                cached.update(fetched)
+        return cached
+
     price_list = []
     if codes:
-        raw_prices = unified_stock_data_service.get_realtime_prices(codes, cache_only=True)
+        raw_prices = _fetch_prices_with_cache(codes)
         for code, data in raw_prices.items():
             price_list.append({
                 'code': code,
@@ -58,7 +80,7 @@ def prices():
             })
 
     bench_codes = [b['code'] for b in BENCHMARK_CODES]
-    bench_raw = unified_stock_data_service.get_realtime_prices(bench_codes, cache_only=True)
+    bench_raw = _fetch_prices_with_cache(bench_codes)
     benchmark_list = []
     for b in BENCHMARK_CODES:
         data = bench_raw.get(b['code'], {})
