@@ -65,6 +65,11 @@ class SignalDetector:
         return item.get('high') or item.get('close') or item.get('price') or 0
 
     @staticmethod
+    def _get_open(item: dict) -> float:
+        """获取开盘价，兼容 open 和 close/price 字段"""
+        return item.get('open') or item.get('close') or item.get('price') or 0
+
+    @staticmethod
     def _detect_volume_breakout(ohlc_data: list) -> list:
         """缩量突破信号检测"""
         signals = []
@@ -127,8 +132,8 @@ class SignalDetector:
         return signals
 
     @staticmethod
-    def _detect_top_volume(ohlc_data: list, lookback: int = 20) -> list:
-        """顶部巨量信号检测"""
+    def _detect_top_volume(ohlc_data: list, lookback: int = 20, high_lookback: int = 60) -> list:
+        """顶部巨量信号检测（高位放量 + 转弱确认）"""
         signals = []
 
         for i in range(lookback, len(ohlc_data)):
@@ -137,18 +142,27 @@ class SignalDetector:
             curr_volume = ohlc_data[i].get('volume') or 0
             volume_ratio = curr_volume / avg_volume if avg_volume > 0 else 0
 
-            # 检查是否在近期高位
-            recent_high = max(SignalDetector._get_high(d) for d in ohlc_data[i - lookback:i + 1])
+            # 高位判定（收盘接近60日最高收或当日高点接近60日最高）
+            start_idx = max(0, i - high_lookback + 1)
+            recent_high = max(SignalDetector._get_high(d) for d in ohlc_data[start_idx:i + 1])
+            recent_close_high = max(SignalDetector._get_close(d) for d in ohlc_data[start_idx:i + 1])
             curr_high = SignalDetector._get_high(ohlc_data[i])
-            is_near_top = curr_high >= recent_high * 0.95
+            curr_close = SignalDetector._get_close(ohlc_data[i])
+            is_near_top = (recent_close_high > 0 and curr_close >= recent_close_high * 0.90) \
+                or (recent_high > 0 and curr_high >= recent_high * 0.95)
 
-            if volume_ratio >= 3 and is_near_top:
+            # 转弱确认：阴线或收盘低于前日
+            prev_close = SignalDetector._get_close(ohlc_data[i - 1]) if i > 0 else 0
+            curr_open = SignalDetector._get_open(ohlc_data[i])
+            is_weak = (curr_close < curr_open) or (prev_close > 0 and curr_close < prev_close)
+
+            if volume_ratio >= 2.5 and is_near_top and is_weak:
                 signals.append({
                     'index': i,
                     'type': 'sell',
                     'name': '顶部巨量',
                     'date': ohlc_data[i].get('date', ''),
-                    'description': f'成交量为{lookback}日均量的{volume_ratio:.1f}倍，处于近期高位'
+                    'description': f'成交量为{lookback}日均量的{volume_ratio:.1f}倍，处于高位且转弱'
                 })
 
         return signals
