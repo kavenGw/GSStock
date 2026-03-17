@@ -119,7 +119,7 @@ class WatchAlertService:
                             },
                         ))
                         self._set_cooldown(key)
-                        ext['high_alerted_level'] = level
+                        ext['high_alerted_level'] = curr
                 ext['high'] = curr
                 ext['high_time'] = now
                 ext['high_confirmed'] = False
@@ -144,7 +144,7 @@ class WatchAlertService:
                             },
                         ))
                         self._set_cooldown(key)
-                        ext['low_alerted_level'] = level
+                        ext['low_alerted_level'] = curr
                 ext['low'] = curr
                 ext['low_time'] = now
                 ext['low_confirmed'] = False
