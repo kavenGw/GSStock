@@ -41,7 +41,7 @@ class QuarterlyEarningsService:
     @classmethod
     def _fetch_a_share(cls, stock_code: str) -> list[dict]:
         """A股财报数据（akshare 东方财富单季利润表）"""
-        import akshare as ak
+        from app.services.akshare_client import ak
 
         pure_code = stock_code.replace('.SS', '').replace('.SH', '').replace('.SZ', '')
         if pure_code.startswith('6'):

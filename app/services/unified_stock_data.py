@@ -646,7 +646,7 @@ class UnifiedStockDataService:
         def fetch_from_eastmoney(codes: list) -> dict:
             result = {}
             try:
-                import akshare as ak
+                from app.services.akshare_client import ak
 
                 if 'eastmoney' not in _source_cache:
                     stock_map = self._get_source_snapshot('eastmoney_stock')
@@ -706,7 +706,7 @@ class UnifiedStockDataService:
         def fetch_from_sina(codes: list) -> dict:
             result = {}
             try:
-                import akshare as ak
+                from app.services.akshare_client import ak
 
                 if 'sina' not in _source_cache:
                     stock_map = self._get_source_snapshot('sina_stock')
@@ -1230,7 +1230,7 @@ class UnifiedStockDataService:
             return self._fetch_intraday_yfinance(code, interval)
 
     def _fetch_intraday_a_share(self, code: str, interval: str = '1m') -> dict:
-        import akshare as ak
+        from app.services.akshare_client import ak
         from app.services.market_session import SmartCacheStrategy
         period_map = {'1m': '1', '5m': '5', '15m': '15'}
         period = period_map.get(interval, '1')
@@ -1465,7 +1465,7 @@ class UnifiedStockDataService:
         # ETF 使用专用接口
         if market == 'A' and is_etf:
             try:
-                import akshare as ak
+                from app.services.akshare_client import ak
                 df = ak.fund_etf_hist_em(
                     symbol=stock_code,
                     period="daily",
@@ -1498,7 +1498,7 @@ class UnifiedStockDataService:
 
         # A股使用负载均衡（按健康状态选择数据源）
         if market == 'A':
-            import akshare as ak
+            from app.services.akshare_client import ak
             import requests
 
             # 数据源获取函数
@@ -1652,7 +1652,7 @@ class UnifiedStockDataService:
             return results
 
         try:
-            import akshare as ak
+            from app.services.akshare_client import ak
             logger.debug(f"[数据服务.走势] 获取ETF历史数据 ({len(etf_codes)}只)...")
 
             def _fetch_single_etf(etf_code):
@@ -1719,7 +1719,7 @@ class UnifiedStockDataService:
     def _fetch_trend_from_eastmoney(self, stock_codes: list, days: int, start_date: date,
                                      today: date, stock_name_map: dict, stock_categories: dict) -> list:
         """从东方财富获取历史K线"""
-        import akshare as ak
+        from app.services.akshare_client import ak
 
         results = []
         logger.debug(f"[数据服务.走势] 东方财富获取 ({len(stock_codes)}只)...")
@@ -1774,7 +1774,7 @@ class UnifiedStockDataService:
     def _fetch_trend_from_sina(self, stock_codes: list, days: int, start_date: date,
                                 today: date, stock_name_map: dict, stock_categories: dict) -> list:
         """从新浪获取历史K线"""
-        import akshare as ak
+        from app.services.akshare_client import ak
 
         results = []
         logger.debug(f"[数据服务.走势] 新浪获取 ({len(stock_codes)}只)...")
@@ -2591,7 +2591,7 @@ class UnifiedStockDataService:
         self._miss_count += len(need_fetch)
 
         def fetch_index_eastmoney(codes: list) -> dict:
-            import akshare as ak
+            from app.services.akshare_client import ak
             res = {}
             try:
                 df = ak.stock_zh_index_spot_em()
@@ -2624,7 +2624,7 @@ class UnifiedStockDataService:
             return res
 
         def fetch_index_sina(codes: list) -> dict:
-            import akshare as ak
+            from app.services.akshare_client import ak
             res = {}
             try:
                 df = ak.stock_zh_index_spot_sina()
@@ -2741,7 +2741,7 @@ class UnifiedStockDataService:
                 continue
 
             try:
-                import akshare as ak
+                from app.services.akshare_client import ak
 
                 if source_name == 'eastmoney':
                     logger.debug(f"[数据服务.A股板块] 尝试数据源: {source_name} ({api_func})")
@@ -2767,7 +2767,7 @@ class UnifiedStockDataService:
                     # 这是akshare库的内部错误，非本代码问题
                     logger.debug(f"[数据服务.A股板块] 尝试数据源: {source_name} ({api_func})")
                     try:
-                        df = ak.stock_sector_spot(indicator="行业板块")
+                        df = ak.stock_sector_spot(indicator="行业")
                     except UnboundLocalError as ule:
                         # akshare库内部bug：网络请求失败时变量未赋值
                         logger.warning(
@@ -2892,7 +2892,7 @@ class UnifiedStockDataService:
 
         def fetch_via_fund_info(codes: list) -> dict:
             """通过 fund_etf_fund_info_em 获取历史净值（T-1）"""
-            import akshare as ak
+            from app.services.akshare_client import ak
             import time
             result = {}
 
@@ -2921,7 +2921,7 @@ class UnifiedStockDataService:
             return result
 
         def fetch_via_spot(codes: list) -> dict:
-            import akshare as ak
+            from app.services.akshare_client import ak
             result = {}
 
             try:

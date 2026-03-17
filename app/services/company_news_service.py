@@ -80,7 +80,7 @@ class CompanyNewsService:
     @staticmethod
     def _fetch_eastmoney_news(stock_code: str, company_name: str) -> list[dict]:
         try:
-            import akshare as ak
+            from app.services.akshare_client import ak
             symbol = stock_code.split('.')[0]
             df = ak.stock_news_em(symbol=symbol)
             articles = []

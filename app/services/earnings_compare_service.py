@@ -94,7 +94,7 @@ class EarningsCompareService:
     @staticmethod
     def _fetch_a_share(stock_code: str, report_type: str) -> tuple[dict | None, dict | None]:
         """获取A股两期财报数据（akshare）"""
-        import akshare as ak
+        from app.services.akshare_client import ak
 
         dates = EarningsCompareService._get_report_dates(report_type)
         if not dates:
