@@ -15,7 +15,17 @@ chmod +x gsstock update_and_run.sh
 echo "=== 安装/更新依赖 ==="
 if [ ! -f venv/bin/pip ]; then
     echo "创建虚拟环境..."
-    python3 -m venv venv
+    if ! python3 -m venv venv 2>/dev/null; then
+        echo "venv 模块缺失，尝试自动安装..."
+        PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+        if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq "python${PY_VER}-venv"
+        else
+            echo "错误：请手动安装 python3-venv 包"
+            exit 1
+        fi
+        python3 -m venv venv || { echo "venv 创建失败"; exit 1; }
+    fi
 fi
 venv/bin/pip install -r requirements.txt -q
 
