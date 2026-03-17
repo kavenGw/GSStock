@@ -102,24 +102,16 @@ Windows 用户可双击 `start.bat` 一键启动并打开浏览器。
 
 ```bash
 sudo apt update
-sudo apt install -y python3 python3-venv python3-pip git
+sudo apt install -y python3 python3-pip git
 ```
 
-### 2. 创建用户和目录
+### 2. 拉取代码
 
 ```bash
-sudo useradd -r -s /bin/false gsstock
-sudo mkdir -p /opt/gsstock
-sudo chown gsstock:gsstock /opt/gsstock
-```
-
-### 3. 拉取代码并创建虚拟环境
-
-```bash
-sudo -u gsstock git clone <your-repo-url> /opt/gsstock
-cd /opt/gsstock
-sudo -u gsstock python3 -m venv venv
-sudo -u gsstock venv/bin/pip install -r requirements.txt
+cd /home/kaven
+git clone <your-repo-url> stock
+cd stock
+pip install -r requirements.txt
 ```
 
 如需新闻爬取功能（crawl4ai），还需安装 Playwright 浏览器：
@@ -128,32 +120,35 @@ sudo -u gsstock venv/bin/pip install -r requirements.txt
 sudo apt install -y libglib2.0-0 libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
   libcups2 libdrm2 libdbus-1-3 libxcomposite1 libxdamage1 libxrandr2 \
   libgbm1 libpango-1.0-0 libcairo2 libasound2 libxshmfence1
-sudo -u gsstock venv/bin/playwright install chromium
+playwright install chromium
 ```
 
-### 4. 环境配置
+### 3. 环境配置
 
 ```bash
-sudo -u gsstock cp .env.sample .env
-sudo -u gsstock nano .env
+cp .env.sample .env
+nano .env
 ```
 
-### 5. 初始化数据目录
+### 4. 安装 systemd 服务
 
 ```bash
-sudo -u gsstock mkdir -p data
-```
-
-### 6. 安装 systemd 服务
-
-```bash
-sudo cp gsstock.service /etc/systemd/system/
+sudo ln -s /home/kaven/stock/gsstock.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable gsstock
 sudo systemctl start gsstock
 ```
 
-### 7. 管理服务
+### 5. 日常更新
+
+```bash
+cd /home/kaven/stock
+git pull
+pip install -r requirements.txt
+sudo systemctl restart gsstock
+```
+
+### 6. 管理服务
 
 ```bash
 sudo systemctl status gsstock    # 查看状态
