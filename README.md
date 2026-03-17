@@ -140,6 +140,10 @@ chmod +x gsstock
 ### 5. 日常更新
 
 ```bash
+# 一键强制更新并重启
+./update_and_run.sh
+
+# 或手动操作
 cd /home/kaven/stock
 git pull
 pip install -r requirements.txt

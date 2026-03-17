@@ -10,6 +10,7 @@ echo "=== 停止 GSStock ==="
 echo "=== 拉取最新代码 ==="
 git fetch --all
 git reset --hard origin/main
+chmod +x gsstock update_and_run.sh
 
 echo "=== 安装/更新依赖 ==="
 if [ -f venv/bin/pip ]; then
