@@ -1,11 +1,11 @@
 import os
+import sys
 import json
 import logging
 from datetime import date
 from flask import render_template, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from app.routes import daily_record_bp
-from app.services.ocr import OcrService
 from app.services.position import PositionService
 from app.services.trade import TradeService
 from app.services.stock import StockService
@@ -15,6 +15,11 @@ from app.models.position import Position
 from app.models.trade import Trade
 from app.models.bank_transfer import BankTransfer
 from app import db
+
+IS_WINDOWS = sys.platform == 'win32'
+
+if IS_WINDOWS:
+    from app.services.ocr import OcrService
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +34,8 @@ def allowed_file(filename: str) -> bool:
 @daily_record_bp.route('/')
 def index():
     """每日记录上传页面"""
+    if not IS_WINDOWS:
+        return render_template('unsupported.html', feature='每日记录', reason='该功能依赖 OCR 识别，暂不支持 Linux'), 200
     today = date.today().isoformat()
     return render_template('daily_record.html', today=today)
 

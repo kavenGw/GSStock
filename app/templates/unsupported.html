@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ feature }} - 不支持{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <h3 class="text-muted mb-3">{{ feature }}</h3>
+            <p class="text-secondary">{{ reason }}</p>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary mt-3">返回首页</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

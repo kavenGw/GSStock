@@ -243,9 +243,10 @@ def create_app(config_class=None):
             from app.services.market_status import market_status_service
             market_status_service.initialize()
 
-    # 预加载 OCR 模型，避免首次识别时卡顿
-    from app.services.ocr import preload_model
-    preload_model()
+    # 预加载 OCR 模型（仅 Windows，Linux 不安装 rapidocr-onnxruntime）
+    if sys.platform == 'win32':
+        from app.services.ocr import preload_model
+        preload_model()
 
     # 添加只读模式上下文处理器
     @app.context_processor
