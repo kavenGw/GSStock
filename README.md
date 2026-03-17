@@ -130,13 +130,10 @@ cp .env.sample .env
 nano .env
 ```
 
-### 4. 安装 systemd 服务
+### 4. 启动服务
 
 ```bash
-sudo ln -s /home/kaven/stock/gsstock.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable gsstock
-sudo systemctl start gsstock
+sudo ./gsstock start &
 ```
 
 ### 5. 日常更新
@@ -145,15 +142,15 @@ sudo systemctl start gsstock
 cd /home/kaven/stock
 git pull
 pip install -r requirements.txt
-sudo systemctl restart gsstock
+sudo ./gsstock restart &
 ```
 
 ### 6. 管理服务
 
 ```bash
-sudo systemctl status gsstock    # 查看状态
-sudo systemctl restart gsstock   # 重启
-sudo journalctl -u gsstock -f    # 查看日志
+sudo ./gsstock status             # 查看状态
+sudo ./gsstock restart &           # 重启
+sudo ./gsstock stop                # 停止
 ```
 
 访问 http://<server-ip>:5000
