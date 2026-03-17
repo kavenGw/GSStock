@@ -149,6 +149,27 @@ def setup_logging(app):
     logging.getLogger('apscheduler').setLevel(logging.WARNING)
 
 
+def check_playwright():
+    """启动前检查 Playwright 和 Chromium 浏览器是否已安装"""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        raise RuntimeError(
+            "Playwright 未安装！请运行: pip install playwright"
+        )
+
+    try:
+        with sync_playwright() as p:
+            executable = p.chromium.executable_path
+            if not executable or not os.path.exists(executable):
+                raise FileNotFoundError(f"Chromium 未找到: {executable}")
+    except Exception as e:
+        raise RuntimeError(
+            f"Playwright Chromium 浏览器未安装！请运行: playwright install chromium\n"
+            f"错误详情: {e}"
+        ) from e
+
+
 def create_app(config_class=None):
     app = Flask(__name__)
 
@@ -157,6 +178,10 @@ def create_app(config_class=None):
         config_class = Config
 
     app.config.from_object(config_class)
+
+    # Playwright 强制检查（只读模式跳过，不需要爬取新闻）
+    if not app.config.get('READONLY_MODE'):
+        check_playwright()
 
     # 确保必要目录存在
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
