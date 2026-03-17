@@ -3,7 +3,7 @@
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 PIDFILE="$APP_DIR/gsstock.pid"
-GUNICORN="gunicorn"
+GUNICORN="python3 -m gunicorn"
 
 cd "$APP_DIR"
 

@@ -128,12 +128,13 @@ playwright install chromium
 ```bash
 cp .env.sample .env
 nano .env
+chmod +x gsstock
 ```
 
 ### 4. 启动服务
 
 ```bash
-sudo ./gsstock start &
+./gsstock start
 ```
 
 ### 5. 日常更新
@@ -142,15 +143,15 @@ sudo ./gsstock start &
 cd /home/kaven/stock
 git pull
 pip install -r requirements.txt
-sudo ./gsstock restart &
+./gsstock restart
 ```
 
 ### 6. 管理服务
 
 ```bash
-sudo ./gsstock status             # 查看状态
-sudo ./gsstock restart &           # 重启
-sudo ./gsstock stop                # 停止
+./gsstock status    # 查看状态
+./gsstock restart   # 重启
+./gsstock stop      # 停止
 ```
 
 访问 http://<server-ip>:5000
