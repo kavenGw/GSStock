@@ -3,7 +3,15 @@
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 PIDFILE="$APP_DIR/gsstock.pid"
-GUNICORN="python3 -m gunicorn"
+VENV="$APP_DIR/venv"
+
+# 优先使用虚拟环境
+if [ -f "$VENV/bin/python" ]; then
+    PYTHON="$VENV/bin/python"
+else
+    PYTHON="python3"
+fi
+GUNICORN="$PYTHON -m gunicorn"
 
 cd "$APP_DIR"
 
