@@ -1,0 +1,90 @@
+#!/bin/bash
+# GSStock 管理脚本
+
+APP_DIR="$(cd "$(dirname "$0")" && pwd)"
+PIDFILE="$APP_DIR/gsstock.pid"
+GUNICORN="gunicorn"
+
+cd "$APP_DIR"
+
+# 加载环境变量
+if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+fi
+
+get_pid() {
+    if [ -f "$PIDFILE" ]; then
+        local pid
+        pid=$(cat "$PIDFILE")
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "$pid"
+            return 0
+        fi
+        rm -f "$PIDFILE"
+    fi
+    return 1
+}
+
+start() {
+    if pid=$(get_pid); then
+        echo "GSStock 已在运行 (PID: $pid)"
+        return 1
+    fi
+    echo "启动 GSStock..."
+    $GUNICORN -c gunicorn.conf.py run:app -D -p "$PIDFILE"
+    sleep 1
+    if pid=$(get_pid); then
+        echo "GSStock 启动成功 (PID: $pid)"
+    else
+        echo "GSStock 启动失败，查看日志排查"
+        return 1
+    fi
+}
+
+stop() {
+    if pid=$(get_pid); then
+        echo "停止 GSStock (PID: $pid)..."
+        kill "$pid"
+        for i in $(seq 1 10); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+                rm -f "$PIDFILE"
+                echo "GSStock 已停止"
+                return 0
+            fi
+            sleep 1
+        done
+        echo "强制终止..."
+        kill -9 "$pid" 2>/dev/null
+        rm -f "$PIDFILE"
+        echo "GSStock 已强制停止"
+    else
+        echo "GSStock 未在运行"
+    fi
+}
+
+restart() {
+    stop
+    sleep 1
+    start
+}
+
+status() {
+    if pid=$(get_pid); then
+        echo "GSStock 运行中 (PID: $pid)"
+    else
+        echo "GSStock 未在运行"
+    fi
+}
+
+case "${1:-}" in
+    start)   start ;;
+    stop)    stop ;;
+    restart) restart ;;
+    status)  status ;;
+    *)
+        echo "用法: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
