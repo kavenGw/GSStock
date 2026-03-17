@@ -52,10 +52,17 @@ class CompanyNewsService:
 
     @staticmethod
     async def _fetch_all(company_names: list[str]) -> list[dict]:
-        from crawl4ai import AsyncWebCrawler
-
         all_results = []
-        async with AsyncWebCrawler() as crawler:
+        crawler = None
+        crawler_ctx = None
+        try:
+            from crawl4ai import AsyncWebCrawler
+            crawler_ctx = AsyncWebCrawler()
+            crawler = await crawler_ctx.__aenter__()
+        except Exception as e:
+            logger.warning(f'[公司新闻] Playwright不可用，Google News降级关闭: {e}')
+
+        try:
             for name in company_names:
                 try:
                     results = await asyncio.wait_for(
@@ -67,6 +74,9 @@ class CompanyNewsService:
                     logger.warning(f'[公司新闻] {name} 爬取超时')
                 except Exception as e:
                     logger.error(f'[公司新闻] {name} 爬取失败: {e}')
+        finally:
+            if crawler_ctx:
+                await crawler_ctx.__aexit__(None, None, None)
         return all_results
 
     @staticmethod
@@ -150,6 +160,8 @@ class CompanyNewsService:
                 return results
             logger.info(f'[公司新闻] {company_name} Yahoo Finance无结果，降级到 Google News')
 
+        if not crawler:
+            return []
         return await CompanyNewsService._search_google_news(crawler, company_name)
 
     @staticmethod

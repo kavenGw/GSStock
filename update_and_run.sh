@@ -29,8 +29,8 @@ if [ ! -f venv/bin/pip ]; then
 fi
 venv/bin/pip install -r requirements.txt -q
 
-echo "=== 安装 Playwright 浏览器 ==="
-venv/bin/playwright install --with-deps 2>/dev/null || echo "Playwright 浏览器安装失败，跳过"
+echo "=== 安装 Playwright Chromium 浏览器 ==="
+venv/bin/playwright install chromium --with-deps || echo "⚠ Playwright 浏览器安装失败，公司新闻爬取功能将不可用"
 
 echo "=== 启动 GSStock ==="
 ./gsstock start

@@ -120,7 +120,6 @@ class DerivationService:
 
     @staticmethod
     async def _async_crawl(search_url: str, max_urls: int) -> list[dict]:
-        """异步爬取"""
         from crawl4ai import AsyncWebCrawler
 
         articles = []
