@@ -61,6 +61,7 @@ class CompanyNewsService:
             crawler = await crawler_ctx.__aenter__()
         except Exception as e:
             logger.warning(f'[公司新闻] Playwright不可用，Google News降级关闭: {e}')
+            crawler_ctx = None
 
         try:
             for name in company_names:
@@ -76,7 +77,10 @@ class CompanyNewsService:
                     logger.error(f'[公司新闻] {name} 爬取失败: {e}')
         finally:
             if crawler_ctx:
-                await crawler_ctx.__aexit__(None, None, None)
+                try:
+                    await crawler_ctx.__aexit__(None, None, None)
+                except Exception:
+                    pass
         return all_results
 
     @staticmethod
