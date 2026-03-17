@@ -13,11 +13,11 @@ git reset --hard origin/main
 chmod +x gsstock update_and_run.sh
 
 echo "=== 安装/更新依赖 ==="
-if [ -f venv/bin/pip ]; then
-    venv/bin/pip install -r requirements.txt -q
-else
-    pip3 install -r requirements.txt -q
+if [ ! -f venv/bin/pip ]; then
+    echo "创建虚拟环境..."
+    python3 -m venv venv
 fi
+venv/bin/pip install -r requirements.txt -q
 
 echo "=== 启动 GSStock ==="
 ./gsstock start
