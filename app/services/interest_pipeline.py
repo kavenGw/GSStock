@@ -306,7 +306,12 @@ class InterestPipeline:
     @staticmethod
     def _notify_interest_slack(items: list[NewsItem]):
         from app.services.notification import NotificationService
+        from app.services.news_dedup import news_deduplicator
         try:
+            items = news_deduplicator.filter_duplicates(items, content_key=lambda n: n.content)
+            if not items:
+                return
+
             # 预加载关联股票名称
             all_codes = set()
             for n in items:

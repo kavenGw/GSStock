@@ -262,7 +262,12 @@ class CompanyNewsService:
     @staticmethod
     def _notify_company_slack(items: list[tuple[str, str]]):
         from app.services.notification import NotificationService
+        from app.services.news_dedup import news_deduplicator
         try:
+            items = news_deduplicator.filter_duplicates(items, content_key=lambda t: t[1])
+            if not items:
+                return
+
             for company, content in items:
                 NotificationService.send_slack(f"🏢 [{company}] {content}")
         except Exception as e:
