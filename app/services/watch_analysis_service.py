@@ -92,6 +92,29 @@ class WatchAnalysisService:
                 if cleaned.startswith('```'):
                     cleaned = cleaned.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
                 parsed = json.loads(cleaned)
+                detail_data = {
+                    'signal_text': parsed.get('signal_text', ''),
+                    'ma_levels': parsed.get('ma_levels', {}),
+                    'price_range': parsed.get('price_range', {}),
+                }
+                if period == '7d':
+                    alert_params = parsed.get('alert_params', {})
+                    raw_pct = alert_params.get('change_threshold_pct', 5.0)
+                    try:
+                        alert_params['change_threshold_pct'] = max(1.0, min(10.0, float(raw_pct)))
+                    except (TypeError, ValueError):
+                        alert_params['change_threshold_pct'] = 5.0
+                    raw_ratio = alert_params.get('volume_anomaly_ratio', 2.0)
+                    try:
+                        alert_params['volume_anomaly_ratio'] = max(1.0, min(5.0, float(raw_ratio)))
+                    except (TypeError, ValueError):
+                        alert_params['volume_anomaly_ratio'] = 2.0
+                    trend_stock = trend_map.get(code, {})
+                    ohlc_for_vol = trend_stock.get('data', [])
+                    volumes = [d.get('volume', 0) for d in ohlc_for_vol[-7:] if d.get('volume')]
+                    alert_params['volume_baseline'] = sum(volumes) / len(volumes) if volumes else 0
+                    detail_data['alert_params'] = alert_params
+
                 WatchService.save_analysis(
                     stock_code=code,
                     period=period,
@@ -99,11 +122,7 @@ class WatchAnalysisService:
                     resistance_levels=parsed.get('resistance_levels', []),
                     summary=parsed.get('summary', ''),
                     signal=parsed.get('signal', ''),
-                    detail={
-                        'signal_text': parsed.get('signal_text', ''),
-                        'ma_levels': parsed.get('ma_levels', {}),
-                        'price_range': parsed.get('price_range', {}),
-                    },
+                    detail=detail_data,
                 )
             except Exception as e:
                 db.session.rollback()
