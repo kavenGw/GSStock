@@ -7,6 +7,7 @@ from app.strategies.base import Strategy, Signal
 logger = logging.getLogger(__name__)
 
 TD_CALC_INTERVAL = 15 * 60
+PARAMS_RETRY_INTERVAL = 30 * 60
 
 
 class WatchAlertStrategy(Strategy):
@@ -18,6 +19,7 @@ class WatchAlertStrategy(Strategy):
     _last_td_calc = None
     _td_cache = {}
     _alert_params_cache = {}
+    _last_params_retry = None
 
     def scan(self) -> list[Signal]:
         from app.models.watch_list import WatchList
@@ -75,11 +77,42 @@ class WatchAlertStrategy(Strategy):
         today = datetime.now().strftime('%Y-%m-%d')
         cache_entry = self._alert_params_cache.get(today)
         if cache_entry and cache_entry.get('_queried_codes', set()) >= set(codes):
-            return cache_entry.get('params', {})
+            result = cache_entry.get('params', {})
+            missing = [c for c in codes if c not in result]
+            if not missing:
+                return result
+            if not self._should_retry_params():
+                return result
+            # 缓存中有缺失且到了重试时间，fall through 重新加载
 
+        result = self._fetch_alert_params(codes)
+
+        missing = [c for c in codes if c not in result]
+        if missing and self._should_retry_params():
+            logger.info(f'[盯盘告警] {len(missing)}只缺少alert_params，触发7d分析重试: {missing}')
+            self._last_params_retry = datetime.now()
+            try:
+                from app.services.watch_analysis_service import WatchAnalysisService
+                WatchAnalysisService.analyze_stocks('7d')
+                result = self._fetch_alert_params(codes)
+                still_missing = [c for c in codes if c not in result]
+                if still_missing:
+                    logger.warning(f'[盯盘告警] 重试后仍有{len(still_missing)}只缺少alert_params: {still_missing}')
+            except Exception as e:
+                logger.error(f'[盯盘告警] 7d分析重试失败: {e}')
+
+        self._alert_params_cache = {today: {'params': result, '_queried_codes': set(codes)}}
+        return result
+
+    def _should_retry_params(self) -> bool:
+        if self._last_params_retry is None:
+            return True
+        return (datetime.now() - self._last_params_retry).total_seconds() >= PARAMS_RETRY_INTERVAL
+
+    @staticmethod
+    def _fetch_alert_params(codes: list[str]) -> dict:
         from app.services.watch_service import WatchService
         all_analyses = WatchService.get_all_today_analyses()
-
         result = {}
         for code in codes:
             analysis_7d = all_analyses.get(code, {}).get('7d', {})
@@ -90,8 +123,6 @@ class WatchAlertStrategy(Strategy):
                 alert_params['resistance_levels'] = analysis_7d.get('resistance_levels', [])
                 alert_params['ma_levels'] = detail.get('ma_levels', {})
                 result[code] = alert_params
-
-        self._alert_params_cache = {today: {'params': result, '_queried_codes': set(codes)}}
         return result
 
     def _calc_td_if_due(self, codes: list[str], data_service) -> dict:
