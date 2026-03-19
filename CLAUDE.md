@@ -194,6 +194,7 @@ TDSequentialService.calculate()
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
+| `WATCH_ALERT_COOLDOWN_MINUTES` | 盘中极值告警冷却时间（分钟） | `5` |
 
 **AI分析调度**：
 - realtime：`watch_realtime` 策略，开盘时段每15分钟（`*/15 9-23 * * 1-5`，内部检查市场状态）

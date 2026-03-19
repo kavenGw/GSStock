@@ -63,6 +63,7 @@ cp .env.sample .env
 | `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
 | `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
+| `WATCH_ALERT_COOLDOWN_MINUTES` | 盘中极值告警冷却时间（分钟） | `5` |
 | `NEWS_INTERVAL_MINUTES` | 新闻后台轮询间隔（分钟） | `10` |
 | `NEWS_DERIVATION_ENABLED` | 启用衍生搜索（crawl4ai 爬取+AI 摘要） | `false` |
 | `COMPANY_NEWS_MAX_COMPANIES` | 每次轮询最多处理的公司数 | `3` |

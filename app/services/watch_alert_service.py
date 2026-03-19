@@ -1,6 +1,7 @@
 """盯盘告警服务 — 7种检测器 + 日级去重"""
 import logging
-from datetime import datetime
+import os
+from datetime import datetime, timedelta
 
 from app.strategies.base import Signal
 
@@ -18,6 +19,7 @@ class WatchAlertService:
             cls._instance._intraday_extremes = {}
             cls._instance._prev_prices = {}
             cls._instance._prev_ma_side = {}
+            cls._instance._extreme_cooldown = {}
             cls._instance._last_trading_date = None
         return cls._instance
 
@@ -28,6 +30,7 @@ class WatchAlertService:
             self._intraday_extremes = {}
             self._prev_prices = {}
             self._prev_ma_side = {}
+            self._extreme_cooldown = {}
             self._last_trading_date = today
 
     def _has_fired(self, key: str) -> bool:
@@ -107,26 +110,31 @@ class WatchAlertService:
         if api_low and api_low < ext['low'] and api_low < curr:
             ext['low'] = api_low
 
+        cooldown_minutes = int(os.environ.get('WATCH_ALERT_COOLDOWN_MINUTES', '5'))
+        now = datetime.now()
+
         if curr > ext['high']:
             level = ext['high']
-            key = f"extreme:{code}:{level:.2f}"
-            if not self._has_fired(key):
+            cooldown_key = f"extreme:{code}:high"
+            last_fired = self._extreme_cooldown.get(cooldown_key)
+            if not last_fired or now - last_fired >= timedelta(minutes=cooldown_minutes):
                 signals.append(self._make_signal(name, code,
                     f'突破盘中前高 {level:.2f}',
                     f'突破盘中前高 {level:.2f} ↑ | 当前 {curr:.2f}',
                     {'alert_type': 'intraday_extreme', 'direction': 'high', 'level': level}))
-                self._mark_fired(key)
+                self._extreme_cooldown[cooldown_key] = now
             ext['high'] = curr
 
         if curr < ext['low']:
             level = ext['low']
-            key = f"extreme:{code}:{level:.2f}"
-            if not self._has_fired(key):
+            cooldown_key = f"extreme:{code}:low"
+            last_fired = self._extreme_cooldown.get(cooldown_key)
+            if not last_fired or now - last_fired >= timedelta(minutes=cooldown_minutes):
                 signals.append(self._make_signal(name, code,
                     f'跌破盘中前低 {level:.2f}',
                     f'跌破盘中前低 {level:.2f} ↓ | 当前 {curr:.2f}',
                     {'alert_type': 'intraday_extreme', 'direction': 'low', 'level': level}))
-                self._mark_fired(key)
+                self._extreme_cooldown[cooldown_key] = now
             ext['low'] = curr
 
         return signals
