@@ -481,7 +481,7 @@ class BriefingPage {
                     </div>
                 </div>
                 ${stock.error ? `<div class="text-warning-dark" style="font-size:0.75rem">${stock.error}</div>` : `
-                    <div class="bc-price">${priceText}</div>
+                    <div class="bc-price ${changeClass}">${priceText}</div>
                     <div class="bc-change ${changeClass}">${changeText}</div>
                     <div class="bc-technical" data-code="${stock.code}">
                         <span class="stock-technical" data-code="${stock.code}"></span>
@@ -529,7 +529,7 @@ class BriefingPage {
             <div class="briefing-card ${index.error ? 'has-error' : ''}" style="text-align:center">
                 <div class="bc-name">${index.name}</div>
                 ${index.error ? `<div class="text-warning-dark" style="font-size:0.75rem">${index.error}</div>` : `
-                    <div class="bc-price">${priceText}</div>
+                    <div class="bc-price ${changeClass}">${priceText}</div>
                     <div class="bc-change ${changeClass}">${changeText}</div>
                 `}
             </div>
@@ -554,7 +554,7 @@ class BriefingPage {
                 <div class="briefing-card ${item.error ? 'has-error' : ''}" style="text-align:center">
                     <div class="bc-name">${item.name}</div>
                     ${item.error ? `<div class="text-warning-dark" style="font-size:0.75rem">${item.error}</div>` : `
-                        <div class="bc-price">${priceText}</div>
+                        <div class="bc-price ${changeClass}">${priceText}</div>
                         <div class="bc-change ${changeClass}">${changeText}</div>
                     `}
                 </div>
