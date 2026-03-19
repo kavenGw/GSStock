@@ -1,5 +1,6 @@
 """新闻推送去重：跨源文本相似度过滤"""
 import logging
+import os
 import re
 import threading
 from datetime import datetime, timedelta
@@ -7,7 +8,7 @@ from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
 
-DEDUP_WINDOW_MINUTES = 30
+DEDUP_WINDOW_MINUTES = int(os.getenv('NEWS_DEDUP_WINDOW_MINUTES', '1440'))
 SIMILARITY_THRESHOLD = 0.4
 
 

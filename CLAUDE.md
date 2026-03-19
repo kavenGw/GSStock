@@ -215,6 +215,7 @@ TDSequentialService.calculate()
 | `COMPANY_NEWS_MAX_ARTICLES` | 每个公司最多爬取文章数 | `5` |
 | `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
+| `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
 
 ## LLM 配置
 
