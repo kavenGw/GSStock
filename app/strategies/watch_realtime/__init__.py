@@ -29,8 +29,11 @@ class WatchRealtimeStrategy(Strategy):
 
         from app.services.watch_analysis_service import WatchAnalysisService
         try:
-            WatchAnalysisService.analyze_stocks('realtime', force=True)
+            results = WatchAnalysisService.analyze_stocks('realtime', force=True)
             logger.info('[盯盘实时] 分析完成')
+
+            from app.services.notification import NotificationService
+            NotificationService.push_realtime_analysis(results)
         except Exception as e:
             logger.error(f'[盯盘实时] 分析失败: {e}')
 

@@ -5,7 +5,7 @@ import json
 import logging
 import ssl
 import threading
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from urllib.request import urlopen, Request
 
 import certifi
@@ -294,6 +294,42 @@ class NotificationService:
             text += f"  {line}\n"
 
         return {'text': text}
+
+    @staticmethod
+    def push_realtime_analysis(analyses: dict) -> bool:
+        """推送盯盘实时分析结果到 Slack"""
+        if not analyses:
+            return False
+
+        from app.services.watch_service import WatchService
+        watch_list = WatchService.get_watch_list()
+        name_map = {w['stock_code']: w['stock_name'] for w in watch_list}
+
+        signal_icons = {'buy': '🟢买入', 'sell': '🔴卖出', 'hold': '🟡持有', 'watch': '⚪观望'}
+        now_str = datetime.now().strftime('%H:%M')
+        lines = []
+
+        for code, periods in analyses.items():
+            data = periods.get('realtime')
+            if not data:
+                continue
+            name = name_map.get(code, code)
+            signal = signal_icons.get(data.get('signal', ''), '⚪观望')
+            summary = data.get('summary', '')
+
+            support = data.get('support_levels', [])
+            resistance = data.get('resistance_levels', [])
+            sup_str = ' / '.join(str(s) for s in support) if support else '-'
+            res_str = ' / '.join(str(r) for r in resistance) if resistance else '-'
+
+            lines.append(f"{name}({code}): {signal} {summary}")
+            lines.append(f"  支撑: {sup_str} | 压力: {res_str}")
+
+        if not lines:
+            return False
+
+        message = f"📊 盯盘实时分析 ({now_str})\n" + "\n".join(lines)
+        return NotificationService.send_slack(message)
 
     @staticmethod
     def format_watch_analysis(analyses: dict) -> dict:
