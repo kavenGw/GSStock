@@ -12,6 +12,7 @@ TASK_LAYER_MAP = {
     'analysis': LLMLayer.PREMIUM,
     'advice': LLMLayer.PREMIUM,
     'watch_analysis': LLMLayer.PREMIUM,
+    'daily_briefing': LLMLayer.PREMIUM,
     'news_briefing': LLMLayer.FLASH,
     'news_classify': LLMLayer.FLASH,
     'news_derivation': LLMLayer.FLASH,

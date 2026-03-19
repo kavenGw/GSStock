@@ -364,8 +364,158 @@ class NotificationService:
         return {'text': text}
 
     @staticmethod
+    def format_indices_summary() -> str:
+        """格式化指数行情用于推送"""
+        try:
+            from app.services.briefing import BriefingService
+            data = BriefingService.get_indices_data()
+            regions = data.get('regions', [])
+            indices = data.get('indices', {})
+            if not regions:
+                return ''
+
+            lines = ['指数行情']
+            for region in regions:
+                key = region['key']
+                region_indices = indices.get(key, [])
+                region_lines = []
+                for idx in region_indices:
+                    if idx.get('close') is None:
+                        continue
+                    pct = idx.get('change_percent')
+                    pct_str = f"{pct:+.2f}%" if pct is not None else "—"
+                    region_lines.append(f"  {idx['name']}: {idx['close']:,.2f} ({pct_str})")
+                if region_lines:
+                    lines.append(f"\n  [{region['name']}]")
+                    lines.extend(region_lines)
+
+            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+        except Exception as e:
+            logger.warning(f'[通知.指数] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
+    def format_futures_summary() -> str:
+        """格式化期货数据用于推送"""
+        try:
+            from app.services.briefing import BriefingService
+            data = BriefingService.get_futures_data()
+            futures = data.get('futures', [])
+            if not futures:
+                return ''
+
+            lines = ['期货数据']
+            for f in futures:
+                if f.get('close') is None:
+                    continue
+                pct = f.get('change_percent')
+                pct_str = f"{pct:+.2f}%" if pct is not None else "—"
+                lines.append(f"  {f['name']}: {f['close']:,.2f} ({pct_str})")
+
+            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+        except Exception as e:
+            logger.warning(f'[通知.期货] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
+    def format_etf_premium_summary() -> str:
+        """格式化ETF溢价率用于推送"""
+        try:
+            from app.services.briefing import BriefingService
+            data = BriefingService.get_etf_premium_data()
+            etfs = data.get('etfs', [])
+            if not etfs:
+                return ''
+
+            signal_map = {'buy': '适合买入', 'sell': '溢价过高', 'normal': '正常'}
+            lines = ['ETF溢价']
+            for etf in etfs:
+                if etf.get('premium_rate') is None:
+                    continue
+                signal = signal_map.get(etf.get('signal', ''), '')
+                signal_str = f" {signal}" if signal else ''
+                lines.append(f"  {etf['name']}({etf['code']}): 溢价 {etf['premium_rate']:+.2f}%{signal_str}")
+
+            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+        except Exception as e:
+            logger.warning(f'[通知.ETF溢价] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
+    def format_sectors_summary() -> str:
+        """格式化板块涨跌用于推送"""
+        try:
+            from app.services.briefing import BriefingService
+
+            lines = ['板块涨跌']
+
+            cn_sectors = BriefingService.get_cn_sectors_data()
+            if cn_sectors:
+                lines.append('\n  [A股行业Top5]')
+                for s in cn_sectors:
+                    leader = f" 领涨: {s['leader']}" if s.get('leader') else ''
+                    lines.append(f"  {s['name']}: {s['change_percent']:+.2f}%{leader}")
+
+            us_sectors = BriefingService.get_us_sectors_data()
+            if us_sectors:
+                lines.append('\n  [美股行业Top5]')
+                for s in us_sectors:
+                    lines.append(f"  {s['name']}: {s['change_percent']:+.2f}%")
+
+            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+        except Exception as e:
+            logger.warning(f'[通知.板块] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
+    def format_dram_summary() -> str:
+        """格式化DRAM价格用于推送"""
+        try:
+            from app.services.dram_price import DramPriceService
+            data = DramPriceService.get_dram_data()
+            today_data = data.get('today', [])
+            if not today_data:
+                return ''
+
+            lines = ['DRAM价格']
+            for item in today_data:
+                if item.get('avg_price') is None:
+                    continue
+                pct = item.get('change_pct')
+                pct_str = f" ({pct:+.2f}%)" if pct is not None else ''
+                lines.append(f"  {item['label']}: ${item['avg_price']:.2f}{pct_str}")
+
+            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+        except Exception as e:
+            logger.warning(f'[通知.DRAM] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
+    def format_technical_summary() -> str:
+        """格式化技术评分用于推送"""
+        try:
+            from app.services.briefing import BriefingService, BRIEFING_STOCKS
+            data = BriefingService.get_stocks_technical_data()
+            if not data:
+                return ''
+
+            name_map = {s['code']: s['name'] for s in BRIEFING_STOCKS}
+            lines = ['技术评分']
+            for code, info in data.items():
+                name = name_map.get(code, code)
+                score = info.get('score', 0)
+                signal_text = info.get('signal_text', '')
+                macd = info.get('macd_signal', '')
+                lines.append(f"  {name}({code}): {score}分 {signal_text} MACD:{macd}")
+
+            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+        except Exception as e:
+            logger.warning(f'[通知.技术评分] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
-        """一键推送每日报告（简报+预警信号+财报提醒+PE预警+AI分析）"""
+        """一键推送每日报告（持仓+简报数据+GLM总结+预警+盯盘分析）"""
         with NotificationService._daily_push_lock:
             today = date.today()
 
@@ -373,27 +523,26 @@ class NotificationService:
                 logger.info('[通知] 今日已推送，跳过')
                 return {'skipped': True}
 
-            # 先标记，防止并发重复推送
             NotificationService._mark_daily_push(today)
 
         subject = f'每日股票分析报告 - {today}'
 
         codes, name_map = NotificationService._get_all_watched_codes()
 
+        # 收集所有结构化数据
         briefing = NotificationService.format_briefing_summary()
         alerts = NotificationService.format_alert_signals(codes, name_map)
         earnings = NotificationService.format_earnings_alerts(codes, name_map)
         pe = NotificationService.format_pe_alerts(codes, name_map)
 
-        text_parts = [briefing['text']]
+        indices_text = NotificationService.format_indices_summary()
+        futures_text = NotificationService.format_futures_summary()
+        etf_text = NotificationService.format_etf_premium_summary()
+        sectors_text = NotificationService.format_sectors_summary()
+        dram_text = NotificationService.format_dram_summary()
+        technical_text = NotificationService.format_technical_summary()
 
-        if alerts.get('text'):
-            text_parts.append(alerts['text'])
-        if earnings.get('text'):
-            text_parts.append(earnings['text'])
-        if pe.get('text'):
-            text_parts.append(pe['text'])
-
+        ai_text = ''
         if include_ai:
             try:
                 from app.services.ai_analyzer import AIAnalyzerService, AI_ENABLED
@@ -406,12 +555,12 @@ class NotificationService:
                         stock_list = [{'code': p.stock_code, 'name': p.stock_name} for p in positions]
                         analyses = ai_service.analyze_batch(stock_list)
                         ai_report = NotificationService.format_ai_report(analyses)
-                        if ai_report['text']:
-                            text_parts.append(ai_report['text'])
+                        ai_text = ai_report.get('text', '')
             except Exception as e:
                 logger.warning(f'[通知.AI报告] 生成失败: {e}')
 
         # 盯盘分析（7d + 30d）
+        watch_text = ''
         try:
             from app.services.watch_analysis_service import WatchAnalysisService
             WatchAnalysisService.analyze_stocks('7d')
@@ -419,10 +568,85 @@ class NotificationService:
             from app.services.watch_service import WatchService
             watch_analyses = WatchService.get_all_today_analyses()
             watch_report = NotificationService.format_watch_analysis(watch_analyses)
-            if watch_report['text']:
-                text_parts.append(watch_report['text'])
+            watch_text = watch_report.get('text', '')
         except Exception as e:
             logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
+
+        # GLM 综合分析
+        core_insights = ''
+        action_suggestions = ''
+        try:
+            from app.llm.router import llm_router
+            from app.llm.prompts.daily_briefing import (
+                DAILY_BRIEFING_SYSTEM_PROMPT, build_daily_briefing_prompt,
+            )
+
+            provider = llm_router.route('daily_briefing')
+            if provider:
+                all_data = {
+                    'position_summary': briefing.get('text', ''),
+                    'indices': indices_text,
+                    'futures': futures_text,
+                    'etf_premium': etf_text,
+                    'sectors': sectors_text,
+                    'dram': dram_text,
+                    'technical': technical_text,
+                    'alert_signals': alerts.get('text', ''),
+                    'earnings_alerts': earnings.get('text', ''),
+                    'pe_alerts': pe.get('text', ''),
+                    'watch_analysis': watch_text,
+                }
+                prompt = build_daily_briefing_prompt(all_data)
+                response = provider.chat(
+                    [
+                        {'role': 'system', 'content': DAILY_BRIEFING_SYSTEM_PROMPT},
+                        {'role': 'user', 'content': prompt},
+                    ],
+                    temperature=0.3,
+                    max_tokens=1000,
+                )
+                cleaned = response.strip()
+                if cleaned.startswith('```'):
+                    cleaned = cleaned.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
+                parsed = json.loads(cleaned)
+                core_insights = parsed.get('core_insights', '')
+                action_suggestions = parsed.get('action_suggestions', '')
+        except Exception as e:
+            logger.warning(f'[通知.GLM总结] 生成失败: {e}')
+
+        # 组装最终消息
+        text_parts = []
+
+        if core_insights:
+            text_parts.append(f"🎯 今日核心观点\n{core_insights}")
+
+        text_parts.append(briefing['text'])
+
+        if indices_text:
+            text_parts.append(indices_text)
+        if futures_text:
+            text_parts.append(futures_text)
+        if etf_text:
+            text_parts.append(etf_text)
+        if sectors_text:
+            text_parts.append(sectors_text)
+        if dram_text:
+            text_parts.append(dram_text)
+        if technical_text:
+            text_parts.append(technical_text)
+        if alerts.get('text'):
+            text_parts.append(alerts['text'])
+        if earnings.get('text'):
+            text_parts.append(earnings['text'])
+        if pe.get('text'):
+            text_parts.append(pe['text'])
+        if ai_text:
+            text_parts.append(ai_text)
+        if watch_text:
+            text_parts.append(watch_text)
+
+        if action_suggestions:
+            text_parts.append(f"💡 操作建议\n{action_suggestions}")
 
         full_text = '\n---\n'.join(text_parts)
 
