@@ -1231,7 +1231,6 @@ class UnifiedStockDataService:
 
     def _fetch_intraday_a_share(self, code: str, interval: str = '1m') -> dict:
         from app.services.akshare_client import ak
-        from app.services.market_session import SmartCacheStrategy
         period_map = {'1m': '1', '5m': '5', '15m': '15'}
         period = period_map.get(interval, '1')
 
@@ -1242,16 +1241,10 @@ class UnifiedStockDataService:
 
             df['时间'] = df['时间'].astype(str)
 
-            # 优先用 effective_cache_date 过滤
-            effective_date = SmartCacheStrategy.get_effective_cache_date(code)
-            target_str = effective_date.strftime('%Y-%m-%d')
-            df_filtered = df[df['时间'].str.startswith(target_str)]
-
-            # 兜底：取最近一天的数据
-            if df_filtered.empty:
-                df['date_part'] = df['时间'].str[:10]
-                target_str = df['date_part'].max()
-                df_filtered = df[df['date_part'] == target_str]
+            # 直接取最近一天的数据（与 yfinance 行为一致）
+            df['date_part'] = df['时间'].str[:10]
+            target_str = df['date_part'].max()
+            df_filtered = df[df['date_part'] == target_str]
 
             data = []
             for _, row in df_filtered.iterrows():
