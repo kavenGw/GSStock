@@ -33,16 +33,22 @@ class WatchAlertStrategy(Strategy):
         if not codes:
             return []
 
-        markets = WatchService.get_watched_markets()
-        has_active = any(TradingCalendarService.is_market_open(m) for m in markets)
-        if not has_active:
+        items = WatchList.query.filter(WatchList.stock_code.in_(codes)).all()
+        market_map = {w.stock_code: w.market or MarketIdentifier.identify(w.stock_code) for w in items}
+
+        # 按股票所属市场过滤，只保留市场已开盘的股票
+        open_markets = {m for m in set(market_map.values()) if m and TradingCalendarService.is_market_open(m)}
+        if not open_markets:
+            return []
+        active_codes = [c for c in codes if market_map.get(c) in open_markets]
+        if not active_codes:
             return []
 
         from app.services.unified_stock_data import UnifiedStockDataService
         data_service = UnifiedStockDataService()
 
         bench_codes = [b['code'] for b in BENCHMARK_CODES]
-        all_codes = list(set(codes + bench_codes))
+        all_codes = list(set(active_codes + bench_codes))
 
         a_codes = [c for c in all_codes if MarketIdentifier.is_a_share(c)]
         other_codes = [c for c in all_codes if c not in a_codes]
@@ -51,15 +57,14 @@ class WatchAlertStrategy(Strategy):
         if a_codes:
             prices.update(data_service.get_realtime_prices(a_codes, force_refresh=True))
         if other_codes:
-            prices.update(data_service.get_realtime_prices(other_codes))
+            prices.update(data_service.get_realtime_prices(other_codes, force_refresh=True))
 
-        watch_prices = {c: prices[c] for c in codes if c in prices}
-        items = WatchList.query.filter(WatchList.stock_code.in_(codes)).all()
+        watch_prices = {c: prices[c] for c in active_codes if c in prices}
         name_map = {w.stock_code: w.stock_name for w in items}
 
-        alert_params_map = self._load_alert_params(codes)
-        td_results = self._calc_td_if_due(codes, data_service)
-        trading_minutes = self._calc_trading_minutes(codes, items, TradingCalendarService)
+        alert_params_map = self._load_alert_params(active_codes)
+        td_results = self._calc_td_if_due(active_codes, data_service)
+        trading_minutes = self._calc_trading_minutes(active_codes, items, TradingCalendarService)
 
         service = WatchAlertService()
         signals = service.check_alerts(
