@@ -44,7 +44,7 @@ class ClaudeCodeVersionService:
                 {
                     'version': r.get('tag_name', ''),
                     'published_at': (r.get('published_at') or '')[:10],
-                    'body': r.get('body', ''),
+                    'body': r.get('body') or '',
                 }
                 for r in data
                 if not r.get('draft') and not r.get('prerelease')

@@ -20,6 +20,7 @@ TASK_LAYER_MAP = {
     'news_recommend': LLMLayer.FLASH,
     'earnings_compare': LLMLayer.FLASH,
     'stock_tags': LLMLayer.FLASH,
+    'claude_code_update': LLMLayer.FLASH,
 }
 
 
