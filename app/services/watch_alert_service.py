@@ -81,7 +81,6 @@ class WatchAlertService:
             if not params:
                 continue
             signals.extend(self._check_target_price(code, name, curr, params))
-            signals.extend(self._check_price_change(code, name, data, params))
             signals.extend(self._check_support_resistance(code, name, curr, params))
             signals.extend(self._check_ma_crossover(code, name, curr, params))
             signals.extend(self._check_volume_anomaly(code, name, data, params, trading_minutes.get(code)))
@@ -154,31 +153,6 @@ class WatchAlertService:
                     f'触达目标价 {price}',
                     f'下破目标价 {price} ↓ | 当前 {curr:.2f} | {reason}',
                     {'alert_type': 'target_price', 'direction': 'below', 'level': price}))
-                self._mark_fired(key)
-        return signals
-
-    def _check_price_change(self, code: str, name: str, data: dict, params: dict) -> list[Signal]:
-        signals = []
-        threshold = params.get('change_threshold_pct')
-        change_pct = data.get('change_percent')
-        if threshold is None or change_pct is None:
-            return signals
-
-        if change_pct >= threshold:
-            key = f"change:{code}:up"
-            if not self._has_fired(key):
-                signals.append(self._make_signal(name, code,
-                    f'涨幅达 {change_pct:.1f}%',
-                    f'涨幅 {change_pct:.1f}% 超过阈值 {threshold:.1f}%',
-                    {'alert_type': 'price_change', 'direction': 'up', 'change_pct': change_pct}))
-                self._mark_fired(key)
-        elif change_pct <= -threshold:
-            key = f"change:{code}:down"
-            if not self._has_fired(key):
-                signals.append(self._make_signal(name, code,
-                    f'跌幅达 {abs(change_pct):.1f}%',
-                    f'跌幅 {abs(change_pct):.1f}% 超过阈值 {threshold:.1f}%',
-                    {'alert_type': 'price_change', 'direction': 'down', 'change_pct': change_pct}))
                 self._mark_fired(key)
         return signals
 

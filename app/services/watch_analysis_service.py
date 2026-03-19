@@ -134,11 +134,7 @@ class WatchAnalysisService:
                 }
                 if period == '7d':
                     alert_params = parsed.get('alert_params', {})
-                    raw_pct = alert_params.get('change_threshold_pct', 5.0)
-                    try:
-                        alert_params['change_threshold_pct'] = max(1.0, min(10.0, float(raw_pct)))
-                    except (TypeError, ValueError):
-                        alert_params['change_threshold_pct'] = 5.0
+                    alert_params.pop('change_threshold_pct', None)
                     raw_ratio = alert_params.get('volume_anomaly_ratio', 2.0)
                     try:
                         alert_params['volume_anomaly_ratio'] = max(1.0, min(5.0, float(raw_ratio)))

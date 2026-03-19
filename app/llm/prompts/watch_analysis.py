@@ -60,14 +60,12 @@ def build_7d_analysis_prompt(stock_name: str, stock_code: str,
     "target_prices": [
       {{"price": 目标价, "direction": "above或below", "reason": "原因"}}
     ],
-    "change_threshold_pct": 根据近期波动率计算的涨跌幅告警阈值百分比,
     "volume_anomaly_ratio": 成交量异动倍率（相对近期日均量）
   }}
 }}
 
 alert_params说明：
 - target_prices：关键突破目标价，不要与support_levels/resistance_levels重复，仅设定超出常规支撑阻力的关键位
-- change_threshold_pct：根据近7日波动率设定合理的涨跌幅告警阈值（通常2-5%）
 - volume_anomaly_ratio：成交量异动倍率，通常1.5-3.0"""
 
 
