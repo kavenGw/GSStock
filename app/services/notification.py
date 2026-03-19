@@ -514,51 +514,61 @@ class NotificationService:
             return ''
 
     @staticmethod
-    def format_claude_code_update() -> tuple[str, str | None]:
-        """格式化 Claude Code 版本更新摘要
+    def format_github_release_updates() -> tuple[list[str], list[tuple[str, str]]]:
+        """格式化所有 GitHub 仓库的版本更新摘要
 
         Returns:
-            (formatted_text, latest_version) — latest_version 为 None 表示无新版本
+            (texts, pushed_versions)
+            - texts: 每个有更新的仓库一段文本
+            - pushed_versions: [(key, version), ...] 需要标记已推送的版本
         """
+        texts = []
+        pushed_versions = []
         try:
-            from app.services.claude_code_version import ClaudeCodeVersionService
-            releases = ClaudeCodeVersionService.get_new_releases()
+            from app.services.github_release import GitHubReleaseService
+            all_updates = GitHubReleaseService.get_all_updates()
 
-            if not releases:
-                return '🤖 Claude Code 更新\nClaude Code 无版本更新', None
+            for item in all_updates:
+                cfg = item['config']
+                releases = item['releases']
+                if not releases:
+                    continue
 
-            latest_version = releases[0]['version']
+                latest_version = releases[0]['version']
+                pushed_versions.append((cfg['key'], latest_version))
 
-            # GLM 摘要
-            try:
-                from app.llm.router import llm_router
-                from app.llm.prompts.claude_code_update import (
-                    CLAUDE_CODE_UPDATE_SYSTEM_PROMPT, build_claude_code_update_prompt,
-                )
-
-                provider = llm_router.route('claude_code_update')
-                if provider:
-                    prompt = build_claude_code_update_prompt(releases)
-                    summary = provider.chat(
-                        [
-                            {'role': 'system', 'content': CLAUDE_CODE_UPDATE_SYSTEM_PROMPT},
-                            {'role': 'user', 'content': prompt},
-                        ],
-                        temperature=0.3,
-                        max_tokens=500,
+                # GLM 摘要
+                try:
+                    from app.llm.router import llm_router
+                    from app.llm.prompts.github_release_update import (
+                        GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT, build_github_release_update_prompt,
                     )
-                    return f"🤖 Claude Code 更新\n{summary.strip()}", latest_version
-            except Exception as e:
-                logger.warning(f'[通知.Claude Code更新] GLM摘要失败: {e}')
 
-            # 降级：纯文本
-            lines = ['🤖 Claude Code 更新']
-            for r in releases:
-                lines.append(f"{r['version']} ({r['published_at']})")
-            return '\n'.join(lines), latest_version
+                    provider = llm_router.route('github_release_update')
+                    if provider:
+                        prompt = build_github_release_update_prompt(cfg['name'], releases)
+                        summary = provider.chat(
+                            [
+                                {'role': 'system', 'content': GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT},
+                                {'role': 'user', 'content': prompt},
+                            ],
+                            temperature=0.3,
+                            max_tokens=500,
+                        )
+                        texts.append(f"{cfg['emoji']} {cfg['name']} 更新\n{summary.strip()}")
+                        continue
+                except Exception as e:
+                    logger.warning(f"[通知.{cfg['name']}更新] GLM摘要失败: {e}")
+
+                # 降级：纯文本
+                lines = [f"{cfg['emoji']} {cfg['name']} 更新"]
+                for r in releases:
+                    lines.append(f"{r['version']} ({r['published_at']})")
+                texts.append('\n'.join(lines))
         except Exception as e:
-            logger.warning(f'[通知.Claude Code更新] 获取失败: {e}')
-            return '', None
+            logger.warning(f'[通知.GitHub Release更新] 获取失败: {e}')
+
+        return texts, pushed_versions
 
     @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
@@ -619,8 +629,8 @@ class NotificationService:
         except Exception as e:
             logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
 
-        # Claude Code 版本更新
-        claude_code_text, claude_code_version = NotificationService.format_claude_code_update()
+        # GitHub Release 版本更新
+        release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
 
         # GLM 综合分析
         core_insights = ''
@@ -695,18 +705,19 @@ class NotificationService:
         if watch_text:
             text_parts.append(watch_text)
 
-        if claude_code_text:
-            text_parts.append(claude_code_text)
+        for rt in release_texts:
+            text_parts.append(rt)
 
         if action_suggestions:
             text_parts.append(f"💡 操作建议\n{action_suggestions}")
 
         full_text = '\n---\n'.join(text_parts)
 
-        # 标记已推送的 Claude Code 版本
-        if claude_code_version:
-            from app.services.claude_code_version import ClaudeCodeVersionService
-            ClaudeCodeVersionService.mark_pushed_version(claude_code_version)
+        # 标记已推送的 GitHub Release 版本
+        if release_pushed_versions:
+            from app.services.github_release import GitHubReleaseService
+            for key, version in release_pushed_versions:
+                GitHubReleaseService.mark_pushed_version(key, version)
 
         results = NotificationService.send_all(subject, full_text)
         results['content_preview'] = full_text[:500]

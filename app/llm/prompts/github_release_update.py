@@ -1,14 +1,15 @@
-"""Claude Code 版本更新摘要 Prompt"""
+"""GitHub Release 版本更新摘要 Prompt（通用）"""
 
-CLAUDE_CODE_UPDATE_SYSTEM_PROMPT = (
+GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT = (
     "你是技术工具更新摘要助手。根据 changelog 生成简洁的中文版本更新摘要。"
 )
 
 
-def build_claude_code_update_prompt(releases: list[dict]) -> str:
-    """构建 Claude Code 版本更新摘要 prompt
+def build_github_release_update_prompt(project_name: str, releases: list[dict]) -> str:
+    """构建版本更新摘要 prompt
 
     Args:
+        project_name: 项目显示名称（如 "Claude Code"）
         releases: [{"version": "v1.0.30", "published_at": "2026-03-19", "body": "..."}]
     """
     max_chars = 200 if len(releases) == 1 else 150 * len(releases)
@@ -19,7 +20,7 @@ def build_claude_code_update_prompt(releases: list[dict]) -> str:
 
     releases_text = '\n---\n'.join(parts)
 
-    return f"""以下是 Claude Code（Anthropic CLI 工具）的版本更新日志：
+    return f"""以下是 {project_name} 的版本更新日志：
 
 {releases_text}
 
