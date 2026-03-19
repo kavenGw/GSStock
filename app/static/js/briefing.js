@@ -256,9 +256,9 @@ class BriefingPage {
     }
 
     static renderDramTrend(history) {
-        const canvas = document.getElementById('dramTrendChart');
-        if (!canvas) return;
-        canvas.classList.remove('d-none');
+        const container = document.getElementById('dramTrendContainer');
+        if (!container) return;
+        container.classList.remove('d-none');
 
         const labels = history.map(h => h.date.slice(5));
         const specs = [
@@ -267,42 +267,41 @@ class BriefingPage {
             { key: 'DDR4_16Gb', label: 'DDR4 16Gb', color: '#fd7e14' },
         ];
 
-        const datasets = specs
-            .filter(s => history.some(h => h[s.key] !== undefined))
-            .map(s => ({
-                label: s.label,
-                data: history.map(h => h[s.key] ?? null),
-                borderColor: s.color,
-                backgroundColor: s.color + '20',
-                borderWidth: 2,
-                pointRadius: 1,
-                tension: 0.3,
-                spanGaps: true,
-            }));
+        for (const s of specs) {
+            const canvas = document.getElementById(`dramTrend_${s.key}`);
+            if (!canvas) continue;
+            const raw = history.map(h => h[s.key] ?? null);
+            if (raw.every(v => v === null)) { canvas.style.display = 'none'; continue; }
 
-        if (datasets.length === 0) return;
+            const base = raw.find(v => v !== null);
+            const values = raw.map(v => v === null ? null : ((v - base) / base) * 100);
+            const valid = values.filter(v => v !== null);
+            const min = Math.min(...valid);
+            const max = Math.max(...valid);
+            const padding = Math.max((max - min) * 0.3, 0.3);
 
-        new Chart(canvas, {
-            type: 'line',
-            data: { labels, datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y?.toFixed(2) ?? '--'}`
-                        }
+            new Chart(canvas, {
+                type: 'line',
+                data: { labels, datasets: [{
+                    label: s.label,
+                    data: values,
+                    borderColor: s.color,
+                    backgroundColor: s.color + '20',
+                    borderWidth: 2, pointRadius: 1, tension: 0.3, spanGaps: true,
+                }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { boxWidth: 10, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y?.toFixed(2) ?? '--'}%` } }
+                    },
+                    scales: {
+                        x: { ticks: { font: { size: 9 }, maxRotation: 0 } },
+                        y: { min: min - padding, max: max + padding, ticks: { font: { size: 9 }, callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%' } }
                     }
-                },
-                scales: {
-                    x: { ticks: { font: { size: 10 }, maxRotation: 0 } },
-                    y: { ticks: { font: { size: 10 }, callback: v => '$' + v } }
                 }
-            }
-        });
+            });
+        }
     }
 
     static async loadETF() {
