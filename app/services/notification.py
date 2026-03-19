@@ -514,6 +514,53 @@ class NotificationService:
             return ''
 
     @staticmethod
+    def format_claude_code_update() -> tuple[str, str | None]:
+        """格式化 Claude Code 版本更新摘要
+
+        Returns:
+            (formatted_text, latest_version) — latest_version 为 None 表示无新版本
+        """
+        try:
+            from app.services.claude_code_version import ClaudeCodeVersionService
+            releases = ClaudeCodeVersionService.get_new_releases()
+
+            if not releases:
+                return '🤖 Claude Code 更新\nClaude Code 无版本更新', None
+
+            latest_version = releases[0]['version']
+
+            # GLM 摘要
+            try:
+                from app.llm.router import llm_router
+                from app.llm.prompts.claude_code_update import (
+                    CLAUDE_CODE_UPDATE_SYSTEM_PROMPT, build_claude_code_update_prompt,
+                )
+
+                provider = llm_router.route('claude_code_update')
+                if provider:
+                    prompt = build_claude_code_update_prompt(releases)
+                    summary = provider.chat(
+                        [
+                            {'role': 'system', 'content': CLAUDE_CODE_UPDATE_SYSTEM_PROMPT},
+                            {'role': 'user', 'content': prompt},
+                        ],
+                        temperature=0.3,
+                        max_tokens=500,
+                    )
+                    return f"🤖 Claude Code 更新\n{summary.strip()}", latest_version
+            except Exception as e:
+                logger.warning(f'[通知.Claude Code更新] GLM摘要失败: {e}')
+
+            # 降级：纯文本
+            lines = ['🤖 Claude Code 更新']
+            for r in releases:
+                lines.append(f"{r['version']} ({r['published_at']})")
+            return '\n'.join(lines), latest_version
+        except Exception as e:
+            logger.warning(f'[通知.Claude Code更新] 获取失败: {e}')
+            return '', None
+
+    @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（持仓+简报数据+GLM总结+预警+盯盘分析）"""
         with NotificationService._daily_push_lock:
@@ -571,6 +618,9 @@ class NotificationService:
             watch_text = watch_report.get('text', '')
         except Exception as e:
             logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
+
+        # Claude Code 版本更新
+        claude_code_text, claude_code_version = NotificationService.format_claude_code_update()
 
         # GLM 综合分析
         core_insights = ''
@@ -645,10 +695,18 @@ class NotificationService:
         if watch_text:
             text_parts.append(watch_text)
 
+        if claude_code_text:
+            text_parts.append(claude_code_text)
+
         if action_suggestions:
             text_parts.append(f"💡 操作建议\n{action_suggestions}")
 
         full_text = '\n---\n'.join(text_parts)
+
+        # 标记已推送的 Claude Code 版本
+        if claude_code_version:
+            from app.services.claude_code_version import ClaudeCodeVersionService
+            ClaudeCodeVersionService.mark_pushed_version(claude_code_version)
 
         results = NotificationService.send_all(subject, full_text)
         results['content_preview'] = full_text[:500]
