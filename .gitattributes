@@ -1,0 +1,4 @@
+# Shell 脚本和配置文件强制 LF 换行
+*.sh text eol=lf
+gsstock text eol=lf
+.env.sample text eol=lf

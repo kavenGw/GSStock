@@ -15,10 +15,10 @@ GUNICORN="$PYTHON -m gunicorn"
 
 cd "$APP_DIR"
 
-# 加载环境变量
+# 加载环境变量（自动处理 Windows CRLF 换行符）
 if [ -f .env ]; then
     set -a
-    source .env
+    source <(sed 's/\r$//' .env)
     set +a
 fi
 
