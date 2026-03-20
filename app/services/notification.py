@@ -638,6 +638,96 @@ class NotificationService:
         return texts, pushed_versions
 
     @staticmethod
+    def format_esports_summary() -> str:
+        """格式化赛事资讯（NBA + LoL）
+
+        Returns:
+            格式化文本，全部获取失败返回空字符串
+        """
+        from app.config.esports_config import ESPORTS_ENABLED
+        if not ESPORTS_ENABLED:
+            return ''
+
+        try:
+            from app.services.esports_service import EsportsService
+
+            sections = []
+            any_success = False
+
+            # NBA
+            nba = EsportsService.get_nba_schedule()
+            if nba is not None:
+                any_success = True
+                nba_section = NotificationService._format_nba_section(nba)
+                sections.append(nba_section)
+            else:
+                sections.append('🏀 NBA\n数据获取失败')
+
+            # LoL
+            lol = EsportsService.get_lol_schedule()
+            if lol is not None:
+                any_success = True
+                for league_name in ['LPL', 'LCK', '先锋赛', 'Worlds', 'MSI']:
+                    if league_name not in lol:
+                        continue
+                    league_data = lol[league_name]
+                    if league_data is None:
+                        sections.append(f'🎮 {league_name}\n数据获取失败')
+                    else:
+                        section = NotificationService._format_lol_section(
+                            league_name, league_data,
+                        )
+                        sections.append(section)
+            else:
+                sections.append('🎮 LoL\n数据获取失败')
+
+            if not any_success:
+                return ''
+
+            return '\n\n'.join(sections)
+        except Exception as e:
+            logger.warning(f'[通知.赛事] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
+    def _format_nba_section(nba_data) -> str:
+        lines = ['🏀 NBA']
+        for label, key in [('昨日', 'yesterday'), ('今日', 'today')]:
+            games = nba_data.get(key)
+            if games is None:
+                lines.append(f'{label}: 数据获取失败')
+            elif not games:
+                lines.append(f'{label}: 无赛事')
+            else:
+                parts = []
+                for g in games:
+                    if g['status'] == 'finished':
+                        parts.append(f"{g['away']} {g['away_score']}-{g['home_score']} {g['home']}")
+                    else:
+                        parts.append(f"{g['away']} vs {g['home']} {g['start_time']}")
+                lines.append(f"{label}: {' | '.join(parts)}")
+        return '\n'.join(lines)
+
+    @staticmethod
+    def _format_lol_section(league_name, league_data) -> str:
+        lines = [f'🎮 {league_name}']
+        for label, key in [('昨日', 'yesterday'), ('今日', 'today')]:
+            matches = league_data.get(key)
+            if matches is None:
+                lines.append(f'{label}: 数据获取失败')
+            elif not matches:
+                lines.append(f'{label}: 无赛事')
+            else:
+                parts = []
+                for m in matches:
+                    if m['status'] == 'finished' and m['score1'] is not None:
+                        parts.append(f"{m['team1']} {m['score1']}-{m['score2']} {m['team2']}")
+                    else:
+                        parts.append(f"{m['team1']} vs {m['team2']} {m['start_time']}")
+                lines.append(f"{label}: {' | '.join(parts)}")
+        return '\n'.join(lines)
+
+    @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（持仓+简报数据+GLM总结+预警+盯盘分析）"""
         with NotificationService._daily_push_lock:
@@ -705,6 +795,9 @@ class NotificationService:
 
         # GitHub Release 版本更新
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
+
+        # 赛事资讯
+        esports_text = NotificationService.format_esports_summary()
 
         # GLM 综合分析
         core_insights = ''
@@ -797,8 +890,13 @@ class NotificationService:
         for rt in release_texts:
             msg3_parts.append(rt)
 
+        # Message 4: 赛事资讯
+        msg4_parts = []
+        if esports_text:
+            msg4_parts.append(esports_text)
+
         messages = []
-        for parts in (msg1_parts, msg2_parts, msg3_parts):
+        for parts in (msg1_parts, msg2_parts, msg3_parts, msg4_parts):
             if parts:
                 messages.append('\n\n'.join(parts))
 

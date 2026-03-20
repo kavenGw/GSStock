@@ -71,6 +71,8 @@ cp .env.sample .env
 | `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
+| `ESPORTS_ENABLED` | 是否启用赛事推送（NBA/LoL） | `true` |
+| `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 
 ### 3. GPU 加速（可选）
 

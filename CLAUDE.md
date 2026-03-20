@@ -220,6 +220,15 @@ TDSequentialService.calculate()
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
 
+## 赛事推送配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `ESPORTS_ENABLED` | 是否启用赛事推送 | `true` |
+| `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
+
+数据源：NBA 用 ESPN API（无需认证），LoL 用 LoL Esports API（LPL/LCK/国际赛事/先锋赛）。
+
 ## LLM 配置
 
 | 环境变量 | 说明 | 默认值 |
