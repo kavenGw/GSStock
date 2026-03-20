@@ -334,6 +334,7 @@ class InterestPipeline:
     def _notify_interest_slack(items: list[NewsItem]):
         from app.services.notification import NotificationService
         from app.services.news_dedup import news_deduplicator
+        from app.services.company_news_service import _format_table_content
         try:
             items = news_deduplicator.filter_duplicates(items, content_key=lambda n: n.content)
             if not items:
@@ -353,7 +354,13 @@ class InterestPipeline:
 
             for n in items:
                 tag = f" [{n.matched_keywords}]" if n.matched_keywords else ""
-                msg = f"📰{tag} {n.content}"
+                formatted = _format_table_content(n.content)
+                if formatted != n.content:
+                    title_line = formatted.split('\n', 1)[0]
+                    table_body = '\n'.join(formatted.split('\n')[1:])
+                    msg = f"📰{tag} {title_line}\n```\n{table_body}\n```"
+                else:
+                    msg = f"📰{tag} {n.content}"
 
                 if n.matched_stocks:
                     codes = n.matched_stocks.split(',')

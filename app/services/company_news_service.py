@@ -79,13 +79,56 @@ def _format_institution_research(content: str) -> str:
     return '\n'.join(lines)
 
 
+def _format_stock_ranking(content: str) -> str:
+    """通用股票排名表格格式化（特大单/主力资金/排名等）"""
+    row_pattern = re.compile(
+        r'(\d{6})\s+(\S+)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(\S{2,})'
+    )
+    rows = row_pattern.findall(content)
+    if len(rows) < 2:
+        return content
+
+    first_match = row_pattern.search(content)
+    raw_before = content[:first_match.start()].strip()
+    title = re.split(r'\s*(?:代码|简称|证券代码|证券简称)\s', raw_before)[0].strip()
+    title = title.rstrip('：: ')
+    # 去除标题中夹杂的无代码数据行（如 "：273.60 9.19 3.96 电力设备"）
+    title = re.sub(r'[：:]\s*\d+\.?\d*(?:\s+-?\d+\.?\d*)+\s+\S+', '', title, count=1).strip()
+    if not title:
+        title = '股票排名'
+
+    col3 = '收盘价' if '收盘价' in content else '价格'
+    col4 = '换手%' if '换手' in content else '涨跌%'
+    if '特大单净流入' in content:
+        col5 = '净流入(亿)'
+    elif '特大单净流出' in content:
+        col5 = '净流出(亿)'
+    elif '主力净流入' in content:
+        col5 = '主力净入(亿)'
+    else:
+        col5 = '净额(亿)'
+
+    lines = [title, '']
+    name_w = max(max(len(r[1]) for r in rows), 2)
+
+    header = f"{'代码':<8}{'名称':<{name_w + 2}}{col3:>8}{col4:>8}{col5:>12}  {'行业'}"
+    lines.append(header)
+
+    for code, name, v1, v2, v3, industry in rows:
+        line = f"{code:<8}{name:<{name_w + 2}}{v1:>8}{v2:>8}{v3:>12}  {industry}"
+        lines.append(line)
+
+    return '\n'.join(lines)
+
+
 def _format_table_content(content: str) -> str:
     """检测并格式化表格类新闻内容，不匹配则原样返回"""
     if '资金流向' in content:
         return _format_capital_flow(content)
     if '调研' in content:
         return _format_institution_research(content)
-    return content
+    # 通用股票排名表格（特大单/净流入/净流出/排名/龙虎榜等）
+    return _format_stock_ranking(content)
 
 
 class CompanyNewsService:
