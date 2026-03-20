@@ -309,6 +309,10 @@ class NotificationService:
         now_str = datetime.now().strftime('%H:%M')
         lines = []
 
+        from app.services.unified_stock_data import unified_stock_data_service
+        all_codes = [c for c, p in analyses.items() if p.get('realtime')]
+        raw_prices = unified_stock_data_service.get_realtime_prices(all_codes) if all_codes else {}
+
         for code, periods in analyses.items():
             data = periods.get('realtime')
             if not data:
@@ -317,12 +321,21 @@ class NotificationService:
             signal = signal_icons.get(data.get('signal', ''), '⚪观望')
             summary = data.get('summary', '')
 
+            price_data = raw_prices.get(code, {})
+            current_price = price_data.get('current_price')
+            change_pct = price_data.get('change_percent')
+            price_str = ''
+            if current_price is not None:
+                arrow = '📈' if (change_pct or 0) >= 0 else '📉'
+                pct_str = f"{change_pct:+.2f}%" if change_pct is not None else ''
+                price_str = f" {arrow}{current_price} ({pct_str})"
+
             support = data.get('support_levels', [])
             resistance = data.get('resistance_levels', [])
             sup_str = ' / '.join(str(s) for s in support) if support else '-'
             res_str = ' / '.join(str(r) for r in resistance) if resistance else '-'
 
-            lines.append(f"{name}({code}): {signal} {summary}")
+            lines.append(f"{name}({code}):{price_str} {signal} {summary}")
             lines.append(f"  支撑: {sup_str} | 压力: {res_str}")
 
         if not lines:
