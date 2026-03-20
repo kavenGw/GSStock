@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <link href="{{ url_for('static', filename='vendor/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/css/bootstrap-icons.css') }}" rel="stylesheet">
+    <style>
+        body { background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-card { max-width: 400px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h4 class="card-title text-center mb-4"><i class="bi bi-shield-lock"></i> 访问验证</h4>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <div class="mb-3">
+                        <input type="password" class="form-control form-control-lg" name="access_key"
+                               placeholder="请输入访问密钥" autofocus required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">登录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='vendor/js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>
