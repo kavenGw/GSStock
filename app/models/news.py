@@ -44,6 +44,18 @@ class CompanyKeyword(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
 
 
+class IdentifiedCompany(db.Model):
+    __tablename__ = 'identified_company'
+
+    id = db.Column(db.Integer, primary_key=True)
+    company_name = db.Column(db.String(100))
+    stock_code = db.Column(db.String(20))
+    news_content = db.Column(db.Text, nullable=False)
+    reason = db.Column(db.Text)
+    raw_result = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
+
 class NewsDerivation(db.Model):
     __tablename__ = 'news_derivation'
 

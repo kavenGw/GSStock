@@ -4,7 +4,7 @@ import logging
 import re
 
 from app import db
-from app.models.news import NewsItem, InterestKeyword, CompanyKeyword
+from app.models.news import NewsItem, InterestKeyword, CompanyKeyword, IdentifiedCompany
 
 logger = logging.getLogger(__name__)
 
@@ -364,7 +364,33 @@ class InterestPipeline:
                 identified = InterestPipeline._identify_company(n.content)
                 if identified:
                     msg += f"\n🔍 AI识别: {identified}"
+                    InterestPipeline._save_identified_companies(n.content, identified)
 
                 NotificationService.send_slack(msg)
         except Exception as e:
             logger.error(f'[兴趣] Slack通知失败: {e}')
+
+    @staticmethod
+    def _save_identified_companies(news_content: str, raw_result: str):
+        """解析AI识别结果并保存到数据库"""
+        # 格式：公司名称(股票代码) - 理由  或  公司名称（股票代码） - 理由
+        pattern = re.compile(r'(.+?)[（(]([^)）]+)[)）]\s*[-—]\s*(.+)')
+        try:
+            for line in raw_result.strip().splitlines():
+                line = line.strip()
+                if not line or '无法确定' in line:
+                    continue
+                m = pattern.match(line)
+                if m:
+                    name, code, reason = m.group(1).strip(), m.group(2).strip(), m.group(3).strip()
+                else:
+                    name, code, reason = line, '', ''
+                record = IdentifiedCompany(
+                    company_name=name, stock_code=code,
+                    news_content=news_content, reason=reason,
+                    raw_result=raw_result,
+                )
+                db.session.add(record)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f'[兴趣] 保存识别公司失败: {e}')

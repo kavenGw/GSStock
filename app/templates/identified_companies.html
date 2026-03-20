@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}AI识别公司{% endblock %}
+
+{% block content %}
+<style>
+.ic-card { border-left: 3px solid #0d6efd; margin-bottom: 12px; }
+.ic-card .news-text { font-size: 0.9rem; color: #555; white-space: pre-wrap; word-break: break-all; }
+.ic-card .reason-text { font-size: 0.85rem; color: #198754; }
+.ic-card .time-text { font-size: 0.75rem; color: #999; }
+.ic-company { font-weight: 600; }
+.ic-code { color: #0d6efd; font-size: 0.85rem; margin-left: 4px; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">AI识别公司</h5>
+    <span class="text-muted small" id="totalCount"></span>
+</div>
+
+<div id="companyList"></div>
+<div class="text-center my-3" id="loadMore" style="display:none;">
+    <button class="btn btn-outline-secondary btn-sm" onclick="loadMore()">加载更多</button>
+</div>
+<div class="text-center text-muted my-4" id="emptyTip" style="display:none;">暂无记录</div>
+
+<script>
+let lastId = null;
+
+async function loadItems(append) {
+    let url = '/news/identified-companies/items?limit=50';
+    if (lastId) url += '&before_id=' + lastId;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.success) return;
+    const items = data.items;
+    const container = document.getElementById('companyList');
+    if (!append) container.innerHTML = '';
+
+    if (!items.length) {
+        if (!append) document.getElementById('emptyTip').style.display = '';
+        document.getElementById('loadMore').style.display = 'none';
+        return;
+    }
+
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card ic-card';
+        card.innerHTML = `
+            <div class="card-body py-2 px-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="ic-company">${esc(item.company_name || '未知')}</span>
+                        ${item.stock_code ? `<span class="ic-code">(${esc(item.stock_code)})</span>` : ''}
+                    </div>
+                    <span class="time-text">${esc(item.created_at)}</span>
+                </div>
+                ${item.reason ? `<div class="reason-text mt-1">${esc(item.reason)}</div>` : ''}
+                <div class="news-text mt-1">${esc(item.news_content)}</div>
+            </div>`;
+        container.appendChild(card);
+        lastId = item.id;
+    });
+
+    document.getElementById('loadMore').style.display = items.length >= 50 ? '' : 'none';
+    if (!append) {
+        document.getElementById('totalCount').textContent = items.length + ' 条';
+    }
+}
+
+function loadMore() { loadItems(true); }
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+loadItems(false);
+</script>
+{% endblock %}

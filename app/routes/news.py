@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request
 from app.routes import news_bp
 from app.services.news_service import NewsService
-from app.models.news import InterestKeyword, CompanyKeyword, NewsDerivation
+from app.models.news import InterestKeyword, CompanyKeyword, NewsDerivation, IdentifiedCompany
 from app import db
 
 
@@ -140,4 +140,30 @@ def get_derivation(news_id):
             'importance': d.importance,
             'search_query': d.search_query,
         }
+    })
+
+
+@news_bp.route('/identified-companies')
+def identified_companies():
+    return render_template('identified_companies.html')
+
+
+@news_bp.route('/identified-companies/items')
+def identified_companies_items():
+    limit = request.args.get('limit', 50, type=int)
+    before_id = request.args.get('before_id', type=int)
+    query = IdentifiedCompany.query.order_by(IdentifiedCompany.created_at.desc())
+    if before_id:
+        query = query.filter(IdentifiedCompany.id < before_id)
+    records = query.limit(limit).all()
+    return jsonify({
+        'success': True,
+        'items': [{
+            'id': r.id,
+            'company_name': r.company_name,
+            'stock_code': r.stock_code,
+            'news_content': r.news_content,
+            'reason': r.reason,
+            'created_at': r.created_at.strftime('%Y-%m-%d %H:%M'),
+        } for r in records]
     })
