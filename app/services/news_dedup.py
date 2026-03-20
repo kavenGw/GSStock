@@ -157,7 +157,64 @@ class NewsDeduplicator:
             return True, 'containment'
         return False, ''
 
+    SOFT_SIMILARITY_THRESHOLD = 0.2
+
+    def _find_suspect_pairs(self, groups: list[list[tuple]]) -> list[tuple[int, int]]:
+        """在未合并的组代表之间，找出需要 LLM 判断的可疑对"""
+        reps = []
+        for i, group in enumerate(groups):
+            _, content, fp = group[0]
+            keywords = self._extract_general_keywords(content)
+            reps.append((i, content, fp, keywords))
+
+        pairs = []
+        for ai in range(len(reps)):
+            for bi in range(ai + 1, len(reps)):
+                i_idx, i_content, i_fp, i_kw = reps[ai]
+                j_idx, j_content, j_fp, j_kw = reps[bi]
+
+                # 规则软匹配
+                sim_score = self._text_similarity_score(i_content, j_content)
+                if self.SOFT_SIMILARITY_THRESHOLD <= sim_score < SIMILARITY_THRESHOLD:
+                    pairs.append((i_idx, j_idx))
+                    continue
+                fp_overlap = self._fingerprint_overlap_count(i_fp, j_fp)
+                if fp_overlap == 1:
+                    pairs.append((i_idx, j_idx))
+                    continue
+
+                # 通用关键词重叠
+                common = i_kw & j_kw
+                if len(common) >= 2:
+                    pairs.append((i_idx, j_idx))
+
+        return pairs
+
+    def _llm_check_duplicate(self, text_a: str, text_b: str) -> bool:
+        """调用 LLM Flash 判断两条新闻是否同一事件，失败时返回 False（放行）"""
+        try:
+            from app.llm.router import llm_router
+            from app.llm.prompts.news_dedup import DEDUP_SYSTEM_PROMPT, build_dedup_prompt
+
+            provider = llm_router.route('news_dedup')
+            if not provider:
+                return False
+
+            messages = [
+                {'role': 'system', 'content': DEDUP_SYSTEM_PROMPT},
+                {'role': 'user', 'content': build_dedup_prompt(text_a, text_b)},
+            ]
+            response = provider.chat(messages, temperature=0.1, max_tokens=10)
+            is_dup = response.strip().lower().startswith('yes')
+            if is_dup:
+                logger.debug(f'[去重] LLM判定重复: {text_a[:30]}... ↔ {text_b[:30]}...')
+            return is_dup
+        except Exception as e:
+            logger.warning(f'[去重] LLM调用失败，放行: {e}')
+            return False
+
     def filter_duplicates(self, items: list, content_key) -> list:
+        # 阶段 1：锁内完成规则分组 + 收集可疑对
         with self._lock:
             now = datetime.now()
             cutoff = now - timedelta(minutes=DEDUP_WINDOW_MINUTES)
@@ -169,7 +226,7 @@ class NewsDeduplicator:
                 fp = self._extract_fingerprint(content)
                 item_data.append((item, content, fp))
 
-            # 批内分组去重
+            # 批内规则分组
             groups: list[list[tuple]] = []
             for entry in item_data:
                 _, content, fp = entry
@@ -184,8 +241,37 @@ class NewsDeduplicator:
                 if not merged:
                     groups.append([entry])
 
+            # 收集可疑对（仅多组时才需要）
+            suspect_pairs = self._find_suspect_pairs(groups) if len(groups) > 1 else []
+
+        # 阶段 2：锁外调用 LLM 判断可疑对
+        llm_merges = []
+        for i_idx, j_idx in suspect_pairs:
+            _, i_content, _ = groups[i_idx][0]
+            _, j_content, _ = groups[j_idx][0]
+            if self._llm_check_duplicate(i_content, j_content):
+                llm_merges.append((i_idx, j_idx))
+
+        # 阶段 3：锁内执行 LLM 合并 + 跨历史去重
+        with self._lock:
+            # 执行 LLM 合并（将 j 组并入 i 组）
+            merged_into = {}  # j_idx -> i_idx
+            for i_idx, j_idx in llm_merges:
+                # 找到实际目标（处理链式合并）
+                target = i_idx
+                while target in merged_into:
+                    target = merged_into[target]
+                if target != j_idx and j_idx not in merged_into:
+                    merged_into[j_idx] = target
+                    groups[target].extend(groups[j_idx])
+
+            llm_filtered = len(merged_into)
+
+            # 构建去重后的列表
             deduplicated = []
-            for group in groups:
+            for i, group in enumerate(groups):
+                if i in merged_into:
+                    continue
                 best = max(group, key=lambda e: len(e[1]))
                 deduplicated.append(best)
 
@@ -217,8 +303,8 @@ class NewsDeduplicator:
             if total_filtered > 0:
                 logger.info(
                     f'[去重] 输入 {len(items)} 条，过滤 {total_filtered} 条'
-                    f'（批内合并{batch_filtered}，文本相似{text_filtered}，'
-                    f'指纹匹配{fp_filtered}，包含度{contain_filtered}），'
+                    f'（批内合并{batch_filtered - llm_filtered}，LLM合并{llm_filtered}，'
+                    f'文本相似{text_filtered}，指纹匹配{fp_filtered}，包含度{contain_filtered}），'
                     f'推送 {len(result)} 条'
                 )
 
