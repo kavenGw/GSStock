@@ -21,6 +21,7 @@ TASK_LAYER_MAP = {
     'earnings_compare': LLMLayer.FLASH,
     'stock_tags': LLMLayer.FLASH,
     'github_release_update': LLMLayer.FLASH,
+    'company_identify': LLMLayer.FLASH,
 }
 
 
