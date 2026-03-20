@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import timedelta
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -15,6 +16,8 @@ def get_local_stock_db_path():
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+    ACCESS_KEY = os.environ.get('ACCESS_KEY', '')
+    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'data', 'stock.db')
     SQLALCHEMY_BINDS = {
