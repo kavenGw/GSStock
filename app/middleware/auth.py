@@ -9,7 +9,9 @@ def init_auth(app):
 
     @app.before_request
     def require_auth():
-        if request.endpoint == 'auth.login' or request.path.startswith('/static/'):
+        if (request.endpoint == 'auth.login'
+                or request.path.startswith('/static/')
+                or request.path == '/favicon.ico'):
             return
         if not session.get('authenticated'):
             return redirect(url_for('auth.login', next=request.url))

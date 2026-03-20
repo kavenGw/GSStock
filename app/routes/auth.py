@@ -15,7 +15,7 @@ def _is_safe_url(target):
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if not current_app.config.get('ACCESS_KEY') or session.get('authenticated'):
-        return redirect(url_for('briefing.index'))
+        return redirect('/')
 
     if request.method == 'POST':
         key = request.form.get('access_key', '')
