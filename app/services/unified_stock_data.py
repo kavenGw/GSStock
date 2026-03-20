@@ -2878,18 +2878,50 @@ class UnifiedStockDataService:
         return result
 
     def _fetch_etf_nav(self, etf_codes: list, today: date, now_str: str) -> dict:
-        """使用负载均衡获取ETF净值"""
-        from app.services.load_balancer import load_balancer
+        """获取ETF净值：IOPV优先，官方净值降级"""
+        from app.services.akshare_client import ak
+        import time
 
         cache_type = 'etf_nav'
+        result = {}
 
-        def fetch_via_fund_info(codes: list) -> dict:
-            """通过 fund_etf_fund_info_em 获取历史净值（T-1）"""
-            from app.services.akshare_client import ak
-            import time
-            result = {}
+        # 第一优先：fund_etf_spot_em 的 IOPV实时估值
+        try:
+            etf_map = self._get_source_snapshot('eastmoney_etf')
+            if etf_map is None:
+                df = ak.fund_etf_spot_em()
+                if df is not None and not df.empty:
+                    etf_map = {str(row.get('代码', '')): row for _, row in df.iterrows()}
+                    self._set_source_snapshot('eastmoney_etf', etf_map)
+                    logger.info(f"[数据服务.ETF净值] ETF快照已获取: {len(etf_map)}只")
 
-            for code in codes:
+            if etf_map:
+                for code in etf_codes:
+                    row = etf_map.get(code)
+                    if row is None:
+                        continue
+                    if 'IOPV实时估值' in row.index:
+                        val = row['IOPV实时估值']
+                        if val and val != '-':
+                            try:
+                                nav = round(float(val), 4)
+                                if nav > 0:
+                                    name = row.get('名称', f'ETF_{code}')
+                                    result[code] = {
+                                        'code': code, 'name': name,
+                                        'nav': nav, 'last_fetch_time': now_str,
+                                    }
+                                    logger.debug(f"[数据服务.ETF净值] {code} {name} IOPV={nav}")
+                            except (ValueError, TypeError):
+                                pass
+        except Exception as e:
+            logger.warning(f"[数据服务.ETF净值] IOPV获取失败: {e}")
+
+        # 第二优先：未获取到 IOPV 的，降级 fund_etf_fund_info_em 官方净值
+        remaining = [c for c in etf_codes if c not in result]
+        if remaining:
+            logger.info(f"[数据服务.ETF净值] {len(remaining)}只IOPV不可用，降级获取官方净值")
+            for code in remaining:
                 try:
                     df = ak.fund_etf_fund_info_em(
                         fund=code,
@@ -2901,83 +2933,14 @@ class UnifiedStockDataService:
                         nav = float(last_row['单位净值'])
                         if nav > 0:
                             result[code] = {
-                                'code': code,
-                                'name': f"ETF_{code}",
-                                'nav': round(nav, 4),
-                                'last_fetch_time': now_str,
+                                'code': code, 'name': f"ETF_{code}",
+                                'nav': round(nav, 4), 'last_fetch_time': now_str,
                             }
-                            logger.debug(f"[数据服务.ETF净值] {code} 净值={nav}")
+                            logger.debug(f"[数据服务.ETF净值] {code} 官方净值={nav}")
                     time.sleep(0.3)
                 except Exception as e:
-                    logger.debug(f"[数据服务.ETF净值] {code} 失败: {e}")
+                    logger.debug(f"[数据服务.ETF净值] {code} 降级获取失败: {e}")
 
-            return result
-
-        def fetch_via_spot(codes: list) -> dict:
-            from app.services.akshare_client import ak
-            result = {}
-
-            try:
-                etf_map = self._get_source_snapshot('eastmoney_etf')
-                if etf_map is None:
-                    df = ak.fund_etf_spot_em()
-                    if df is None or df.empty:
-                        return result
-                    etf_map = {str(row.get('代码', '')): row for _, row in df.iterrows()}
-                    self._set_source_snapshot('eastmoney_etf', etf_map)
-                    logger.info(f"[数据服务.快照] ETF数据已缓存: {len(etf_map)}只")
-                else:
-                    logger.info(f"[数据服务.快照] ETF数据: {len(etf_map)}只")
-
-                for code in codes:
-                    row = etf_map.get(code)
-                    if row is None:
-                        continue
-
-                    nav = None
-                    if 'IOPV实时估值' in row.index:
-                        val = row['IOPV实时估值']
-                        if val and val != '-':
-                            try:
-                                nav = round(float(val), 4)
-                            except (ValueError, TypeError):
-                                pass
-
-                    if nav is None and '最新价' in row.index:
-                        val = row['最新价']
-                        if val and val != '-':
-                            try:
-                                nav = round(float(val), 4)
-                            except (ValueError, TypeError):
-                                pass
-
-                    if nav:
-                        name = row.get('名称', f'ETF_{code}')
-                        result[code] = {
-                            'code': code,
-                            'name': name,
-                            'nav': nav,
-                            'last_fetch_time': now_str,
-                        }
-                        logger.debug(f"[数据服务.ETF净值] {code} {name} 净值={nav}")
-
-            except Exception as e:
-                logger.warning(f"[数据服务.ETF净值] 获取失败: {e}")
-
-            return result
-
-        fetch_funcs = {
-            'etf_fund_info': fetch_via_fund_info,
-            'etf_spot': fetch_via_spot,
-        }
-
-        result = load_balancer.fetch_with_balancing(
-            etf_codes,
-            fetch_funcs,
-            fallback_func=None
-        )
-
-        # 保存到缓存（在主线程的应用上下文中）
         for code, data in result.items():
             UnifiedStockCache.set_cached_data(code, cache_type, data, today)
 

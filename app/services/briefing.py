@@ -446,41 +446,52 @@ class BriefingService:
     def get_etf_premium_data() -> dict:
         """获取ETF溢价率数据
 
-        当天永久缓存：首次获取后缓存，同一天内不再重新获取。
+        从 fund_etf_spot_em 一次性获取价格和IOPV，确保同源同时间点。
         溢价率 = (价格 / 净值 - 1) × 100%
         """
         from app.services.unified_stock_data import unified_stock_data_service
-        from app.models.unified_cache import UnifiedStockCache
-        from app.services.market_session import SmartCacheStrategy
-
-        today = SmartCacheStrategy.get_effective_cache_date('159941')
-        cache_type = 'briefing_etf'
-        cache_key = 'BRIEFING_ETF_PREMIUM'
-
-        # 检查当天缓存
-        cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)
-        if cached and isinstance(cached, dict) and 'etfs' in cached:
-            return cached
+        from app.services.akshare_client import ak
 
         result = []
         etf_codes = [etf['code'] for etf in BRIEFING_ETFS]
-        prices = unified_stock_data_service.get_realtime_prices(etf_codes)
+
+        # 从 fund_etf_spot_em 快照一次性获取（2分钟TTL）
+        etf_map = unified_stock_data_service._get_source_snapshot('eastmoney_etf')
+        if etf_map is None:
+            try:
+                df = ak.fund_etf_spot_em()
+                if df is not None and not df.empty:
+                    etf_map = {str(row.get('代码', '')): row for _, row in df.iterrows()}
+                    unified_stock_data_service._set_source_snapshot('eastmoney_etf', etf_map)
+                    logger.info(f"[简报.ETF溢价] ETF快照已获取: {len(etf_map)}只")
+            except Exception as e:
+                logger.warning(f"[简报.ETF溢价] fund_etf_spot_em 获取失败: {e}")
+                etf_map = {}
 
         partial = False
         for etf_info in BRIEFING_ETFS:
             code = etf_info['code']
-            price_data = prices.get(code)
+            row = etf_map.get(code) if etf_map else None
 
-            if not price_data or price_data.get('_is_degraded'):
+            if row is None:
                 partial = True
                 result.append({
                     'code': code, 'name': etf_info['name'],
                     'price': None, 'nav': None, 'premium_rate': None,
-                    'signal': None, 'error': '价格获取失败'
+                    'signal': None, 'error': 'ETF数据未找到'
                 })
                 continue
 
-            price = price_data.get('current_price')
+            # 从同一行获取价格
+            price = None
+            if '最新价' in row.index:
+                val = row['最新价']
+                if val and val != '-':
+                    try:
+                        price = float(val)
+                    except (ValueError, TypeError):
+                        pass
+
             if not price:
                 partial = True
                 result.append({
@@ -490,14 +501,26 @@ class BriefingService:
                 })
                 continue
 
-            nav = BriefingService.get_etf_nav(code)
+            # 从同一行获取 IOPV 作为净值
+            nav = None
+            if 'IOPV实时估值' in row.index:
+                val = row['IOPV实时估值']
+                if val and val != '-':
+                    try:
+                        nav = float(val)
+                    except (ValueError, TypeError):
+                        pass
+
+            # IOPV 不可用时降级为官方净值
+            if nav is None:
+                nav = BriefingService.get_etf_nav(code)
 
             if not nav:
                 partial = True
                 result.append({
                     'code': code, 'name': etf_info['name'],
                     'price': round(price, 3), 'nav': None, 'premium_rate': None,
-                    'signal': None, 'error': '无法计算溢价率'
+                    'signal': None, 'error': 'IOPV和净值均不可用'
                 })
                 continue
 
@@ -517,13 +540,7 @@ class BriefingService:
                 'signal': signal, 'error': None
             })
 
-        data = {'etfs': result, 'partial': partial}
-
-        # 保存整体缓存
-        if not partial:
-            UnifiedStockCache.set_cached_data(cache_key, cache_type, data, today)
-
-        return data
+        return {'etfs': result, 'partial': partial}
 
     @staticmethod
     def get_cache_update_time() -> Optional[datetime]:

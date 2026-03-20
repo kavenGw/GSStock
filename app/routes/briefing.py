@@ -72,7 +72,7 @@ def get_futures():
 
 @briefing_bp.route('/api/etf')
 def get_etf():
-    """ETF溢价数据（当天永久缓存）"""
+    """ETF溢价数据"""
     try:
         data = BriefingService.get_etf_premium_data()
         return jsonify(data)
