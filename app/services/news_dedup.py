@@ -34,6 +34,14 @@ class NewsDeduplicator:
 
     _ENTITY_TTL = timedelta(hours=1)
 
+    _GENERAL_EN_RE = re.compile(r'[A-Za-z]{3,}')
+    _GENERAL_CN_ORG_RE = re.compile(r'(?<!该)(?<!上市)(?<!多家)(?<!一家)(?<!这家)(?<!那家)([\u4e00-\u9fa5]{2,6}(?:公司|集团|银行|证券|科技|基金|保险|控股|汽车|电子|医药|能源))')
+    _EN_STOPWORDS = frozenset({
+        'CEO', 'CFO', 'CTO', 'COO', 'IPO', 'ETF', 'GDP', 'API', 'APP',
+        'THE', 'AND', 'FOR', 'WITH', 'FROM', 'THAT', 'THIS', 'WILL',
+        'HAS', 'HAD', 'WAS', 'ARE', 'BUT', 'NOT', 'ALL', 'CAN',
+    })
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -93,22 +101,38 @@ class NewsDeduplicator:
         features.update(self._DATE_RE.findall(cleaned))
         return frozenset(features)
 
-    def _is_fingerprint_match(self, fp_a: frozenset, fp_b: frozenset) -> bool:
-        if len(fp_a) < 2 or len(fp_b) < 2:
-            return False
-        intersection = fp_a & fp_b
-        union = fp_a | fp_b
-        if len(union) < 3 or len(intersection) < 2:
-            return False
-        jaccard = len(intersection) / len(union)
-        return jaccard >= 0.5
+    def _extract_general_keywords(self, text: str) -> set[str]:
+        cleaned = self._strip_prefix(text)
+        keywords = set()
+        for m in self._GENERAL_EN_RE.finditer(cleaned):
+            word = m.group().upper()
+            if word not in self._EN_STOPWORDS:
+                keywords.add(word)
+        for m in self._GENERAL_CN_ORG_RE.finditer(cleaned):
+            keywords.add(m.group())
+        return keywords
 
-    def _is_text_similar(self, text_a: str, text_b: str) -> bool:
+    def _text_similarity_score(self, text_a: str, text_b: str) -> float:
         a = self._normalize(text_a)
         b = self._normalize(text_b)
         if not a or not b:
+            return 0.0
+        return SequenceMatcher(None, a, b).ratio()
+
+    def _fingerprint_overlap_count(self, fp_a: frozenset, fp_b: frozenset) -> int:
+        return len(fp_a & fp_b)
+
+    def _is_fingerprint_match(self, fp_a: frozenset, fp_b: frozenset) -> bool:
+        if len(fp_a) < 2 or len(fp_b) < 2:
             return False
-        return SequenceMatcher(None, a, b).ratio() >= SIMILARITY_THRESHOLD
+        intersection_count = self._fingerprint_overlap_count(fp_a, fp_b)
+        union = fp_a | fp_b
+        if len(union) < 3 or intersection_count < 2:
+            return False
+        return intersection_count / len(union) >= 0.5
+
+    def _is_text_similar(self, text_a: str, text_b: str) -> bool:
+        return self._text_similarity_score(text_a, text_b) >= SIMILARITY_THRESHOLD
 
     def _is_contained(self, text_a: str, text_b: str) -> bool:
         """短文本包含度检测：当长度比>3:1时，检查短文本是否大部分出现在长文本中"""
