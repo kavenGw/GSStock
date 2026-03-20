@@ -44,6 +44,14 @@
                         <li><a class="dropdown-item" href="{{ url_for('rebalance.index') }}"><i class="bi bi-sliders"></i> 仓位配平</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="NotifySettings.show()"><i class="bi bi-send"></i> 推送设置</a></li>
+                        {% if auth_enabled %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ url_for('auth.logout') }}" method="POST" class="d-inline">
+                                <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i> 登出</button>
+                            </form>
+                        </li>
+                        {% endif %}
                     </ul>
                 </li>
             </div>
