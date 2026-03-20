@@ -22,6 +22,7 @@ TASK_LAYER_MAP = {
     'stock_tags': LLMLayer.FLASH,
     'github_release_update': LLMLayer.FLASH,
     'company_identify': LLMLayer.PREMIUM,
+    'news_dedup': LLMLayer.FLASH,
 }
 
 
