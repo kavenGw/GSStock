@@ -110,13 +110,27 @@ class NewsDeduplicator:
             return False
         return SequenceMatcher(None, a, b).ratio() >= SIMILARITY_THRESHOLD
 
+    def _is_contained(self, text_a: str, text_b: str) -> bool:
+        """短文本包含度检测：当长度比>3:1时，检查短文本是否大部分出现在长文本中"""
+        a = self._normalize(text_a)
+        b = self._normalize(text_b)
+        if not a or not b:
+            return False
+        short, long = (a, b) if len(a) <= len(b) else (b, a)
+        if len(short) < 10 or len(long) / len(short) <= 3:
+            return False
+        matched = sum(block.size for block in SequenceMatcher(None, short, long).get_matching_blocks())
+        return matched / len(short) >= 0.6
+
     def _is_duplicate(self, text_a: str, fp_a: frozenset,
                       text_b: str, fp_b: frozenset) -> tuple[bool, str]:
-        """返回 (是否重复, 匹配方式: 'text'|'fingerprint'|'')"""
+        """返回 (是否重复, 匹配方式: 'text'|'fingerprint'|'containment'|'')"""
         if self._is_text_similar(text_a, text_b):
             return True, 'text'
         if self._is_fingerprint_match(fp_a, fp_b):
             return True, 'fingerprint'
+        if self._is_contained(text_a, text_b):
+            return True, 'containment'
         return False, ''
 
     def filter_duplicates(self, items: list, content_key) -> list:
@@ -155,6 +169,7 @@ class NewsDeduplicator:
             result = []
             text_filtered = 0
             fp_filtered = 0
+            contain_filtered = 0
             for item, content, fp in deduplicated:
                 is_dup = False
                 for r in self._pushed_buffer:
@@ -163,6 +178,8 @@ class NewsDeduplicator:
                         is_dup = True
                         if method == 'text':
                             text_filtered += 1
+                        elif method == 'containment':
+                            contain_filtered += 1
                         else:
                             fp_filtered += 1
                         logger.debug(f'[去重] {method}命中: {fp} ↔ {r.fingerprint}')
@@ -176,7 +193,8 @@ class NewsDeduplicator:
             if total_filtered > 0:
                 logger.info(
                     f'[去重] 输入 {len(items)} 条，过滤 {total_filtered} 条'
-                    f'（批内合并{batch_filtered}，文本相似{text_filtered}，指纹匹配{fp_filtered}），'
+                    f'（批内合并{batch_filtered}，文本相似{text_filtered}，'
+                    f'指纹匹配{fp_filtered}，包含度{contain_filtered}），'
                     f'推送 {len(result)} 条'
                 )
 
