@@ -63,8 +63,9 @@ class WatchAnalysisService:
 
         intraday_map = {}
         trend_map = {}
-        if period == 'realtime':
-            intraday = unified_stock_data_service.get_intraday_data(codes)
+        is_realtime = period == 'realtime'
+        if is_realtime:
+            intraday = unified_stock_data_service.get_intraday_data(codes, force_refresh=True)
             intraday_map = {s['stock_code']: s for s in intraday.get('stocks', [])}
 
         if period in ('7d', '30d'):
@@ -72,7 +73,7 @@ class WatchAnalysisService:
             trend = unified_stock_data_service.get_trend_data(codes, days=days)
             trend_map = {s['stock_code']: s for s in trend.get('stocks', [])}
 
-        raw_prices = unified_stock_data_service.get_realtime_prices(codes)
+        raw_prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=is_realtime)
 
         provider = llm_router.route('watch_analysis')
         if not provider:
