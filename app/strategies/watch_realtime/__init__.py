@@ -55,7 +55,8 @@ class WatchRealtimeStrategy(Strategy):
             stocks = Stock.query.filter(Stock.stock_code.in_(a_codes)).all()
             name_map = {s.stock_code: s.stock_name for s in stocks}
 
-            trend_data = PositionService.get_trend_data(a_codes, days=365)
+            from datetime import date
+            trend_data = PositionService.get_trend_data(a_codes, date.today(), days=365)
             if trend_data and trend_data.get('stocks'):
                 SignalCacheService.update_signals_from_trend_data(trend_data, name_map)
                 logger.info(f'[盯盘实时] 信号缓存更新: {len(a_codes)}只')

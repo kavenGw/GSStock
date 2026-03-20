@@ -42,7 +42,8 @@ class DailyBriefingStrategy(Strategy):
             if not a_codes:
                 return
 
-            trend_data = PositionService.get_trend_data(a_codes, days=365)
+            from datetime import date
+            trend_data = PositionService.get_trend_data(a_codes, date.today(), days=365)
             if trend_data and trend_data.get('stocks'):
                 SignalCacheService.update_signals_from_trend_data(trend_data, name_map)
                 logger.info(f'[每日简报] 信号缓存更新完成: {len(a_codes)}只A股')

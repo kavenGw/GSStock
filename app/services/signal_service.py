@@ -2,21 +2,28 @@
 import logging
 from pathlib import Path
 
-from app.ml.predictor import TrendPredictor
-
 logger = logging.getLogger(__name__)
 
-_predictor = TrendPredictor()
+try:
+    from app.ml.predictor import TrendPredictor
+    _predictor = TrendPredictor()
+except ImportError:
+    logger.warning('[SignalService] torch 未安装，AI信号功能不可用')
+    _predictor = None
 
 
 class SignalService:
 
     @staticmethod
     def get_signal(stock_code: str, ohlcv: list[dict]) -> dict | None:
+        if not _predictor:
+            return None
         return _predictor.predict(stock_code, ohlcv)
 
     @staticmethod
     def get_batch_signals(stock_data: dict[str, list[dict]]) -> dict[str, dict]:
+        if not _predictor:
+            return {}
         results = {}
         for code, ohlcv in stock_data.items():
             signal = _predictor.predict(code, ohlcv)
@@ -26,8 +33,11 @@ class SignalService:
 
     @staticmethod
     def has_model(stock_code: str) -> bool:
+        if not _predictor:
+            return False
         return (Path('data/models') / stock_code / 'model.pt').exists()
 
     @staticmethod
     def clear_model_cache(stock_code: str = None):
-        _predictor.clear_cache(stock_code)
+        if _predictor:
+            _predictor.clear_cache(stock_code)
