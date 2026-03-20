@@ -228,6 +228,14 @@ TDSequentialService.calculate()
 | `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
 | `LLAMA_MAX_CONTEXT` | llama-server 上下文窗口大小 | `4096` |
 
+## 认证配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `ACCESS_KEY` | 访问密钥，配置后所有页面需验证才能访问 | 空（不启用） |
+
+启用认证时 `SECRET_KEY` 也必须配置为固定值，否则重启后 session 失效需重新登录。
+
 ## 技术栈
 
 - Flask + SQLAlchemy + SQLite
