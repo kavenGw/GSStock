@@ -322,7 +322,7 @@ class InterestPipeline:
             result = provider.chat([
                 {'role': 'system', 'content': COMPANY_IDENTIFY_SYSTEM_PROMPT},
                 {'role': 'user', 'content': build_company_identify_prompt(content)},
-            ], temperature=0.1, max_tokens=200)
+            ], temperature=0.1, max_tokens=500)
             result = result.strip()
             if result and result != '无法确定':
                 return result
