@@ -32,5 +32,13 @@ venv/bin/pip install -r requirements.txt -q
 echo "=== 安装 Playwright Chromium 浏览器 ==="
 venv/bin/playwright install chromium --with-deps || echo "⚠ Playwright 浏览器安装失败，公司新闻爬取功能将不可用"
 
+echo "=== 检查 PyTorch（AI走势预测，可选） ==="
+if venv/bin/python -c "import torch" 2>/dev/null; then
+    echo "PyTorch 已安装"
+else
+    echo "PyTorch 未安装，AI走势预测功能将不可用"
+    echo "如需安装: venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu"
+fi
+
 echo "=== 启动 GSStock ==="
 ./gsstock start

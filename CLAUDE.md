@@ -17,6 +17,9 @@ python run.py
 
 # 一键启动（启动并打开浏览器）
 start.bat
+
+# Linux 部署（拉取代码 + 更新依赖 + 重启）
+./update_and_run.sh
 ```
 
 访问地址：http://127.0.0.1:5000
@@ -236,6 +239,7 @@ TDSequentialService.calculate()
 - akshare（A股数据）+ yfinance（美股/港股/期货数据）+ Twelve Data + Polygon
 - 智谱 GLM（AI 分析，Flash/Premium 分层路由）
 - APScheduler（策略调度）
+- PyTorch（AI走势预测，可选）— `app/ml/` 模块，未安装 torch 时自动跳过
 
 ## 股票代码配置
 
