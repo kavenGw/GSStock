@@ -82,7 +82,6 @@ class NotificationService:
         """生成每日简报摘要（持仓/收益/异常）"""
         from app.services.position import PositionService
 
-        today = date.today()
         latest_date = PositionService.get_latest_date()
         if not latest_date:
             return {'text': '暂无持仓数据'}
@@ -93,8 +92,6 @@ class NotificationService:
 
         total_market_value = 0
         total_cost = 0
-        up_count = 0
-        down_count = 0
         items = []
 
         for p in positions:
@@ -105,10 +102,6 @@ class NotificationService:
 
             total_market_value += mv
             total_cost += cost
-            if profit > 0:
-                up_count += 1
-            elif profit < 0:
-                down_count += 1
 
             items.append({
                 'code': p.stock_code,
@@ -121,30 +114,24 @@ class NotificationService:
         total_profit = total_market_value - total_cost
         total_pct = (total_profit / total_cost * 100) if total_cost > 0 else 0
 
-        sign = '+' if total_profit >= 0 else ''
-
-        text = f"持仓概览 ({latest_date})\n"
-        text += f"总市值: ¥{total_market_value:,.0f} | 浮盈: {sign}¥{total_profit:,.0f} ({sign}{total_pct:.1f}%)\n"
-        text += f"持仓: {len(positions)}只 | 盈利: {up_count} | 亏损: {down_count}\n"
+        text = f"📊 持仓 ({latest_date}) | ¥{total_market_value:,.0f} | {total_pct:+.1f}%\n"
 
         sorted_items = sorted(items, key=lambda x: x['profit_pct'], reverse=True)
-        gainers = [i for i in sorted_items if i['profit_pct'] > 0]
+        gainers = [i for i in sorted_items if i['profit_pct'] >= 0]
         losers = [i for i in sorted_items if i['profit_pct'] < 0]
 
         if gainers:
-            text += "\n盈利 Top3:\n"
-            for item in gainers[:3]:
-                text += f"  {item['name']}({item['code']}): +{item['profit_pct']:.1f}%\n"
-
+            parts = [f"🟢{i['name']} {i['profit_pct']:+.1f}%" for i in gainers]
+            text += ' | '.join(parts) + '\n'
         if losers:
-            text += "\n亏损 Top3:\n"
-            for item in losers[:3]:
-                text += f"  {item['name']}({item['code']}): {item['profit_pct']:.1f}%\n"
+            parts = [f"🔴{i['name']} {i['profit_pct']:+.1f}%" for i in losers]
+            text += ' | '.join(parts)
 
-        return {'text': text}
+        return {'text': text.rstrip('\n')}
 
     @staticmethod
-    def format_alert_signals(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
+    def format_alert_signals(codes: list[str] = None, name_map: dict[str, str] = None,
+                             position_codes: set[str] = None) -> dict:
         """生成预警信号摘要（所有关注股票）"""
         from app.services.signal_cache import SignalCacheService
         from app.utils.market_identifier import MarketIdentifier
@@ -204,19 +191,54 @@ class NotificationService:
                 or latest.get(s.get('stock_code', ''), (None, 'sell'))[1] == 'sell'
             ]
 
-        text = "预警信号\n"
+        grouped = {}
+        for sig in buy_signals:
+            code = sig.get('stock_code', '')
+            if code not in grouped:
+                grouped[code] = {'name': sig.get('stock_name', code), 'buy': [], 'sell': []}
+            grouped[code]['buy'].append(sig.get('name', ''))
+        for sig in sell_signals:
+            code = sig.get('stock_code', '')
+            if code not in grouped:
+                grouped[code] = {'name': sig.get('stock_name', code), 'buy': [], 'sell': []}
+            grouped[code]['sell'].append(sig.get('name', ''))
 
-        if sell_signals:
-            text += "\n卖出信号:\n"
-            for sig in sell_signals[:10]:
-                text += f"  {sig.get('stock_name', '')}({sig.get('stock_code', '')}) - {sig.get('name', '')}\n"
+        text = "⚡ 关键信号\n"
 
-        if buy_signals:
-            text += "\n买入信号:\n"
-            for sig in buy_signals[:10]:
-                text += f"  {sig.get('stock_name', '')}({sig.get('stock_code', '')}) - {sig.get('name', '')}\n"
+        if position_codes:
+            pos_codes = [c for c in grouped if c in position_codes]
+            watch_codes = [c for c in grouped if c not in position_codes]
+        else:
+            pos_codes = []
+            watch_codes = list(grouped.keys())
 
-        return {'text': text}
+        if pos_codes:
+            text += "\n持仓:\n"
+            for code in pos_codes:
+                g = grouped[code]
+                parts = []
+                for s in g['sell']:
+                    parts.append(f"🔴{s}")
+                for s in g['buy']:
+                    parts.append(f"🟢{s}")
+                text += f"  {g['name']} {' '.join(parts)}\n"
+
+        if watch_codes:
+            text += "\n关注:\n"
+            sell_parts = []
+            buy_parts = []
+            for code in watch_codes:
+                g = grouped[code]
+                for s in g['sell']:
+                    sell_parts.append(f"{g['name']}·{s}")
+                for s in g['buy']:
+                    buy_parts.append(f"{g['name']}·{s}")
+            if sell_parts:
+                text += f"  🔴卖出: {' | '.join(sell_parts[:8])}\n"
+            if buy_parts:
+                text += f"  🟢买入: {' | '.join(buy_parts[:8])}\n"
+
+        return {'text': text.rstrip('\n')}
 
     @staticmethod
     def format_earnings_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
@@ -235,7 +257,7 @@ class NotificationService:
         if not upcoming:
             return {'text': ''}
 
-        text = "财报提醒（未来7天）\n"
+        text = "📅 财报提醒（未来7天）\n"
         for item in upcoming:
             name = name_map.get(item['code'], item['code'])
             if item['is_today']:
@@ -243,7 +265,7 @@ class NotificationService:
             else:
                 text += f"  {name}({item['code']}) - {item['days_until']}天后({item['earnings_date']})\n"
 
-        return {'text': text}
+        return {'text': text.rstrip('\n')}
 
     @staticmethod
     def format_pe_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
@@ -267,12 +289,15 @@ class NotificationService:
                 name = name_map.get(code, code)
                 pe_display = data.get('pe_display', '?')
                 label = {'high': '偏高', 'very_high': '极高', 'low': '偏低'}[status]
-                alerts.append(f"  {name}({code}) PE={pe_display} {label}")
+                alerts.append(f"{name} PE={pe_display} {label}")
 
         if not alerts:
             return {'text': ''}
 
-        text = "PE估值预警\n" + "\n".join(alerts) + "\n"
+        if len(alerts) == 1:
+            text = f"⚠️ PE预警: {alerts[0]}"
+        else:
+            text = "⚠️ PE预警\n" + "\n".join(f"  {a}" for a in alerts)
         return {'text': text}
 
     @staticmethod
@@ -354,6 +379,7 @@ class NotificationService:
         watch_list = WatchService.get_watch_list()
         name_map = {w['stock_code']: w['stock_name'] for w in watch_list}
 
+        signal_emoji = {'buy': '🟢', 'sell': '🔴', 'hold': '🟡'}
         signal_map = {'buy': '买入', 'sell': '卖出', 'hold': '持有', 'watch': '观望'}
         lines = []
 
@@ -364,16 +390,20 @@ class NotificationService:
                 data = periods.get(period)
                 if not data:
                     continue
-                signal = signal_map.get(data.get('signal', ''), '观望')
+                sig_key = data.get('signal', '')
+                signal = signal_map.get(sig_key, '观望')
+                emoji = signal_emoji.get(sig_key, '')
                 summary = data.get('summary', '')
-                parts.append(f"[{period}]{signal} {summary}")
+                if len(summary) > 30:
+                    summary = summary[:30] + '…'
+                parts.append(f"{period}{emoji}{signal} {summary}")
             if parts:
-                lines.append(f"  {name}({code}): {' | '.join(parts)}")
+                lines.append(f"  {name} {' | '.join(parts)}")
 
         if not lines:
             return {'text': ''}
 
-        text = "盯盘分析\n" + "\n".join(lines) + "\n"
+        text = "🔭 盯盘分析\n" + "\n".join(lines)
         return {'text': text}
 
     @staticmethod
@@ -387,22 +417,21 @@ class NotificationService:
             if not regions:
                 return ''
 
-            lines = ['指数行情']
+            lines = ['📈 市场行情']
             for region in regions:
                 key = region['key']
                 region_indices = indices.get(key, [])
-                region_lines = []
+                parts = []
                 for idx in region_indices:
                     if idx.get('close') is None:
                         continue
                     pct = idx.get('change_percent')
                     pct_str = f"{pct:+.2f}%" if pct is not None else "—"
-                    region_lines.append(f"  {idx['name']}: {idx['close']:,.2f} ({pct_str})")
-                if region_lines:
-                    lines.append(f"\n  [{region['name']}]")
-                    lines.extend(region_lines)
+                    parts.append(f"{idx['name']} {idx['close']:,.0f}({pct_str})")
+                if parts:
+                    lines.append(f"{region['name']}: {' '.join(parts)}")
 
-            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+            return '\n'.join(lines) if len(lines) > 1 else ''
         except Exception as e:
             logger.warning(f'[通知.指数] 格式化失败: {e}')
             return ''
@@ -417,15 +446,15 @@ class NotificationService:
             if not futures:
                 return ''
 
-            lines = ['期货数据']
+            parts = []
             for f in futures:
                 if f.get('close') is None:
                     continue
                 pct = f.get('change_percent')
                 pct_str = f"{pct:+.2f}%" if pct is not None else "—"
-                lines.append(f"  {f['name']}: {f['close']:,.2f} ({pct_str})")
+                parts.append(f"{f['name']} {f['close']:,.2f}({pct_str})")
 
-            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+            return f"期货: {' '.join(parts)}" if parts else ''
         except Exception as e:
             logger.warning(f'[通知.期货] 格式化失败: {e}')
             return ''
@@ -440,16 +469,15 @@ class NotificationService:
             if not etfs:
                 return ''
 
-            signal_map = {'buy': '适合买入', 'sell': '溢价过高', 'normal': '正常'}
-            lines = ['ETF溢价']
+            signal_map = {'buy': '🟢适合买入', 'sell': '🔴溢价过高', 'normal': '正常'}
+            parts = []
             for etf in etfs:
                 if etf.get('premium_rate') is None:
                     continue
                 signal = signal_map.get(etf.get('signal', ''), '')
-                signal_str = f" {signal}" if signal else ''
-                lines.append(f"  {etf['name']}({etf['code']}): 溢价 {etf['premium_rate']:+.2f}%{signal_str}")
+                parts.append(f"{etf['name']} {etf['premium_rate']:+.2f}%{signal}")
 
-            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+            return f"ETF溢价: {' | '.join(parts)}" if parts else ''
         except Exception as e:
             logger.warning(f'[通知.ETF溢价] 格式化失败: {e}')
             return ''
@@ -460,22 +488,22 @@ class NotificationService:
         try:
             from app.services.briefing import BriefingService
 
-            lines = ['板块涨跌']
+            lines = ['🔥 板块热点']
 
             cn_sectors = BriefingService.get_cn_sectors_data()
             if cn_sectors:
-                lines.append('\n  [A股行业Top5]')
+                parts = []
                 for s in cn_sectors:
-                    leader = f" 领涨: {s['leader']}" if s.get('leader') else ''
-                    lines.append(f"  {s['name']}: {s['change_percent']:+.2f}%{leader}")
+                    leader = f"({s['leader']})" if s.get('leader') else ''
+                    parts.append(f"{s['name']}{s['change_percent']:+.2f}%{leader}")
+                lines.append(f"A股: {' | '.join(parts)}")
 
             us_sectors = BriefingService.get_us_sectors_data()
             if us_sectors:
-                lines.append('\n  [美股行业Top5]')
-                for s in us_sectors:
-                    lines.append(f"  {s['name']}: {s['change_percent']:+.2f}%")
+                parts = [f"{s['name']}{s['change_percent']:+.2f}%" for s in us_sectors]
+                lines.append(f"美股: {' | '.join(parts)}")
 
-            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+            return '\n'.join(lines) if len(lines) > 1 else ''
         except Exception as e:
             logger.warning(f'[通知.板块] 格式化失败: {e}')
             return ''
@@ -490,15 +518,18 @@ class NotificationService:
             if not today_data:
                 return ''
 
-            lines = ['DRAM价格']
+            parts = []
             for item in today_data:
                 if item.get('avg_price') is None:
                     continue
                 pct = item.get('change_pct')
-                pct_str = f" ({pct:+.2f}%)" if pct is not None else ''
-                lines.append(f"  {item['label']}: ${item['avg_price']:.2f}{pct_str}")
+                if pct is None or pct == 0:
+                    pct_str = '持平'
+                else:
+                    pct_str = f"{pct:+.2f}%"
+                parts.append(f"{item['label']} ${item['avg_price']:.2f}({pct_str})")
 
-            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+            return f"💾 DRAM: {' | '.join(parts)}" if parts else ''
         except Exception as e:
             logger.warning(f'[通知.DRAM] 格式化失败: {e}')
             return ''
@@ -513,15 +544,38 @@ class NotificationService:
                 return ''
 
             name_map = {s['code']: s['name'] for s in BRIEFING_STOCKS}
-            lines = ['技术评分']
+            buy_group = []
+            sell_group = []
+            hold_group = []
+
             for code, info in data.items():
                 name = name_map.get(code, code)
                 score = info.get('score', 0)
                 signal_text = info.get('signal_text', '')
-                macd = info.get('macd_signal', '')
-                lines.append(f"  {name}({code}): {score}分 {signal_text} MACD:{macd}")
+                entry = (name, score)
+                if '买入' in signal_text:
+                    buy_group.append(entry)
+                elif '卖出' in signal_text:
+                    sell_group.append(entry)
+                else:
+                    hold_group.append(entry)
 
-            return '\n'.join(lines) + '\n' if len(lines) > 1 else ''
+            buy_group.sort(key=lambda x: x[1], reverse=True)
+            sell_group.sort(key=lambda x: x[1], reverse=True)
+            hold_group.sort(key=lambda x: x[1], reverse=True)
+
+            lines = ['📊 技术评分']
+            if buy_group:
+                items = ' '.join(f"{n}{s}" for n, s in buy_group)
+                lines.append(f"🟢买入: {items}")
+            if sell_group:
+                items = ' '.join(f"{n}{s}" for n, s in sell_group)
+                lines.append(f"🔴卖出: {items}")
+            if hold_group:
+                items = ' '.join(f"{n}{s}" for n, s in hold_group)
+                lines.append(f"⚪观望: {items}")
+
+            return '\n'.join(lines) if len(lines) > 1 else ''
         except Exception as e:
             logger.warning(f'[通知.技术评分] 格式化失败: {e}')
             return ''
@@ -599,9 +653,16 @@ class NotificationService:
 
         codes, name_map = NotificationService._get_all_watched_codes()
 
+        from app.services.position import PositionService
+        position_codes = set()
+        latest_date = PositionService.get_latest_date()
+        if latest_date:
+            pos_list = PositionService.get_snapshot(latest_date)
+            position_codes = {p.stock_code for p in pos_list}
+
         # 收集所有结构化数据
         briefing = NotificationService.format_briefing_summary()
-        alerts = NotificationService.format_alert_signals(codes, name_map)
+        alerts = NotificationService.format_alert_signals(codes, name_map, position_codes)
         earnings = NotificationService.format_earnings_alerts(codes, name_map)
         pe = NotificationService.format_pe_alerts(codes, name_map)
 
@@ -687,44 +748,59 @@ class NotificationService:
         except Exception as e:
             logger.warning(f'[通知.GLM总结] 生成失败: {e}')
 
-        # 组装最终消息
-        text_parts = []
+        # 组装多条消息分批发送
 
+        # Message 1: 要点（核心观点 + 持仓 + 信号）
+        msg1_parts = []
         if core_insights:
-            text_parts.append(f"🎯 今日核心观点\n{core_insights}")
-
-        text_parts.append(briefing['text'])
-
-        if indices_text:
-            text_parts.append(indices_text)
-        if futures_text:
-            text_parts.append(futures_text)
-        if etf_text:
-            text_parts.append(etf_text)
-        if sectors_text:
-            text_parts.append(sectors_text)
-        if dram_text:
-            text_parts.append(dram_text)
-        if technical_text:
-            text_parts.append(technical_text)
+            header = f"🎯 今日核心观点\n{core_insights}"
+            if action_suggestions:
+                header += f"\n\n💡 {action_suggestions}"
+            msg1_parts.append(header)
+        elif action_suggestions:
+            msg1_parts.append(f"💡 {action_suggestions}")
+        msg1_parts.append(briefing['text'])
         if alerts.get('text'):
-            text_parts.append(alerts['text'])
-        if earnings.get('text'):
-            text_parts.append(earnings['text'])
-        if pe.get('text'):
-            text_parts.append(pe['text'])
-        if ai_text:
-            text_parts.append(ai_text)
+            msg1_parts.append(alerts['text'])
+
+        # Message 2: AI分析（盯盘）
+        msg2_parts = []
         if watch_text:
-            text_parts.append(watch_text)
+            msg2_parts.append(watch_text)
 
+        # Message 3: 市场与数据
+        msg3_parts = []
+        market_lines = []
+        if indices_text:
+            market_lines.append(indices_text)
+        if futures_text:
+            market_lines.append(futures_text)
+        if etf_text:
+            market_lines.append(etf_text)
+        if market_lines:
+            msg3_parts.append('\n'.join(market_lines))
+        if sectors_text:
+            msg3_parts.append(sectors_text)
+        if technical_text:
+            msg3_parts.append(technical_text)
+        data_lines = []
+        if dram_text:
+            data_lines.append(dram_text)
+        if earnings.get('text'):
+            data_lines.append(earnings['text'])
+        if pe.get('text'):
+            data_lines.append(pe['text'])
+        if data_lines:
+            msg3_parts.append('\n'.join(data_lines))
+        if ai_text:
+            msg3_parts.append(ai_text)
         for rt in release_texts:
-            text_parts.append(rt)
+            msg3_parts.append(rt)
 
-        if action_suggestions:
-            text_parts.append(f"💡 操作建议\n{action_suggestions}")
-
-        full_text = '\n---\n'.join(text_parts)
+        messages = []
+        for parts in (msg1_parts, msg2_parts, msg3_parts):
+            if parts:
+                messages.append('\n\n'.join(parts))
 
         # 标记已推送的 GitHub Release 版本
         if release_pushed_versions:
@@ -732,8 +808,12 @@ class NotificationService:
             for key, version in release_pushed_versions:
                 GitHubReleaseService.mark_pushed_version(key, version)
 
-        results = NotificationService.send_all(subject, full_text)
-        results['content_preview'] = full_text[:500]
+        sent = 0
+        for msg in messages:
+            if NotificationService.send_slack(msg):
+                sent += 1
+        results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': len(messages)}
+        results['content_preview'] = messages[0][:500] if messages else ''
         return results
 
     @staticmethod
