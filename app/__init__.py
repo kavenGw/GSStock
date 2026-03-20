@@ -207,6 +207,9 @@ def create_app(config_class=None):
             stock_db_path, _ = get_db_paths(app)
             cleanup_legacy_tables(stock_db_path)
 
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
     from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp, watch_bp, news_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
@@ -224,6 +227,9 @@ def create_app(config_class=None):
     app.register_blueprint(stock_detail_bp)
     app.register_blueprint(watch_bp)
     app.register_blueprint(news_bp)
+
+    from app.middleware.auth import init_auth
+    init_auth(app)
 
     with app.app_context():
         from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, InterestKeyword, NewsDerivation
@@ -273,11 +279,13 @@ def create_app(config_class=None):
         from app.services.ocr import preload_model
         preload_model()
 
-    # 添加只读模式上下文处理器
     @app.context_processor
-    def inject_readonly_mode():
+    def inject_global_vars():
         from app.utils.readonly_mode import is_readonly_mode
-        return {'readonly_mode': is_readonly_mode()}
+        return {
+            'readonly_mode': is_readonly_mode(),
+            'auth_enabled': bool(app.config.get('ACCESS_KEY')),
+        }
 
     if app.config.get('READONLY_MODE'):
         logging.info("应用运行在只读模式：不从服务器获取数据，stock.db 只读")
