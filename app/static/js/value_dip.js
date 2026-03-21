@@ -3,8 +3,18 @@
     let currentPeriod = '30d';
     let expandedSector = null;
     let chartInstances = [];
+    let compareChart = null;
+    let compareVisible = false;
 
-    window.addEventListener('resize', () => chartInstances.forEach(c => c.resize()));
+    const SECTOR_COLORS = [
+        '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
+        '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#5b8ff9'
+    ];
+
+    window.addEventListener('resize', () => {
+        chartInstances.forEach(c => c.resize());
+        if (compareChart) compareChart.resize();
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
         loadSectors();
@@ -18,6 +28,19 @@
             });
             renderCards();
             if (expandedSector) renderTrend(expandedSector);
+            if (compareVisible) renderCompareChart();
+        });
+
+        document.getElementById('compare-btn').addEventListener('click', () => {
+            compareVisible = !compareVisible;
+            const container = document.getElementById('compare-container');
+            container.classList.toggle('d-none', !compareVisible);
+            if (compareVisible) renderCompareChart();
+        });
+
+        document.getElementById('compare-close').addEventListener('click', () => {
+            compareVisible = false;
+            document.getElementById('compare-container').classList.add('d-none');
         });
     });
 
@@ -78,6 +101,108 @@
             renderTrend(key);
         }
         renderCards();
+    }
+
+    function renderCompareChart() {
+        if (!sectorData || !sectorData.sectors) return;
+
+        const el = document.getElementById('compare-chart');
+        if (compareChart) {
+            compareChart.dispose();
+        }
+        compareChart = echarts.init(el);
+
+        // 计算每个板块的平均涨跌幅走势
+        const periodDays = { '7d': 7, '30d': 30, '90d': 90 };
+        const days = periodDays[currentPeriod] || 30;
+
+        const seriesData = [];
+        let maxLen = 0;
+        let commonDates = [];
+
+        sectorData.sectors.forEach((sector, idx) => {
+            // 收集板块内所有股票的走势数据，计算平均涨跌幅
+            const stocksWithData = sector.stocks.filter(s => s.trend_data && s.trend_data.length > 0);
+            if (stocksWithData.length === 0) return;
+
+            // 找到最短的数据长度以对齐
+            const minLen = Math.min(...stocksWithData.map(s => s.trend_data.length));
+            const dataLen = Math.min(minLen, days);
+
+            if (dataLen > maxLen) {
+                maxLen = dataLen;
+                commonDates = stocksWithData[0].trend_data.slice(-dataLen).map(d => d.date);
+            }
+
+            // 计算每天的平均涨跌幅（相对于第一天）
+            const avgChanges = [];
+            for (let i = 0; i < dataLen; i++) {
+                let sumChange = 0;
+                let validCount = 0;
+                stocksWithData.forEach(stock => {
+                    const data = stock.trend_data;
+                    const startIdx = data.length - dataLen;
+                    if (startIdx >= 0 && data[startIdx].close > 0) {
+                        const basePrice = data[startIdx].close;
+                        const currentPrice = data[startIdx + i].close;
+                        sumChange += (currentPrice - basePrice) / basePrice * 100;
+                        validCount++;
+                    }
+                });
+                avgChanges.push(validCount > 0 ? Math.round(sumChange / validCount * 100) / 100 : 0);
+            }
+
+            seriesData.push({
+                name: sector.name,
+                type: 'line',
+                data: avgChanges,
+                smooth: true,
+                symbol: 'none',
+                lineStyle: { width: 2, color: SECTOR_COLORS[idx % SECTOR_COLORS.length] },
+                itemStyle: { color: SECTOR_COLORS[idx % SECTOR_COLORS.length] }
+            });
+        });
+
+        // 截取到当前周期对应的天数
+        const displayDays = Math.min(days, maxLen);
+        const displayDates = commonDates.slice(-displayDays);
+        seriesData.forEach(s => {
+            s.data = s.data.slice(-displayDays);
+        });
+
+        compareChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    let tip = params[0].axisValue + '<br/>';
+                    params.forEach(p => {
+                        const color = p.color;
+                        const value = p.value >= 0 ? '+' + p.value : p.value;
+                        tip += `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;"></span>${p.seriesName}: ${value}%<br/>`;
+                    });
+                    return tip;
+                }
+            },
+            legend: {
+                data: seriesData.map(s => s.name),
+                bottom: 0
+            },
+            grid: { left: '8%', right: '5%', top: '10%', bottom: '15%' },
+            xAxis: {
+                type: 'category',
+                data: displayDates,
+                axisLabel: { fontSize: 10, rotate: 30 }
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    fontSize: 10,
+                    formatter: v => v + '%'
+                },
+                splitLine: { lineStyle: { type: 'dashed' } }
+            },
+            series: seriesData
+        });
     }
 
     function renderTrend(sectorKey) {
