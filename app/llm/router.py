@@ -23,6 +23,8 @@ TASK_LAYER_MAP = {
     'github_release_update': LLMLayer.FLASH,
     'company_identify': LLMLayer.PREMIUM,
     'news_dedup': LLMLayer.FLASH,
+    'research_report': LLMLayer.PREMIUM,
+    'research_relevance': LLMLayer.FLASH,
 }
 
 

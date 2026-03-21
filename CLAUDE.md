@@ -219,6 +219,17 @@ TDSequentialService.calculate()
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
 
+## 研报推送配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `RESEARCH_REPORT_ENABLED` | 是否启用研报推送 | `true` |
+| `RESEARCH_REPORT_MAX_STOCKS` | 每次最多处理股票数 | `20` |
+| `RESEARCH_REPORT_SEARCH_RESULTS` | 每个 query 取前N条 | `5` |
+| `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
+
+每日 9:00（工作日）自动搜索持仓股票的最新研报（ETF 除外），通过 Google News 搜索 + crawl4ai 爬取，GLM 整理关键信息后 Slack 独立推送。每日简报（8:30）中包含前一天的研报摘要。
+
 ## Slack 推送配置
 
 | 环境变量 | 说明 | 默认值 |

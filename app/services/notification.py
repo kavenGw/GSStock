@@ -792,6 +792,45 @@ class NotificationService:
         return '\n'.join(lines)
 
     @staticmethod
+    def format_research_summary() -> str:
+        """格式化研报摘要用于日报推送"""
+        try:
+            from app.services.research_report_service import (
+                RESEARCH_REPORT_ENABLED,
+                ResearchReportService,
+            )
+
+            if not RESEARCH_REPORT_ENABLED:
+                return ''
+
+            cache = ResearchReportService.get_latest_cached_summary()
+            if not cache:
+                return ''
+
+            lines = ['📋 研报动态']
+            has_report = False
+            for code, info in cache.items():
+                analysis = info.get('analysis', '')
+                if not analysis:
+                    continue
+                has_report = True
+                name = info.get('name', code)
+                first_line = analysis.split('\n')[0].strip()
+                first_line = first_line.lstrip('#*- ').strip()
+                if len(first_line) > 80:
+                    first_line = first_line[:80] + '...'
+                lines.append(f'• {name}: {first_line}')
+
+            if not has_report:
+                return ''
+
+            lines.append('（完整研报已于 9:00 独立推送）')
+            return '\n'.join(lines)
+        except Exception as e:
+            logger.warning(f'[通知.研报] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（持仓+简报数据+GLM总结+预警+盯盘分析）"""
         with NotificationService._daily_push_lock:
@@ -862,6 +901,8 @@ class NotificationService:
 
         # 赛事资讯
         nba_text, lol_text = NotificationService.format_esports_summary_split()
+
+        research_text = NotificationService.format_research_summary()
 
         # GLM 综合分析
         core_insights = ''
@@ -951,6 +992,8 @@ class NotificationService:
             msg3_parts.append('\n'.join(data_lines))
         if ai_text:
             msg3_parts.append(ai_text)
+        if research_text:
+            msg3_parts.append(research_text)
 
         messages = []
         for parts in (msg1_parts, msg2_parts, msg3_parts):

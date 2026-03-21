@@ -71,6 +71,10 @@ cp .env.sample .env
 | `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
+| `RESEARCH_REPORT_ENABLED` | 是否启用研报推送 | `true` |
+| `RESEARCH_REPORT_MAX_STOCKS` | 每次最多处理股票数 | `20` |
+| `RESEARCH_REPORT_SEARCH_RESULTS` | 每个 query 取前N条 | `5` |
+| `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
 | `ESPORTS_ENABLED` | 是否启用赛事推送（NBA/LoL） | `true` |
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `60` |
