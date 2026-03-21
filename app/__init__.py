@@ -286,11 +286,10 @@ def create_app(config_class=None):
     from app.strategies.registry import registry
     from app.scheduler.engine import scheduler_engine
     from app.scheduler.event_bus import event_bus
-    from app.notifications.manager import notification_manager
+    from app.services.notification import NotificationService
 
     registry.discover()
-    notification_manager.init_channels()
-    event_bus.subscribe(notification_manager.dispatch)
+    event_bus.subscribe(NotificationService.dispatch_signal)
 
     import os as _os
     if not app.debug or _os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
