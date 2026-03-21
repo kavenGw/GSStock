@@ -21,7 +21,7 @@ class TrendSignalStrategy(Strategy):
             return []
 
         data_svc = UnifiedStockDataService()
-        codes = [s.code for s in stocks if SignalService.has_model(s.code)]
+        codes = [s.stock_code for s in stocks if SignalService.has_model(s.stock_code)]
         if not codes:
             return []
 
@@ -39,8 +39,8 @@ class TrendSignalStrategy(Strategy):
             if result['confidence'] < 0.6:
                 continue
 
-            stock = next((s for s in stocks if s.code == code), None)
-            name = stock.name if stock else code
+            stock = next((s for s in stocks if s.stock_code == code), None)
+            name = stock.stock_name if stock else code
             action = '买入' if result['signal'] == 'buy' else '卖出'
             probs = result['probabilities']
 
