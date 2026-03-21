@@ -14,7 +14,7 @@ class EarningsSnapshotStrategy(Strategy):
     needs_llm = False
 
     def scan(self) -> list[Signal]:
-        from app.models import db
+        from app import db
         from app.models.stock import Stock
         from app.models.earnings_snapshot import EarningsSnapshot
         from app.services.market_cap_service import MarketCapService
