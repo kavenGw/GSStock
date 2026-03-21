@@ -13,4 +13,16 @@ GITHUB_RELEASE_REPOS = [
         'name': 'Superpowers',
         'emoji': '⚡',
     },
+    {
+        'key': 'openclaw',
+        'repo': 'openclaw/openclaw',
+        'name': 'OpenClaw',
+        'emoji': '🦀',
+    },
+    {
+        'key': 'claude-relay-service',
+        'repo': 'Wei-Shaw/claude-relay-service',
+        'name': 'Claude Relay Service',
+        'emoji': '🔄',
+    },
 ]
