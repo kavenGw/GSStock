@@ -21,7 +21,7 @@ class NewsItem(db.Model):
     matched_stocks = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
-    derivations = db.relationship('NewsDerivation', backref='news_item', lazy='dynamic')
+
 
 
 class InterestKeyword(db.Model):
@@ -53,16 +53,4 @@ class IdentifiedCompany(db.Model):
     news_content = db.Column(db.Text, nullable=False)
     reason = db.Column(db.Text)
     raw_result = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.now)
-
-
-class NewsDerivation(db.Model):
-    __tablename__ = 'news_derivation'
-
-    id = db.Column(db.Integer, primary_key=True)
-    news_item_id = db.Column(db.Integer, db.ForeignKey('news_item.id'), nullable=False)
-    search_query = db.Column(db.Text)
-    sources = db.Column(db.JSON)
-    summary = db.Column(db.Text)
-    importance = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.now)

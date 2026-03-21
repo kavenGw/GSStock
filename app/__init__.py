@@ -226,7 +226,7 @@ def create_app(config_class=None):
     app.register_blueprint(news_bp)
 
     with app.app_context():
-        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, InterestKeyword, NewsDerivation
+        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, InterestKeyword
 
         db.create_all()
 

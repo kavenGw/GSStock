@@ -15,10 +15,6 @@ NEWS_SOURCE_LABELS = {
     'yahoo_finance': {'label': 'Yahoo', 'color': 'dark'},
 }
 
-MAX_DERIVATION_PER_POLL = 2
-DERIVATION_URL_TIMEOUT = 30
-DERIVATION_TOTAL_TIMEOUT = 120
-
 # 公司新闻爬取配置
 COMPANY_NEWS_MAX_COMPANIES = int(os.getenv('COMPANY_NEWS_MAX_COMPANIES', '3'))
 COMPANY_NEWS_MAX_ARTICLES = int(os.getenv('COMPANY_NEWS_MAX_ARTICLES', '5'))

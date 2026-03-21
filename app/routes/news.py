@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request
 from app.routes import news_bp
 from app.services.news_service import NewsService
-from app.models.news import InterestKeyword, CompanyKeyword, NewsDerivation, IdentifiedCompany
+from app.models.news import InterestKeyword, CompanyKeyword, IdentifiedCompany
 from app import db
 
 
@@ -125,22 +125,6 @@ def delete_company(company_id):
     db.session.delete(c)
     db.session.commit()
     return jsonify({'success': True})
-
-
-@news_bp.route('/derivations/<int:news_id>')
-def get_derivation(news_id):
-    d = NewsDerivation.query.filter_by(news_item_id=news_id).first()
-    if not d:
-        return jsonify({'success': False})
-    return jsonify({
-        'success': True,
-        'derivation': {
-            'summary': d.summary,
-            'sources': d.sources or [],
-            'importance': d.importance,
-            'search_query': d.search_query,
-        }
-    })
 
 
 @news_bp.route('/identified-companies')

@@ -205,16 +205,6 @@ const News = {
             ? item.matched_keywords.split(',').map(k => `<span class="badge bg-success keyword-tag">${k.trim()}</span>`).join('')
             : '';
 
-        const hasDerivation = item.is_interest && item.importance >= 4;
-        const derivationArea = hasDerivation
-            ? `<div class="derivation-wrap" style="display:${item.importance >= 5 ? '' : 'none'}" id="deriv-${item.id}">
-                   <div class="derivation-card"><span class="text-muted">加载衍生内容...</span></div>
-               </div>`
-            : '';
-        const derivToggle = hasDerivation
-            ? `<button class="btn btn-sm btn-link text-muted p-0 ms-2" onclick="News.toggleDerivation('${item.id}', this)">${item.importance >= 5 ? '收起 ▲' : '▸ 查看衍生'}</button>`
-            : '';
-
         const div = document.createElement('div');
         div.className = 'd-flex align-items-start py-2 border-bottom news-item';
         div.dataset.id = item.id;
@@ -225,53 +215,12 @@ const News = {
             </div>
             <div class="flex-grow-1">
                 <div>
-                    <span>${item.content}</span>${srcBadge}${stars}${kwTags}${derivToggle}
+                    <span>${item.content}</span>${srcBadge}${stars}${kwTags}
                 </div>
-                ${derivationArea}
             </div>
         `;
 
-        if (hasDerivation && item.importance >= 5) {
-            this.loadDerivation(item.id, div.querySelector('.derivation-card'));
-        }
         return div;
-    },
-
-    async toggleDerivation(newsId, btn) {
-        const wrap = document.getElementById(`deriv-${newsId}`);
-        if (!wrap) return;
-        const isHidden = wrap.style.display === 'none';
-        wrap.style.display = isHidden ? '' : 'none';
-        btn.textContent = isHidden ? '收起 ▲' : '▸ 查看衍生';
-        if (isHidden) {
-            const card = wrap.querySelector('.derivation-card');
-            if (card && card.dataset.loaded !== 'true') {
-                await this.loadDerivation(newsId, card);
-            }
-        }
-    },
-
-    async loadDerivation(newsId, container) {
-        try {
-            const resp = await fetch(`/news/derivations/${newsId}`);
-            const data = await resp.json();
-            if (!data.success) {
-                container.innerHTML = '<span class="text-muted">暂无衍生内容</span>';
-                return;
-            }
-            const d = data.derivation;
-            const sources = (d.sources || []).map(s => {
-                try { return `<a href="${s}" target="_blank" class="me-2">${new URL(s).hostname}</a>`; }
-                catch { return ''; }
-            }).join('');
-            container.innerHTML = `
-                <div>${d.summary.replace(/\n/g, '<br>')}</div>
-                ${sources ? `<div class="derivation-sources">来源: ${sources}</div>` : ''}
-            `;
-            container.dataset.loaded = 'true';
-        } catch (e) {
-            container.innerHTML = '<span class="text-muted">加载失败</span>';
-        }
     },
 
     renderItems() {
