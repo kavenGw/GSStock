@@ -224,6 +224,21 @@ class NotificationService:
                 text += f"  {g['name']} {' '.join(parts)}\n"
 
         if watch_codes:
+            # 同时有买卖信号的关注股票：保留最新方向
+            for code in watch_codes:
+                g = grouped[code]
+                if g['buy'] and g['sell']:
+                    buy_latest = max(
+                        (s.get('date', '') for s in buy_signals
+                         if s.get('stock_code') == code), default='')
+                    sell_latest = max(
+                        (s.get('date', '') for s in sell_signals
+                         if s.get('stock_code') == code), default='')
+                    if buy_latest >= sell_latest:
+                        g['sell'] = []
+                    else:
+                        g['buy'] = []
+
             text += "\n关注:\n"
             sell_parts = []
             buy_parts = []
@@ -398,7 +413,9 @@ class NotificationService:
                     summary = summary[:30] + '…'
                 parts.append(f"{period}{emoji}{signal} {summary}")
             if parts:
-                lines.append(f"  {name} {' | '.join(parts)}")
+                lines.append(f"  {name}")
+                for p in parts:
+                    lines.append(f"    {p}")
 
         if not lines:
             return {'text': ''}
@@ -492,16 +509,16 @@ class NotificationService:
 
             cn_sectors = BriefingService.get_cn_sectors_data()
             if cn_sectors:
-                parts = []
+                lines.append("A股:")
                 for s in cn_sectors:
                     leader = f"({s['leader']})" if s.get('leader') else ''
-                    parts.append(f"{s['name']}{s['change_percent']:+.2f}%{leader}")
-                lines.append(f"A股: {' | '.join(parts)}")
+                    lines.append(f"  {s['name']}{s['change_percent']:+.2f}%{leader}")
 
             us_sectors = BriefingService.get_us_sectors_data()
             if us_sectors:
-                parts = [f"{s['name']}{s['change_percent']:+.2f}%" for s in us_sectors]
-                lines.append(f"美股: {' | '.join(parts)}")
+                lines.append("美股:")
+                for s in us_sectors:
+                    lines.append(f"  {s['name']}{s['change_percent']:+.2f}%")
 
             return '\n'.join(lines) if len(lines) > 1 else ''
         except Exception as e:

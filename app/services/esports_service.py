@@ -33,17 +33,33 @@ class EsportsService:
             today = datetime.now(_CST).date()
         yesterday = today - timedelta(days=1)
 
-        result = {}
-        for label, d in [('today', today), ('yesterday', yesterday)]:
+        # ESPN 用美国日期，需多查一天覆盖时区偏移
+        all_games = []
+        any_success = False
+        for offset in range(3):
+            d = today - timedelta(days=offset)
             games = EsportsService._fetch_espn_scoreboard(d)
-            if games is None:
-                result[label] = None
-            else:
-                result[label] = games
+            if games is not None:
+                any_success = True
+                all_games.extend(games)
 
-        # 两个日期都失败时返回 None，区分"获取失败"和"无赛事"
-        if result.get('today') is None and result.get('yesterday') is None:
+        if not any_success:
             return None
+
+        # 按北京日期重新分类，去重
+        result = {'today': [], 'yesterday': []}
+        seen = set()
+        for game in all_games:
+            beijing_date = game.pop('_beijing_date', None)
+            key = (game['home'], game['away'], game.get('start_time'))
+            if key in seen:
+                continue
+            seen.add(key)
+            if beijing_date == today:
+                result['today'].append(game)
+            elif beijing_date == yesterday:
+                result['yesterday'].append(game)
+
         return result
 
     @staticmethod
@@ -92,10 +108,12 @@ class EsportsService:
                 # 解析开赛时间 → 北京时间
                 start_utc = event.get('date', '')
                 start_time = ''
+                beijing_date = game_date
                 if start_utc:
                     try:
                         dt = datetime.fromisoformat(start_utc.replace('Z', '+00:00'))
                         start_time = dt.astimezone(_CST).strftime('%H:%M')
+                        beijing_date = dt.astimezone(_CST).date()
                     except (ValueError, TypeError):
                         pass
 
@@ -104,6 +122,7 @@ class EsportsService:
                     'away': away_cn,
                     'status': 'finished' if state == 'post' else 'scheduled',
                     'start_time': start_time,
+                    '_beijing_date': beijing_date,
                     'home_score': None,
                     'away_score': None,
                 }
