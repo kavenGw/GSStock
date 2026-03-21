@@ -155,6 +155,6 @@ class MarketIdentifier:
         if not code or not code.isdigit() or len(code) != 6:
             return False
 
-        # 上交所ETF: 51/52开头
+        # 上交所ETF: 51/52/56/58开头
         # 深交所ETF: 15/16开头
-        return code.startswith(('51', '52', '15', '16'))
+        return code.startswith(('51', '52', '56', '58', '15', '16'))
