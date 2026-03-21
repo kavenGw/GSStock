@@ -1,5 +1,11 @@
 """消息推送配置"""
 import os
 
-SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
-SLACK_ENABLED = bool(SLACK_WEBHOOK_URL)
+SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN', '')
+SLACK_ENABLED = bool(SLACK_BOT_TOKEN)
+
+# 频道常量（不带 # 前缀，chat.postMessage 要求频道名或频道 ID）
+CHANNEL_NEWS = 'news'
+CHANNEL_AI_TOOL = 'news_ai_tool'
+CHANNEL_LOL = 'news_lol'
+CHANNEL_NBA = 'news_nba'
