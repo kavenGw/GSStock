@@ -166,6 +166,8 @@ class EsportsService:
         games = EsportsService._fetch_espn_scoreboard(today)
         if games is None:
             return None
+        for g in games:
+            g.pop('_beijing_date', None)
         return {g['match_id']: g for g in games if g.get('match_id')}
 
     @staticmethod

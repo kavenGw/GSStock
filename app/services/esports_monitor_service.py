@@ -103,7 +103,19 @@ class EsportsMonitorService:
         interval = ESPORTS_NBA_MONITOR_INTERVAL if match_type == 'nba' else ESPORTS_LOL_MONITOR_INTERVAL
 
         now = datetime.now(_CST)
-        created_at = now
+
+        # 超时截止时间基于比赛开始时间（而非 job 创建时间）
+        deadline = now
+        if match_info.get('start_time'):
+            try:
+                h, m = map(int, match_info['start_time'].split(':'))
+                deadline = now.replace(hour=h, minute=m, second=0, microsecond=0)
+                if deadline < now:
+                    deadline = now
+            except (ValueError, TypeError):
+                pass
+        max_hours = self.NBA_MAX_DURATION_HOURS if match_type == 'nba' else self.LOL_MAX_DURATION_HOURS
+        deadline = deadline + timedelta(hours=max_hours)
 
         try:
             trigger = IntervalTrigger(minutes=interval)
@@ -111,7 +123,7 @@ class EsportsMonitorService:
                 'func': self._poll_match,
                 'trigger': trigger,
                 'args': [match_type, match_id, match_info['teams_desc'],
-                         match_info['league'], created_at],
+                         match_info['league'], deadline],
                 'id': job_id,
                 'replace_existing': True,
                 'misfire_grace_time': None,
@@ -137,15 +149,14 @@ class EsportsMonitorService:
             logger.error(f'[赛事监控] 创建任务失败 {job_id}: {e}')
             return False
 
-    def _poll_match(self, match_type, match_id, teams_desc, league, created_at):
+    def _poll_match(self, match_type, match_id, teams_desc, league, deadline):
         """轮询单场比赛并推送"""
         with self.app.app_context():
             from app.scheduler.engine import scheduler_engine
             job_id = f'{self.JOB_PREFIX}{match_type}_{match_id}'
 
-            max_hours = self.NBA_MAX_DURATION_HOURS if match_type == 'nba' else self.LOL_MAX_DURATION_HOURS
-            if datetime.now(_CST) - created_at > timedelta(hours=max_hours):
-                logger.info(f'[赛事监控] {job_id} 超时 {max_hours}h，移除')
+            if datetime.now(_CST) > deadline:
+                logger.info(f'[赛事监控] {job_id} 已超过截止时间，移除')
                 try:
                     scheduler_engine.scheduler.remove_job(job_id)
                 except Exception:
@@ -178,9 +189,6 @@ class EsportsMonitorService:
                         score_text = f"{game['away']} {game['away_score']}-{game['home_score']} {game['home']}"
                         msg = f"🏀 {score_text} | {quarter}" if quarter else f"🏀 {score_text}"
                         NotificationService.send_slack(msg)
-                    else:
-                        msg = f"🏀 {teams_desc} | 未开始"
-                        NotificationService.send_slack(msg)
 
                 else:
                     scores = EsportsService.get_lol_live_scores()
@@ -204,9 +212,6 @@ class EsportsMonitorService:
                         score2 = match.get('score2', 0) or 0
                         msg = f"🎮 [{league}] {match['team1']} {score1}-{score2} {match['team2']} | 进行中"
                         NotificationService.send_slack(msg)
-                    else:
-                        msg = f"🎮 [{league}] {teams_desc} | 未开始"
-                        NotificationService.send_slack(msg)
 
             except Exception as e:
                 logger.error(f'[赛事监控] {job_id} 轮询失败: {e}')
@@ -214,10 +219,11 @@ class EsportsMonitorService:
     def _cleanup_monitors(self):
         """清理所有赛事监控 job"""
         from app.scheduler.engine import scheduler_engine
+        jobs_to_remove = [job for job in scheduler_engine.scheduler.get_jobs()
+                          if job.id.startswith(self.JOB_PREFIX)]
         removed = 0
-        for job in scheduler_engine.scheduler.get_jobs():
-            if job.id.startswith(self.JOB_PREFIX):
-                job.remove()
-                removed += 1
+        for job in jobs_to_remove:
+            job.remove()
+            removed += 1
         if removed:
             logger.info(f'[赛事监控] 清理 {removed} 个旧任务')
