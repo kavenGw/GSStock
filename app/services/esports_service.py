@@ -25,7 +25,7 @@ class EsportsService:
         Returns:
             {'today': [game, ...], 'yesterday': [game, ...]}
             game = {'home': str, 'away': str, 'home_score': int|None,
-                    'away_score': int|None, 'status': 'scheduled'|'finished',
+                    'away_score': int|None, 'status': 'scheduled'|'in_progress'|'completed',
                     'start_time': str(HH:MM)}
             返回 None 表示全部获取失败
         """
@@ -117,16 +117,32 @@ class EsportsService:
                     except (ValueError, TypeError):
                         pass
 
+                match_id = event.get('id', '')
+
+                if state == 'post':
+                    status = 'completed'
+                elif state == 'in':
+                    status = 'in_progress'
+                else:
+                    status = 'scheduled'
+
+                quarter = ''
+                if state == 'in':
+                    status_detail = status_obj.get('type', {}).get('shortDetail', '')
+                    quarter = status_detail
+
                 game = {
+                    'match_id': match_id,
                     'home': home_cn,
                     'away': away_cn,
-                    'status': 'finished' if state == 'post' else 'scheduled',
+                    'status': status,
                     'start_time': start_time,
                     '_beijing_date': beijing_date,
                     'home_score': None,
                     'away_score': None,
+                    'quarter': quarter,
                 }
-                if state == 'post':
+                if state in ('post', 'in'):
                     try:
                         game['home_score'] = int(home_info.get('score', 0))
                         game['away_score'] = int(away_info.get('score', 0))
@@ -146,7 +162,7 @@ class EsportsService:
         Returns:
             dict: {league_name: {'today': [...], 'yesterday': [...]}} 或 None（全部失败）
             match = {'team1': str, 'team2': str, 'score1': int|None,
-                     'score2': int|None, 'status': 'scheduled'|'finished',
+                     'score2': int|None, 'status': 'scheduled'|'in_progress'|'completed',
                      'start_time': str(HH:MM)}
         """
         if today is None:
@@ -228,16 +244,24 @@ class EsportsService:
                         continue
 
                     state = event.get('state', '')
+                    if state == 'completed':
+                        status = 'completed'
+                    elif state == 'inProgress':
+                        status = 'in_progress'
+                    else:
+                        status = 'scheduled'
+
                     match = {
+                        'match_id': match_info.get('id', ''),
                         'team1': teams[0].get('name', ''),
                         'team2': teams[1].get('name', ''),
-                        'status': 'finished' if state == 'completed' else 'scheduled',
+                        'status': status,
                         'start_time': event_time,
                         'score1': None,
                         'score2': None,
                     }
 
-                    if state == 'completed':
+                    if state in ('completed', 'inProgress'):
                         result_obj = teams[0].get('result', {})
                         result_obj2 = teams[1].get('result', {})
                         if result_obj and result_obj2:

@@ -718,7 +718,7 @@ class NotificationService:
             else:
                 parts = []
                 for g in games:
-                    if g['status'] == 'finished':
+                    if g['status'] in ('completed', 'in_progress'):
                         parts.append(f"{g['away']} {g['away_score']}-{g['home_score']} {g['home']}")
                     else:
                         parts.append(f"{g['away']} vs {g['home']} {g['start_time']}")
@@ -737,7 +737,7 @@ class NotificationService:
             else:
                 parts = []
                 for m in matches:
-                    if m['status'] == 'finished' and m['score1'] is not None:
+                    if m['status'] in ('completed', 'in_progress') and m['score1'] is not None:
                         parts.append(f"{m['team1']} {m['score1']}-{m['score2']} {m['team2']}")
                     else:
                         parts.append(f"{m['team1']} vs {m['team2']} {m['start_time']}")
