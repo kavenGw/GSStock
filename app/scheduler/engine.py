@@ -140,3 +140,6 @@ class SchedulerEngine:
     def shutdown(self):
         if self.scheduler.running:
             self.scheduler.shutdown(wait=False)
+
+
+scheduler_engine = SchedulerEngine()
