@@ -21,12 +21,22 @@ class DailyBriefingStrategy(Strategy):
             results = NotificationService.push_daily_report()
             if results.get('slack'):
                 logger.info('[每日简报] 推送成功')
+                self._setup_esports_monitors()
             else:
                 logger.warning('[每日简报] 推送失败或未配置')
         except Exception as e:
             logger.error(f'[每日简报] 推送失败: {e}')
 
         return []
+
+    @staticmethod
+    def _setup_esports_monitors():
+        try:
+            from flask import current_app
+            from app.services.esports_monitor_service import EsportsMonitorService
+            EsportsMonitorService(current_app._get_current_object()).setup_match_monitors()
+        except Exception as e:
+            logger.error(f'[每日简报] 赛事监控创建失败: {e}')
 
     @staticmethod
     def _refresh_signal_cache():

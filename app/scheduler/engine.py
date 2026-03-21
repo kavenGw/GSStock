@@ -62,6 +62,7 @@ class SchedulerEngine:
         atexit.register(self.shutdown)
         logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
         self._check_daily_push_catchup(app)
+        self._recover_esports_monitors(app)
 
     def _check_daily_push_catchup(self, app):
         """检查是否需要补发每日推送"""
@@ -100,10 +101,28 @@ class SchedulerEngine:
                 results = NotificationService.push_daily_report()
                 if results.get('slack'):
                     logger.info('[调度器] 每日推送补发成功')
+                    self._setup_esports_monitors_safe()
                 else:
                     logger.warning('[调度器] 每日推送补发失败或未配置')
             except Exception as e:
                 logger.error(f'[调度器] 每日推送补发失败: {e}')
+
+    def _recover_esports_monitors(self, app):
+        """启动时恢复赛事监控"""
+        try:
+            with app.app_context():
+                from app.services.esports_monitor_service import EsportsMonitorService
+                EsportsMonitorService(app).recover_monitors()
+        except Exception as e:
+            logger.warning(f'[调度器] 赛事监控恢复失败（不影响启动）: {e}')
+
+    def _setup_esports_monitors_safe(self):
+        """安全地创建赛事监控（已在 app context 内）"""
+        try:
+            from app.services.esports_monitor_service import EsportsMonitorService
+            EsportsMonitorService(self.app).setup_match_monitors()
+        except Exception as e:
+            logger.error(f'[调度器] 赛事监控创建失败: {e}')
 
     def _run_strategy(self, strategy_name: str):
         """在 app context 内执行策略扫描"""
