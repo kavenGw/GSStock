@@ -106,15 +106,32 @@ class ValueDipService:
         if not data:
             return info
 
-        info['trend_data'] = [{'date': d.get('date', ''), 'close': d.get('close', 0)} for d in data]
-        info['price'] = data[-1].get('close')
+        # 统一类型转换，确保 close 是 float
+        info['trend_data'] = [
+            {
+                'date': d.get('date', ''),
+                'close': float(d.get('close')) if d.get('close') is not None else 0.0
+            }
+            for d in data
+        ]
+
+        # price 添加 None 检查
+        last_close = data[-1].get('close')
+        info['price'] = float(last_close) if last_close is not None else None
 
         for period_key, days in [('7d', 7), ('30d', 30), ('90d', len(data))]:
             if len(data) >= 2:
                 idx = max(0, len(data) - days)
-                base_price = data[idx].get('close', 0)
-                current_price = data[-1].get('close', 0)
-                if base_price and base_price > 0:
-                    info[f'change_{period_key}'] = round((current_price - base_price) / base_price * 100, 2)
+                base_price_raw = data[idx].get('close')
+                current_price_raw = data[-1].get('close')
+
+                # 两个价格都必须有效
+                if base_price_raw is not None and current_price_raw is not None:
+                    base_price = float(base_price_raw)
+                    current_price = float(current_price_raw)
+                    if base_price > 0:
+                        info[f'change_{period_key}'] = round(
+                            (current_price - base_price) / base_price * 100, 2
+                        )
 
         return info
