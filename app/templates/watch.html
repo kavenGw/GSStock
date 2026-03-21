@@ -39,7 +39,12 @@
 .td-badge-sell { background: #fef2f2; color: #dc2626; }
 .td-badge-warn { animation: td-pulse 1s ease-in-out infinite; }
 @keyframes td-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-.earnings-table td, .earnings-table th { padding: 0.25rem 0.4rem; white-space: nowrap; }
+.earnings-table { table-layout: fixed; width: 100%; }
+.earnings-table td, .earnings-table th { padding: 0.25rem 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.earnings-table th:nth-child(1), .earnings-table td:nth-child(1) { width: 25%; text-align: left; }
+.earnings-table th:nth-child(2), .earnings-table td:nth-child(2) { width: 25%; text-align: right; }
+.earnings-table th:nth-child(3), .earnings-table td:nth-child(3) { width: 25%; text-align: right; }
+.earnings-table th:nth-child(4), .earnings-table td:nth-child(4) { width: 25%; text-align: right; }
 </style>
 {% endblock %}
 
