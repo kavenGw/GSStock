@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}价值洼地{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">价值洼地</h4>
+    <div class="btn-group btn-group-sm" id="period-toggle">
+        <button type="button" class="btn btn-outline-primary" data-period="7d">7天</button>
+        <button type="button" class="btn btn-primary" data-period="30d">30天</button>
+        <button type="button" class="btn btn-outline-primary" data-period="90d">90天</button>
+    </div>
+</div>
+
+<div id="sector-cards" class="row g-3 mb-4">
+    <!-- JS 动态渲染板块卡片 -->
+</div>
+
+<div id="trend-container" class="d-none">
+    <h5 id="trend-title" class="mb-3"></h5>
+    <div id="trend-charts" class="row g-3">
+        <!-- JS 动态渲染走势图 -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/value_dip.js') }}"></script>
+{% endblock %}

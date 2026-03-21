@@ -69,3 +69,27 @@ BENCHMARK_CODES = [
     {'code': 'SI=F', 'name': 'COMEX白银', 'market': 'US'},
     {'code': '^NDX', 'name': '纳指100', 'market': 'US'},
 ]
+
+# 价值洼地板块配置
+VALUE_DIP_SECTORS = {
+    'korea_storage': {
+        'name': '韩国存储',
+        'stocks': {'005930.KS': '三星电子', '000660.KS': 'SK海力士'}
+    },
+    'a_storage_controller': {
+        'name': 'A股存储主控',
+        'stocks': {'300671': '德明利', '603005': '江波龙', '688525': '佰维存储'}
+    },
+    'a_storage': {
+        'name': 'A股存储',
+        'stocks': {'300223': '北京君正', '603986': '兆易创新'}
+    },
+    'a_pcb': {
+        'name': 'A股PCB',
+        'stocks': {'002463': '沪电股份', '300476': '胜宏科技'}
+    },
+    'a_ccl': {
+        'name': 'A股CCL',
+        'stocks': {'600183': '生益科技', '688519': '南亚新材'}
+    },
+}

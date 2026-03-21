@@ -1,0 +1,120 @@
+"""价值洼地分析服务 — 对比板块涨幅，找出洼地"""
+import logging
+from app.config.stock_codes import VALUE_DIP_SECTORS
+from app.services.unified_stock_data import unified_stock_data_service
+
+logger = logging.getLogger(__name__)
+
+DIP_THRESHOLD = 0.5
+
+
+class ValueDipService:
+
+    @staticmethod
+    def get_sector_performance() -> dict:
+        """获取所有板块的 7d/30d/90d 涨幅及个股明细"""
+        all_codes = []
+        code_to_name = {}
+        for sector in VALUE_DIP_SECTORS.values():
+            for code, name in sector['stocks'].items():
+                all_codes.append(code)
+                code_to_name[code] = name
+
+        trend_result = unified_stock_data_service.get_trend_data(all_codes, days=90)
+        trend_map = {}
+        if trend_result and trend_result.get('stocks'):
+            for stock in trend_result['stocks']:
+                trend_map[stock['stock_code']] = stock.get('data', [])
+
+        sectors = []
+        for key, sector_cfg in VALUE_DIP_SECTORS.items():
+            stocks = []
+            for code, name in sector_cfg['stocks'].items():
+                data = trend_map.get(code, [])
+                stock_info = ValueDipService._calc_stock_changes(code, name, data)
+                stocks.append(stock_info)
+
+            sector_info = {
+                'key': key,
+                'name': sector_cfg['name'],
+                'stocks': stocks,
+            }
+            for period in ('7d', '30d', '90d'):
+                changes = [s[f'change_{period}'] for s in stocks if s[f'change_{period}'] is not None]
+                sector_info[f'change_{period}'] = round(sum(changes) / len(changes), 2) if changes else None
+
+            sectors.append(sector_info)
+
+        averages = {}
+        for period in ('7d', '30d', '90d'):
+            values = [s[f'change_{period}'] for s in sectors if s[f'change_{period}'] is not None]
+            avg = sum(values) / len(values) if values else 0
+            averages[f'avg_{period}'] = round(avg, 2)
+
+            for s in sectors:
+                val = s[f'change_{period}']
+                if val is not None:
+                    threshold = avg - abs(avg) * DIP_THRESHOLD
+                    s[f'is_dip_{period}'] = val < threshold
+                else:
+                    s[f'is_dip_{period}'] = False
+
+        return {
+            'sectors': sectors,
+            'averages': averages,
+            'dip_threshold': DIP_THRESHOLD,
+        }
+
+    @staticmethod
+    def detect_value_dips() -> list:
+        """检测洼地板块，返回需推送的洼地信息列表"""
+        try:
+            result = ValueDipService.get_sector_performance()
+        except Exception as e:
+            logger.error(f'[价值洼地] 检测失败: {e}')
+            return []
+
+        dips = []
+        averages = result['averages']
+        for sector in result['sectors']:
+            for period in ('7d', '30d', '90d'):
+                if sector.get(f'is_dip_{period}'):
+                    dips.append({
+                        'period': period,
+                        'sector_name': sector['name'],
+                        'sector_change': sector[f'change_{period}'],
+                        'avg_change': averages[f'avg_{period}'],
+                        'stocks': [
+                            {'name': s['name'], 'change': s[f'change_{period}']}
+                            for s in sector['stocks']
+                        ],
+                    })
+        return dips
+
+    @staticmethod
+    def _calc_stock_changes(code: str, name: str, data: list) -> dict:
+        """从走势数据计算单只股票的各周期涨幅"""
+        info = {
+            'code': code,
+            'name': name,
+            'price': None,
+            'change_7d': None,
+            'change_30d': None,
+            'change_90d': None,
+            'trend_data': [],
+        }
+        if not data:
+            return info
+
+        info['trend_data'] = [{'date': d.get('date', ''), 'close': d.get('close', 0)} for d in data]
+        info['price'] = data[-1].get('close')
+
+        for period_key, days in [('7d', 7), ('30d', 30), ('90d', len(data))]:
+            if len(data) >= 2:
+                idx = max(0, len(data) - days)
+                base_price = data[idx].get('close', 0)
+                current_price = data[-1].get('close', 0)
+                if base_price and base_price > 0:
+                    info[f'change_{period_key}'] = round((current_price - base_price) / base_price * 100, 2)
+
+        return info
