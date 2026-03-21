@@ -156,6 +156,19 @@ class EsportsService:
             return None
 
     @staticmethod
+    def get_nba_live_scores():
+        """获取当天所有 NBA 比赛实时比分
+
+        Returns:
+            dict: {match_id: game_dict} 或 None
+        """
+        today = datetime.now(_CST).date()
+        games = EsportsService._fetch_espn_scoreboard(today)
+        if games is None:
+            return None
+        return {g['match_id']: g for g in games if g.get('match_id')}
+
+    @staticmethod
     def get_lol_schedule(today=None):
         """获取所有 LoL 联赛今日赛程 + 昨日结果
 
@@ -292,3 +305,27 @@ class EsportsService:
         except Exception as e:
             logger.warning(f'[赛事.LoL] 联赛{league_id}获取失败: {e}')
             return None
+
+    @staticmethod
+    def get_lol_live_scores():
+        """获取当天所有 LoL 比赛实时比分
+
+        Returns:
+            dict: {match_id: {match_dict + 'league': str}} 或 None
+        """
+        today = datetime.now(_CST).date()
+        yesterday = today - timedelta(days=1)
+        result = {}
+        any_success = False
+        for league_name, league_id in LOL_LEAGUES.items():
+            matches = EsportsService._fetch_lol_esports_schedule(
+                league_id, today, yesterday,
+            )
+            if matches is None:
+                continue
+            any_success = True
+            for m in matches.get('today', []):
+                if m.get('match_id'):
+                    m['league'] = league_name
+                    result[m['match_id']] = m
+        return result if any_success else None
