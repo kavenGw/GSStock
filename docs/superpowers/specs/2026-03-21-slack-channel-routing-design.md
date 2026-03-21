@@ -14,29 +14,29 @@
 
 | 频道 | 内容 |
 |------|------|
-| `#news` | 每日简报、盯盘分析、盯盘告警、价格/涨跌幅预警、公司新闻、兴趣新闻 |
-| `#news_ai_tool` | GitHub Release 更新（Claude Code、Superpowers） |
-| `#news_lol` | LoL 赛事实时比分 |
-| `#news_nba` | NBA 赛事实时比分 |
+| `news` | 每日简报、盯盘分析、盯盘告警、价格/涨跌幅预警、公司新闻、兴趣新闻 |
+| `news_ai_tool` | GitHub Release 更新（Claude Code、Superpowers） |
+| `news_lol` | LoL 赛事实时比分 |
+| `news_nba` | NBA 赛事实时比分 |
 
 ## 设计
 
 ### 1. Slack 发送层改造
 
-`NotificationService.send_slack()` 新增 `channel` 参数，从 Webhook 切换到 Bot Token API。
+`NotificationService.send_slack()` 新增 `channel` 参数，从 Webhook 切换到 Bot Token + `chat.postMessage` API。
 
 **配置 (`app/config/notification_config.py`)**：
 
 ```python
 SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN', '')
 SLACK_ENABLED = bool(SLACK_BOT_TOKEN)
-SLACK_DEFAULT_CHANNEL = os.environ.get('SLACK_DEFAULT_CHANNEL', '#news')
+SLACK_DEFAULT_CHANNEL = os.environ.get('SLACK_DEFAULT_CHANNEL', 'news')
 
-# 频道常量
-CHANNEL_NEWS = '#news'
-CHANNEL_AI_TOOL = '#news_ai_tool'
-CHANNEL_LOL = '#news_lol'
-CHANNEL_NBA = '#news_nba'
+# 频道常量（不带 # 前缀，chat.postMessage 要求频道名或频道 ID）
+CHANNEL_NEWS = 'news'
+CHANNEL_AI_TOOL = 'news_ai_tool'
+CHANNEL_LOL = 'news_lol'
+CHANNEL_NBA = 'news_nba'
 ```
 
 **发送方法**：
@@ -47,12 +47,14 @@ def send_slack(message: str, channel: str = CHANNEL_NEWS) -> bool:
     # POST https://slack.com/api/chat.postMessage
     # Headers: Authorization: Bearer {SLACK_BOT_TOKEN}
     # Body: {"channel": channel, "text": message}
+    # 保留 certifi SSL context
+    # 检查 response JSON 的 "ok" 字段（非仅 HTTP status）
 ```
 
 **环境变量变更**：
 - 移除 `SLACK_WEBHOOK_URL`
 - 新增 `SLACK_BOT_TOKEN`
-- 新增 `SLACK_DEFAULT_CHANNEL`（可选，默认 `#news`）
+- 新增 `SLACK_DEFAULT_CHANNEL`（可选，默认 `news`）
 
 ### 2. 删除多通道抽象层
 
@@ -63,41 +65,55 @@ def send_slack(message: str, channel: str = CHANNEL_NEWS) -> bool:
 - `channels/__init__.py`
 - `__init__.py`
 
-**去重逻辑迁移**：NotificationManager 中的状态机去重（`_is_duplicate`、`_signal_state`）迁移到 NotificationService。
+**去重逻辑迁移**：NotificationManager 中的状态机去重迁移到 NotificationService。`_signal_state` 作为类变量，`_is_duplicate` / `_make_signal_key` / `_get_signal_direction` 全部为 `@staticmethod`，通过 `NotificationService._signal_state` 访问。
 
 **事件总线订阅改造**：
 
 ```python
 # app/__init__.py
-# 移除 notification_manager 相关代码
+# 移除 notification_manager 相关 import 和代码
 # 改为：
+from app.services.notification import NotificationService
 event_bus.subscribe(NotificationService.dispatch_signal)
 ```
 
-NotificationService 新增 `dispatch_signal` 静态方法：
+NotificationService 新增信号分发：
 
 ```python
-_signal_state = {}
+class NotificationService:
+    _signal_state = {}  # 类变量，状态机去重
 
-@staticmethod
-def dispatch_signal(signal):
-    """事件总线回调：去重 + 格式化 + 发送到 #news"""
-    if signal.priority == "LOW":
-        return
-    if NotificationService._is_duplicate(signal):
-        return
-    emoji = {"HIGH": "🔴", "MEDIUM": "🟡"}.get(signal.priority, "")
-    text = f"{emoji} *[{signal.strategy}]* {signal.title}\n{signal.detail}"
-    NotificationService.send_slack(text, CHANNEL_NEWS)
+    @staticmethod
+    def _make_signal_key(signal): ...
+
+    @staticmethod
+    def _get_signal_direction(signal): ...
+
+    @staticmethod
+    def _is_duplicate(signal):
+        key = NotificationService._make_signal_key(signal)
+        # ... 使用 NotificationService._signal_state
+
+    @staticmethod
+    def dispatch_signal(signal):
+        """事件总线回调：去重 + 格式化 + 发送到 news 频道"""
+        if signal.priority == "LOW":
+            return
+        if NotificationService._is_duplicate(signal):
+            return
+        emoji = {"HIGH": "🔴", "MEDIUM": "🟡"}.get(signal.priority, "")
+        text = f"{emoji} *[{signal.strategy}]* {signal.title}\n{signal.detail}"
+        NotificationService.send_slack(text, CHANNEL_NEWS)
 ```
 
 ### 3. 各推送路径频道路由
 
 **每日简报 `push_daily_report()`**：
-- Message 1（核心观点+持仓+信号）→ `#news`
-- Message 2（盯盘分析）→ `#news`
-- Message 3（市场数据）→ `#news`，GitHub Release 部分剥离 → `#news_ai_tool`
-- Message 4（赛事）→ 删除，赛事摘要拆分发到 `#news_nba` / `#news_lol`
+- Message 1（核心观点+持仓+信号）→ `CHANNEL_NEWS`
+- Message 2（盯盘分析）→ `CHANNEL_NEWS`
+- Message 3（市场数据）→ `CHANNEL_NEWS`
+- GitHub Release：`release_texts` 合并为一条消息，发送到 `CHANNEL_AI_TOOL`（从 msg3_parts 中移除）
+- 赛事：调用 `format_esports_summary_split()` 得到 `(nba_text, lol_text)`，分别发送到 `CHANNEL_NBA` / `CHANNEL_LOL`（原 Message 4 删除）
 
 **赛事监控 `esports_monitor_service.py`**：
 - NBA 的 `send_slack(msg)` → `send_slack(msg, CHANNEL_NBA)`
@@ -110,7 +126,7 @@ def dispatch_signal(signal):
 - `send_slack(msg)` → `send_slack(msg, CHANNEL_NEWS)`
 
 **策略信号**（price_alert / change_alert / watch_alert / watch_realtime）：
-- 全部走 `dispatch_signal()` → `#news`
+- 全部走 `dispatch_signal()` → `CHANNEL_NEWS`
 
 **盯盘实时分析 `push_realtime_analysis()`**：
 - `send_slack(message)` → `send_slack(message, CHANNEL_NEWS)`
@@ -122,13 +138,25 @@ def dispatch_signal(signal):
 ```python
 @staticmethod
 def format_esports_summary_split() -> tuple[str, str]:
-    """返回 (nba_text, lol_text)"""
-    nba_text = ...  # 🏀 NBA 部分
-    lol_text = ...  # 🎮 LoL 部分
+    """返回 (nba_text, lol_text)
+
+    nba_text: NBA 赛程/比分
+    lol_text: 所有联赛 section 拼接（LPL、LCK、先锋赛、国际赛事）
+    """
+    nba_text = ...
+    lol_text = ...
     return nba_text, lol_text
 ```
 
-原 `format_esports_summary()` 删除。
+原 `format_esports_summary()` 删除。`push_daily_report` 中替换为：
+
+```python
+nba_text, lol_text = NotificationService.format_esports_summary_split()
+if nba_text:
+    NotificationService.send_slack(nba_text, CHANNEL_NBA)
+if lol_text:
+    NotificationService.send_slack(lol_text, CHANNEL_LOL)
+```
 
 ### 5. 清理
 
@@ -146,4 +174,5 @@ def format_esports_summary_split() -> tuple[str, str]:
 | 赛事频道路由 | `app/services/esports_monitor_service.py` |
 | 兴趣新闻频道 | `app/services/interest_pipeline.py` |
 | 公司新闻频道 | `app/services/company_news_service.py` |
+| 前端提示文字 | `app/templates/base.html` |
 | 配置文档同步 | `.env.sample` / `CLAUDE.md` / `README.md` |
