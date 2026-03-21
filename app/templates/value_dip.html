@@ -4,10 +4,27 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">价值洼地</h4>
-    <div class="btn-group btn-group-sm" id="period-toggle">
-        <button type="button" class="btn btn-outline-primary" data-period="7d">7天</button>
-        <button type="button" class="btn btn-primary" data-period="30d">30天</button>
-        <button type="button" class="btn btn-outline-primary" data-period="90d">90天</button>
+    <div class="d-flex gap-3 align-items-center">
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="compare-btn">
+            板块走势对比
+        </button>
+        <div class="btn-group btn-group-sm" id="period-toggle">
+            <button type="button" class="btn btn-outline-primary" data-period="7d">7天</button>
+            <button type="button" class="btn btn-primary" data-period="30d">30天</button>
+            <button type="button" class="btn btn-outline-primary" data-period="90d">90天</button>
+        </div>
+    </div>
+</div>
+
+<div id="compare-container" class="mb-4 d-none">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>板块走势对比（涨跌幅%）</span>
+            <button type="button" class="btn-close" id="compare-close"></button>
+        </div>
+        <div class="card-body">
+            <div id="compare-chart" style="height: 400px;"></div>
+        </div>
     </div>
 </div>
 
