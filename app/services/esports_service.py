@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import httpx
+from httpx import Timeout
 
 from app.config.esports_config import (
     ESPN_NBA_SCOREBOARD_URL, ESPORTS_FETCH_TIMEOUT, NBA_TEAM_NAMES,
@@ -244,7 +245,7 @@ class EsportsService:
                     f'{LOL_ESPORTS_API_BASE}/getSchedule',
                     params=params,
                     headers={'x-api-key': LOL_ESPORTS_API_KEY},
-                    timeout=ESPORTS_FETCH_TIMEOUT,
+                    timeout=Timeout(ESPORTS_FETCH_TIMEOUT, connect=30),
                 )
                 resp.raise_for_status()
                 data = resp.json()
