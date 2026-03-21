@@ -1,5 +1,5 @@
 """
-消息推送服务 - Slack Webhook
+消息推送服务 - Slack Bot Token (chat.postMessage)
 """
 import json
 import logging
@@ -10,7 +10,10 @@ from urllib.request import urlopen, Request
 
 import certifi
 
-from app.config.notification_config import SLACK_WEBHOOK_URL, SLACK_ENABLED
+from app.config.notification_config import (
+    SLACK_BOT_TOKEN, SLACK_ENABLED,
+    CHANNEL_NEWS, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,28 +29,80 @@ class NotificationService:
             'slack': SLACK_ENABLED,
         }
 
+    _signal_state = {}  # 类变量，状态机去重
+
     @staticmethod
-    def send_slack(message: str) -> bool:
+    def _make_signal_key(signal) -> str:
+        data = signal.data or {}
+        stock_code = data.get('stock_code') or data.get('code', '')
+        signal_name = data.get('name', '')
+        if stock_code and signal_name:
+            return f"{signal.strategy}:{stock_code}:{signal_name}"
+        return ''
+
+    @staticmethod
+    def _get_signal_direction(signal) -> str:
+        data = signal.data or {}
+        direction = data.get('type', '')
+        if direction:
+            return direction
+        change_pct = data.get('change_pct')
+        if change_pct is not None:
+            return 'up' if change_pct > 0 else 'down'
+        return ''
+
+    @staticmethod
+    def _is_duplicate(signal) -> bool:
+        key = NotificationService._make_signal_key(signal)
+        if not key:
+            return False
+        direction = NotificationService._get_signal_direction(signal)
+        if not direction:
+            return False
+        last_direction = NotificationService._signal_state.get(key)
+        if last_direction == direction:
+            logger.debug(f'[通知去重] 跳过重复信号: {key} direction={direction}')
+            return True
+        NotificationService._signal_state[key] = direction
+        return False
+
+    @staticmethod
+    def dispatch_signal(signal):
+        """事件总线回调：去重 + 格式化 + 发送到 news 频道"""
+        if signal.priority == "LOW":
+            return
+        if NotificationService._is_duplicate(signal):
+            return
+        emoji = {"HIGH": "\U0001f534", "MEDIUM": "\U0001f7e1"}.get(signal.priority, "")
+        text = f"{emoji} *[{signal.strategy}]* {signal.title}\n{signal.detail}"
+        NotificationService.send_slack(text, CHANNEL_NEWS)
+
+    @staticmethod
+    def send_slack(message: str, channel: str = CHANNEL_NEWS) -> bool:
         if not SLACK_ENABLED:
             logger.warning('[通知.Slack] Slack 未配置')
             return False
 
         try:
-            payload = json.dumps({'text': message}).encode('utf-8')
-            req = Request(SLACK_WEBHOOK_URL, data=payload, headers={'Content-Type': 'application/json'})
+            payload = json.dumps({'channel': channel, 'text': message}).encode('utf-8')
+            req = Request(
+                'https://slack.com/api/chat.postMessage',
+                data=payload,
+                headers={
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Authorization': f'Bearer {SLACK_BOT_TOKEN}',
+                },
+            )
             ctx = ssl.create_default_context(cafile=certifi.where())
             with urlopen(req, timeout=10, context=ctx) as resp:
-                return resp.status == 200
+                body = json.loads(resp.read().decode('utf-8'))
+                if not body.get('ok'):
+                    logger.error(f'[通知.Slack] API 错误: {body.get("error", "unknown")}')
+                    return False
+                return True
         except Exception as e:
             logger.error(f'[通知.Slack] 推送失败: {e}', exc_info=True)
             return False
-
-    @staticmethod
-    def send_all(subject: str, text_content: str) -> dict:
-        results = {}
-        if SLACK_ENABLED:
-            results['slack'] = NotificationService.send_slack(text_content)
-        return results
 
     @staticmethod
     def _get_all_watched_codes() -> tuple[list[str], dict[str, str]]:
