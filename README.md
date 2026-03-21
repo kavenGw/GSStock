@@ -61,7 +61,7 @@ cp .env.sample .env
 | `LLM_REQUEST_TIMEOUT` | LLM API 请求超时（秒） | `300` |
 | `LLAMA_SERVER_ENABLED` | 启用本地 llama-server（可选） | `false` |
 | `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
-| `SLACK_WEBHOOK_URL` | Slack 推送（可选） | 空 |
+| `SLACK_BOT_TOKEN` | Slack Bot Token（可选） | 空 |
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
 | `WATCH_ALERT_COOLDOWN_MINUTES` | 盘中极值告警冷却时间（分钟） | `5` |
 | `NEWS_INTERVAL_MINUTES` | 新闻后台轮询间隔（分钟） | `10` |
@@ -278,15 +278,17 @@ pip install torch --index-url https://download.pytorch.org/whl/cu124
 
 1. 打开 [Slack API: Applications](https://api.slack.com/apps)，点击 **Create New App** → **From scratch**
 2. 输入应用名称（如 `Stock Alert`），选择目标 Workspace，点击 **Create App**
-3. 左侧菜单选择 **Incoming Webhooks**，开启 **Activate Incoming Webhooks**
-4. 页面底部点击 **Add New Webhook to Workspace**，选择接收通知的频道，点击 **Allow**
-5. 复制生成的 Webhook URL，填入 `.env`：
+3. 左侧菜单 **OAuth & Permissions**，在 **Bot Token Scopes** 添加 `chat:write`
+4. 页面顶部点击 **Install to Workspace**，点击 **Allow**
+5. 复制 **Bot User OAuth Token**（`xoxb-...`），填入 `.env`：
 
 ```env
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx
+SLACK_BOT_TOKEN=xoxb-your-bot-token
 ```
 
-配置后自动启用。
+6. 在 Slack 中将 Bot 邀请到目标频道（`/invite @Stock Alert`）
+
+配置后自动启用，消息按类型路由到 `news`、`news_ai_tool`、`news_lol`、`news_nba` 频道。
 
 ## 技术栈
 

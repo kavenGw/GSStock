@@ -818,12 +818,7 @@ SECRET_KEY=<随机密钥>
 READONLY_MODE=false
 
 # 通知配置
-SLACK_WEBHOOK_URL=<Slack Webhook>
-SMTP_HOST=<SMTP服务器>
-SMTP_PORT=587
-SMTP_USER=<邮箱>
-SMTP_PASSWORD=<密码>
-NOTIFY_EMAIL_TO=<收件人>
+SLACK_BOT_TOKEN=<Slack Bot Token>
 
 # 数据源 API (可选)
 TWELVE_DATA_API_KEY=<API密钥>

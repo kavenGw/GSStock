@@ -34,7 +34,6 @@ app/
 ├── routes/            # Flask Blueprint 路由（14 个模块）
 ├── services/          # 业务逻辑层（数据、分析、交易等）
 ├── llm/               # LLM 路由和提供者（智谱 GLM）
-├── notifications/     # 通知系统（Slack）
 ├── strategies/        # 策略插件系统（自动发现注册）
 ├── scheduler/         # APScheduler 后台调度 + 事件总线
 ├── middleware/        # Flask 中间件
@@ -219,6 +218,21 @@ TDSequentialService.calculate()
 | `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
+
+## Slack 推送配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `SLACK_BOT_TOKEN` | Slack Bot Token | 空 |
+
+频道路由：
+
+| 频道 | 内容 |
+|------|------|
+| `news` | 每日简报、盯盘、预警、公司新闻、兴趣新闻 |
+| `news_ai_tool` | GitHub Release 更新 |
+| `news_lol` | LoL 赛事 |
+| `news_nba` | NBA 赛事 |
 
 ## 赛事推送配置
 
