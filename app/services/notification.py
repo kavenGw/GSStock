@@ -710,56 +710,48 @@ class NotificationService:
         return texts, pushed_versions
 
     @staticmethod
-    def format_esports_summary() -> str:
-        """格式化赛事资讯（NBA + LoL）
+    def format_esports_summary_split() -> tuple[str, str]:
+        """格式化赛事资讯，分别返回 NBA 和 LoL 文本
 
         Returns:
-            格式化文本，全部获取失败返回空字符串
+            (nba_text, lol_text)，获取失败的部分返回空字符串
         """
         from app.config.esports_config import ESPORTS_ENABLED
         if not ESPORTS_ENABLED:
-            return ''
+            return '', ''
+
+        nba_text = ''
+        lol_text = ''
 
         try:
             from app.services.esports_service import EsportsService
 
-            sections = []
-            any_success = False
-
             # NBA
             nba = EsportsService.get_nba_schedule()
             if nba is not None:
-                any_success = True
-                nba_section = NotificationService._format_nba_section(nba)
-                sections.append(nba_section)
-            else:
-                sections.append('🏀 NBA\n数据获取失败')
+                nba_text = NotificationService._format_nba_section(nba)
 
             # LoL
             lol = EsportsService.get_lol_schedule()
             if lol is not None:
-                any_success = True
+                lol_sections = []
                 for league_name in ['LPL', 'LCK', '先锋赛', 'Worlds', 'MSI']:
                     if league_name not in lol:
                         continue
                     league_data = lol[league_name]
                     if league_data is None:
-                        sections.append(f'🎮 {league_name}\n数据获取失败')
+                        lol_sections.append(f'🎮 {league_name}\n数据获取失败')
                     else:
                         section = NotificationService._format_lol_section(
                             league_name, league_data,
                         )
-                        sections.append(section)
-            else:
-                sections.append('🎮 LoL\n数据获取失败')
-
-            if not any_success:
-                return ''
-
-            return '\n\n'.join(sections)
+                        lol_sections.append(section)
+                if lol_sections:
+                    lol_text = '\n\n'.join(lol_sections)
         except Exception as e:
             logger.warning(f'[通知.赛事] 格式化失败: {e}')
-            return ''
+
+        return nba_text, lol_text
 
     @staticmethod
     def _format_nba_section(nba_data) -> str:
@@ -869,7 +861,7 @@ class NotificationService:
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
 
         # 赛事资讯
-        esports_text = NotificationService.format_esports_summary()
+        nba_text, lol_text = NotificationService.format_esports_summary_split()
 
         # GLM 综合分析
         core_insights = ''
@@ -959,16 +951,9 @@ class NotificationService:
             msg3_parts.append('\n'.join(data_lines))
         if ai_text:
             msg3_parts.append(ai_text)
-        for rt in release_texts:
-            msg3_parts.append(rt)
-
-        # Message 4: 赛事资讯
-        msg4_parts = []
-        if esports_text:
-            msg4_parts.append(esports_text)
 
         messages = []
-        for parts in (msg1_parts, msg2_parts, msg3_parts, msg4_parts):
+        for parts in (msg1_parts, msg2_parts, msg3_parts):
             if parts:
                 messages.append('\n\n'.join(parts))
 
@@ -980,8 +965,23 @@ class NotificationService:
 
         sent = 0
         for msg in messages:
-            if NotificationService.send_slack(msg):
+            if NotificationService.send_slack(msg, CHANNEL_NEWS):
                 sent += 1
+
+        # GitHub Release → news_ai_tool
+        if release_texts:
+            release_msg = '\n\n'.join(release_texts)
+            if NotificationService.send_slack(release_msg, CHANNEL_AI_TOOL):
+                sent += 1
+
+        # 赛事 → 各自频道
+        if nba_text:
+            if NotificationService.send_slack(nba_text, CHANNEL_NBA):
+                sent += 1
+        if lol_text:
+            if NotificationService.send_slack(lol_text, CHANNEL_LOL):
+                sent += 1
+
         results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': len(messages)}
         results['content_preview'] = messages[0][:500] if messages else ''
         return results
