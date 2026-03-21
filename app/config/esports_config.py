@@ -4,6 +4,10 @@ import os
 ESPORTS_ENABLED = os.getenv('ESPORTS_ENABLED', 'true').lower() == 'true'
 ESPORTS_FETCH_TIMEOUT = int(os.getenv('ESPORTS_FETCH_TIMEOUT', '15'))
 
+# 赛事实时监控
+ESPORTS_NBA_MONITOR_INTERVAL = int(os.getenv('ESPORTS_NBA_MONITOR_INTERVAL', '60'))
+ESPORTS_LOL_MONITOR_INTERVAL = int(os.getenv('ESPORTS_LOL_MONITOR_INTERVAL', '30'))
+
 # ESPN NBA API
 ESPN_NBA_SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
 
