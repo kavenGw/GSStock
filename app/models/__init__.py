@@ -20,5 +20,6 @@ from app.models.trading_strategy import TradingStrategy, StrategyExecution
 from app.models.watch_list import WatchList, WatchAnalysis
 from app.models.news import NewsItem, InterestKeyword, IdentifiedCompany
 from app.models.dram_price import DramPrice
+from app.models.earnings_snapshot import EarningsSnapshot
 
-__all__ = ['Position', 'Advice', 'Config', 'Category', 'StockCategory', 'Trade', 'Settlement', 'WyckoffReference', 'WyckoffAnalysis', 'Stock', 'StockAlias', 'StockWeight', 'MetalTrendCache', 'IndexTrendCache', 'DailySnapshot', 'PositionPlan', 'RebalanceConfig', 'SignalCache', 'UnifiedStockCache', 'BankTransfer', 'TradingStrategy', 'StrategyExecution', 'WatchList', 'WatchAnalysis', 'NewsItem', 'InterestKeyword', 'IdentifiedCompany', 'DramPrice']
+__all__ = ['Position', 'Advice', 'Config', 'Category', 'StockCategory', 'Trade', 'Settlement', 'WyckoffReference', 'WyckoffAnalysis', 'Stock', 'StockAlias', 'StockWeight', 'MetalTrendCache', 'IndexTrendCache', 'DailySnapshot', 'PositionPlan', 'RebalanceConfig', 'SignalCache', 'UnifiedStockCache', 'BankTransfer', 'TradingStrategy', 'StrategyExecution', 'WatchList', 'WatchAnalysis', 'NewsItem', 'InterestKeyword', 'IdentifiedCompany', 'DramPrice', 'EarningsSnapshot']

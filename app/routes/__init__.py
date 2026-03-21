@@ -17,5 +17,6 @@ stock_detail_bp = Blueprint('stock_detail', __name__, url_prefix='/api/stock-det
 watch_bp = Blueprint('watch', __name__, url_prefix='/watch')
 news_bp = Blueprint('news', __name__, url_prefix='/news')
 value_dip_bp = Blueprint('value_dip', __name__, url_prefix='/value-dip')
+earnings_page_bp = Blueprint('earnings_page', __name__, url_prefix='/earnings')
 
-from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, strategy, stock_detail, watch, news, value_dip
+from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, strategy, stock_detail, watch, news, value_dip, earnings_page
