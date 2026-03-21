@@ -157,18 +157,31 @@ class EsportsService:
 
     @staticmethod
     def get_nba_live_scores():
-        """获取当天所有 NBA 比赛实时比分
+        """获取当天所有 NBA 比赛实时比分（查询多天覆盖时区偏移）
 
         Returns:
             dict: {match_id: game_dict} 或 None
         """
         today = datetime.now(_CST).date()
-        games = EsportsService._fetch_espn_scoreboard(today)
-        if games is None:
+        all_games = []
+        any_success = False
+        for offset in range(3):
+            d = today - timedelta(days=offset)
+            games = EsportsService._fetch_espn_scoreboard(d)
+            if games is not None:
+                any_success = True
+                all_games.extend(games)
+        if not any_success:
             return None
-        for g in games:
+        seen = set()
+        result = {}
+        for g in all_games:
             g.pop('_beijing_date', None)
-        return {g['match_id']: g for g in games if g.get('match_id')}
+            mid = g.get('match_id')
+            if mid and mid not in seen:
+                seen.add(mid)
+                result[mid] = g
+        return result
 
     @staticmethod
     def get_lol_schedule(today=None):
