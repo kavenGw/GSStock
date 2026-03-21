@@ -166,6 +166,7 @@ class EsportsMonitorService:
             try:
                 from app.services.esports_service import EsportsService
                 from app.services.notification import NotificationService
+                from app.config.notification_config import CHANNEL_NBA, CHANNEL_LOL
 
                 if match_type == 'nba':
                     scores = EsportsService.get_nba_live_scores()
@@ -179,7 +180,7 @@ class EsportsMonitorService:
 
                     if game['status'] == 'completed':
                         msg = f"🏆 {game['away']} {game['away_score']}-{game['home_score']} {game['home']} | 全场结束"
-                        NotificationService.send_slack(msg)
+                        NotificationService.send_slack(msg, CHANNEL_NBA)
                         scheduler_engine.scheduler.remove_job(job_id)
                         logger.info(f'[赛事监控] {job_id} 比赛结束，移除')
                         return
@@ -188,7 +189,7 @@ class EsportsMonitorService:
                         quarter = game.get('quarter', '')
                         score_text = f"{game['away']} {game['away_score']}-{game['home_score']} {game['home']}"
                         msg = f"🏀 {score_text} | {quarter}" if quarter else f"🏀 {score_text}"
-                        NotificationService.send_slack(msg)
+                        NotificationService.send_slack(msg, CHANNEL_NBA)
 
                 else:
                     scores = EsportsService.get_lol_live_scores()
@@ -202,7 +203,7 @@ class EsportsMonitorService:
 
                     if match['status'] == 'completed':
                         msg = f"🏆 [{league}] {match['team1']} {match['score1']}-{match['score2']} {match['team2']} | 比赛结束"
-                        NotificationService.send_slack(msg)
+                        NotificationService.send_slack(msg, CHANNEL_LOL)
                         scheduler_engine.scheduler.remove_job(job_id)
                         logger.info(f'[赛事监控] {job_id} 比赛结束，移除')
                         return
@@ -211,7 +212,7 @@ class EsportsMonitorService:
                         score1 = match.get('score1', 0) or 0
                         score2 = match.get('score2', 0) or 0
                         msg = f"🎮 [{league}] {match['team1']} {score1}-{score2} {match['team2']} | 进行中"
-                        NotificationService.send_slack(msg)
+                        NotificationService.send_slack(msg, CHANNEL_LOL)
 
             except Exception as e:
                 logger.error(f'[赛事监控] {job_id} 轮询失败: {e}')
