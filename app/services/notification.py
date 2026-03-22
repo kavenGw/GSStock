@@ -1030,6 +1030,43 @@ class NotificationService:
         return results
 
     @staticmethod
+    def push_daily_extras() -> dict:
+        """周末推送: GitHub Release + 赛事资讯（不含市场简报）"""
+        with NotificationService._daily_push_lock:
+            today = date.today()
+
+            if NotificationService.has_daily_push(today):
+                logger.info('[通知] 今日已推送，跳过')
+                return {'skipped': True}
+
+            NotificationService._mark_daily_push(today)
+
+        sent = 0
+
+        # GitHub Release → news_ai_tool
+        release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
+        if release_texts:
+            release_msg = '\n\n'.join(release_texts)
+            if NotificationService.send_slack(release_msg, CHANNEL_AI_TOOL):
+                sent += 1
+
+        if release_pushed_versions:
+            from app.services.github_release import GitHubReleaseService
+            for key, version in release_pushed_versions:
+                GitHubReleaseService.mark_pushed_version(key, version)
+
+        # 赛事 → 各自频道
+        nba_text, lol_text = NotificationService.format_esports_summary_split()
+        if nba_text:
+            if NotificationService.send_slack(nba_text, CHANNEL_NBA):
+                sent += 1
+        if lol_text:
+            if NotificationService.send_slack(lol_text, CHANNEL_LOL):
+                sent += 1
+
+        return {'slack': sent > 0, 'messages_sent': sent}
+
+    @staticmethod
     def _mark_daily_push(push_date: date) -> None:
         import os
         try:

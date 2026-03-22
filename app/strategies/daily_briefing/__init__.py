@@ -8,13 +8,25 @@ logger = logging.getLogger(__name__)
 class DailyBriefingStrategy(Strategy):
     name = "daily_briefing"
     description = "每日简报（市场概况+持仓+预警）"
-    schedule = "30 8 * * 1-5"
+    schedule = "30 8 * * *"
     needs_llm = False
 
     def scan(self) -> list[Signal]:
+        from datetime import date
         from app.services.notification import NotificationService
 
-        # 推送前先更新所有 A 股信号缓存（每天一次）
+        is_weekend = date.today().weekday() >= 5
+
+        if is_weekend:
+            self._scan_weekend()
+        else:
+            self._scan_weekday()
+
+        return []
+
+    def _scan_weekday(self):
+        from app.services.notification import NotificationService
+
         self._refresh_signal_cache()
 
         try:
@@ -28,7 +40,20 @@ class DailyBriefingStrategy(Strategy):
             logger.error(f'[每日简报] 推送失败: {e}')
 
         self._push_value_dip_alert()
-        return []
+
+    def _scan_weekend(self):
+        from app.services.notification import NotificationService
+
+        try:
+            results = NotificationService.push_daily_extras()
+            if results.get('slack'):
+                logger.info('[每日简报] 周末推送成功')
+            elif not results.get('skipped'):
+                logger.info('[每日简报] 周末无新内容')
+        except Exception as e:
+            logger.error(f'[每日简报] 周末推送失败: {e}')
+
+        self._setup_esports_monitors()
 
     @staticmethod
     def _setup_esports_monitors():

@@ -65,14 +65,12 @@ class SchedulerEngine:
         self._recover_esports_monitors(app)
 
     def _check_daily_push_catchup(self, app):
-        """检查是否需要补发每日推送"""
+        """检查是否需要补发每日推送（含周末 extras）"""
         from datetime import date, time
 
         now = datetime.now()
         today = date.today()
 
-        if today.weekday() >= 5:
-            return
         if now.time() < time(8, 30):
             return
 
@@ -97,15 +95,22 @@ class SchedulerEngine:
             return
         with self.app.app_context():
             try:
+                from datetime import date
                 from app.services.notification import NotificationService
-                results = NotificationService.push_daily_report()
+                is_weekend = date.today().weekday() >= 5
+                if is_weekend:
+                    results = NotificationService.push_daily_extras()
+                    label = '周末'
+                else:
+                    results = NotificationService.push_daily_report()
+                    label = '每日'
                 if results.get('slack'):
-                    logger.info('[调度器] 每日推送补发成功')
+                    logger.info(f'[调度器] {label}推送补发成功')
                     self._setup_esports_monitors_safe()
                 else:
-                    logger.warning('[调度器] 每日推送补发失败或未配置')
+                    logger.warning(f'[调度器] {label}推送补发失败或未配置')
             except Exception as e:
-                logger.error(f'[调度器] 每日推送补发失败: {e}')
+                logger.error(f'[调度器] 推送补发失败: {e}')
 
     def _recover_esports_monitors(self, app):
         """启动时恢复赛事监控"""
