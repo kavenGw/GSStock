@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from logging.handlers import RotatingFileHandler
+from logging.handlers import RotatingFileHandler as _RotatingFileHandler
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -100,6 +100,16 @@ def migrate_wyckoff_table():
     logging.info("wyckoff_auto_result 迁移完成")
 
 
+class SafeRotatingFileHandler(_RotatingFileHandler):
+    """Windows 安全的 RotatingFileHandler，轮转失败时跳过而非崩溃"""
+
+    def doRollover(self):
+        try:
+            super().doRollover()
+        except PermissionError:
+            pass
+
+
 def setup_logging(app):
     """配置应用日志系统（幂等，重复调用不会叠加 handler）"""
     root_logger = logging.getLogger()
@@ -115,7 +125,7 @@ def setup_logging(app):
     )
 
     # app.log - 所有日志（5MB轮转，保留3份）
-    file_handler = RotatingFileHandler(
+    file_handler = SafeRotatingFileHandler(
         os.path.join(log_dir, 'app.log'),
         maxBytes=5*1024*1024, backupCount=3,
         encoding='utf-8'
@@ -124,7 +134,7 @@ def setup_logging(app):
     file_handler.setFormatter(formatter)
 
     # error.log - 仅错误（2MB轮转，保留3份）
-    error_handler = RotatingFileHandler(
+    error_handler = SafeRotatingFileHandler(
         os.path.join(log_dir, 'error.log'),
         maxBytes=2*1024*1024, backupCount=3,
         encoding='utf-8'
