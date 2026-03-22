@@ -77,8 +77,9 @@ cp .env.sample .env
 | `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
 | `ESPORTS_ENABLED` | 是否启用赛事推送（NBA/LoL） | `true` |
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
-| `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `60` |
+| `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |
 | `ESPORTS_LOL_MONITOR_INTERVAL` | LoL 比分轮询间隔（分钟） | `30` |
+| `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `10` |
 
 ### 3. GPU 加速（可选）
 
