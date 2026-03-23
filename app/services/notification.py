@@ -12,7 +12,7 @@ import certifi
 
 from app.config.notification_config import (
     SLACK_BOT_TOKEN, SLACK_ENABLED,
-    CHANNEL_NEWS, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA,
+    CHANNEL_NEWS, CHANNEL_WATCH, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA,
 )
 
 logger = logging.getLogger(__name__)
@@ -437,7 +437,7 @@ class NotificationService:
             return False
 
         message = f"📊 盯盘实时分析 ({now_str})\n" + "\n".join(lines)
-        return NotificationService.send_slack(message)
+        return NotificationService.send_slack(message, CHANNEL_WATCH)
 
     @staticmethod
     def format_watch_analysis(analyses: dict) -> dict:
@@ -995,10 +995,12 @@ class NotificationService:
         if research_text:
             msg3_parts.append(research_text)
 
-        messages = []
-        for parts in (msg1_parts, msg2_parts, msg3_parts):
+        news_messages = []
+        for parts in (msg1_parts, msg3_parts):
             if parts:
-                messages.append('\n\n'.join(parts))
+                news_messages.append('\n\n'.join(parts))
+
+        watch_msg = '\n\n'.join(msg2_parts) if msg2_parts else ''
 
         # 标记已推送的 GitHub Release 版本
         if release_pushed_versions:
@@ -1007,9 +1009,12 @@ class NotificationService:
                 GitHubReleaseService.mark_pushed_version(key, version)
 
         sent = 0
-        for msg in messages:
+        for msg in news_messages:
             if NotificationService.send_slack(msg, CHANNEL_NEWS):
                 sent += 1
+
+        if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
+            sent += 1
 
         # GitHub Release → news_ai_tool
         if release_texts:
@@ -1025,8 +1030,9 @@ class NotificationService:
             if NotificationService.send_slack(lol_text, CHANNEL_LOL):
                 sent += 1
 
-        results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': len(messages)}
-        results['content_preview'] = messages[0][:500] if messages else ''
+        total = len(news_messages) + (1 if watch_msg else 0)
+        results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': total}
+        results['content_preview'] = news_messages[0][:500] if news_messages else ''
         return results
 
     @staticmethod

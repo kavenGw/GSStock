@@ -240,7 +240,8 @@ TDSequentialService.calculate()
 
 | 频道 | 内容 |
 |------|------|
-| `news` | 每日简报、盯盘、预警、公司新闻、兴趣新闻 |
+| `news` | 每日简报、预警、公司新闻、兴趣新闻 |
+| `news_watch` | 盯盘实时分析、每日简报盯盘部分 |
 | `news_ai_tool` | GitHub Release 更新 |
 | `news_lol` | LoL 赛事 |
 | `news_nba` | NBA 赛事 |
@@ -267,6 +268,7 @@ TDSequentialService.calculate()
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
 | `ZHIPU_API_KEY` | 智谱 GLM API 密钥 | 空 |
+| `GEMINI_API_KEY` | Google Gemini API 密钥（公司识别） | 空 |
 | `LLM_DAILY_BUDGET` | 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `300` |
 | `LLAMA_SERVER_ENABLED` | 启用本地 llama-server | `false` |
