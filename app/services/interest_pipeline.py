@@ -282,22 +282,28 @@ class InterestPipeline:
 
     @staticmethod
     def _identify_company(content: str) -> str | None:
-        """用 GLM 识别推送中描述的未具名公司"""
+        """用 Gemini 识别推送中描述的未具名公司，Gemini 不可用时降级到 GLM"""
         if not any(hint in content for hint in InterestPipeline._UNNAMED_COMPANY_HINTS):
             return None
         try:
-            from app.llm.router import llm_router
             from app.llm.prompts.company_identify import (
                 COMPANY_IDENTIFY_SYSTEM_PROMPT, build_company_identify_prompt,
             )
-            provider = llm_router.route('company_identify')
-            if not provider:
-                return None
-            result = provider.chat([
+            messages = [
                 {'role': 'system', 'content': COMPANY_IDENTIFY_SYSTEM_PROMPT},
                 {'role': 'user', 'content': build_company_identify_prompt(content)},
-            ], temperature=0.1, max_tokens=500)
-            result = result.strip()
+            ]
+
+            from app.llm.providers.gemini import GeminiFlashProvider, GEMINI_API_KEY
+            if GEMINI_API_KEY:
+                provider = GeminiFlashProvider()
+            else:
+                from app.llm.router import llm_router
+                provider = llm_router.route('company_identify')
+            if not provider:
+                return None
+
+            result = provider.chat(messages, temperature=0.1, max_tokens=500).strip()
             if result and result != '无法确定':
                 return result
         except Exception as e:

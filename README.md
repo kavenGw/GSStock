@@ -57,6 +57,7 @@ cp .env.sample .env
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
+| `GEMINI_API_KEY` | Google Gemini 密钥（可选，公司识别） | 空 |
 | `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | LLM API 请求超时（秒） | `300` |
 | `LLAMA_SERVER_ENABLED` | 启用本地 llama-server（可选） | `false` |
