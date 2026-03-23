@@ -68,14 +68,15 @@ class NotificationService:
 
     @staticmethod
     def dispatch_signal(signal):
-        """事件总线回调：去重 + 格式化 + 发送到 news 频道"""
+        """事件总线回调：去重 + 格式化 + 按策略路由频道"""
         if signal.priority == "LOW":
             return
         if NotificationService._is_duplicate(signal):
             return
         emoji = {"HIGH": "\U0001f534", "MEDIUM": "\U0001f7e1"}.get(signal.priority, "")
         text = f"{emoji} *[{signal.strategy}]* {signal.title}\n{signal.detail}"
-        NotificationService.send_slack(text, CHANNEL_NEWS)
+        channel = CHANNEL_WATCH if signal.strategy == 'watch_alert' else CHANNEL_NEWS
+        NotificationService.send_slack(text, channel)
 
     @staticmethod
     def send_slack(message: str, channel: str = CHANNEL_NEWS) -> bool:
