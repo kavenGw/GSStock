@@ -12,6 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 安装依赖
 pip install -r requirements.txt
 
+# 脚本中查询数据库（禁用调度器，避免后台任务阻塞）
+SCHEDULER_ENABLED=0 python -c "from app import create_app; app = create_app(); ..."
+
 # 启动应用
 python run.py
 
@@ -246,6 +249,7 @@ TDSequentialService.calculate()
 | `news_lol` | LoL 赛事 |
 | `news_nba` | NBA 赛事 |
 | `news_daily` | 每日核心观点（带日期） |
+| `news_operation` | 清仓策略、操作计划 |
 
 ## 赛事推送配置
 

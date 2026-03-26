@@ -13,6 +13,7 @@ import certifi
 from app.config.notification_config import (
     SLACK_BOT_TOKEN, SLACK_ENABLED,
     CHANNEL_NEWS, CHANNEL_WATCH, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA, CHANNEL_DAILY,
+    CHANNEL_OPERATION,
 )
 
 logger = logging.getLogger(__name__)
