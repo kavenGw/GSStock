@@ -12,7 +12,7 @@ import certifi
 
 from app.config.notification_config import (
     SLACK_BOT_TOKEN, SLACK_ENABLED,
-    CHANNEL_NEWS, CHANNEL_WATCH, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA,
+    CHANNEL_NEWS, CHANNEL_WATCH, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA, CHANNEL_DAILY,
 )
 
 logger = logging.getLogger(__name__)
@@ -1008,6 +1008,13 @@ class NotificationService:
             from app.services.github_release import GitHubReleaseService
             for key, version in release_pushed_versions:
                 GitHubReleaseService.mark_pushed_version(key, version)
+
+        # 今日核心观点 → news_daily
+        if core_insights:
+            daily_header = f"📅 {today.strftime('%Y-%m-%d')}\n\n🎯 今日核心观点\n{core_insights}"
+            if action_suggestions:
+                daily_header += f"\n\n💡 {action_suggestions}"
+            NotificationService.send_slack(daily_header, CHANNEL_DAILY)
 
         sent = 0
         for msg in news_messages:

@@ -245,6 +245,7 @@ TDSequentialService.calculate()
 | `news_ai_tool` | GitHub Release 更新 |
 | `news_lol` | LoL 赛事 |
 | `news_nba` | NBA 赛事 |
+| `news_daily` | 每日核心观点（带日期） |
 
 ## 赛事推送配置
 
