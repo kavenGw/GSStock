@@ -12,7 +12,7 @@ from threading import Lock
 
 from app.config.esports_config import (
     ESPORTS_ENABLED, ESPORTS_NBA_MONITOR_INTERVAL, ESPORTS_LOL_MONITOR_INTERVAL,
-    ESPORTS_PRE_MATCH_MINUTES,
+    ESPORTS_PRE_MATCH_MINUTES, NBA_TEAM_MONITOR,
 )
 
 logger = logging.getLogger(__name__)
@@ -98,8 +98,11 @@ class EsportsMonitorService:
         try:
             nba = EsportsService.get_nba_schedule()
             if nba:
+                monitored = {k for k, v in NBA_TEAM_MONITOR.items() if v}
                 for game in nba.get('today', []):
                     if game.get('match_id') and game['status'] != 'completed':
+                        if monitored and not ({game['home'], game['away']} & monitored):
+                            continue
                         matches.append({
                             'match_id': game['match_id'],
                             'match_type': 'nba',

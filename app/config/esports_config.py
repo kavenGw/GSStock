@@ -27,6 +27,41 @@ LOL_LEAGUES = {
 # 常驻显示的联赛（无赛事也显示"无赛事"）
 LOL_ALWAYS_SHOW = {'LPL', 'LCK', '先锋赛'}
 
+# NBA 球队监控开关（0=不监控, 1=监控）
+# 比赛双方至少有一个被监控的球队才会推送
+NBA_TEAM_MONITOR = {
+    'Atlanta Hawks': 0,
+    'Boston Celtics': 1,
+    'Brooklyn Nets': 0,
+    'Charlotte Hornets': 0,
+    'Chicago Bulls': 0,
+    'Cleveland Cavaliers': 1,
+    'Dallas Mavericks': 0,
+    'Denver Nuggets': 1,
+    'Detroit Pistons': 0,
+    'Golden State Warriors': 1,
+    'Houston Rockets': 1,
+    'Indiana Pacers': 0,
+    'LA Clippers': 1,
+    'Los Angeles Lakers': 1,
+    'Memphis Grizzlies': 0,
+    'Miami Heat': 0,
+    'Milwaukee Bucks': 0,
+    'Minnesota Timberwolves': 1,
+    'New Orleans Pelicans': 0,
+    'New York Knicks': 1,
+    'Oklahoma City Thunder':10,
+    'Orlando Magic': 0,
+    'Philadelphia 76ers': 0,
+    'Phoenix Suns': 0,
+    'Portland Trail Blazers': 0,
+    'Sacramento Kings': 0,
+    'San Antonio Spurs': 1,
+    'Toronto Raptors': 0,
+    'Utah Jazz': 0,
+    'Washington Wizards': 0,
+}
+
 # NBA 球队英文→中文简称映射
 NBA_TEAM_NAMES = {
     'Atlanta Hawks': '老鹰',
