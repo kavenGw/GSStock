@@ -25,6 +25,7 @@ function initDailyRecordPage() {
     initUploadZone(tradeZone, 'tradeFileInput', 'trade');
 
     document.getElementById('targetDate')?.addEventListener('change', async () => {
+        resetTransferForm();
         await loadExistingTransfers();
         if (accountData.total_asset) {
             await calculateDailyProfit();
@@ -68,6 +69,17 @@ function initDailyRecordPage() {
         transferNote.addEventListener('input', () => {
             transferData.note = transferNote.value;
         });
+    }
+
+    function resetTransferForm() {
+        const transferType = document.getElementById('transferType');
+        const transferAmount = document.getElementById('transferAmount');
+        const transferNote = document.getElementById('transferNote');
+        if (transferType) transferType.value = '';
+        if (transferAmount) { transferAmount.value = ''; transferAmount.disabled = true; }
+        if (transferNote) { transferNote.value = ''; transferNote.disabled = true; }
+        transferData = { type: '', amount: 0, note: '' };
+        updateSaveButtonState();
     }
 
     async function loadExistingTransfers() {
