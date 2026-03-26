@@ -31,6 +31,9 @@ class InterestPipeline:
 
             db.session.commit()
 
+            # 对所有含未具名公司的新闻做公司识别（不限于兴趣新闻）
+            InterestPipeline._identify_and_notify_companies(items)
+
             # Slack 推送兴趣新闻
             interest_items = [n for n in items if n.is_interest]
             if interest_items:
@@ -281,10 +284,10 @@ class InterestPipeline:
     _UNNAMED_COMPANY_HINTS = ('这家公司', '该公司', '这家企业', '该企业', '此公司')
 
     @staticmethod
-    def _identify_company(content: str) -> str | None:
-        """用 Gemini 识别推送中描述的未具名公司，Gemini 不可用时降级到 GLM"""
+    def _identify_company(content: str) -> tuple[str | None, str]:
+        """用 Gemini 识别推送中描述的未具名公司，返回 (结果, 错误原因)"""
         if not any(hint in content for hint in InterestPipeline._UNNAMED_COMPANY_HINTS):
-            return None
+            return None, '未包含公司暗示词'
         try:
             from app.llm.prompts.company_identify import (
                 COMPANY_IDENTIFY_SYSTEM_PROMPT, build_company_identify_prompt,
@@ -301,14 +304,33 @@ class InterestPipeline:
                 from app.llm.router import llm_router
                 provider = llm_router.route('company_identify')
             if not provider:
-                return None
+                return None, 'LLM provider 不可用（Gemini/GLM 均未配置）'
 
             result = provider.chat(messages, temperature=0.1, max_tokens=500).strip()
             if result and result != '无法确定':
-                return result
+                return result, ''
+            return None, f'LLM 返回: {result or "空响应"}'
         except Exception as e:
             logger.error(f'[兴趣] 公司识别失败: {e}')
-        return None
+            return None, f'异常: {e}'
+
+    @staticmethod
+    def _identify_and_notify_companies(items: list[NewsItem]):
+        """对所有含未具名公司暗示的新闻做公司识别，识别成功推送结果，失败推送原因"""
+        from app.services.notification import NotificationService
+        for n in items:
+            if not any(hint in n.content for hint in InterestPipeline._UNNAMED_COMPANY_HINTS):
+                continue
+            identified, error = InterestPipeline._identify_company(n.content)
+            if identified:
+                msg = f"🔍 AI公司识别: {identified}\n> {n.content[:100]}..."
+                InterestPipeline._save_identified_companies(n.content, identified)
+                NotificationService.send_slack(msg)
+            else:
+                snippet = n.content[:80].replace('\n', ' ')
+                msg = f"⚠️ AI公司识别失败: {error}\n> {snippet}..."
+                NotificationService.send_slack(msg)
+                logger.warning(f'[兴趣] 公司识别失败: {error}, 内容: {snippet}')
 
     @staticmethod
     def _notify_interest_slack(items: list[NewsItem]):
@@ -346,12 +368,6 @@ class InterestPipeline:
                     codes = n.matched_stocks.split(',')
                     stock_labels = [f"{c}{stock_name_map.get(c, '')}" for c in codes]
                     msg += f"\n→ 关联: {', '.join(stock_labels)}"
-
-                # GLM 识别未具名公司
-                identified = InterestPipeline._identify_company(n.content)
-                if identified:
-                    msg += f"\n🔍 AI识别: {identified}"
-                    InterestPipeline._save_identified_companies(n.content, identified)
 
                 NotificationService.send_slack(msg)
         except Exception as e:
