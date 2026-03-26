@@ -81,6 +81,11 @@ def _format_institution_research(content: str) -> str:
 
 def _format_stock_ranking(content: str) -> str:
     """通用股票排名表格格式化（特大单/主力资金/排名等）"""
+    # 先尝试5字段格式：代码 名称 价格 涨跌幅 行业（如"收盘价创历史新高股一览"）
+    result = _format_stock_ranking_5col(content)
+    if result != content:
+        return result
+
     row_pattern = re.compile(
         r'(\d{6})\s+(\S+)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(\S{2,})'
     )
@@ -92,7 +97,6 @@ def _format_stock_ranking(content: str) -> str:
     raw_before = content[:first_match.start()].strip()
     title = re.split(r'\s*(?:代码|简称|证券代码|证券简称)\s', raw_before)[0].strip()
     title = title.rstrip('：: ')
-    # 去除标题中夹杂的无代码数据行（如 "：273.60 9.19 3.96 电力设备"）
     title = re.sub(r'[：:]\s*\d+\.?\d*(?:\s+-?\d+\.?\d*)+\s+\S+', '', title, count=1).strip()
     if not title:
         title = '股票排名'
@@ -116,6 +120,36 @@ def _format_stock_ranking(content: str) -> str:
 
     for code, name, v1, v2, v3, industry in rows:
         line = f"{code:<8}{name:<{name_w + 2}}{v1:>8}{v2:>8}{v3:>12}  {industry}"
+        lines.append(line)
+
+    return '\n'.join(lines)
+
+
+def _format_stock_ranking_5col(content: str) -> str:
+    """5字段股票表格：代码 名称 价格 涨跌幅 行业"""
+    row_pattern = re.compile(r'(\d{6})\s+(\S+)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+([\u4e00-\u9fff]{2,})')
+    rows = row_pattern.findall(content)
+    if len(rows) < 2:
+        return content
+
+    first_match = row_pattern.search(content)
+    raw_before = content[:first_match.start()].strip()
+    title = re.split(r'\s*(?:代码|简称|证券代码|证券简称)\s', raw_before)[0].strip()
+    title = title.rstrip('：: ')
+    if not title:
+        title = '股票排名'
+
+    col3 = '收盘价' if '收盘价' in content else '价格'
+
+    lines = [title, '']
+    name_w = max(max(len(r[1]) for r in rows), 2)
+    ind_w = max(max(len(r[4]) for r in rows), 2)
+
+    header = f"{'代码':<8}{'名称':<{name_w + 2}}{col3:>8}{'涨跌%':>8}  {'行业'}"
+    lines.append(header)
+
+    for code, name, price, chg, industry in rows:
+        line = f"{code:<8}{name:<{name_w + 2}}{price:>8}{chg:>8}  {industry}"
         lines.append(line)
 
     return '\n'.join(lines)
