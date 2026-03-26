@@ -1,19 +1,49 @@
-"""Google Gemini Provider — 用于公司识别"""
+"""Google Gemini Provider — 用于公司识别，支持多 API Key 轮转"""
 import logging
 import os
+import time
+import threading
 import httpx
 from app.llm.base import LLMProvider
 
 logger = logging.getLogger(__name__)
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta'
 LLM_REQUEST_TIMEOUT = int(os.environ.get('LLM_REQUEST_TIMEOUT', '300'))
 
 
+class _KeyPool:
+    """多 API Key 轮转池，429 时自动切换下一个 key"""
+
+    def __init__(self):
+        raw = os.environ.get('GEMINI_API_KEY', '')
+        self._keys = [k.strip() for k in raw.split(',') if k.strip()]
+        self._index = 0
+        self._lock = threading.Lock()
+
+    @property
+    def available(self) -> bool:
+        return len(self._keys) > 0
+
+    @property
+    def size(self) -> int:
+        return len(self._keys)
+
+    def next(self) -> str:
+        with self._lock:
+            if not self._keys:
+                raise ValueError('GEMINI_API_KEY 未配置')
+            key = self._keys[self._index % len(self._keys)]
+            self._index += 1
+            return key
+
+
+_key_pool = _KeyPool()
+
+
 class GeminiFlashProvider(LLMProvider):
     name = "gemini-flash"
-    model = "gemini-2.0-flash"
+    model = "gemini-2.5-flash-lite"
     cost_per_1k_tokens = 0.0001
 
     def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
@@ -40,8 +70,8 @@ def _convert_messages(messages: list[dict]) -> tuple[str | None, list[dict]]:
 
 
 def _call_gemini(model: str, messages: list[dict], temperature: float, max_tokens: int) -> str:
-    """调用 Gemini API"""
-    if not GEMINI_API_KEY:
+    """调用 Gemini API，多 key 轮转 + 429 重试"""
+    if not _key_pool.available:
         raise ValueError('GEMINI_API_KEY 未配置')
 
     system_instruction, contents = _convert_messages(messages)
@@ -56,26 +86,49 @@ def _call_gemini(model: str, messages: list[dict], temperature: float, max_token
     if system_instruction:
         body['systemInstruction'] = {'parts': [{'text': system_instruction}]}
 
-    response = httpx.post(
-        f'{GEMINI_BASE_URL}/models/{model}:generateContent',
-        params={'key': GEMINI_API_KEY},
-        headers={'Content-Type': 'application/json'},
-        json=body,
-        timeout=LLM_REQUEST_TIMEOUT,
-    )
-    response.raise_for_status()
-    data = response.json()
+    # 最多尝试所有 key，每个 key 重试一次
+    max_attempts = _key_pool.size * 2
+    last_error = None
+    for attempt in range(max_attempts):
+        api_key = _key_pool.next()
+        key_hint = api_key[-6:]
+        try:
+            response = httpx.post(
+                f'{GEMINI_BASE_URL}/models/{model}:generateContent',
+                params={'key': api_key},
+                headers={'Content-Type': 'application/json'},
+                json=body,
+                timeout=LLM_REQUEST_TIMEOUT,
+            )
+            if response.status_code == 429:
+                logger.warning(f'[GeminiAPI] key ...{key_hint} 429 限流，切换下一个 key ({attempt + 1}/{max_attempts})')
+                time.sleep(2)
+                continue
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            last_error = e
+            if e.response.status_code == 429:
+                continue
+            raise
+        except Exception:
+            raise
 
-    candidates = data.get('candidates', [])
-    if not candidates:
-        logger.warning(f'[GeminiAPI] {model} 无候选结果')
-        raise ValueError('Gemini API 返回空结果')
+        data = response.json()
+        candidates = data.get('candidates', [])
+        if not candidates:
+            logger.warning(f'[GeminiAPI] {model} 无候选结果')
+            raise ValueError('Gemini API 返回空结果')
 
-    parts = candidates[0].get('content', {}).get('parts', [])
-    content = ''.join(p.get('text', '') for p in parts).strip()
-    if not content:
-        finish_reason = candidates[0].get('finishReason', 'unknown')
-        logger.warning(f'[GeminiAPI] {model} 返回空内容, finishReason={finish_reason}')
-        raise ValueError('Gemini API 返回空内容')
+        parts = candidates[0].get('content', {}).get('parts', [])
+        content = ''.join(p.get('text', '') for p in parts).strip()
+        if not content:
+            finish_reason = candidates[0].get('finishReason', 'unknown')
+            logger.warning(f'[GeminiAPI] {model} 返回空内容, finishReason={finish_reason}')
+            raise ValueError('Gemini API 返回空内容')
 
-    return content
+        return content
+
+    logger.error(f'[GeminiAPI] 所有 key ({_key_pool.size}个) 均被限流')
+    if last_error:
+        raise last_error
+    raise ValueError(f'所有 Gemini API key 均被限流')

@@ -297,8 +297,8 @@ class InterestPipeline:
                 {'role': 'user', 'content': build_company_identify_prompt(content)},
             ]
 
-            from app.llm.providers.gemini import GeminiFlashProvider, GEMINI_API_KEY
-            if GEMINI_API_KEY:
+            from app.llm.providers.gemini import GeminiFlashProvider, _key_pool
+            if _key_pool.available:
                 provider = GeminiFlashProvider()
             else:
                 from app.llm.router import llm_router

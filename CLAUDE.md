@@ -273,7 +273,7 @@ TDSequentialService.calculate()
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
 | `ZHIPU_API_KEY` | 智谱 GLM API 密钥 | 空 |
-| `GEMINI_API_KEY` | Google Gemini API 密钥（公司识别） | 空 |
+| `GEMINI_API_KEY` | Google Gemini API 密钥，多个逗号分隔（公司识别） | 空 |
 | `LLM_DAILY_BUDGET` | 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `300` |
 | `LLAMA_SERVER_ENABLED` | 启用本地 llama-server | `false` |
