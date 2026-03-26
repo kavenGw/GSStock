@@ -323,14 +323,13 @@ class InterestPipeline:
                 continue
             identified, error = InterestPipeline._identify_company(n.content)
             if identified:
-                msg = f"🔍 AI公司识别: {identified}\n> {n.content[:100]}..."
+                msg = f"🔍 AI公司识别: {identified}\n\n{n.content}"
                 InterestPipeline._save_identified_companies(n.content, identified)
                 NotificationService.send_slack(msg)
             else:
-                snippet = n.content[:80].replace('\n', ' ')
-                msg = f"⚠️ AI公司识别失败: {error}\n> {snippet}..."
+                msg = f"⚠️ AI公司识别失败: {error}\n\n{n.content}"
                 NotificationService.send_slack(msg)
-                logger.warning(f'[兴趣] 公司识别失败: {error}, 内容: {snippet}')
+                logger.warning(f'[兴趣] 公司识别失败: {error}, 内容: {n.content[:80]}')
 
     @staticmethod
     def _notify_interest_slack(items: list[NewsItem]):
