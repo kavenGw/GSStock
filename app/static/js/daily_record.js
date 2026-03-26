@@ -33,6 +33,7 @@ function initDailyRecordPage() {
         }
     });
 
+    resetTransferForm();
     loadExistingTransfers();
 
     function initTransferControls() {
@@ -79,6 +80,8 @@ function initDailyRecordPage() {
         if (transferAmount) { transferAmount.value = ''; transferAmount.disabled = true; }
         if (transferNote) { transferNote.value = ''; transferNote.disabled = true; }
         transferData = { type: '', amount: 0, note: '' };
+        const existingDiv = document.getElementById('existingTransfers');
+        if (existingDiv) existingDiv.style.display = 'none';
         updateSaveButtonState();
     }
 
