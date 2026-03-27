@@ -82,7 +82,7 @@ function initDailyRecordPage() {
         transferData = { type: '', amount: 0, note: '' };
         const existingDiv = document.getElementById('existingTransfers');
         if (existingDiv) existingDiv.style.display = 'none';
-        updateSaveButtonState();
+        updateSaveButton();
     }
 
     async function loadExistingTransfers() {
@@ -534,14 +534,23 @@ function initDailyRecordPage() {
     });
 
     document.getElementById('saveAllBtn')?.addEventListener('click', async () => {
-        const positions = collectPositionData();
-        const trades = collectTradeData();
+        const btn = document.getElementById('saveAllBtn');
+        btn.disabled = true;
+        btn.textContent = '保存中...';
 
-        if (!validateData(positions, trades)) {
-            return;
+        try {
+            const positions = collectPositionData();
+            const trades = collectTradeData();
+
+            if (!validateData(positions, trades)) {
+                return;
+            }
+
+            await saveData(positions, trades, false);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '保存全部';
         }
-
-        await saveData(positions, trades, false);
     });
 
     async function saveData(positions, trades, overwriteStocks) {
