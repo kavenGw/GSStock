@@ -249,32 +249,14 @@ def chart_data():
         }
         result['trading_sessions'] = TRADING_SESSIONS.get(market, [['09:30', '16:00']])
 
-        prev_day_data = []
-        try:
-            from datetime import datetime as dt_cls
-            trading_date_obj = dt_cls.strptime(trading_date, '%Y-%m-%d').date() if trading_date else None
-            if trading_date_obj:
-                prev_date = TradingCalendarService.get_last_trading_day(market, trading_date_obj)
-                from app.models.unified_cache import UnifiedStockCache
-                cached = UnifiedStockCache.get_cache_with_status([code], 'intraday_1m', prev_date).get(code)
-                if cached and cached.get('data'):
-                    prev_day_data = cached['data'].get('data', [])
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).debug(f"[盯盘] 前日分时缓存读取失败 {code}: {e}")
-        result['prev_day_data'] = prev_day_data
-
         prev_close = None
-        if prev_day_data:
-            prev_close = prev_day_data[-1].get('close')
-        if prev_close is None:
-            try:
-                trend_2d = unified_stock_data_service.get_trend_data([code], days=5)
-                trend_stocks = trend_2d.get('stocks', [])
-                if trend_stocks and len(trend_stocks[0].get('data', [])) >= 2:
-                    prev_close = trend_stocks[0]['data'][-2].get('close')
-            except Exception:
-                pass
+        try:
+            trend_2d = unified_stock_data_service.get_trend_data([code], days=5)
+            trend_stocks = trend_2d.get('stocks', [])
+            if trend_stocks and len(trend_stocks[0].get('data', [])) >= 2:
+                prev_close = trend_stocks[0]['data'][-2].get('close')
+        except Exception:
+            pass
         result['prev_close'] = prev_close
 
         # 分钟级九转信号

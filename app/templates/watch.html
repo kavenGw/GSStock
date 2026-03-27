@@ -3,20 +3,16 @@
 
 {% block extra_css %}
 <style>
-.stock-card { border-radius: 8px; transition: box-shadow 0.2s; }
-.stock-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.chart-container { height: 200px; border-radius: 4px; background: #fafafa; }
-.analysis-tab .nav-link { padding: 0.25rem 0.75rem; font-size: 0.8rem; }
-.analysis-tab .nav-link.active { font-weight: 600; }
-.analysis-content { font-size: 0.85rem; min-height: 40px; }
+.market-section { border-radius: 8px; }
+.market-chart { height: 320px; border-radius: 4px; background: #fafafa; }
+.stock-summary-table { font-size: 0.82rem; }
+.stock-summary-table td, .stock-summary-table th { padding: 0.3rem 0.5rem; }
+.stock-summary-table .stock-name { font-weight: 600; }
+.view-toggle .btn { padding: 0.15rem 0.6rem; font-size: 0.78rem; }
+.view-toggle .btn.active { font-weight: 600; }
 .price-up { color: #dc3545; }
 .price-down { color: #28a745; }
 .price-flat { color: #6c757d; }
-.bottom-panel { display: flex; gap: 12px; }
-.bottom-panel .panel-left,
-.bottom-panel .panel-right { flex: 1; min-width: 0; }
-.panel-right table { font-size: 0.78rem; }
-.panel-right th { font-weight: 600; color: #6b7280; }
 .entry-signal {
     display: inline-block;
     padding: 0 0.4rem;
@@ -39,12 +35,6 @@
 .td-badge-sell { background: #fef2f2; color: #dc2626; }
 .td-badge-warn { animation: td-pulse 1s ease-in-out infinite; }
 @keyframes td-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-.earnings-table { table-layout: fixed; width: 100%; }
-.earnings-table td, .earnings-table th { padding: 0.25rem 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.earnings-table th:nth-child(1), .earnings-table td:nth-child(1) { width: 25%; text-align: left; }
-.earnings-table th:nth-child(2), .earnings-table td:nth-child(2) { width: 25%; text-align: right; }
-.earnings-table th:nth-child(3), .earnings-table td:nth-child(3) { width: 25%; text-align: right; }
-.earnings-table th:nth-child(4), .earnings-table td:nth-child(4) { width: 25%; text-align: right; }
 </style>
 {% endblock %}
 

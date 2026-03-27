@@ -49,7 +49,8 @@ const WatchCache = {
             marketStatus: watch.marketStatus,
             tdSequential: watch.tdSequential,
             tdSequentialIntraday: watch.tdSequentialIntraday,
-            earnings: watch.earnings,
+            weeklyChartData: watch._weeklyChartData,
+            marketViewMode: watch._marketViewMode,
             lastRefreshTime: watch.lastRefreshTime,
         };
     },
@@ -63,7 +64,8 @@ const WatchCache = {
         watch.marketStatus = cache.marketStatus || {};
         watch.tdSequential = cache.tdSequential || {};
         watch.tdSequentialIntraday = cache.tdSequentialIntraday || {};
-        watch.earnings = cache.earnings || {};
+        watch._weeklyChartData = cache.weeklyChartData || {};
+        watch._marketViewMode = cache.marketViewMode || {};
         watch.lastRefreshTime = cache.lastRefreshTime || null;
     },
 };
@@ -72,6 +74,7 @@ const Watch = {
     REFRESH_INTERVAL: 60,
     ANALYSIS_INTERVAL: 15 * 60,
     MARKET_STATUS_INTERVAL: 5 * 60,
+    CHART_COLORS: ['#1890ff', '#f5222d', '#52c41a', '#fa8c16', '#722ed1', '#13c2c2', '#eb2f96', '#faad14'],
     searchDebounce: null,
     stocks: [],
     prices: [],
@@ -83,14 +86,14 @@ const Watch = {
     chartMeta: {},
     tdSequential: {},
     tdSequentialIntraday: {},
-    earnings: {},
+    _marketViewMode: {},
+    _weeklyChartData: {},
     lastRefreshTime: null,
     refreshTimer: null,
     analysisTimer: null,
     marketStatusTimer: null,
 
     async init() {
-        // 阶段1：从缓存恢复（立即渲染）
         const cache = WatchCache.load();
         if (cache && cache.prices && cache.prices.length > 0) {
             WatchCache.restore(this, cache);
@@ -105,16 +108,13 @@ const Watch = {
                 this.renderCards();
                 this.renderBenchmarks();
                 this.loadAllChartsFromCache();
-                this.stocks.forEach(s => this.renderEarnings(s.stock_code));
                 this.updateStatus(`${this.stocks.length} 只股票`);
                 this.showRefreshTime();
             }
         }
 
-        // 阶段2：读取后端缓存数据
         await this.loadList();
 
-        // 阶段3：读取分析缓存 + 启动定时器
         this.loadAnalysis();
         this.startRefreshLoop();
         this.startAnalysisLoop();
@@ -149,7 +149,6 @@ const Watch = {
             this.updateStatus(`${this.stocks.length} 只股票`);
             this.recordRefreshTime();
             await this.loadAllCharts();
-            this.stocks.forEach(s => this.loadEarnings(s.stock_code));
 
             WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
@@ -178,24 +177,165 @@ const Watch = {
         }).join('');
     },
 
-    async loadAllCharts() {
-        const promises = this.stocks.map(s => this.loadChartData(s.stock_code));
-        await Promise.all(promises);
+    // --- 市场分组工具 ---
+    _getMarketGroups() {
+        const groups = {};
+        this.stocks.forEach(stock => {
+            const market = stock.market || 'A';
+            if (!groups[market]) groups[market] = [];
+            groups[market].push(stock);
+        });
+        const marketOrder = Object.keys(this.marketStatus);
+        const sortedMarkets = Object.keys(groups).sort((a, b) => {
+            const ai = marketOrder.indexOf(a);
+            const bi = marketOrder.indexOf(b);
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        });
+        return { groups, sortedMarkets };
     },
 
-    loadAllChartsFromCache() {
-        for (const stock of this.stocks) {
+    // --- 渲染 ---
+    renderCards() {
+        Object.values(this.chartInstances).forEach(c => c.dispose());
+        this.chartInstances = {};
+
+        const { groups, sortedMarkets } = this._getMarketGroups();
+        const container = document.getElementById('stockCards');
+        let html = '';
+
+        for (const market of sortedMarkets) {
+            const ms = this.marketStatus[market] || {};
+            const icon = ms.icon || '';
+            const name = ms.name || market;
+            const statusText = ms.status_text || '';
+            const statusBadge = this.getStatusBadgeClass(ms.status || 'closed');
+            const statusIcon = this.getStatusIcon(ms.status || 'closed');
+            const viewMode = this._marketViewMode[market] || 'intraday';
+
+            html += `<div class="card market-section mb-4" id="market-section-${market}">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold">${icon} ${name}</span>
+                            <span class="badge ${statusBadge}">${statusIcon} ${statusText}</span>
+                        </div>
+                        <div class="view-toggle btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary${viewMode === 'intraday' ? ' active' : ''}" onclick="Watch.switchMarketView('${market}','intraday',this)">实时</button>
+                            <button class="btn btn-outline-secondary${viewMode === '7d' ? ' active' : ''}" onclick="Watch.switchMarketView('${market}','7d',this)">7日</button>
+                        </div>
+                    </div>
+                    <div class="market-chart" id="chart-market-${market}">
+                        <div class="skeleton skeleton-card" style="height:100%;"></div>
+                    </div>
+                    <div id="summary-table-${market}" class="mt-2"></div>
+                </div>
+            </div>`;
+        }
+
+        container.innerHTML = html;
+        document.getElementById('loadingState').classList.add('d-none');
+        document.getElementById('emptyState').classList.add('d-none');
+        container.classList.remove('d-none');
+
+        this._updateAllSummaryTables();
+    },
+
+    _renderSummaryTable(market) {
+        const el = document.getElementById(`summary-table-${market}`);
+        if (!el) return;
+
+        const { groups } = this._getMarketGroups();
+        const stocks = groups[market] || [];
+        const pricesMap = {};
+        this.prices.forEach(p => { pricesMap[p.code] = p; });
+
+        let html = `<table class="table table-sm table-hover stock-summary-table mb-0">
+            <thead><tr>
+                <th>股票</th><th class="text-end">涨跌%</th><th class="text-end">压力位</th>
+                <th class="text-end">现价</th><th class="text-end">支撑位</th>
+                <th>AI摘要</th><th></th>
+            </tr></thead><tbody>`;
+
+        for (const stock of stocks) {
             const code = stock.stock_code;
-            if (this.chartData[code] && this.chartData[code].length > 0) {
-                this.renderChart(code);
+            const name = stock.stock_name || code;
+            const mkt = stock.market || 'A';
+            const p = pricesMap[code] || {};
+
+            const td = this.tdSequential[code] || {};
+            let tdBadge = '';
+            if (td.direction && td.count > 0) {
+                const tdClass = td.direction === 'buy' ? 'td-badge-buy' : 'td-badge-sell';
+                const warn = td.count >= 7 ? ' td-badge-warn' : '';
+                const check = td.completed ? ' ✓' : '';
+                const label = td.direction === 'buy' ? '买' : '卖';
+                tdBadge = ` <span class="td-badge ${tdClass}${warn}">${label}${td.count}${check}</span>`;
             }
+
+            const priceDisplay = p.price != null ? this.formatPrice(p.price, mkt) : '--';
+            const pctClass = p.change_pct > 0 ? 'price-up' : p.change_pct < 0 ? 'price-down' : 'price-flat';
+            const pctSign = p.change_pct > 0 ? '+' : '';
+            const pctDisplay = p.change_pct != null ? `${pctSign}${p.change_pct.toFixed(2)}%` : '--';
+
+            const meta = this.chartMeta[code] || {};
+            const supports = (meta.supportLevels || []).filter(s => p.price != null && s < p.price);
+            const nearestSupport = supports.length > 0 ? Math.max(...supports) : null;
+            const supportDisplay = nearestSupport != null ? nearestSupport.toFixed(2) : '--';
+            const supportDist = nearestSupport != null && p.price != null ? (p.price - nearestSupport).toFixed(2) : null;
+
+            const resistances = (meta.resistanceLevels || []).filter(r => p.price != null && r > p.price);
+            const nearestResistance = resistances.length > 0 ? Math.min(...resistances) : null;
+            const resistanceDisplay = nearestResistance != null ? nearestResistance.toFixed(2) : '--';
+            const resistanceDist = nearestResistance != null && p.price != null ? (nearestResistance - p.price).toFixed(2) : null;
+
+            const codeAnalysis = this.analyses[code] || {};
+            const rtData = codeAnalysis['realtime'] || {};
+            let aiHtml = '<span class="text-muted">--</span>';
+            if (rtData.summary) {
+                const signal = rtData.signal || '';
+                const signalText = rtData.detail?.signal_text || this._signalTextMap(signal);
+                let badge = signal ? `<span class="entry-signal signal-${signal} me-1">${signalText}</span>` : '';
+                const summaryText = rtData.summary.length > 30 ? rtData.summary.slice(0, 30) + '...' : rtData.summary;
+                aiHtml = `${badge}<span class="small">${summaryText}</span>`;
+            }
+
+            const resistanceCell = resistanceDist != null ? `${resistanceDisplay} <small class="text-muted">(${resistanceDist})</small>` : resistanceDisplay;
+            const supportCell = supportDist != null ? `${supportDisplay} <small class="text-muted">(${supportDist})</small>` : supportDisplay;
+
+            html += `<tr>
+                <td class="stock-name">${name}${tdBadge}</td>
+                <td class="text-end ${pctClass} fw-bold">${pctDisplay}</td>
+                <td class="text-end text-danger">${resistanceCell}</td>
+                <td class="text-end fw-bold">${priceDisplay}</td>
+                <td class="text-end text-success">${supportCell}</td>
+                <td>${aiHtml}</td>
+                <td class="text-end"><button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="移除"><i class="bi bi-x-lg"></i></button></td>
+            </tr>`;
+        }
+
+        html += '</tbody></table>';
+        el.innerHTML = html;
+    },
+
+    _updateAllSummaryTables() {
+        const { sortedMarkets } = this._getMarketGroups();
+        for (const market of sortedMarkets) {
+            this._renderSummaryTable(market);
         }
     },
 
-    async loadChartData(code) {
-        const container = document.getElementById(`chart-${code}`);
-        if (!container) return;
+    // --- 图表 ---
+    async loadAllCharts() {
+        const promises = this.stocks.map(s => this.loadChartData(s.stock_code));
+        await Promise.all(promises);
+        this._renderAllMarketCharts();
+    },
 
+    loadAllChartsFromCache() {
+        this._renderAllMarketCharts();
+    },
+
+    async loadChartData(code) {
         try {
             const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(code)}&period=intraday`);
             const result = await resp.json();
@@ -206,7 +346,6 @@ const Watch = {
                 tradingDate: result.trading_date,
                 isTrading: result.is_trading,
                 tradingSessions: result.trading_sessions || [],
-                prevDayData: result.prev_day_data || [],
                 prevClose: result.prev_close || null,
                 supportLevels: result.support_levels || [],
                 resistanceLevels: result.resistance_levels || [],
@@ -217,14 +356,363 @@ const Watch = {
             if (result.td_sequential_intraday) {
                 this.tdSequentialIntraday[code] = result.td_sequential_intraday;
             }
-            this.renderChart(code);
             WatchCache.save(WatchCache.snapshot(this));
         } catch (e) {
             console.error(`[Watch] chart load failed ${code}:`, e);
-            container.innerHTML = '<div class="text-muted text-center small py-4">图表加载失败</div>';
         }
     },
 
+    _renderAllMarketCharts() {
+        const { sortedMarkets } = this._getMarketGroups();
+        for (const market of sortedMarkets) {
+            this.renderMarketChart(market);
+        }
+    },
+
+    renderMarketChart(market) {
+        const mode = this._marketViewMode[market] || 'intraday';
+        const { groups } = this._getMarketGroups();
+        const stocks = groups[market] || [];
+        const container = document.getElementById(`chart-market-${market}`);
+        if (!container || stocks.length === 0) return;
+
+        if (mode === '7d') {
+            this._renderWeeklyChart(market, container, stocks);
+        } else {
+            this._renderIntradayChart(market, container, stocks);
+        }
+    },
+
+    _getPrevClose(code) {
+        const meta = this.chartMeta[code] || {};
+        if (meta.prevClose != null) return meta.prevClose;
+        const p = this.prices.find(pr => pr.code === code);
+        if (p && p.price != null && p.change != null) {
+            return Math.round((p.price - p.change) * 100) / 100;
+        }
+        return null;
+    },
+
+    _generateFullTimeAxis(sessions) {
+        const times = [];
+        for (const [start, end] of sessions) {
+            const [sh, sm] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            let mins = sh * 60 + sm;
+            const endMins = eh * 60 + em;
+            while (mins <= endMins) {
+                times.push(`${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`);
+                mins++;
+            }
+        }
+        return times;
+    },
+
+    _getKeyTimePoints(sessions) {
+        const keys = new Set();
+        for (let i = 0; i < sessions.length; i++) {
+            const [start, end] = sessions[i];
+            keys.add(start);
+            if (i === sessions.length - 1) keys.add(end);
+            const [sh] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            for (let h = sh + 1; h <= eh; h++) {
+                if (h * 60 <= eh * 60 + em) {
+                    keys.add(`${String(h).padStart(2, '0')}:00`);
+                }
+            }
+        }
+        return keys;
+    },
+
+    _mapDataToTimeAxis(rawData, fullAxis) {
+        const timeMap = {};
+        for (const d of rawData) {
+            timeMap[d.time] = d.close;
+        }
+        return fullAxis.map(t => timeMap[t] != null ? timeMap[t] : null);
+    },
+
+    _renderIntradayChart(market, container, stocks) {
+        if (this.chartInstances[market]) {
+            this.chartInstances[market].dispose();
+            delete this.chartInstances[market];
+        }
+
+        let sessions = [];
+        for (const stock of stocks) {
+            const meta = this.chartMeta[stock.stock_code] || {};
+            if (meta.tradingSessions && meta.tradingSessions.length > 0) {
+                sessions = meta.tradingSessions;
+                break;
+            }
+        }
+
+        const hasData = stocks.some(s => (this.chartData[s.stock_code] || []).length > 0);
+        if (!hasData) {
+            container.innerHTML = '<div class="text-muted text-center small py-4">暂无分时数据</div>';
+            return;
+        }
+
+        const fullAxis = sessions.length > 0
+            ? this._generateFullTimeAxis(sessions)
+            : (() => {
+                const allTimes = new Set();
+                stocks.forEach(s => (this.chartData[s.stock_code] || []).forEach(d => allTimes.add(d.time)));
+                return [...allTimes].sort();
+            })();
+
+        const keyTimes = sessions.length > 0 ? this._getKeyTimePoints(sessions) : new Set(fullAxis.filter(t => t.endsWith(':00')));
+
+        container.innerHTML = '';
+        const chart = echarts.init(container);
+        this.chartInstances[market] = chart;
+
+        const seriesList = [];
+        const legendData = [];
+
+        stocks.forEach((stock, idx) => {
+            const code = stock.stock_code;
+            const name = stock.stock_name || code;
+            const color = this.CHART_COLORS[idx % this.CHART_COLORS.length];
+            const data = this.chartData[code] || [];
+            const prevClose = this._getPrevClose(code);
+
+            const prices = sessions.length > 0
+                ? this._mapDataToTimeAxis(data, fullAxis)
+                : fullAxis.map(t => { const d = data.find(x => x.time === t); return d ? d.close : null; });
+
+            const pctData = prices.map(p => {
+                if (p == null || prevClose == null || prevClose === 0) return null;
+                return Math.round((p - prevClose) / prevClose * 10000) / 100;
+            });
+
+            legendData.push(name);
+
+            const tdMarkPoints = this._buildTDIntradayMarkPointsPct(code, fullAxis, prevClose);
+
+            seriesList.push({
+                name,
+                type: 'line',
+                data: pctData,
+                smooth: true,
+                symbol: 'none',
+                connectNulls: false,
+                lineStyle: { width: 1.5, color },
+                itemStyle: { color },
+                markPoint: tdMarkPoints.length > 0 ? { silent: true, data: tdMarkPoints } : undefined,
+            });
+        });
+
+        chart.setOption({
+            grid: { left: 10, right: 10, top: 30, bottom: 20, containLabel: true },
+            legend: { data: legendData, top: 0, textStyle: { fontSize: 11 }, selectedMode: true },
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    let html = params[0].axisValue;
+                    params.forEach(p => {
+                        if (p.value != null) {
+                            const sign = p.value > 0 ? '+' : '';
+                            html += `<br/><span style="color:${p.color}">\u25CF</span> ${p.seriesName}: ${sign}${p.value.toFixed(2)}%`;
+                        }
+                    });
+                    return html;
+                },
+            },
+            xAxis: {
+                type: 'category',
+                data: fullAxis,
+                boundaryGap: false,
+                axisLabel: { fontSize: 9, interval: (idx, value) => keyTimes.has(value) },
+                axisTick: { alignWithLabel: true, interval: (idx) => keyTimes.has(fullAxis[idx]) },
+                axisLine: { lineStyle: { color: '#ddd' } },
+            },
+            yAxis: {
+                type: 'value',
+                scale: true,
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                axisLabel: {
+                    fontSize: 9,
+                    formatter: v => (v > 0 ? '+' : '') + v.toFixed(2) + '%',
+                },
+            },
+            series: seriesList,
+        });
+
+        new ResizeObserver(() => chart.resize()).observe(container);
+    },
+
+    _renderWeeklyChart(market, container, stocks) {
+        if (this.chartInstances[market]) {
+            this.chartInstances[market].dispose();
+            delete this.chartInstances[market];
+        }
+
+        const hasData = stocks.some(s => (this._weeklyChartData[s.stock_code] || []).length > 0);
+        if (!hasData) {
+            container.innerHTML = '<div class="text-muted text-center small py-4">暂无7日数据</div>';
+            return;
+        }
+
+        const allDates = new Set();
+        stocks.forEach(s => (this._weeklyChartData[s.stock_code] || []).forEach(d => allDates.add(d.date)));
+        const dateAxis = [...allDates].sort();
+        const displayAxis = dateAxis.map(d => d.slice(5));
+
+        container.innerHTML = '';
+        const chart = echarts.init(container);
+        this.chartInstances[market] = chart;
+
+        const seriesList = [];
+        const legendData = [];
+
+        stocks.forEach((stock, idx) => {
+            const code = stock.stock_code;
+            const name = stock.stock_name || code;
+            const color = this.CHART_COLORS[idx % this.CHART_COLORS.length];
+            const data = this._weeklyChartData[code] || [];
+
+            const dateMap = {};
+            data.forEach(d => { dateMap[d.date] = d.close; });
+
+            const baseClose = data.length > 0 ? data[0].close : null;
+            const pctData = dateAxis.map(date => {
+                const close = dateMap[date];
+                if (close == null || baseClose == null || baseClose === 0) return null;
+                return Math.round((close - baseClose) / baseClose * 10000) / 100;
+            });
+
+            legendData.push(name);
+            seriesList.push({
+                name,
+                type: 'line',
+                data: pctData,
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 4,
+                connectNulls: false,
+                lineStyle: { width: 1.5, color },
+                itemStyle: { color },
+            });
+        });
+
+        chart.setOption({
+            grid: { left: 10, right: 10, top: 30, bottom: 20, containLabel: true },
+            legend: { data: legendData, top: 0, textStyle: { fontSize: 11 }, selectedMode: true },
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    let html = params[0].axisValue;
+                    params.forEach(p => {
+                        if (p.value != null) {
+                            const sign = p.value > 0 ? '+' : '';
+                            html += `<br/><span style="color:${p.color}">\u25CF</span> ${p.seriesName}: ${sign}${p.value.toFixed(2)}%`;
+                        }
+                    });
+                    return html;
+                },
+            },
+            xAxis: {
+                type: 'category',
+                data: displayAxis,
+                boundaryGap: false,
+                axisLabel: { fontSize: 9 },
+                axisLine: { lineStyle: { color: '#ddd' } },
+            },
+            yAxis: {
+                type: 'value',
+                scale: true,
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                axisLabel: {
+                    fontSize: 9,
+                    formatter: v => (v > 0 ? '+' : '') + v.toFixed(2) + '%',
+                },
+            },
+            series: seriesList,
+        });
+
+        new ResizeObserver(() => chart.resize()).observe(container);
+    },
+
+    _buildTDIntradayMarkPointsPct(code, fullAxis, prevClose) {
+        const tdIntraday = this.tdSequentialIntraday[code] || {};
+        const tdHistory = tdIntraday.history || [];
+        const markData = [];
+        if (tdHistory.length === 0 || fullAxis.length === 0 || prevClose == null || prevClose === 0) return markData;
+
+        for (const h of tdHistory) {
+            const idx = fullAxis.indexOf(h.time);
+            if (idx === -1) continue;
+            const pctValue = (h.price - prevClose) / prevClose * 100;
+            const isBuy = h.direction === 'buy';
+            markData.push({
+                coord: [idx, pctValue],
+                value: h.count,
+                symbol: h.count === 9 ? 'circle' : 'none',
+                symbolSize: h.count === 9 ? 16 : 1,
+                itemStyle: h.count === 9 ? {
+                    color: isBuy ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)',
+                    borderColor: isBuy ? '#16a34a' : '#dc2626',
+                    borderWidth: 1,
+                } : undefined,
+                label: {
+                    show: true,
+                    formatter: String(h.count),
+                    position: isBuy ? 'bottom' : 'top',
+                    color: isBuy ? '#16a34a' : '#dc2626',
+                    fontSize: 11,
+                    fontWeight: h.count >= 7 ? 'bold' : 'normal',
+                    offset: isBuy ? [0, 4] : [0, -4],
+                },
+            });
+        }
+        return markData;
+    },
+
+    switchMarketView(market, mode, btn) {
+        this._marketViewMode[market] = mode;
+        const section = document.getElementById(`market-section-${market}`);
+        if (section) {
+            section.querySelectorAll('.view-toggle .btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        if (mode === '7d') {
+            this._loadAndRenderWeeklyChart(market);
+        } else {
+            this.renderMarketChart(market);
+        }
+        WatchCache.save(WatchCache.snapshot(this));
+    },
+
+    async _loadAndRenderWeeklyChart(market) {
+        const { groups } = this._getMarketGroups();
+        const stocks = groups[market] || [];
+        const missing = stocks.filter(s => !(this._weeklyChartData[s.stock_code] && this._weeklyChartData[s.stock_code].length > 0));
+
+        if (missing.length > 0) {
+            const container = document.getElementById(`chart-market-${market}`);
+            if (container) container.innerHTML = '<div class="text-muted text-center small py-4">加载7日数据...</div>';
+
+            await Promise.all(missing.map(async (stock) => {
+                try {
+                    const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(stock.stock_code)}&period=7d`);
+                    const result = await resp.json();
+                    if (result.success && result.data) {
+                        this._weeklyChartData[stock.stock_code] = result.data;
+                    }
+                } catch (e) {
+                    console.error(`[Watch] weekly data load failed ${stock.stock_code}:`, e);
+                }
+            }));
+
+            WatchCache.save(WatchCache.snapshot(this));
+        }
+
+        this.renderMarketChart(market);
+    },
+
+    // --- 数据刷新 ---
     async refreshIncrementalData() {
         try {
             const priceResp = await fetch('/watch/prices');
@@ -260,6 +748,8 @@ const Watch = {
         const pricesMap = {};
         this.prices.forEach(p => { pricesMap[p.code] = p; });
 
+        const affectedMarkets = new Set();
+
         for (const stock of this.stocks) {
             const code = stock.stock_code;
             const market = stock.market || 'A';
@@ -278,10 +768,28 @@ const Watch = {
                 data.push(newPoint);
             }
             this.chartData[code] = data;
-            this.renderChart(code);
+            affectedMarkets.add(market);
         }
+
+        for (const market of affectedMarkets) {
+            const mode = this._marketViewMode[market] || 'intraday';
+            if (mode === 'intraday') {
+                this.renderMarketChart(market);
+            }
+        }
+
+        this._updateAllSummaryTables();
     },
 
+    updateAllPrices() {
+        this._updateAllSummaryTables();
+    },
+
+    updateAllAnalysisPanels() {
+        this._updateAllSummaryTables();
+    },
+
+    // --- 定时器 ---
     startRefreshLoop() {
         this.stopRefreshLoop();
         const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
@@ -351,6 +859,7 @@ const Watch = {
         }
     },
 
+    // --- 增删 ---
     async addStock(code, name) {
         try {
             const resp = await fetch('/watch/add', {
@@ -379,18 +888,17 @@ const Watch = {
             const resp = await fetch(`/watch/remove/${code}`, { method: 'DELETE' });
             const data = await resp.json();
             if (data.success) {
-                if (this.chartInstances[code]) {
-                    this.chartInstances[code].dispose();
-                    delete this.chartInstances[code];
-                }
+                Object.values(this.chartInstances).forEach(c => c.dispose());
+                this.chartInstances = {};
                 delete this.chartData[code];
+                delete this._weeklyChartData[code];
                 this.stocks = this.stocks.filter(s => s.stock_code !== code);
                 this.prices = this.prices.filter(p => p.code !== code);
                 if (this.stocks.length === 0) {
                     this.showEmpty();
                 } else {
                     this.renderCards();
-                    this.loadAllCharts();
+                    this._renderAllMarketCharts();
                 }
                 this.updateStatus(`${this.stocks.length} 只股票`);
             }
@@ -422,620 +930,18 @@ const Watch = {
         }, 300);
     },
 
-    renderStockCard(stock, pricesMap) {
-        const code = stock.stock_code;
-        const name = stock.stock_name || code;
-        const market = stock.market || 'A';
-        const p = pricesMap[code] || {};
-
-        const priceDisplay = p.price != null ? this.formatPrice(p.price, market) : '--';
-        const pctClass = p.change_pct > 0 ? 'price-up' : p.change_pct < 0 ? 'price-down' : 'price-flat';
-        const pctSign = p.change_pct > 0 ? '+' : '';
-        const pctDisplay = p.change_pct != null ? `${pctSign}${p.change_pct.toFixed(2)}%` : '--';
-        const changeDisplay = p.change != null ? `${p.change > 0 ? '+' : ''}${p.change.toFixed(2)}` : '';
-
-        const td = this.tdSequential[code] || {};
-        let tdBadgeHtml = '';
-        if (td.direction && td.count > 0) {
-            const tdClass = td.direction === 'buy' ? 'td-badge-buy' : 'td-badge-sell';
-            const warn = td.count >= 7 ? ' td-badge-warn' : '';
-            const check = td.completed ? ' \u2713' : '';
-            const label = td.direction === 'buy' ? '\u4e70' : '\u5356';
-            tdBadgeHtml = `<span class="td-badge ${tdClass}${warn}">${label}${td.count}${check}</span>`;
-        }
-
-        return `<div class="card stock-card mb-3" id="card-${code}">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-bold fs-6">${name}</span>
-                        <small class="text-muted">${code}</small>
-                        ${tdBadgeHtml}
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="text-end">
-                            <span class="fs-5 fw-bold" data-field="price" data-code="${code}">${priceDisplay}</span>
-                            <span class="${pctClass} fw-bold ms-2" data-field="change_pct" data-code="${code}">${pctDisplay}</span>
-                            <span class="${pctClass} small ms-1" data-field="change" data-code="${code}">${changeDisplay}</span>
-                        </div>
-                        <button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="\u79fb\u9664">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="chart-container mb-2" id="chart-${code}">
-                    <div class="skeleton skeleton-card" style="height:100%;"></div>
-                </div>
-                <div class="bottom-panel">
-                    <div class="panel-left">
-                        <ul class="nav nav-tabs analysis-tab mb-2" role="tablist">
-                            <li class="nav-item"><button class="nav-link active" data-period="realtime" onclick="Watch.switchAnalysisTab('${code}','realtime',this)">\u5b9e\u65f6</button></li>
-                            <li class="nav-item"><button class="nav-link" data-period="7d" onclick="Watch.switchAnalysisTab('${code}','7d',this)">7\u5929</button></li>
-                            <li class="nav-item"><button class="nav-link" data-period="30d" onclick="Watch.switchAnalysisTab('${code}','30d',this)">30\u5929</button></li>
-                        </ul>
-                        <div class="analysis-content" id="analysis-content-${code}">
-                            <span class="text-muted small">\u7b49\u5f85\u5206\u6790\u6570\u636e...</span>
-                        </div>
-                    </div>
-                    <div class="panel-right">
-                        <div class="small fw-bold text-muted mb-1">\u8d22\u62a5\u6570\u636e</div>
-                        <div id="earnings-${code}">
-                            <span class="text-muted small">\u52a0\u8f7d\u4e2d...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-    },
-
-    renderCards() {
-        Object.values(this.chartInstances).forEach(c => c.dispose());
-        this.chartInstances = {};
-
-        const pricesMap = {};
-        this.prices.forEach(p => { pricesMap[p.code] = p; });
-
-        const groups = {};
-        this.stocks.forEach(stock => {
-            const market = stock.market || 'A';
-            if (!groups[market]) groups[market] = [];
-            groups[market].push(stock);
-        });
-
-        const marketOrder = Object.keys(this.marketStatus);
-        const sortedMarkets = Object.keys(groups).sort((a, b) => {
-            const ai = marketOrder.indexOf(a);
-            const bi = marketOrder.indexOf(b);
-            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-        });
-
-        const container = document.getElementById('stockCards');
-        let html = '';
-
-        for (const market of sortedMarkets) {
-            const ms = this.marketStatus[market] || {};
-            const icon = ms.icon || '';
-            const name = ms.name || market;
-            const statusText = ms.status_text || '';
-            const statusBadge = this.getStatusBadgeClass(ms.status || 'closed');
-            const statusIcon = this.getStatusIcon(ms.status || 'closed');
-
-            html += `<div class="market-group mb-4">
-                <div class="d-flex align-items-center mb-2">
-                    <span class="fw-bold">${icon} ${name}</span>
-                    <span class="badge ${statusBadge} ms-2">${statusIcon} ${statusText}</span>
-                </div>
-                <div class="market-stocks">`;
-
-            for (const stock of groups[market]) {
-                html += this.renderStockCard(stock, pricesMap);
-            }
-
-            html += `</div></div>`;
-        }
-
-        container.innerHTML = html;
-        document.getElementById('loadingState').classList.add('d-none');
-        document.getElementById('emptyState').classList.add('d-none');
-        container.classList.remove('d-none');
-    },
-
-    _generateFullTimeAxis(sessions) {
-        const times = [];
-        for (const [start, end] of sessions) {
-            const [sh, sm] = start.split(':').map(Number);
-            const [eh, em] = end.split(':').map(Number);
-            let mins = sh * 60 + sm;
-            const endMins = eh * 60 + em;
-            while (mins <= endMins) {
-                times.push(`${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`);
-                mins++;
-            }
-        }
-        return times;
-    },
-
-    _getKeyTimePoints(sessions) {
-        const keys = new Set();
-        for (let i = 0; i < sessions.length; i++) {
-            const [start, end] = sessions[i];
-            keys.add(start);
-            if (i === sessions.length - 1) keys.add(end);
-            const [sh] = start.split(':').map(Number);
-            const [eh, em] = end.split(':').map(Number);
-            for (let h = sh + 1; h <= eh; h++) {
-                if (h * 60 <= eh * 60 + em) {
-                    keys.add(`${String(h).padStart(2, '0')}:00`);
-                }
-            }
-        }
-        return keys;
-    },
-
-    _getPrevClose(code) {
-        const meta = this.chartMeta[code] || {};
-        if (meta.prevClose != null) return meta.prevClose;
-        const prevData = meta.prevDayData || [];
-        if (prevData.length > 0) return prevData[prevData.length - 1].close;
-        const p = this.prices.find(pr => pr.code === code);
-        if (p && p.price != null && p.change != null) {
-            return Math.round((p.price - p.change) * 100) / 100;
-        }
-        return null;
-    },
-
-    _mapDataToTimeAxis(rawData, fullAxis) {
-        const timeMap = {};
-        for (const d of rawData) {
-            timeMap[d.time] = d.close;
-        }
-        return fullAxis.map(t => timeMap[t] != null ? timeMap[t] : null);
-    },
-
-    renderChart(code) {
-        const container = document.getElementById(`chart-${code}`);
-        if (!container) return;
-        const data = this.chartData[code] || [];
-
-        if (data.length === 0) {
-            container.innerHTML = '<div class="text-muted text-center small py-4">暂无分时数据</div>';
-            return;
-        }
-
-        const meta = this.chartMeta[code] || {};
-        if (meta.tradingDate) {
-            const hintId = `chart-hint-${code}`;
-            let hintEl = document.getElementById(hintId);
-            if (!hintEl) {
-                hintEl = document.createElement('div');
-                hintEl.id = hintId;
-                hintEl.className = 'text-muted text-center small';
-                container.parentNode.insertBefore(hintEl, container);
-            }
-            const label = meta.isTrading ? '今日分时' : `${meta.tradingDate} 分时`;
-            hintEl.textContent = label;
-        }
-
-        const sessions = meta.tradingSessions || [];
-        const fullAxis = sessions.length > 0 ? this._generateFullTimeAxis(sessions) : data.map(d => d.time);
-        const prices = sessions.length > 0 ? this._mapDataToTimeAxis(data, fullAxis) : data.map(d => d.close);
-
-        const prevData = meta.prevDayData || [];
-        const prevPrices = sessions.length > 0 && prevData.length > 0
-            ? this._mapDataToTimeAxis(prevData, fullAxis) : [];
-
-        if (this.chartInstances[code]) {
-            const tdMark = this._buildTDIntradayMarkPoints(code, fullAxis);
-            const hlMark = this._buildHighLowMarkPoints(prices, fullAxis);
-            const allMark = [...tdMark, ...hlMark];
-            const updatedMarkLines = this._buildMarkLines(code);
-            const seriesUpdate = [{
-                data: prices,
-                markLine: updatedMarkLines.length > 0 ? { silent: true, symbol: 'none', data: updatedMarkLines } : { data: [] },
-                markPoint: allMark.length > 0 ? { silent: true, data: allMark } : { data: [] },
-            }];
-            if (prevPrices.length > 0) seriesUpdate.push({ data: prevPrices });
-            this.chartInstances[code].setOption({
-                xAxis: { data: fullAxis },
-                series: seriesUpdate,
-            });
-            this._renderTDGraphic(code, this.chartInstances[code]);
-            return;
-        }
-
-        container.innerHTML = '';
-        const chart = echarts.init(container);
-        this.chartInstances[code] = chart;
-
-        const markLines = this._buildMarkLines(code);
-
-        const keyTimes = sessions.length > 0 ? this._getKeyTimePoints(sessions) : new Set(fullAxis.filter(t => t.endsWith(':00')));
-
-        const tdMarkPoints = this._buildTDIntradayMarkPoints(code, fullAxis);
-        const hlMarkPoints = this._buildHighLowMarkPoints(prices, fullAxis);
-        const allMarkPoints = [...tdMarkPoints, ...hlMarkPoints];
-
-        const seriesList = [{
-            type: 'line',
-            data: prices,
-            smooth: true,
-            symbol: 'none',
-            connectNulls: false,
-            lineStyle: { width: 1.5, color: '#1890ff' },
-            areaStyle: { color: 'rgba(24,144,255,0.08)' },
-            markLine: markLines.length > 0 ? { silent: true, symbol: 'none', data: markLines } : undefined,
-            markPoint: allMarkPoints.length > 0 ? { silent: true, data: allMarkPoints } : undefined,
-        }];
-
-        if (prevPrices.length > 0) {
-            seriesList.push({
-                type: 'line',
-                data: prevPrices,
-                smooth: true,
-                symbol: 'none',
-                connectNulls: false,
-                lineStyle: { width: 1, color: '#888', type: 'dashed' },
-                opacity: 0.4,
-            });
-        }
-
-        chart.setOption({
-            grid: { left: 10, right: 60, top: 25, bottom: 20, containLabel: true },
-            tooltip: {
-                trigger: 'axis',
-                formatter: params => {
-                    let html = params[0].axisValue;
-                    params.forEach(p => {
-                        if (p.value != null) {
-                            const label = p.seriesIndex === 0 ? '' : '昨日 ';
-                            html += `<br/>${label}${Number(p.value).toFixed(2)}`;
-                        }
-                    });
-                    return html;
-                },
-            },
-            xAxis: {
-                type: 'category',
-                data: fullAxis,
-                boundaryGap: false,
-                axisLabel: {
-                    fontSize: 9,
-                    interval: (idx, value) => keyTimes.has(value),
-                },
-                axisTick: {
-                    alignWithLabel: true,
-                    interval: (idx, value) => keyTimes.has(fullAxis[idx]),
-                },
-                axisLine: { lineStyle: { color: '#ddd' } },
-            },
-            yAxis: {
-                type: 'value',
-                scale: true,
-                splitLine: { lineStyle: { color: '#f0f0f0' } },
-                axisLabel: {
-                    fontSize: 9,
-                    formatter: value => {
-                        if (value >= 10000) return (value / 10000).toFixed(1) + '万';
-                        if (value >= 1000) return value.toFixed(0);
-                        return value.toFixed(2);
-                    },
-                },
-            },
-            series: seriesList,
-        });
-
-        this._renderTDGraphic(code, chart);
-
-        new ResizeObserver(() => chart.resize()).observe(container);
-    },
-
-    _buildMarkLines(code) {
-        const meta = this.chartMeta[code] || {};
-        const markLines = [];
-
-        (meta.supportLevels || []).forEach(level => {
-            markLines.push({
-                yAxis: level,
-                lineStyle: { color: '#28a745', type: 'dashed', width: 1 },
-                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#28a745' },
-            });
-        });
-
-        (meta.resistanceLevels || []).forEach(level => {
-            markLines.push({
-                yAxis: level,
-                lineStyle: { color: '#dc3545', type: 'dashed', width: 1 },
-                label: { formatter: String(level), position: 'end', fontSize: 9, color: '#dc3545' },
-            });
-        });
-
-        const prevClose = this._getPrevClose(code);
-        if (prevClose != null) {
-            markLines.push({
-                yAxis: prevClose,
-                lineStyle: { color: '#FFA500', type: 'dashed', width: 1.5 },
-                label: {
-                    formatter: `昨收 ${prevClose}`,
-                    position: 'insideEndTop',
-                    fontSize: 10,
-                    color: '#fff',
-                    backgroundColor: 'rgba(255,165,0,0.85)',
-                    padding: [3, 6],
-                    borderRadius: 2,
-                },
-            });
-        }
-
-        return markLines;
-    },
-
-    _buildTDIntradayMarkPoints(code, fullAxis) {
-        const tdIntraday = this.tdSequentialIntraday[code] || {};
-        const tdHistory = tdIntraday.history || [];
-        const markData = [];
-        if (tdHistory.length === 0 || fullAxis.length === 0) return markData;
-
-        for (const h of tdHistory) {
-            const idx = fullAxis.indexOf(h.time);
-            if (idx === -1) continue;
-            const isBuy = h.direction === 'buy';
-            markData.push({
-                coord: [idx, h.price],
-                value: h.count,
-                symbol: h.count === 9 ? 'circle' : 'none',
-                symbolSize: h.count === 9 ? 16 : 1,
-                itemStyle: h.count === 9 ? {
-                    color: isBuy ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)',
-                    borderColor: isBuy ? '#16a34a' : '#dc2626',
-                    borderWidth: 1,
-                } : undefined,
-                label: {
-                    show: true,
-                    formatter: String(h.count),
-                    position: isBuy ? 'bottom' : 'top',
-                    color: isBuy ? '#16a34a' : '#dc2626',
-                    fontSize: 11,
-                    fontWeight: h.count >= 7 ? 'bold' : 'normal',
-                    offset: isBuy ? [0, 4] : [0, -4],
-                },
-            });
-        }
-        return markData;
-    },
-
-    _buildHighLowMarkPoints(prices, fullAxis) {
-        const markData = [];
-        let highVal = -Infinity, lowVal = Infinity;
-        let highIdx = -1, lowIdx = -1;
-
-        for (let i = 0; i < prices.length; i++) {
-            const p = prices[i];
-            if (p == null) continue;
-            if (p > highVal) { highVal = p; highIdx = i; }
-            if (p < lowVal) { lowVal = p; lowIdx = i; }
-        }
-
-        if (highIdx === -1) return markData;
-
-        const fmt = v => v >= 1000 ? v.toFixed(0) : v.toFixed(2);
-
-        markData.push({
-            coord: [highIdx, highVal],
-            symbol: 'circle',
-            symbolSize: 8,
-            itemStyle: { color: '#dc3545' },
-            label: {
-                show: true,
-                formatter: fmt(highVal),
-                position: 'top',
-                color: '#dc3545',
-                fontSize: 10,
-                fontWeight: 'bold',
-                offset: [0, -16],
-            },
-        });
-
-        if (lowIdx !== highIdx) {
-            markData.push({
-                coord: [lowIdx, lowVal],
-                symbol: 'circle',
-                symbolSize: 8,
-                itemStyle: { color: '#28a745' },
-                label: {
-                    show: true,
-                    formatter: fmt(lowVal),
-                    position: 'bottom',
-                    color: '#28a745',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    offset: [0, 2],
-                },
-            });
-        }
-
-        return markData;
-    },
-
-    _renderTDGraphic(code, chart) {
-        const td = this.tdSequential[code] || {};
-        if (td.direction && td.count > 0) {
-            const label = td.direction === 'buy' ? 'TD\u4e70\u5165' : 'TD\u5356\u51fa';
-            const color = td.direction === 'buy' ? '#16a34a' : '#dc2626';
-            const check = td.completed ? ' \u2713' : '';
-            chart.setOption({
-                graphic: [{
-                    type: 'group',
-                    left: 15,
-                    bottom: 25,
-                    children: [{
-                        type: 'rect',
-                        shape: { width: 90, height: 22, r: 3 },
-                        style: { fill: 'rgba(255,255,255,0.85)', stroke: color, lineWidth: 1 },
-                    }, {
-                        type: 'text',
-                        style: {
-                            text: `${label} ${td.count}/9${check}`,
-                            x: 8, y: 4,
-                            fill: color,
-                            font: 'bold 11px sans-serif',
-                        },
-                    }],
-                }],
-            });
-        } else {
-            chart.setOption({ graphic: [] });
-        }
-    },
-
-    switchAnalysisTab(code, period, btn) {
-        const card = document.getElementById(`card-${code}`);
-        if (!card) return;
-        card.querySelectorAll('.analysis-tab .nav-link').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.renderAnalysisContent(code, period);
-    },
-
-    updateAllAnalysisPanels() {
-        this.stocks.forEach(stock => {
-            const code = stock.stock_code;
-            const card = document.getElementById(`card-${code}`);
-            if (!card) return;
-            const activeBtn = card.querySelector('.analysis-tab .nav-link.active');
-            const activePeriod = activeBtn ? activeBtn.dataset.period : 'realtime';
-            this.renderAnalysisContent(code, activePeriod);
-        });
-    },
-
-    _signalTextMap(signal) {
-        const map = { buy: '买入', sell: '卖出', hold: '持有', watch: '观望' };
-        return map[signal] || '观望';
-    },
-
-    renderAnalysisContent(code, period) {
-        const el = document.getElementById(`analysis-content-${code}`);
-        if (!el) return;
-
-        const codeAnalysis = this.analyses[code] || {};
-        const periodData = codeAnalysis[period];
-
-        if (!periodData) {
-            el.innerHTML = '<span class="text-muted small">暂无分析数据</span>';
-            return;
-        }
-
-        const supports = periodData.support_levels || [];
-        const resistances = periodData.resistance_levels || [];
-        const summary = periodData.summary || '';
-        const signal = periodData.signal || '';
-        const detail = periodData.detail || {};
-
-        let html = '';
-        if (signal) {
-            const signalText = detail.signal_text || this._signalTextMap(signal);
-            html += `<span class="entry-signal signal-${signal} me-2">${signalText}</span>`;
-        }
-        if (summary) html += `<span class="small">${summary}</span>`;
-        html += '<div class="mt-1">';
-        if (supports.length > 0) html += `<span class="text-success small me-2">支撑: ${supports.join(' / ')}</span>`;
-        if (resistances.length > 0) html += `<span class="text-danger small">阻力: ${resistances.join(' / ')}</span>`;
-        html += '</div>';
-        el.innerHTML = html || '<span class="text-muted small">暂无分析数据</span>';
-    },
-
-    async loadEarnings(code) {
-        try {
-            const resp = await fetch(`/watch/earnings?code=${encodeURIComponent(code)}`);
-            const data = await resp.json();
-            if (data.success) {
-                this.earnings[code] = data.data || [];
-                this.renderEarnings(code);
-            }
-        } catch (e) {
-            console.error(`[Watch] earnings load failed ${code}:`, e);
-        }
-    },
-
-    renderEarnings(code) {
-        const el = document.getElementById(`earnings-${code}`);
-        if (!el) return;
-        const items = this.earnings[code] || [];
-        if (items.length === 0) {
-            el.innerHTML = '<span class="text-muted small">\u6682\u65e0\u8d22\u62a5\u6570\u636e</span>';
-            return;
-        }
-        let html = `<table class="table table-sm table-borderless earnings-table mb-0">
-            <thead><tr><th>\u5b63\u5ea6</th><th>\u8425\u6536</th><th>\u5229\u6da6</th><th>\u80a1\u4ef7\u533a\u95f4</th></tr></thead><tbody>`;
-        for (const item of items) {
-            const rev = this._formatLargeNumber(item.revenue);
-            const prof = this._formatLargeNumber(item.profit);
-            let priceRange = '--';
-            if (item.price_high != null && item.price_low != null) {
-                priceRange = `${item.price_low}-${item.price_high}`;
-            }
-            html += `<tr><td>${item.quarter}</td><td>${rev}</td><td>${prof}</td><td>${priceRange}</td></tr>`;
-        }
-        html += '</tbody></table>';
-        el.innerHTML = html;
-    },
-
-    _formatLargeNumber(num) {
-        if (num == null || num === 0) return '--';
-        const abs = Math.abs(num);
-        const sign = num < 0 ? '-' : '';
-        if (abs >= 1e12) return sign + (abs / 1e12).toFixed(1) + 'T';
-        if (abs >= 1e9) return sign + (abs / 1e9).toFixed(1) + 'B';
-        if (abs >= 1e8) return sign + (abs / 1e8).toFixed(1) + '\u4ebf';
-        if (abs >= 1e4) return sign + (abs / 1e4).toFixed(0) + '\u4e07';
-        return sign + abs.toFixed(0);
-    },
-
-    updateAllPrices() {
-        const pricesMap = {};
-        this.prices.forEach(p => { pricesMap[p.code] = p; });
-
-        this.stocks.forEach(stock => {
-            const code = stock.stock_code;
-            const market = stock.market || 'A';
-            const p = pricesMap[code];
-            if (!p) return;
-
-            const priceEl = document.querySelector(`[data-field="price"][data-code="${code}"]`);
-            if (priceEl && p.price != null) priceEl.textContent = this.formatPrice(p.price, market);
-
-            const pctClass = p.change_pct > 0 ? 'price-up' : p.change_pct < 0 ? 'price-down' : 'price-flat';
-            const pctSign = p.change_pct > 0 ? '+' : '';
-
-            const pctEl = document.querySelector(`[data-field="change_pct"][data-code="${code}"]`);
-            if (pctEl && p.change_pct != null) {
-                pctEl.textContent = `${pctSign}${p.change_pct.toFixed(2)}%`;
-                pctEl.className = `${pctClass} fw-bold ms-2`;
-            }
-
-            const amtEl = document.querySelector(`[data-field="change"][data-code="${code}"]`);
-            if (amtEl && p.change != null) {
-                amtEl.textContent = `${p.change > 0 ? '+' : ''}${p.change.toFixed(2)}`;
-                amtEl.className = `${pctClass} small ms-1`;
-            }
-        });
-    },
-
+    // --- UI工具 ---
     updateMarketStatusBadges() {
-        document.querySelectorAll('.market-group').forEach(group => {
-            const badge = group.querySelector('.badge');
-            const marketName = group.querySelector('.fw-bold');
-            if (!badge || !marketName) return;
-
-            const marketEntry = Object.entries(this.marketStatus).find(([_, ms]) =>
-                marketName.textContent.includes(ms.name)
-            );
-            if (!marketEntry) return;
-
-            const [, ms] = marketEntry;
-            const statusBadge = this.getStatusBadgeClass(ms.status || 'closed');
-            const statusIcon = this.getStatusIcon(ms.status || 'closed');
-            badge.className = `badge ${statusBadge} ms-2`;
-            badge.textContent = `${statusIcon} ${ms.status_text || ''}`;
-        });
+        const { sortedMarkets } = this._getMarketGroups();
+        for (const market of sortedMarkets) {
+            const section = document.getElementById(`market-section-${market}`);
+            if (!section) continue;
+            const badge = section.querySelector('.badge');
+            if (!badge) continue;
+            const ms = this.marketStatus[market] || {};
+            badge.className = `badge ${this.getStatusBadgeClass(ms.status || 'closed')}`;
+            badge.textContent = `${this.getStatusIcon(ms.status || 'closed')} ${ms.status_text || ''}`;
+        }
     },
 
     showEmpty() {
@@ -1070,6 +976,22 @@ const Watch = {
         if (market === 'JP') return `¥${Math.round(price).toLocaleString()}`;
         if (market === 'TW') return `NT$${val}`;
         return `¥${val}`;
+    },
+
+    _signalTextMap(signal) {
+        const map = { buy: '买入', sell: '卖出', hold: '持有', watch: '观望' };
+        return map[signal] || '观望';
+    },
+
+    _formatLargeNumber(num) {
+        if (num == null || num === 0) return '--';
+        const abs = Math.abs(num);
+        const sign = num < 0 ? '-' : '';
+        if (abs >= 1e12) return sign + (abs / 1e12).toFixed(1) + 'T';
+        if (abs >= 1e9) return sign + (abs / 1e9).toFixed(1) + 'B';
+        if (abs >= 1e8) return sign + (abs / 1e8).toFixed(1) + '亿';
+        if (abs >= 1e4) return sign + (abs / 1e4).toFixed(0) + '万';
+        return sign + abs.toFixed(0);
     },
 
     getStatusIcon(status) {
