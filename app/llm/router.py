@@ -77,7 +77,7 @@ class LLMRouter:
                 self._providers[LLMLayer.FLASH] = zhipu_flash
                 logger.info('[LLM路由] FLASH = 智谱 Flash')
             self._providers[LLMLayer.PREMIUM] = ZhipuPremiumProvider()
-            logger.info('[LLM路由] PREMIUM = 智谱 GLM-4')
+            logger.info('[LLM路由] PREMIUM = 智谱 GLM-5')
         elif LLAMA_SERVER_ENABLED:
             self._providers[LLMLayer.FLASH] = LlamaServerProvider()
             logger.info('[LLM路由] FLASH = llama-server (无云端兜底)')
