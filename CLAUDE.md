@@ -233,6 +233,14 @@ TDSequentialService.calculate()
 
 每日 9:00（工作日）自动搜索持仓股票的最新研报（ETF 除外），通过 Google News 搜索 + crawl4ai 爬取，GLM 整理关键信息后 Slack 独立推送。每日简报（8:30）中包含前一天的研报摘要。
 
+## 博客监控配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `BLOG_MONITOR_ENABLED` | 是否启用博客监控 | `true` |
+
+每日简报时自动检查 Anthropic Engineering / OpenAI Blog / DeepMind Blog 新文章，crawl4ai 抓取全文 + GLM 中文摘要，推送到 `news_ai_tool` 频道。博客源配置在 `app/config/blog_monitor.py`。
+
 ## Slack 推送配置
 
 | 环境变量 | 说明 | 默认值 |

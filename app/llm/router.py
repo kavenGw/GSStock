@@ -18,6 +18,7 @@ TASK_LAYER_MAP = {
     'news_recommend': LLMLayer.FLASH,
     'stock_tags': LLMLayer.FLASH,
     'github_release_update': LLMLayer.FLASH,
+    'blog_summary': LLMLayer.FLASH,
     'company_identify': LLMLayer.PREMIUM,
     'news_dedup': LLMLayer.FLASH,
     'research_report': LLMLayer.PREMIUM,

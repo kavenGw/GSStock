@@ -712,6 +712,24 @@ class NotificationService:
         return texts, pushed_versions
 
     @staticmethod
+    def format_blog_updates() -> list[str]:
+        """获取新博客文章并格式化推送文本"""
+        try:
+            from app.services.blog_monitor_service import BlogMonitorService
+            articles = BlogMonitorService.check_all_blogs()
+            texts = []
+            for article in articles:
+                text = f"📝 {article['source_name']} 新文章\n{article['title']}"
+                if article.get('summary'):
+                    text += f"\n\n{article['summary']}"
+                text += f"\n\n🔗 {article['url']}"
+                texts.append(text)
+            return texts
+        except Exception as e:
+            logger.warning(f'[通知.博客监控] 获取失败: {e}')
+            return []
+
+    @staticmethod
     def format_esports_summary_split() -> tuple[str, str]:
         """格式化赛事资讯，分别返回 NBA 和 LoL 文本
 
@@ -1025,10 +1043,12 @@ class NotificationService:
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
             sent += 1
 
-        # GitHub Release → news_ai_tool
-        if release_texts:
-            release_msg = '\n\n'.join(release_texts)
-            if NotificationService.send_slack(release_msg, CHANNEL_AI_TOOL):
+        # GitHub Release + 博客监控 → news_ai_tool
+        blog_texts = NotificationService.format_blog_updates()
+        ai_tool_texts = release_texts + blog_texts
+        if ai_tool_texts:
+            ai_tool_msg = '\n\n'.join(ai_tool_texts)
+            if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
                 sent += 1
 
         # 赛事 → 各自频道
@@ -1058,11 +1078,13 @@ class NotificationService:
 
         sent = 0
 
-        # GitHub Release → news_ai_tool
+        # GitHub Release + 博客监控 → news_ai_tool
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
-        if release_texts:
-            release_msg = '\n\n'.join(release_texts)
-            if NotificationService.send_slack(release_msg, CHANNEL_AI_TOOL):
+        blog_texts = NotificationService.format_blog_updates()
+        ai_tool_texts = release_texts + blog_texts
+        if ai_tool_texts:
+            ai_tool_msg = '\n\n'.join(ai_tool_texts)
+            if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
                 sent += 1
 
         if release_pushed_versions:
