@@ -76,6 +76,9 @@ cp .env.sample .env
 | `RESEARCH_REPORT_MAX_STOCKS` | 每次最多处理股票数 | `20` |
 | `RESEARCH_REPORT_SEARCH_RESULTS` | 每个 query 取前N条 | `5` |
 | `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
+| `BLOG_MONITOR_ENABLED` | 是否启用博客监控 | `true` |
+| `GITHUB_TRENDING_ENABLED` | 是否启用 GitHub Trending 监控 | `true` |
+| `GITHUB_TRENDING_TOP_N` | 取前 N 个项目 | `10` |
 | `ESPORTS_ENABLED` | 是否启用赛事推送（NBA/LoL） | `true` |
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |

@@ -241,6 +241,15 @@ TDSequentialService.calculate()
 
 每日简报时自动检查 Anthropic Engineering / OpenAI Blog / DeepMind Blog 新文章，crawl4ai 抓取全文 + GLM 中文摘要，推送到 `news_ai_tool` 频道。博客源配置在 `app/config/blog_monitor.py`。
 
+## GitHub Trending 监控配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `GITHUB_TRENDING_ENABLED` | 是否启用 GitHub Trending 监控 | `true` |
+| `GITHUB_TRENDING_TOP_N` | 取前 N 个项目 | `10` |
+
+每日简报时自动爬取 github.com/trending 页面 Top N 项目，与已推送记录比对，仅推送新上榜的项目（含 GLM 中文摘要）到 `news_ai_tool` 频道。首次运行只记录不推送。
+
 ## Slack 推送配置
 
 | 环境变量 | 说明 | 默认值 |
