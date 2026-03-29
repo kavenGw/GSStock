@@ -746,6 +746,33 @@ class NotificationService:
             return []
 
     @staticmethod
+    def format_github_trending_updates() -> list[str]:
+        """获取 GitHub Trending 新上榜项目并格式化推送文本"""
+        try:
+            from app.services.github_trending_service import GitHubTrendingService
+            repos = GitHubTrendingService.fetch_trending()
+            if not repos:
+                return []
+
+            lines = [f'🔥 GitHub Trending 新上榜（{len(repos)}个）']
+            for repo in repos:
+                lines.append('')
+                lines.append(f"⭐ {repo['full_name']} - {repo['description'][:60] if repo['description'] else '无描述'}")
+                star_info = f"⭐ {repo['stars']}" if repo['stars'] else ''
+                if repo['today_stars']:
+                    star_info += f" | 今日 +{repo['today_stars']}"
+                if star_info:
+                    lines.append(star_info)
+                if repo.get('summary'):
+                    lines.append(repo['summary'])
+                lines.append(f"🔗 {repo['url']}")
+
+            return ['\n'.join(lines)]
+        except Exception as e:
+            logger.warning(f'[通知.GitHub Trending] 获取失败: {e}')
+            return []
+
+    @staticmethod
     def format_esports_summary_split() -> tuple[str, str]:
         """格式化赛事资讯，分别返回 NBA 和 LoL 文本
 
@@ -1059,9 +1086,10 @@ class NotificationService:
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
             sent += 1
 
-        # GitHub Release + 博客监控 → news_ai_tool
+        # GitHub Release + 博客监控 + GitHub Trending → news_ai_tool
         blog_texts = NotificationService.format_blog_updates()
-        ai_tool_texts = release_texts + blog_texts
+        trending_texts = NotificationService.format_github_trending_updates()
+        ai_tool_texts = release_texts + blog_texts + trending_texts
         if ai_tool_texts:
             ai_tool_msg = '\n\n'.join(ai_tool_texts)
             if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
@@ -1094,10 +1122,11 @@ class NotificationService:
 
         sent = 0
 
-        # GitHub Release + 博客监控 → news_ai_tool
+        # GitHub Release + 博客监控 + GitHub Trending → news_ai_tool
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
         blog_texts = NotificationService.format_blog_updates()
-        ai_tool_texts = release_texts + blog_texts
+        trending_texts = NotificationService.format_github_trending_updates()
+        ai_tool_texts = release_texts + blog_texts + trending_texts
         if ai_tool_texts:
             ai_tool_msg = '\n\n'.join(ai_tool_texts)
             if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
