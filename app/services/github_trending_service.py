@@ -52,8 +52,11 @@ class GitHubTrendingService:
         for match in article_pattern.finditer(html):
             block = match.group(1)
 
-            # repo 全名
-            name_match = re.search(r'href="(/[^"]+)"', block)
+            # repo 全名（从 h2 标签内的链接提取，避免匹配到 sponsor 链接）
+            h2_match = re.search(r'<h2[^>]*>(.*?)</h2>', block, re.DOTALL)
+            if not h2_match:
+                continue
+            name_match = re.search(r'href="(/[^"]+)"', h2_match.group(1))
             if not name_match:
                 continue
             full_name = name_match.group(1).strip('/')
