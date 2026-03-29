@@ -799,13 +799,13 @@ class NotificationService:
             elif not games:
                 lines.append(f'{label}: 无赛事')
             else:
-                parts = []
-                for g in games:
-                    if g['status'] in ('completed', 'in_progress'):
-                        parts.append(f"{g['away']} {g['away_score']}-{g['home_score']} {g['home']}")
-                    else:
-                        parts.append(f"{g['away']} vs {g['home']} {g['start_time']}")
-                lines.append(f"{label}: {' | '.join(parts)}")
+                completed = [g for g in games if g['status'] in ('completed', 'in_progress')]
+                scheduled = [g for g in games if g['status'] not in ('completed', 'in_progress')]
+                lines.append(f'{label} ({len(games)}场):')
+                for g in completed:
+                    lines.append(f"  {g['away']} {g['away_score']}-{g['home_score']} {g['home']}")
+                for g in scheduled:
+                    lines.append(f"  {g['away']} vs {g['home']} {g['start_time']}")
         return '\n'.join(lines)
 
     @staticmethod
@@ -818,13 +818,13 @@ class NotificationService:
             elif not matches:
                 lines.append(f'{label}: 无赛事')
             else:
-                parts = []
-                for m in matches:
-                    if m['status'] in ('completed', 'in_progress') and m['score1'] is not None:
-                        parts.append(f"{m['team1']} {m['score1']}-{m['score2']} {m['team2']}")
-                    else:
-                        parts.append(f"{m['team1']} vs {m['team2']} {m['start_time']}")
-                lines.append(f"{label}: {' | '.join(parts)}")
+                completed = [m for m in matches if m['status'] in ('completed', 'in_progress') and m['score1'] is not None]
+                scheduled = [m for m in matches if m['status'] not in ('completed', 'in_progress') or m['score1'] is None]
+                lines.append(f'{label} ({len(matches)}场):')
+                for m in completed:
+                    lines.append(f"  {m['team1']} {m['score1']}-{m['score2']} {m['team2']}")
+                for m in scheduled:
+                    lines.append(f"  {m['team1']} vs {m['team2']} {m['start_time']}")
         return '\n'.join(lines)
 
     @staticmethod
