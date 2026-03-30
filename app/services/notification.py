@@ -80,13 +80,16 @@ class NotificationService:
         NotificationService.send_slack(text, channel)
 
     @staticmethod
-    def send_slack(message: str, channel: str = CHANNEL_NEWS) -> bool:
+    def send_slack(message: str, channel: str = CHANNEL_NEWS, blocks: list = None) -> bool:
         if not SLACK_ENABLED:
             logger.warning('[通知.Slack] Slack 未配置')
             return False
 
         try:
-            payload = json.dumps({'channel': channel, 'text': message}).encode('utf-8')
+            data = {'channel': channel, 'text': message}
+            if blocks:
+                data['blocks'] = blocks[:50]
+            payload = json.dumps(data).encode('utf-8')
             req = Request(
                 'https://slack.com/api/chat.postMessage',
                 data=payload,
@@ -893,6 +896,245 @@ class NotificationService:
             logger.warning(f'[通知.研报] 格式化失败: {e}')
             return ''
 
+    # ── Slack Block Kit helpers ──
+
+    @staticmethod
+    def _block_header(text: str) -> dict:
+        return {'type': 'header', 'text': {'type': 'plain_text', 'text': text, 'emoji': True}}
+
+    @staticmethod
+    def _block_section(text: str) -> dict:
+        return {'type': 'section', 'text': {'type': 'mrkdwn', 'text': text}}
+
+    @staticmethod
+    def _block_divider() -> dict:
+        return {'type': 'divider'}
+
+    @staticmethod
+    def _block_fields(fields: list[str]) -> dict:
+        return {
+            'type': 'section',
+            'fields': [{'type': 'mrkdwn', 'text': f} for f in fields[:10]],
+        }
+
+    @staticmethod
+    def _pct_fmt(pct, bold=False) -> str:
+        if pct is None:
+            return '—'
+        s = f"{pct:+.2f}%"
+        if bold:
+            return f"*{s}*" if pct >= 0 else f"*{s}*"
+        return s
+
+    @staticmethod
+    def build_briefing_blocks(briefing_text: str, alerts_text: str,
+                              core_insights: str = '', action_suggestions: str = '') -> list:
+        """构建 Message 1 的 Block Kit blocks（核心观点 + 持仓 + 信号）"""
+        B = NotificationService
+        blocks = []
+
+        if core_insights:
+            blocks.append(B._block_header('🎯 今日核心观点'))
+            text = core_insights
+            if action_suggestions:
+                text += f"\n\n💡 {action_suggestions}"
+            blocks.append(B._block_section(text))
+            blocks.append(B._block_divider())
+
+        if briefing_text:
+            for line in briefing_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith('📊'):
+                    blocks.append(B._block_header(line))
+                elif '🟢' in line or '🔴' in line:
+                    items = [x.strip() for x in line.split(' | ') if x.strip()]
+                    if len(items) > 1:
+                        blocks.append(B._block_fields(items))
+                    else:
+                        blocks.append(B._block_section(line))
+                else:
+                    blocks.append(B._block_section(line))
+
+        if alerts_text:
+            blocks.append(B._block_divider())
+            for line in alerts_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith('⚡'):
+                    blocks.append(B._block_header(line))
+                elif line.startswith('持仓:') or line.startswith('关注:'):
+                    blocks.append(B._block_section(f"*{line}*"))
+                elif line.startswith('🔴卖出:') or line.startswith('🟢买入:'):
+                    items = line.split(': ', 1)
+                    if len(items) == 2:
+                        label = items[0]
+                        sigs = [s.strip() for s in items[1].split(' | ') if s.strip()]
+                        sig_text = '\n'.join(f"• {s}" for s in sigs)
+                        blocks.append(B._block_section(f"*{label}*\n{sig_text}"))
+                    else:
+                        blocks.append(B._block_section(line))
+                else:
+                    blocks.append(B._block_section(line))
+
+        return blocks
+
+    @staticmethod
+    def _fmt_index_item(idx: dict) -> str:
+        """格式化单个指数/期货项为 mrkdwn"""
+        name = idx.get('name', '')
+        close = idx.get('close')
+        pct = idx.get('change_percent')
+        if close is None:
+            return ''
+        close_str = f"{close:,.0f}" if close >= 100 else f"{close:,.2f}"
+        if pct is not None:
+            arrow = '📈' if pct >= 0 else '📉'
+            return f"{name}  {close_str}  {arrow} `{pct:+.2f}%`"
+        return f"{name}  {close_str}"
+
+    @staticmethod
+    def build_market_blocks(indices_text: str, futures_text: str, etf_text: str,
+                            sectors_text: str, technical_text: str,
+                            dram_text: str = '', earnings_text: str = '',
+                            pe_text: str = '', ai_text: str = '',
+                            research_text: str = '') -> list:
+        """构建 Message 3 的 Block Kit blocks（市场行情 + 板块 + 技术 + 数据）"""
+        B = NotificationService
+        blocks = []
+
+        # 市场行情 - 从 BriefingService 获取结构化数据
+        has_market = indices_text or futures_text or etf_text
+        if has_market:
+            blocks.append(B._block_header('📈 市场行情'))
+
+        try:
+            from app.services.briefing import BriefingService
+            idx_data = BriefingService.get_indices_data()
+            regions = idx_data.get('regions', [])
+            indices = idx_data.get('indices', {})
+            for region in regions:
+                key = region['key']
+                region_indices = indices.get(key, [])
+                items = [B._fmt_index_item(idx) for idx in region_indices if idx.get('close') is not None]
+                if items:
+                    blocks.append(B._block_section(f"*{region['name']}*"))
+                    for i in range(0, len(items), 2):
+                        blocks.append(B._block_fields(items[i:i+2]))
+        except Exception:
+            if indices_text:
+                for line in indices_text.split('\n'):
+                    line = line.strip()
+                    if line and not line.startswith('📈'):
+                        blocks.append(B._block_section(line))
+
+        try:
+            from app.services.briefing import BriefingService
+            fut_data = BriefingService.get_futures_data()
+            futures = fut_data.get('futures', [])
+            items = [B._fmt_index_item(f) for f in futures if f.get('close') is not None]
+            if items:
+                blocks.append(B._block_section('*期货*'))
+                for i in range(0, len(items), 2):
+                    blocks.append(B._block_fields(items[i:i+2]))
+        except Exception:
+            if futures_text:
+                blocks.append(B._block_section(futures_text))
+
+        try:
+            from app.services.briefing import BriefingService
+            etf_data = BriefingService.get_etf_premium_data()
+            etfs = etf_data.get('etfs', [])
+            signal_map = {'buy': '🟢 适合买入', 'sell': '🔴 溢价过高', 'normal': '正常'}
+            items = []
+            for etf in etfs:
+                if etf.get('premium_rate') is None:
+                    continue
+                sig = signal_map.get(etf.get('signal', ''), '')
+                items.append(f"{etf['name']}  `{etf['premium_rate']:+.2f}%`  {sig}")
+            if items:
+                blocks.append(B._block_section('*ETF溢价*'))
+                blocks.append(B._block_fields(items))
+        except Exception:
+            if etf_text:
+                blocks.append(B._block_section(etf_text))
+
+        # 板块热点
+        if sectors_text:
+            blocks.append(B._block_divider())
+            try:
+                from app.services.briefing import BriefingService
+                blocks.append(B._block_header('🔥 板块热点'))
+                cn_sectors = BriefingService.get_cn_sectors_data()
+                if cn_sectors:
+                    items = []
+                    for s in cn_sectors:
+                        leader = f"({s['leader']})" if s.get('leader') else ''
+                        pct = s['change_percent']
+                        arrow = '📈' if pct >= 0 else '📉'
+                        items.append(f"{s['name']}  {arrow} `{pct:+.2f}%` {leader}")
+                    blocks.append(B._block_section('*A股*'))
+                    for i in range(0, len(items), 2):
+                        blocks.append(B._block_fields(items[i:i+2]))
+                us_sectors = BriefingService.get_us_sectors_data()
+                if us_sectors:
+                    items = []
+                    for s in us_sectors:
+                        pct = s['change_percent']
+                        arrow = '📈' if pct >= 0 else '📉'
+                        items.append(f"{s['name']}  {arrow} `{pct:+.2f}%`")
+                    blocks.append(B._block_section('*美股*'))
+                    for i in range(0, len(items), 2):
+                        blocks.append(B._block_fields(items[i:i+2]))
+            except Exception:
+                for line in sectors_text.split('\n'):
+                    line = line.strip()
+                    if line and not line.startswith('🔥'):
+                        blocks.append(B._block_section(line))
+
+        # 技术评分
+        if technical_text:
+            blocks.append(B._block_divider())
+            for line in technical_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith('📊'):
+                    blocks.append(B._block_header(line))
+                elif line.startswith(('🟢', '🔴', '⚪')):
+                    colon = line.find(':')
+                    if colon > 0:
+                        label = line[:colon + 1].strip()
+                        items = line[colon + 1:].strip().split()
+                        item_text = '  '.join(f"`{it}`" for it in items)
+                        blocks.append(B._block_section(f"*{label}* {item_text}"))
+                    else:
+                        blocks.append(B._block_section(line))
+                else:
+                    blocks.append(B._block_section(line))
+
+        # DRAM / 财报 / PE
+        extra_texts = [t for t in [dram_text, earnings_text, pe_text] if t]
+        if extra_texts:
+            blocks.append(B._block_divider())
+            for t in extra_texts:
+                for line in t.split('\n'):
+                    line = line.strip()
+                    if line:
+                        blocks.append(B._block_section(line))
+
+        if ai_text:
+            blocks.append(B._block_divider())
+            blocks.append(B._block_section(ai_text[:3000]))
+
+        if research_text:
+            blocks.append(B._block_divider())
+            blocks.append(B._block_section(research_text[:3000]))
+
+        return blocks
+
     @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
         """一键推送每日报告（持仓+简报数据+GLM总结+预警+盯盘分析）"""
@@ -1009,7 +1251,7 @@ class NotificationService:
         except Exception as e:
             logger.warning(f'[通知.GLM总结] 生成失败: {e}')
 
-        # 组装多条消息分批发送
+        # 组装纯文本（fallback）+ Block Kit blocks
 
         # Message 1: 要点（核心观点 + 持仓 + 信号）
         msg1_parts = []
@@ -1023,6 +1265,9 @@ class NotificationService:
         msg1_parts.append(briefing['text'])
         if alerts.get('text'):
             msg1_parts.append(alerts['text'])
+
+        msg1_blocks = NotificationService.build_briefing_blocks(
+            briefing['text'], alerts.get('text', ''), core_insights, action_suggestions)
 
         # Message 2: AI分析（盯盘）
         msg2_parts = []
@@ -1058,10 +1303,17 @@ class NotificationService:
         if research_text:
             msg3_parts.append(research_text)
 
+        msg3_blocks = NotificationService.build_market_blocks(
+            indices_text, futures_text, etf_text, sectors_text, technical_text,
+            dram_text, earnings.get('text', ''), pe.get('text', ''),
+            ai_text, research_text)
+
         news_messages = []
-        for parts in (msg1_parts, msg3_parts):
+        news_blocks_list = []
+        for parts, blks in ((msg1_parts, msg1_blocks), (msg3_parts, msg3_blocks)):
             if parts:
                 news_messages.append('\n\n'.join(parts))
+                news_blocks_list.append(blks if blks else None)
 
         watch_msg = '\n\n'.join(msg2_parts) if msg2_parts else ''
 
@@ -1073,14 +1325,22 @@ class NotificationService:
 
         # 今日核心观点 → news_daily
         if core_insights:
-            daily_header = f"📅 {today.strftime('%Y-%m-%d')}\n\n🎯 今日核心观点\n{core_insights}"
+            daily_text = f"📅 {today.strftime('%Y-%m-%d')}\n\n🎯 今日核心观点\n{core_insights}"
             if action_suggestions:
-                daily_header += f"\n\n💡 {action_suggestions}"
-            NotificationService.send_slack(daily_header, CHANNEL_DAILY)
+                daily_text += f"\n\n💡 {action_suggestions}"
+            daily_blocks = [
+                NotificationService._block_header(f"📅 {today.strftime('%Y-%m-%d')}"),
+                NotificationService._block_header('🎯 今日核心观点'),
+                NotificationService._block_section(core_insights),
+            ]
+            if action_suggestions:
+                daily_blocks.append(NotificationService._block_section(f"💡 {action_suggestions}"))
+            NotificationService.send_slack(daily_text, CHANNEL_DAILY, blocks=daily_blocks)
 
         sent = 0
-        for msg in news_messages:
-            if NotificationService.send_slack(msg, CHANNEL_NEWS):
+        for i, msg in enumerate(news_messages):
+            blks = news_blocks_list[i] if i < len(news_blocks_list) else None
+            if NotificationService.send_slack(msg, CHANNEL_NEWS, blocks=blks):
                 sent += 1
 
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
