@@ -17,7 +17,8 @@ class WatchAnalysisService:
 
     @staticmethod
     def _call_llm_with_retry(provider, system_prompt: str, prompt: str,
-                              code: str, period: str) -> dict | None:
+                              code: str, period: str,
+                              max_tokens: int = 500) -> dict | None:
         """调用LLM并解析JSON，失败时重试"""
         last_err = None
         for attempt in range(1, LLM_MAX_RETRIES + 1):
@@ -25,7 +26,7 @@ class WatchAnalysisService:
                 response = provider.chat([
                     {'role': 'system', 'content': system_prompt},
                     {'role': 'user', 'content': prompt},
-                ])
+                ], max_tokens=max_tokens)
                 cleaned = response.strip()
                 if cleaned.startswith('```'):
                     cleaned = cleaned.split('\n', 1)[-1].rsplit('```', 1)[0].strip()
@@ -122,8 +123,10 @@ class WatchAnalysisService:
                         continue
                     prompt = build_30d_analysis_prompt(stock_name, code, ohlc, current_price)
 
+                token_limit = 4096 if period in ('7d', '30d') else 500
                 parsed = WatchAnalysisService._call_llm_with_retry(
                     provider, SYSTEM_PROMPT, prompt, code, period,
+                    max_tokens=token_limit,
                 )
                 if parsed is None:
                     failed_codes.append(code)
