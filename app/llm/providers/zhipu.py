@@ -30,7 +30,7 @@ class ZhipuPremiumProvider(LLMProvider):
 
 
 REASONING_MODELS = {'glm-5', 'glm-5-turbo', 'glm-5.1'}
-REASONING_MIN_TOKENS = 1000
+REASONING_MIN_TOKENS = 2000
 
 
 def _call_zhipu(model: str, messages: list[dict], temperature: float, max_tokens: int) -> str:
