@@ -120,7 +120,7 @@ class WatchAlertService:
             if not last_fired or now - last_fired >= timedelta(minutes=cooldown_minutes):
                 signals.append(self._make_signal(name, code,
                     f'({curr:.2f}) 突破盘中新高({level:.2f})',
-                    f'({curr:.2f}) 突破盘中新高({level:.2f})',
+                    '',
                     {'alert_type': 'intraday_extreme', 'direction': 'high', 'level': level}))
                 self._extreme_cooldown[cooldown_key] = now
             ext['high'] = curr
@@ -132,7 +132,7 @@ class WatchAlertService:
             if not last_fired or now - last_fired >= timedelta(minutes=cooldown_minutes):
                 signals.append(self._make_signal(name, code,
                     f'({curr:.2f}) 跌破盘中新低({level:.2f})',
-                    f'({curr:.2f}) 跌破盘中新低({level:.2f})',
+                    '',
                     {'alert_type': 'intraday_extreme', 'direction': 'low', 'level': level}))
                 self._extreme_cooldown[cooldown_key] = now
             ext['low'] = curr

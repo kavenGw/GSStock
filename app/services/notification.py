@@ -75,7 +75,9 @@ class NotificationService:
         if NotificationService._is_duplicate(signal):
             return
         emoji = {"HIGH": "\U0001f534", "MEDIUM": "\U0001f7e1"}.get(signal.priority, "")
-        text = f"{emoji} *[{signal.strategy}]* {signal.title}\n{signal.detail}"
+        text = f"{emoji} *[{signal.strategy}]* {signal.title}"
+        if signal.detail:
+            text += f"\n{signal.detail}"
         channel = CHANNEL_WATCH if signal.strategy == 'watch_alert' else CHANNEL_NEWS
         NotificationService.send_slack(text, channel)
 
