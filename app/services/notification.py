@@ -808,10 +808,14 @@ class NotificationService:
                     if league_data is None:
                         lol_sections.append(f'🎮 {league_name}\n数据获取失败')
                     else:
-                        section = NotificationService._format_lol_section(
-                            league_name, league_data,
+                        has_matches = any(
+                            league_data.get(k) for k in ('yesterday', 'today')
                         )
-                        lol_sections.append(section)
+                        if has_matches:
+                            section = NotificationService._format_lol_section(
+                                league_name, league_data,
+                            )
+                            lol_sections.append(section)
                 if lol_sections:
                     lol_text = '\n\n'.join(lol_sections)
         except Exception as e:
