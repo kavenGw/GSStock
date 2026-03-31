@@ -19,3 +19,13 @@ def sectors():
     except Exception as e:
         logger.error(f'[价值洼地] API 错误: {e}')
         return jsonify({'error': str(e)}), 500
+
+
+@value_dip_bp.route('/api/pullback')
+def pullback():
+    try:
+        data = ValueDipService.get_pullback_ranking()
+        return jsonify({'stocks': data})
+    except Exception as e:
+        logger.error(f'[价值洼地] 高点回退API错误: {e}')
+        return jsonify({'error': str(e)}), 500

@@ -32,6 +32,30 @@
     <!-- JS 动态渲染板块卡片 -->
 </div>
 
+<div id="pullback-container" class="mb-4">
+    <div class="card">
+        <div class="card-header">
+            <span>📉 高点回退排行（90日）</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>股票</th>
+                        <th>板块</th>
+                        <th class="text-end">现价</th>
+                        <th class="text-end">90日高点</th>
+                        <th class="text-end">回退幅度</th>
+                    </tr>
+                </thead>
+                <tbody id="pullback-body">
+                    <tr><td colspan="5" class="text-center text-muted py-3">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <div id="trend-container" class="d-none">
     <h5 id="trend-title" class="mb-3"></h5>
     <div id="trend-charts" class="row g-3">

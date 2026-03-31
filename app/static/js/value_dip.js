@@ -18,6 +18,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         loadSectors();
+        loadPullback();
         document.getElementById('period-toggle').addEventListener('click', e => {
             const btn = e.target.closest('[data-period]');
             if (!btn) return;
@@ -52,6 +53,35 @@
         } catch (e) {
             console.error('加载板块数据失败:', e);
         }
+    }
+
+    async function loadPullback() {
+        try {
+            const resp = await fetch('/value-dip/api/pullback');
+            const data = await resp.json();
+            renderPullback(data.stocks || []);
+        } catch (e) {
+            console.error('加载高点回退数据失败:', e);
+        }
+    }
+
+    function renderPullback(stocks) {
+        const tbody = document.getElementById('pullback-body');
+        if (!stocks.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">暂无数据</td></tr>';
+            return;
+        }
+        tbody.innerHTML = stocks.map(s => {
+            const pct = s.pullback_pct;
+            const color = pct < -10 ? 'text-danger fw-bold' : pct < -5 ? 'text-danger' : 'text-muted';
+            return `<tr>
+                <td>${s.name}<span class="text-muted small ms-1">${s.code}</span></td>
+                <td>${s.sector}</td>
+                <td class="text-end">${s.price}</td>
+                <td class="text-end">${s.high_90d}</td>
+                <td class="text-end ${color}">${pct}%</td>
+            </tr>`;
+        }).join('');
     }
 
     function renderCards() {

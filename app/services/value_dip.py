@@ -66,6 +66,30 @@ class ValueDipService:
         }
 
     @staticmethod
+    def get_pullback_ranking() -> list:
+        """获取所有股票的高点回退排行（回退幅度从大到小）"""
+        try:
+            result = ValueDipService.get_sector_performance()
+        except Exception as e:
+            logger.error(f'[价值洼地] 高点回退计算失败: {e}')
+            return []
+
+        stocks = []
+        for sector in result['sectors']:
+            for s in sector['stocks']:
+                if s.get('high_90d') is not None and s.get('pullback_pct') is not None:
+                    stocks.append({
+                        'code': s['code'],
+                        'name': s['name'],
+                        'sector': sector['name'],
+                        'price': s['price'],
+                        'high_90d': s['high_90d'],
+                        'pullback_pct': s['pullback_pct'],
+                    })
+        stocks.sort(key=lambda x: x['pullback_pct'])
+        return stocks
+
+    @staticmethod
     def detect_value_dips() -> list:
         """检测洼地板块，返回需推送的洼地信息列表"""
         try:
@@ -125,7 +149,6 @@ class ValueDipService:
                 base_price_raw = data[idx].get('close')
                 current_price_raw = data[-1].get('close')
 
-                # 两个价格都必须有效
                 if base_price_raw is not None and current_price_raw is not None:
                     base_price = float(base_price_raw)
                     current_price = float(current_price_raw)
@@ -133,5 +156,12 @@ class ValueDipService:
                         info[f'change_{period_key}'] = round(
                             (current_price - base_price) / base_price * 100, 2
                         )
+
+        # 计算90日高点回退
+        closes = [float(d.get('close')) for d in data if d.get('close') is not None]
+        if closes and info['price'] is not None:
+            high_90d = max(closes)
+            info['high_90d'] = round(high_90d, 2)
+            info['pullback_pct'] = round((info['price'] - high_90d) / high_90d * 100, 2) if high_90d > 0 else 0
 
         return info

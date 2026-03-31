@@ -40,6 +40,7 @@ class DailyBriefingStrategy(Strategy):
             logger.error(f'[每日简报] 推送失败: {e}')
 
         self._push_value_dip_alert()
+        self._push_pullback_alert()
 
     def _scan_weekend(self):
         from app.services.notification import NotificationService
@@ -103,6 +104,36 @@ class DailyBriefingStrategy(Strategy):
             logger.info(f'[每日简报] 价值洼地推送: {len(dips)} 条')
         except Exception as e:
             logger.error(f'[每日简报] 价值洼地推送失败: {e}')
+
+    @staticmethod
+    def _push_pullback_alert():
+        """推送高点回退排行"""
+        from app.services.value_dip import ValueDipService
+        from app.services.notification import NotificationService
+
+        try:
+            stocks = ValueDipService.get_pullback_ranking()
+            significant = [s for s in stocks if s['pullback_pct'] <= -5]
+            if not significant:
+                logger.info('[每日简报] 无显著高点回退')
+                return
+
+            message = DailyBriefingStrategy._format_pullback_message(significant)
+            NotificationService.send_slack(message, 'news')
+            logger.info(f'[每日简报] 高点回退推送: {len(significant)} 只')
+        except Exception as e:
+            logger.error(f'[每日简报] 高点回退推送失败: {e}')
+
+    @staticmethod
+    def _format_pullback_message(stocks: list) -> str:
+        lines = ['📉 *高点回退提醒*（90日高点）\n']
+        for s in stocks:
+            lines.append(
+                f"  · {s['name']}（{s['sector']}）"
+                f" 现价{s['price']} / 高点{s['high_90d']}"
+                f" → *{s['pullback_pct']}%*"
+            )
+        return '\n'.join(lines)
 
     @staticmethod
     def _format_value_dip_message(dips: list) -> str:
