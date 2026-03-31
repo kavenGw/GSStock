@@ -15,5 +15,6 @@ class LLMProvider(ABC):
 
 class LLMLayer:
     RULE = 0       # 规则引擎，$0
-    FLASH = 1      # 便宜快速模型
-    PREMIUM = 2    # 强力模型
+    LITE = 1       # 最便宜模型（glm-4-flash）
+    FLASH = 2      # 便宜快速模型
+    PREMIUM = 3    # 强力模型

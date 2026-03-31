@@ -14,7 +14,7 @@ TASK_LAYER_MAP = {
     'watch_analysis': LLMLayer.PREMIUM,
     'daily_briefing': LLMLayer.PREMIUM,
     'news_briefing': LLMLayer.FLASH,
-    'news_classify': LLMLayer.FLASH,
+    'news_classify': LLMLayer.LITE,
     'news_recommend': LLMLayer.FLASH,
     'stock_tags': LLMLayer.FLASH,
     'github_release_update': LLMLayer.FLASH,
@@ -68,9 +68,11 @@ class LLMRouter:
 
         from app.llm.providers.llamacpp import LlamaServerProvider, LLAMA_SERVER_ENABLED
 
-        from app.llm.providers.zhipu import ZhipuFlashProvider, ZhipuPremiumProvider, ZHIPU_API_KEY
+        from app.llm.providers.zhipu import ZhipuLiteProvider, ZhipuFlashProvider, ZhipuPremiumProvider, ZHIPU_API_KEY
         if ZHIPU_API_KEY:
             zhipu_flash = ZhipuFlashProvider()
+            self._providers[LLMLayer.LITE] = ZhipuLiteProvider()
+            logger.info('[LLM路由] LITE = 智谱 glm-4-flash')
             if LLAMA_SERVER_ENABLED:
                 self._providers[LLMLayer.FLASH] = FallbackProvider(LlamaServerProvider(), zhipu_flash)
                 logger.info('[LLM路由] FLASH = llama-server → 智谱 Flash (降级)')
@@ -99,8 +101,8 @@ class LLMRouter:
         if self._daily_budget is not None:
             if self._daily_cost >= self._daily_budget:
                 logger.warning(f'[LLM路由] 日预算已用尽 ({self._daily_cost:.2f}/{self._daily_budget:.2f})')
-                if LLMLayer.FLASH in self._providers:
-                    return self._providers[LLMLayer.FLASH]
+                if LLMLayer.LITE in self._providers:
+                    return self._providers[LLMLayer.LITE]
                 return None
 
             if self._daily_cost >= self._daily_budget * 0.8 and target_layer == LLMLayer.PREMIUM:

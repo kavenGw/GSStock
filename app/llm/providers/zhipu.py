@@ -11,6 +11,15 @@ ZHIPU_BASE_URL = 'https://open.bigmodel.cn/api/paas/v4'
 LLM_REQUEST_TIMEOUT = int(os.environ.get('LLM_REQUEST_TIMEOUT', '300'))
 
 
+class ZhipuLiteProvider(LLMProvider):
+    name = "zhipu-lite"
+    model = "glm-4-flash"
+    cost_per_1k_tokens = 0.0
+
+    def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
+        return _call_zhipu(self.model, messages, temperature, max_tokens)
+
+
 class ZhipuFlashProvider(LLMProvider):
     name = "zhipu-flash"
     model = "glm-5-turbo"
