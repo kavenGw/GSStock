@@ -74,7 +74,13 @@ class NotificationService:
             return
         if NotificationService._is_duplicate(signal):
             return
-        emoji = {"HIGH": "\U0001f534", "MEDIUM": "\U0001f7e1"}.get(signal.priority, "")
+        direction = (signal.data or {}).get('direction', '')
+        if direction in ('high', 'above', 'up', 'buy'):
+            emoji = '🔴'
+        elif direction in ('low', 'below', 'down', 'sell'):
+            emoji = '🟢'
+        else:
+            emoji = {"HIGH": "⚠️", "MEDIUM": "🟡"}.get(signal.priority, "")
         text = f"{emoji} *[{signal.strategy}]* {signal.title}"
         if signal.detail:
             text += f"\n{signal.detail}"
@@ -183,10 +189,10 @@ class NotificationService:
         losers = [i for i in sorted_items if i['profit_pct'] < 0]
 
         if gainers:
-            parts = [f"🟢{i['name']} {i['profit_pct']:+.1f}%" for i in gainers]
+            parts = [f"🔴{i['name']} {i['profit_pct']:+.1f}%" for i in gainers]
             text += ' | '.join(parts) + '\n'
         if losers:
-            parts = [f"🔴{i['name']} {i['profit_pct']:+.1f}%" for i in losers]
+            parts = [f"🟢{i['name']} {i['profit_pct']:+.1f}%" for i in losers]
             text += ' | '.join(parts)
 
         return {'text': text.rstrip('\n')}
@@ -280,9 +286,9 @@ class NotificationService:
                 g = grouped[code]
                 parts = []
                 for s in g['sell']:
-                    parts.append(f"🔴{s}")
-                for s in g['buy']:
                     parts.append(f"🟢{s}")
+                for s in g['buy']:
+                    parts.append(f"🔴{s}")
                 text += f"  {g['name']} {' '.join(parts)}\n"
 
         if watch_codes:
@@ -311,9 +317,9 @@ class NotificationService:
                 for s in g['buy']:
                     buy_parts.append(f"{g['name']}·{s}")
             if sell_parts:
-                text += f"  🔴卖出: {' | '.join(sell_parts[:8])}\n"
+                text += f"  🟢卖出: {' | '.join(sell_parts[:8])}\n"
             if buy_parts:
-                text += f"  🟢买入: {' | '.join(buy_parts[:8])}\n"
+                text += f"  🔴买入: {' | '.join(buy_parts[:8])}\n"
 
         return {'text': text.rstrip('\n')}
 
@@ -407,7 +413,7 @@ class NotificationService:
         watch_list = WatchService.get_watch_list()
         name_map = {w['stock_code']: w['stock_name'] for w in watch_list}
 
-        signal_icons = {'buy': '🟢买入', 'sell': '🔴卖出', 'hold': '🟡持有', 'watch': '⚪观望'}
+        signal_icons = {'buy': '🔴买入', 'sell': '🟢卖出', 'hold': '🟡持有', 'watch': '⚪观望'}
         now_str = datetime.now().strftime('%H:%M')
         blocks = []
 
@@ -472,7 +478,7 @@ class NotificationService:
         watch_list = WatchService.get_watch_list()
         name_map = {w['stock_code']: w['stock_name'] for w in watch_list}
 
-        signal_emoji = {'buy': '🟢', 'sell': '🔴', 'hold': '🟡'}
+        signal_emoji = {'buy': '🔴', 'sell': '🟢', 'hold': '🟡'}
         signal_map = {'buy': '买入', 'sell': '卖出', 'hold': '持有', 'watch': '观望'}
         lines = []
 
@@ -564,7 +570,7 @@ class NotificationService:
             if not etfs:
                 return ''
 
-            signal_map = {'buy': '🟢适合买入', 'sell': '🔴溢价过高', 'normal': '正常'}
+            signal_map = {'buy': '🔴适合买入', 'sell': '🟢溢价过高', 'normal': '正常'}
             parts = []
             for etf in etfs:
                 if etf.get('premium_rate') is None:
@@ -662,10 +668,10 @@ class NotificationService:
             lines = ['📊 技术评分']
             if buy_group:
                 items = ' '.join(f"{n}{s}" for n, s in buy_group)
-                lines.append(f"🟢买入: {items}")
+                lines.append(f"🔴买入: {items}")
             if sell_group:
                 items = ' '.join(f"{n}{s}" for n, s in sell_group)
-                lines.append(f"🔴卖出: {items}")
+                lines.append(f"🟢卖出: {items}")
             if hold_group:
                 items = ' '.join(f"{n}{s}" for n, s in hold_group)
                 lines.append(f"⚪观望: {items}")
@@ -973,7 +979,7 @@ class NotificationService:
                     blocks.append(B._block_header(line))
                 elif line.startswith('持仓:') or line.startswith('关注:'):
                     blocks.append(B._block_section(f"*{line}*"))
-                elif line.startswith('🔴卖出:') or line.startswith('🟢买入:'):
+                elif line.startswith('🟢卖出:') or line.startswith('🔴买入:'):
                     items = line.split(': ', 1)
                     if len(items) == 2:
                         label = items[0]
@@ -1053,7 +1059,7 @@ class NotificationService:
             from app.services.briefing import BriefingService
             etf_data = BriefingService.get_etf_premium_data()
             etfs = etf_data.get('etfs', [])
-            signal_map = {'buy': '🟢 适合买入', 'sell': '🔴 溢价过高', 'normal': '正常'}
+            signal_map = {'buy': '🔴 适合买入', 'sell': '🟢 溢价过高', 'normal': '正常'}
             items = []
             for etf in etfs:
                 if etf.get('premium_rate') is None:
