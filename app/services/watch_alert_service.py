@@ -46,7 +46,7 @@ class WatchAlertService:
             strategy='watch_alert',
             priority='HIGH',
             title=f'{name}({code}) {title}',
-            detail=f'{name}({code}) {detail}',
+            detail=detail,
             data={'stock_code': code, **data},
         )
 
