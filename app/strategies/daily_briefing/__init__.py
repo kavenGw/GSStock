@@ -130,7 +130,7 @@ class DailyBriefingStrategy(Strategy):
         for s in stocks:
             lines.append(
                 f"  · {s['name']}（{s['sector']}）"
-                f" 现价{s['price']} / 高点{s['high_90d']}"
+                f" 现价{s['price']} / 高点{s['high']}"
                 f" → *{s['pullback_pct']}%*"
             )
         return '\n'.join(lines)

@@ -66,8 +66,11 @@ class ValueDipService:
         }
 
     @staticmethod
-    def get_pullback_ranking() -> list:
+    def get_pullback_ranking(days: int = 90) -> list:
         """获取所有股票的高点回退排行（回退幅度从大到小）"""
+        period_map = {7: '7d', 30: '30d', 90: '90d'}
+        period_key = period_map.get(days, '90d')
+
         try:
             result = ValueDipService.get_sector_performance()
         except Exception as e:
@@ -77,14 +80,16 @@ class ValueDipService:
         stocks = []
         for sector in result['sectors']:
             for s in sector['stocks']:
-                if s.get('high_90d') is not None and s.get('pullback_pct') is not None:
+                high = s.get(f'high_{period_key}')
+                pullback = s.get(f'pullback_{period_key}')
+                if high is not None and pullback is not None:
                     stocks.append({
                         'code': s['code'],
                         'name': s['name'],
                         'sector': sector['name'],
                         'price': s['price'],
-                        'high_90d': s['high_90d'],
-                        'pullback_pct': s['pullback_pct'],
+                        'high': high,
+                        'pullback_pct': pullback,
                     })
         stocks.sort(key=lambda x: x['pullback_pct'])
         return stocks
@@ -157,11 +162,13 @@ class ValueDipService:
                             (current_price - base_price) / base_price * 100, 2
                         )
 
-        # 计算90日高点回退（使用日内最高价）
-        highs = [float(d.get('high', d.get('close'))) for d in data if d.get('high') is not None or d.get('close') is not None]
-        if highs and info['price'] is not None:
-            high_90d = max(highs)
-            info['high_90d'] = round(high_90d, 2)
-            info['pullback_pct'] = round((info['price'] - high_90d) / high_90d * 100, 2) if high_90d > 0 else 0
+        # 计算各周期高点回退（使用日内最高价）
+        for period_key, period_days in [('7d', 7), ('30d', 30), ('90d', len(data))]:
+            period_data = data[-period_days:] if period_days < len(data) else data
+            highs = [float(d.get('high', d.get('close'))) for d in period_data if d.get('high') is not None or d.get('close') is not None]
+            if highs and info['price'] is not None:
+                high_val = max(highs)
+                info[f'high_{period_key}'] = round(high_val, 2)
+                info[f'pullback_{period_key}'] = round((info['price'] - high_val) / high_val * 100, 2) if high_val > 0 else 0
 
         return info

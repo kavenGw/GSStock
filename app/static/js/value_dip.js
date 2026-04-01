@@ -28,6 +28,7 @@
                 b.classList.toggle('btn-outline-primary', b.dataset.period !== currentPeriod);
             });
             renderCards();
+            loadPullback();
             if (expandedSector) renderTrend(expandedSector);
             if (compareVisible) renderCompareChart();
         });
@@ -56,17 +57,22 @@
     }
 
     async function loadPullback() {
+        const periodDays = { '7d': 7, '30d': 30, '90d': 90 };
+        const days = periodDays[currentPeriod] || 90;
         try {
-            const resp = await fetch('/value-dip/api/pullback');
+            const resp = await fetch(`/value-dip/api/pullback?days=${days}`);
             const data = await resp.json();
-            renderPullback(data.stocks || []);
+            renderPullback(data.stocks || [], days);
         } catch (e) {
             console.error('加载高点回退数据失败:', e);
         }
     }
 
-    function renderPullback(stocks) {
+    function renderPullback(stocks, days) {
         const tbody = document.getElementById('pullback-body');
+        const header = document.getElementById('pullback-header');
+        if (header) header.textContent = `📉 高点回退排行（${days}日）`;
+        document.querySelector('#pullback-container th:nth-child(4)').textContent = `${days}日高点`;
         if (!stocks.length) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">暂无数据</td></tr>';
             return;
@@ -78,7 +84,7 @@
                 <td>${s.name}<span class="text-muted small ms-1">${s.code}</span></td>
                 <td>${s.sector}</td>
                 <td class="text-end">${s.price}</td>
-                <td class="text-end">${s.high_90d}</td>
+                <td class="text-end">${s.high}</td>
                 <td class="text-end ${color}">${pct}%</td>
             </tr>`;
         }).join('');

@@ -1,5 +1,5 @@
 import logging
-from flask import render_template, jsonify
+from flask import render_template, jsonify, request
 from app.routes import value_dip_bp
 from app.services.value_dip import ValueDipService
 
@@ -24,7 +24,8 @@ def sectors():
 @value_dip_bp.route('/api/pullback')
 def pullback():
     try:
-        data = ValueDipService.get_pullback_ranking()
+        days = request.args.get('days', 90, type=int)
+        data = ValueDipService.get_pullback_ranking(days)
         return jsonify({'stocks': data})
     except Exception as e:
         logger.error(f'[价值洼地] 高点回退API错误: {e}')
