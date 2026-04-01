@@ -203,7 +203,7 @@ TDSequentialService.calculate()
 
 **AI分析调度**：
 - realtime：`watch_realtime` 策略，开盘时段每15分钟（`*/15 9-23 * * 1-5`，内部检查市场状态）
-- 7d/30d：每日简报推送时自动计算（8:30am），结果包含在 Slack 消息中
+- 7d/30d：每日简报推送时自动计算（8:00am），结果包含在 Slack 消息中
 - 分析入口：`WatchAnalysisService.analyze_stocks(period, force)`
 
 ## 新闻轮询配置
@@ -231,7 +231,7 @@ TDSequentialService.calculate()
 | `RESEARCH_REPORT_SEARCH_RESULTS` | 每个 query 取前N条 | `5` |
 | `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
 
-每日 9:00（工作日）自动搜索持仓股票的最新研报（ETF 除外），通过 Google News 搜索 + crawl4ai 爬取，GLM 整理关键信息后 Slack 独立推送。每日简报（8:30）中包含前一天的研报摘要。
+每日 6:00（工作日）自动搜索持仓股票的最新研报（ETF 除外），通过 Google News 搜索 + crawl4ai 爬取，GLM 整理关键信息后 Slack 独立推送。
 
 ## 博客监控配置
 
@@ -239,7 +239,7 @@ TDSequentialService.calculate()
 |---------|------|-------|
 | `BLOG_MONITOR_ENABLED` | 是否启用博客监控 | `true` |
 
-每日简报时自动检查 Anthropic Engineering / OpenAI Blog / DeepMind Blog 新文章，crawl4ai 抓取全文 + GLM 中文摘要，推送到 `news_ai_tool` 频道。博客源配置在 `app/config/blog_monitor.py`。
+每日 5:00 独立调度检查 Anthropic Engineering / OpenAI Blog / DeepMind Blog 新文章，crawl4ai 抓取全文 + GLM 中文摘要，推送到 `news_ai_tool` 频道。博客源配置在 `app/config/blog_monitor.py`。
 
 ## GitHub Trending 监控配置
 
@@ -248,7 +248,7 @@ TDSequentialService.calculate()
 | `GITHUB_TRENDING_ENABLED` | 是否启用 GitHub Trending 监控 | `true` |
 | `GITHUB_TRENDING_TOP_N` | 取前 N 个项目 | `10` |
 
-每日简报时自动爬取 github.com/trending 页面 Top N 项目，与已推送记录比对，仅推送新上榜的项目（含 GLM 中文摘要）到 `news_ai_tool` 频道。首次运行只记录不推送。
+每日 5:00 独立调度爬取 github.com/trending 页面 Top N 项目，与已推送记录比对，仅推送新上榜的项目（含 GLM 中文摘要）到 `news_ai_tool` 频道。首次运行只记录不推送。
 
 ## Slack 推送配置
 
@@ -293,6 +293,7 @@ TDSequentialService.calculate()
 | `GEMINI_API_KEY` | Google Gemini API 密钥，多个逗号分隔（公司识别） | 空 |
 | `LLM_DAILY_BUDGET` | 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `300` |
+| `LLM_RATE_LIMIT_RPM` | 智谱 API 全局限流（RPM） | `10` |
 | `LLAMA_SERVER_ENABLED` | 启用本地 llama-server | `false` |
 | `LLAMA_SERVER_URL` | llama-server 地址 | `http://127.0.0.1:8080` |
 | `LLAMA_MAX_CONTEXT` | llama-server 上下文窗口大小 | `4096` |
