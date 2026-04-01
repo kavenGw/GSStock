@@ -32,14 +32,14 @@ class ZhipuFlashProvider(LLMProvider):
 
 class ZhipuPremiumProvider(LLMProvider):
     name = "zhipu-premium"
-    model = "glm-5"
+    model = "glm-4.6"
     cost_per_1k_tokens = 0.01
 
     def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
         return _call_zhipu(self.model, messages, temperature, max_tokens)
 
 
-REASONING_MODELS = {'glm-5', 'glm-5-turbo', 'glm-5.1'}
+REASONING_MODELS = {'glm-4.6', 'glm-5', 'glm-5-turbo', 'glm-5.1'}
 REASONING_MIN_TOKENS = 2000
 
 _MAX_RETRIES = 3
