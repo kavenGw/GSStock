@@ -11,7 +11,7 @@ class ResearchReportStrategy(Strategy):
 
     name = "research_report"
     description = "持仓股票研报搜索与分析"
-    schedule = "0 9 * * 1-5"
+    schedule = "0 6 * * 1-5"
     enabled = True
     needs_llm = True
 

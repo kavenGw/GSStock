@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class EarningsSnapshotStrategy(Strategy):
     name = "earnings_snapshot"
     description = "每日财报估值快照预计算"
-    schedule = "0 8 * * 1-5"
+    schedule = "0 7 * * 1-5"
     needs_llm = False
 
     def scan(self) -> list[Signal]:
