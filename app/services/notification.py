@@ -1358,10 +1358,8 @@ class NotificationService:
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
             sent += 1
 
-        # GitHub Release + 博客监控 + GitHub Trending → news_ai_tool
-        blog_texts = NotificationService.format_blog_updates()
-        trending_texts = NotificationService.format_github_trending_updates()
-        ai_tool_texts = release_texts + blog_texts + trending_texts
+        # GitHub Release → news_ai_tool（博客/Trending 已独立调度）
+        ai_tool_texts = release_texts
         if ai_tool_texts:
             ai_tool_msg = '\n\n'.join(ai_tool_texts)
             if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
@@ -1394,11 +1392,9 @@ class NotificationService:
 
         sent = 0
 
-        # GitHub Release + 博客监控 + GitHub Trending → news_ai_tool
+        # GitHub Release → news_ai_tool（博客/Trending 已独立调度）
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
-        blog_texts = NotificationService.format_blog_updates()
-        trending_texts = NotificationService.format_github_trending_updates()
-        ai_tool_texts = release_texts + blog_texts + trending_texts
+        ai_tool_texts = release_texts
         if ai_tool_texts:
             ai_tool_msg = '\n\n'.join(ai_tool_texts)
             if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
