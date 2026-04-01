@@ -157,10 +157,10 @@ class ValueDipService:
                             (current_price - base_price) / base_price * 100, 2
                         )
 
-        # 计算90日高点回退
-        closes = [float(d.get('close')) for d in data if d.get('close') is not None]
-        if closes and info['price'] is not None:
-            high_90d = max(closes)
+        # 计算90日高点回退（使用日内最高价）
+        highs = [float(d.get('high', d.get('close'))) for d in data if d.get('high') is not None or d.get('close') is not None]
+        if highs and info['price'] is not None:
+            high_90d = max(highs)
             info['high_90d'] = round(high_90d, 2)
             info['pullback_pct'] = round((info['price'] - high_90d) / high_90d * 100, 2) if high_90d > 0 else 0
 
