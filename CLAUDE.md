@@ -275,12 +275,13 @@ TDSequentialService.calculate()
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |
 | `ESPORTS_LOL_MONITOR_INTERVAL` | LoL 比分轮询间隔（分钟） | `30` |
-| `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `10` |
+| `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `30` |
 
 **推送逻辑**：
-- 赛前提醒：比赛开始前10分钟推送
+- 赛前提醒：比赛开始前30分钟推送
 - 比分变化：仅在比分发生变化时推送（避免重复通知）
 - 比赛结束：自动检测并推送最终比分
+- NBA晚间调度：每天18:00额外执行一次NBA监控设置，覆盖当晚比赛
 
 数据源：NBA 用 ESPN API（无需认证），LoL 用 LoL Esports API（LPL/LCK/国际赛事/先锋赛）。
 
