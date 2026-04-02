@@ -58,6 +58,16 @@ class SchedulerEngine:
         )
         registered.append(f'news_poll(every {NEWS_INTERVAL_MINUTES}min)')
 
+        # NBA 晚间调度（18:00 北京时间，覆盖当晚比赛）
+        self.scheduler.add_job(
+            self._setup_nba_evening_monitors,
+            trigger=CronTrigger(hour=18, minute=0),
+            id='nba_evening_monitors',
+            replace_existing=True,
+            misfire_grace_time=300,
+        )
+        registered.append('nba_evening_monitors(18:00)')
+
         self.scheduler.start()
         atexit.register(self.shutdown)
         logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
@@ -128,6 +138,17 @@ class SchedulerEngine:
             EsportsMonitorService(self.app).setup_match_monitors()
         except Exception as e:
             logger.error(f'[调度器] 赛事监控创建失败: {e}')
+
+    def _setup_nba_evening_monitors(self):
+        """晚间 NBA 监控调度（只清理重建 NBA job，保留 LoL）"""
+        if not self.app:
+            return
+        with self.app.app_context():
+            try:
+                from app.services.esports_monitor_service import EsportsMonitorService
+                EsportsMonitorService(self.app).setup_match_monitors(match_type='nba')
+            except Exception as e:
+                logger.error(f'[调度器] NBA晚间监控创建失败: {e}')
 
     def _run_strategy(self, strategy_name: str):
         """在 app context 内执行策略扫描"""
