@@ -84,7 +84,11 @@ class NotificationService:
         text = f"{emoji} *[{signal.strategy}]* {signal.title}"
         if signal.detail:
             text += f"\n{signal.detail}"
-        channel = CHANNEL_WATCH if signal.strategy == 'watch_alert' else CHANNEL_NEWS
+        STRATEGY_CHANNEL = {
+            'watch_alert': CHANNEL_WATCH,
+            'volume_alert': CHANNEL_DAILY,
+        }
+        channel = STRATEGY_CHANNEL.get(signal.strategy, CHANNEL_NEWS)
         NotificationService.send_slack(text, channel)
 
     @staticmethod
