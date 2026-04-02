@@ -76,12 +76,21 @@ def _call_zhipu(model: str, messages: list[dict], temperature: float, max_tokens
         )
 
         if response.status_code == 429:
+            body_text = response.text[:300] if response.text else ''
+            try:
+                err_data = response.json().get('error', {})
+                err_code = err_data.get('code', '')
+            except Exception:
+                err_code = ''
+
+            if err_code == '1113':
+                raise RuntimeError(f'[智谱API] 余额不足，请充值 | {body_text}')
+
             delay = _BACKOFF_BASE ** attempt
             retry_after = response.headers.get('Retry-After', '')
-            body_preview = response.text[:200] if response.text else ''
             logger.warning(
                 f'[智谱API] {model} 429 限流，{delay}s 后重试 ({attempt}/{_MAX_RETRIES})'
-                f' | Retry-After={retry_after} | body={body_preview}'
+                f' | Retry-After={retry_after} | body={body_text}'
             )
             if retry_after and retry_after.isdigit():
                 delay = max(delay, int(retry_after))

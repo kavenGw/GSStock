@@ -82,6 +82,8 @@ class WatchAnalysisService:
             return WatchService.get_all_today_analyses()
 
         failed_codes = []
+        consecutive_llm_failures = 0
+        _MAX_CONSECUTIVE = 3
         for code in codes:
             price_data = raw_prices.get(code, {})
             current_price = price_data.get('current_price', 0)
@@ -130,7 +132,16 @@ class WatchAnalysisService:
                 )
                 if parsed is None:
                     failed_codes.append(code)
+                    consecutive_llm_failures += 1
+                    if consecutive_llm_failures >= _MAX_CONSECUTIVE:
+                        remaining = len(codes) - codes.index(code) - 1
+                        logger.error(
+                            f'[盯盘AI] {period} 连续{consecutive_llm_failures}只LLM失败，'
+                            f'中止剩余{remaining}只分析'
+                        )
+                        break
                     continue
+                consecutive_llm_failures = 0
                 detail_data = {
                     'signal_text': parsed.get('signal_text', ''),
                     'ma_levels': parsed.get('ma_levels', {}),
