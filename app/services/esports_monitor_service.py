@@ -83,63 +83,70 @@ class EsportsMonitorService:
     def __init__(self, app):
         self.app = app
 
-    def setup_match_monitors(self):
-        """为当天比赛创建监控 job"""
+    def setup_match_monitors(self, match_type=None):
+        """为当天比赛创建监控 job
+
+        Args:
+            match_type: 'nba' 或 'lol'，None 表示全部
+        """
         if not ESPORTS_ENABLED:
             return
 
         from app.services.esports_service import EsportsService
 
-        self._cleanup_monitors()
+        self._cleanup_monitors(match_type)
 
         matches = []
 
-        # NBA
-        try:
-            nba = EsportsService.get_nba_schedule()
-            if nba:
-                monitored = {k for k, v in NBA_TEAM_MONITOR.items() if v}
-                for game in nba.get('today', []):
-                    if game.get('match_id') and game['status'] != 'completed':
-                        if monitored and not ({game['home'], game['away']} & monitored):
-                            continue
-                        matches.append({
-                            'match_id': game['match_id'],
-                            'match_type': 'nba',
-                            'status': game['status'],
-                            'start_time': game.get('start_time', ''),
-                            'teams_desc': f"{game['away']} vs {game['home']}",
-                            'league': 'NBA',
-                            'home': game['home'],
-                            'away': game['away'],
-                        })
-        except Exception as e:
-            logger.warning(f'[赛事监控] NBA赛程获取失败: {e}')
-
-        # LoL
-        try:
-            lol = EsportsService.get_lol_schedule()
-            if lol:
-                for league_name, league_data in lol.items():
-                    if league_data is None:
-                        continue
-                    for match in league_data.get('today', []):
-                        if match.get('match_id') and match['status'] != 'completed':
+        if not match_type or match_type == 'nba':
+            # NBA
+            try:
+                nba = EsportsService.get_nba_schedule()
+                if nba:
+                    monitored = {k for k, v in NBA_TEAM_MONITOR.items() if v}
+                    for game in nba.get('today', []):
+                        if game.get('match_id') and game['status'] != 'completed':
+                            if monitored and not ({game['home'], game['away']} & monitored):
+                                continue
                             matches.append({
-                                'match_id': match['match_id'],
-                                'match_type': 'lol',
-                                'status': match['status'],
-                                'start_time': match.get('start_time', ''),
-                                'teams_desc': f"{match['team1']} vs {match['team2']}",
-                                'league': league_name,
-                                'team1': match['team1'],
-                                'team2': match['team2'],
+                                'match_id': game['match_id'],
+                                'match_type': 'nba',
+                                'status': game['status'],
+                                'start_time': game.get('start_time', ''),
+                                'teams_desc': f"{game['away']} vs {game['home']}",
+                                'league': 'NBA',
+                                'home': game['home'],
+                                'away': game['away'],
                             })
-        except Exception as e:
-            logger.warning(f'[赛事监控] LoL赛程获取失败: {e}')
+            except Exception as e:
+                logger.warning(f'[赛事监控] NBA赛程获取失败: {e}')
+
+        if not match_type or match_type == 'lol':
+            # LoL
+            try:
+                lol = EsportsService.get_lol_schedule()
+                if lol:
+                    for league_name, league_data in lol.items():
+                        if league_data is None:
+                            continue
+                        for match in league_data.get('today', []):
+                            if match.get('match_id') and match['status'] != 'completed':
+                                matches.append({
+                                    'match_id': match['match_id'],
+                                    'match_type': 'lol',
+                                    'status': match['status'],
+                                    'start_time': match.get('start_time', ''),
+                                    'teams_desc': f"{match['team1']} vs {match['team2']}",
+                                    'league': league_name,
+                                    'team1': match['team1'],
+                                    'team2': match['team2'],
+                                })
+            except Exception as e:
+                logger.warning(f'[赛事监控] LoL赛程获取失败: {e}')
 
         if not matches:
-            logger.info('[赛事监控] 当天无需监控的比赛')
+            type_desc = match_type or '全部'
+            logger.info(f'[赛事监控] 当天无需监控的比赛 ({type_desc})')
             return
 
         if len(matches) > self.MAX_MONITOR_JOBS:
@@ -385,18 +392,33 @@ class EsportsMonitorService:
             else:
                 logger.debug(f'[赛事监控] {job_id} 比分未变化，跳过推送')
 
-    def _cleanup_monitors(self):
-        """清理所有赛事监控 job"""
+    def _cleanup_monitors(self, match_type=None):
+        """清理赛事监控 job
+
+        Args:
+            match_type: 'nba' 或 'lol'，None 表示全部清理
+        """
         from app.scheduler.engine import scheduler_engine
-        jobs_to_remove = [job for job in scheduler_engine.scheduler.get_jobs()
-                          if job.id.startswith(self.JOB_PREFIX) or job.id.startswith(self.PRE_MATCH_PREFIX)]
+        jobs_to_remove = []
+        for job in scheduler_engine.scheduler.get_jobs():
+            if not (job.id.startswith(self.JOB_PREFIX) or job.id.startswith(self.PRE_MATCH_PREFIX)):
+                continue
+            if match_type and f'_{match_type}_' not in job.id:
+                continue
+            jobs_to_remove.append(job)
+
         removed = 0
         for job in jobs_to_remove:
             job.remove()
             removed += 1
         if removed:
-            logger.info(f'[赛事监控] 清理 {removed} 个旧任务')
+            logger.info(f'[赛事监控] 清理 {removed} 个{"" if not match_type else match_type + " "}旧任务')
 
         # 清理比分状态
         with _score_state_lock:
-            _score_state.clear()
+            if match_type:
+                keys_to_remove = [k for k in _score_state if k.startswith(f'{match_type}_')]
+                for k in keys_to_remove:
+                    del _score_state[k]
+            else:
+                _score_state.clear()
