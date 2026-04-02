@@ -833,13 +833,28 @@ class NotificationService:
 
     @staticmethod
     def _format_nba_section(nba_data) -> str:
+        from app.config.esports_config import NBA_TEAM_MONITOR, NBA_TEAM_NAMES
+
+        # 构建关注球队的中文名集合
+        monitored_cn = set()
+        for eng_name, enabled in NBA_TEAM_MONITOR.items():
+            if enabled:
+                cn_name = NBA_TEAM_NAMES.get(eng_name, eng_name)
+                monitored_cn.add(cn_name)
+
         lines = ['🏀 NBA']
         for label, key in [('昨日', 'yesterday'), ('今日', 'today')]:
             games = nba_data.get(key)
             if games is None:
                 lines.append(f'{label}: 数据获取失败')
-            elif not games:
-                lines.append(f'{label}: 无赛事')
+                continue
+
+            # 过滤关注球队
+            if monitored_cn:
+                games = [g for g in games if g['home'] in monitored_cn or g['away'] in monitored_cn]
+
+            if not games:
+                lines.append(f'{label}: 无关注球队比赛')
             else:
                 completed = [g for g in games if g['status'] in ('completed', 'in_progress')]
                 scheduled = [g for g in games if g['status'] not in ('completed', 'in_progress')]
