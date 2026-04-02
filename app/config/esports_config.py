@@ -7,7 +7,7 @@ ESPORTS_FETCH_TIMEOUT = int(os.getenv('ESPORTS_FETCH_TIMEOUT', '15'))
 # 赛事实时监控
 ESPORTS_NBA_MONITOR_INTERVAL = int(os.getenv('ESPORTS_NBA_MONITOR_INTERVAL', '15'))  # 每15分钟检查比分
 ESPORTS_LOL_MONITOR_INTERVAL = int(os.getenv('ESPORTS_LOL_MONITOR_INTERVAL', '30'))  # 每30分钟检查比分
-ESPORTS_PRE_MATCH_MINUTES = int(os.getenv('ESPORTS_PRE_MATCH_MINUTES', '10'))  # 赛前提醒（开赛前N分钟）
+ESPORTS_PRE_MATCH_MINUTES = int(os.getenv('ESPORTS_PRE_MATCH_MINUTES', '30'))  # 赛前提醒（开赛前N分钟）
 
 # ESPN NBA API
 ESPN_NBA_SCOREBOARD_URL = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
@@ -50,7 +50,7 @@ NBA_TEAM_MONITOR = {
     'Minnesota Timberwolves': 1,
     'New Orleans Pelicans': 0,
     'New York Knicks': 1,
-    'Oklahoma City Thunder':10,
+    'Oklahoma City Thunder': 1,
     'Orlando Magic': 0,
     'Philadelphia 76ers': 0,
     'Phoenix Suns': 0,
