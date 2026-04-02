@@ -21,3 +21,4 @@ venv/
 nul
 data/memory_cache
 data
+.omc
