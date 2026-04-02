@@ -22,8 +22,6 @@ TASK_LAYER_MAP = {
     'github_trending_summary': LLMLayer.FLASH,
     'company_identify': LLMLayer.PREMIUM,
     'news_dedup': LLMLayer.FLASH,
-    'research_report': LLMLayer.PREMIUM,
-    'research_relevance': LLMLayer.FLASH,
 }
 
 

@@ -869,45 +869,6 @@ class NotificationService:
                     lines.append(f"  {m['team1']} vs {m['team2']} {m['start_time']}")
         return '\n'.join(lines)
 
-    @staticmethod
-    def format_research_summary() -> str:
-        """格式化研报摘要用于日报推送"""
-        try:
-            from app.services.research_report_service import (
-                RESEARCH_REPORT_ENABLED,
-                ResearchReportService,
-            )
-
-            if not RESEARCH_REPORT_ENABLED:
-                return ''
-
-            cache = ResearchReportService.get_latest_cached_summary()
-            if not cache:
-                return ''
-
-            lines = ['📋 研报动态']
-            has_report = False
-            for code, info in cache.items():
-                analysis = info.get('analysis', '')
-                if not analysis:
-                    continue
-                has_report = True
-                name = info.get('name', code)
-                first_line = analysis.split('\n')[0].strip()
-                first_line = first_line.lstrip('#*- ').strip()
-                if len(first_line) > 80:
-                    first_line = first_line[:80] + '...'
-                lines.append(f'• {name}: {first_line}')
-
-            if not has_report:
-                return ''
-
-            lines.append('（完整研报已于 9:00 独立推送）')
-            return '\n'.join(lines)
-        except Exception as e:
-            logger.warning(f'[通知.研报] 格式化失败: {e}')
-            return ''
-
     # ── Slack Block Kit helpers ──
 
     @staticmethod
@@ -1011,8 +972,7 @@ class NotificationService:
     def build_market_blocks(indices_text: str, futures_text: str, etf_text: str,
                             sectors_text: str, technical_text: str,
                             dram_text: str = '', earnings_text: str = '',
-                            pe_text: str = '', ai_text: str = '',
-                            research_text: str = '') -> list:
+                            pe_text: str = '', ai_text: str = '') -> list:
         """构建 Message 3 的 Block Kit blocks（市场行情 + 板块 + 技术 + 数据）"""
         B = NotificationService
         blocks = []
@@ -1141,10 +1101,6 @@ class NotificationService:
             blocks.append(B._block_divider())
             blocks.append(B._block_section(ai_text[:3000]))
 
-        if research_text:
-            blocks.append(B._block_divider())
-            blocks.append(B._block_section(research_text[:3000]))
-
         return blocks
 
     @staticmethod
@@ -1218,8 +1174,6 @@ class NotificationService:
 
         # 赛事资讯
         nba_text, lol_text = NotificationService.format_esports_summary_split()
-
-        research_text = NotificationService.format_research_summary()
 
         # GLM 综合分析
         core_insights = ''
@@ -1312,13 +1266,11 @@ class NotificationService:
             msg3_parts.append('\n'.join(data_lines))
         if ai_text:
             msg3_parts.append(ai_text)
-        if research_text:
-            msg3_parts.append(research_text)
 
         msg3_blocks = NotificationService.build_market_blocks(
             indices_text, futures_text, etf_text, sectors_text, technical_text,
             dram_text, earnings.get('text', ''), pe.get('text', ''),
-            ai_text, research_text)
+            ai_text)
 
         news_messages = []
         news_blocks_list = []
