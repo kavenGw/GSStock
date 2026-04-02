@@ -222,16 +222,14 @@ TDSequentialService.calculate()
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
 
-## 研报推送配置
+## 华尔街见闻投行观点配置
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
-| `RESEARCH_REPORT_ENABLED` | 是否启用研报推送 | `true` |
-| `RESEARCH_REPORT_MAX_STOCKS` | 每次最多处理股票数 | `20` |
-| `RESEARCH_REPORT_SEARCH_RESULTS` | 每个 query 取前N条 | `5` |
-| `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
+| `WALLSTREET_NEWS_ENABLED` | 是否启用华尔街见闻策略 | `true` |
+| `WALLSTREET_NEWS_FETCH_TIMEOUT` | crawl4ai 全文爬取超时（秒） | `10` |
 
-每日 6:00（工作日）自动搜索持仓股票的最新研报（ETF 除外），通过 Google News 搜索 + crawl4ai 爬取，GLM 整理关键信息后 Slack 独立推送。
+每日 20:00（工作日）自动抓取华尔街见闻快讯流和文章列表，关键词过滤投行/机构观点（高盛、摩根、花旗等），crawl4ai 爬取全文，GLM Flash 整理关键信息后 Slack 推送到 `news_research` 频道。
 
 ## 博客监控配置
 
@@ -267,6 +265,7 @@ TDSequentialService.calculate()
 | `news_nba` | NBA 赛事 |
 | `news_daily` | 每日核心观点（带日期） |
 | `news_operation` | 清仓策略、操作计划 |
+| `news_research` | 投行观点日报 |
 
 ## 赛事推送配置
 

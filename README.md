@@ -72,10 +72,8 @@ cp .env.sample .env
 | `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
 | `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
 | `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
-| `RESEARCH_REPORT_ENABLED` | 是否启用研报推送 | `true` |
-| `RESEARCH_REPORT_MAX_STOCKS` | 每次最多处理股票数 | `20` |
-| `RESEARCH_REPORT_SEARCH_RESULTS` | 每个 query 取前N条 | `5` |
-| `RESEARCH_REPORT_FETCH_TIMEOUT` | 全文爬取超时（秒） | `10` |
+| `WALLSTREET_NEWS_ENABLED` | 是否启用华尔街见闻策略 | `true` |
+| `WALLSTREET_NEWS_FETCH_TIMEOUT` | crawl4ai 全文爬取超时（秒） | `10` |
 | `BLOG_MONITOR_ENABLED` | 是否启用博客监控 | `true` |
 | `GITHUB_TRENDING_ENABLED` | 是否启用 GitHub Trending 监控 | `true` |
 | `GITHUB_TRENDING_TOP_N` | 取前 N 个项目 | `10` |
