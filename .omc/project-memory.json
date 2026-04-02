@@ -1,0 +1,404 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775091210328,
+  "projectRoot": "D:\\Git\\stock",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "requirements.txt"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "pip",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "app",
+      "docs",
+      "scripts",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 1,
+      "lastAccessed": 1775091210317,
+      "keyFiles": [
+        "__init__.py"
+      ]
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 18,
+      "lastAccessed": 1775091210317,
+      "keyFiles": [
+        "blog_monitor_deepmind_blog_pushed.json",
+        "blog_monitor_openai_blog_pushed.json",
+        "daily_push_2026-03-26.flag",
+        "daily_push_2026-03-27.flag",
+        "daily_push_2026-03-28.flag"
+      ]
+    },
+    "doc": {
+      "path": "doc",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1775091210318,
+      "keyFiles": [
+        "architecture.md",
+        "data-flow.md"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1775091210318,
+      "keyFiles": [
+        "TECHNICAL_DOCUMENTATION.md"
+      ]
+    },
+    "logs": {
+      "path": "logs",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1775091210318,
+      "keyFiles": [
+        "app.log",
+        "app.log.1",
+        "app.log.3",
+        "error.log"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1775091210319,
+      "keyFiles": [
+        "migrate_news.py"
+      ]
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1775091210319,
+      "keyFiles": []
+    },
+    "uploads": {
+      "path": "uploads",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1775091210319,
+      "keyFiles": [
+        "0e89ac82097c4b7dbaad6db3ce894f43_038885252f5cbed3d8ed8d8e3ee646dc.jpg",
+        "294d0af530314e7e9a84cbd98428ee7e_038885252f5cbed3d8ed8d8e3ee646dc.jpg",
+        "3c7a1314ea4c438782cafc5aa42e1016_0aa59d823ceb9b0c80e97cd0a306f459.jpg",
+        "763acbf47f2f43658fc9f04cf7e1a54e_0aa59d823ceb9b0c80e97cd0a306f459.jpg",
+        "942af40ece444613a9747d8bb48adb8d_0aa59d823ceb9b0c80e97cd0a306f459.jpg"
+      ]
+    },
+    "__pycache__": {
+      "path": "__pycache__",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775091210319,
+      "keyFiles": [
+        "config.cpython-310.pyc"
+      ]
+    },
+    "app\\config": {
+      "path": "app\\config",
+      "purpose": "Configuration files",
+      "fileCount": 10,
+      "lastAccessed": 1775091210320,
+      "keyFiles": [
+        "blog_monitor.py",
+        "data_sources.py",
+        "esports_config.py"
+      ]
+    },
+    "app\\models": {
+      "path": "app\\models",
+      "purpose": "Data models",
+      "fileCount": 24,
+      "lastAccessed": 1775091210320,
+      "keyFiles": [
+        "advice.py",
+        "bank_transfer.py",
+        "category.py"
+      ]
+    },
+    "app\\routes": {
+      "path": "app\\routes",
+      "purpose": "Route handlers",
+      "fileCount": 19,
+      "lastAccessed": 1775091210320,
+      "keyFiles": [
+        "advice.py",
+        "alert.py",
+        "briefing.py"
+      ]
+    },
+    "app\\services": {
+      "path": "app\\services",
+      "purpose": "Business logic services",
+      "fileCount": 54,
+      "lastAccessed": 1775091210320,
+      "keyFiles": [
+        "ai_analyzer.py",
+        "akshare_client.py",
+        "backtest.py"
+      ]
+    },
+    "app\\static": {
+      "path": "app\\static",
+      "purpose": "Static files",
+      "fileCount": 0,
+      "lastAccessed": 1775091210320,
+      "keyFiles": []
+    },
+    "tests\\api": {
+      "path": "tests\\api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1775091210321,
+      "keyFiles": []
+    },
+    "tests\\data": {
+      "path": "tests\\data",
+      "purpose": "Data files",
+      "fileCount": 0,
+      "lastAccessed": 1775091210321,
+      "keyFiles": []
+    },
+    "tests\\fixtures": {
+      "path": "tests\\fixtures",
+      "purpose": "Test fixtures",
+      "fileCount": 0,
+      "lastAccessed": 1775091210321,
+      "keyFiles": []
+    },
+    "tests\\helpers": {
+      "path": "tests\\helpers",
+      "purpose": "Helper functions",
+      "fileCount": 0,
+      "lastAccessed": 1775091210322,
+      "keyFiles": []
+    },
+    "tests\\services": {
+      "path": "tests\\services",
+      "purpose": "Business logic services",
+      "fileCount": 0,
+      "lastAccessed": 1775091210322,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "app\\scheduler\\engine.py",
+      "accessCount": 10,
+      "lastAccessed": 1775100009951,
+      "type": "file"
+    },
+    {
+      "path": "app\\services\\notification.py",
+      "accessCount": 9,
+      "lastAccessed": 1775099903739,
+      "type": "directory"
+    },
+    {
+      "path": "app\\config\\esports_config.py",
+      "accessCount": 7,
+      "lastAccessed": 1775099889325,
+      "type": "file"
+    },
+    {
+      "path": "app\\services\\esports_monitor_service.py",
+      "accessCount": 7,
+      "lastAccessed": 1775099945182,
+      "type": "file"
+    },
+    {
+      "path": "app\\services\\watch_analysis_service.py",
+      "accessCount": 6,
+      "lastAccessed": 1775093396776,
+      "type": "file"
+    },
+    {
+      "path": "app\\services\\esports_service.py",
+      "accessCount": 5,
+      "lastAccessed": 1775099209716,
+      "type": "file"
+    },
+    {
+      "path": "app\\llm\\providers\\zhipu.py",
+      "accessCount": 4,
+      "lastAccessed": 1775094427401,
+      "type": "file"
+    },
+    {
+      "path": "app\\scheduler",
+      "accessCount": 3,
+      "lastAccessed": 1775093302753,
+      "type": "directory"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 3,
+      "lastAccessed": 1775100014622,
+      "type": "file"
+    },
+    {
+      "path": ".env.sample",
+      "accessCount": 3,
+      "lastAccessed": 1775100014691,
+      "type": "file"
+    },
+    {
+      "path": "app\\llm",
+      "accessCount": 2,
+      "lastAccessed": 1775091323452,
+      "type": "directory"
+    },
+    {
+      "path": "app\\llm\\rate_limiter.py",
+      "accessCount": 1,
+      "lastAccessed": 1775091291656,
+      "type": "file"
+    },
+    {
+      "path": "app\\llm\\router.py",
+      "accessCount": 1,
+      "lastAccessed": 1775091327725,
+      "type": "file"
+    },
+    {
+      "path": "app\\strategies\\daily_briefing\\__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1775091394663,
+      "type": "file"
+    },
+    {
+      "path": "app\\strategies\\watch_realtime\\__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1775091394830,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1775093304202,
+      "type": "directory"
+    },
+    {
+      "path": "run.py",
+      "accessCount": 1,
+      "lastAccessed": 1775093308765,
+      "type": "file"
+    },
+    {
+      "path": "update_and_run.sh",
+      "accessCount": 1,
+      "lastAccessed": 1775093308832,
+      "type": "file"
+    },
+    {
+      "path": "gsstock",
+      "accessCount": 1,
+      "lastAccessed": 1775093313119,
+      "type": "file"
+    },
+    {
+      "path": "gunicorn.conf.py",
+      "accessCount": 1,
+      "lastAccessed": 1775093317813,
+      "type": "file"
+    },
+    {
+      "path": ".env",
+      "accessCount": 1,
+      "lastAccessed": 1775094397316,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\plans\\2026-03-21-esports-monitor-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1775098717122,
+      "type": "file"
+    },
+    {
+      "path": "app\\config\\notification_config.py",
+      "accessCount": 1,
+      "lastAccessed": 1775098720552,
+      "type": "file"
+    },
+    {
+      "path": "docs\\plans\\2026-03-21-esports-monitor-plan.md",
+      "accessCount": 1,
+      "lastAccessed": 1775098777259,
+      "type": "file"
+    },
+    {
+      "path": "docs\\plans\\2026-04-02-nba-monitor-fix-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1775099351504,
+      "type": "file"
+    },
+    {
+      "path": "docs\\plans\\2026-04-02-nba-monitor-fix-plan.md",
+      "accessCount": 1,
+      "lastAccessed": 1775099484948,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\kaven\\.claude\\plugins\\cache\\superpowers-marketplace\\superpowers\\5.0.7\\skills\\subagent-driven-development\\implementer-prompt.md",
+      "accessCount": 1,
+      "lastAccessed": 1775099844344,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\kaven\\.claude\\plugins\\cache\\superpowers-marketplace\\superpowers\\5.0.7\\skills\\subagent-driven-development\\spec-reviewer-prompt.md",
+      "accessCount": 1,
+      "lastAccessed": 1775099845068,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\kaven\\.claude\\plugins\\cache\\superpowers-marketplace\\superpowers\\5.0.7\\skills\\subagent-driven-development\\code-quality-reviewer-prompt.md",
+      "accessCount": 1,
+      "lastAccessed": 1775099845278,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

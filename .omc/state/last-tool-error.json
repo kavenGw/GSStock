@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"python -c \\\"import ast; ast.parse(open('app/services/esports_monitor_service.py').read()); print('syntax ok')\\\"\"}",
+  "error": "Exit code 1\nTraceback (most recent call last):\r\n  File \"<string>\", line 1, in <module>\r\nUnicodeDecodeError: 'cp950' codec can't decode byte 0x9b in position 5: illegal multibyte sequence",
+  "timestamp": "2026-04-02T03:19:09.528Z",
+  "retry_count": 2
+}
