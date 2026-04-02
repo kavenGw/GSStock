@@ -77,7 +77,14 @@ def _call_zhipu(model: str, messages: list[dict], temperature: float, max_tokens
 
         if response.status_code == 429:
             delay = _BACKOFF_BASE ** attempt
-            logger.warning(f'[智谱API] {model} 429 限流，{delay}s 后重试 ({attempt}/{_MAX_RETRIES})')
+            retry_after = response.headers.get('Retry-After', '')
+            body_preview = response.text[:200] if response.text else ''
+            logger.warning(
+                f'[智谱API] {model} 429 限流，{delay}s 后重试 ({attempt}/{_MAX_RETRIES})'
+                f' | Retry-After={retry_after} | body={body_preview}'
+            )
+            if retry_after and retry_after.isdigit():
+                delay = max(delay, int(retry_after))
             time.sleep(delay)
             continue
 
