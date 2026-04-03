@@ -1,5 +1,6 @@
 """A股收盘成交量异动策略 — 盯盘股票量比超30%时推送"""
 import logging
+from datetime import date
 from app.strategies.base import Strategy, Signal
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ VOLUME_CHANGE_THRESHOLD = 0.3
 class VolumeAlertStrategy(Strategy):
     name = "volume_alert"
     description = "A股收盘成交量异动推送"
-    schedule = "35 15 * * 1-5"  # 工作日15:35，A股收盘后
+    schedule = "50 15 * * 1-5"  # 工作日15:50，A股收盘后留足数据结算时间
     needs_llm = False
 
     def scan(self) -> list[Signal]:
@@ -24,14 +25,21 @@ class VolumeAlertStrategy(Strategy):
             return []
 
         data_service = UnifiedStockDataService()
-        trend = data_service.get_trend_data(a_codes, days=5)
+        trend = data_service.get_trend_data(a_codes, days=5, force_refresh=True)
 
+        today_str = date.today().strftime('%Y-%m-%d')
         signals = []
         for stock in trend.get('stocks', []):
             code = stock.get('stock_code')
             name = stock.get('stock_name', code)
             ohlc = stock.get('data', [])
             if not ohlc or len(ohlc) < 2:
+                continue
+
+            # 校验最后一条数据是今天，防止数据源延迟导致推送错误日期
+            last_date = ohlc[-1].get('date', '')
+            if last_date != today_str:
+                logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}，跳过")
                 continue
 
             today_vol = ohlc[-1].get('volume', 0)
