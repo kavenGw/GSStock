@@ -14,7 +14,6 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
             - position_summary: 持仓概览
             - alert_signals: 预警信号
             - earnings_alerts: 财报提醒
-            - pe_alerts: PE估值预警
             - watch_analysis: 盯盘分析(7d+30d)
             - indices: 指数行情
             - futures: 期货数据
@@ -34,7 +33,6 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
         'technical': '技术评分',
         'alert_signals': '预警信号',
         'earnings_alerts': '财报提醒',
-        'pe_alerts': 'PE估值预警',
         'watch_analysis': '盯盘分析',
     }
 

@@ -355,39 +355,6 @@ class NotificationService:
         return {'text': text.rstrip('\n')}
 
     @staticmethod
-    def format_pe_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
-        """生成PE估值预警（偏高/偏低）"""
-        from app.services.earnings import EarningsService
-        from app.utils.market_identifier import MarketIdentifier
-
-        if codes is None or name_map is None:
-            codes, name_map = NotificationService._get_all_watched_codes()
-        non_a_codes = [c for c in codes if not MarketIdentifier.is_a_share(c)]
-
-        if not non_a_codes:
-            return {'text': ''}
-
-        pe_data = EarningsService.get_pe_ratios(non_a_codes)
-
-        alerts = []
-        for code, data in pe_data.items():
-            status = data.get('pe_status', 'na')
-            if status in ('high', 'very_high', 'low'):
-                name = name_map.get(code, code)
-                pe_display = data.get('pe_display', '?')
-                label = {'high': '偏高', 'very_high': '极高', 'low': '偏低'}[status]
-                alerts.append(f"{name} PE={pe_display} {label}")
-
-        if not alerts:
-            return {'text': ''}
-
-        if len(alerts) == 1:
-            text = f"⚠️ PE预警: {alerts[0]}"
-        else:
-            text = "⚠️ PE预警\n" + "\n".join(f"  {a}" for a in alerts)
-        return {'text': text}
-
-    @staticmethod
     def format_ai_report(analyses: list) -> dict:
         if not analyses:
             return {'text': ''}
@@ -1149,7 +1116,6 @@ class NotificationService:
         briefing = NotificationService.format_briefing_summary()
         alerts = NotificationService.format_alert_signals(codes, name_map, position_codes)
         earnings = NotificationService.format_earnings_alerts(codes, name_map)
-        pe = NotificationService.format_pe_alerts(codes, name_map)
 
         indices_text = NotificationService.format_indices_summary()
         futures_text = NotificationService.format_futures_summary()
@@ -1215,7 +1181,6 @@ class NotificationService:
                     'technical': technical_text,
                     'alert_signals': alerts.get('text', ''),
                     'earnings_alerts': earnings.get('text', ''),
-                    'pe_alerts': pe.get('text', ''),
                     'watch_analysis': watch_text,
                 }
                 prompt = build_daily_briefing_prompt(all_data)

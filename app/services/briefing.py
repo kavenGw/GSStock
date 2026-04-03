@@ -164,30 +164,6 @@ class BriefingService:
         }
 
     @staticmethod
-    def get_stocks_pe_data(force_refresh: bool = False) -> dict:
-        """获取股票PE数据"""
-        from app.services.unified_stock_data import unified_stock_data_service
-
-        stock_codes = [s['code'] for s in BRIEFING_STOCKS]
-        pe_data = {}
-        try:
-            pe_data = unified_stock_data_service.get_pe_data(stock_codes, force_refresh)
-        except Exception as e:
-            logger.warning(f"[简报服务.PE] 获取PE数据失败: {e}")
-
-        result = {}
-        for code in stock_codes:
-            pe = pe_data.get(code, {})
-            if pe:
-                result[code] = {
-                    'pe_ttm': pe.get('pe_ttm'),
-                    'pe_forward': pe.get('pe_forward'),
-                    'pe_status': pe.get('pe_status', 'na')
-                }
-
-        return result
-
-    @staticmethod
     def get_stocks_earnings_data(force_refresh: bool = False) -> dict:
         """获取股票财报日期数据"""
         from app.services.earnings import EarningsService

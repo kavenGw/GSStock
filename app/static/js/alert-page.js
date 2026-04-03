@@ -1517,25 +1517,11 @@ const AlertPage = {
             `;
         }
 
-        const peDisplay = earningsData.pe_display || '暂无数据';
-        const peStatus = earningsData.pe_status || 'na';
-        const peClassMap = {
-            'low': 'bg-success',
-            'normal': 'bg-secondary',
-            'high': 'bg-warning',
-            'very_high': 'bg-danger',
-            'loss': 'bg-dark text-white',
-            'na': 'bg-light text-muted'
-        };
-        const peClass = peClassMap[peStatus] || 'bg-secondary';
+        if (!earningsDateHtml) return '';
 
         return `
             <div class="earnings-info mt-2 pt-2 border-top">
                 ${earningsDateHtml}
-                <div class="d-flex justify-content-between align-items-center small${earningsDateHtml ? ' mt-1' : ''}">
-                    <span class="text-muted">市盈率(TTM)</span>
-                    <span class="badge ${peClass}">${peDisplay}</span>
-                </div>
             </div>
         `;
     },

@@ -24,17 +24,6 @@ def get_stocks():
         return jsonify({'error': str(e)}), 500
 
 
-@briefing_bp.route('/api/stocks/pe')
-def get_stocks_pe():
-    """股票PE数据"""
-    try:
-        force = request.args.get('force', 'false') == 'true'
-        data = BriefingService.get_stocks_pe_data(force)
-        return jsonify(data)
-    except Exception as e:
-        logger.error(f"[简报.PE] 获取失败: {e}", exc_info=True)
-        return jsonify({'error': str(e)}), 500
-
 
 @briefing_bp.route('/api/stocks/earnings')
 def get_stocks_earnings():

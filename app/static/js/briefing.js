@@ -2,7 +2,6 @@
  * 每日简报页面 - 渐进式加载
  */
 class BriefingPage {
-    static peData = null;
     static earningsData = null;
     static technicalData = null;
     static stocksRendered = false;
@@ -19,7 +18,6 @@ class BriefingPage {
         this.setLoadingPlaceholders();
 
         this.loadStocks();
-        this.loadStocksPE();
         this.loadStocksEarnings();
         this.loadStocksTechnical();
         this.loadIndices();
@@ -121,29 +119,12 @@ class BriefingPage {
 
             this.renderStocks(data);
             this.stocksRendered = true;
-            // 应用已到达的PE/财报/技术指标数据
-            this.applyPEData();
             this.applyEarningsData();
             this.applyTechnicalData();
 
         } catch (e) {
             console.error('加载股票数据失败:', e);
             document.getElementById('stocksContainer').innerHTML = `<div class="text-warning-dark">股票数据加载失败</div>`;
-        }
-    }
-
-    static async loadStocksPE() {
-        try {
-            const url = '/briefing/api/stocks/pe';
-            const resp = await fetch(url);
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const data = await resp.json();
-            if (data.error) throw new Error(data.error);
-
-            this.peData = data;
-            this.applyPEData();
-        } catch (e) {
-            console.error('加载PE数据失败:', e);
         }
     }
 
@@ -345,21 +326,7 @@ class BriefingPage {
         }
     }
 
-    // ========== PE/财报异步填充 ==========
-
-    static applyPEData() {
-        if (!this.peData || !this.stocksRendered) return;
-        for (const [code, pe] of Object.entries(this.peData)) {
-            const el = document.querySelector(`.stock-pe[data-code="${code}"]`);
-            if (!el) continue;
-            if (pe.pe_status === 'loss') {
-                el.innerHTML = '<span class="text-up">亏损</span>';
-            } else if (pe.pe_ttm !== null && pe.pe_ttm !== undefined) {
-                const cls = this.getPEStatusClass(pe.pe_status);
-                el.innerHTML = `PE:<span class="${cls}">${pe.pe_ttm.toFixed(1)}</span>`;
-            }
-        }
-    }
+    // ========== 财报异步填充 ==========
 
     static applyEarningsData() {
         if (!this.earningsData || !this.stocksRendered) return;
@@ -487,7 +454,6 @@ class BriefingPage {
                         <span class="stock-technical" data-code="${stock.code}"></span>
                     </div>
                     <div class="bc-secondary">
-                        ${stock.market !== 'A' ? `<span class="stock-pe" data-code="${stock.code}"></span>` : ''}
                         <span class="stock-earnings" data-code="${stock.code}"></span>
                     </div>
                 `}
@@ -683,17 +649,6 @@ class BriefingPage {
         if (changePercent > 0) return 'text-up';
         if (changePercent < 0) return 'text-down';
         return 'text-flat';
-    }
-
-    static getPEStatusClass(status) {
-        switch (status) {
-            case 'low': return 'text-success';
-            case 'normal': return '';
-            case 'high': return 'text-warning';
-            case 'very_high':
-            case 'loss': return 'text-danger';
-            default: return 'text-muted';
-        }
     }
 
     static getEarningsDateClass(daysUntil) {

@@ -225,20 +225,15 @@ def get_earnings_data():
     with log_operation(logger, "预警.财报") as op:
         try:
             earnings_dates = EarningsService.get_earnings_dates(stock_codes)
-            pe_ratios = EarningsService.get_pe_ratios(stock_codes)
 
             result = {}
             for code in stock_codes:
                 earnings = earnings_dates.get(code, {})
-                pe = pe_ratios.get(code, {})
                 result[code] = {
                     'last_earnings_date': earnings.get('last_earnings_date'),
                     'next_earnings_date': earnings.get('next_earnings_date'),
                     'days_until_next': earnings.get('days_until_next'),
                     'is_today': earnings.get('is_today', False),
-                    'pe_ttm': pe.get('pe_ttm'),
-                    'pe_display': pe.get('pe_display', '暂无数据'),
-                    'pe_status': pe.get('pe_status', 'na'),
                     'market': earnings.get('market', 'unknown')
                 }
 

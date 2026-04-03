@@ -363,58 +363,8 @@ class WyckoffAutoService:
                 result = future.result()
                 results.append(result)
 
-        # 批量获取PE数据并添加到结果中
-        stock_codes = [item['code'] for item in stock_list]
-        pe_data_map = WyckoffAutoService._get_batch_pe_data(stock_codes)
-        for result in results:
-            code = result.get('stock_code')
-            if code and code in pe_data_map:
-                result['pe_data'] = pe_data_map[code]
-            else:
-                result['pe_data'] = {'pe_ttm': None, 'pe_status': 'na', 'pe_display': '暂无数据'}
-
         # 排序
         return WyckoffAutoService._sort_results(results)
-
-    @staticmethod
-    def _get_batch_pe_data(stock_codes: list) -> dict:
-        """批量获取PE数据
-
-        Args:
-            stock_codes: 股票代码列表
-
-        Returns:
-            {stock_code: pe_data} 字典
-        """
-        try:
-            from app.services.earnings import EarningsService
-            return EarningsService.get_pe_ratios(stock_codes)
-        except Exception as e:
-            logger.warning(f"[威科夫.PE] 批量获取PE数据失败: {e}")
-            return {}
-
-    @staticmethod
-    def _enrich_with_pe_ratio(result: dict, stock_code: str) -> dict:
-        """为分析结果添加市盈率数据
-
-        Args:
-            result: 原始分析结果字典
-            stock_code: 股票代码
-
-        Returns:
-            添加了 pe_data 字段的结果字典
-        """
-        try:
-            from app.services.earnings import EarningsService
-            pe_data = EarningsService.get_pe_ratios([stock_code])
-            if stock_code in pe_data:
-                result['pe_data'] = pe_data[stock_code]
-            else:
-                result['pe_data'] = {'pe_ttm': None, 'pe_status': 'na', 'pe_display': '暂无数据'}
-        except Exception as e:
-            logger.warning(f"[威科夫.PE] 获取 {stock_code} PE数据失败: {e}")
-            result['pe_data'] = {'pe_ttm': None, 'pe_status': 'na', 'pe_display': '暂无数据'}
-        return result
 
     @staticmethod
     def _sort_results(results: list) -> list:

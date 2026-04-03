@@ -21,10 +21,6 @@ CACHE_TYPE_EARNINGS = 'earnings'
 # 缓存有效期：24小时
 EARNINGS_CACHE_TTL_HOURS = 24
 
-# PE阈值
-PE_THRESHOLD_LOW = 15       # 低估参考
-PE_THRESHOLD_NORMAL = 30    # 正常上限
-PE_THRESHOLD_HIGH = 200     # 高估上限
 
 # 重试配置
 MAX_RETRIES = 3
@@ -174,21 +170,10 @@ class EarningsService:
                 except Exception as e:
                     logger.debug(f"[财报] 获取 {stock_code} earnings_dates 失败: {e}")
 
-                pe_ttm = None
-                try:
-                    info = ticker.info
-                    if info:
-                        pe_ttm = info.get('trailingPE')
-                        if pe_ttm is not None:
-                            pe_ttm = round(float(pe_ttm), 2)
-                except Exception as e:
-                    logger.warning(f"[财报.PE] {stock_code} yfinance获取PE失败: {e}")
-
                 circuit_breaker.record_success('yfinance')
                 return {
                     'last_earnings_date': last_earnings_date,
                     'next_earnings_date': next_earnings_date,
-                    'pe_ttm': pe_ttm,
                     'market': market,
                     'fetch_time': datetime.now().isoformat()
                 }
@@ -211,30 +196,16 @@ class EarningsService:
 
     @staticmethod
     def _fetch_earnings_akshare(stock_code: str) -> dict | None:
-        """从akshare获取A股财报数据（委托unified服务获取PE）"""
-        from app.services.unified_stock_data import unified_stock_data_service
-
+        """从akshare获取A股财报数据"""
         try:
-            pe_ttm = None
-
-            if not MarketIdentifier.is_etf(stock_code):
-                pe_data = unified_stock_data_service.get_pe_data([stock_code])
-                stock_pe = pe_data.get(stock_code)
-                if stock_pe:
-                    pe_ttm = stock_pe.get('pe_ttm')
-                    if pe_ttm is not None:
-                        pe_ttm = round(pe_ttm, 2)
-
             return {
                 'last_earnings_date': None,
                 'next_earnings_date': None,
-                'pe_ttm': pe_ttm,
                 'market': 'A',
                 'fetch_time': datetime.now().isoformat()
             }
-
         except Exception as e:
-            logger.warning(f"[财报.PE] {stock_code} 获取A股数据失败: {e}")
+            logger.warning(f"[财报] {stock_code} 获取A股数据失败: {e}")
             return None
 
     @staticmethod
@@ -384,96 +355,6 @@ class EarningsService:
             'next_earnings_date': next_date_str,
             'days_until_next': days_until,
             'is_today': is_today,
-            'market': data.get('market', 'unknown')
-        }
-
-    @staticmethod
-    def get_pe_ratios(stock_codes: list, force_refresh: bool = False) -> dict:
-        """获取市盈率数据
-
-        通过 UnifiedStockDataService 获取 PE 数据。
-
-        Args:
-            stock_codes: 股票代码列表
-            force_refresh: 是否强制刷新
-
-        Returns:
-            {
-                'TSLA': {
-                    'code': 'TSLA',
-                    'pe_ttm': 45.6,
-                    'pe_label': 'TTM',
-                    'pe_display': '45.6',
-                    'pe_status': 'high',  # 'low'/'normal'/'high'/'very_high'/'loss'/'na'
-                    'market': 'US'
-                }
-            }
-        """
-        if not stock_codes:
-            return {}
-
-        from app.services.unified_stock_data import unified_stock_data_service
-
-        # 通过统一服务获取 PE 数据
-        pe_data = unified_stock_data_service.get_pe_data(stock_codes, force_refresh)
-
-        # 转换为原有格式
-        result = {}
-        for code, data in pe_data.items():
-            result[code] = {
-                'code': code,
-                'pe_ttm': data.get('pe_ttm'),
-                'pe_label': 'TTM' if data.get('pe_ttm') is not None else None,
-                'pe_display': data.get('pe_display', '暂无数据'),
-                'pe_status': data.get('pe_status', 'na'),
-                'market': data.get('market', 'unknown')
-            }
-
-        # 对于未获取到数据的股票，返回默认值
-        for code in stock_codes:
-            if code not in result:
-                market = MarketIdentifier.identify(code)
-                result[code] = {
-                    'code': code,
-                    'pe_ttm': None,
-                    'pe_label': None,
-                    'pe_display': '暂无数据',
-                    'pe_status': 'na',
-                    'market': market or 'unknown'
-                }
-
-        return result
-
-    @staticmethod
-    def _format_pe_result(code: str, data: dict) -> dict:
-        """格式化市盈率结果"""
-        pe_ttm = data.get('pe_ttm')
-        pe_status = 'na'
-        pe_display = '暂无数据'
-
-        if pe_ttm is not None:
-            if pe_ttm < 0:
-                pe_status = 'loss'
-                pe_display = '亏损'
-            elif pe_ttm <= PE_THRESHOLD_LOW:
-                pe_status = 'low'
-                pe_display = str(round(pe_ttm, 1))
-            elif pe_ttm <= PE_THRESHOLD_NORMAL:
-                pe_status = 'normal'
-                pe_display = str(round(pe_ttm, 1))
-            elif pe_ttm <= PE_THRESHOLD_HIGH:
-                pe_status = 'high'
-                pe_display = str(round(pe_ttm, 1))
-            else:
-                pe_status = 'very_high'
-                pe_display = '>200'
-
-        return {
-            'code': code,
-            'pe_ttm': pe_ttm,
-            'pe_label': 'TTM' if pe_ttm is not None else None,
-            'pe_display': pe_display,
-            'pe_status': pe_status,
             'market': data.get('market', 'unknown')
         }
 
