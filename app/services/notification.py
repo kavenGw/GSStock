@@ -1323,7 +1323,7 @@ class NotificationService:
         sent = 0
         for i, msg in enumerate(news_messages):
             blks = news_blocks_list[i] if i < len(news_blocks_list) else None
-            if NotificationService.send_slack(msg, CHANNEL_NEWS, blocks=blks):
+            if NotificationService.send_slack(msg, CHANNEL_DAILY, blocks=blks):
                 sent += 1
 
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):

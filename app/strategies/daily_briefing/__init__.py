@@ -100,7 +100,7 @@ class DailyBriefingStrategy(Strategy):
                 return
 
             message = DailyBriefingStrategy._format_value_dip_message(dips)
-            NotificationService.send_slack(message, 'news')
+            NotificationService.send_slack(message, 'news_daily')
             logger.info(f'[每日简报] 价值洼地推送: {len(dips)} 条')
         except Exception as e:
             logger.error(f'[每日简报] 价值洼地推送失败: {e}')
@@ -119,7 +119,7 @@ class DailyBriefingStrategy(Strategy):
                 return
 
             message = DailyBriefingStrategy._format_pullback_message(significant)
-            NotificationService.send_slack(message, 'news')
+            NotificationService.send_slack(message, 'news_daily')
             logger.info(f'[每日简报] 高点回退推送: {len(significant)} 只')
         except Exception as e:
             logger.error(f'[每日简报] 高点回退推送失败: {e}')
