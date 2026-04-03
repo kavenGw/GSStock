@@ -58,6 +58,16 @@ class SchedulerEngine:
         )
         registered.append(f'news_poll(every {NEWS_INTERVAL_MINUTES}min)')
 
+        # 赛事早间调度（5:00 北京时间，覆盖 NBA 早场比赛的赛前提醒）
+        self.scheduler.add_job(
+            self._setup_esports_monitors_with_context,
+            trigger=CronTrigger(hour=5, minute=0),
+            id='esports_morning_monitors',
+            replace_existing=True,
+            misfire_grace_time=300,
+        )
+        registered.append('esports_morning_monitors(05:00)')
+
         # NBA 晚间调度（18:00 北京时间，覆盖当晚比赛）
         self.scheduler.add_job(
             self._setup_nba_evening_monitors,
@@ -67,6 +77,16 @@ class SchedulerEngine:
             misfire_grace_time=300,
         )
         registered.append('nba_evening_monitors(18:00)')
+
+        # 明日赛事预调度（22:00 北京时间，提前获取明天赛程）
+        self.scheduler.add_job(
+            self._setup_tomorrow_monitors,
+            trigger=CronTrigger(hour=22, minute=0),
+            id='esports_tomorrow_monitors',
+            replace_existing=True,
+            misfire_grace_time=300,
+        )
+        registered.append('esports_tomorrow_monitors(22:00)')
 
         self.scheduler.start()
         atexit.register(self.shutdown)
@@ -138,6 +158,27 @@ class SchedulerEngine:
             EsportsMonitorService(self.app).setup_match_monitors()
         except Exception as e:
             logger.error(f'[调度器] 赛事监控创建失败: {e}')
+
+    def _setup_esports_monitors_with_context(self):
+        """早间赛事监控调度（在 app context 内创建全部监控）"""
+        if not self.app:
+            return
+        with self.app.app_context():
+            self._setup_esports_monitors_safe()
+
+    def _setup_tomorrow_monitors(self):
+        """22:00 提前获取明天赛程并创建监控"""
+        if not self.app:
+            return
+        with self.app.app_context():
+            try:
+                from datetime import date, timezone
+                from app.services.esports_monitor_service import EsportsMonitorService
+                _CST = timezone(timedelta(hours=8))
+                tomorrow = (datetime.now(_CST) + timedelta(days=1)).date()
+                EsportsMonitorService(self.app).setup_match_monitors(target_date=tomorrow)
+            except Exception as e:
+                logger.error(f'[调度器] 明日赛事预调度失败: {e}')
 
     def _setup_nba_evening_monitors(self):
         """晚间 NBA 监控调度（只清理重建 NBA job，保留 LoL）"""

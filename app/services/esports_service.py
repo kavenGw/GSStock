@@ -64,6 +64,42 @@ class EsportsService:
         return result
 
     @staticmethod
+    def get_nba_schedule_by_date(target_date):
+        """获取指定北京日期的 NBA 赛程
+
+        Args:
+            target_date: 目标北京日期
+
+        Returns:
+            list[game] 或 None
+        """
+        # ESPN 用美国日期，查 target_date 及前一天覆盖时区偏移
+        all_games = []
+        any_success = False
+        for offset in [-1, 0]:
+            d = target_date + timedelta(days=offset)
+            games = EsportsService._fetch_espn_scoreboard(d)
+            if games is not None:
+                any_success = True
+                all_games.extend(games)
+
+        if not any_success:
+            return None
+
+        result = []
+        seen = set()
+        for game in all_games:
+            beijing_date = game.pop('_beijing_date', None)
+            key = (game['home'], game['away'], game.get('start_time'))
+            if key in seen:
+                continue
+            seen.add(key)
+            if beijing_date == target_date:
+                result.append(game)
+
+        return result
+
+    @staticmethod
     def _fetch_espn_scoreboard(game_date):
         """从 ESPN API 获取指定日期的 NBA 赛程
 

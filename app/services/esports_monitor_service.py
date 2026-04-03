@@ -83,41 +83,56 @@ class EsportsMonitorService:
     def __init__(self, app):
         self.app = app
 
-    def setup_match_monitors(self, match_type=None):
-        """为当天比赛创建监控 job
+    def setup_match_monitors(self, match_type=None, target_date=None):
+        """为指定日期的比赛创建监控 job
 
         Args:
             match_type: 'nba' 或 'lol'，None 表示全部
+            target_date: 目标北京日期，None 表示今天
         """
         if not ESPORTS_ENABLED:
             return
 
         from app.services.esports_service import EsportsService
 
-        self._cleanup_monitors(match_type)
+        if target_date is None:
+            target_date = datetime.now(_CST).date()
+
+        is_today = target_date == datetime.now(_CST).date()
+
+        # 仅清理今天的监控，明天的追加不清理
+        if is_today:
+            self._cleanup_monitors(match_type)
 
         matches = []
 
         if not match_type or match_type == 'nba':
             # NBA
             try:
-                nba = EsportsService.get_nba_schedule()
-                if nba:
-                    monitored = {k for k, v in NBA_TEAM_MONITOR.items() if v}
-                    for game in nba.get('today', []):
-                        if game.get('match_id') and game['status'] != 'completed':
-                            if monitored and not ({game['home'], game['away']} & monitored):
-                                continue
-                            matches.append({
-                                'match_id': game['match_id'],
-                                'match_type': 'nba',
-                                'status': game['status'],
-                                'start_time': game.get('start_time', ''),
-                                'teams_desc': f"{game['away']} vs {game['home']}",
-                                'league': 'NBA',
-                                'home': game['home'],
-                                'away': game['away'],
-                            })
+                if is_today:
+                    nba_games = []
+                    nba = EsportsService.get_nba_schedule()
+                    if nba:
+                        nba_games = nba.get('today', [])
+                else:
+                    nba_games = EsportsService.get_nba_schedule_by_date(target_date) or []
+
+                monitored = {k for k, v in NBA_TEAM_MONITOR.items() if v}
+                for game in nba_games:
+                    if game.get('match_id') and game['status'] != 'completed':
+                        if monitored and not ({game['home'], game['away']} & monitored):
+                            continue
+                        matches.append({
+                            'match_id': game['match_id'],
+                            'match_type': 'nba',
+                            'status': game['status'],
+                            'start_time': game.get('start_time', ''),
+                            'game_date': target_date,
+                            'teams_desc': f"{game['away']} vs {game['home']}",
+                            'league': 'NBA',
+                            'home': game['home'],
+                            'away': game['away'],
+                        })
             except Exception as e:
                 logger.warning(f'[赛事监控] NBA赛程获取失败: {e}')
 
@@ -136,6 +151,7 @@ class EsportsMonitorService:
                                     'match_type': 'lol',
                                     'status': match['status'],
                                     'start_time': match.get('start_time', ''),
+                                    'game_date': target_date,
                                     'teams_desc': f"{match['team1']} vs {match['team2']}",
                                     'league': league_name,
                                     'team1': match['team1'],
@@ -187,10 +203,12 @@ class EsportsMonitorService:
             return False
 
         now = datetime.now(_CST)
+        game_date = match_info.get('game_date', now.date())
 
         try:
             h, m = map(int, match_info['start_time'].split(':'))
-            start_dt = now.replace(hour=h, minute=m, second=0, microsecond=0)
+            start_dt = now.replace(year=game_date.year, month=game_date.month,
+                                   day=game_date.day, hour=h, minute=m, second=0, microsecond=0)
 
             # 赛前提醒时间
             remind_dt = start_dt - timedelta(minutes=ESPORTS_PRE_MATCH_MINUTES)
@@ -246,13 +264,15 @@ class EsportsMonitorService:
         interval = ESPORTS_NBA_MONITOR_INTERVAL if match_type == 'nba' else ESPORTS_LOL_MONITOR_INTERVAL
 
         now = datetime.now(_CST)
+        game_date = match_info.get('game_date', now.date())
 
         # 超时截止时间基于比赛开始时间（而非 job 创建时间）
         deadline = now
         if match_info.get('start_time'):
             try:
                 h, m = map(int, match_info['start_time'].split(':'))
-                deadline = now.replace(hour=h, minute=m, second=0, microsecond=0)
+                deadline = now.replace(year=game_date.year, month=game_date.month,
+                                       day=game_date.day, hour=h, minute=m, second=0, microsecond=0)
                 if deadline < now:
                     deadline = now
             except (ValueError, TypeError):
@@ -277,7 +297,8 @@ class EsportsMonitorService:
             elif match_info['status'] == 'scheduled' and match_info.get('start_time'):
                 try:
                     h, m = map(int, match_info['start_time'].split(':'))
-                    start_dt = now.replace(hour=h, minute=m, second=0, microsecond=0)
+                    start_dt = now.replace(year=game_date.year, month=game_date.month,
+                                           day=game_date.day, hour=h, minute=m, second=0, microsecond=0)
                     if start_dt > now:
                         kwargs['next_run_time'] = start_dt
                     else:
