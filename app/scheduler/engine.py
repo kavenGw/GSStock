@@ -141,6 +141,7 @@ class SchedulerEngine:
                     logger.warning(f'[调度器] {label}推送补发失败或未配置')
             except Exception as e:
                 logger.error(f'[调度器] 推送补发失败: {e}')
+                self._notify_error('每日推送补发', e)
 
     def _recover_esports_monitors(self, app):
         """启动时恢复赛事监控"""
@@ -158,6 +159,7 @@ class SchedulerEngine:
             EsportsMonitorService(self.app).setup_match_monitors()
         except Exception as e:
             logger.error(f'[调度器] 赛事监控创建失败: {e}')
+            self._notify_error('赛事监控创建', e)
 
     def _setup_esports_monitors_with_context(self):
         """早间赛事监控调度（在 app context 内创建全部监控）"""
@@ -179,6 +181,7 @@ class SchedulerEngine:
                 EsportsMonitorService(self.app).setup_match_monitors(target_date=tomorrow)
             except Exception as e:
                 logger.error(f'[调度器] 明日赛事预调度失败: {e}')
+                self._notify_error('明日赛事预调度', e)
 
     def _setup_nba_evening_monitors(self):
         """晚间 NBA 监控调度（只清理重建 NBA job，保留 LoL）"""
@@ -190,6 +193,16 @@ class SchedulerEngine:
                 EsportsMonitorService(self.app).setup_match_monitors(match_type='nba')
             except Exception as e:
                 logger.error(f'[调度器] NBA晚间监控创建失败: {e}')
+                self._notify_error('NBA晚间监控', e)
+
+    def _notify_error(self, task_name: str, error: Exception):
+        """调度任务异常时推送 Slack 通知"""
+        try:
+            from app.services.notification import NotificationService
+            NotificationService.send_slack(
+                f'🔴 *[调度器]* {task_name} 执行失败: {error}', 'news_daily')
+        except Exception:
+            logger.error(f'[调度器] 错误推送失败: {task_name} - {error}')
 
     def _run_strategy(self, strategy_name: str):
         """在 app context 内执行策略扫描"""
@@ -210,6 +223,7 @@ class SchedulerEngine:
                     logger.info(f'[调度器] {strategy_name} 产出 {len(signals)} 个信号')
             except Exception as e:
                 logger.error(f'[调度器] {strategy_name} 执行失败: {e}')
+                self._notify_error(strategy_name, e)
 
     def _poll_news(self):
         if not self.app:
@@ -222,6 +236,7 @@ class SchedulerEngine:
                     logger.info(f'[调度器] 新闻轮询完成，新增 {count} 条')
             except Exception as e:
                 logger.error(f'[调度器] 新闻轮询失败: {e}')
+                self._notify_error('新闻轮询', e)
 
     def shutdown(self):
         if self.scheduler.running:

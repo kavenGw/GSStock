@@ -1,11 +1,12 @@
 """A股收盘成交量异动策略 — 盯盘股票量比超30%时推送"""
 import logging
-from datetime import date
+from datetime import date, datetime, timedelta
 from app.strategies.base import Strategy, Signal
 
 logger = logging.getLogger(__name__)
 
 VOLUME_CHANGE_THRESHOLD = 0.3
+RETRY_DELAY_MINUTES = 10
 
 
 class VolumeAlertStrategy(Strategy):
@@ -14,21 +15,36 @@ class VolumeAlertStrategy(Strategy):
     schedule = "50 15 * * 1-5"  # 工作日15:50，A股收盘后留足数据结算时间
     needs_llm = False
 
-    def scan(self) -> list[Signal]:
+    def scan(self, retry_codes: list = None) -> list[Signal]:
+        try:
+            return self._do_scan(retry_codes)
+        except Exception as e:
+            logger.error(f'[成交量异动] 扫描异常: {e}', exc_info=True)
+            self._push_error(f'扫描异常: {e}')
+            return []
+
+    def _do_scan(self, retry_codes: list = None) -> list[Signal]:
         from app.services.watch_service import WatchService
         from app.services.unified_stock_data import UnifiedStockDataService
         from app.utils.market_identifier import MarketIdentifier
 
-        codes = WatchService.get_watch_codes()
-        a_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
+        if retry_codes:
+            a_codes = retry_codes
+            logger.info(f'[成交量异动] 重试 {len(a_codes)} 只: {a_codes}')
+        else:
+            codes = WatchService.get_watch_codes()
+            a_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
         if not a_codes:
             return []
 
         data_service = UnifiedStockDataService()
         trend = data_service.get_trend_data(a_codes, days=5, force_refresh=True)
+        realtime = data_service.get_realtime_prices(a_codes, force_refresh=True)
 
         today_str = date.today().strftime('%Y-%m-%d')
         signals = []
+        missing_codes = []
+
         for stock in trend.get('stocks', []):
             code = stock.get('stock_code')
             name = stock.get('stock_name', code)
@@ -36,10 +52,10 @@ class VolumeAlertStrategy(Strategy):
             if not ohlc or len(ohlc) < 2:
                 continue
 
-            # 校验最后一条数据是今天，防止数据源延迟导致推送错误日期
             last_date = ohlc[-1].get('date', '')
             if last_date != today_str:
-                logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}，跳过")
+                missing_codes.append(code)
+                logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}")
                 continue
 
             today_vol = ohlc[-1].get('volume', 0)
@@ -53,7 +69,8 @@ class VolumeAlertStrategy(Strategy):
 
             direction = '放量' if change_pct > 0 else '缩量'
             pct_str = f"{abs(change_pct):.0%}"
-            price_change = ohlc[-1].get('change_pct', 0)
+            rt = realtime.get(code, {})
+            price_change = rt.get('change_pct', ohlc[-1].get('change_pct', 0))
             price_str = f"+{price_change:.2f}%" if price_change >= 0 else f"{price_change:.2f}%"
 
             signals.append(Signal(
@@ -64,6 +81,50 @@ class VolumeAlertStrategy(Strategy):
                 data={'stock_code': code, 'volume_change_pct': round(change_pct, 4)},
             ))
 
+        if missing_codes and not retry_codes:
+            self._schedule_retry(missing_codes)
+        elif missing_codes and retry_codes:
+            names = [s.get('stock_name', s.get('stock_code'))
+                     for s in trend.get('stocks', [])
+                     if s.get('stock_code') in missing_codes]
+            self._push_error(f'重试仍缺失今日数据: {", ".join(names or missing_codes)}')
+
         if signals:
             logger.info(f'[成交量异动] 扫描 {len(a_codes)} 只, 产出 {len(signals)} 个信号')
         return signals
+
+    def _schedule_retry(self, codes: list):
+        from app.scheduler.engine import scheduler_engine
+        from app.scheduler.event_bus import event_bus
+        from apscheduler.triggers.date import DateTrigger
+
+        run_time = datetime.now() + timedelta(minutes=RETRY_DELAY_MINUTES)
+
+        def _retry_job():
+            try:
+                with scheduler_engine.app.app_context():
+                    signals = self.scan(retry_codes=codes)
+                    for sig in signals:
+                        event_bus.publish(sig)
+                    if signals:
+                        logger.info(f'[成交量异动] 重试产出 {len(signals)} 个信号')
+            except Exception as e:
+                logger.error(f'[成交量异动] 重试异常: {e}', exc_info=True)
+                with scheduler_engine.app.app_context():
+                    self._push_error(f'重试异常: {e}')
+
+        scheduler_engine.scheduler.add_job(
+            _retry_job,
+            trigger=DateTrigger(run_date=run_time),
+            id='volume_alert_retry',
+            replace_existing=True,
+        )
+        logger.info(f'[成交量异动] {len(codes)} 只数据缺失，{RETRY_DELAY_MINUTES}分钟后重试')
+
+    @staticmethod
+    def _push_error(msg: str):
+        try:
+            from app.services.notification import NotificationService
+            NotificationService.send_slack(f'🔴 *[volume_alert]* {msg}', 'news_daily')
+        except Exception:
+            logger.error(f'[成交量异动] 错误推送失败: {msg}')
