@@ -777,6 +777,7 @@ class NotificationService:
                 nba_text = NotificationService._format_nba_section(nba)
 
             # LoL
+            from app.config.esports_config import LOL_ALWAYS_SHOW
             lol = EsportsService.get_lol_schedule()
             if lol is not None:
                 lol_sections = []
@@ -790,7 +791,7 @@ class NotificationService:
                         has_matches = any(
                             league_data.get(k) for k in ('yesterday', 'today')
                         )
-                        if has_matches:
+                        if has_matches or league_name in LOL_ALWAYS_SHOW:
                             section = NotificationService._format_lol_section(
                                 league_name, league_data,
                             )
