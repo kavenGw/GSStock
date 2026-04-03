@@ -103,10 +103,7 @@ class PositionService:
 
         result = list(merged.values())
 
-        # 计算加权平均价格：total_amount / quantity
-        for record in result:
-            if record['quantity'] > 0:
-                record['current_price'] = round(record['total_amount'] / record['quantity'], 2)
+        # 合并后 total_amount 已累加，current_price 保持原值（同一股票现价相同）
 
         logger.info(f"[持仓.合并] 合并完成，输出{len(result)}条记录")
         return result
