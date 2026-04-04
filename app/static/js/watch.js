@@ -1,72 +1,68 @@
-const WatchCache = {
-    KEY: 'watch_cache',
-    _saveTimer: null,
+const WatchStore = {
+    PREFIX: 'watch_',
+    STALE_MS: 2 * 60 * 1000,
 
     _today() {
         return new Date().toISOString().slice(0, 10);
     },
 
-    load() {
+    _key(type, market) {
+        return market ? `${this.PREFIX}${type}_${market}` : `${this.PREFIX}${type}`;
+    },
+
+    init() {
         try {
-            const raw = sessionStorage.getItem(this.KEY);
-            if (!raw) return null;
-            const cache = JSON.parse(raw);
-            if (cache.date !== this._today()) {
-                sessionStorage.removeItem(this.KEY);
-                return null;
+            const meta = this.get('meta');
+            if (!meta || meta.date !== this._today()) {
+                this.clearAll();
             }
-            return cache;
         } catch {
-            sessionStorage.removeItem(this.KEY);
+            this.clearAll();
+        }
+    },
+
+    get(type, market) {
+        try {
+            const raw = localStorage.getItem(this._key(type, market));
+            if (!raw) return null;
+            return JSON.parse(raw);
+        } catch {
             return null;
         }
     },
 
-    save(data) {
-        clearTimeout(this._saveTimer);
-        this._saveTimer = setTimeout(() => {
-            try {
-                data.date = this._today();
-                sessionStorage.setItem(this.KEY, JSON.stringify(data));
-            } catch (e) {
-                console.warn('[WatchCache] save failed:', e);
+    set(type, market, data) {
+        try {
+            const wrapped = { data, timestamp: Date.now() };
+            localStorage.setItem(this._key(type, market), JSON.stringify(wrapped));
+            const meta = this.get('meta') || {};
+            meta.date = this._today();
+            localStorage.setItem(this._key('meta'), JSON.stringify(meta));
+        } catch (e) {
+            console.warn('[WatchStore] save failed:', e);
+        }
+    },
+
+    isStale(type, market) {
+        try {
+            const raw = localStorage.getItem(this._key(type, market));
+            if (!raw) return true;
+            const parsed = JSON.parse(raw);
+            return !parsed.timestamp || (Date.now() - parsed.timestamp) > this.STALE_MS;
+        } catch {
+            return true;
+        }
+    },
+
+    clearAll() {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(this.PREFIX)) {
+                keysToRemove.push(key);
             }
-        }, 500);
-    },
-
-    clear() {
-        sessionStorage.removeItem(this.KEY);
-    },
-
-    snapshot(watch) {
-        return {
-            date: this._today(),
-            prices: watch.prices,
-            benchmarks: watch.benchmarks,
-            intradayData: watch.chartData,
-            chartMeta: watch.chartMeta,
-            analyses: watch.analyses,
-            marketStatus: watch.marketStatus,
-            tdSequential: watch.tdSequential,
-            tdSequentialIntraday: watch.tdSequentialIntraday,
-            weeklyChartData: watch._weeklyChartData,
-            marketViewMode: watch._marketViewMode,
-            lastRefreshTime: watch.lastRefreshTime,
-        };
-    },
-
-    restore(watch, cache) {
-        watch.prices = cache.prices || [];
-        watch.benchmarks = cache.benchmarks || [];
-        watch.chartData = cache.intradayData || {};
-        watch.chartMeta = cache.chartMeta || {};
-        watch.analyses = cache.analyses || {};
-        watch.marketStatus = cache.marketStatus || {};
-        watch.tdSequential = cache.tdSequential || {};
-        watch.tdSequentialIntraday = cache.tdSequentialIntraday || {};
-        watch._weeklyChartData = cache.weeklyChartData || {};
-        watch._marketViewMode = cache.marketViewMode || {};
-        watch.lastRefreshTime = cache.lastRefreshTime || null;
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
     },
 };
 
@@ -94,9 +90,9 @@ const Watch = {
     marketStatusTimer: null,
 
     async init() {
-        const cache = WatchCache.load();
-        if (cache && cache.prices && cache.prices.length > 0) {
-            WatchCache.restore(this, cache);
+        WatchStore.init();
+        this._restoreFromStore();
+        if (this.prices.length > 0) {
             try {
                 const listResp = await fetch('/watch/list');
                 const listData = await listResp.json();
@@ -114,11 +110,75 @@ const Watch = {
         }
 
         await this.loadList();
-
         this.loadAnalysis();
         this.startRefreshLoop();
         this.startAnalysisLoop();
         this.startMarketStatusLoop();
+    },
+
+    _restoreFromStore() {
+        const markets = ['A', 'US', 'HK', 'KR', 'TW', 'JP'];
+        let allPrices = [];
+        for (const m of markets) {
+            const priceData = WatchStore.get('prices', m);
+            if (priceData && priceData.data) {
+                allPrices = allPrices.concat(priceData.data);
+            }
+            const chart7d = WatchStore.get('chart7d', m);
+            if (chart7d && chart7d.data) {
+                Object.assign(this._weeklyChartData, chart7d.data);
+            }
+            const analysis = WatchStore.get('analysis', m);
+            if (analysis && analysis.data) {
+                Object.assign(this.analyses, analysis.data);
+            }
+        }
+        if (allPrices.length > 0) this.prices = allPrices;
+
+        const benchData = WatchStore.get('benchmarks');
+        if (benchData && benchData.data) this.benchmarks = benchData.data;
+
+        const marketStatus = WatchStore.get('marketStatus');
+        if (marketStatus && marketStatus.data) this.marketStatus = marketStatus.data;
+
+        const viewMode = WatchStore.get('viewMode');
+        if (viewMode && viewMode.data) this._marketViewMode = viewMode.data;
+
+        const refreshTime = WatchStore.get('refreshTime');
+        if (refreshTime && refreshTime.data) this.lastRefreshTime = refreshTime.data;
+    },
+
+    _saveToStore() {
+        const { groups } = this._getMarketGroups();
+        for (const [market, stocks] of Object.entries(groups)) {
+            const codes = stocks.map(s => s.stock_code);
+            const marketPrices = this.prices.filter(p => codes.includes(p.code));
+            WatchStore.set('prices', market, marketPrices);
+
+            const marketChart7d = {};
+            for (const code of codes) {
+                if (this._weeklyChartData[code]) {
+                    marketChart7d[code] = this._weeklyChartData[code];
+                }
+            }
+            if (Object.keys(marketChart7d).length > 0) {
+                WatchStore.set('chart7d', market, marketChart7d);
+            }
+
+            const marketAnalysis = {};
+            for (const code of codes) {
+                if (this.analyses[code]) {
+                    marketAnalysis[code] = this.analyses[code];
+                }
+            }
+            if (Object.keys(marketAnalysis).length > 0) {
+                WatchStore.set('analysis', market, marketAnalysis);
+            }
+        }
+        WatchStore.set('benchmarks', null, this.benchmarks);
+        WatchStore.set('marketStatus', null, this.marketStatus);
+        WatchStore.set('viewMode', null, this._marketViewMode);
+        WatchStore.set('refreshTime', null, this.lastRefreshTime);
     },
 
     async loadList() {
@@ -150,7 +210,7 @@ const Watch = {
             this.recordRefreshTime();
             await this.loadAllCharts();
 
-            WatchCache.save(WatchCache.snapshot(this));
+            this._saveToStore();
         } catch (e) {
             console.error('[Watch] loadList failed:', e);
             this.updateStatus('加载失败');
@@ -356,7 +416,7 @@ const Watch = {
             if (result.td_sequential_intraday) {
                 this.tdSequentialIntraday[code] = result.td_sequential_intraday;
             }
-            WatchCache.save(WatchCache.snapshot(this));
+            this._saveToStore();
         } catch (e) {
             console.error(`[Watch] chart load failed ${code}:`, e);
         }
@@ -682,34 +742,73 @@ const Watch = {
         } else {
             this.renderMarketChart(market);
         }
-        WatchCache.save(WatchCache.snapshot(this));
+        this._saveToStore();
     },
 
     async _loadAndRenderWeeklyChart(market) {
         const { groups } = this._getMarketGroups();
         const stocks = groups[market] || [];
+        const cached = stocks.filter(s => this._weeklyChartData[s.stock_code] && this._weeklyChartData[s.stock_code].length > 0);
         const missing = stocks.filter(s => !(this._weeklyChartData[s.stock_code] && this._weeklyChartData[s.stock_code].length > 0));
 
-        if (missing.length > 0) {
-            const container = document.getElementById(`chart-market-${market}`);
-            if (container) container.innerHTML = '<div class="text-muted text-center small py-4">加载7日数据...</div>';
-
-            await Promise.all(missing.map(async (stock) => {
-                try {
-                    const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(stock.stock_code)}&period=7d`);
-                    const result = await resp.json();
-                    if (result.success && result.data) {
-                        this._weeklyChartData[stock.stock_code] = result.data;
-                    }
-                } catch (e) {
-                    console.error(`[Watch] weekly data load failed ${stock.stock_code}:`, e);
-                }
-            }));
-
-            WatchCache.save(WatchCache.snapshot(this));
+        if (cached.length > 0) {
+            this.renderMarketChart(market);
         }
 
-        this.renderMarketChart(market);
+        if (missing.length === 0) return;
+
+        const container = document.getElementById(`chart-market-${market}`);
+        const total = missing.length;
+        let loaded = 0;
+        const SINGLE_TIMEOUT = 5000;
+        const TOTAL_TIMEOUT = 15000;
+
+        if (cached.length === 0 && container) {
+            container.innerHTML = `<div class="text-muted text-center small py-4">加载7日数据 (0/${total})...</div>`;
+        }
+
+        const controller = new AbortController();
+        const totalTimer = setTimeout(() => controller.abort(), TOTAL_TIMEOUT);
+
+        const fetchOne = async (stock) => {
+            try {
+                const singleController = new AbortController();
+                const singleTimer = setTimeout(() => singleController.abort(), SINGLE_TIMEOUT);
+
+                controller.signal.addEventListener('abort', () => singleController.abort());
+
+                const resp = await fetch(
+                    `/watch/chart-data?code=${encodeURIComponent(stock.stock_code)}&period=7d`,
+                    { signal: singleController.signal }
+                );
+                clearTimeout(singleTimer);
+                const result = await resp.json();
+
+                if (result.success && result.data && result.data.length > 0) {
+                    this._weeklyChartData[stock.stock_code] = result.data;
+                }
+                if (result.stale) {
+                    console.warn(`[Watch] ${stock.stock_code} 7d data is stale`);
+                }
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    console.warn(`[Watch] ${stock.stock_code} 7d fetch timeout`);
+                } else {
+                    console.error(`[Watch] ${stock.stock_code} 7d fetch error:`, e);
+                }
+            }
+            loaded++;
+            this.renderMarketChart(market);
+            if (container) {
+                const progress = container.querySelector('.watch-load-progress');
+                if (progress) progress.textContent = `${loaded}/${total}`;
+            }
+        };
+
+        await Promise.allSettled(missing.map(s => fetchOne(s)));
+        clearTimeout(totalTimer);
+
+        this._saveToStore();
     },
 
     // --- 数据刷新 ---
@@ -735,7 +834,7 @@ const Watch = {
                 this.startAnalysisLoop();
             }
 
-            WatchCache.save(WatchCache.snapshot(this));
+            this._saveToStore();
         } catch (e) {
             console.error('[Watch] refresh failed:', e);
         }
@@ -852,7 +951,7 @@ const Watch = {
             if (data.success) {
                 this.analyses = data.data || {};
                 this.updateAllAnalysisPanels();
-                WatchCache.save(WatchCache.snapshot(this));
+                this._saveToStore();
             }
         } catch (e) {
             console.error('[Watch] loadAnalysis failed:', e);

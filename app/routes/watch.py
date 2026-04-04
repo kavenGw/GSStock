@@ -39,36 +39,20 @@ def remove_stock(stock_code):
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
     from app.config.stock_codes import BENCHMARK_CODES
-    from app.services.trading_calendar import TradingCalendarService
-    from app.utils.market_identifier import MarketIdentifier
 
     codes = WatchService.get_watch_codes()
 
-    def _fetch_prices_with_cache(target_codes: list) -> dict:
+    def _read_cached_prices(target_codes: list) -> dict:
         if not target_codes:
             return {}
-
         cached, missing = unified_stock_data_service.get_prices_cached_only(target_codes)
-        stale = [code for code, data in cached.items()
-                 if isinstance(data, dict) and data.get('_is_degraded')]
-        refresh_candidates = set(missing) | set(stale)
-
-        # If market is open and cache is missing or degraded, force a refresh once.
-        if refresh_candidates:
-            refresh_codes = []
-            for code in refresh_candidates:
-                market = MarketIdentifier.identify(code) or 'A'
-                if TradingCalendarService.is_market_open(market):
-                    refresh_codes.append(code)
-            if refresh_codes:
-                fetched = unified_stock_data_service.get_realtime_prices(refresh_codes, force_refresh=True)
-                cached.update(fetched)
         return cached
 
     price_list = []
     if codes:
-        raw_prices = _fetch_prices_with_cache(codes)
-        for code, data in raw_prices.items():
+        raw_prices = _read_cached_prices(codes)
+        for code in codes:
+            data = raw_prices.get(code, {})
             price_list.append({
                 'code': code,
                 'name': data.get('name', code),
@@ -77,10 +61,11 @@ def prices():
                 'change_pct': data.get('change_percent'),
                 'volume': data.get('volume'),
                 'market': data.get('market', ''),
+                'stale': code not in raw_prices or data.get('_is_degraded', False),
             })
 
     bench_codes = [b['code'] for b in BENCHMARK_CODES]
-    bench_raw = _fetch_prices_with_cache(bench_codes)
+    bench_raw = _read_cached_prices(bench_codes)
     benchmark_list = []
     for b in BENCHMARK_CODES:
         data = bench_raw.get(b['code'], {})
@@ -96,16 +81,18 @@ def prices():
     return jsonify({'success': True, 'prices': price_list, 'benchmarks': benchmark_list})
 
 
-@watch_bp.route('/analyze', methods=['POST'])
+@watch_bp.route('/analyze')
 def analyze():
-    from app.services.watch_analysis_service import WatchAnalysisService
-
-    data = request.get_json() or {}
-    period = data.get('period', '30d')
-    force = data.get('force', False)
-
-    all_analyses = WatchAnalysisService.analyze_stocks(period, force)
-    return jsonify({'success': True, 'data': all_analyses})
+    """只读今日分析结果（数据由 watch_realtime 策略预填充）"""
+    period = request.args.get('period')
+    analyses = WatchService.get_all_today_analyses()
+    if period:
+        filtered = {}
+        for code, periods in analyses.items():
+            if period in periods:
+                filtered[code] = {period: periods[period]}
+        analyses = filtered
+    return jsonify({'success': True, 'data': analyses})
 
 
 @watch_bp.route('/analysis')
@@ -276,6 +263,8 @@ def chart_data():
         trend = unified_stock_data_service.get_trend_data([code], days=fetch_days)
         stocks = trend.get('stocks', [])
         ohlc_data = stocks[0]['data'] if stocks else []
+        if not ohlc_data:
+            result['stale'] = True
 
         bollinger = []
         if len(ohlc_data) >= 20:

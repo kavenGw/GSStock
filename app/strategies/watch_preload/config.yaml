@@ -1,0 +1,2 @@
+# watch_preload 策略配置
+trend_interval: 15  # 每N次tick预取走势数据

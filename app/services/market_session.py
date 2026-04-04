@@ -1,7 +1,7 @@
 """交易时段与智能TTL服务
 
 根据不同市场的交易状态，提供智能的缓存策略：
-- 交易时段内: 短TTL (30分钟)
+- 交易时段内: 短TTL (1分钟)
 - 收盘后: 长TTL (次日开盘前有效)
 - 非交易日: 无限TTL (下个交易日开盘前有效)
 """
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 # TTL 常量
-TTL_TRADING = timedelta(minutes=30)    # 交易时段内 TTL
+TTL_TRADING = timedelta(minutes=1)     # 交易时段内 TTL（配合 watch_preload 每分钟预取）
 TTL_INFINITE = timedelta(days=365)     # 表示"无限"的大TTL
 
 
