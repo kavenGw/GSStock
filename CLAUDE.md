@@ -193,7 +193,7 @@ TDSequentialService.calculate()
 **盯盘助手前端架构**：
 - 图表：ECharts 分时线图，全宽，支撑/阻力标线，九转信号浮动标注
 - 下方双栏：左=AI分析（realtime/7d/30d标签页），右=季度财报表格
-- 缓存：sessionStorage（WatchCache），防抖500ms持久化
+- 缓存：localStorage（WatchStore），按市场分key持久化，每日自动清理
 - 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）
 
 | 环境变量 | 说明 | 默认值 |
