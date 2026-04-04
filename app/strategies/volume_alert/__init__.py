@@ -24,9 +24,14 @@ class VolumeAlertStrategy(Strategy):
             return []
 
     def _do_scan(self, retry_codes: list = None) -> list[Signal]:
+        from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
         from app.services.unified_stock_data import UnifiedStockDataService
         from app.utils.market_identifier import MarketIdentifier
+
+        if not TradingCalendarService.is_trading_day('A', date.today()):
+            logger.info(f'[成交量异动] {date.today()} 非A股交易日，跳过扫描')
+            return []
 
         if retry_codes:
             a_codes = retry_codes
