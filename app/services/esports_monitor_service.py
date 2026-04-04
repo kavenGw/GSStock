@@ -12,7 +12,7 @@ from threading import Lock
 
 from app.config.esports_config import (
     ESPORTS_ENABLED, ESPORTS_NBA_MONITOR_INTERVAL, ESPORTS_LOL_MONITOR_INTERVAL,
-    ESPORTS_PRE_MATCH_MINUTES, NBA_TEAM_MONITOR,
+    ESPORTS_PRE_MATCH_MINUTES, NBA_TEAM_MONITOR, NBA_TEAM_NAMES,
 )
 
 logger = logging.getLogger(__name__)
@@ -117,7 +117,7 @@ class EsportsMonitorService:
                 else:
                     nba_games = EsportsService.get_nba_schedule_by_date(target_date) or []
 
-                monitored = {k for k, v in NBA_TEAM_MONITOR.items() if v}
+                monitored = {NBA_TEAM_NAMES.get(k, k) for k, v in NBA_TEAM_MONITOR.items() if v}
                 for game in nba_games:
                     if game.get('match_id') and game['status'] != 'completed':
                         if monitored and not ({game['home'], game['away']} & monitored):
@@ -396,6 +396,17 @@ class EsportsMonitorService:
 
         # 比赛结束：推送最终比分
         if status == 'completed':
+            # API状态转completed时gameWins可能尚未更新，与缓存比分对比后重试
+            last = _get_last_score('lol', match_id)
+            if last and score1 == last['score1'] and score2 == last['score2']:
+                import time
+                time.sleep(5)
+                fresh_scores = EsportsService.get_lol_live_scores()
+                if fresh_scores and match_id in fresh_scores:
+                    fresh = fresh_scores[match_id]
+                    score1 = fresh.get('score1') or score1
+                    score2 = fresh.get('score2') or score2
+                    logger.info(f'[赛事监控] 重试获取最终比分: {score1}-{score2}')
             msg = f"🏆 [{league}] {match['team1']} {score1}-{score2} {match['team2']} | 比赛结束"
             NotificationService.send_slack(msg, channel)
             _clear_score('lol', match_id)
