@@ -57,7 +57,7 @@ class TradingCalendarService:
                 logger.warning(f"[交易日历] 未知市场 {market}，使用纽约交易所日历")
                 calendar_name = 'XNYS'
             try:
-                cls._calendars[market] = xcals.get_calendar(calendar_name)
+                cls._calendars[market] = xcals.get_calendar(calendar_name, start='2020-01-01')
             except Exception as e:
                 logger.error(f"[交易日历] 获取日历 {calendar_name} 失败: {e}", exc_info=True)
                 cls._calendars[market] = xcals.get_calendar('XNYS')
