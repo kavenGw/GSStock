@@ -22,3 +22,4 @@ nul
 data/memory_cache
 data
 .omc
+.claude/settings.local.json
