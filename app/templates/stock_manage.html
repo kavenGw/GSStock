@@ -367,117 +367,99 @@ createForm.addEventListener('submit', async (e) => {
     StockMeta.invalidate(); location.reload();
 });
 
+// 创建编辑操作按钮
+function createEditActions(onSave, onCancel) {
+    const div = document.createElement('div');
+    div.className = 'edit-actions';
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-save';
+    saveBtn.textContent = '✓ 保存';
+    saveBtn.type = 'button';
+    saveBtn.addEventListener('click', (e) => { e.stopPropagation(); onSave(); });
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-cancel';
+    cancelBtn.textContent = '✕ 取消';
+    cancelBtn.type = 'button';
+    cancelBtn.addEventListener('click', (e) => { e.stopPropagation(); onCancel(); });
+    div.appendChild(cancelBtn);
+    div.appendChild(saveBtn);
+    return div;
+}
+
+// 恢复标签 pill 显示
+function restoreTagsPill(cell, tagsStr) {
+    cell.innerHTML = '';
+    if (tagsStr) {
+        tagsStr.split(',').forEach(t => {
+            const tag = t.trim();
+            if (!tag) return;
+            const span = document.createElement('span');
+            span.className = 'tag-pill';
+            span.textContent = tag;
+            cell.appendChild(span);
+        });
+    }
+}
+
 // 双击编辑
 stockList.addEventListener('dblclick', (e) => {
     const cell = e.target.closest('.editable');
-    if (!cell || cell.querySelector('input')) return;
+    if (!cell || cell.classList.contains('editing')) return;
 
     const row = cell.closest('tr');
     const code = row.dataset.code;
     const field = cell.dataset.field;
+
+    if (field === 'tags') {
+        startTagsEdit(cell, code);
+    } else if (field === 'advice') {
+        startAdviceEdit(cell, code);
+    } else {
+        startSimpleEdit(cell, code, field);
+    }
+});
+
+// 普通字段编辑（代码/名称/别名）
+function startSimpleEdit(cell, code, field) {
     const oldValue = cell.textContent.trim();
+    cell.classList.add('editing');
 
     const input = document.createElement('input');
     input.type = 'text';
     input.value = oldValue;
-    input.maxLength = field === 'tags' ? 500 : (field === 'advice' ? 500 : (field === 'alias' ? 200 : (field === 'code' ? 20 : 50)));
-    if (field === 'alias') {
-        input.placeholder = '多个别名用逗号分隔';
-    }
-    if (field === 'advice') {
-        input.placeholder = '输入投资建议';
-    }
+    input.maxLength = field === 'alias' ? 200 : (field === 'code' ? 20 : 50);
+    if (field === 'alias') input.placeholder = '多个别名用逗号分隔';
 
-    cell.textContent = '';
-    cell.appendChild(input);
-    input.focus();
-    input.select();
+    const cancel = () => {
+        cell.classList.remove('editing');
+        cell.textContent = oldValue;
+    };
 
-    const saveEdit = async () => {
+    const save = async () => {
         const newValue = input.value.trim();
+        if (field !== 'alias' && !newValue) { cancel(); return; }
+        if (newValue === oldValue) { cancel(); return; }
 
-        // 别名和投资建议字段允许清空
-        if (field !== 'alias' && field !== 'advice' && field !== 'tags' && !newValue) {
-            cell.textContent = oldValue;
-            return;
-        }
-        if (newValue === oldValue) {
-            cell.textContent = oldValue;
-            return;
-        }
+        cell.classList.remove('editing');
 
-        if (field === 'tags') {
-            const res = await fetch(`/stocks/${code}/tags`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({tags: newValue || null})
-            });
-            const data = await res.json();
-            if (data.error) {
-                alert(data.error);
-                cell.textContent = oldValue;
-                return;
-            }
-            cell.textContent = data.tags || '';
-            return;
-        }
-
-        if (field === 'advice') {
-            const res = await fetch(`/stocks/${code}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({investment_advice: newValue || null})
-            });
-            const data = await res.json();
-
-            if (data.error) {
-                alert(data.error);
-                cell.textContent = oldValue;
-                return;
-            }
-            cell.textContent = data.investment_advice || '';
-        } else if (field === 'alias') {
-            // 解析逗号分隔的别名
+        if (field === 'alias') {
             const aliases = newValue ? newValue.split(',').map(a => a.trim()).filter(a => a) : [];
-
             const res = await fetch(`/stocks/${code}/aliases`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({aliases: aliases})
+                body: JSON.stringify({aliases})
             });
             const data = await res.json();
-
-            if (data.error) {
-                alert(data.error);
-                cell.textContent = oldValue;
-                return;
-            }
+            if (data.error) { alert(data.error); cell.textContent = oldValue; return; }
             cell.textContent = data.aliases.join(', ');
         } else if (field === 'code') {
-            // 支持多市场股票代码验证
-            const patterns = [
-                /^\d{6}$/,           // A股: 6位数字
-                /^[A-Z]{1,5}$/i,     // 美股: 1-5位字母
-                /^\d{5}\.HK$/i,      // 港股: 5位数字+.HK
-                /^\d{4}\.TW$/i,      // 台股: 4位数字+.TW
-                /^\d{6}\.KS$/i,      // 韩股: 6位数字+.KS
-                /^[0-9A-Z]{3,4}\.T$/i,  // 日股: 3-4位字母数字+.T
-            ];
-            if (!patterns.some(pattern => pattern.test(newValue))) {
-                alert('股票代码格式不正确');
-                cell.textContent = oldValue;
-                return;
-            }
-            // 更新股票代码需要删除旧的再创建新的
-            const nameCell = row.querySelector('.stock-name');
-            const stockName = nameCell.textContent.trim();
+            const patterns = [/^\d{6}$/, /^[A-Z]{1,5}$/i, /^\d{5}\.HK$/i, /^\d{4}\.TW$/i, /^\d{6}\.KS$/i, /^[0-9A-Z]{3,4}\.T$/i];
+            if (!patterns.some(p => p.test(newValue))) { alert('股票代码格式不正确'); cell.textContent = oldValue; return; }
 
+            const row = cell.closest('tr');
+            const stockName = row.querySelector('.stock-name').textContent.trim();
             const deleteRes = await fetch(`/stocks/${code}`, {method: 'DELETE'});
-            if (!deleteRes.ok) {
-                alert('更新失败');
-                cell.textContent = oldValue;
-                return;
-            }
+            if (!deleteRes.ok) { alert('更新失败'); cell.textContent = oldValue; return; }
 
             const createRes = await fetch('/stocks', {
                 method: 'POST',
@@ -485,22 +467,12 @@ stockList.addEventListener('dblclick', (e) => {
                 body: JSON.stringify({stock_code: newValue, stock_name: stockName})
             });
             const createData = await createRes.json();
-
             if (createData.error) {
-                // 恢复原股票
-                await fetch('/stocks', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({stock_code: code, stock_name: stockName})
-                });
-                alert(createData.error);
-                cell.textContent = oldValue;
-                return;
+                await fetch('/stocks', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({stock_code: code, stock_name: stockName}) });
+                alert(createData.error); cell.textContent = oldValue; return;
             }
-
             row.dataset.code = newValue;
             cell.textContent = newValue;
-            // 更新分类下拉框的 data-code
             const select = row.querySelector('.category-select');
             if (select) select.dataset.code = newValue;
         } else if (field === 'name') {
@@ -510,27 +482,147 @@ stockList.addEventListener('dblclick', (e) => {
                 body: JSON.stringify({stock_name: newValue})
             });
             const data = await res.json();
-
-            if (data.error) {
-                alert(data.error);
-                cell.textContent = oldValue;
-                return;
-            }
+            if (data.error) { alert(data.error); cell.textContent = oldValue; return; }
             cell.textContent = data.stock_name;
         }
     };
 
-    input.addEventListener('blur', saveEdit);
+    cell.textContent = '';
+    cell.appendChild(input);
+    cell.appendChild(createEditActions(save, cancel));
+    input.focus();
+    input.select();
+
     input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            input.blur();
-        }
-        if (e.key === 'Escape') {
-            cell.textContent = oldValue;
-        }
+        if (e.key === 'Enter') { e.preventDefault(); save(); }
+        if (e.key === 'Escape') { cancel(); }
     });
-});
+}
+
+// 投资建议编辑（textarea）
+function startAdviceEdit(cell, code) {
+    const oldValue = cell.textContent.trim();
+    cell.classList.add('editing');
+
+    const textarea = document.createElement('textarea');
+    textarea.value = oldValue;
+    textarea.maxLength = 500;
+    textarea.rows = 4;
+    textarea.placeholder = '输入投资建议';
+
+    const cancel = () => {
+        cell.classList.remove('editing');
+        cell.textContent = oldValue;
+    };
+
+    const save = async () => {
+        const newValue = textarea.value.trim();
+        if (newValue === oldValue) { cancel(); return; }
+
+        cell.classList.remove('editing');
+        const res = await fetch(`/stocks/${code}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({investment_advice: newValue || null})
+        });
+        const data = await res.json();
+        if (data.error) { alert(data.error); cell.textContent = oldValue; return; }
+        cell.textContent = data.investment_advice || '';
+    };
+
+    cell.textContent = '';
+    cell.appendChild(textarea);
+    cell.appendChild(createEditActions(save, cancel));
+    textarea.focus();
+
+    textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); save(); }
+        if (e.key === 'Escape') { cancel(); }
+    });
+}
+
+// 标签 pill 编辑
+function startTagsEdit(cell, code) {
+    const oldPills = cell.querySelectorAll('.tag-pill');
+    const oldTags = Array.from(oldPills).map(p => p.textContent.trim());
+    const oldTagsStr = oldTags.join(',');
+    let currentTags = [...oldTags];
+
+    cell.classList.add('editing');
+    cell.innerHTML = '';
+
+    function render() {
+        const editor = cell.querySelector('.tag-editor');
+        if (editor) editor.remove();
+
+        const container = document.createElement('div');
+        container.className = 'tag-editor';
+
+        currentTags.forEach((tag, i) => {
+            const pill = document.createElement('span');
+            pill.className = 'tag-pill';
+            pill.innerHTML = `${tag}<span class="tag-remove" data-index="${i}">&times;</span>`;
+            container.appendChild(pill);
+        });
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = '输入标签按回车…';
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = input.value.trim();
+                if (val && !currentTags.includes(val)) {
+                    currentTags.push(val);
+                    input.value = '';
+                    render();
+                }
+            }
+            if (e.key === 'Escape') { cancel(); }
+        });
+        container.appendChild(input);
+
+        container.addEventListener('click', (e) => {
+            const rm = e.target.closest('.tag-remove');
+            if (rm) {
+                currentTags.splice(parseInt(rm.dataset.index), 1);
+                render();
+            }
+        });
+
+        const actions = cell.querySelector('.edit-actions');
+        if (actions) {
+            cell.insertBefore(container, actions);
+        } else {
+            cell.appendChild(container);
+            cell.appendChild(createEditActions(save, cancel));
+        }
+
+        input.focus();
+    }
+
+    const cancel = () => {
+        cell.classList.remove('editing');
+        restoreTagsPill(cell, oldTagsStr);
+    };
+
+    const save = async () => {
+        const newTagsStr = currentTags.join(',');
+        if (newTagsStr === oldTagsStr) { cancel(); return; }
+
+        cell.classList.remove('editing');
+        const res = await fetch(`/stocks/${code}/tags`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({tags: newTagsStr || null})
+        });
+        const data = await res.json();
+        if (data.error) { alert(data.error); restoreTagsPill(cell, oldTagsStr); return; }
+        restoreTagsPill(cell, data.tags || '');
+    };
+
+    render();
+}
 
 // 删除按钮
 stockList.addEventListener('click', async (e) => {
