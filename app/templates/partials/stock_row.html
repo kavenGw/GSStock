@@ -2,7 +2,7 @@
     <td class="stock-code clickable-stock" onclick="StockDetailDrawer.open('{{ stock.stock_code }}', '{{ stock.stock_name }}')">{{ stock.stock_code }}</td>
     <td class="editable stock-name" data-field="name">{{ stock.stock_name }}</td>
     <td class="editable alias-cell" data-field="alias">{{ alias_map.get(stock.stock_code, [])|join(', ') }}</td>
-    <td class="editable tags-cell" data-field="tags">{{ stock.tags or '' }}</td>
+    <td class="editable tags-cell" data-field="tags">{% if stock.tags %}{% for tag in stock.tags.split(',') %}<span class="tag-pill">{{ tag.strip() }}</span>{% endfor %}{% endif %}</td>
     <td class="editable advice-cell" data-field="advice">{{ stock.investment_advice or '' }}</td>
     <td>
         <select class="form-select form-select-sm category-select" data-code="{{ stock.stock_code }}">

@@ -12,15 +12,99 @@ main.container {
     cursor: pointer;
     padding: 2px 4px;
     border-radius: 3px;
+    position: relative;
 }
 .editable:hover {
-    background-color: #f0f0f0;
+    background-color: rgba(13, 110, 253, 0.08);
 }
-.editable input {
+.editable:hover::after {
+    content: '✏';
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    font-size: 10px;
+    opacity: 0.4;
+}
+.editable.editing {
+    background-color: rgba(13, 110, 253, 0.05);
+    border: 1px solid rgba(13, 110, 253, 0.3);
+    border-radius: 4px;
+    padding: 6px;
+}
+.editable.editing::after {
+    display: none;
+}
+.editable input, .editable textarea {
     border: 1px solid #0d6efd;
-    padding: 2px 4px;
-    border-radius: 3px;
+    padding: 4px 8px;
+    border-radius: 4px;
     width: 100%;
+    font-size: 13px;
+}
+.editable textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 6px;
+}
+.edit-actions .btn-save {
+    background: #198754;
+    color: #fff;
+    border: none;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.edit-actions .btn-cancel {
+    background: transparent;
+    color: #999;
+    border: 1px solid #666;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    margin: 1px 2px;
+    white-space: nowrap;
+}
+.tag-pill .tag-remove {
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 14px;
+    line-height: 1;
+}
+.tag-pill .tag-remove:hover {
+    opacity: 1;
+}
+.tag-editor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+.tag-editor input {
+    border: none;
+    background: transparent;
+    outline: none;
+    min-width: 100px;
+    flex: 1;
+    font-size: 12px;
+    padding: 2px 4px;
 }
 .category-select {
     min-width: 120px;
@@ -30,13 +114,12 @@ main.container {
     font-style: italic;
 }
 #stockList table { table-layout: fixed; }
-#stockList th.col-code { width: 6%; }
-#stockList th.col-name { width: 8%; }
-#stockList th.col-alias { width: 7%; }
-#stockList th.col-tags { width: 15%; }
-#stockList .tags-cell { word-break: break-all; font-size: 0.85em; color: #666; }
-#stockList th.col-category { width: 15%; }
-#stockList th.col-action { width: 80px; }
+#stockList th.col-code { width: 7%; }
+#stockList th.col-name { width: 9%; }
+#stockList th.col-alias { width: 8%; }
+#stockList th.col-tags { width: 10%; }
+#stockList th.col-category { width: 12%; }
+#stockList th.col-action { width: 70px; }
 #stockList .advice-cell { word-break: break-all; }
 .clickable-stock {
     cursor: pointer;
@@ -134,6 +217,7 @@ main.container {
                             <th class="col-code">股票代码</th>
                             <th class="col-name">股票名称</th>
                             <th class="col-alias">别名</th>
+                            <th class="col-tags">标签</th>
                             <th>投资建议</th>
                             <th class="col-category">分类</th>
                             <th class="col-action">操作</th>
