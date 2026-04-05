@@ -676,33 +676,47 @@ class NotificationService:
                 latest_version = releases[0]['version']
                 pushed_versions.append((cfg['key'], latest_version))
 
-                # GLM 摘要
-                try:
-                    from app.llm.router import llm_router
-                    from app.llm.prompts.github_release_update import (
-                        GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT, build_github_release_update_prompt,
-                    )
+                release_url = releases[0].get('url', '')
+                has_body = any(r.get('body', '').strip() for r in releases)
 
-                    provider = llm_router.route('github_release_update')
-                    if provider:
-                        prompt = build_github_release_update_prompt(cfg['name'], releases)
-                        summary = provider.chat(
-                            [
-                                {'role': 'system', 'content': GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT},
-                                {'role': 'user', 'content': prompt},
-                            ],
-                            temperature=0.3,
-                            max_tokens=500,
+                # GLM 摘要（仅在有 changelog 内容时调用）
+                if has_body:
+                    try:
+                        from app.llm.router import llm_router
+                        from app.llm.prompts.github_release_update import (
+                            GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT, build_github_release_update_prompt,
                         )
-                        texts.append(f"{cfg['emoji']} {cfg['name']} 更新\n{summary.strip()}")
-                        continue
-                except Exception as e:
-                    logger.warning(f"[通知.{cfg['name']}更新] GLM摘要失败: {e}")
 
-                # 降级：纯文本
+                        provider = llm_router.route('github_release_update')
+                        if provider:
+                            prompt = build_github_release_update_prompt(cfg['name'], releases)
+                            summary = provider.chat(
+                                [
+                                    {'role': 'system', 'content': GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT},
+                                    {'role': 'user', 'content': prompt},
+                                ],
+                                temperature=0.3,
+                                max_tokens=500,
+                            )
+                            text = f"{cfg['emoji']} {cfg['name']} 更新\n{summary.strip()}"
+                            if release_url:
+                                text += f"\n\n🔗 {release_url}"
+                            texts.append(text)
+                            continue
+                    except Exception as e:
+                        logger.warning(f"[通知.{cfg['name']}更新] GLM摘要失败: {e}")
+
+                # 降级：纯文本（含 changelog）
                 lines = [f"{cfg['emoji']} {cfg['name']} 更新"]
                 for r in releases:
                     lines.append(f"{r['version']} ({r['published_at']})")
+                    if r.get('body'):
+                        body = r['body'].strip()
+                        if len(body) > 500:
+                            body = body[:500] + '…'
+                        lines.append(body)
+                if release_url:
+                    lines.append(f"\n🔗 {release_url}")
                 texts.append('\n'.join(lines))
         except Exception as e:
             logger.warning(f'[通知.GitHub Release更新] 获取失败: {e}')
@@ -736,17 +750,23 @@ class NotificationService:
             if not repos:
                 return []
 
-            lines = [f'🔥 GitHub Trending 新上榜（{len(repos)}个）']
+            lines = [f'🔥 *GitHub Trending 新上榜（{len(repos)}个）*']
             for repo in repos:
                 lines.append('')
-                lines.append(f"⭐ {repo['full_name']} - {repo['description'][:60] if repo['description'] else '无描述'}")
-                star_info = f"⭐ {repo['stars']}" if repo['stars'] else ''
+                lines.append('─' * 30)
+                lines.append(f"📦 *{repo['full_name']}*")
+                star_parts = []
+                if repo['stars']:
+                    star_parts.append(f"⭐ {repo['stars']:,}")
                 if repo['today_stars']:
-                    star_info += f" | 今日 +{repo['today_stars']}"
-                if star_info:
-                    lines.append(star_info)
+                    star_parts.append(f"📈 今日 +{repo['today_stars']:,}")
+                if star_parts:
+                    lines.append(' │ '.join(star_parts))
+                lines.append('')
                 if repo.get('summary'):
                     lines.append(repo['summary'])
+                elif repo['description']:
+                    lines.append(repo['description'])
                 lines.append(f"🔗 {repo['url']}")
 
             return ['\n'.join(lines)]
