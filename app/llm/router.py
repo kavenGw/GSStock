@@ -23,6 +23,7 @@ TASK_LAYER_MAP = {
     'company_identify': LLMLayer.PREMIUM,
     'news_dedup': LLMLayer.FLASH,
     'wallstreet_news': LLMLayer.FLASH,
+    'nomura_research': LLMLayer.FLASH,
 }
 
 

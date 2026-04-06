@@ -325,3 +325,28 @@ class WallstreetNewsService:
             'articles': article_count,
             'matched': len(all_items),
         }
+
+    @staticmethod
+    def test_push() -> bool:
+        """测试推送到 Slack（使用模拟数据）"""
+        try:
+            from app.services.notification import NotificationService
+            from app.config.notification_config import CHANNEL_RESEARCH
+
+            test_msg = (
+                '🏦 *投行观点日报* (测试)\n\n'
+                '━━━━━━━━━━━━━━━━\n'
+                '*评级变动*\n'
+                '  · 高盛上调贵州茅台至"买入"，目标价2200元\n'
+                '  · 摩根大通下调阿里巴巴至"中性"\n\n'
+                '*重要观点*\n'
+                '  · 花旗：A股短期震荡，关注科技板块\n'
+                '━━━━━━━━━━━━━━━━\n\n'
+                '来源：华尔街见闻 | 测试推送'
+            )
+            success = NotificationService.send_slack(test_msg, CHANNEL_RESEARCH)
+            logger.info(f'[华尔街见闻] 测试推送: {"成功" if success else "失败"}')
+            return success
+        except Exception as e:
+            logger.error(f'[华尔街见闻] 测试推送异常: {e}')
+            return False

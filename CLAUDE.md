@@ -231,6 +231,14 @@ TDSequentialService.calculate()
 
 每日 20:00（工作日）自动抓取华尔街见闻快讯流和文章列表，关键词过滤投行/机构观点（高盛、摩根、花旗等），crawl4ai 爬取全文，GLM Flash 整理关键信息后 Slack 推送到 `news_research` 频道。
 
+## 野村证券研报配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `NOMURA_RESEARCH_ENABLED` | 是否启用野村研报爬虫 | `true` |
+
+每日 20:10（工作日）抓取 nomuraconnects.com 的 economics 和 central-banks 分类，关键词过滤亚洲/中国相关文章，crawl4ai 爬取全文，GLM Flash 整理关键观点后推送到 `news_research` 频道。
+
 ## 博客监控配置
 
 | 环境变量 | 说明 | 默认值 |
