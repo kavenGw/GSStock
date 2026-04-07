@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class WatchPreloadStrategy(Strategy):
     name = "watch_preload"
-    description = "盯盘数据预取（每分钟价格，每15分钟走势）"
+    description = "盯盘数据预取（每分钟价格+分时，每15分钟走势）"
     schedule = "interval_minutes:1"
     needs_llm = False
 
@@ -44,6 +44,15 @@ class WatchPreloadStrategy(Strategy):
             logger.debug(f'[盯盘预取] 价格预取完成: {len(active_codes)}只')
         except Exception as e:
             logger.error(f'[盯盘预取] 价格预取失败: {e}')
+
+        # 每次预取A股分时数据（缓存TTL=1分钟，保证客户端随时可获取完整分时）
+        a_codes = market_codes.get('A', [])
+        if a_codes:
+            try:
+                unified_stock_data_service.get_intraday_data(a_codes)
+                logger.debug(f'[盯盘预取] A股分时预取完成: {len(a_codes)}只')
+            except Exception as e:
+                logger.error(f'[盯盘预取] A股分时预取失败: {e}')
 
         # 每 trend_interval 次预取走势
         trend_interval = self._config.get('trend_interval', 15)

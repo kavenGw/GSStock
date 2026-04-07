@@ -68,6 +68,8 @@ const WatchStore = {
 
 const Watch = {
     REFRESH_INTERVAL: 60,
+    CHART_FULL_REFRESH_EVERY: 5,  // 每5次刷新重新拉取完整分时数据
+    _refreshCount: 0,
     ANALYSIS_INTERVAL: 15 * 60,
     MARKET_STATUS_INTERVAL: 5 * 60,
     CHART_COLORS: ['#1890ff', '#f5222d', '#52c41a', '#fa8c16', '#722ed1', '#13c2c2', '#eb2f96', '#faad14'],
@@ -840,7 +842,13 @@ const Watch = {
                 this.benchmarks = priceData.benchmarks || [];
                 this.updateAllPrices();
                 this.renderBenchmarks();
-                this.appendPricesToCharts();
+
+                this._refreshCount = (this._refreshCount || 0) + 1;
+                if (this._refreshCount % this.CHART_FULL_REFRESH_EVERY === 0) {
+                    await this.loadAllCharts();
+                } else {
+                    this.appendPricesToCharts();
+                }
                 this.recordRefreshTime();
             }
 
