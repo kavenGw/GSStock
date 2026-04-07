@@ -86,6 +86,8 @@ def _call_gemini(model: str, messages: list[dict], temperature: float, max_token
     if system_instruction:
         body['systemInstruction'] = {'parts': [{'text': system_instruction}]}
 
+    RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+
     # 最多尝试所有 key，每个 key 重试一次
     max_attempts = _key_pool.size * 2
     last_error = None
@@ -100,14 +102,14 @@ def _call_gemini(model: str, messages: list[dict], temperature: float, max_token
                 json=body,
                 timeout=LLM_REQUEST_TIMEOUT,
             )
-            if response.status_code == 429:
-                logger.warning(f'[GeminiAPI] key ...{key_hint} 429 限流，切换下一个 key ({attempt + 1}/{max_attempts})')
-                time.sleep(2)
+            if response.status_code in RETRYABLE_STATUS:
+                logger.warning(f'[GeminiAPI] key ...{key_hint} {response.status_code}，切换下一个 key ({attempt + 1}/{max_attempts})')
+                time.sleep(3 if response.status_code != 429 else 2)
                 continue
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
             last_error = e
-            if e.response.status_code == 429:
+            if e.response.status_code in RETRYABLE_STATUS:
                 continue
             raise
         except Exception:
@@ -128,7 +130,7 @@ def _call_gemini(model: str, messages: list[dict], temperature: float, max_token
 
         return content
 
-    logger.error(f'[GeminiAPI] 所有 key ({_key_pool.size}个) 均被限流')
+    logger.error(f'[GeminiAPI] 所有 key ({_key_pool.size}个) 重试耗尽')
     if last_error:
         raise last_error
-    raise ValueError(f'所有 Gemini API key 均被限流')
+    raise ValueError(f'所有 Gemini API key 重试耗尽')
