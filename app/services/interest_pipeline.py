@@ -280,14 +280,39 @@ class InterestPipeline:
             except Exception as e:
                 logger.error(f'AI关键词推荐失败: {e}')
 
-    # 触发公司识别的关键词
+    # 弱触发词：泛指代词，需排除行业泛述场景
     _UNNAMED_COMPANY_HINTS = ('这家公司', '该公司', '这家企业', '该企业', '此公司')
+    # 行业泛述排除：同时出现多个代词指代不同公司 = 行业分析，非个股暗示
+    _MULTI_COMPANY_PATTERN = re.compile(
+        r'(这家|另一家|一家|那家).{0,30}(这家|另一家|一家|那家)'
+    )
+    # 强触发：分析师推荐语言中模糊指代公司（直接触发，不受排除规则影响）
+    _STRONG_COMPANY_PATTERNS = [
+        re.compile(r'(?:强call|看好|推荐).{0,10}公司'),
+        re.compile(r'公司是.{0,20}(?:唯一|独家|核心|最大).{0,10}(?:供应商|客户|合作)'),
+        re.compile(r'公司.{0,15}(?:业绩|营收|净利).{0,10}(?:翻倍|暴增|高增)'),
+        re.compile(r'公司.{0,10}(?:全球|国内).{0,10}(?:龙头|第一|领先|市占率)'),
+    ]
+
+    @staticmethod
+    def _should_identify_company(content: str) -> bool:
+        """判断是否应触发公司识别"""
+        # 强触发：分析师推荐语言
+        for pat in InterestPipeline._STRONG_COMPANY_PATTERNS:
+            if pat.search(content):
+                return True
+        # 弱触发：代词指代，但排除行业泛述（同时提及多个未具名公司）
+        if any(hint in content for hint in InterestPipeline._UNNAMED_COMPANY_HINTS):
+            if InterestPipeline._MULTI_COMPANY_PATTERN.search(content):
+                return False
+            return True
+        return False
 
     @staticmethod
     def _identify_company(content: str) -> tuple[str | None, str]:
         """用 Gemini 识别推送中描述的未具名公司，返回 (结果, 错误原因)"""
-        if not any(hint in content for hint in InterestPipeline._UNNAMED_COMPANY_HINTS):
-            return None, '未包含公司暗示词'
+        if not InterestPipeline._should_identify_company(content):
+            return None, '未匹配公司识别触发条件'
         try:
             from app.llm.prompts.company_identify import (
                 COMPANY_IDENTIFY_SYSTEM_PROMPT, build_company_identify_prompt,
@@ -319,7 +344,7 @@ class InterestPipeline:
         """对所有含未具名公司暗示的新闻做公司识别，识别成功推送结果，失败推送原因"""
         from app.services.notification import NotificationService
         for n in items:
-            if not any(hint in n.content for hint in InterestPipeline._UNNAMED_COMPANY_HINTS):
+            if not InterestPipeline._should_identify_company(n.content):
                 continue
             identified, error = InterestPipeline._identify_company(n.content)
             if identified:
