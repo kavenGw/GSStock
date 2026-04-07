@@ -311,8 +311,8 @@ const Watch = {
 
         let html = `<table class="table table-sm table-hover stock-summary-table mb-0">
             <thead><tr>
-                <th>股票</th><th class="text-end">涨跌%</th><th class="text-end">压力位</th>
-                <th class="text-end">现价</th><th class="text-end">支撑位</th>
+                <th>股票</th><th class="text-end">涨跌%</th>
+                <th style="min-width:220px">支撑 / 现价 / 压力</th>
                 <th>AI摘要</th><th></th>
             </tr></thead><tbody>`;
 
@@ -359,15 +359,33 @@ const Watch = {
                 aiHtml = `${badge}<span class="small">${summaryText}</span>`;
             }
 
-            const resistanceCell = resistanceDist != null ? `${resistanceDisplay} <small class="text-muted">(${resistanceDist})</small>` : resistanceDisplay;
-            const supportCell = supportDist != null ? `${supportDisplay} <small class="text-muted">(${supportDist})</small>` : supportDisplay;
+            // Build price range bar
+            let rangeBarHtml = '--';
+            if (p.price != null && nearestSupport != null && nearestResistance != null) {
+                const lo = nearestSupport;
+                const hi = nearestResistance;
+                const span = hi - lo || 1;
+                const pct = Math.max(2, Math.min(98, ((p.price - lo) / span) * 100));
+                const supportPct = 0;
+                const resistancePct = 100 - pct;
+                rangeBarHtml = `<div class="price-range-bar">
+                    <div class="range-fill range-support" style="width:${pct}%"></div>
+                    <div class="range-fill range-resistance" style="width:${resistancePct}%"></div>
+                    <div class="price-marker" style="left:${pct}%"></div>
+                    <span class="bar-label label-support">${nearestSupport.toFixed(1)}</span>
+                    <span class="bar-label label-price" style="left:${pct}%;transform:translate(-50%,-50%);top:-14px;position:absolute">${priceDisplay}</span>
+                    <span class="bar-label label-resistance">${nearestResistance.toFixed(1)}</span>
+                </div>`;
+            } else if (p.price != null) {
+                rangeBarHtml = `<span class="fw-bold">${priceDisplay}</span>`;
+                if (nearestSupport != null) rangeBarHtml += ` <small class="text-success">(支${nearestSupport.toFixed(1)})</small>`;
+                if (nearestResistance != null) rangeBarHtml += ` <small class="text-danger">(压${nearestResistance.toFixed(1)})</small>`;
+            }
 
             html += `<tr>
                 <td class="stock-name">${name}${tdBadge}</td>
                 <td class="text-end ${pctClass} fw-bold">${pctDisplay}</td>
-                <td class="text-end text-danger">${resistanceCell}</td>
-                <td class="text-end fw-bold">${priceDisplay}</td>
-                <td class="text-end text-success">${supportCell}</td>
+                <td>${rangeBarHtml}</td>
                 <td>${aiHtml}</td>
                 <td class="text-end"><button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="移除"><i class="bi bi-x-lg"></i></button></td>
             </tr>`;
