@@ -28,6 +28,7 @@ if [ ! -f venv/bin/pip ]; then
     fi
 fi
 venv/bin/pip install -r requirements.txt -q
+venv/bin/pip install -U akshare -q
 
 echo "=== 安装 Playwright Chromium 浏览器 ==="
 venv/bin/playwright install chromium --with-deps || echo "⚠ Playwright 浏览器安装失败，公司新闻爬取功能将不可用"
