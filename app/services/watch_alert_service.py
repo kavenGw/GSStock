@@ -175,9 +175,10 @@ class WatchAlertService:
             if self._has_fired(key):
                 continue
             if abs(curr - level) / level <= tolerance:
+                cmp = '>' if curr > level else '<' if curr < level else '='
                 signals.append(self._make_signal(name, code,
-                    f'触及支撑位 {level}',
-                    f'价格 {curr:.2f} 触及支撑位 {level}',
+                    f'当前 {curr:.2f} {cmp} 支撑 {level}',
+                    '',
                     {'alert_type': 'support_resistance', 'direction': 'support', 'level': level}))
                 self._mark_fired(key)
 
@@ -188,9 +189,10 @@ class WatchAlertService:
             if self._has_fired(key):
                 continue
             if abs(curr - level) / level <= tolerance:
+                cmp = '<' if curr < level else '>' if curr > level else '='
                 signals.append(self._make_signal(name, code,
-                    f'触及阻力位 {level}',
-                    f'价格 {curr:.2f} 触及阻力位 {level}',
+                    f'当前 {curr:.2f} {cmp} 阻力 {level}',
+                    '',
                     {'alert_type': 'support_resistance', 'direction': 'resistance', 'level': level}))
                 self._mark_fired(key)
 
