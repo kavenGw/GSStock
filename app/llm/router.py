@@ -11,7 +11,7 @@ TASK_LAYER_MAP = {
     'sentiment': LLMLayer.FLASH,
     'analysis': LLMLayer.PREMIUM,
     'advice': LLMLayer.PREMIUM,
-    'watch_analysis': LLMLayer.PREMIUM,
+    'watch_analysis': LLMLayer.FLASH,
     'daily_briefing': LLMLayer.PREMIUM,
     'news_briefing': LLMLayer.FLASH,
     'news_classify': LLMLayer.LITE,
@@ -62,25 +62,29 @@ class LLMRouter:
         return cls._instance
 
     def init_providers(self):
-        """延迟初始化 providers — 本地优先，云端兜底"""
+        """延迟初始化 providers — LITE=智谱免费，FLASH/PREMIUM=Gemini"""
         if self._providers:
             return
 
         from app.llm.providers.llamacpp import LlamaServerProvider, LLAMA_SERVER_ENABLED
+        from app.llm.providers.zhipu import ZhipuLiteProvider, ZHIPU_API_KEY
+        from app.llm.providers.gemini import GeminiFlashProvider, GeminiPremiumProvider, _key_pool
 
-        from app.llm.providers.zhipu import ZhipuLiteProvider, ZhipuFlashProvider, ZhipuPremiumProvider, ZHIPU_API_KEY
         if ZHIPU_API_KEY:
-            zhipu_flash = ZhipuFlashProvider()
             self._providers[LLMLayer.LITE] = ZhipuLiteProvider()
-            logger.info('[LLM路由] LITE = 智谱 glm-4-flash')
+            logger.info('[LLM路由] LITE = 智谱 glm-4-flash (免费)')
+
+        if _key_pool.available:
+            gemini_flash = GeminiFlashProvider()
+            gemini_premium = GeminiPremiumProvider()
             if LLAMA_SERVER_ENABLED:
-                self._providers[LLMLayer.FLASH] = FallbackProvider(LlamaServerProvider(), zhipu_flash)
-                logger.info('[LLM路由] FLASH = llama-server → 智谱 Flash (降级)')
+                self._providers[LLMLayer.FLASH] = FallbackProvider(LlamaServerProvider(), gemini_flash)
+                logger.info('[LLM路由] FLASH = llama-server → Gemini Flash-Lite (降级)')
             else:
-                self._providers[LLMLayer.FLASH] = zhipu_flash
-                logger.info('[LLM路由] FLASH = 智谱 Flash')
-            self._providers[LLMLayer.PREMIUM] = ZhipuPremiumProvider()
-            logger.info('[LLM路由] PREMIUM = 智谱 GLM-5')
+                self._providers[LLMLayer.FLASH] = gemini_flash
+                logger.info('[LLM路由] FLASH = Gemini Flash-Lite')
+            self._providers[LLMLayer.PREMIUM] = gemini_premium
+            logger.info('[LLM路由] PREMIUM = Gemini Flash')
         elif LLAMA_SERVER_ENABLED:
             self._providers[LLMLayer.FLASH] = LlamaServerProvider()
             logger.info('[LLM路由] FLASH = llama-server (无云端兜底)')

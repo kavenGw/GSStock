@@ -21,27 +21,6 @@ class ZhipuLiteProvider(LLMProvider):
         return _call_zhipu(self.model, messages, temperature, max_tokens)
 
 
-class ZhipuFlashProvider(LLMProvider):
-    name = "zhipu-flash"
-    model = "glm-5-turbo"
-    cost_per_1k_tokens = 0.0001
-
-    def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
-        return _call_zhipu(self.model, messages, temperature, max_tokens)
-
-
-class ZhipuPremiumProvider(LLMProvider):
-    name = "zhipu-premium"
-    model = "glm-4.6"
-    cost_per_1k_tokens = 0.01
-
-    def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
-        return _call_zhipu(self.model, messages, temperature, max_tokens)
-
-
-REASONING_MODELS = {'glm-4.6', 'glm-5', 'glm-5-turbo', 'glm-5.1'}
-REASONING_MIN_TOKENS = 2000
-
 _MAX_RETRIES = 3
 _BACKOFF_BASE = 2  # 2s, 4s, 8s
 
@@ -53,12 +32,11 @@ def _call_zhipu(model: str, messages: list[dict], temperature: float, max_tokens
 
     from app.llm.rate_limiter import rate_limiter
 
-    actual_max_tokens = max(max_tokens, REASONING_MIN_TOKENS) if model in REASONING_MODELS else max_tokens
     payload = {
         'model': model,
         'messages': messages,
         'temperature': temperature,
-        'max_tokens': actual_max_tokens,
+        'max_tokens': max_tokens,
     }
     headers = {
         'Authorization': f'Bearer {ZHIPU_API_KEY}',

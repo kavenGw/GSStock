@@ -297,8 +297,8 @@ TDSequentialService.calculate()
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
-| `ZHIPU_API_KEY` | 智谱 GLM API 密钥 | 空 |
-| `GEMINI_API_KEY` | Google Gemini API 密钥，多个逗号分隔（公司识别） | 空 |
+| `ZHIPU_API_KEY` | 智谱 GLM API 密钥（仅免费 glm-4-flash） | 空 |
+| `GEMINI_API_KEY` | Google Gemini API 密钥，多个逗号分隔（FLASH/PREMIUM 主力） | 空 |
 | `LLM_DAILY_BUDGET` | 日预算上限（美元） | 无上限 |
 | `LLM_REQUEST_TIMEOUT` | API 请求超时（秒） | `300` |
 | `LLM_RATE_LIMIT_RPM` | 智谱 API 全局限流（RPM） | `10` |
@@ -312,7 +312,7 @@ TDSequentialService.calculate()
 - RapidOCR (ONNX Runtime)
 - Bootstrap 5 + 原生 JavaScript
 - akshare（A股数据）+ yfinance（美股/港股/期货数据）+ Twelve Data + Polygon
-- 智谱 GLM（AI 分析，Flash/Premium 分层路由）
+- 智谱 GLM（LITE 层免费 glm-4-flash）+ Google Gemini（FLASH/PREMIUM 层主力）
 - APScheduler（策略调度）
 - PyTorch（AI走势预测，可选）— `app/ml/` 模块，未安装 torch 时自动跳过
 

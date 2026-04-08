@@ -1,4 +1,4 @@
-"""Google Gemini Provider — 用于公司识别，支持多 API Key 轮转"""
+"""Google Gemini Provider — FLASH/PREMIUM 层主力，支持多 API Key 轮转"""
 import logging
 import os
 import time
@@ -44,7 +44,16 @@ _key_pool = _KeyPool()
 class GeminiFlashProvider(LLMProvider):
     name = "gemini-flash"
     model = "gemini-2.5-flash-lite"
-    cost_per_1k_tokens = 0.0001
+    cost_per_1k_tokens = 0.0
+
+    def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
+        return _call_gemini(self.model, messages, temperature, max_tokens)
+
+
+class GeminiPremiumProvider(LLMProvider):
+    name = "gemini-premium"
+    model = "gemini-2.5-flash"
+    cost_per_1k_tokens = 0.0
 
     def chat(self, messages: list[dict], temperature: float = 0.3, max_tokens: int = 500) -> str:
         return _call_gemini(self.model, messages, temperature, max_tokens)

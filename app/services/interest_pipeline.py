@@ -322,12 +322,8 @@ class InterestPipeline:
                 {'role': 'user', 'content': build_company_identify_prompt(content)},
             ]
 
-            from app.llm.providers.gemini import GeminiFlashProvider, _key_pool
-            if _key_pool.available:
-                provider = GeminiFlashProvider()
-            else:
-                from app.llm.router import llm_router
-                provider = llm_router.route('company_identify')
+            from app.llm.router import llm_router
+            provider = llm_router.route('company_identify')
             if not provider:
                 return None, 'LLM provider 不可用（Gemini/GLM 均未配置）'
 
