@@ -54,6 +54,17 @@ def _clear_score(match_type, match_id):
         _score_state.pop(key, None)
 
 
+def _format_score(team1, score1, team2, score2, show_trophy=False):
+    """格式化比分，领先方分数加粗，结束时获胜方名字旁加奖杯"""
+    if score1 > score2:
+        t1 = f"🏆{team1}" if show_trophy else team1
+        return f"{t1} *{score1}*-{score2} {team2}"
+    elif score2 > score1:
+        t2 = f"🏆{team2}" if show_trophy else team2
+        return f"{team1} {score1}-*{score2}* {t2}"
+    return f"{team1} {score1}-{score2} {team2}"
+
+
 def _has_score_changed(match_type, match_id, new_score1, new_score2, new_status):
     """检测比分是否发生变化"""
     last = _get_last_score(match_type, match_id)
@@ -247,7 +258,7 @@ class EsportsMonitorService:
                 emoji = '🏀' if match_type == 'nba' else '🎮'
                 league_prefix = f'[{league}] ' if match_type == 'lol' else ''
 
-                msg = f"⏰ {emoji} {league_prefix}{teams_desc} | 比赛将于 {start_time} 开始"
+                msg = f"{emoji} {league_prefix}{teams_desc} | ⏰ 比赛将于 {start_time} 开始"
                 NotificationService.send_slack(msg, channel)
                 logger.info(f'[赛事监控] 赛前提醒已发送: {teams_desc}')
             except Exception as e:
@@ -359,7 +370,8 @@ class EsportsMonitorService:
 
         # 比赛结束：推送最终比分
         if status == 'completed':
-            msg = f"🏆 {game['away']} {away_score}-{home_score} {game['home']} | 全场结束"
+            score_text = _format_score(game['away'], away_score, game['home'], home_score, show_trophy=True)
+            msg = f"🏀 {score_text}"
             NotificationService.send_slack(msg, channel)
             _clear_score('nba', match_id)
             scheduler_engine.scheduler.remove_job(job_id)
@@ -370,7 +382,7 @@ class EsportsMonitorService:
         if status == 'in_progress':
             if _has_score_changed('nba', match_id, away_score, home_score, status):
                 quarter = game.get('quarter', '')
-                score_text = f"{game['away']} {away_score}-{home_score} {game['home']}"
+                score_text = _format_score(game['away'], away_score, game['home'], home_score)
                 msg = f"🏀 {score_text} | {quarter}" if quarter else f"🏀 {score_text}"
                 NotificationService.send_slack(msg, channel)
                 _update_score('nba', match_id, away_score, home_score, status)
@@ -407,7 +419,8 @@ class EsportsMonitorService:
                     score1 = fresh.get('score1') or score1
                     score2 = fresh.get('score2') or score2
                     logger.info(f'[赛事监控] 重试获取最终比分: {score1}-{score2}')
-            msg = f"🏆 [{league}] {match['team1']} {score1}-{score2} {match['team2']} | 比赛结束"
+            score_text = _format_score(match['team1'], score1, match['team2'], score2, show_trophy=True)
+            msg = f"🎮 [{league}] {score_text}"
             NotificationService.send_slack(msg, channel)
             _clear_score('lol', match_id)
             scheduler_engine.scheduler.remove_job(job_id)
@@ -417,7 +430,8 @@ class EsportsMonitorService:
         # 比赛进行中：仅在比分变化时推送
         if status == 'in_progress':
             if _has_score_changed('lol', match_id, score1, score2, status):
-                msg = f"🎮 [{league}] {match['team1']} {score1}-{score2} {match['team2']} | 进行中"
+                score_text = _format_score(match['team1'], score1, match['team2'], score2)
+                msg = f"🎮 [{league}] {score_text} | 进行中"
                 NotificationService.send_slack(msg, channel)
                 _update_score('lol', match_id, score1, score2, status)
                 logger.info(f'[赛事监控] LoL比分变化: {match["team1"]} {score1}-{score2} {match["team2"]}')
