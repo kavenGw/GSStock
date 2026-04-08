@@ -180,8 +180,28 @@ def check_playwright():
         ) from e
 
 
+class _SafeJsonProvider(Flask.json_provider_class):
+    """NaN/Infinity → null，避免前端 JSON.parse 失败"""
+
+    def dumps(self, obj, **kwargs):
+        return super().dumps(_sanitize_nan(obj), **kwargs)
+
+
+def _sanitize_nan(obj):
+    import math
+    if isinstance(obj, float):
+        return None if (math.isnan(obj) or math.isinf(obj)) else obj
+    if isinstance(obj, dict):
+        return {k: _sanitize_nan(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize_nan(v) for v in obj]
+    return obj
+
+
 def create_app(config_class=None):
     app = Flask(__name__)
+    app.json_provider_class = _SafeJsonProvider
+    app.json = _SafeJsonProvider(app)
 
     if config_class is None:
         from config import Config
