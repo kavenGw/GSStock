@@ -119,7 +119,7 @@ class WatchAlertService:
             last_fired = self._extreme_cooldown.get(cooldown_key)
             if not last_fired or now - last_fired >= timedelta(minutes=cooldown_minutes):
                 signals.append(self._make_signal(name, code,
-                    f'({curr:.2f}) 突破盘中新高({level:.2f})',
+                    f'当前 {curr:.2f} > 前高 {level:.2f}',
                     '',
                     {'alert_type': 'intraday_extreme', 'direction': 'high', 'level': level}))
                 self._extreme_cooldown[cooldown_key] = now
@@ -131,7 +131,7 @@ class WatchAlertService:
             last_fired = self._extreme_cooldown.get(cooldown_key)
             if not last_fired or now - last_fired >= timedelta(minutes=cooldown_minutes):
                 signals.append(self._make_signal(name, code,
-                    f'({curr:.2f}) 跌破盘中新低({level:.2f})',
+                    f'当前 {curr:.2f} < 前低 {level:.2f}',
                     '',
                     {'alert_type': 'intraday_extreme', 'direction': 'low', 'level': level}))
                 self._extreme_cooldown[cooldown_key] = now
@@ -152,14 +152,14 @@ class WatchAlertService:
                 continue
             if direction == 'above' and curr >= price:
                 signals.append(self._make_signal(name, code,
-                    f'触达目标价 {price}',
-                    f'上破目标价 {price} ↑ | 当前 {curr:.2f} | {reason}',
+                    f'当前 {curr:.2f} > 目标 {price}',
+                    reason,
                     {'alert_type': 'target_price', 'direction': 'above', 'level': price}))
                 self._mark_fired(key)
             elif direction == 'below' and curr <= price:
                 signals.append(self._make_signal(name, code,
-                    f'触达目标价 {price}',
-                    f'下破目标价 {price} ↓ | 当前 {curr:.2f} | {reason}',
+                    f'当前 {curr:.2f} < 目标 {price}',
+                    reason,
                     {'alert_type': 'target_price', 'direction': 'below', 'level': price}))
                 self._mark_fired(key)
         return signals
@@ -224,11 +224,11 @@ class WatchAlertService:
             if self._has_fired(key):
                 continue
 
-            arrow = '↑' if direction == 'up' else '↓'
+            cmp = '>' if direction == 'up' else '<'
             label = '上穿' if direction == 'up' else '下穿'
             signals.append(self._make_signal(name, code,
-                f'{label}{ma_type.upper()} {ma_val:.2f}',
-                f'{label}{ma_type.upper()} {ma_val:.2f} {arrow} | 当前 {curr:.2f}',
+                f'{label} 当前 {curr:.2f} {cmp} {ma_type.upper()} {ma_val:.2f}',
+                '',
                 {'alert_type': 'ma_crossover', 'ma_type': ma_type, 'direction': direction, 'level': ma_val}))
             self._mark_fired(key)
 
@@ -255,8 +255,8 @@ class WatchAlertService:
             key = f"volume:{code}"
             if not self._has_fired(key):
                 signals.append(self._make_signal(name, code,
-                    f'成交量异动 {normalized/baseline:.1f}倍',
-                    f'成交量异动 | 归一化量 {int(normalized)} ≈ 日均 {int(baseline)} 的 {normalized/baseline:.1f} 倍',
+                    f'成交量 {int(normalized):,} > 日均 {int(baseline):,} ({normalized/baseline:.1f}x)',
+                    '',
                     {'alert_type': 'volume_anomaly', 'normalized_volume': normalized, 'baseline': baseline}))
                 self._mark_fired(key)
         return signals
@@ -275,8 +275,8 @@ class WatchAlertService:
 
         label = '买入' if direction == 'buy' else '卖出'
         signals.append(self._make_signal(name, code,
-            f'TD九转{label}信号完成',
-            f'TD九转{label}信号完成（count=9）| 当前 {curr:.2f}',
+            f'TD九转{label}信号 | 当前 {curr:.2f}',
+            '',
             {'alert_type': 'td_sequential', 'direction': direction, 'count': 9}))
         self._mark_fired(key)
         return signals

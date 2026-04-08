@@ -340,6 +340,24 @@ TDSequentialService.calculate()
 
 设计和实施计划保存在 `docs/plans/` 目录，格式 `YYYY-MM-DD-<topic>-design.md`
 
+## 盯盘告警推送格式
+
+所有盯盘告警统一用 `>` `<` 直观显示价格与关键位的关系，一行展示核心信息，detail 仅放补充说明。
+
+| 告警类型 | 格式示例 |
+|---------|--------|
+| 盘中极值 | `当前 26.00 > 前高 25.50` |
+| 目标价 | `当前 26.00 > 目标 25.50` |
+| 支撑/阻力 | `当前 26.00 > 支撑 25.00` |
+| 均线穿越 | `上穿 当前 21.00 > MA5 20.50` |
+| 成交量异动 | `成交量 100 > 日均 50 (2.0x)` |
+| TD九转 | `TD九转买入信号 | 当前 26.00` |
+
+**涉及文件**：
+- `app/services/watch_alert_service.py` — 7种检测器（极值/目标价/支撑阻力/均线/成交量/TD九转）
+- `app/services/notification.py` — `push_realtime_analysis()` 实时分析推送格式
+- `app/strategies/volume_alert/__init__.py` — 收盘成交量异动策略
+
 ## 开发规范
 
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处

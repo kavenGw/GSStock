@@ -423,12 +423,12 @@ class NotificationService:
             res_str = _fmt_levels(resistance, current_price)
 
             lines = [f"{signal} {name}({code})"]
-            lines.append(f"  ▽ 支撑 {sup_str}")
             if current_price is not None:
                 arrow = '▲' if (change_pct or 0) >= 0 else '▼'
                 pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
-                lines.append(f"  → 现价 {current_price} {arrow}{pct_str}")
-            lines.append(f"  △ 压力 {res_str}")
+                lines.append(f"  现价 {current_price} {arrow}{pct_str} | 支撑 {sup_str} | 压力 {res_str}")
+            else:
+                lines.append(f"  支撑 {sup_str} | 压力 {res_str}")
             lines.append(f"  💡 {summary}")
             blocks.append("\n".join(lines))
 
@@ -1286,12 +1286,6 @@ class NotificationService:
 
         watch_msg = '\n\n'.join(msg2_parts) if msg2_parts else ''
 
-        # 标记已推送的 GitHub Release 版本
-        if release_pushed_versions:
-            from app.services.github_release import GitHubReleaseService
-            for key, version in release_pushed_versions:
-                GitHubReleaseService.mark_pushed_version(key, version)
-
         # 今日核心观点 → news_daily
         if core_insights:
             daily_text = f"📅 {today.strftime('%Y-%m-%d')}\n\n🎯 今日核心观点\n{core_insights}"
@@ -1321,6 +1315,10 @@ class NotificationService:
             ai_tool_msg = '\n\n'.join(ai_tool_texts)
             if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
                 sent += 1
+                if release_pushed_versions:
+                    from app.services.github_release import GitHubReleaseService
+                    for key, version in release_pushed_versions:
+                        GitHubReleaseService.mark_pushed_version(key, version)
 
         # 赛事 → 各自频道
         if nba_text:
@@ -1356,11 +1354,10 @@ class NotificationService:
             ai_tool_msg = '\n\n'.join(ai_tool_texts)
             if NotificationService.send_slack(ai_tool_msg, CHANNEL_AI_TOOL):
                 sent += 1
-
-        if release_pushed_versions:
-            from app.services.github_release import GitHubReleaseService
-            for key, version in release_pushed_versions:
-                GitHubReleaseService.mark_pushed_version(key, version)
+                if release_pushed_versions:
+                    from app.services.github_release import GitHubReleaseService
+                    for key, version in release_pushed_versions:
+                        GitHubReleaseService.mark_pushed_version(key, version)
 
         # 赛事 → 各自频道
         nba_text, lol_text = NotificationService.format_esports_summary_split()

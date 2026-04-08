@@ -78,11 +78,12 @@ class VolumeAlertStrategy(Strategy):
             price_change = rt.get('change_pct', ohlc[-1].get('change_pct', 0))
             price_str = f"+{price_change:.2f}%" if price_change >= 0 else f"{price_change:.2f}%"
 
+            vol_cmp = '>' if change_pct > 0 else '<'
             signals.append(Signal(
                 strategy=self.name,
                 priority='HIGH' if abs(change_pct) >= 0.5 else 'MEDIUM',
                 title=f'{name}({code}) {direction}{pct_str}',
-                detail=f"今日成交量 {today_vol:,.0f} | 昨日 {prev_vol:,.0f} | 涨跌 {price_str}",
+                detail=f"今日 {today_vol:,.0f} {vol_cmp} 昨日 {prev_vol:,.0f} | 涨跌 {price_str}",
                 data={'stock_code': code, 'volume_change_pct': round(change_pct, 4)},
             ))
 
