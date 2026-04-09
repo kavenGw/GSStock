@@ -992,21 +992,19 @@ class UnifiedStockDataService:
                     logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 完整数据")
                     continue
 
-            # 非交易时间使用缓存（不做增量）
+            # 非交易时间：缓存含最近交易日→使用，否则仍从API获取（OHLC历史数据不受交易时间限制）
             if code in trading_status['use_cache']:
-                if cache_info:
-                    cached_stocks.append(cache_info['data'])
-                    memory_cache.set(code, cache_type, cache_info['data'], stable=True)
-                    self._hit_count += 1
-                    db_hit_count += 1
-                    logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 非交易时间")
-                    continue
-                expired_data = self._get_expired_cache(code, cache_type, '非交易时间无有效缓存')
-                if expired_data:
-                    cached_stocks.append(expired_data)
-                    memory_cache.set(code, cache_type, expired_data, stable=True)
-                    continue
-                logger.debug(f"[数据服务.缓存] {code} {stock_name} 未命中: 无缓存")
+                if cache_info and data_end:
+                    market = self._identify_market(code)
+                    last_trading = TradingCalendarService.get_last_trading_day(market, effective_date + timedelta(days=1))
+                    if data_end >= last_trading:
+                        cached_stocks.append(cache_info['data'])
+                        memory_cache.set(code, cache_type, cache_info['data'], stable=True)
+                        self._hit_count += 1
+                        db_hit_count += 1
+                        logger.debug(f"[数据服务.缓存] {code} {stock_name} 命中: 非交易时间")
+                        continue
+                logger.debug(f"[数据服务.缓存] {code} {stock_name} 非交易时间缓存过旧(data_end={data_end})，加入刷新队列")
                 need_refresh.append(code)
                 continue
 
