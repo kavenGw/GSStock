@@ -103,10 +103,22 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 | 指数数据 | `index` | 交易时段30分钟 / 收盘后8小时 |
 | 季度财报 | `quarterly_earnings` | 7天 |
 
+### 腾讯HTTP数据源
+
+实时价格和分时K线优先使用腾讯HTTP接口（并发安全、无需限速）：
+- 实时价格批量：`http://qt.gtimg.cn/q=sh600519,sz000001`（GBK编码，`~`分隔）
+- 分钟K线：`http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param=sh600519,m1,,240`
+- 日K线：`http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh600519,day,...`
+- **字段顺序**：`[datetime, open, close, high, low, volume]`（close在第2位，非标准OHLC）
+
+### 策略数据协作
+
+`watch_preload`（每分钟）负责 `force_refresh` 写缓存，`watch_alert` 和其他策略读缓存即可，避免重复API调用
+
 ### 核心组件
 
 - **UnifiedStockDataService** - 统一数据获取入口（单例模式）
-  - `get_realtime_prices(stock_codes, force_refresh)` - A股用akshare，美股/港股用yfinance
+  - `get_realtime_prices(stock_codes, force_refresh)` - A股用腾讯HTTP批量+akshare负载均衡，美股/港股用yfinance
   - `get_trend_data(stock_codes, days)` - OHLC走势数据
   - `get_indices_data(target_date)` - 指数数据
   - `get_cache_stats()` - 缓存命中率统计
