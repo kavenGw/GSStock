@@ -55,14 +55,16 @@ def _clear_score(match_type, match_id):
 
 
 def _format_score(team1, score1, team2, score2, show_trophy=False):
-    """格式化比分，领先方分数加粗，结束时获胜方名字旁加奖杯"""
+    """格式化比分，领先方队名+分数整体加粗，显示分差，结束时获胜方加奖杯"""
+    diff = abs(score1 - score2)
+    diff_text = f" (+{diff})" if diff > 0 else ""
     if score1 > score2:
-        t1 = f"🏆{team1}" if show_trophy else team1
-        return f"{t1} *{score1}*-{score2} {team2}"
+        t1 = f"🏆 {team1}" if show_trophy else team1
+        return f"*{t1} {score1}* - {score2} {team2}{diff_text}"
     elif score2 > score1:
-        t2 = f"🏆{team2}" if show_trophy else team2
-        return f"{team1} {score1}-*{score2}* {t2}"
-    return f"{team1} {score1}-{score2} {team2}"
+        t2 = f"🏆 {team2}" if show_trophy else team2
+        return f"{team1} {score1} - *{score2} {t2}*{diff_text}"
+    return f"{team1} {score1} - {score2} {team2}"
 
 
 def _has_score_changed(match_type, match_id, new_score1, new_score2, new_status):
