@@ -138,21 +138,33 @@ class DailyBriefingStrategy(Strategy):
     @staticmethod
     def _format_value_dip_message(dips: list) -> str:
         lines = ['⚠ *价值洼地提醒*\n']
+
+        # Group by sector for compact display
+        from collections import OrderedDict
+        sector_groups = OrderedDict()
         for dip in dips:
-            period = dip['period']
-            lines.append(
-                f"{period}维度：{dip['sector_name']}"
-                f"（{'+' if dip['sector_change'] >= 0 else ''}{dip['sector_change']}%）"
-                f"显著落后板块均值"
-                f"（{'+' if dip['avg_change'] >= 0 else ''}{dip['avg_change']}%）"
-            )
+            name = dip['sector_name']
+            if name not in sector_groups:
+                sector_groups[name] = []
+            sector_groups[name].append(dip)
+
+        for sector_name, periods in sector_groups.items():
+            lines.append(f"*{sector_name}*")
+            for p in periods:
+                sc = p['sector_change']
+                ac = p['avg_change']
+                sc_s = f"{'+' if sc >= 0 else ''}{sc}%"
+                ac_s = f"{'+' if ac >= 0 else ''}{ac}%"
+                lines.append(f"  {p['period']} {sc_s} < 均值 {ac_s}")
+
             stock_parts = []
-            for s in dip['stocks']:
+            for s in periods[0]['stocks']:
                 c = s['change']
                 if c is not None:
-                    stock_parts.append(f"  · {s['name']} {'+' if c >= 0 else ''}{c}%")
+                    stock_parts.append(f"{s['name']} {'+' if c >= 0 else ''}{c}%")
                 else:
-                    stock_parts.append(f"  · {s['name']} N/A")
-            lines.append(''.join(stock_parts))
+                    stock_parts.append(f"{s['name']} N/A")
+            lines.append('  · ' + ' · '.join(stock_parts))
             lines.append('')
+
         return '\n'.join(lines).strip()
