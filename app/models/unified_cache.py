@@ -6,6 +6,7 @@
 import json
 import logging
 from datetime import datetime, date
+from sqlalchemy.exc import IntegrityError
 from app import db
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,7 @@ class UnifiedStockCache(db.Model):
     def set_cached_data(cls, stock_code: str, cache_type: str, data: dict | list,
                         cache_date: date = None, is_complete: bool = False,
                         data_end_date: date = None) -> 'UnifiedStockCache':
-        """设置缓存数据"""
+        """设置缓存数据（并发安全）"""
         if cache_date is None:
             cache_date = date.today()
 
@@ -123,21 +124,38 @@ class UnifiedStockCache(db.Model):
             if data_end_date:
                 cache.data_end_date = data_end_date
             cache.updated_at = now
-        else:
-            cache = cls(
+            db.session.commit()
+            return cache
+
+        cache = cls(
+            stock_code=stock_code,
+            cache_type=cache_type,
+            cache_date=cache_date,
+            data_json=data_json,
+            last_fetch_time=now,
+            is_complete=is_complete,
+            data_end_date=data_end_date,
+            created_at=now,
+            updated_at=now,
+        )
+        db.session.add(cache)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            cache = cls.query.filter_by(
                 stock_code=stock_code,
                 cache_type=cache_type,
-                cache_date=cache_date,
-                data_json=data_json,
-                last_fetch_time=now,
-                is_complete=is_complete,
-                data_end_date=data_end_date,
-                created_at=now,
-                updated_at=now,
-            )
-            db.session.add(cache)
-
-        db.session.commit()
+                cache_date=cache_date
+            ).first()
+            if cache:
+                cache.data_json = data_json
+                cache.last_fetch_time = now
+                cache.is_complete = is_complete
+                if data_end_date:
+                    cache.data_end_date = data_end_date
+                cache.updated_at = now
+                db.session.commit()
         return cache
 
     @classmethod
