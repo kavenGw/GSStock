@@ -47,6 +47,8 @@ app/
 
 ## 核心设计
 
+**JSON 安全序列化**：`_SafeJsonProvider`（`app/__init__.py`）全局将 `NaN`/`Infinity` 转 `null`，避免前端 `JSON.parse` 失败
+
 **数据模型**：按日期保存持仓快照，`(date, stock_code)` 为唯一约束
 
 **多账户合并**：同一股票多次出现时，数量相加，成本按加权平均计算
@@ -89,6 +91,10 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 - **内存缓存**：按股票分目录存储（`data/memory_cache/{stock_code}/{cache_type}.pkl`），延迟flush（变更后5秒批量持久化），启动时自动恢复
 - **数据库缓存**：SQLite 存储，完整性标记，支持过期缓存降级
+
+**缓存刷新策略区分**：
+- 实时价格：非交易时间跳过API（市场关闭无新数据）
+- OHLC走势：非交易时间仍可获取（历史数据始终可用），缓存需检查 `data_end_date` 是否含最近交易日
 
 | 数据类型 | 缓存类型 | TTL |
 |---------|---------|-----|
