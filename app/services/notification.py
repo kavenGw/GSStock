@@ -31,6 +31,7 @@ class NotificationService:
         }
 
     _signal_state = {}  # 类变量，状态机去重
+    _realtime_push_state = {'date': None, 'stocks': {}}  # 实时分析增量推送状态
 
     @staticmethod
     def _make_signal_key(signal) -> str:
@@ -375,8 +376,46 @@ class NotificationService:
         return {'text': text}
 
     @staticmethod
+    def _normalize_levels(levels):
+        """归一化支撑/压力位用于比较"""
+        if not levels:
+            return []
+        return sorted(round(float(lv), 2) for lv in levels if lv is not None)
+
+    @staticmethod
+    def _detect_realtime_changes(code: str, data: dict) -> tuple:
+        """检测实时分析相对上次推送的变化。返回 (is_first, changes_dict)"""
+        state = NotificationService._realtime_push_state
+        today = datetime.now().strftime('%Y-%m-%d')
+        if state['date'] != today:
+            state['date'] = today
+            state['stocks'] = {}
+
+        current = {
+            'signal': data.get('signal', ''),
+            'support_levels': NotificationService._normalize_levels(data.get('support_levels', [])),
+            'resistance_levels': NotificationService._normalize_levels(data.get('resistance_levels', [])),
+            'summary': data.get('summary', ''),
+        }
+
+        prev = state['stocks'].get(code)
+        if prev is None:
+            return True, current
+
+        changes = {}
+        if current['signal'] != prev['signal']:
+            changes['signal'] = prev['signal']
+        if current['support_levels'] != prev['support_levels']:
+            changes['support'] = True
+        if current['resistance_levels'] != prev['resistance_levels']:
+            changes['resistance'] = True
+        if current['summary'] != prev['summary']:
+            changes['summary'] = True
+        return False, changes
+
+    @staticmethod
     def push_realtime_analysis(analyses: dict) -> bool:
-        """推送盯盘实时分析结果到 Slack"""
+        """推送盯盘实时分析结果到 Slack（首次完整，后续仅推变化）"""
         if not analyses:
             return False
 
@@ -386,14 +425,12 @@ class NotificationService:
 
         signal_icons = {'buy': '🔴买入', 'sell': '🟢卖出', 'hold': '🟡持有', 'watch': '⚪观望'}
         now_str = datetime.now().strftime('%H:%M')
-        blocks = []
 
         from app.services.unified_stock_data import unified_stock_data_service
         all_codes = [c for c, p in analyses.items() if p.get('realtime')]
         raw_prices = unified_stock_data_service.get_realtime_prices(all_codes) if all_codes else {}
 
         def _fmt_levels(levels, current):
-            """格式化支撑/压力位，带距离百分比"""
             if not levels or current is None:
                 return ' / '.join(str(s) for s in levels) if levels else '-'
             parts = []
@@ -405,39 +442,79 @@ class NotificationService:
                     parts.append(str(lv))
             return ' / '.join(parts)
 
+        full_blocks = []
+        update_blocks = []
+
         for code, periods in analyses.items():
             data = periods.get('realtime')
             if not data:
                 continue
-            name = name_map.get(code, code)
-            signal = signal_icons.get(data.get('signal', ''), '⚪观望')
-            summary = data.get('summary', '')
 
+            is_first, changes = NotificationService._detect_realtime_changes(code, data)
+
+            if not is_first and not changes:
+                continue
+
+            name = name_map.get(code, code)
+            signal_key = data.get('signal', '')
+            signal = signal_icons.get(signal_key, '⚪观望')
+            summary = data.get('summary', '')
             price_data = raw_prices.get(code, {})
             current_price = price_data.get('current_price')
             change_pct = price_data.get('change_percent')
-
             support = data.get('support_levels', [])
             resistance = data.get('resistance_levels', [])
             sup_str = _fmt_levels(support, current_price)
             res_str = _fmt_levels(resistance, current_price)
 
-            lines = [f"{signal} {name}({code})"]
-            if current_price is not None:
-                arrow = '▲' if (change_pct or 0) >= 0 else '▼'
-                pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
-                lines.append(f"  现价 {current_price} {arrow}{pct_str} | 支撑 {sup_str} | 压力 {res_str}")
+            # 记录本次推送状态
+            NotificationService._realtime_push_state['stocks'][code] = {
+                'signal': signal_key,
+                'support_levels': NotificationService._normalize_levels(support),
+                'resistance_levels': NotificationService._normalize_levels(resistance),
+                'summary': summary,
+            }
+
+            if is_first:
+                lines = [f"{signal} {name}({code})"]
+                if current_price is not None:
+                    arrow = '▲' if (change_pct or 0) >= 0 else '▼'
+                    pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
+                    lines.append(f"  现价 {current_price} {arrow}{pct_str} | 支撑 {sup_str} | 压力 {res_str}")
+                else:
+                    lines.append(f"  支撑 {sup_str} | 压力 {res_str}")
+                lines.append(f"  💡 {summary}")
+                full_blocks.append("\n".join(lines))
             else:
-                lines.append(f"  支撑 {sup_str} | 压力 {res_str}")
-            lines.append(f"  💡 {summary}")
-            blocks.append("\n".join(lines))
+                old_signal = changes.get('signal')
+                header = f"{signal} {name}({code})"
+                if old_signal is not None:
+                    old_label = signal_icons.get(old_signal, old_signal)
+                    header += f"  <- {old_label}"
+                lines = [header]
+                if current_price is not None:
+                    arrow = '▲' if (change_pct or 0) >= 0 else '▼'
+                    pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
+                    lines.append(f"  现价 {current_price} {arrow}{pct_str}")
+                if changes.get('support'):
+                    lines.append(f"  支撑 {sup_str} -> 调整")
+                if changes.get('resistance'):
+                    lines.append(f"  压力 {res_str} -> 调整")
+                if changes.get('summary'):
+                    lines.append(f"  💡 {summary}")
+                update_blocks.append("\n".join(lines))
 
-        if not blocks:
-            return False
-
+        sent = False
         separator = "\n——————————————————\n"
-        message = f"📊 盯盘实时分析 ({now_str})\n——————————————————\n" + separator.join(blocks)
-        return NotificationService.send_slack(message, CHANNEL_WATCH)
+        if full_blocks:
+            msg = f"📊 盯盘实时分析 ({now_str})\n——————————————————\n" + separator.join(full_blocks)
+            sent = NotificationService.send_slack(msg, CHANNEL_WATCH) or sent
+        if update_blocks:
+            msg = f"🔄 盯盘更新 ({now_str})\n——————————————————\n" + separator.join(update_blocks)
+            sent = NotificationService.send_slack(msg, CHANNEL_WATCH) or sent
+        if not full_blocks and not update_blocks:
+            logger.info('[盯盘实时] 分析无变化，跳过推送')
+        return sent
 
     @staticmethod
     def format_watch_analysis(analyses: dict) -> dict:
