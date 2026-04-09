@@ -53,11 +53,12 @@ class WatchAlertStrategy(Strategy):
         a_codes = [c for c in all_codes if MarketIdentifier.is_a_share(c)]
         other_codes = [c for c in all_codes if c not in a_codes]
 
+        # 价格由 watch_preload 每分钟 force_refresh 预取，这里直接读缓存
         prices = {}
         if a_codes:
-            prices.update(data_service.get_realtime_prices(a_codes, force_refresh=True))
+            prices.update(data_service.get_realtime_prices(a_codes))
         if other_codes:
-            prices.update(data_service.get_realtime_prices(other_codes, force_refresh=True))
+            prices.update(data_service.get_realtime_prices(other_codes))
 
         watch_prices = {c: prices[c] for c in active_codes if c in prices}
         name_map = {w.stock_code: w.stock_name for w in items}

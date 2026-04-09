@@ -1191,12 +1191,11 @@ class UnifiedStockDataService:
                     continue
             need_fetch.append(code)
 
-        # 第三层：API获取
-        for code in need_fetch:
+        # 第三层：API获取（并发）
+        def _fetch_and_cache(code):
             try:
                 data = self._fetch_intraday(code, interval)
                 if data and data.get('data'):
-                    result_stocks.append(data)
                     cache_date = effective_dates.get(code, SmartCacheStrategy.get_effective_cache_date(code))
                     trading_date = data.get('trading_date')
                     if trading_date:
@@ -1209,9 +1208,17 @@ class UnifiedStockDataService:
                             pass
                     memory_cache.set(code, cache_type, data)
                     UnifiedStockCache.set_cached_data(code, cache_type, data, cache_date)
+                    return data
             except Exception as e:
-
                 logger.warning(f"[数据服务.分时] {code} 获取失败: {e}")
+            return None
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = {executor.submit(_fetch_and_cache, code): code for code in need_fetch}
+            for future in as_completed(futures):
+                data = future.result()
+                if data:
+                    result_stocks.append(data)
 
         logger.info(f"[数据服务.分时] 完成: 成功 {len(result_stocks)}只")
         return {'stocks': result_stocks}
@@ -1224,26 +1231,74 @@ class UnifiedStockDataService:
             return self._fetch_intraday_yfinance(code, interval)
 
     def _fetch_intraday_a_share(self, code: str, interval: str = '1m') -> dict:
+        empty = {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
+
+        # 主接口: 腾讯分钟K线HTTP（无需锁、无需sleep）
+        result = self._fetch_intraday_a_share_tencent(code, interval)
+        if result and result.get('data'):
+            return result
+
+        # Fallback: akshare（串行保护）
         import time as _time
         from app.services.akshare_client import ak
         period_map = {'1m': '1', '5m': '5', '15m': '15'}
         period = period_map.get(interval, '1')
-        empty = {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
 
         with self._intraday_lock:
-            # 主接口: stock_zh_a_hist_min_em
             result = self._fetch_intraday_a_share_hist(ak, code, period)
             if result and result.get('data'):
                 _time.sleep(0.3)
                 return result
 
-            # Fallback: stock_intraday_em（逐笔成交→聚合OHLC）
-            logger.info(f"[数据服务.分时] {code} 主接口无数据，尝试逐笔聚合fallback")
+            logger.info(f"[数据服务.分时] {code} 腾讯+akshare主接口无数据，尝试逐笔聚合fallback")
             result = self._fetch_intraday_a_share_tick(ak, code)
             _time.sleep(0.3)
             if result and result.get('data'):
                 return result
 
+            return empty
+
+    def _fetch_intraday_a_share_tencent(self, code: str, interval: str = '1m') -> dict:
+        """腾讯分钟K线HTTP接口 — 并发安全，无需限速"""
+        empty = {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
+        interval_map = {'1m': 'm1', '5m': 'm5', '15m': 'm15'}
+        tc_interval = interval_map.get(interval, 'm1')
+        try:
+            tc = f'sh{code}' if code.startswith(('6', '5')) else f'sz{code}'
+            url = f"http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param={tc},{tc_interval},,240"
+            resp = requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+            data = resp.json()
+            if data.get('code') != 0:
+                return empty
+
+            klines = data.get('data', {}).get(tc, {}).get(tc_interval)
+            if not klines:
+                return empty
+
+            # 只保留最新交易日数据
+            last_dt = klines[-1][0]
+            last_date = last_dt[:8]
+            trading_date = f"{last_date[:4]}-{last_date[4:6]}-{last_date[6:8]}"
+
+            result_data = []
+            for row in klines:
+                if row[0][:8] != last_date:
+                    continue
+                # 腾讯格式: [datetime, open, close, high, low, volume]
+                dt_str = row[0]
+                time_str = f"{dt_str[8:10]}:{dt_str[10:12]}"
+                result_data.append({
+                    'time': time_str,
+                    'open': round(float(row[1]), 2),
+                    'high': round(float(row[3]), 2),
+                    'low': round(float(row[4]), 2),
+                    'close': round(float(row[2]), 2),
+                    'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0,
+                })
+
+            return {'stock_code': code, 'stock_name': '', 'data': result_data, 'trading_date': trading_date}
+        except Exception as e:
+            logger.debug(f"[数据服务.分时] {code} 腾讯分时获取失败: {e}")
             return empty
 
     def _fetch_intraday_a_share_hist(self, ak, code: str, period: str) -> dict:
