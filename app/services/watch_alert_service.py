@@ -273,13 +273,28 @@ class WatchAlertService:
         self._prev_ma_side[code] = curr_sides
         return signals
 
+    # 成交量异动比率上限，超过此值视为数据异常而非真实异动
+    VOLUME_RATIO_CAP = 50.0
+
     def _check_volume_anomaly(self, code: str, name: str, data: dict, params: dict,
                                minutes_info: dict = None) -> list[Signal]:
         signals = []
         baseline = params.get('volume_baseline', 0)
         ratio = params.get('volume_anomaly_ratio', 2.0)
         volume = data.get('volume')
-        if not baseline or not volume or not minutes_info:
+
+        if not volume or not baseline:
+            key = f"volume_missing:{code}"
+            if not self._has_fired(key):
+                missing = []
+                if not volume:
+                    missing.append('实时成交量')
+                if not baseline:
+                    missing.append('日均基准量')
+                logger.warning(f"[盯盘告警] {name}({code}) 成交量数据缺失: {', '.join(missing)}")
+                self._mark_fired(key)
+            return signals
+        if not minutes_info:
             return signals
 
         elapsed = minutes_info.get('elapsed', 0)
@@ -288,12 +303,18 @@ class WatchAlertService:
             return signals
 
         normalized = volume / (elapsed / total)
+        actual_ratio = normalized / baseline
+
+        if actual_ratio >= self.VOLUME_RATIO_CAP:
+            logger.warning(f"[盯盘告警] {name}({code}) 成交量比率异常 {actual_ratio:.1f}x (>{self.VOLUME_RATIO_CAP}x)，"
+                           f"疑似数据单位不一致，跳过告警 (实时={volume:,}, 归一化={int(normalized):,}, 基准={int(baseline):,})")
+            return signals
 
         if normalized >= baseline * ratio:
             key = f"volume:{code}"
             if not self._has_fired(key):
                 signals.append(self._make_signal(name, code,
-                    f'成交量 {int(normalized):,} > 日均 {int(baseline):,} ({normalized/baseline:.1f}x)',
+                    f'成交量 {int(normalized):,} > 日均 {int(baseline):,} ({actual_ratio:.1f}x)',
                     '',
                     {'alert_type': 'volume_anomaly', 'normalized_volume': normalized, 'baseline': baseline}))
                 self._mark_fired(key)

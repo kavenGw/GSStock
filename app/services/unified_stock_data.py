@@ -881,7 +881,7 @@ class UnifiedStockDataService:
                         'current_price': float(fields[3]) if fields[3] else None,
                         'prev_close': float(fields[4]) if fields[4] else None,
                         'open': float(fields[5]) if fields[5] else None,
-                        'volume': int(float(fields[6])) if fields[6] else None,
+                        'volume': int(float(fields[6]) / 100) if fields[6] else None,  # 股→手，与OHLC数据统一
                         'high': float(fields[33]) if fields[33] else None,
                         'low': float(fields[34]) if fields[34] else None,
                         'change': float(fields[31]) if fields[31] else None,
