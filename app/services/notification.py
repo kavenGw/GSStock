@@ -76,9 +76,9 @@ class NotificationService:
         if NotificationService._is_duplicate(signal):
             return
         direction = (signal.data or {}).get('direction', '')
-        if direction in ('high', 'above', 'up', 'buy'):
+        if direction in ('high', 'above', 'up', 'buy', 'resistance_break'):
             emoji = '🔴'
-        elif direction in ('low', 'below', 'down', 'sell'):
+        elif direction in ('low', 'below', 'down', 'sell', 'support_break'):
             emoji = '🟢'
         else:
             emoji = {"HIGH": "⚠️", "MEDIUM": "🟡"}.get(signal.priority, "")

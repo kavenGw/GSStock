@@ -168,35 +168,73 @@ class WatchAlertService:
         signals = []
         tolerance = 0.005
 
-        for level in params.get('support_levels', []):
-            if not level:
-                continue
+        support_levels = sorted([l for l in params.get('support_levels', []) if l], reverse=True)
+        resistance_levels = sorted([l for l in params.get('resistance_levels', []) if l])
+
+        for level in support_levels:
             key = f"sr:{code}:{level}"
             if self._has_fired(key):
                 continue
             if abs(curr - level) / level <= tolerance:
-                cmp = '>' if curr > level else '<' if curr < level else '='
+                if curr < level:
+                    label, direction = '跌破支撑', 'support_break'
+                elif curr > level:
+                    label, direction = '测试支撑', 'support_hold'
+                else:
+                    label, direction = '触及支撑', 'support_hold'
+                detail = self._sr_detail(curr, level, direction, support_levels, resistance_levels)
                 signals.append(self._make_signal(name, code,
-                    f'当前 {curr:.2f} {cmp} 支撑 {level}',
-                    '',
-                    {'alert_type': 'support_resistance', 'direction': 'support', 'level': level}))
+                    f'{label} {level} | 当前 {curr:.2f}',
+                    detail,
+                    {'alert_type': 'support_resistance', 'direction': direction, 'level': level}))
                 self._mark_fired(key)
 
-        for level in params.get('resistance_levels', []):
-            if not level:
-                continue
+        for level in resistance_levels:
             key = f"sr:{code}:{level}"
             if self._has_fired(key):
                 continue
             if abs(curr - level) / level <= tolerance:
-                cmp = '<' if curr < level else '>' if curr > level else '='
+                if curr > level:
+                    label, direction = '突破阻力', 'resistance_break'
+                elif curr < level:
+                    label, direction = '测试阻力', 'resistance_test'
+                else:
+                    label, direction = '触及阻力', 'resistance_test'
+                detail = self._sr_detail(curr, level, direction, support_levels, resistance_levels)
                 signals.append(self._make_signal(name, code,
-                    f'当前 {curr:.2f} {cmp} 阻力 {level}',
-                    '',
-                    {'alert_type': 'support_resistance', 'direction': 'resistance', 'level': level}))
+                    f'{label} {level} | 当前 {curr:.2f}',
+                    detail,
+                    {'alert_type': 'support_resistance', 'direction': direction, 'level': level}))
                 self._mark_fired(key)
 
         return signals
+
+    def _sr_detail(self, curr: float, level: float, direction: str,
+                   support_levels: list, resistance_levels: list) -> str:
+        """生成支撑/阻力告警的上下文：下一关键位 + 距离百分比"""
+        if direction == 'support_break':
+            nxt = next((s for s in support_levels if s < level), None)
+            if nxt:
+                dist = (nxt - curr) / curr * 100
+                return f"下方支撑 {nxt}({dist:+.1f}%)"
+            return "下方无支撑"
+        if direction == 'resistance_break':
+            nxt = next((r for r in resistance_levels if r > level), None)
+            if nxt:
+                dist = (nxt - curr) / curr * 100
+                return f"上方阻力 {nxt}({dist:+.1f}%)"
+            return "上方无阻力"
+        if direction == 'support_hold':
+            nxt = next((r for r in resistance_levels if r > curr), None)
+            if nxt:
+                dist = (nxt - curr) / curr * 100
+                return f"上方阻力 {nxt}({dist:+.1f}%)"
+        if direction == 'resistance_test':
+            nxt = next((s for s in support_levels if s < curr), None)
+            if nxt:
+                dist = (nxt - curr) / curr * 100
+                return f"下方支撑 {nxt}({dist:+.1f}%)"
+        return ''
 
     def _check_ma_crossover(self, code: str, name: str, curr: float, params: dict) -> list[Signal]:
         signals = []

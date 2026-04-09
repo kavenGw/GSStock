@@ -209,6 +209,7 @@ TDSequentialService.calculate()
 
 **AI分析调度**：
 - realtime：`watch_realtime` 策略，开盘时段每15分钟（`*/15 9-23 * * 1-5`，内部检查市场状态）
+- realtime 增量推送：`_realtime_push_state` 追踪每股当日已推状态，首次完整推送，后续仅推变化（信号/支撑阻力/摘要），无变化跳过
 - 7d/30d：每日简报推送时自动计算（8:00am），结果包含在 Slack 消息中
 - 分析入口：`WatchAnalysisService.analyze_stocks(period, force)`
 
@@ -348,20 +349,23 @@ TDSequentialService.calculate()
 
 ## 盯盘告警推送格式
 
-所有盯盘告警统一用 `>` `<` 直观显示价格与关键位的关系，一行展示核心信息，detail 仅放补充说明。
+盯盘告警 title 一行展示核心信息，detail 补充上下文。支撑/阻力用描述性标签（跌破/突破/测试/触及），其余用 `>` `<` 直观比较。
 
 | 告警类型 | 格式示例 |
 |---------|--------|
 | 盘中极值 | `当前 26.00 > 前高 25.50` |
 | 目标价 | `当前 26.00 > 目标 25.50` |
-| 支撑/阻力 | `当前 26.00 > 支撑 25.00` |
+| 跌破支撑 | `跌破支撑 25.00 \| 当前 24.95` + detail: `下方支撑 24.00(-3.8%)` |
+| 突破阻力 | `突破阻力 30.00 \| 当前 30.05` + detail: `上方阻力 32.00(+6.5%)` |
+| 测试支撑 | `测试支撑 25.00 \| 当前 25.05` + detail: `上方阻力 28.00(+11.8%)` |
+| 测试阻力 | `测试阻力 30.00 \| 当前 29.95` + detail: `下方支撑 28.00(-6.5%)` |
 | 均线穿越 | `上穿 当前 21.00 > MA5 20.50` |
 | 成交量异动 | `成交量 100 > 日均 50 (2.0x)` |
 | TD九转 | `TD九转买入信号 | 当前 26.00` |
 
 **涉及文件**：
 - `app/services/watch_alert_service.py` — 7种检测器（极值/目标价/支撑阻力/均线/成交量/TD九转）
-- `app/services/notification.py` — `push_realtime_analysis()` 实时分析推送格式
+- `app/services/notification.py` — `dispatch_signal()` direction→emoji 路由（🔴=up/buy/resistance_break, 🟢=down/sell/support_break），`push_realtime_analysis()` 实时分析推送格式
 - `app/strategies/volume_alert/__init__.py` — 收盘成交量异动策略
 
 ## 开发规范
