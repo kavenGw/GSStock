@@ -211,6 +211,7 @@ class UnifiedStockDataService:
         if hasattr(self, '_fetch_lock'):
             return
         self._fetch_lock = threading.Lock()
+        self._intraday_lock = threading.Lock()
         self._stock_name_cache = {}
         self._source_snapshots = {}
         self._snapshot_lock = threading.Lock()
@@ -1223,18 +1224,35 @@ class UnifiedStockDataService:
             return self._fetch_intraday_yfinance(code, interval)
 
     def _fetch_intraday_a_share(self, code: str, interval: str = '1m') -> dict:
+        import time as _time
         from app.services.akshare_client import ak
         period_map = {'1m': '1', '5m': '5', '15m': '15'}
         period = period_map.get(interval, '1')
+        empty = {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
 
+        with self._intraday_lock:
+            # 主接口: stock_zh_a_hist_min_em
+            result = self._fetch_intraday_a_share_hist(ak, code, period)
+            if result and result.get('data'):
+                _time.sleep(0.3)
+                return result
+
+            # Fallback: stock_intraday_em（逐笔成交→聚合OHLC）
+            logger.info(f"[数据服务.分时] {code} 主接口无数据，尝试逐笔聚合fallback")
+            result = self._fetch_intraday_a_share_tick(ak, code)
+            _time.sleep(0.3)
+            if result and result.get('data'):
+                return result
+
+            return empty
+
+    def _fetch_intraday_a_share_hist(self, ak, code: str, period: str) -> dict:
         try:
             df = ak.stock_zh_a_hist_min_em(symbol=code, period=period, adjust='qfq')
             if df is None or df.empty:
-                return {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
+                return None
 
             df['时间'] = df['时间'].astype(str)
-
-            # 直接取最近一天的数据（与 yfinance 行为一致）
             df['date_part'] = df['时间'].str[:10]
             target_str = df['date_part'].max()
             df_filtered = df[df['date_part'] == target_str]
@@ -1255,8 +1273,49 @@ class UnifiedStockDataService:
 
             return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': target_str}
         except Exception as e:
-            logger.warning(f"[数据服务.分时] A股 {code} akshare获取失败: {e}")
-            return {'stock_code': code, 'stock_name': '', 'data': [], 'trading_date': ''}
+            logger.warning(f"[数据服务.分时] A股 {code} hist_min获取失败: {e}")
+            return None
+
+    def _fetch_intraday_a_share_tick(self, ak, code: str) -> dict:
+        try:
+            df = ak.stock_intraday_em(symbol=code)
+            if df is None or df.empty:
+                return None
+
+            df['时间_parsed'] = pd.to_datetime(df['时间'], format='%H:%M:%S')
+            df['minute'] = df['时间_parsed'].dt.strftime('%H:%M')
+            df = df[
+                ((df['minute'] >= '09:30') & (df['minute'] <= '11:30')) |
+                ((df['minute'] >= '13:00') & (df['minute'] <= '15:00'))
+            ]
+            if df.empty:
+                return None
+
+            ohlc = df.groupby('minute').agg(
+                open=('成交价', 'first'),
+                high=('成交价', 'max'),
+                low=('成交价', 'min'),
+                close=('成交价', 'last'),
+                volume=('手数', 'sum')
+            ).reset_index()
+
+            trading_date = date.today().strftime('%Y-%m-%d')
+            data = []
+            for _, row in ohlc.iterrows():
+                data.append({
+                    'time': row['minute'],
+                    'open': float(row['open']),
+                    'high': float(row['high']),
+                    'low': float(row['low']),
+                    'close': float(row['close']),
+                    'volume': int(row['volume'])
+                })
+
+            logger.info(f"[数据服务.分时] {code} fallback成功: {len(data)}条")
+            return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': trading_date}
+        except Exception as e:
+            logger.warning(f"[数据服务.分时] A股 {code} intraday_em fallback失败: {e}")
+            return None
 
     def _fetch_intraday_yfinance(self, code: str, interval: str = '1m') -> dict:
         import yfinance as yf
