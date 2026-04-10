@@ -69,6 +69,9 @@ def _format_score(team1, score1, team2, score2, show_trophy=False):
 
 def _has_score_changed(match_type, match_id, new_score1, new_score2, new_status):
     """检测比分是否发生变化"""
+    if new_score1 == 0 and new_score2 == 0:
+        return False  # 0:0 不推送
+
     last = _get_last_score(match_type, match_id)
     if last is None:
         return True  # 首次记录，视为变化
