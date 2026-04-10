@@ -12,7 +12,7 @@ RETRY_DELAY_MINUTES = 10
 class VolumeAlertStrategy(Strategy):
     name = "volume_alert"
     description = "A股收盘成交量异动推送"
-    schedule = "50 15 * * 1-5"  # 工作日15:50，A股收盘后留足数据结算时间
+    schedule = "30 16 * * 1-5"  # 工作日16:30，等待数据源完成收盘结算
     needs_llm = False
 
     def scan(self, retry_codes: list = None) -> list[Signal]:
