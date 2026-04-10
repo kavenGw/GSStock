@@ -1,0 +1,1 @@
+{"nodes": [{"id": "github_trending", "label": "github_trending.py", "file_type": "code", "source_file": "app\\config\\github_trending.py", "source_location": "L1"}], "edges": [{"source": "github_trending", "target": "os", "relation": "imports", "confidence": "EXTRACTED", "source_file": "app\\config\\github_trending.py", "source_location": "L2", "weight": 1.0}]}

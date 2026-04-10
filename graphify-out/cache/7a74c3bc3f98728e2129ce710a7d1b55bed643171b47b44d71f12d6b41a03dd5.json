@@ -1,0 +1,1 @@
+{"nodes": [{"id": "news_config", "label": "news_config.py", "file_type": "code", "source_file": "app\\config\\news_config.py", "source_location": "L1"}], "edges": [{"source": "news_config", "target": "os", "relation": "imports", "confidence": "EXTRACTED", "source_file": "app\\config\\news_config.py", "source_location": "L2", "weight": 1.0}]}

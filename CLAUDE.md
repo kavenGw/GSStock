@@ -405,3 +405,12 @@ TDSequentialService.calculate()
 **避免**：
 - 同一信息重复出现（如标题行已截断描述 + 下方再输出完整描述）
 - 同一 emoji 表达不同含义（如 ⭐ 既标记标题又标记星数）
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current
