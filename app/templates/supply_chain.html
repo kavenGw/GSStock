@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}产业链图谱 - 股票管理{% endblock %}
+
+{% block extra_css %}
+<style>
+.chain-selector { cursor: pointer; transition: all .2s; }
+.chain-selector:hover, .chain-selector.active { border-color: #0d6efd !important; background: #f0f4ff; }
+.info-card { border-left: 4px solid #0d6efd; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin: 2px; }
+.tag-tech { background: #e3f2fd; color: #1565c0; }
+.tag-customer { background: #fce4ec; color: #c62828; }
+.tag-product { background: #e8f5e9; color: #2e7d32; }
+.tag-trend { background: #fff3e0; color: #e65100; }
+.legend-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; }
+#graph-container { width: 100%; height: 600px; border: 1px solid #dee2e6; border-radius: 8px; background: #fafafa; }
+.company-table th { font-size: 13px; white-space: nowrap; }
+.company-table td { font-size: 13px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-diagram-3"></i> 产业链图谱</h4>
+</div>
+
+<!-- 图谱选择 -->
+<div class="row mb-3">
+    {% for chain in chains %}
+    <div class="col-auto">
+        <div class="card chain-selector border-2 {% if loop.first %}active{% endif %}"
+             data-chain="{{ chain.key }}" onclick="loadChain('{{ chain.key }}', this)">
+            <div class="card-body py-2 px-3">
+                <strong>{{ chain.name }}</strong>
+                <span class="text-muted">({{ chain.code }})</span>
+                <div class="text-muted small">{{ chain.description }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 核心信息 -->
+<div class="row mb-3" id="core-info" style="display:none;">
+    <div class="col-md-12">
+        <div class="card info-card">
+            <div class="card-body py-2">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div>
+                        <strong class="me-1">核心技术</strong>
+                        <span id="tech-tags"></span>
+                    </div>
+                    <div class="border-start ps-3">
+                        <strong class="me-1">主要客户</strong>
+                        <span id="customer-tags"></span>
+                    </div>
+                    <div class="border-start ps-3">
+                        <strong class="me-1">产品</strong>
+                        <span id="product-tags"></span>
+                    </div>
+                    <div class="border-start ps-3">
+                        <strong class="me-1">趋势</strong>
+                        <span id="trend-tags"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图例 -->
+<div class="mb-2 small text-muted">
+    <span class="legend-dot" style="background:#c62828"></span>核心
+    <span class="legend-dot ms-2" style="background:#1565c0"></span>上游供应
+    <span class="legend-dot ms-2" style="background:#2e7d32"></span>中游代工
+    <span class="legend-dot ms-2" style="background:#e65100"></span>下游应用
+    <span class="legend-dot ms-2" style="background:#6a1b9a"></span>竞争对手
+</div>
+
+<!-- 关系图 -->
+<div id="graph-container"></div>
+
+<!-- 公司列表 -->
+<div class="row mt-3" id="company-tables" style="display:none;">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header py-2"><strong><i class="bi bi-arrow-up-circle"></i> 上游供应链</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0 company-table">
+                    <thead><tr><th>分类</th><th>公司</th><th>代码</th><th>角色</th></tr></thead>
+                    <tbody id="upstream-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header py-2"><strong><i class="bi bi-arrow-down-circle"></i> 中游代工/封装</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-hover mb-0 company-table">
+                    <thead><tr><th>分类</th><th>公司</th><th>代码</th><th>角色</th></tr></thead>
+                    <tbody id="midstream-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='vendor/js/echarts.min.js') }}"></script>
+<script>
+let chart = null;
+
+const COLORS = {
+    core: '#c62828',
+    upstream_group: '#1565c0',
+    upstream: '#42a5f5',
+    midstream_group: '#2e7d32',
+    midstream: '#66bb6a',
+    downstream: '#e65100',
+    competitor: '#6a1b9a',
+};
+
+function makeTags(items, cls) {
+    return items.map(t => `<span class="tag ${cls}">${t}</span>`).join('');
+}
+
+function buildTable(nodes, tbodyId, category) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    const groups = nodes.filter(n => n.category === category + '_group');
+    groups.forEach(g => {
+        const children = nodes.filter(n =>
+            n.category === category && n.detail && n.detail.code
+        );
+    });
+    // 按分组渲染
+    let groupNodes = nodes.filter(n => n.category === category + '_group');
+    groupNodes.forEach(g => {
+        const children = nodes.filter(n => {
+            if (n.category !== category) return false;
+            // 找该 group 的子节点（id 在 group id 之后到下一个 group 之前）
+            const nextGroup = groupNodes.find(ng => ng.id > g.id);
+            return n.id > g.id && (!nextGroup || n.id < nextGroup.id);
+        });
+        children.forEach((c, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${i === 0 ? g.name : ''}</td>
+                <td><strong>${c.detail.code ? c.name.split('\n')[0] : c.name}</strong></td>
+                <td><code>${c.detail.code || ''}</code></td>
+                <td class="text-muted">${c.detail.role || ''}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
+
+function renderGraph(data) {
+    if (!chart) {
+        chart = echarts.init(document.getElementById('graph-container'));
+        window.addEventListener('resize', () => chart.resize());
+    }
+
+    const categories = [
+        {name: '核心'},
+        {name: '上游分类'},
+        {name: '上游公司'},
+        {name: '中游分类'},
+        {name: '中游公司'},
+        {name: '下游应用'},
+        {name: '竞争对手'},
+    ];
+    const catMap = {
+        core: 0, upstream_group: 1, upstream: 2,
+        midstream_group: 3, midstream: 4, downstream: 5, competitor: 6,
+    };
+
+    const nodes = data.nodes.map(n => ({
+        id: String(n.id),
+        name: n.name,
+        symbolSize: n.symbolSize,
+        category: catMap[n.category],
+        itemStyle: { color: COLORS[n.category] },
+        detail: n.detail,
+        label: {
+            show: n.symbolSize >= 25,
+            fontSize: n.symbolSize >= 35 ? 12 : 10,
+        },
+    }));
+
+    const edges = data.edges.map(e => ({
+        source: String(e.source),
+        target: String(e.target),
+        label: e.label ? { show: true, formatter: e.label, fontSize: 10 } : undefined,
+        lineStyle: {
+            color: e.relation === 'compete' ? '#6a1b9a' : '#999',
+            type: e.relation === 'compete' ? 'dashed' : 'solid',
+        },
+    }));
+
+    chart.setOption({
+        tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+                if (params.dataType === 'node' && params.data.detail) {
+                    const d = params.data.detail;
+                    let html = `<strong>${params.data.name}</strong><br/>`;
+                    if (d.role) html += `角色: ${d.role}<br/>`;
+                    if (d.description) html += d.description;
+                    if (d.technologies) html += `技术: ${d.technologies.join(', ')}`;
+                    if (d.tag) html += `<br/>标签: ${d.tag}`;
+                    return html;
+                }
+                return params.data.name || '';
+            },
+        },
+        legend: { show: false },
+        series: [{
+            type: 'graph',
+            layout: 'force',
+            data: nodes,
+            links: edges,
+            categories: categories,
+            roam: true,
+            draggable: true,
+            force: {
+                repulsion: 300,
+                edgeLength: [80, 200],
+                gravity: 0.1,
+            },
+            lineStyle: { width: 1.5, curveness: 0.1 },
+            label: { position: 'bottom', color: '#333' },
+            emphasis: {
+                focus: 'adjacency',
+                lineStyle: { width: 3 },
+            },
+        }],
+    }, true);
+}
+
+function loadChain(name, el) {
+    document.querySelectorAll('.chain-selector').forEach(e => e.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    fetch(`/supply-chain/api/${name}`)
+        .then(r => r.json())
+        .then(data => {
+            // 核心信息
+            document.getElementById('core-info').style.display = '';
+            document.getElementById('tech-tags').innerHTML = makeTags(data.core.technologies, 'tag-tech');
+            document.getElementById('customer-tags').innerHTML = makeTags(data.core.customers, 'tag-customer');
+            document.getElementById('product-tags').innerHTML = makeTags(data.core.products, 'tag-product');
+            document.getElementById('trend-tags').innerHTML = makeTags(
+                [data.trends.bandwidth, ...data.trends.technologies], 'tag-trend'
+            );
+
+            // 图表
+            renderGraph(data);
+
+            // 表格
+            document.getElementById('company-tables').style.display = '';
+            buildTable(data.nodes, 'upstream-tbody', 'upstream');
+            buildTable(data.nodes, 'midstream-tbody', 'midstream');
+        });
+}
+
+// 初始加载
+{% if chains %}
+loadChain('{{ chains[0].key }}');
+{% endif %}
+</script>
+{% endblock %}
