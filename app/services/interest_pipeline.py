@@ -293,10 +293,24 @@ class InterestPipeline:
         re.compile(r'公司.{0,15}(?:业绩|营收|净利).{0,10}(?:翻倍|暴增|高增)'),
         re.compile(r'公司.{0,10}(?:全球|国内).{0,10}(?:龙头|第一|领先|市占率)'),
     ]
+    # 显式非A股语境：港股/美股 IPO、招股、挂牌等，即便触发词命中也直接排除
+    _NON_A_SHARE_EXCLUSIONS = [
+        re.compile(r'港股.{0,40}(?:募资|招股|挂牌|上市|IPO|发售|定价)'),
+        re.compile(r'美股.{0,40}(?:募资|招股|挂牌|上市|IPO|发售|定价)'),
+        re.compile(r'港元.{0,20}(?:募资|发售|定价|挂牌)'),
+        re.compile(r'拟(?:募资|IPO|挂牌|赴港|赴美)'),
+    ]
+    # 段落分隔符：①②③…⑩
+    _PARAGRAPH_MARKERS = '①②③④⑤⑥⑦⑧⑨⑩'
+    _PARAGRAPH_SPLIT = re.compile(f'(?=[{_PARAGRAPH_MARKERS}])')
 
     @staticmethod
     def _should_identify_company(content: str) -> bool:
         """判断是否应触发公司识别"""
+        # 显式非A股语境优先排除
+        for pat in InterestPipeline._NON_A_SHARE_EXCLUSIONS:
+            if pat.search(content):
+                return False
         # 强触发：分析师推荐语言
         for pat in InterestPipeline._STRONG_COMPANY_PATTERNS:
             if pat.search(content):
@@ -309,48 +323,68 @@ class InterestPipeline:
         return False
 
     @staticmethod
+    def _split_numbered_paragraphs(content: str) -> list[tuple[str, str]]:
+        """按 ①②③ 编号拆段；无编号时返回单段。返回 [(marker, text), ...]"""
+        parts = [p.strip() for p in InterestPipeline._PARAGRAPH_SPLIT.split(content) if p.strip()]
+        numbered = [(p[0], p) for p in parts if p and p[0] in InterestPipeline._PARAGRAPH_MARKERS]
+        return numbered if numbered else [('', content)]
+
+    @staticmethod
     def _identify_company(content: str) -> tuple[str | None, str]:
-        """用 Gemini 识别推送中描述的未具名公司，返回 (结果, 错误原因)"""
+        """用 Gemini 识别推送中描述的未具名公司，返回 (结果, 错误原因)
+
+        多段（①②③）内容会拆分后逐段调用 LLM，避免一次请求漏段。
+        """
         if not InterestPipeline._should_identify_company(content):
             return None, '未匹配公司识别触发条件'
         try:
             from app.llm.prompts.company_identify import (
                 COMPANY_IDENTIFY_SYSTEM_PROMPT, build_company_identify_prompt,
             )
-            messages = [
-                {'role': 'system', 'content': COMPANY_IDENTIFY_SYSTEM_PROMPT},
-                {'role': 'user', 'content': build_company_identify_prompt(content)},
-            ]
-
             from app.llm.router import llm_router
             provider = llm_router.route('company_identify')
             if not provider:
                 return None, 'LLM provider 不可用（Gemini/GLM 均未配置）'
 
-            result = provider.chat(messages, temperature=0.1, max_tokens=500).strip()
-            if result and result != '无法确定':
-                return result, ''
-            return None, f'LLM 返回: {result or "空响应"}'
+            paragraphs = InterestPipeline._split_numbered_paragraphs(content)
+            results: list[str] = []
+            for marker, para in paragraphs:
+                messages = [
+                    {'role': 'system', 'content': COMPANY_IDENTIFY_SYSTEM_PROMPT},
+                    {'role': 'user', 'content': build_company_identify_prompt(para)},
+                ]
+                try:
+                    resp = provider.chat(messages, temperature=0.1, max_tokens=300).strip()
+                except Exception as e:
+                    logger.warning(f'[兴趣] 公司识别分段调用失败 marker={marker!r}: {e}')
+                    continue
+                if not resp or '无法确定' in resp:
+                    continue
+                # 取首行，避免 LLM 附带多行解释
+                line = resp.splitlines()[0].strip()
+                results.append(f'{marker} {line}'.strip() if marker else line)
+
+            if results:
+                return '\n'.join(results), ''
+            return None, 'LLM 全部段落返回无法确定或为空'
         except Exception as e:
             logger.error(f'[兴趣] 公司识别失败: {e}')
             return None, f'异常: {e}'
 
     @staticmethod
     def _identify_and_notify_companies(items: list[NewsItem]):
-        """对所有含未具名公司暗示的新闻做公司识别，识别成功推送结果，失败推送原因"""
+        """对所有含未具名公司暗示的新闻做公司识别；仅成功时推送，失败只记日志避免噪音"""
         from app.services.notification import NotificationService
         for n in items:
             if not InterestPipeline._should_identify_company(n.content):
                 continue
             identified, error = InterestPipeline._identify_company(n.content)
             if identified:
-                msg = f"🔍 AI公司识别: {identified}\n\n{n.content}"
+                msg = f"🔍 AI公司识别:\n{identified}\n\n{n.content}"
                 InterestPipeline._save_identified_companies(n.content, identified)
                 NotificationService.send_slack(msg)
             else:
-                msg = f"⚠️ AI公司识别失败: {error}\n\n{n.content}"
-                NotificationService.send_slack(msg)
-                logger.warning(f'[兴趣] 公司识别失败: {error}, 内容: {n.content[:80]}')
+                logger.info(f'[兴趣] 公司识别跳过: {error}, 内容: {n.content[:80]}')
 
     @staticmethod
     def _notify_interest_slack(items: list[NewsItem]):
