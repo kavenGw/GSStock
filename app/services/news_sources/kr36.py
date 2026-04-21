@@ -1,6 +1,7 @@
 """36kr新闻源 (RSS)"""
 import logging
 import hashlib
+import re
 from datetime import datetime
 from time import mktime
 import requests
@@ -10,6 +11,9 @@ from app.services.news_sources.base import NewsSourceBase
 logger = logging.getLogger(__name__)
 
 KR36_RSS_URL = 'https://36kr.com/feed'
+
+# 36kr 服务端偶发推送含 U+FFFD 的坏标题，压成省略号保留其余内容
+_FFFD_RUN = re.compile('�+')
 
 
 class Kr36Source(NewsSourceBase):
@@ -25,7 +29,7 @@ class Kr36Source(NewsSourceBase):
             raise ValueError(f'RSS解析失败: {feed.bozo_exception}')
         results = []
         for entry in feed.entries[:20]:
-            title = entry.get('title', '')
+            title = _FFFD_RUN.sub('…', entry.get('title', ''))
             source_id = entry.get('id') or hashlib.md5(title.encode()).hexdigest()
             published = entry.get('published_parsed')
             ts = mktime(published) if published else datetime.now().timestamp()
