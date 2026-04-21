@@ -74,7 +74,7 @@ def _has_score_changed(match_type, match_id, new_score1, new_score2, new_status)
 
     last = _get_last_score(match_type, match_id)
     if last is None:
-        return True  # 首次记录，视为变化
+        return True  # 首次记录（且非 0:0），视为变化
 
     # 比分变化
     if last['score1'] != new_score1 or last['score2'] != new_score2:
@@ -413,6 +413,12 @@ class EsportsMonitorService:
 
         # 比赛结束：推送最终比分
         if status == 'completed':
+            # completed + 0:0 一定是 API 脏数据（BO 系列赛不可能零封收官），
+            # 保留 job 等待后续轮询获取真实终局比分
+            if score1 + score2 == 0:
+                logger.warning(f'[赛事监控] {job_id} completed+0:0 脏数据，跳过推送等待重试')
+                return
+
             # API状态转completed时gameWins可能尚未更新，与缓存比分对比后重试
             last = _get_last_score('lol', match_id)
             if last and score1 == last['score1'] and score2 == last['score2']:
@@ -432,7 +438,7 @@ class EsportsMonitorService:
             logger.info(f'[赛事监控] {job_id} 比赛结束，移除')
             return
 
-        # 比赛进行中：仅在比分变化时推送
+        # 比赛进行中：0:0 也要记录 baseline 供 completed 分支重试比对
         if status == 'in_progress':
             if _has_score_changed('lol', match_id, score1, score2, status):
                 score_text = _format_score(match['team1'], score1, match['team2'], score2)
@@ -441,6 +447,7 @@ class EsportsMonitorService:
                 _update_score('lol', match_id, score1, score2, status)
                 logger.info(f'[赛事监控] LoL比分变化: {match["team1"]} {score1}-{score2} {match["team2"]}')
             else:
+                _update_score('lol', match_id, score1, score2, status)
                 logger.debug(f'[赛事监控] {job_id} 比分未变化，跳过推送')
 
     def _cleanup_monitors(self, match_type=None):
