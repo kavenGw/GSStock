@@ -58,13 +58,25 @@ class VolumeAlertStrategy(Strategy):
                 continue
 
             last_date = ohlc[-1].get('date', '')
-            if last_date != today_str:
-                missing_codes.append(code)
-                logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}")
-                continue
+            rt = realtime.get(code) or {}
 
-            today_vol = ohlc[-1].get('volume', 0)
-            prev_vol = ohlc[-2].get('volume', 0)
+            if last_date != today_str:
+                # OHLC 主源未出今日 bar，用 realtime 合成（腾讯 qt.gtimg.cn volume 已转"手"，与 OHLC 对齐）
+                rt_vol = rt.get('volume')
+                if rt_vol:
+                    today_vol = rt_vol
+                    prev_vol = ohlc[-1].get('volume', 0)  # 此时 ohlc[-1] 即昨日
+                    price_change = rt.get('change_percent', rt.get('change_pct', 0)) or 0
+                    logger.info(f"[成交量异动] {code} {name} 使用realtime合成今日bar: vol={today_vol:,}")
+                else:
+                    missing_codes.append(code)
+                    logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}, realtime 无 volume")
+                    continue
+            else:
+                today_vol = ohlc[-1].get('volume', 0)
+                prev_vol = ohlc[-2].get('volume', 0)
+                price_change = rt.get('change_pct', ohlc[-1].get('change_pct', 0))
+
             if not prev_vol or not today_vol:
                 continue
 
@@ -74,8 +86,6 @@ class VolumeAlertStrategy(Strategy):
 
             direction = '放量' if change_pct > 0 else '缩量'
             pct_str = f"{abs(change_pct):.0%}"
-            rt = realtime.get(code, {})
-            price_change = rt.get('change_pct', ohlc[-1].get('change_pct', 0))
             price_str = f"+{price_change:.2f}%" if price_change >= 0 else f"{price_change:.2f}%"
 
             vol_cmp = '>' if change_pct > 0 else '<'

@@ -10,7 +10,7 @@ import logging
 import threading
 import pandas as pd
 from dataclasses import dataclass, asdict
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, time, timedelta
 from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -1506,6 +1506,26 @@ class UnifiedStockDataService:
             )
             results.extend(yf_results)
 
+        # A 股今日 bar 兜底：15:00 后若主源返回的末日非今日，用东财直连补齐
+        if a_share_codes and datetime.now().time() >= time(15, 0) \
+                and TradingCalendarService.is_trading_day('A', today):
+            today_str = today.strftime('%Y-%m-%d')
+            stale = [r for r in results
+                     if r.get('stock_code') in a_share_codes
+                     and r.get('data')
+                     and r['data'][-1].get('date') != today_str]
+            if stale:
+                stale_codes = [r['stock_code'] for r in stale]
+                logger.info(f"[数据服务.走势] {len(stale_codes)}只A股末日非今日，东财直连补齐: {stale_codes}")
+                patched = self._fetch_trend_from_eastmoney_direct(
+                    stale_codes, days, start_date, today, stock_name_map, stock_categories
+                )
+                patched_map = {r['stock_code']: r for r in patched
+                               if r.get('data') and r['data'][-1].get('date') == today_str}
+                for r in results:
+                    if r['stock_code'] in patched_map:
+                        r['data'] = patched_map[r['stock_code']]['data']
+
         # 保存到缓存
         for result in results:
             code = result['stock_code']
@@ -2003,6 +2023,72 @@ class UnifiedStockDataService:
         if results:
             names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
             logger.info(f"[数据服务.走势] {today} 腾讯 → {names} ({len(results)}只)")
+
+        return results
+
+    def _fetch_trend_from_eastmoney_direct(self, stock_codes: list, days: int, start_date: date,
+                                            today: date, stock_name_map: dict, stock_categories: dict) -> list:
+        """东财 push2his 直连接口（不走 akshare），用于日 K 今日 bar 缺失时的兜底补齐"""
+        import requests
+
+        results = []
+        headers = {'User-Agent': 'Mozilla/5.0'}
+
+        for code in stock_codes:
+            try:
+                secid = f"1.{code}" if code.startswith(('6', '5')) else f"0.{code}"
+                url = (
+                    f"http://push2his.eastmoney.com/api/qt/stock/kline/get"
+                    f"?secid={secid}&klt=101&fqt=1"
+                    f"&beg={start_date.strftime('%Y%m%d')}&end={today.strftime('%Y%m%d')}"
+                    f"&lmt={days}"
+                    f"&fields1=f1,f2,f3,f4,f5"
+                    f"&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61"
+                )
+                resp = requests.get(url, timeout=10, headers=headers)
+                payload = resp.json() or {}
+                data = payload.get('data') or {}
+                klines = data.get('klines') or []
+                if len(klines) < 2:
+                    continue
+
+                base_price = float(klines[0].split(',')[2])
+                points = []
+                for kl in klines:
+                    parts = kl.split(',')
+                    if len(parts) < 6:
+                        continue
+                    date_str = parts[0]
+                    if not self._is_valid_date_format(date_str):
+                        continue
+                    close_price = float(parts[2])
+                    points.append({
+                        'date': date_str,
+                        'open': round(float(parts[1]), 2),
+                        'close': round(close_price, 2),
+                        'high': round(float(parts[3]), 2),
+                        'low': round(float(parts[4]), 2),
+                        'volume': int(float(parts[5])) if parts[5] else 0,
+                        'change_pct': round((close_price - base_price) / base_price * 100, 2),
+                    })
+
+                if len(points) >= 2:
+                    sc = stock_categories.get(code, {})
+                    stock_name = stock_name_map.get(code, code)
+                    results.append({
+                        'stock_code': code,
+                        'stock_name': stock_name,
+                        'category_id': sc.get('category_id'),
+                        'data': points,
+                    })
+                    logger.debug(f"[数据服务.获取] {code} {stock_name} 成功 (eastmoney_direct)")
+            except Exception as e:
+                stock_name = stock_name_map.get(code, code)
+                logger.debug(f"[数据服务.获取] {code} {stock_name} 失败 (eastmoney_direct): {e}")
+
+        if results:
+            names = ', '.join(f"{r['stock_name']}({len(r['data'])}天)" for r in results)
+            logger.info(f"[数据服务.走势] {today} 东财直连 → {names} ({len(results)}只)")
 
         return results
 
