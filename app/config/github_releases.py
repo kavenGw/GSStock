@@ -19,4 +19,10 @@ GITHUB_RELEASE_REPOS = [
         'name': 'OpenClaw',
         'emoji': '🦀',
     },
+    {
+        'key': 'oh-my-claudecode',
+        'repo': 'yeachan-heo/oh-my-claudecode',
+        'name': 'oh-my-claudecode',
+        'emoji': '🧩',
+    },
 ]
