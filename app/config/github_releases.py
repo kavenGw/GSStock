@@ -37,4 +37,10 @@ GITHUB_RELEASE_REPOS = [
         'name': 'graphify',
         'emoji': '🕸️',
     },
+    {
+        'key': 'rtk',
+        'repo': 'rtk-ai/rtk',
+        'name': 'RTK',
+        'emoji': '🪙',
+    },
 ]
