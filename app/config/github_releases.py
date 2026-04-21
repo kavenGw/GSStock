@@ -31,4 +31,10 @@ GITHUB_RELEASE_REPOS = [
         'name': 'Buffett Skills',
         'emoji': '💰',
     },
+    {
+        'key': 'graphify',
+        'repo': 'safishamsi/graphify',
+        'name': 'graphify',
+        'emoji': '🕸️',
+    },
 ]
