@@ -15,6 +15,9 @@ pip install -r requirements.txt
 # 脚本中查询数据库（禁用调度器，避免后台任务阻塞）
 SCHEDULER_ENABLED=0 python -c "from app import create_app; app = create_app(); ..."
 
+# Windows 下 python -c 打印含 emoji 的对象，需指定 UTF-8 避免 cp950 编码错误
+PYTHONIOENCODING=utf-8 python -c "..."
+
 # 启动应用
 python run.py
 
@@ -399,6 +402,8 @@ TDSequentialService.calculate()
 ## 开发规范
 
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
+
+**安装第三方仓库时**：无论是 Claude Code skill/plugin 还是其他工具仓库，完成安装后需同步添加到 `app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`，以便监控新版本
 
 ### Slack 推送排版规范
 

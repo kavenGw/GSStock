@@ -25,4 +25,10 @@ GITHUB_RELEASE_REPOS = [
         'name': 'oh-my-claudecode',
         'emoji': '🧩',
     },
+    {
+        'key': 'buffett-skills',
+        'repo': 'agi-now/buffett-skills',
+        'name': 'Buffett Skills',
+        'emoji': '💰',
+    },
 ]
