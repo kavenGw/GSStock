@@ -275,6 +275,22 @@ TDSequentialService.calculate()
 
 每日 5:00 独立调度爬取 github.com/trending 页面 Top N 项目，与已推送记录比对，仅推送新上榜的项目（含 GLM 中文摘要）到 `news_ai_tool` 频道。首次运行只记录不推送。
 
+## GitHub Release 监控配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|-------|
+| `CLAUDE_PLUGINS_DIR` | Claude Code 插件目录（动态发现本地已装插件所属仓库） | `~/.claude/plugins` |
+
+监控仓库列表 = 静态配置（`app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`） ∪ 本地已装 Claude Code 插件对应 marketplace 仓库，按 `repo` 去重（静态优先保留自定义 `name`/`emoji`/`key`）。
+
+动态发现逻辑（`app/services/plugin_discovery.py`）：
+- 读取 `$CLAUDE_PLUGINS_DIR/installed_plugins.json` 提取已装插件所属的 marketplace 名
+- 在 `known_marketplaces.json` 查每个 marketplace 的 `source`，支持 `{source: 'github', repo: ...}` 和 `{source: 'git', url: 'https://github.com/.../.git'}`
+- 非 github.com 源、目录不存在、JSON 损坏均安全降级为空列表（只用静态配置）
+- 动态条目 `key` 统一加 `marketplace_` 前缀避免与静态 key 冲突
+
+注意：不使用 GitHub Releases 发版的仓库（仅 commit 或 tag，如 `anthropics/claude-plugins-official`、`supabase/agent-skills`）纳入监控后不会产生推送，直到其首次发 Release。
+
 ## Slack 推送配置
 
 | 环境变量 | 说明 | 默认值 |

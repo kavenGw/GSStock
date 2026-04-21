@@ -97,9 +97,18 @@ class GitHubReleaseService:
 
     @staticmethod
     def get_all_updates() -> list[dict]:
-        """遍历所有配置仓库，返回每个仓库的更新"""
+        """遍历静态配置 + 本地已装插件对应仓库（按 repo 去重，静态优先），返回每个仓库的更新"""
+        from app.services.plugin_discovery import discover_plugin_repos
+
+        seen_repos = {cfg['repo'].lower() for cfg in GITHUB_RELEASE_REPOS}
+        merged = list(GITHUB_RELEASE_REPOS)
+        for cfg in discover_plugin_repos():
+            if cfg['repo'].lower() not in seen_repos:
+                merged.append(cfg)
+                seen_repos.add(cfg['repo'].lower())
+
         results = []
-        for repo_cfg in GITHUB_RELEASE_REPOS:
+        for repo_cfg in merged:
             releases = GitHubReleaseService.get_new_releases(repo_cfg['repo'], repo_cfg['key'])
             results.append({'config': repo_cfg, 'releases': releases})
         return results
