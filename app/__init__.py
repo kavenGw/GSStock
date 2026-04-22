@@ -237,7 +237,7 @@ def create_app(config_class=None):
             stock_db_path, _ = get_db_paths(app)
             cleanup_legacy_tables(stock_db_path)
 
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, strategy_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, supply_chain_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, supply_chain_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
@@ -250,7 +250,6 @@ def create_app(config_class=None):
     app.register_blueprint(heavy_metals_bp)
     app.register_blueprint(alert_bp)
     app.register_blueprint(briefing_bp)
-    app.register_blueprint(strategy_bp)
     app.register_blueprint(stock_detail_bp)
     app.register_blueprint(watch_bp)
     app.register_blueprint(news_bp)
@@ -259,7 +258,18 @@ def create_app(config_class=None):
     app.register_blueprint(supply_chain_bp)
 
     with app.app_context():
-        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, TradingStrategy, StrategyExecution, WatchList, WatchAnalysis, NewsItem, InterestKeyword, EarningsSnapshot
+        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, WatchList, WatchAnalysis, NewsItem, InterestKeyword, EarningsSnapshot
+
+        # 一次性迁移：移除交易策略模块遗留表（2026-04-22 起）
+        from sqlalchemy import inspect as sa_inspect, text
+        _insp = sa_inspect(db.engine)
+        _existing = set(_insp.get_table_names())
+        for _t in ('strategy_executions', 'trading_strategies'):
+            if _t in _existing:
+                with db.engine.connect() as _conn:
+                    _conn.execute(text(f'DROP TABLE IF EXISTS {_t}'))
+                    _conn.commit()
+                logging.info(f'[移除] 已删除交易策略遗留表 {_t}')
 
         db.create_all()
 
@@ -291,10 +301,6 @@ def create_app(config_class=None):
                 db.session.execute(text("ALTER TABLE watch_analysis ADD COLUMN period VARCHAR(10) NOT NULL DEFAULT '30d'"))
                 db.session.commit()
                 logging.info('[迁移] watch_analysis 新增 period 字段')
-
-        # 初始化默认交易策略
-        from app.services.trading_strategy import TradingStrategyService
-        TradingStrategyService.init_default_strategies()
 
         # 初始化市场状态缓存（仅 reloader 子进程，父进程不处理请求）
         if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or 'werkzeug' not in sys.modules:

@@ -144,14 +144,13 @@ GSStock 是一个功能完善的个人股票投资组合管理系统，基于 Fl
 │   │   ├── stock_codes.py         # 期货/指数/分类代码
 │   │   ├── data_sources.py        # 数据源优先级配置
 │   │   └── sector_ratings.py      # 板块评级配置
-│   ├── models/                     # SQLAlchemy ORM 模型 (21个)
+│   ├── models/                     # SQLAlchemy ORM 模型
 │   │   ├── position.py            # 持仓模型
 │   │   ├── trade.py               # 交易模型
 │   │   ├── unified_cache.py       # 核心缓存模型
 │   │   ├── wyckoff.py             # 威科夫分析模型
-│   │   ├── trading_strategy.py    # 交易策略模型
 │   │   └── ...
-│   ├── routes/                     # Flask 蓝图 (15个)
+│   ├── routes/                     # Flask 蓝图
 │   │   ├── main.py                # 首页路由
 │   │   ├── position.py            # 持仓管理路由
 │   │   ├── briefing.py            # 市场简报路由
@@ -292,8 +291,6 @@ class UnifiedStockCache(db.Model):
 | SignalCache | shared | 信号缓存 |
 | WyckoffReference | shared | 威科夫参考图 |
 | WyckoffAnalysis | private | 威科夫分析记录 |
-| TradingStrategy | private | 交易策略 |
-| StrategyExecution | private | 策略执行记录 |
 | Settlement | private | 结算记录 |
 | PositionPlan | private | 再平衡计划 |
 | RebalanceConfig | private | 再平衡配置 |
@@ -597,7 +594,6 @@ class SignalDetectorService:
 | preload | / | 后台数据预加载 |
 | alert | /alert | 价格/信号预警 |
 | briefing | /briefing | 每日市场简报 |
-| strategy | /strategies | 交易策略 |
 
 ### 6.2 主要API端点
 
@@ -697,7 +693,6 @@ POST /rebalance/calculate
 | profit/*.html | 日盈亏/总盈亏图表 |
 | rebalance.html | 组合再平衡 |
 | stock_manage.html | 股票代码 CRUD |
-| trading_strategy.html | 策略管理 |
 | wyckoff_*.html | 威科夫分析 |
 | category.html | 分类管理 |
 
@@ -716,7 +711,6 @@ POST /rebalance/calculate
 | profit_charts.js | 盈亏可视化 | 12KB |
 | rebalance.js | 再平衡计算器 | 9.5KB |
 | wyckoff.js | 形态图表 UI | - |
-| trading_strategy.js | 策略管理 | 13KB |
 | relative.js | 比较分析 | 12KB |
 | trade_stats.js | 交易统计 | 15KB |
 
