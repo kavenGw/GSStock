@@ -61,7 +61,7 @@ class VolumeAlertStrategy(Strategy):
             rt = realtime.get(code) or {}
 
             if last_date != today_str:
-                # OHLC 主源未出今日 bar，用 realtime 合成（腾讯 qt.gtimg.cn volume 已转"手"，与 OHLC 对齐）
+                # OHLC 主源未出今日 bar，用 realtime 合成（所有源 volume 已统一归一为"手"）
                 rt_vol = rt.get('volume')
                 if rt_vol:
                     today_vol = rt_vol
@@ -79,6 +79,26 @@ class VolumeAlertStrategy(Strategy):
 
             if not prev_vol or not today_vol:
                 continue
+
+            # Sanity gate 1: 比值异常（单位错乱或脏数据）— 真实极端异动罕见 >30x
+            ratio = today_vol / prev_vol
+            if ratio > 30 or ratio < 1 / 30:
+                logger.warning(
+                    f'[成交量异动] {code} {name} 比值异常跳过: '
+                    f'today={today_vol:,} prev={prev_vol:,} ratio={ratio:.2f}'
+                )
+                continue
+
+            # Sanity gate 2: 今日 bar 残缺（低于近 5 日均量 1% 视为数据不完整）
+            recent_vols = [p.get('volume', 0) for p in ohlc[-5:] if p.get('volume')]
+            if recent_vols:
+                avg_5d = sum(recent_vols) / len(recent_vols)
+                if avg_5d > 0 and today_vol < avg_5d * 0.01:
+                    logger.warning(
+                        f'[成交量异动] {code} {name} 今日bar疑残缺跳过: '
+                        f'today={today_vol:,} 5d均量={avg_5d:,.0f}'
+                    )
+                    continue
 
             change_pct = (today_vol - prev_vol) / prev_vol
             if abs(change_pct) < VOLUME_CHANGE_THRESHOLD:

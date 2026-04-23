@@ -5,6 +5,8 @@
 - 交易时段内: 30分钟TTL
 - 收盘后: 次日开盘前有效
 - 非交易日: 下个交易日开盘前有效
+
+单位契约：所有 A 股 OHLC/realtime volume 字段统一为"手"（腾讯/新浪源解析时 /100 归一）。
 """
 import logging
 import threading
@@ -26,6 +28,10 @@ from app.utils.market_identifier import MarketIdentifier
 from app.utils.readonly_mode import is_readonly_mode
 
 logger = logging.getLogger(__name__)
+
+
+# 缓存 volume 单位契约版本；变更契约时 bump 触发启动时全量清理
+VOLUME_UNIT_SCHEMA_VERSION = 2
 
 
 # 数据类型定义
@@ -216,6 +222,78 @@ class UnifiedStockDataService:
         self._source_snapshots = {}
         self._snapshot_lock = threading.Lock()
         self._SNAPSHOT_TTL = 120
+        self._check_cache_schema_version()
+
+    def _check_cache_schema_version(self):
+        """启动时校验缓存单位契约版本，不匹配则清理所有 volume 相关缓存"""
+        from pathlib import Path
+        version_file = Path('data/memory_cache/.schema_version')
+        current_version = None
+        if version_file.exists():
+            try:
+                current_version = int(version_file.read_text().strip())
+            except (ValueError, OSError):
+                current_version = None
+
+        if current_version == VOLUME_UNIT_SCHEMA_VERSION:
+            return
+
+        logger.warning(
+            f'[数据服务.缓存] schema 版本不匹配 (当前={current_version}, '
+            f'期望={VOLUME_UNIT_SCHEMA_VERSION})，清理 volume 相关缓存'
+        )
+        self._clear_volume_related_cache()
+        try:
+            version_file.parent.mkdir(parents=True, exist_ok=True)
+            version_file.write_text(str(VOLUME_UNIT_SCHEMA_VERSION))
+        except OSError as e:
+            logger.error(f'[数据服务.缓存] 写入 schema_version 失败: {e}')
+
+    def _clear_volume_related_cache(self):
+        """清理内存缓存 + 数据库缓存中与 volume 相关的条目
+
+        数据库清理需要 Flask app context。无上下文时仅清理内存缓存，
+        数据库条目通过 TTL 过期或后续 force_refresh 覆盖。
+        """
+        from pathlib import Path
+        cache_dir = Path('data/memory_cache')
+        removed_pkl = 0
+        if cache_dir.exists():
+            for stock_dir in cache_dir.iterdir():
+                if not stock_dir.is_dir():
+                    continue
+                for pkl in stock_dir.glob('*.pkl'):
+                    if pkl.stem.startswith(('ohlc_', 'price', 'index')):
+                        try:
+                            pkl.unlink()
+                            removed_pkl += 1
+                        except OSError:
+                            pass
+
+        deleted = 0
+        try:
+            from flask import has_app_context
+            if not has_app_context():
+                logger.info(
+                    f'[数据服务.缓存] 无 Flask 上下文，仅清理内存缓存（pkl={removed_pkl}），'
+                    f'数据库条目将由 TTL/force_refresh 覆盖'
+                )
+                return
+            deleted = UnifiedStockCache.query.filter(
+                UnifiedStockCache.cache_type.in_(['price', 'index']) |
+                UnifiedStockCache.cache_type.like('ohlc_%')
+            ).delete(synchronize_session=False)
+            db.session.commit()
+        except Exception as e:
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
+            logger.error(f'[数据服务.缓存] 清理数据库缓存失败: {e}')
+
+        logger.info(
+            f'[数据服务.缓存] volume 相关缓存已清理: pkl={removed_pkl}, db={deleted}'
+        )
 
     def _get_source_snapshot(self, source_key: str):
         with self._snapshot_lock:
@@ -728,7 +806,8 @@ class UnifiedStockDataService:
                             'current_price': float(row['最新价']) if row['最新价'] else None,
                             'change': float(row.get('涨跌额', 0)) if row.get('涨跌额') else None,
                             'change_percent': float(row['涨跌幅']) if row['涨跌幅'] else None,
-                            'volume': int(row['成交量']) if row.get('成交量') else None,
+                            # 新浪 stock_zh_a_spot 返回"股"，/100 归一到"手"（与腾讯/东财对齐）
+                            'volume': int(row['成交量']) // 100 if row.get('成交量') else None,
                             'high': float(row['最高']) if row.get('最高') else None,
                             'low': float(row['最低']) if row.get('最低') else None,
                             'open': float(row['今开']) if row.get('今开') else None,
@@ -1667,7 +1746,8 @@ class UnifiedStockDataService:
                         'low': round(float(row['low']), 2),
                         'close': round(float(row['close']), 2),
                         'change_pct': 0,
-                        'volume': int(row['volume']) if row.get('volume') else 0
+                        # 新浪 stock_zh_a_daily 返回"股"，/100 归一到"手"
+                        'volume': int(row['volume']) // 100 if row.get('volume') else 0
                     })
                 return data_points if data_points else None
 
@@ -1694,7 +1774,8 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(float(row[2]), 2),
                         'change_pct': 0,
-                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
+                        # 腾讯 fqkline 日K row[5] 是"股"，/100 归一到"手"
+                        'volume': int(float(row[5]) / 100) if len(row) > 5 and row[5] else 0
                     })
                 return data_points if data_points else None
 
@@ -2002,7 +2083,8 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(close_price, 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
+                        # 腾讯 fqkline 日K row[5] 是"股"，/100 归一到"手"
+                        'volume': int(float(row[5]) / 100) if len(row) > 5 and row[5] else 0
                     })
 
                 if len(data_points) >= 2:

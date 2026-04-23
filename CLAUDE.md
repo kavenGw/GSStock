@@ -18,6 +18,9 @@ SCHEDULER_ENABLED=0 python -c "from app import create_app; app = create_app(); .
 # Windows 下 python -c 打印含 emoji 的对象，需指定 UTF-8 避免 cp950 编码错误
 PYTHONIOENCODING=utf-8 python -c "..."
 
+# 运行单测（禁用调度器 + UTF-8 编码）
+PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
+
 # 启动应用
 python run.py
 
@@ -59,6 +62,8 @@ app/
 **OCR 流程**：图片上传 → Pillow 预处理 → Tesseract 识别 → 正则解析提取股票代码/名称/数量/价格
 
 **服务层模式**：业务逻辑放在 `services/`，路由保持简洁
+
+**模块级单例的 Flask context 陷阱**：`app/services/__init__.py` 的 `unified_stock_data_service = UnifiedStockDataService()` 在 import 期就会触发 `__init__`，此时无 Flask app context；任何访问 `db.session` 或 `<Model>.query` 的 init 期代码必须用 `has_app_context()` 守卫
 
 ## 统一股票数据API
 
@@ -105,6 +110,17 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 | OHLC走势 | `ohlc_{days}` | 交易时段30分钟 / 收盘后8小时 |
 | 指数数据 | `index` | 交易时段30分钟 / 收盘后8小时 |
 | 季度财报 | `quarterly_earnings` | 7天 |
+
+### Volume 单位契约
+
+所有 A 股 OHLC/realtime 的 `volume` 字段统一为**"手"** 单位（1手=100股）。
+
+- 腾讯 `qt.gtimg.cn` / `fqkline` 日K原生返回"股"，解析时 `/100` 归一
+- 新浪 `stock_zh_a_spot` / `stock_zh_a_daily` 原生返回"股"，解析时 `//100` 归一
+- 东财 akshare `stock_zh_a_hist` / `stock_zh_a_spot_em` 原生是"手"，保持不变
+- 东财直连 push2his、ETF `fund_etf_hist_em` 原生是"手"，保持不变
+
+**VOLUME_UNIT_SCHEMA_VERSION 机制**：`app/services/unified_stock_data.py` 顶部定义版本常量，启动时校验 `data/memory_cache/.schema_version`。版本不匹配则自动清理内存缓存（`ohlc_*/price/index` pkl）和数据库缓存（`UnifiedStockCache` 对应 `cache_type` 行）。单位契约变更时 bump 该常量触发全量清理。
 
 ### 腾讯HTTP数据源
 
