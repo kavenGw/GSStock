@@ -152,6 +152,19 @@ def setup_logging(app):
     root_logger.addHandler(error_handler)
     root_logger.addHandler(console_handler)
 
+    # match.log - 赛事监控专用（2MB轮转，保留5份），便于排查 NBA/LoL 推送问题
+    match_handler = SafeRotatingFileHandler(
+        os.path.join(log_dir, 'match.log'),
+        maxBytes=2*1024*1024, backupCount=5,
+        encoding='utf-8'
+    )
+    match_handler.setLevel(logging.DEBUG)
+    match_handler.setFormatter(formatter)
+    for name in ('app.services.esports_service', 'app.services.esports_monitor_service'):
+        lg = logging.getLogger(name)
+        lg.setLevel(logging.DEBUG)
+        lg.addHandler(match_handler)
+
     # 抑制第三方库噪音
     logging.getLogger('yfinance').setLevel(logging.CRITICAL)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
