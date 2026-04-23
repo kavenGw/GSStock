@@ -342,6 +342,11 @@ class EsportsService:
                 else:
                     status = 'scheduled'
 
+                strategy = match_info.get('strategy', {}) or {}
+                best_of = strategy.get('count') if strategy.get('type') == 'bestOf' else None
+                if not isinstance(best_of, int) or best_of < 1:
+                    best_of = 3  # 默认常规赛 BO3
+
                 match = {
                     'match_id': match_info.get('id', ''),
                     'team1': teams[0].get('name', ''),
@@ -350,6 +355,7 @@ class EsportsService:
                     'start_time': event_time,
                     'score1': None,
                     'score2': None,
+                    'best_of': best_of,
                 }
 
                 if state in ('completed', 'inProgress'):
@@ -358,6 +364,14 @@ class EsportsService:
                     if result_obj and result_obj2:
                         match['score1'] = result_obj.get('gameWins', 0)
                         match['score2'] = result_obj2.get('gameWins', 0)
+
+                # API 可能在中间局结束时短暂返回 completed，但系列赛尚未决出胜者
+                # 修正为 in_progress，避免提前推送终局比分
+                if status == 'completed' and match['score1'] is not None:
+                    needed = best_of // 2 + 1
+                    if max(match['score1'], match['score2']) < needed:
+                        match['status'] = 'in_progress'
+                        status = 'in_progress'
 
                 if event_date == today:
                     today_matches.append(match)
