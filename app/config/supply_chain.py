@@ -660,6 +660,142 @@ SUPPLY_CHAIN_GRAPHS = {
                           '+ 液冷（英维克）+ 封测（长电/通富）全链条深度供应',
         },
     },
+    'energy_storage': {
+        'name': '宁德时代',
+        'code': '300750',
+        'description': '全球储能/动力电池龙头 + A 股储能全产业链（电芯/PCS/集成/温控）',
+        'core': {
+            'technologies': ['磷酸铁锂', '280Ah/314Ah 大电芯', 'CTP/CTC 无模组',
+                             '液冷热管理', '构网型 PCS', '钠离子电池'],
+            'products': ['储能电芯', 'Pack', '储能系统 EnerOne/EnerC', '动力电池', '换电'],
+            'customers': ['电网公司', '新能源电站', '户储欧美', '工商业园区', '车企'],
+        },
+        'extra_cores': [
+            {
+                'code': '300274',
+                'name': '阳光电源',
+                'market': 'A',
+                'description': 'PCS + 储能系统集成全球 Top，光储充一体化出海龙头',
+            },
+            {
+                'code': '002594',
+                'name': '比亚迪',
+                'market': 'A',
+                'description': '刀片电池 + 储能集成，垂直一体化新能源龙头',
+            },
+            {
+                'code': '300014',
+                'name': '亿纬锂能',
+                'market': 'A',
+                'description': '储能电芯第二梯队，280Ah/314Ah 大电芯主力',
+            },
+            {
+                'code': '688063',
+                'name': '派能科技',
+                'market': 'A',
+                'description': '户储电池龙头，欧洲户储高份额',
+            },
+        ],
+        'upstream': {
+            '锂盐 / 正极材料': {
+                'description': '锂资源 + 磷酸铁锂/三元正极 + 前驱体',
+                'companies': {
+                    '002460': {'name': '赣锋锂业', 'role': '锂盐全球龙头 + 固态电池布局', 'tag': 'not_analyzed'},
+                    '002466': {'name': '天齐锂业', 'role': '锂资源自给率全球第一', 'tag': 'not_analyzed'},
+                    '300769': {'name': '德方纳米', 'role': '磷酸铁锂正极龙头（宁德核心供应）', 'tag': 'not_analyzed'},
+                    '300073': {'name': '当升科技', 'role': '高镍三元正极 + 磷酸铁锂', 'tag': 'not_analyzed'},
+                    '300919': {'name': '中伟股份', 'role': '三元前驱体全球龙头', 'tag': 'not_analyzed'},
+                    '603799': {'name': '华友钴业', 'role': '钴镍资源 + 三元前驱体', 'tag': 'not_analyzed'},
+                },
+            },
+            '负极材料': {
+                'description': '人造石墨 / 天然石墨 / 硅基负极',
+                'companies': {
+                    '835185': {'name': '贝特瑞', 'role': '负极材料全球第一（北交所）', 'tag': 'not_analyzed'},
+                    '300035': {'name': '中科电气', 'role': '人造石墨负极', 'tag': 'not_analyzed'},
+                    '603659': {'name': '璞泰来', 'role': '负极 + 涂覆隔膜双主业', 'tag': 'not_analyzed'},
+                },
+            },
+            '电解液': {
+                'description': '电解液 + 六氟磷酸锂 + 添加剂',
+                'companies': {
+                    '002709': {'name': '天赐材料', 'role': '电解液全球第一（宁德核心供应）', 'tag': 'not_analyzed'},
+                    '300037': {'name': '新宙邦', 'role': '电解液第二 + 氟化工', 'tag': 'not_analyzed'},
+                    '002407': {'name': '多氟多', 'role': '六氟磷酸锂龙头', 'tag': 'not_analyzed'},
+                },
+            },
+            '隔膜': {
+                'description': '湿法/干法隔膜 + 陶瓷涂覆',
+                'companies': {
+                    '002812': {'name': '恩捷股份', 'role': '湿法隔膜全球第一', 'tag': 'not_analyzed'},
+                    '300568': {'name': '星源材质', 'role': '干法+湿法隔膜双线', 'tag': 'not_analyzed'},
+                },
+            },
+            '结构件与铜箔': {
+                'description': '电池壳体 / 铝塑膜 / 锂电铜箔',
+                'companies': {
+                    '002850': {'name': '科达利', 'role': '动力/储能电池结构件龙头', 'tag': 'not_analyzed'},
+                    '300129': {'name': '泰胜风能', 'role': '储能结构件配套（风储联动）', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            '储能电芯与 Pack': {
+                'description': '方形/圆柱储能电芯 + Pack 组装',
+                'companies': {
+                    '002074': {'name': '国轩高科', 'role': '大众入股，储能电芯第二梯队', 'tag': 'not_analyzed'},
+                    '300207': {'name': '欣旺达', 'role': '动力+储能电芯 + 消费电池龙头', 'tag': 'not_analyzed'},
+                    '300750': {'name': '宁德时代', 'role': 'core 自身（EnerOne/EnerC 储能系统）'},
+                },
+            },
+            'BMS / PCS / 逆变器': {
+                'description': '电池管理系统 + 储能变流器 + 逆变器',
+                'companies': {
+                    '300693': {'name': '盛弘股份', 'role': 'PCS 储能变流器专业龙头', 'tag': 'not_analyzed'},
+                    '300827': {'name': '上能电气', 'role': 'PCS + 光伏逆变器', 'tag': 'not_analyzed'},
+                    '688390': {'name': '固德威', 'role': '户储逆变器 + PCS 出海', 'tag': 'not_analyzed'},
+                    '300763': {'name': '锦浪科技', 'role': '组串/储能逆变器出海', 'tag': 'not_analyzed'},
+                },
+            },
+            '储能系统集成': {
+                'description': '电站级储能集成 + EPC + 光储充一体化',
+                'companies': {
+                    '600406': {'name': '国电南瑞', 'role': '电网侧储能 + 调度系统龙头', 'tag': 'not_analyzed'},
+                    '002028': {'name': '思源电气', 'role': '电网设备 + 储能变流器', 'tag': 'not_analyzed'},
+                    '688408': {'name': '中信博', 'role': '跟踪支架 + 储能集成', 'tag': 'not_analyzed'},
+                },
+            },
+            '温控与消防': {
+                'description': '液冷/风冷热管理 + 锂电消防方案',
+                'companies': {
+                    '002837': {'name': '英维克', 'role': '液冷热管理龙头（数据中心+储能双驱）', 'tag': 'not_analyzed'},
+                    '300499': {'name': '高澜股份', 'role': '储能液冷专业供应商', 'tag': 'not_analyzed'},
+                    '002009': {'name': '天奇股份', 'role': '锂电池消防 + 电池回收', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            '电网侧储能': {'description': '调峰调频 + 共享储能电站，2024-2030 国内装机主战场'},
+            '工商业储能': {'description': '峰谷套利 + 需量管理，经济性敏感但增速快'},
+            '户用储能': {'description': '欧洲/美澳/日本户储，派能/比亚迪/华为出海主力'},
+            '新能源配储': {'description': '风电/光伏强制配储 10-30% / 2-4h，装机刚性支撑'},
+            '充电桩与换电': {'description': '光储充一体化 + 换电站，车网互动(V2G)前瞻'},
+        },
+        'competitors': {
+            '373220.KS': {'name': 'LG 新能源', 'market': 'KR'},
+            'TSLA':      {'name': '特斯拉 Megapack', 'market': 'US'},
+            'FLNC':      {'name': 'Fluence Energy', 'market': 'US'},
+            'ENPH':      {'name': 'Enphase Energy', 'market': 'US'},
+            '6752.T':    {'name': '松下 Panasonic', 'market': 'JP'},
+        },
+        'trends': {
+            'bandwidth': '280Ah → 314Ah → 500Ah+ 大电芯 / 2h → 4h → 8h+ 长时储能',
+            'technologies': ['磷酸铁锂主流', '钠离子电池量产', '液冷热管理',
+                             '构网型 PCS', '长时储能(液流/压缩空气)', '固态电池'],
+            'china_role': '电芯产能全球 80%+ / PCS 与集成出海（阳光/宁德/比亚迪三强领跑欧美）'
+                          '/ 四大材料（正极/负极/电解液/隔膜）全球绝对主导',
+        },
+    },
 }
 
 
