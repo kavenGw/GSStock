@@ -308,6 +308,100 @@ SUPPLY_CHAIN_GRAPHS = {
             'china_role': '芯片自主 + 整机 ODM + 光互连 + 液冷全栈国产化',
         },
     },
+    'beer': {
+        'name': '青岛啤酒',
+        'code': '600600',
+        'description': '中国啤酒 CR5 + 高端化主线 + 全球化品牌代表',
+        'core': {
+            'technologies': ['纯生酿造', '全麦芽工艺', '高端化双品牌', '物流半径成本结构'],
+            'products': ['青岛经典', '青岛纯生', '奥古特', '一厂 1903', '白啤/皮尔森'],
+            'customers': ['餐饮渠道', '商超/便利店', '电商/即时零售', '夜场/精酿吧', '出口海外'],
+        },
+        'extra_cores': [
+            {
+                'code': '0291.HK',
+                'name': '华润啤酒',
+                'market': 'HK',
+                'description': '雪花品牌 + 收购喜力中国，A股啤酒销量第一（Not Analyzed）',
+            },
+            {
+                'code': '600132',
+                'name': '重庆啤酒',
+                'market': 'A',
+                'description': '嘉士伯 60% 控股，乌苏+1664+乐堡高端矩阵（Keep Watching）',
+            },
+            {
+                'code': '000729',
+                'name': '燕京啤酒',
+                'market': 'A',
+                'description': 'U8 大单品复兴 + 北方市场基本盘（Not Analyzed）',
+            },
+        ],
+        'upstream': {
+            '金属包装': {
+                'description': '啤酒易拉罐/金属罐头部供应商',
+                'companies': {
+                    '002701': {'name': '奥瑞金', 'role': '易拉罐龙头，百威/青啤/华润核心供应', 'tag': 'not_analyzed'},
+                    '601968': {'name': '宝钢包装', 'role': '金属罐/二片罐，全国产能布局', 'tag': 'not_analyzed'},
+                },
+            },
+            '玻璃包装': {
+                'description': '啤酒玻璃瓶 / 浮法玻璃',
+                'companies': {
+                    '600876': {'name': '洛阳玻璃', 'role': '浮法玻璃/日用玻璃', 'tag': 'not_analyzed'},
+                    '000012': {'name': '南玻A', 'role': '玻璃综合龙头', 'tag': 'not_analyzed'},
+                },
+            },
+            '纸箱瓦楞包装': {
+                'description': '啤酒外箱与瓦楞纸包装',
+                'companies': {
+                    '002228': {'name': '合兴包装', 'role': '瓦楞纸箱龙头', 'tag': 'not_analyzed'},
+                    '600433': {'name': '冠豪高新', 'role': '特种纸/包装用纸', 'tag': 'not_analyzed'},
+                },
+            },
+            '酿造装备': {
+                'description': '糖化/发酵罐/灌装线等酿造装备',
+                'companies': {
+                    '603076': {'name': '乐惠国际', 'role': '国内啤酒装备龙头，青啤/华润/百威供货', 'tag': 'not_analyzed'},
+                },
+            },
+            '原料（大麦/啤酒花/麦芽）': {
+                'description': 'A 股直投标的稀缺，大麦/啤酒花主要从澳大利亚、法国、德国进口；关注进口成本波动',
+                'companies': {},
+            },
+        },
+        'midstream': {
+            '区域啤酒品牌': {
+                'description': '区域型啤酒品牌（核心 4 家已在 core/extra_cores）',
+                'companies': {
+                    '002461': {'name': '珠江啤酒', 'role': '华南区域龙头、高端 97 纯生', 'tag': 'not_analyzed'},
+                    '000929': {'name': '兰州黄河', 'role': '西北区域啤酒', 'tag': 'not_analyzed'},
+                },
+            },
+            '精酿/进口代理': {
+                'description': '精酿啤酒兴起 + 进口品牌代理，A 股直投标的稀缺',
+                'companies': {},
+            },
+        },
+        'downstream': {
+            '餐饮渠道': {'description': '啤酒消费 50%+ 来自餐饮，即饮/夜场是高端化主战场'},
+            '商超电商': {'description': '商超/便利店/电商/即时零售，中高端线与家庭消费主场'},
+            '体育赛事营销': {'description': '历届世界杯/欧洲杯啤酒赞助脉冲（联动 worldcup_2026）'},
+            '出口海外': {'description': '青啤/华润出海，东南亚/北美/日韩市场'},
+        },
+        'competitors': {
+            'BUD':       {'name': '百威英博', 'market': 'US'},
+            '1876.HK':   {'name': '百威亚太', 'market': 'HK'},
+            'TAP':       {'name': 'Molson Coors', 'market': 'US'},
+            'HEINY':     {'name': 'Heineken', 'market': 'US'},
+            'CARL-B.CO': {'name': '嘉士伯（重啤控股方）', 'market': 'EU'},
+        },
+        'trends': {
+            'bandwidth': '销量见顶(2013) → 吨价高端化 → 超高端(1664/科罗娜/喜力)',
+            'technologies': ['高端化结构', '精酿兴起', '即饮渠道数字化', 'CR5 寡头默契'],
+            'china_role': 'CR5 主导：华润/青啤/百威亚太/燕京/嘉士伯占销量 ~90%',
+        },
+    },
 }
 
 
