@@ -122,6 +122,13 @@ const COLORS = {
     competitor: '#6a1b9a',
 };
 
+const TAG_LABELS = {
+    'frontEC': '前沿供应链',
+    'don_buy': '巴菲特视角：不买',
+    'keep_watching': '巴菲特视角：观察',
+    'not_analyzed': '待分析',
+};
+
 function makeTags(items, cls) {
     return items.map(t => `<span class="tag ${cls}">${t}</span>`).join('');
 }
@@ -210,7 +217,7 @@ function renderGraph(data) {
                     if (d.role) html += `角色: ${d.role}<br/>`;
                     if (d.description) html += d.description;
                     if (d.technologies) html += `技术: ${d.technologies.join(', ')}`;
-                    if (d.tag) html += `<br/>标签: ${d.tag}`;
+                    if (d.tag) html += `<br/>标签: ${TAG_LABELS[d.tag] || d.tag}`;
                     return html;
                 }
                 return params.data.name || '';

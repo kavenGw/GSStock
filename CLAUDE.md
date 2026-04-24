@@ -23,6 +23,10 @@ PYTHONIOENCODING=utf-8 python -c "..."
 
 # create_app() 即便带 SCHEDULER_ENABLED=0 仍会启动调度器（17 任务）+ OCR + crawl4ai + LLM；
 # 只测路由/配置层时跳过 create_app：Flask() + register_blueprint(<bp>) 直接注入，秒级、零副作用。
+# 例外：渲染 HTML 的路由会因 base.html 跨 blueprint url_for（briefing.index 等）抛 BuildError → HTML 测试必须走 create_app()。
+
+# 只读 DB 巡检不需要 create_app，直接 sqlite3 最快：
+# PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.db').cursor(); c.execute('SELECT ...'); ..."
 
 # 运行单测（禁用调度器 + UTF-8 编码）
 PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
@@ -63,6 +67,8 @@ app/
 
 **数据模型**：按日期保存持仓快照，`(date, stock_code)` 为唯一约束
 
+**Stock 表约定**：PK 是 `stock_code` 字符串（非自增 id），列 `(stock_code, stock_name, investment_advice, created_at, updated_at, tags)`；库只存用户关注池（~50 条），不是全 A 股。新标的通过 `app/seeds/` 幂等注入。
+
 **多账户合并**：同一股票多次出现时，数量相加，成本按加权平均计算
 
 **OCR 流程**：图片上传 → Pillow 预处理 → Tesseract 识别 → 正则解析提取股票代码/名称/数量/价格
@@ -72,6 +78,8 @@ app/
 **模块级单例的 Flask context 陷阱**：`app/services/__init__.py` 的 `unified_stock_data_service = UnifiedStockDataService()` 在 import 期就会触发 `__init__`，此时无 Flask app context；任何访问 `db.session` 或 `<Model>.query` 的 init 期代码必须用 `has_app_context()` 守卫
 
 **启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
+
+**产业链图谱约定**：配置在 `app/config/supply_chain.py` 的 `SUPPLY_CHAIN_GRAPHS` 字典，渲染路由 `/supply-chain/api/<name>`。`upstream/midstream/downstream` 三层均支持 `companies` 字段；公司条目可带 `tag` 承载非产业链语义，约定取值 `frontEC` / `don_buy` / `keep_watching` / `not_analyzed`，前端 `supply_chain.html` 的 `TAG_LABELS` 映射显示文案。主题型图谱（如赛事）的 `competitors` 可留 `{}`，`core.code` 用虚拟 slug（如 `WC2026`）。
 
 ## 统一股票数据API
 

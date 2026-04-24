@@ -134,6 +134,94 @@ SUPPLY_CHAIN_GRAPHS = {
             'china_role': '封装基板+封测+ODM 全栈配套，海光/龙芯双路线突破',
         },
     },
+    'worldcup_2026': {
+        'name': 'FIFA 世界杯 2026',
+        'code': 'WC2026',
+        'description': '美加墨 48 队扩军世界杯（2026.6.11–7.19），A 股受益链条主题映射',
+        'core': {
+            'technologies': ['FIFA 官方认证', '全球转播权', '场馆基建', '赞助体系'],
+            'products': ['48队104场赛事', '3国16城场馆', '全球百亿观众', '官方周边商品'],
+            'customers': ['品牌赞助商', '转播商', '球迷消费', '体彩/博彩'],
+        },
+        'upstream': {
+            '人造草坪': {
+                'description': '球场草坪供应（FIFA Preferred Producer）',
+                'companies': {
+                    '605099': {'name': '共创草坪', 'role': '全球人造草坪龙头、FIFA 认证', 'tag': 'keep_watching'},
+                },
+            },
+            '体育器材': {
+                'description': '赛事器材、训练与健身设备',
+                'companies': {
+                    '300651': {'name': '金陵体育', 'role': '篮球架/足球门/田径器材 FIBA/FIFA 认证', 'tag': 'don_buy'},
+                    '605299': {'name': '舒华体育', 'role': '商用/家用健身器材', 'tag': 'don_buy'},
+                    '002899': {'name': '英派斯', 'role': '商用健身器材、场馆配套', 'tag': 'not_analyzed'},
+                },
+            },
+            '场馆建设': {
+                'description': '文体场馆建设与看台/舞美设施',
+                'companies': {
+                    '603081': {'name': '大丰实业', 'role': '文体场馆看台、舞美灯光', 'tag': 'not_analyzed'},
+                    '601668': {'name': '中国建筑', 'role': '海外基建，美加墨场馆改造概念', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            '赛事运营': {
+                'description': '赛事承办、经纪与综合体育平台',
+                'companies': {
+                    '600158': {'name': '中体产业', 'role': '国家体育总局背景综合平台', 'tag': 'don_buy'},
+                },
+            },
+            '体彩/彩票': {
+                'description': '彩票印刷、销售系统与主题题材',
+                'companies': {
+                    '002229': {'name': '鸿博股份', 'role': '彩票印刷龙头、世界杯体彩脉冲', 'tag': 'not_analyzed'},
+                    '002605': {'name': '姚记科技', 'role': '扑克+互联网彩票、赛事主题活跃', 'tag': 'not_analyzed'},
+                },
+            },
+            '传媒转播': {
+                'description': '赛事转播、报业营销与整合广告',
+                'companies': {
+                    '002181': {'name': '粤传媒', 'role': '报业+户外广告、赛事营销承接', 'tag': 'don_buy'},
+                    '600831': {'name': '广电网络', 'role': '陕西有线、赛事直播渠道', 'tag': 'not_analyzed'},
+                    '002712': {'name': '思美传媒', 'role': '整合营销、赛事赞助代理', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            '运动鞋服': {
+                'description': '大众运动品牌与户外鞋服，赛事主题消费承接',
+                'companies': {
+                    '603555': {'name': '贵人鸟', 'role': '大众运动鞋服品牌', 'tag': 'not_analyzed'},
+                    '300005': {'name': '探路者', 'role': '户外运动品牌', 'tag': 'not_analyzed'},
+                    '002832': {'name': '比音勒芬', 'role': '高尔夫运动服饰', 'tag': 'not_analyzed'},
+                    '603908': {'name': '牧高笛', 'role': '露营帐篷、观赛衍生场景', 'tag': 'not_analyzed'},
+                },
+            },
+            '食品饮料': {
+                'description': '啤酒/乳制品主题消费脉冲（历届世界杯规律）',
+                'companies': {
+                    '600600': {'name': '青岛啤酒', 'role': '世界杯主题消费脉冲', 'tag': 'not_analyzed'},
+                    '000729': {'name': '燕京啤酒', 'role': '北方啤酒龙头、赛事营销', 'tag': 'not_analyzed'},
+                    '600887': {'name': '伊利股份', 'role': '历届世界杯赞助商/主题营销', 'tag': 'not_analyzed'},
+                },
+            },
+            '出行旅游': {
+                'description': '观赛出境游、北美航线受益',
+                'companies': {
+                    '601111': {'name': '中国国航', 'role': '北美航线、赛事出行', 'tag': 'not_analyzed'},
+                    '002707': {'name': '众信旅游', 'role': '出境游、世界杯观赛团', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'competitors': {},
+        'trends': {
+            'bandwidth': '2026.6.11 开赛 → 2026.7.19 决赛',
+            'technologies': ['主题消费脉冲', '体彩销售激增', '赛事转播权分销'],
+            'china_role': '制造端（草坪/器材）主力，消费端（赞助/出行）承接',
+        },
+    },
 }
 
 
@@ -158,8 +246,8 @@ def get_all_stock_codes(name):
         if extra.get('code'):
             codes.append(extra['code'])
 
-    # 上游/中游
-    for stream in ('upstream', 'midstream'):
+    # 上游/中游/下游（下游分类若含 companies 也收录）
+    for stream in ('upstream', 'midstream', 'downstream'):
         for _category, info in graph.get(stream, {}).items():
             for code in info.get('companies', {}):
                 codes.append(code)

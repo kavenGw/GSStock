@@ -103,22 +103,33 @@ def get_graph_data(name):
                 'name': f"{info['name']}\n({code})",
                 'category': 'midstream',
                 'symbolSize': 25,
-                'detail': {'code': code, 'role': info['role']},
+                'detail': {'code': code, 'role': info['role'], 'tag': info.get('tag', '')},
             })
             edges.append({'source': group_id, 'target': node_id})
             node_id += 1
 
     # 下游
     for cat_name, cat_info in graph.get('downstream', {}).items():
+        group_id = node_id
         nodes.append({
-            'id': node_id,
+            'id': group_id,
             'name': cat_name,
             'category': 'downstream',
             'symbolSize': 30,
             'detail': {'description': cat_info['description']},
         })
-        edges.append({'source': core_id, 'target': node_id, 'label': '应用'})
+        edges.append({'source': core_id, 'target': group_id, 'label': '应用'})
         node_id += 1
+        for code, info in cat_info.get('companies', {}).items():
+            nodes.append({
+                'id': node_id,
+                'name': f"{info['name']}\n({code})",
+                'category': 'downstream',
+                'symbolSize': 22,
+                'detail': {'code': code, 'role': info['role'], 'tag': info.get('tag', '')},
+            })
+            edges.append({'source': group_id, 'target': node_id})
+            node_id += 1
 
     # 竞争对手
     for code, info in graph.get('competitors', {}).items():
