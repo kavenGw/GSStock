@@ -18,6 +18,9 @@ SCHEDULER_ENABLED=0 python -c "from app import create_app; app = create_app(); .
 # Windows 下 python -c 打印含 emoji 的对象，需指定 UTF-8 避免 cp950 编码错误
 PYTHONIOENCODING=utf-8 python -c "..."
 
+# Windows bash 管道（| grep）或 PowerShell Select-String 可能静默吞掉 python 脚本 stdout；
+# 验证脚本直接 open(path, 'w').write(...) 再用 Read 读取，稳过管道。
+
 # 运行单测（禁用调度器 + UTF-8 编码）
 PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
 
@@ -64,6 +67,8 @@ app/
 **服务层模式**：业务逻辑放在 `services/`，路由保持简洁
 
 **模块级单例的 Flask context 陷阱**：`app/services/__init__.py` 的 `unified_stock_data_service = UnifiedStockDataService()` 在 import 期就会触发 `__init__`，此时无 Flask app context；任何访问 `db.session` 或 `<Model>.query` 的 init 期代码必须用 `has_app_context()` 守卫
+
+**启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
 
 ## 统一股票数据API
 
