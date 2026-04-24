@@ -356,6 +356,7 @@ TDSequentialService.calculate()
 | `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `30` |
 
 **推送逻辑**：
+- 每日赛程预告：`esports_daily_schedule` 策略 07:00 推送当日 NBA/LoL 赛程到 `news_nba` / `news_lol`（NBA 按 `NBA_TEAM_MONITOR` 过滤关注球队；LoL 覆盖 LPL/LCK/先锋赛/Worlds/MSI）
 - 赛前提醒：比赛开始前30分钟推送
 - 比分变化：仅在比分发生变化时推送（避免重复通知）
 - 比赛结束：自动检测并推送最终比分
