@@ -77,6 +77,63 @@ SUPPLY_CHAIN_GRAPHS = {
             'china_role': '材料/光元件/代工封装基础完备',
         },
     },
+    'cpu': {
+        'name': 'Intel',
+        'code': 'INTC',
+        'description': 'x86 CPU 双寡头 + 国产替代产业链',
+        'core': {
+            'technologies': ['x86', 'Zen', 'Core/Xeon', 'Chiplet', '先进封装'],
+            'products': ['桌面CPU', '服务器CPU', 'AI加速卡(DCU/GPU)', 'APU'],
+            'customers': ['数据中心', 'PC OEM', '信创政企', '云服务商'],
+        },
+        'extra_cores': [
+            {
+                'code': 'AMD',
+                'name': 'AMD',
+                'market': 'US',
+                'description': 'x86 CPU/GPU 双线龙头，Zen 架构授权海光',
+            },
+        ],
+        'upstream': {
+            '封装基板': {
+                'description': 'FC-BGA / ABF 封装基板（CPU 关键载体）',
+                'companies': {
+                    '002916': {'name': '深南电路', 'role': 'FC-BGA 基板，Intel 合格供应商'},
+                    '002436': {'name': '兴森科技', 'role': 'FC-BGA 小批量供货北美 CPU 大客户'},
+                },
+            },
+        },
+        'midstream': {
+            '服务器 ODM': {
+                'description': '基于 Intel/AMD 平台的服务器代工',
+                'companies': {
+                    '601138': {'name': '工业富联', 'role': '全球最大 Intel 服务器 ODM，AI 服务器核心代工'},
+                },
+            },
+            'CPU 封测': {
+                'description': 'CPU / APU / GPU 先进封装测试',
+                'companies': {
+                    '002156': {'name': '通富微电', 'role': 'AMD 合资 TFAMD，承接 AMD 绝大部分 CPU/APU/GPU 封测'},
+                    '600584': {'name': '长电科技', 'role': '全球前三封测，FCBGA/Chiplet 高端封装'},
+                    '002185': {'name': '华天科技', 'role': '国内第三大封测，承接国产 CPU/SoC'},
+                },
+            },
+        },
+        'downstream': {
+            'AI 数据中心': {'description': '超大规模云与 AI 训练推理'},
+            'PC / 桌面': {'description': '消费级 CPU'},
+            '信创政企': {'description': '党政军国产化替代'},
+        },
+        'competitors': {
+            '688041': {'name': '海光信息', 'market': 'A'},
+            '688047': {'name': '龙芯中科', 'market': 'A'},
+        },
+        'trends': {
+            'bandwidth': '5nm → 3nm → 2nm 制程',
+            'technologies': ['Chiplet', '先进封装', 'AI 算力集成', '国产替代'],
+            'china_role': '封装基板+封测+ODM 全栈配套，海光/龙芯双路线突破',
+        },
+    },
 }
 
 
@@ -95,6 +152,11 @@ def get_all_stock_codes(name):
     # 核心公司
     if graph.get('code'):
         codes.append(graph['code'])
+
+    # 额外核心（双核心/多核心产业链）
+    for extra in graph.get('extra_cores', []) or []:
+        if extra.get('code'):
+            codes.append(extra['code'])
 
     # 上游/中游
     for stream in ('upstream', 'midstream'):

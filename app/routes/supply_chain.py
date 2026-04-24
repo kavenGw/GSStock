@@ -41,6 +41,27 @@ def get_graph_data(name):
     })
     node_id += 1
 
+    # 额外核心（例如 Intel + AMD 双核心）
+    for extra in graph.get('extra_cores', []) or []:
+        nodes.append({
+            'id': node_id,
+            'name': f"{extra['name']}\n({extra['code']})",
+            'category': 'core',
+            'symbolSize': 55,
+            'detail': {
+                'code': extra['code'],
+                'market': extra.get('market', ''),
+                'description': extra.get('description', ''),
+            },
+        })
+        edges.append({
+            'source': core_id,
+            'target': node_id,
+            'label': '同业',
+            'relation': 'alliance',
+        })
+        node_id += 1
+
     # 上游
     for cat_name, cat_info in graph.get('upstream', {}).items():
         group_id = node_id

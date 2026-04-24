@@ -21,6 +21,9 @@ PYTHONIOENCODING=utf-8 python -c "..."
 # Windows bash 管道（| grep）或 PowerShell Select-String 可能静默吞掉 python 脚本 stdout；
 # 验证脚本直接 open(path, 'w').write(...) 再用 Read 读取，稳过管道。
 
+# create_app() 即便带 SCHEDULER_ENABLED=0 仍会启动调度器（17 任务）+ OCR + crawl4ai + LLM；
+# 只测路由/配置层时跳过 create_app：Flask() + register_blueprint(<bp>) 直接注入，秒级、零副作用。
+
 # 运行单测（禁用调度器 + UTF-8 编码）
 PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
 
