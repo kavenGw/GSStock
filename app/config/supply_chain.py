@@ -402,6 +402,127 @@ SUPPLY_CHAIN_GRAPHS = {
             'china_role': 'CR5 主导：华润/青啤/百威亚太/燕京/嘉士伯占销量 ~90%',
         },
     },
+    'nvidia': {
+        'name': 'NVIDIA',
+        'code': 'NVDA',
+        'description': '全球 AI GPU 算力绝对龙头 + A 股间接供应链（服务器 ODM / PCB / 光模块 / 液冷）',
+        'core': {
+            'technologies': ['Blackwell B200/GB200', 'Hopper H100/H200', 'CUDA',
+                             'NVLink/NVSwitch', 'Spectrum-X', 'Grace CPU', 'CoWoS-L 封装'],
+            'products': ['AI 训练 GPU', 'AI 推理 GPU', 'DGX/HGX 系统',
+                         'NVLink Switch', 'BlueField DPU', 'Spectrum-X 以太网'],
+            'customers': ['微软/Meta/Google/AWS/Oracle/xAI', '戴尔/超微/联想/HPE 服务器 OEM',
+                          '中国云厂商（合规版 H20/B30A）'],
+        },
+        'upstream': {
+            'PCB / CCL': {
+                'description': 'AI 服务器高多层 PCB / HDI / FC-BGA 基板 / 覆铜板',
+                'companies': {
+                    '002463': {'name': '沪电股份', 'role': 'AI 服务器高多层 PCB 龙头（同属 ascend 产业链）', 'tag': 'not_analyzed'},
+                    '300476': {'name': '胜宏科技', 'role': 'NVIDIA GB200 PCB 主力供应商', 'tag': 'not_analyzed'},
+                    '600183': {'name': '生益科技', 'role': '高频高速覆铜板（同属 ascend 产业链）', 'tag': 'not_analyzed'},
+                    '002916': {'name': '深南电路', 'role': 'FC-BGA 基板 / 通信 PCB（同属 cpu/ascend 产业链）', 'tag': 'not_analyzed'},
+                    '002436': {'name': '兴森科技', 'role': 'FC-BGA 基板 / IC 载板（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '连接器 / 铜缆': {
+                'description': '高速铜缆 / AI 高速背板连接器（NVLink Scale-up 互连）',
+                'companies': {
+                    '002130': {'name': '沃尔核材', 'role': '高速铜缆 / OAM Scale-up 互连', 'tag': 'not_analyzed'},
+                    '688668': {'name': '鼎通科技', 'role': 'AI 高速背板连接器', 'tag': 'not_analyzed'},
+                    '300252': {'name': '金信诺', 'role': '高速线缆组件', 'tag': 'not_analyzed'},
+                },
+            },
+            '光模块 / 光芯片': {
+                'description': 'Scale-out 800G/1.6T 光互连',
+                'companies': {
+                    '300308': {'name': '中际旭创', 'role': '800G/1.6T 光模块龙头（同属 ascend/lumentum 产业链）', 'tag': 'not_analyzed'},
+                    '300502': {'name': '新易盛', 'role': '800G 光模块（同属 ascend/lumentum 产业链）', 'tag': 'not_analyzed'},
+                    '300394': {'name': '天孚通信', 'role': 'CPO 光引擎 / 连接器（同属 ascend/lumentum 产业链）', 'tag': 'not_analyzed'},
+                    '002281': {'name': '光迅科技', 'role': '光芯片 EML/DFB（同属 ascend/lumentum 产业链）', 'tag': 'not_analyzed'},
+                    '000988': {'name': '华工科技', 'role': '光模块 / 激光（同属 ascend/lumentum 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '液冷 / 散热': {
+                'description': 'AI 服务器液冷冷板 + 精密空调',
+                'companies': {
+                    '002837': {'name': '英维克', 'role': '数据中心液冷龙头（同属 ascend 产业链）', 'tag': 'not_analyzed'},
+                    '300499': {'name': '高澜股份', 'role': '液冷温控（同属 ascend 产业链）', 'tag': 'not_analyzed'},
+                    '300602': {'name': '飞荣达', 'role': '导热散热材料（同属 ascend 产业链）', 'tag': 'not_analyzed'},
+                    '301018': {'name': '申菱环境', 'role': '数据中心精密空调', 'tag': 'not_analyzed'},
+                },
+            },
+            '封测（CoWoS/HBM 辅助）': {
+                'description': '先进封装与 Chiplet（台积电 CoWoS 主导，A 股参与辅助段）',
+                'companies': {
+                    '600584': {'name': '长电科技', 'role': '全球前三封测，Chiplet 高端封装（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                    '002156': {'name': '通富微电', 'role': 'AMD/NVIDIA GPU 封测（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                    '002185': {'name': '华天科技', 'role': '国内第三大封测（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '电源模组': {
+                'description': 'AI 服务器高功率电源',
+                'companies': {
+                    '002851': {'name': '麦格米特', 'role': 'AI 服务器电源模组', 'tag': 'not_analyzed'},
+                    '300870': {'name': '欧陆通', 'role': '服务器电源', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            'AI 服务器 ODM / 品牌': {
+                'description': 'NVIDIA HGX/DGX 平台服务器代工与国内合规版品牌',
+                'companies': {
+                    '601138': {'name': '工业富联', 'role': '全球最大 NVIDIA AI 服务器代工（同属 cpu/ascend 产业链）', 'tag': 'not_analyzed'},
+                    '000977': {'name': '浪潮信息', 'role': '国内 NVIDIA 服务器主力（H20/B30A）', 'tag': 'not_analyzed'},
+                    '000938': {'name': '紫光股份', 'role': '新华三，企业级 NV 服务器', 'tag': 'not_analyzed'},
+                    '603019': {'name': '中科曙光', 'role': '国产算力 + NV 兼容服务器（同属 ascend 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '网络交换机': {
+                'description': '数据中心高端交换机（NVIDIA Spectrum-X 生态配套）',
+                'companies': {
+                    '002396': {'name': '星网锐捷', 'role': '高端数据中心交换机', 'tag': 'not_analyzed'},
+                    '301191': {'name': '菲菱科思', 'role': '交换机 ODM', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            'AI 数据中心': {'description': '北美四大云 + 国内互联网智算中心'},
+            '大模型训练推理': {'description': '全球主流大模型（OpenAI/Anthropic/xAI/Meta/Google）+ 国内合规版需求'},
+            '自动驾驶 / 车载': {
+                'description': 'NV Orin/Thor 平台上车',
+                'companies': {
+                    '002920': {'name': '德赛西威', 'role': 'NV Orin/Thor 域控合作', 'tag': 'not_analyzed'},
+                    '600699': {'name': '均胜电子', 'role': 'NV 智驾域控合作', 'tag': 'not_analyzed'},
+                },
+            },
+            '机器人 / 具身智能': {
+                'description': 'NV Isaac/GR00T 生态',
+                'companies': {
+                    '002747': {'name': '埃斯顿', 'role': '工业机器人国产龙头 + 具身智能', 'tag': 'not_analyzed'},
+                    '002050': {'name': '三花智控', 'role': '人形机器人执行器 + 热管理', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'competitors': {
+            'TSM':       {'name': '台积电', 'market': 'US'},
+            'AVGO':      {'name': '博通', 'market': 'US'},
+            'AMD':       {'name': 'AMD', 'market': 'US'},
+            'INTC':      {'name': 'Intel', 'market': 'US'},
+            '000660.KS': {'name': 'SK 海力士', 'market': 'KR'},
+            'MU':        {'name': '美光', 'market': 'US'},
+            '005930.KS': {'name': '三星电子', 'market': 'KR'},
+            '688256':    {'name': '寒武纪', 'market': 'A'},
+            '688041':    {'name': '海光信息', 'market': 'A'},
+        },
+        'trends': {
+            'bandwidth': 'H100 → H200 → B200 → B300 → Rubin(2026)',
+            'technologies': ['NVLink 超节点', 'Blackwell/Rubin 架构', 'Spectrum-X 以太网',
+                             'CoWoS-L 封装', '液冷冷板 + 浸没式'],
+            'china_role': '服务器 ODM（工业富联/浪潮）+ PCB（沪电/胜宏）+ 光模块（旭创/新易盛）'
+                          '+ 液冷（英维克）+ 封测（长电/通富）全链条深度供应',
+        },
+    },
 }
 
 
