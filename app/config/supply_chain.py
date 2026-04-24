@@ -308,6 +308,143 @@ SUPPLY_CHAIN_GRAPHS = {
             'china_role': '芯片自主 + 整机 ODM + 光互连 + 液冷全栈国产化',
         },
     },
+    'storage': {
+        'name': 'SK海力士',
+        'code': '000660.KS',
+        'description': 'DRAM/HBM 全球第二 + AI 时代存储三大模块 + 国产替代',
+        'core': {
+            'technologies': ['DDR5', 'HBM3E/HBM4', '3D NAND', 'CXL 内存池化', '1a/1b nm DRAM'],
+            'products': ['DRAM', 'HBM', 'NAND Flash', 'eSSD'],
+            'customers': ['NVIDIA', 'AMD', '苹果', 'Google', 'Meta', '数据中心', '手机厂商'],
+        },
+        'extra_cores': [
+            {
+                'code': 'MU',
+                'name': '美光',
+                'market': 'US',
+                'description': 'DRAM/NAND/HBM 三巨头之一，美国唯一存储大厂',
+            },
+            {
+                'code': '005930.KS',
+                'name': '三星电子',
+                'market': 'KR',
+                'description': 'DRAM/NAND 全球第一，HBM3E 追赶 SK海力士（行情仅展示）',
+            },
+            {
+                'code': '285A.T',
+                'name': '铠侠 Kioxia',
+                'market': 'JP',
+                'description': 'NAND 第二大厂（原东芝存储），2024 日本重新上市（行情仅展示）',
+            },
+            {
+                'code': 'SNDK',
+                'name': '闪迪 Sandisk',
+                'market': 'US',
+                'description': 'NAND 消费端龙头，2025 从西数分拆独立上市',
+            },
+            {
+                'code': 'YMTC',
+                'name': '长江存储',
+                'market': 'CN',
+                'description': '中国 3D NAND 唯一量产厂（未上市），Xtacking 架构',
+            },
+            {
+                'code': 'CXMT',
+                'name': '长鑫存储',
+                'market': 'CN',
+                'description': '中国 DRAM 唯一量产厂（未上市），DDR4/LPDDR4X 主力',
+            },
+        ],
+        'upstream': {
+            '半导体设备': {
+                'description': '存储芯片制造核心设备（刻蚀/薄膜/CMP）',
+                'companies': {
+                    '002371': {'name': '北方华创', 'role': '刻蚀/薄膜沉积（存储产线核心，同属光通信/CPU 链）'},
+                    '688012': {'name': '中微公司', 'role': '刻蚀设备（3D NAND 堆叠关键）'},
+                    '688072': {'name': '拓荆科技', 'role': 'PECVD/ALD 薄膜沉积'},
+                    '688120': {'name': '华海清科', 'role': 'CMP 抛光设备龙头'},
+                },
+            },
+            '电子材料': {
+                'description': '前驱体 / 光刻胶 / 特气 / CMP 抛光液',
+                'companies': {
+                    '002409': {'name': '雅克科技', 'role': '前驱体材料（存储刻蚀/薄膜必需）'},
+                    '300054': {'name': '鼎龙股份', 'role': 'CMP 抛光垫/液国产替代'},
+                    '688019': {'name': '安集科技', 'role': 'CMP 抛光液'},
+                },
+            },
+            '硅片/衬底': {
+                'description': '存储芯片基础衬底',
+                'companies': {
+                    '688126': {'name': '沪硅产业', 'role': '12 英寸大硅片国产替代'},
+                    '002129': {'name': 'TCL中环', 'role': '半导体硅片 + 单晶硅'},
+                },
+            },
+        },
+        'midstream': {
+            'DDR 内存接口': {
+                'description': 'DDR5 服务器内存接口芯片 + DRAM 自研 + 车规 DRAM',
+                'companies': {
+                    '688008': {'name': '澜起科技', 'role': 'DDR5 RCD/DB 内存接口全球三强'},
+                    '688123': {'name': '聚辰股份', 'role': 'DDR5 SPD EEPROM（澜起独家配套，SPD 全球三强）'},
+                    '603986': {'name': '兆易创新', 'role': 'DRAM 自研 17nm DDR4 已量产（跨 DDR/NAND 双线）'},
+                    '300223': {'name': '北京君正', 'role': '车规 DRAM/SRAM（ISSI）'},
+                },
+            },
+            'HBM 先进封装': {
+                'description': 'HBM 2.5D/3D 封装 + TSV + CoWoS 配套',
+                'companies': {
+                    '002156': {'name': '通富微电', 'role': 'AMD HBM 封装主力'},
+                    '600584': {'name': '长电科技', 'role': '国内封测龙头，HBM 先进封装'},
+                    '000021': {'name': '深科技', 'role': '金士顿合资，DRAM 封测'},
+                    '600667': {'name': '太极实业', 'role': 'SK海力士 DRAM 封测合资（core 生态）'},
+                },
+            },
+            'NAND 主控/颗粒': {
+                'description': 'NAND 存储主控芯片 + NOR Flash + 小容量 DRAM',
+                'companies': {
+                    '688110': {'name': '东芯股份', 'role': 'SLC NAND / NOR / 小容量 DRAM'},
+                    '603986': {'name': '兆易创新', 'role': 'NOR Flash 全球前三（跨 DDR/NAND 双线）'},
+                    '688766': {'name': '普冉股份', 'role': 'NOR Flash / EEPROM'},
+                    '688449': {'name': '联芸科技', 'role': 'SSD 主控芯片龙头'},
+                    '300672': {'name': '国科微', 'role': '企业级 SSD 主控'},
+                },
+            },
+            '存储模组': {
+                'description': '消费级/企业级 SSD/eMMC/UFS 模组与品牌',
+                'companies': {
+                    '301308': {'name': '江波龙', 'role': 'DRAM/eMMC/UFS/SSD 模组龙头'},
+                    '688525': {'name': '佰维存储', 'role': '嵌入式存储 + 企业级 SSD'},
+                    '001309': {'name': '德明利', 'role': 'SSD/存储卡品牌 + 主控'},
+                    '300042': {'name': '朗科科技', 'role': 'U盘/SSD 品牌（U盘发明专利持有者）'},
+                },
+            },
+            '传统存储/HDD': {
+                'description': '企业级 HDD（云冷数据主力）+ 磁存储配套，A 股无直投标的，核心玩家见 competitors（WDC / STX）',
+                'companies': {},
+            },
+        },
+        'downstream': {
+            'AI 服务器/HBM': {'description': 'HBM3E/HBM4 + DDR5 RDIMM，AI 训练推理主战场'},
+            '消费电子': {'description': '手机/PC/平板 DRAM+NAND'},
+            '企业级存储': {'description': '数据中心 QLC SSD + HDD 冷存储 + CXL 内存池'},
+            '汽车电子': {'description': '车规存储（ADAS/智能座舱/自动驾驶）'},
+        },
+        'competitors': {
+            'MU':        {'name': '美光', 'market': 'US'},
+            '005930.KS': {'name': '三星电子', 'market': 'KR'},
+            '285A.T':    {'name': '铠侠 Kioxia', 'market': 'JP'},
+            'SNDK':      {'name': '闪迪 Sandisk', 'market': 'US'},
+            'WDC':       {'name': '西部数据', 'market': 'US'},
+            'STX':       {'name': '希捷科技', 'market': 'US'},
+        },
+        'trends': {
+            'bandwidth': 'DDR4→DDR5→DDR6 / HBM3→HBM3E→HBM4 16 层堆叠',
+            'technologies': ['HBM4 16 层堆叠', '3D NAND 300+ 层', 'CXL 内存池化',
+                             'QLC 企业 SSD', '1b nm DRAM'],
+            'china_role': '长江/长鑫追赶量产 + 模组封测全栈 + NOR/小容量 DRAM 自主',
+        },
+    },
     'beer': {
         'name': '青岛啤酒',
         'code': '600600',
