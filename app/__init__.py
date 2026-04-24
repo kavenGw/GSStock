@@ -291,6 +291,9 @@ def create_app(config_class=None):
         migrate_trades_table()
         migrate_wyckoff_table()
 
+        from app.seeds import seed_cpu_category
+        seed_cpu_category()
+
         # news 表重建：source_id 列类型从 INT 改为 VARCHAR
         from sqlalchemy import inspect as sa_inspect, text
         inspector = sa_inspect(db.engine)
