@@ -222,6 +222,92 @@ SUPPLY_CHAIN_GRAPHS = {
             'china_role': '制造端（草坪/器材）主力，消费端（赞助/出行）承接',
         },
     },
+    'ascend': {
+        'name': '华为昇腾',
+        'code': 'HUAWEI',
+        'description': '昇腾 Atlas 950/960 SuperPoD 超节点 + 国产 AI 算力全栈',
+        'core': {
+            'technologies': ['昇腾910C', 'Atlas 950/960', 'SuperPoD 超节点',
+                             'CloudMatrix 384', 'CANN', 'MindSpore'],
+            'products': ['AI训练集群', 'AI推理服务器', '昇腾加速模块', '大模型一体机'],
+            'customers': ['三大运营商', '政企信创', '央国企', '头部互联网', '大模型厂商'],
+        },
+        'upstream': {
+            'PCB/封装基板': {
+                'description': 'AI 服务器高多层 PCB / HDI / 基板',
+                'companies': {
+                    '002463': {'name': '沪电股份', 'role': 'AI 服务器高多层 PCB 龙头'},
+                    '600183': {'name': '生益科技', 'role': '高频高速覆铜板'},
+                    '002916': {'name': '深南电路', 'role': 'FC-BGA 基板 / 通信 PCB（同属 CPU 产业链）'},
+                },
+            },
+            '光互连元件': {
+                'description': '超节点内部 Scale-up 光互连核心元件',
+                'companies': {
+                    '300316': {'name': '晶盛机电', 'role': '碳化硅/蓝宝石衬底'},
+                    '688195': {'name': '腾景科技', 'role': '滤光片/隔离器'},
+                    '002222': {'name': '福晶科技', 'role': '非线性光学晶体'},
+                },
+            },
+            '液冷散热': {
+                'description': 'AI 服务器液冷核心供应商',
+                'companies': {
+                    '002837': {'name': '英维克', 'role': '数据中心液冷龙头'},
+                    '300499': {'name': '高澜股份', 'role': '液冷温控'},
+                    '300602': {'name': '飞荣达', 'role': '导热散热材料'},
+                },
+            },
+        },
+        'midstream': {
+            '昇腾整机 ODM': {
+                'description': '昇腾 Atlas 服务器整机代工与品牌',
+                'companies': {
+                    '603019': {'name': '中科曙光', 'role': '昇腾服务器深度合作，国产算力龙头'},
+                    '000628': {'name': '高新发展', 'role': '华鲲振宇控股股东，昇腾整机主力'},
+                    '600839': {'name': '四川长虹', 'role': '天宫实验室合资，昇腾服务器'},
+                    '601138': {'name': '工业富联', 'role': 'AI 服务器 ODM 全球龙头（同属 CPU 产业链）'},
+                },
+            },
+            '光模块': {
+                'description': '超节点 Scale-up / Scale-out 光模块',
+                'companies': {
+                    '300308': {'name': '中际旭创', 'role': '800G/1.6T 光模块龙头'},
+                    '300502': {'name': '新易盛', 'role': '800G 光模块'},
+                    '300394': {'name': '天孚通信', 'role': 'CPO 光引擎/连接器'},
+                    '000988': {'name': '华工科技', 'role': '光模块/激光'},
+                    '002281': {'name': '光迅科技', 'role': '光芯片 EML/DFB'},
+                },
+            },
+            '软件生态与分销': {
+                'description': '昇腾 CANN/MindSpore 适配、行业解决方案、分销渠道',
+                'companies': {
+                    '002261': {'name': '拓维信息', 'role': '昇腾鲲鹏整机 + 鸿蒙教育，生态核心'},
+                    '000158': {'name': '常山北明', 'role': '鲲鹏昇腾适配 + 政务信创'},
+                    '000034': {'name': '神州数码', 'role': '华为昇腾 A 级总经销商'},
+                    '301236': {'name': '软通动力', 'role': '华为生态服务龙头 + 鸿蒙欧拉'},
+                    '600498': {'name': '烽火通信', 'role': '光传输 + 昇腾合作'},
+                },
+            },
+        },
+        'downstream': {
+            '政企信创': {'description': '党政军 / 央国企国产算力替代'},
+            'AI 数据中心': {'description': '三大运营商智算中心、头部云厂商昇腾集群'},
+            '大模型训练': {'description': '国产千亿/万亿参数大模型训练与推理'},
+            '自动驾驶/车载': {'description': '昇腾车载 AI 方案（Mate/问界生态）'},
+        },
+        'competitors': {
+            '688256': {'name': '寒武纪', 'market': 'A'},
+            '688041': {'name': '海光信息', 'market': 'A'},
+            '300474': {'name': '景嘉微', 'market': 'A'},
+            'NVDA':   {'name': 'NVIDIA', 'market': 'US'},
+        },
+        'trends': {
+            'bandwidth': '昇腾910B → 910C → Atlas 950 SuperPoD(384卡)',
+            'technologies': ['超节点 Scale-up', 'CloudMatrix', '全光互连', '液冷',
+                             '自主生态 CANN/MindSpore'],
+            'china_role': '芯片自主 + 整机 ODM + 光互连 + 液冷全栈国产化',
+        },
+    },
 }
 
 
