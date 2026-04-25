@@ -930,6 +930,116 @@ SUPPLY_CHAIN_GRAPHS = {
                           ' / 铜加工（海亮/楚江/博威）出口竞争力全球前列',
         },
     },
+    'apple': {
+        'name': '苹果',
+        'code': 'AAPL',
+        'description': '全球消费电子绝对龙头，A 股苹果链覆盖玻璃/声学/光学/FPC/结构件/组装全栈',
+        'core': {
+            'technologies': ['Apple Silicon (A/M 系列)', 'iOS/macOS/visionOS',
+                             'MicroLED', 'OLED LTPO', '钛金属机身', 'UWB/U2 芯片',
+                             'Face ID 3D 结构光', 'Apple Intelligence 端侧 AI'],
+            'products': ['iPhone', 'Mac', 'iPad', 'AirPods', 'Apple Watch',
+                         'Vision Pro', 'Services（App Store/iCloud/广告）'],
+            'customers': ['全球高端消费电子用户', '企业 IT', '开发者生态', '运营商渠道'],
+        },
+        'upstream': {
+            '玻璃盖板与外观件': {
+                'description': 'iPhone/Watch/Vision Pro 前后盖玻璃 + 触控显示模组',
+                'companies': {
+                    '300433': {'name': '蓝思科技', 'role': '苹果玻璃盖板核心供应（iPhone/Watch）', 'tag': 'not_analyzed'},
+                    '300088': {'name': '长信科技', 'role': '触控显示模组 + 玻璃减薄', 'tag': 'not_analyzed'},
+                    '603876': {'name': '鼎胜新材', 'role': '苹果电池铝箔配套', 'tag': 'not_analyzed'},
+                },
+            },
+            '光学摄像头': {
+                'description': 'iPhone 多摄模组 + 镜头 + VCSEL 3D 传感',
+                'companies': {
+                    '002456': {'name': '欧菲光', 'role': '前置摄像/触控（曾被剔除后部分回归）', 'tag': 'don_buy'},
+                    '600703': {'name': '三安光电', 'role': 'VCSEL/磷化铟（同属 lumentum 产业链）', 'tag': 'frontEC'},
+                },
+            },
+            'PCB / FPC': {
+                'description': '主板 HDI / SLP + 模组 FPC（iPhone/Watch/AirPods）',
+                'companies': {
+                    '002938': {'name': '鹏鼎控股', 'role': '苹果 FPC 全球第一供应（iPhone 主板/电池/无线充）', 'tag': 'not_analyzed'},
+                    '002384': {'name': '东山精密', 'role': 'Apple Watch FPC + iPhone 天线', 'tag': 'not_analyzed'},
+                    '002463': {'name': '沪电股份', 'role': '高多层 PCB（同属 ascend/nvidia 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '声学元件': {
+                'description': 'AirPods/iPhone 麦克风/扬声器/振动马达',
+                'companies': {
+                    '002241': {'name': '歌尔股份', 'role': 'AirPods 主力组装 + Vision Pro 独家代工', 'tag': 'not_analyzed'},
+                    '2018.HK': {'name': '瑞声科技', 'role': '声学/触觉马达/光学，苹果声学双供之一', 'tag': 'not_analyzed'},
+                },
+            },
+            '连接器与精密结构件': {
+                'description': 'Lightning/USB-C/MagSafe 连接器 + iPhone/Mac 金属中框/小件',
+                'companies': {
+                    '002475': {'name': '立讯精密', 'role': 'AirPods 主力组装 + iPhone 部分组装 + 连接器', 'tag': 'not_analyzed'},
+                    '300115': {'name': '长盈精密', 'role': 'iPhone 金属结构件 + Apple Watch 表壳', 'tag': 'not_analyzed'},
+                    '002635': {'name': '安洁科技', 'role': 'iPhone/Mac 精密功能件、无线充模组', 'tag': 'not_analyzed'},
+                },
+            },
+            '电池与电源': {
+                'description': 'iPhone/Watch/AirPods 锂电池 Pack + 充电模块',
+                'companies': {
+                    '000049': {'name': '德赛电池', 'role': 'iPhone/Watch 电池 Pack 主力', 'tag': 'not_analyzed'},
+                    '300207': {'name': '欣旺达', 'role': '苹果 iPhone/Mac 电池 Pack（同属 energy_storage 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '显示面板': {
+                'description': 'iPhone/iPad OLED/LTPO 面板（韩厂主导，国内 BOE 切入）',
+                'companies': {
+                    '000725': {'name': '京东方A', 'role': 'iPhone OLED 第三供应（追赶三星/LGD）', 'tag': 'not_analyzed'},
+                    '000100': {'name': 'TCL科技', 'role': '中尺寸 LCD/Mini-LED 切入苹果备选', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            '整机组装 EMS/ODM': {
+                'description': 'iPhone/Mac/iPad/AirPods/Vision Pro 组装代工',
+                'companies': {
+                    '601138': {'name': '工业富联', 'role': 'iPhone/Mac/iPad 全球最大代工（同属 cpu/ascend/nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '002475': {'name': '立讯精密', 'role': 'AirPods 主力 + iPhone 部分组装（同上 upstream）', 'tag': 'not_analyzed'},
+                    '002241': {'name': '歌尔股份', 'role': 'AirPods + Vision Pro 独家组装（同上 upstream）', 'tag': 'not_analyzed'},
+                    '0285.HK': {'name': '比亚迪电子', 'role': 'iPad/Mac 组装 + 金属中框', 'tag': 'not_analyzed'},
+                },
+            },
+            '模组半成品': {
+                'description': '摄像头模组、无线充模组、Touch ID/Face ID 模组',
+                'companies': {
+                    '2382.HK': {'name': '舜宇光学', 'role': '苹果摄像头模组主力', 'tag': 'not_analyzed'},
+                    '1478.HK': {'name': '丘钛科技', 'role': '苹果摄像头模组备选', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            'iPhone': {'description': '苹果营收支柱（占比 ~50%），全球高端智能手机龙头'},
+            'Mac': {'description': 'Apple Silicon 重塑 PC，M 系列芯片驱动产品力'},
+            'iPad': {'description': '平板市场份额第一，教育/创作场景'},
+            'AirPods': {'description': 'TWS 耳机绝对龙头，立讯/歌尔国内独享代工'},
+            'Apple Watch': {'description': '智能手表全球第一，健康/医疗场景延展'},
+            'Vision Pro': {'description': '空间计算新品类（2024 上市），歌尔独家代工'},
+            'Services': {'description': 'App Store/iCloud/Apple Music/广告，毛利率 70%+ 第二增长曲线'},
+        },
+        'competitors': {
+            '005930.KS': {'name': '三星电子', 'market': 'KR'},
+            '1810.HK':   {'name': '小米集团', 'market': 'HK'},
+            'GOOGL':     {'name': 'Alphabet/Google (Pixel)', 'market': 'US'},
+            'MSFT':      {'name': 'Microsoft (Surface)', 'market': 'US'},
+            'META':      {'name': 'Meta (Quest VR)', 'market': 'US'},
+        },
+        'trends': {
+            'bandwidth': 'iPhone 销量见顶 → Services 接棒 → Vision Pro/AI 新增量（Apple Intelligence）',
+            'technologies': ['Apple Silicon 自研芯片下沉到 iPhone/Mac/Vision Pro 全线',
+                             'Vision Pro 空间计算开启', 'Apple Intelligence 端侧 AI',
+                             'MicroLED/折叠屏路线探索', '印度产能扩张（去中国化）'],
+            'china_role': '组装端：立讯/歌尔/工业富联三强主导；零部件端：蓝思（玻璃）/鹏鼎（FPC）'
+                          '/京东方（OLED 切入）/德赛（电池）/长盈（结构件）全栈配套；'
+                          '风险：印度/越南产能转移持续推进',
+        },
+    },
 }
 
 
