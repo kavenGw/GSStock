@@ -77,6 +77,8 @@ app/
 
 **模块级单例的 Flask context 陷阱**：`app/services/__init__.py` 的 `unified_stock_data_service = UnifiedStockDataService()` 在 import 期就会触发 `__init__`，此时无 Flask app context；任何访问 `db.session` 或 `<Model>.query` 的 init 期代码必须用 `has_app_context()` 守卫
 
+**数据获取服务失败语义二分**：`_fetch_*` 类方法返回 `None` 表示异常/获取失败（已重试耗尽），返回空数据字典如 `{'today': [], 'yesterday': []}` 表示 API 成功但当下无数据。推送/聚合层据此区分"数据获取失败" vs "今日无赛事"。涉及该约定的服务异常分支必须 `logger.warning(... exc_info=True)` + 含 `type(e).__name__` + 关键上下文（如 league_id / HTTP status / 响应体片段），否则吞异常会让两种场景在日志中无法区分。参考 `app/services/esports_service.py:_fetch_lol_esports_schedule`。
+
 **启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
 
 **产业链图谱约定**：配置在 `app/config/supply_chain.py` 的 `SUPPLY_CHAIN_GRAPHS` 字典，渲染路由 `/supply-chain/api/<name>`。`upstream/midstream/downstream` 三层均支持 `companies` 字段；公司条目可带 `tag` 承载非产业链语义，约定取值 `frontEC` / `don_buy` / `keep_watching` / `not_analyzed`，前端 `supply_chain.html` 的 `TAG_LABELS` 映射显示文案。主题型图谱（如赛事）的 `competitors` 可留 `{}`，`core.code` 用虚拟 slug（如 `WC2026`）。
@@ -433,6 +435,8 @@ TDSequentialService.calculate()
 - `app/strategies/volume_alert/__init__.py` — 收盘成交量异动策略
 
 ## 开发规范
+
+**测试目录布局**：单测放 `tests/test_*.py` 平铺，不用 `tests/services/` 等子目录（仅存空 `__pycache__`）
 
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
 
