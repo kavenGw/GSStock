@@ -409,9 +409,20 @@ TDSequentialService.calculate()
 - 内存缓存持久化：`data/memory_cache/{stock_code}/{cache_type}.pkl`
 - 上传图片：`uploads/`
 
-## 设计文档
+## akshare 财务取数接口约定
 
-设计和实施计划保存在 `docs/plans/` 目录，格式 `YYYY-MM-DD-<topic>-design.md`
+- **多年财务时序首选**：`ak.stock_financial_abstract_ths(symbol, indicator="按年度")` — 唯一对全市场（主板/创业板/科创板）稳定返回的接口，含 ROE/毛利率/净利率/营收/净利/现金流/周转/负债率
+- **PE/PB 5 年历史分位**：`ak.stock_zh_valuation_baidu(symbol, indicator="市盈率(TTM)"|"市净率", period="近5年")`
+- **避坑**：
+  - `ak.stock_financial_analysis_indicator(symbol)` 对部分主板代码（如 603986）返回空，不可作默认
+  - `ak.stock_a_indicator_lg` 已从 akshare 移除，AttributeError
+  - `ak.stock_zh_a_spot_em` / `stock_individual_info_em` 频繁被东财限流（RemoteDisconnected）；实时价改用 `UnifiedStockDataService.get_realtime_prices()`
+
+## 文档目录约定
+
+- `docs/plans/` — 设计与实施计划，格式 `YYYY-MM-DD-<topic>-design.md`
+- `docs/analysis/` — 个股 buffett 风格深度分析，格式 `YYYY-MM-DD-<股票名>-buffett分析.md`
+- `docs/financial-analysis/` — 多股横向对比 / comps / 估值，格式 `YYYY-MM-DD-<主题>-<细分>.md`
 
 ## 盯盘告警推送格式
 
