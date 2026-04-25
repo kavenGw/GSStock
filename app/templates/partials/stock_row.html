@@ -21,6 +21,9 @@
         </select>
     </td>
     <td>
+        {% if stock.stock_name in buffett_index %}
+        <button class="btn btn-sm btn-outline-info buffett-btn me-1" title="查看巴菲特分析">巴</button>
+        {% endif %}
         <button class="btn btn-sm btn-outline-danger delete-btn">删除</button>
     </td>
 </tr>

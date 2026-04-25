@@ -139,6 +139,20 @@ main.container {
 .subcategory-section table {
     margin-bottom: 0;
 }
+#buffettModal .modal-dialog { max-width: 900px; }
+#buffettContent { font-size: 14px; line-height: 1.7; }
+#buffettContent h1 { font-size: 1.6em; margin-top: 0.5em; padding-bottom: 0.3em; border-bottom: 1px solid rgba(128,128,128,0.3); }
+#buffettContent h2 { font-size: 1.3em; margin-top: 1.2em; padding-bottom: 0.2em; border-bottom: 1px solid rgba(128,128,128,0.2); }
+#buffettContent h3 { font-size: 1.1em; margin-top: 1em; }
+#buffettContent table { border-collapse: collapse; margin: 0.8em 0; width: 100%; }
+#buffettContent table th, #buffettContent table td { border: 1px solid rgba(128,128,128,0.3); padding: 6px 10px; }
+#buffettContent table th { background: rgba(13,110,253,0.08); }
+#buffettContent blockquote { border-left: 3px solid #0d6efd; padding: 4px 12px; margin: 0.8em 0; color: #6c757d; background: rgba(13,110,253,0.04); }
+#buffettContent code { background: rgba(128,128,128,0.15); padding: 2px 4px; border-radius: 3px; font-size: 0.9em; }
+#buffettContent pre { background: rgba(128,128,128,0.1); padding: 10px; border-radius: 4px; overflow-x: auto; }
+#buffettContent pre code { background: none; padding: 0; }
+#buffettContent hr { margin: 1.4em 0; border-top: 1px solid rgba(128,128,128,0.3); }
+#buffettModal .modal-footer .source-path { font-size: 12px; color: #6c757d; }
 </style>
 {% endblock %}
 
@@ -270,6 +284,25 @@ main.container {
     {% if not stocks %}
     <div class="text-center text-muted py-4">暂无股票</div>
     {% endif %}
+</div>
+
+<!-- 巴菲特分析查看弹窗 -->
+<div class="modal fade" id="buffettModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buffettModalTitle">巴菲特分析</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="buffettContent"><div class="text-muted">加载中...</div></div>
+            </div>
+            <div class="modal-footer">
+                <span class="source-path" id="buffettSource"></span>
+                <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- 新增分类弹窗 -->
@@ -623,6 +656,35 @@ function startTagsEdit(cell, code) {
 
     render();
 }
+
+// 巴菲特分析查看
+stockList.addEventListener('click', async (e) => {
+    if (!e.target.classList.contains('buffett-btn')) return;
+    const row = e.target.closest('tr');
+    const code = row.dataset.code;
+    const name = row.querySelector('.stock-name').textContent.trim();
+    const titleEl = document.getElementById('buffettModalTitle');
+    const contentEl = document.getElementById('buffettContent');
+    const sourceEl = document.getElementById('buffettSource');
+    titleEl.textContent = `${name} 巴菲特分析`;
+    contentEl.innerHTML = '<div class="text-muted">加载中...</div>';
+    sourceEl.textContent = '';
+    new bootstrap.Modal(document.getElementById('buffettModal')).show();
+
+    try {
+        const res = await fetch(`/stocks/${code}/buffett`);
+        if (res.ok) {
+            const data = await res.json();
+            contentEl.innerHTML = data.html;
+            sourceEl.textContent = data.source || '';
+        } else {
+            const data = await res.json().catch(() => ({}));
+            contentEl.innerHTML = `<div class="text-danger">${data.error || '未找到该股票的分析文件'}</div>`;
+        }
+    } catch (err) {
+        contentEl.innerHTML = `<div class="text-danger">加载失败：${err.message}</div>`;
+    }
+});
 
 // 删除按钮
 stockList.addEventListener('click', async (e) => {

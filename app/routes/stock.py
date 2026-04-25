@@ -3,6 +3,7 @@ from app.routes import stock_bp
 from app.services.stock import StockService
 from app.services.category import CategoryService
 from app.services.stock_meta import StockMetaService
+from app.services.buffett_analysis import BuffettAnalysisService
 
 
 @stock_bp.route('/manage')
@@ -60,13 +61,29 @@ def manage():
             if cat_id in stocks_by_category:
                 stocks_by_category[cat_id]['stocks'].append(stock)
 
+    buffett_index = set(BuffettAnalysisService.build_index().keys())
+
     return render_template('stock_manage.html',
                            stocks=stocks,
                            stocks_by_category=stocks_by_category,
                            uncategorized_stocks=uncategorized_stocks,
                            stock_categories=stock_categories,
                            categories=categories,
-                           alias_map=alias_map)
+                           alias_map=alias_map,
+                           buffett_index=buffett_index)
+
+
+@stock_bp.route('/<code>/buffett', methods=['GET'])
+def get_buffett_analysis(code):
+    """读取股票对应的巴菲特分析（只读 markdown 渲染）"""
+    stock = StockService.get_stock(code)
+    if not stock:
+        return jsonify({'error': '股票代码不存在'}), 404
+
+    result = BuffettAnalysisService.get_html(stock.stock_name)
+    if result is None:
+        return jsonify({'error': '暂无分析'}), 404
+    return jsonify(result)
 
 
 @stock_bp.route('', methods=['GET'])
