@@ -50,7 +50,7 @@ class EsportsDailyScheduleStrategy(Strategy):
             NotificationService.send_slack('\n'.join(lines), CHANNEL_NBA)
             logger.info(f'[赛事安排] NBA 推送 {len(games)} 场')
         except Exception as e:
-            logger.error(f'[赛事安排] NBA 推送失败: {e}')
+            logger.error(f'[赛事安排] NBA 推送失败: {type(e).__name__}: {e}', exc_info=True)
 
     @staticmethod
     def _push_lol_today():
@@ -93,4 +93,4 @@ class EsportsDailyScheduleStrategy(Strategy):
             NotificationService.send_slack(header + '\n\n' + '\n\n'.join(sections), CHANNEL_LOL)
             logger.info(f'[赛事安排] LoL 推送 {total} 场')
         except Exception as e:
-            logger.error(f'[赛事安排] LoL 推送失败: {e}')
+            logger.error(f'[赛事安排] LoL 推送失败: {type(e).__name__}: {e}', exc_info=True)

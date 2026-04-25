@@ -267,8 +267,13 @@ class EsportsService:
 
         return result if not all_failed else None
 
+    # 重试退避序列（秒），与 _max_retries 长度对齐
+    _LOL_FETCH_BACKOFF = [1, 3, 8]
+    # 4xx 中明确不可重试的状态码（鉴权/参数错）
+    _LOL_NO_RETRY_4XX = {400, 401, 403, 404}
+
     @staticmethod
-    def _fetch_lol_esports_schedule(league_id, today, yesterday, _max_retries=2):
+    def _fetch_lol_esports_schedule(league_id, today, yesterday, _max_retries=3):
         """从 LoL Esports API 获取指定联赛的赛程
 
         API 返回分页数据（无日期过滤参数），需要翻页查找目标日期。
@@ -278,17 +283,51 @@ class EsportsService:
         Returns:
             {'today': [match, ...], 'yesterday': [match, ...]} 或 None（获取失败）
         """
+        backoff = EsportsService._LOL_FETCH_BACKOFF
         for attempt in range(_max_retries + 1):
             try:
-                result = EsportsService._do_fetch_lol_schedule(league_id, today, yesterday)
-                return result
-            except Exception as e:
+                return EsportsService._do_fetch_lol_schedule(league_id, today, yesterday)
+            except httpx.HTTPStatusError as e:
+                status = e.response.status_code
+                body = e.response.text[:500] if e.response is not None else ''
+                retriable = status >= 500 or status == 429 or (
+                    400 <= status < 500 and status not in EsportsService._LOL_NO_RETRY_4XX
+                )
+                if retriable and attempt < _max_retries:
+                    wait = backoff[min(attempt, len(backoff) - 1)]
+                    logger.info(
+                        f'[赛事.LoL] league={league_id} HTTP {status}，{wait}s 后重试 '
+                        f'({attempt + 1}/{_max_retries})'
+                    )
+                    time.sleep(wait)
+                    continue
+                logger.warning(
+                    f'[赛事.LoL] league={league_id} HTTP {status} 获取失败 body={body!r}',
+                    exc_info=True,
+                )
+                return None
+            except (httpx.ConnectError, httpx.ReadTimeout, httpx.ConnectTimeout,
+                    httpx.RemoteProtocolError, httpx.ReadError) as e:
                 if attempt < _max_retries:
-                    logger.info(f'[赛事.LoL] 联赛{league_id}第{attempt + 1}次获取失败，重试: {e}')
-                    time.sleep(2)
-                else:
-                    logger.warning(f'[赛事.LoL] 联赛{league_id}获取失败（已重试{_max_retries}次）: {e}')
-                    return None
+                    wait = backoff[min(attempt, len(backoff) - 1)]
+                    logger.info(
+                        f'[赛事.LoL] league={league_id} 网络异常 {type(e).__name__}，'
+                        f'{wait}s 后重试 ({attempt + 1}/{_max_retries})'
+                    )
+                    time.sleep(wait)
+                    continue
+                logger.warning(
+                    f'[赛事.LoL] league={league_id} 网络异常重试耗尽: '
+                    f'{type(e).__name__}: {e}',
+                    exc_info=True,
+                )
+                return None
+            except Exception as e:
+                logger.warning(
+                    f'[赛事.LoL] league={league_id} 未知异常: {type(e).__name__}: {e}',
+                    exc_info=True,
+                )
+                return None
 
     @staticmethod
     def _do_fetch_lol_schedule(league_id, today, yesterday):
