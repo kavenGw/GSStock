@@ -796,6 +796,140 @@ SUPPLY_CHAIN_GRAPHS = {
                           '/ 四大材料（正极/负极/电解液/隔膜）全球绝对主导',
         },
     },
+    'copper': {
+        'name': '铜产业链',
+        'code': 'COPPER',
+        'description': '电气化时代核心金属：能源转型 + AI 数据中心 + 电网升级三轮驱动',
+        'core': {
+            'technologies': ['湿法/火法冶炼', '阳极泥提金', '电解精炼', '锂电铜箔', '高速铜缆'],
+            'products': ['铜精矿', '阴极铜（电解铜）', '铜杆/铜管/铜带', '锂电铜箔', '漆包线'],
+            'customers': ['国家电网', '新能源车', '储能电站', 'AI 数据中心', '空调家电', '建筑'],
+        },
+        'extra_cores': [
+            {
+                'code': '601899',
+                'name': '紫金矿业',
+                'market': 'A',
+                'description': '全球前十铜矿商 + 国内最大金铜矿龙头（Don Buy：当前估值偏高）',
+            },
+            {
+                'code': '603993',
+                'name': '洛阳钼业',
+                'market': 'A',
+                'description': '刚果金 TFM/KFM 铜钴双矿主力（Don Buy：仅极端低估才考虑）',
+            },
+            {
+                'code': '600362',
+                'name': '江西铜业',
+                'market': 'A',
+                'description': '国内最大纯铜业（自有矿+冶炼），A 股铜价 β 代表',
+            },
+            {
+                'code': '000630',
+                'name': '铜陵有色',
+                'market': 'A',
+                'description': '国内第二大铜冶炼，安徽国资',
+            },
+        ],
+        'upstream': {
+            '铜矿资源': {
+                'description': '国内/海外铜精矿自给主力（自给率约 20%，海外并购为主）',
+                'companies': {
+                    '601899': {'name': '紫金矿业', 'role': '全球前十铜矿商，金铜兼营（同 extra_cores）', 'tag': 'don_buy'},
+                    '603993': {'name': '洛阳钼业', 'role': '刚果金 TFM/KFM 铜钴双矿（同 extra_cores）', 'tag': 'don_buy'},
+                    '600362': {'name': '江西铜业', 'role': '国内最大铜矿+冶炼一体化（同 extra_cores）'},
+                    '601168': {'name': '西部矿业', 'role': '玉龙铜矿 + 铜锌铅多金属', 'tag': 'not_analyzed'},
+                    '600489': {'name': '中金黄金', 'role': '黄金为主、铜为辅，金铜伴生（Don Buy）', 'tag': 'don_buy'},
+                },
+            },
+            '铜冶炼': {
+                'description': '阴极铜（电解铜）冶炼龙头，全球产能 45%+ 集中于中国',
+                'companies': {
+                    '000630': {'name': '铜陵有色', 'role': '国内第二大铜冶炼，安徽国资（同 extra_cores）'},
+                    '000878': {'name': '云南铜业', 'role': '国内第三大铜冶炼，西南龙头', 'tag': 'not_analyzed'},
+                },
+            },
+            '副产物（金/钴/钼）': {
+                'description': '铜矿伴生贵金属与小金属，副产物贡献毛利',
+                'companies': {
+                    '600489': {'name': '中金黄金', 'role': '金铜兼营，铜为副产（Don Buy 同上）', 'tag': 'don_buy'},
+                    '603993': {'name': '洛阳钼业', 'role': '刚果金钴副产 + 钼业务（同上 Don Buy）', 'tag': 'don_buy'},
+                },
+            },
+            '矿山装备': {
+                'description': '选矿/破碎/电解槽设备，A 股直投标的稀缺',
+                'companies': {},
+            },
+        },
+        'midstream': {
+            '铜管/铜杆': {
+                'description': '空调铜管 + 电力铜杆，全球出口龙头',
+                'companies': {
+                    '002203': {'name': '海亮股份', 'role': '全球铜管第一，空调/制冷主力', 'tag': 'not_analyzed'},
+                    '002295': {'name': '精艺股份', 'role': '精密铜管', 'tag': 'not_analyzed'},
+                },
+            },
+            '铜带/铜板/合金': {
+                'description': '高端铜合金 + 铜带（连接器/引线框架/汽车端子）',
+                'companies': {
+                    '002171': {'name': '楚江新材', 'role': '铜带龙头 + 锂电铜箔', 'tag': 'not_analyzed'},
+                    '601137': {'name': '博威合金', 'role': '高端铜合金（汽车/通信连接器）', 'tag': 'not_analyzed'},
+                    '601609': {'name': '金田股份', 'role': '综合铜加工龙头', 'tag': 'not_analyzed'},
+                    '600255': {'name': '鑫科材料', 'role': '铜基新材料', 'tag': 'not_analyzed'},
+                },
+            },
+            '锂电铜箔': {
+                'description': '4-8μm 极薄铜箔（动力/储能电池负极集流体）',
+                'companies': {
+                    '600110': {'name': '诺德股份', 'role': '锂电铜箔龙头（同属 energy_storage 链）', 'tag': 'not_analyzed'},
+                    '002171': {'name': '楚江新材', 'role': '铜带 + 锂电铜箔双线（同上）', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            '电力电网': {
+                'description': '特高压电缆 + 变压器铜绕组，电网投资刚性需求',
+                'companies': {
+                    '600406': {'name': '国电南瑞', 'role': '电网调度 + 储能（同属 energy_storage 产业链）', 'tag': 'not_analyzed'},
+                    '002028': {'name': '思源电气', 'role': '变压器/开关 + 储能变流器（同属 energy_storage 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '新能源车 / 储能': {
+                'description': '电池铜箔 + 结构件 + 高压线束，单车铜含量 60kg vs 燃油车 23kg',
+                'companies': {
+                    '300750': {'name': '宁德时代', 'role': '动力/储能电池龙头（同属 energy_storage core）'},
+                    '002850': {'name': '科达利', 'role': '电池结构件铜部件（同属 energy_storage 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            'AI 数据中心': {
+                'description': 'NVLink Scale-up 高速铜缆 + 高速背板连接器（铜缆部分替代光模块）',
+                'companies': {
+                    '002130': {'name': '沃尔核材', 'role': '高速铜缆 / OAM Scale-up 互连（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '688668': {'name': '鼎通科技', 'role': 'AI 高速背板连接器（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '300252': {'name': '金信诺', 'role': '高速线缆组件（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '空调家电 / 建筑': {
+                'description': '家电铜管 + 建筑布线，A 股集中度低，主供应方见 midstream（海亮/精艺）',
+                'companies': {},
+            },
+        },
+        'competitors': {
+            'FCX':     {'name': 'Freeport-McMoRan', 'market': 'US'},
+            'SCCO':    {'name': 'Southern Copper', 'market': 'US'},
+            'BHP':     {'name': '必和必拓', 'market': 'US'},
+            'RIO':     {'name': '力拓', 'market': 'US'},
+            '1208.HK': {'name': '五矿资源', 'market': 'HK'},
+            '0358.HK': {'name': '江西铜业(H)', 'market': 'HK'},
+        },
+        'trends': {
+            'bandwidth': '铜价 USD/t：2020 5000 → 2024 9500 → 2030E 12000+（IEA 长期短缺）',
+            'technologies': ['锂电铜箔 6μm→4μm 极薄化', 'AI 数据中心高速铜缆替代部分光模块',
+                             '电网特高压扩张', '新能源车单车铜含量 60kg vs 燃油车 23kg'],
+            'china_role': '冶炼产能全球 45%+ / 铜矿自给率仅 20%（紫金/洛阳钼业海外并购主力）'
+                          ' / 铜加工（海亮/楚江/博威）出口竞争力全球前列',
+        },
+    },
 }
 
 
