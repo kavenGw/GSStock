@@ -995,6 +995,12 @@ SUPPLY_CHAIN_GRAPHS = {
                     '000100': {'name': 'TCL科技', 'role': '中尺寸 LCD/Mini-LED 切入苹果备选', 'tag': 'not_analyzed'},
                 },
             },
+            '天线 / 无线充电模组': {
+                'description': 'iPhone LCP/MPI 天线 + AirPods/Watch 无线充电 Tx/Rx 模组 + EMI 电磁屏蔽件',
+                'companies': {
+                    '300136': {'name': '信维通信', 'role': 'iPhone LCP 天线 + Apple Watch/AirPods 无线充电模组 + EMI 屏蔽', 'tag': 'not_analyzed'},
+                },
+            },
         },
         'midstream': {
             '整机组装 EMS/ODM': {
@@ -1287,7 +1293,9 @@ SUPPLY_CHAIN_GRAPHS = {
             ],
             'china_role': 'ITAR 禁运下 A 股零直供。'
                           '国产商业航天主力（蓝箭航天/星河动力/银河航天/天兵科技）均未上市；'
-                          'A 股可参照 600118 中国卫星 / 600879 航天电子作为「中国版 SpaceX」对标',
+                          'A 股可参照 600118 中国卫星 / 600879 航天电子作为「中国版 SpaceX」对标。'
+                          '钛/特种合金侧：600456 宝钛股份 / 002149 西部材料 / 688122 西部超导 '
+                          '是国内航天结构件主力，但与 SpaceX 无供货关系（ITAR 限制）',
         },
     },
 }
