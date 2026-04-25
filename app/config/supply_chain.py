@@ -1298,6 +1298,125 @@ SUPPLY_CHAIN_GRAPHS = {
                           '是国内航天结构件主力，但与 SpaceX 无供货关系（ITAR 限制）',
         },
     },
+    'photoresist': {
+        'name': '光刻胶产业链',
+        'code': 'PHOTORESIST',
+        'description': '半导体/面板/PCB 三大应用核心材料，国产替代主线（整体国产化率 <10%）',
+        'core': {
+            'technologies': ['g/i 线', 'KrF', 'ArF (干式/浸没)', 'EUV', 'OLED 彩色光刻胶'],
+            'products': ['半导体光刻胶', '面板光刻胶 (LCD/OLED)', 'PCB 光刻胶 (干膜/湿膜/阻焊油墨)'],
+            'customers': ['中芯国际', '华虹', '长江存储', '长鑫存储', '京东方', 'TCL华星', '鹏鼎/沪电'],
+        },
+        'extra_cores': [
+            {
+                'code': '603650',
+                'name': '彤程新材',
+                'market': 'A',
+                'description': 'KrF/ArF 光刻胶国产突破龙头（北京科华母公司）',
+            },
+            {
+                'code': '300346',
+                'name': '南大光电',
+                'market': 'A',
+                'description': 'ArF 光刻胶量产 + 高纯电子特气（MO源/三氟化氮）',
+            },
+            {
+                'code': '603306',
+                'name': '华懋科技',
+                'market': 'A',
+                'description': '参股徐州博康（KrF/ArF 光刻胶单体核心供应商）',
+            },
+        ],
+        'upstream': {
+            '光刻胶单体/树脂': {
+                'description': '光刻胶配方核心原料（树脂占比 50%+），国产单体已具竞争力',
+                'companies': {
+                    '300398': {'name': '飞凯材料', 'role': '光刻胶单体 + LCD/PCB 光刻胶（同属 apple 链显示侧）'},
+                    '688550': {'name': '瑞联新材', 'role': 'OLED 中间体 + 光刻胶单体'},
+                    '002326': {'name': '永太科技', 'role': '显示/半导体光刻胶单体（含氟中间体）', 'tag': 'not_analyzed'},
+                },
+            },
+            '光引发剂': {
+                'description': '光固化反应核心组分，国产已具全球竞争力',
+                'companies': {
+                    '300429': {'name': '强力新材', 'role': '光引发剂全球龙头 + 光刻胶树脂'},
+                },
+            },
+            '电子级溶剂/特气': {
+                'description': '光刻胶配套溶剂、显影液、刻蚀气体（前驱体材料）',
+                'companies': {
+                    '300346': {'name': '南大光电', 'role': '高纯电子特气（同 extra_cores）'},
+                    '688268': {'name': '华特气体', 'role': '电子特气国产替代龙头', 'tag': 'not_analyzed'},
+                    '002409': {'name': '雅克科技', 'role': '前驱体材料（同属 storage 链）'},
+                },
+            },
+        },
+        'midstream': {
+            '半导体光刻胶 (KrF/ArF/EUV)': {
+                'description': '晶圆厂 g/i 线 → KrF → ArF → EUV，国产 KrF 已突破，ArF 量产爬坡',
+                'companies': {
+                    '300346': {'name': '南大光电', 'role': 'ArF 光刻胶量产（同 extra_cores）'},
+                    '603650': {'name': '彤程新材', 'role': 'KrF/ArF 光刻胶（北京科华，同 extra_cores）'},
+                    '603306': {'name': '华懋科技', 'role': '徐州博康 KrF/ArF（同 extra_cores）'},
+                    '300236': {'name': '上海新阳', 'role': 'ArF 光刻胶 + 电镀液', 'tag': 'not_analyzed'},
+                    '300655': {'name': '晶瑞电材', 'role': 'g/i 线/KrF 光刻胶 + 双氧水', 'tag': 'not_analyzed'},
+                },
+            },
+            '面板光刻胶 (LCD/OLED)': {
+                'description': 'LCD 彩色光刻胶/黑色光刻胶 + OLED 像素定义层光刻胶',
+                'companies': {
+                    '300398': {'name': '飞凯材料', 'role': 'LCD 彩色光刻胶 + 单体（同上）'},
+                    '300576': {'name': '容大感光', 'role': 'PCB/面板光刻胶 + 光刻液', 'tag': 'not_analyzed'},
+                },
+            },
+            'PCB 光刻胶 (干膜/湿膜)': {
+                'description': 'PCB 干膜光致抗蚀剂 + 阻焊油墨（应用最成熟、国产化率最高）',
+                'companies': {
+                    '300576': {'name': '容大感光', 'role': 'PCB 干膜/湿膜 + 阻焊油墨（同上）', 'tag': 'not_analyzed'},
+                    '300537': {'name': '广信材料', 'role': 'PCB 阻焊油墨 + UV 光固化', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            '半导体晶圆厂': {
+                'description': '逻辑/存储晶圆厂为半导体光刻胶最大需求方',
+                'companies': {
+                    '688981': {'name': '中芯国际', 'role': '国内最大晶圆代工，KrF/ArF 主要客户'},
+                },
+            },
+            '面板厂': {
+                'description': 'LCD/OLED 面板厂为面板光刻胶主要客户（同属 apple 链显示侧）',
+                'companies': {
+                    '000725': {'name': '京东方A', 'role': 'LCD/OLED 全球第一（同属 apple 链）'},
+                    '000100': {'name': 'TCL科技', 'role': 'TCL华星 LCD 全球前列（同属 apple 链）'},
+                },
+            },
+            'PCB 厂': {
+                'description': 'PCB 厂为 PCB 光刻胶/干膜主要客户（同属 apple/cpu 链）',
+                'companies': {
+                    '002463': {'name': '沪电股份', 'role': 'AI 服务器 PCB 龙头（同属 apple/cpu 链）'},
+                    '002938': {'name': '鹏鼎控股', 'role': 'iPhone FPC 第一（同属 apple 链）'},
+                    '002384': {'name': '东山精密', 'role': 'FPC + 软板（同属 apple 链）'},
+                },
+            },
+        },
+        'competitors': {
+            '4185.T': {'name': 'JSR', 'market': 'JP'},
+            '4063.T': {'name': '信越化学', 'market': 'JP'},
+            '4186.T': {'name': '东京应化 TOK', 'market': 'JP'},
+            '4901.T': {'name': '富士胶片', 'market': 'JP'},
+            '4005.T': {'name': '住友化学', 'market': 'JP'},
+            'DD':     {'name': 'DuPont', 'market': 'US'},
+        },
+        'trends': {
+            'bandwidth': 'g/i 线 → KrF → ArF → EUV，国产 KrF 已突破，ArF 量产爬坡，EUV 长跑（无量产标的）',
+            'technologies': ['ArF 光刻胶国产替代加速', 'EUV 光刻胶研发（彤程/南大）',
+                             'OLED 像素定义层光刻胶', 'PCB 干膜高分辨率化'],
+            'china_role': '上游单体/光引发剂（强力新材/瑞联）已具全球竞争力；'
+                          '中游半导体光刻胶整体国产化率 <10%（KrF ~20%，ArF <5%，EUV 0%）；'
+                          '面板/PCB 光刻胶国产化率较高（PCB 60%+，面板 30%+）',
+        },
+    },
 }
 
 
