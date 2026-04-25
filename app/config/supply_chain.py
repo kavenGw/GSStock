@@ -1040,6 +1040,256 @@ SUPPLY_CHAIN_GRAPHS = {
                           '风险：印度/越南产能转移持续推进',
         },
     },
+    'tesla': {
+        'name': '特斯拉',
+        'code': 'TSLA',
+        'description': '电动车 + 储能 + 人形机器人 + FSD 全栈龙头，A 股特斯拉链是"汽车智能化 + 具身智能"双主线最大交集',
+        'core': {
+            'technologies': ['一体化压铸 (6000T+)', '4680 圆柱电池', 'FSD V12 / HW4',
+                             'Dojo 自研超算', 'Optimus 人形机器人', '行星滚柱丝杠执行器',
+                             'Megapack 储能', '48V 低压架构'],
+            'products': ['Model 3/Y', 'Model S/X', 'Cybertruck', 'Semi 卡车',
+                         'Megapack 储能', 'Optimus 人形机器人', 'Robotaxi/Cybercab', 'FSD'],
+            'customers': ['全球高端 EV 用户', '电网与商业储能客户', '工厂/服务机器人场景',
+                          'Robotaxi 出行网络', '商用卡车运营商'],
+        },
+        'extra_cores': [
+            {
+                'code': '002594',
+                'name': '比亚迪',
+                'market': 'A',
+                'description': '全球新能源车销量第一，垂直一体化（同属 energy_storage 产业链）',
+            },
+            {
+                'code': '601689',
+                'name': '拓普集团',
+                'market': 'A',
+                'description': '特斯拉中国链最大单一供应商（一体压铸+底盘+内饰+Optimus 执行器三条线）',
+            },
+        ],
+        'upstream': {
+            '一体化压铸': {
+                'description': '特斯拉首创 6000T 一体压铸 → 大型铝合金结构件，国内供应链快速跟进',
+                'companies': {
+                    '603348': {'name': '文灿股份', 'role': '特斯拉一体压铸核心供应（铝合金后地板）', 'tag': 'not_analyzed'},
+                    '600933': {'name': '爱柯迪', 'role': '中小铝压铸 + 新能源汽车结构件', 'tag': 'not_analyzed'},
+                    '002101': {'name': '广东鸿图', 'role': '一体压铸副车架 + 电池托盘', 'tag': 'not_analyzed'},
+                    '601689': {'name': '拓普集团', 'role': '一体压铸 + 底盘 + 内饰多线供应（同 extra_cores）'},
+                },
+            },
+            '三电系统（电池/电机/电控）': {
+                'description': '动力电池 + 电机壳体/转子 + 电控配套',
+                'companies': {
+                    '300750': {'name': '宁德时代', 'role': '上海工厂动力电池主供（同属 energy_storage core）'},
+                    '603305': {'name': '旭升集团', 'role': '特斯拉电机壳体/变速箱壳体核心独供', 'tag': 'not_analyzed'},
+                    '300207': {'name': '欣旺达', 'role': 'BMS + 动力电池配套（同属 energy_storage / apple 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '热管理': {
+                'description': 'EV 热泵 + 电池冷却 + 电子膨胀阀（特斯拉热管理是 A 股双主线代表）',
+                'companies': {
+                    '002050': {'name': '三花智控', 'role': '特斯拉热泵+电子膨胀阀核心独供 + Optimus 执行器（同属 nvidia 机器人产业链）', 'tag': 'not_analyzed'},
+                    '002126': {'name': '银轮股份', 'role': '热交换器 + 电池冷却板', 'tag': 'not_analyzed'},
+                    '603960': {'name': '克来机电', 'role': '热管理总成 + 自动化产线', 'tag': 'not_analyzed'},
+                },
+            },
+            '车身结构与内饰': {
+                'description': '座椅 + 仪表板 + 副仪表板 + 内饰件',
+                'companies': {
+                    '603997': {'name': '继峰股份', 'role': '特斯拉座椅总成 + 头枕扶手', 'tag': 'not_analyzed'},
+                    '603179': {'name': '新泉股份', 'role': '特斯拉仪表板 + 门板内饰主供', 'tag': 'not_analyzed'},
+                },
+            },
+            '玻璃 / 轮毂 / 线束': {
+                'description': '汽车玻璃 + 铝合金轮毂 + 高低压线束',
+                'companies': {
+                    '600660': {'name': '福耀玻璃', 'role': '特斯拉车窗玻璃全球核心供应', 'tag': 'not_analyzed'},
+                    '300428': {'name': '立中集团', 'role': '铝合金轮毂 + 一体压铸合金材料', 'tag': 'not_analyzed'},
+                    '002085': {'name': '万丰奥威', 'role': '镁/铝合金轮毂', 'tag': 'not_analyzed'},
+                    '605333': {'name': '沪光股份', 'role': '特斯拉高压线束主供', 'tag': 'not_analyzed'},
+                },
+            },
+            '智能驾驶域控 / 智能座舱': {
+                'description': 'FSD 国内适配 + 智能座舱域控（特斯拉 HW4 自研，国内域控合作 NV Orin/Thor）',
+                'companies': {
+                    '002920': {'name': '德赛西威', 'role': '智能座舱+智驾域控（同属 nvidia 自动驾驶产业链）', 'tag': 'not_analyzed'},
+                    '600699': {'name': '均胜电子', 'role': '智能座舱 + 安全系统（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '机器人执行器（Optimus 旋转/直线执行器）': {
+                'description': 'Optimus 关节核心模组：旋转执行器 6 个 + 直线执行器 14 个 / 单台机器人',
+                'companies': {
+                    '002050': {'name': '三花智控', 'role': 'Optimus 直线执行器（行星滚柱丝杠总成）核心合作（同上 热管理）', 'tag': 'not_analyzed'},
+                    '002747': {'name': '埃斯顿', 'role': '工业机器人国产龙头 + 具身智能（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '行星滚柱丝杠 / 减速器': {
+                'description': 'Optimus 直线关节核心：行星滚柱丝杠（卡脖子部件）+ 谐波减速器',
+                'companies': {
+                    '603667': {'name': '五洲新春', 'role': '行星滚柱丝杠送样特斯拉', 'tag': 'not_analyzed'},
+                    '603009': {'name': '北特科技', 'role': '汽车转向丝杠 + 滚柱丝杠人形机器人切入', 'tag': 'not_analyzed'},
+                    '688017': {'name': '绿的谐波', 'role': '谐波减速器国产龙头', 'tag': 'not_analyzed'},
+                    '002896': {'name': '中大力德', 'role': '精密减速器 + 行星滚柱丝杠双布局', 'tag': 'not_analyzed'},
+                    '300580': {'name': '贝斯特', 'role': '滚柱丝杠/丝母精密加工', 'tag': 'not_analyzed'},
+                    '300718': {'name': '长盛轴承', 'role': '自润滑轴承 + 关节配套', 'tag': 'not_analyzed'},
+                },
+            },
+            '空心杯电机 / 灵巧手': {
+                'description': 'Optimus 灵巧手 11 自由度：空心杯电机 + 微型传动 + 触觉传感',
+                'companies': {
+                    '603728': {'name': '鸣志电器', 'role': '空心杯电机国产龙头，特斯拉灵巧手送样', 'tag': 'not_analyzed'},
+                    '003021': {'name': '兆威机电', 'role': '微型传动 + 灵巧手关节模组', 'tag': 'not_analyzed'},
+                    '300115': {'name': '长盈精密', 'role': '机器人精密结构件（同属 apple 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '机器人传感器': {
+                'description': '六维力/扭矩传感器 + 触觉传感（A 股标的稀缺）',
+                'companies': {
+                    '603662': {'name': '柯力传感', 'role': '六维力传感器 + 应变式力传感', 'tag': 'not_analyzed'},
+                    '300354': {'name': '东华测试', 'role': '动态力学测试 + 力传感器', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            '充电桩与电驱配套': {
+                'description': '特斯拉超充 V4 + 国内 NACS 标准开放，第三方充电运营受益',
+                'companies': {
+                    '300693': {'name': '盛弘股份', 'role': 'PCS + 充电桩模块（同属 energy_storage 产业链）', 'tag': 'not_analyzed'},
+                    '300491': {'name': '通合科技', 'role': '充电模块 + 电力电源', 'tag': 'not_analyzed'},
+                },
+            },
+            '中国 EV 整车竞品': {
+                'description': '特斯拉在国内主要直接竞品（同属电动车赛道，部分共享供应链）',
+                'companies': {
+                    '9868.HK': {'name': '小鹏汽车', 'role': '智驾路线最贴近 FSD 的国内新势力', 'tag': 'not_analyzed'},
+                    '2015.HK': {'name': '理想汽车', 'role': '增程 SUV + 纯电 MEGA', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            'Model 3/Y 主销车型': {'description': '特斯拉销量支柱（占比 ~95%），上海工厂主力出口'},
+            'Model S/X 高端车型': {'description': '高端豪华 EV 标杆，技术验证平台'},
+            'Cybertruck / Semi': {'description': 'Cybertruck 不锈钢异形 + Semi 长途纯电卡车（HW4/4680 首发）'},
+            'Megapack 储能': {'description': '电网级储能（同属 energy_storage 下游），与宁德 EnerC 直接竞争'},
+            'Optimus 人形机器人': {'description': '马斯克"长期价值 10 倍于汽车"，2026 量产 1 万台目标 → 2030 百万台'},
+            'FSD / Robotaxi / Cybercab': {'description': 'FSD V12 端到端 + 2026 Robotaxi/Cybercab 商业化'},
+            'Dojo 训练超算': {'description': '自研 D1 芯片训练集群，FSD/Optimus 共用基础设施'},
+        },
+        'competitors': {
+            'NIO':     {'name': '蔚来', 'market': 'US'},
+            'XPEV':    {'name': '小鹏汽车', 'market': 'US'},
+            'LI':      {'name': '理想汽车', 'market': 'US'},
+            'RIVN':    {'name': 'Rivian', 'market': 'US'},
+            'LCID':    {'name': 'Lucid', 'market': 'US'},
+            'F':       {'name': '福特', 'market': 'US'},
+            'GM':      {'name': '通用汽车', 'market': 'US'},
+            '7203.T':  {'name': '丰田', 'market': 'JP'},
+            '9880.HK': {'name': '优必选（人形机器人侧）', 'market': 'HK'},
+        },
+        'trends': {
+            'bandwidth': '汽车端：年销 180w → 200w+ 平台期 / 机器人端：Optimus 2026 1w 台 → 2030 100w 台',
+            'technologies': ['一体压铸 6000T → 9000T', '4680 干法电极量产', 'FSD V12 端到端神经网络',
+                             'Optimus Gen 2/3 量产化（行星滚柱丝杠是最关键卡脖子）',
+                             'NACS 充电标准全球开放', '48V 低压架构重塑线束'],
+            'china_role': '汽车端：拓普/三花/旭升/福耀/沪光 一线供应商深度绑定（上海工厂国产化率 95%+）；'
+                          '机器人端：拓普/三花横跨双主线 + 五洲新春/绿的/鸣志/兆威 在丝杠/减速器/电机/灵巧手卡位',
+        },
+    },
+    'spacex': {
+        'name': 'SpaceX',
+        'code': 'SPACEX',
+        'description': '全球商业航天绝对龙头：可回收火箭 + Starlink 星链 + Dragon 飞船。'
+                       'ITAR 禁运下 A 股零直供，本图谱聚焦自身技术栈与全球竞争格局',
+        'core': {
+            'technologies': [
+                'Falcon 9 一级回收',
+                'Starship 全箭复用 + Raptor 全流量分级燃烧',
+                '甲烷推进 (Methalox)',
+                'Starlink V2 Mini / V3 卫星',
+                '激光星间链路',
+                'Dragon 2 载人/货运飞船',
+                'Direct to Cell 卫星直连手机',
+            ],
+            'products': [
+                'Falcon 9/Heavy 商业发射',
+                'Starship 超重型运载（百吨级 LEO）',
+                'Starlink 全球卫星互联网（>6000 在轨，6M+ 用户）',
+                'Dragon 载人/货运（NASA 商业载人/CRS）',
+                'Starshield 国防专属星座',
+            ],
+            'customers': [
+                'NASA（载人/货运/Artemis HLS 月球着陆）',
+                'NRO/美国国防部（Starshield 机密星座）',
+                '全球商业卫星运营商（一箭多星拼车）',
+                'Starlink 个人/企业/海事/航空终端用户',
+                '商业载人航天（Polaris 等）',
+            ],
+        },
+        'upstream': {
+            'ITAR 限制说明': {
+                'description': 'SpaceX 受美国 ITAR (国际武器贸易条例) 严格管控，'
+                               '火箭/卫星/Dragon 关键零部件禁止中国厂商参与，'
+                               'A 股直供标的几乎为零。下方分类保留以呈现产业结构，但 companies 暂为空',
+                'companies': {},
+            },
+            '推进系统（自研）': {
+                'description': 'Merlin/Raptor 引擎、不锈钢箭体均由 SpaceX 在 '
+                               'Hawthorne/McGregor/Starbase 内部生产',
+                'companies': {},
+            },
+            '卫星载荷与相控阵': {
+                'description': 'Starlink 卫星总装在 Redmond/华盛顿厂区，相控阵天线、'
+                               '光通信终端、霍尔推进器 (krypton/argon) 均自研',
+                'companies': {},
+            },
+        },
+        'midstream': {
+            '内部垂直一体化': {
+                'description': 'SpaceX 三大产能（加州 Hawthorne 火箭/德州 McGregor 引擎试车/'
+                               '德州 Starbase 星舰）全部自营，A 股无中游集成参与',
+                'companies': {},
+            },
+        },
+        'downstream': {
+            'Starlink 卫星互联网': {
+                'description': '全球 6000+ 在轨低轨卫星，覆盖 100+ 国家。'
+                               '中国大陆未授权运营，国产对标星座见 competitors',
+            },
+            '商业发射服务': {
+                'description': 'Falcon 9 已成全球商业发射事实标准（2024 年 130+ 次/年），'
+                               '猎鹰重型/星舰承接重型与超重型任务',
+            },
+            'NASA 载人/货运': {
+                'description': 'Dragon 国际空间站补给与载人，Artemis 月球计划 HLS 载人着陆器',
+            },
+            'Starshield 国防业务': {
+                'description': '美国军方专属星座，机密级业务，长期排他合同',
+            },
+        },
+        'competitors': {
+            'RKLB':   {'name': 'Rocket Lab（小型发射 + Neutron）', 'market': 'US'},
+            'ASTS':   {'name': 'AST SpaceMobile（卫星直连手机）', 'market': 'US'},
+            'IRDM':   {'name': 'Iridium（铱星，老牌卫星通信）', 'market': 'US'},
+            'BA':     {'name': 'Boeing（ULA 母公司之一 + Starliner）', 'market': 'US'},
+            'LMT':    {'name': 'Lockheed Martin（ULA 母公司之一）', 'market': 'US'},
+            '600118': {'name': '中国卫星（航天科技集团卫星总体）', 'market': 'A'},
+            '600879': {'name': '航天电子（航天电子配套）', 'market': 'A'},
+        },
+        'trends': {
+            'bandwidth': 'Falcon 9 (2010 首飞) → Falcon Heavy (2018) → '
+                         'Starship (2024 在测) → 火星殖民（长期愿景）',
+            'technologies': [
+                '完全可重复使用降低发射成本 100x',
+                'Starship 单次百吨级运力开启太空大规模经济',
+                'Starlink V3 单星 Tbps 级容量 + 激光星间链路替代地面站',
+                'Direct to Cell 卫星直连手机（与 ASTS 竞速）',
+                'Starshield 国防订单成为新利润极',
+            ],
+            'china_role': 'ITAR 禁运下 A 股零直供。'
+                          '国产商业航天主力（蓝箭航天/星河动力/银河航天/天兵科技）均未上市；'
+                          'A 股可参照 600118 中国卫星 / 600879 航天电子作为「中国版 SpaceX」对标',
+        },
+    },
 }
 
 
