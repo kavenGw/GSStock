@@ -1417,6 +1417,186 @@ SUPPLY_CHAIN_GRAPHS = {
                           '面板/PCB 光刻胶国产化率较高（PCB 60%+，面板 30%+）',
         },
     },
+    'ti': {
+        'name': '德州仪器',
+        'code': 'TXN',
+        'description': '全球模拟芯片+嵌入式 MCU 绝对龙头，工业/汽车占营收 70%+，'
+                       'A 股国产替代主战场（信号链/电源管理/MCU/车规模拟/功率分立）',
+        'core': {
+            'technologies': ['模拟信号链', '电源管理 IC (PMIC/DC-DC/LDO)',
+                             'C2000 实时控制 MCU', 'MSP430 / Arm Cortex-M MCU',
+                             'Sitara SoC', '12 寸内部 IDM (RFAB1/2/LFAB)',
+                             'AWR 毫米波雷达', 'GaN/SiC 功率'],
+            'products': ['信号链 IC（运放/比较器/数据转换器）', '电源管理 IC',
+                         '嵌入式处理器 / MCU', '模拟开关与接口', '隔离器/驱动器',
+                         '车规毫米波雷达', '功率分立'],
+            'customers': ['工业自动化', '汽车 OEM/Tier1', '通信基础设施',
+                          '个人电子', '企业级系统'],
+        },
+        'extra_cores': [
+            {
+                'code': 'ADI',
+                'name': '亚德诺',
+                'market': 'US',
+                'description': '高端信号链/数据转换器全球第一，TI 最直接对标',
+            },
+            {
+                'code': 'MCHP',
+                'name': 'Microchip',
+                'market': 'US',
+                'description': '8/16/32 位 MCU + 模拟综合厂商，业务结构与 TI 高度重合',
+            },
+            {
+                'code': 'STM',
+                'name': '意法半导',
+                'market': 'US',
+                'description': '欧洲模拟+MCU+功率龙头，STM32 全球 MCU 出货第一',
+            },
+        ],
+        'upstream': {
+            '半导体设备': {
+                'description': '8/12 寸成熟制程刻蚀/薄膜/CMP（模拟/MCU 主流产线）',
+                'companies': {
+                    '002371': {'name': '北方华创', 'role': '刻蚀/薄膜沉积（同属 storage/cpu 产业链）', 'tag': 'not_analyzed'},
+                    '688012': {'name': '中微公司', 'role': '刻蚀设备（同属 storage 产业链）', 'tag': 'not_analyzed'},
+                    '688072': {'name': '拓荆科技', 'role': 'PECVD/ALD 薄膜（同属 storage 产业链）', 'tag': 'not_analyzed'},
+                    '688120': {'name': '华海清科', 'role': 'CMP 抛光设备龙头（同属 storage 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '电子材料/特气': {
+                'description': '前驱体 + 高纯电子特气（模拟/MCU 制程必需）',
+                'companies': {
+                    '002409': {'name': '雅克科技', 'role': '前驱体材料（同属 storage/photoresist 产业链）', 'tag': 'not_analyzed'},
+                    '300346': {'name': '南大光电', 'role': '高纯电子特气（同属 photoresist 产业链）', 'tag': 'not_analyzed'},
+                    '688268': {'name': '华特气体', 'role': '电子特气国产替代（同属 photoresist 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '硅片/衬底': {
+                'description': '8/12 寸大硅片 + SiC 衬底',
+                'companies': {
+                    '688126': {'name': '沪硅产业', 'role': '12 寸大硅片国产替代（同属 storage 产业链）', 'tag': 'not_analyzed'},
+                    '002129': {'name': 'TCL中环', 'role': '半导体硅片 + 单晶硅（同属 storage 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '封测产能': {
+                'description': '模拟/MCU 封测（QFN/SOP/BGA），A 股封测全栈配套',
+                'companies': {
+                    '600584': {'name': '长电科技', 'role': '全球前三封测（同属 cpu/nvidia/storage 产业链）', 'tag': 'not_analyzed'},
+                    '002156': {'name': '通富微电', 'role': 'AMD 主力封测（同属 cpu/nvidia/storage 产业链）', 'tag': 'not_analyzed'},
+                    '002185': {'name': '华天科技', 'role': '国内第三大封测（同属 cpu/nvidia/storage 产业链）', 'tag': 'not_analyzed'},
+                    '603005': {'name': '晶方科技', 'role': '传感器/CIS 晶圆级封测', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            '信号链 IC': {
+                'description': '运放/比较器/模拟开关/数据转换器，TI 信号链最直接对标',
+                'companies': {
+                    '688536': {'name': '思瑞浦', 'role': '信号链国产龙头（运放/比较器/接口）'},
+                    '300661': {'name': '圣邦股份', 'role': '国产模拟综合龙头（信号链+电源全线）'},
+                    '688798': {'name': '艾为电子', 'role': '模拟+音频功放（消费电子主力）', 'tag': 'not_analyzed'},
+                },
+            },
+            '电源管理 IC': {
+                'description': 'PMIC / DC-DC / LDO / 充电管理',
+                'companies': {
+                    '688173': {'name': '希荻微', 'role': '移动端 PMIC + 车规电源', 'tag': 'frontEC'},
+                    '688508': {'name': '芯朋微', 'role': '家电+工控 PMIC', 'tag': 'not_analyzed'},
+                    '688141': {'name': '杰华特', 'role': '工业/通信电源 IC', 'tag': 'not_analyzed'},
+                    '688049': {'name': '炬芯科技', 'role': 'IoT SoC + 电源', 'tag': 'not_analyzed'},
+                },
+            },
+            '通用 MCU / 嵌入式': {
+                'description': '消费/工控/IoT MCU，国产替代渗透率最高的赛道',
+                'companies': {
+                    '603986': {'name': '兆易创新', 'role': 'GD32 国产 MCU 绝对龙头（同属 storage 产业链）'},
+                    '300327': {'name': '中颖电子', 'role': '家电 MCU 龙头', 'tag': 'not_analyzed'},
+                    '300077': {'name': '国民技术', 'role': '安全 MCU + IoT', 'tag': 'not_analyzed'},
+                    '688385': {'name': '复旦微电', 'role': 'FPGA + 安全 MCU'},
+                    '688018': {'name': '乐鑫科技', 'role': 'WiFi/BLE MCU（IoT 主力）', 'tag': 'not_analyzed'},
+                    '688766': {'name': '普冉股份', 'role': 'NOR + EEPROM 配套 MCU 生态（同属 storage 产业链）', 'tag': 'frontEC'},
+                },
+            },
+            '车规模拟 + 功率分立': {
+                'description': '车规模拟/隔离/磁传感 + IGBT/MOSFET/SiC 国产替代',
+                'companies': {
+                    '688052': {'name': '纳芯微', 'role': '车规隔离/磁传感/SBC，TI 车规直接对标', 'tag': 'not_analyzed'},
+                    '688261': {'name': '东微半导', 'role': '高压超级结 MOSFET', 'tag': 'not_analyzed'},
+                    '600460': {'name': '士兰微', 'role': 'IDM 模拟+IGBT+MEMS', 'tag': 'not_analyzed'},
+                    '605111': {'name': '新洁能', 'role': 'MOSFET/IGBT 设计', 'tag': 'not_analyzed'},
+                    '688396': {'name': '华润微', 'role': 'IDM 功率龙头（IGBT/MOSFET/SiC）', 'tag': 'not_analyzed'},
+                    '300373': {'name': '扬杰科技', 'role': '二极管/MOSFET/SiC', 'tag': 'not_analyzed'},
+                    '603290': {'name': '斯达半导', 'role': '车规 IGBT 模块龙头', 'tag': 'not_analyzed'},
+                    '300623': {'name': '捷捷微电', 'role': '晶闸管/MOSFET', 'tag': 'not_analyzed'},
+                },
+            },
+            '接口/驱动/保护': {
+                'description': 'ESD/TVS 保护 + LED 驱动 + 高速接口',
+                'companies': {
+                    '688230': {'name': '芯导科技', 'role': 'ESD/TVS 接口保护', 'tag': 'not_analyzed'},
+                    '688699': {'name': '明微电子', 'role': 'LED 驱动 IC', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            '工业自动化 / PLC': {
+                'description': 'TI C2000 实时控制 MCU 国内工控渗透率高，国产替代以兆易/纳芯微/思瑞浦为主',
+                'companies': {
+                    '300124': {'name': '汇川技术', 'role': '国产工控龙头（变频器/PLC/伺服）', 'tag': 'not_analyzed'},
+                    '603416': {'name': '信捷电气', 'role': '中小型 PLC', 'tag': 'not_analyzed'},
+                    '002527': {'name': '新时达', 'role': '工业机器人控制器', 'tag': 'not_analyzed'},
+                    '002747': {'name': '埃斯顿', 'role': '工业机器人国产龙头（同属 nvidia/tesla 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '汽车电子': {
+                'description': '智能化+电动化双驱动，车规模拟/MCU/功率单车价值量持续提升',
+                'companies': {
+                    '002920': {'name': '德赛西威', 'role': '智驾/座舱域控（同属 nvidia/tesla 产业链）', 'tag': 'not_analyzed'},
+                    '600699': {'name': '均胜电子', 'role': '智能座舱+安全系统（同属 nvidia/tesla 产业链）', 'tag': 'not_analyzed'},
+                    '002050': {'name': '三花智控', 'role': '热管理（车规 BMS 模拟需求，同属 tesla/nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '601689': {'name': '拓普集团', 'role': '一体压铸+底盘（同属 tesla 产业链）'},
+                },
+            },
+            '通信基础设施 / 数据中心': {
+                'description': 'AI 服务器 BBU/VRM 电源管理是 TI/MPS 主战场，国产配套以圣邦/杰华特/思瑞浦为主',
+                'companies': {
+                    '002463': {'name': '沪电股份', 'role': 'AI 服务器 PCB（电源 IC 配套，同属 nvidia/ascend/cpu 产业链）', 'tag': 'not_analyzed'},
+                    '002851': {'name': '麦格米特', 'role': 'AI 服务器电源（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '300870': {'name': '欧陆通', 'role': '服务器电源（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            '消费电子 / IoT': {
+                'description': '苹果/小米/安卓 PMIC 与音频功放是 TI/Cirrus/圣邦微主战场',
+                'companies': {
+                    '002475': {'name': '立讯精密', 'role': 'Apple 链组装 + 连接器（同属 apple 产业链）', 'tag': 'not_analyzed'},
+                    '002241': {'name': '歌尔股份', 'role': 'Apple 链 + AR/VR（同属 apple 产业链）', 'tag': 'not_analyzed'},
+                    '002938': {'name': '鹏鼎控股', 'role': 'iPhone FPC 第一（同属 apple 产业链）', 'tag': 'not_analyzed'},
+                    '300433': {'name': '蓝思科技', 'role': '玻璃盖板（同属 apple 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'competitors': {
+            'NXPI':   {'name': '恩智浦', 'market': 'US'},
+            'IFNNY':  {'name': '英飞凌', 'market': 'US'},
+            'ON':     {'name': '安森美', 'market': 'US'},
+            '6723.T': {'name': '瑞萨电子', 'market': 'JP'},
+            '688536': {'name': '思瑞浦', 'market': 'A'},
+            '300661': {'name': '圣邦股份', 'market': 'A'},
+            '688052': {'name': '纳芯微', 'market': 'A'},
+            '603986': {'name': '兆易创新', 'market': 'A'},
+        },
+        'trends': {
+            'bandwidth': '12 寸 RFAB2/LFAB 满产 → 内部产能全球前列；'
+                         'A 股国产化率 信号链 ~15% / 电源 ~20% / MCU ~30% / 车规模拟 <10%',
+            'technologies': ['12 寸内部 IDM 满产', 'SiC/GaN 功率芯片量产',
+                             'C2000 实时控制 MCU', '毫米波雷达 AWR 系列',
+                             '工业 4.0 + 汽车智能化双驱动'],
+            'china_role': '国产替代主线：信号链（思瑞浦/圣邦）+ 电源（希荻微/杰华特/芯朋微）'
+                          '+ MCU（兆易/中颖/复旦微）+ 车规模拟（纳芯微）'
+                          '+ 功率分立（士兰/华润微/斯达/扬杰）；'
+                          'TI 关税与产能转移背景下国产份额持续提升',
+        },
+    },
 }
 
 

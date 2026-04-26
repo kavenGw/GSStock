@@ -81,7 +81,7 @@ app/
 
 **启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
 
-**产业链图谱约定**：配置在 `app/config/supply_chain.py` 的 `SUPPLY_CHAIN_GRAPHS` 字典，渲染路由 `/supply-chain/api/<name>`。`upstream/midstream/downstream` 三层均支持 `companies` 字段；公司条目可带 `tag` 承载非产业链语义，约定取值 `frontEC` / `don_buy` / `keep_watching` / `not_analyzed`，前端 `supply_chain.html` 的 `TAG_LABELS` 映射显示文案。主题型图谱（如赛事）的 `competitors` 可留 `{}`，`core.code` 用虚拟 slug（如 `WC2026`）。
+**产业链图谱约定**：配置在 `app/config/supply_chain.py` 的 `SUPPLY_CHAIN_GRAPHS` 字典，渲染路由 `/supply-chain/api/<name>`。`upstream/midstream/downstream` 三层均支持 `companies` 字段；公司条目可带 `tag` 承载非产业链语义，约定取值 `frontEC` / `don_buy` / `keep_watching` / `not_analyzed`，前端 `supply_chain.html` 的 `TAG_LABELS` 映射显示文案。主题型图谱（如赛事）的 `competitors` 可留 `{}`，`core.code` 用虚拟 slug（如 `WC2026`）。新增图谱只需在 `SUPPLY_CHAIN_GRAPHS` 加 dict key 即自动注册（路由按 dict 遍历），零路由/模板/seed 改动；跨链复用标的在 `role` 末尾标注「（同属 X 产业链）」与既有图谱保持一致。
 
 ## 统一股票数据API
 
