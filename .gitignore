@@ -23,4 +23,6 @@ data/memory_cache
 data
 .omc
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
+scripts/_*.txt
 .graphify_incremental.json
