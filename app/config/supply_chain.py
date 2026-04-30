@@ -93,6 +93,20 @@ SUPPLY_CHAIN_GRAPHS = {
                 'market': 'US',
                 'description': 'x86 CPU/GPU 双线龙头，Zen 架构授权海光',
             },
+            {
+                'code': '688041',
+                'name': '海光信息',
+                'market': 'A',
+                'description': 'Hygon C86 架构（AMD Zen 授权）国产 x86 龙头，CPU + DCU AI 加速卡双主线，信创/AI 算力主力供应商',
+                'relation_label': 'Zen 授权',
+                'supply_chain': {
+                    '002156': {'role': 'DCU/CPU 封测主力供应商'},
+                    '002185': {'role': '国产 SoC/CPU 封测配套'},
+                    '002916': {'role': 'FC-BGA 封装基板国产替代'},
+                    '002436': {'role': 'FC-BGA 基板备选供应商'},
+                    '600584': {'role': 'Chiplet/FCBGA 高端封装'},
+                },
+            },
         ],
         'upstream': {
             '封装基板': {
@@ -125,7 +139,6 @@ SUPPLY_CHAIN_GRAPHS = {
             '信创政企': {'description': '党政军国产化替代'},
         },
         'competitors': {
-            '688041': {'name': '海光信息', 'market': 'A'},
             '688047': {'name': '龙芯中科', 'market': 'A'},
         },
         'trends': {
