@@ -57,7 +57,7 @@ def get_graph_data(name):
         edges.append({
             'source': core_id,
             'target': node_id,
-            'label': '同业',
+            'label': extra.get('relation_label', '同业'),
             'relation': 'alliance',
         })
         node_id += 1

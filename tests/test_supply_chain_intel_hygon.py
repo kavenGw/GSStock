@@ -33,3 +33,51 @@ def test_hygon_removed_from_competitors():
     cpu = SUPPLY_CHAIN_GRAPHS['cpu']
     assert '688041' not in cpu['competitors'], 'competitors 中海光未清理（会导致节点重复）'
     assert '688047' in cpu['competitors'], '龙芯应保留为 competitor'
+
+
+# ============ 2. 路由 JSON 契约 ============
+
+import pytest
+from flask import Flask
+
+
+@pytest.fixture
+def client():
+    """轻量路由测试：跳过 create_app（API 端点不渲染模板，无需 app context）"""
+    from app.routes import supply_chain_bp
+    app = Flask(__name__)
+    app.register_blueprint(supply_chain_bp, url_prefix='/supply-chain')
+    return app.test_client()
+
+
+def test_extra_core_uses_custom_relation_label(client):
+    """海光 extra_core 与 Intel core 之间的边 label 应为 'Zen 授权'"""
+    resp = client.get('/supply-chain/api/cpu')
+    data = resp.get_json()
+    nodes = {n['id']: n for n in data['nodes']}
+
+    intel_id = next(n['id'] for n in data['nodes']
+                    if n['category'] == 'core' and 'INTC' in n['name'])
+    hygon_id = next(n['id'] for n in data['nodes']
+                    if n['category'] == 'core' and '688041' in n['name'])
+
+    edge = next(e for e in data['edges']
+                if e['source'] == intel_id and e['target'] == hygon_id)
+    assert edge['label'] == 'Zen 授权', \
+        f"海光边 label 应为 'Zen 授权'，实际：{edge.get('label')}"
+
+
+def test_extra_core_default_label_unchanged(client):
+    """未配置 relation_label 的 extra_core（如 AMD）边 label 应回退为 '同业'"""
+    resp = client.get('/supply-chain/api/cpu')
+    data = resp.get_json()
+
+    intel_id = next(n['id'] for n in data['nodes']
+                    if n['category'] == 'core' and 'INTC' in n['name'])
+    amd_id = next(n['id'] for n in data['nodes']
+                  if n['category'] == 'core' and 'AMD' in n['name'])
+
+    edge = next(e for e in data['edges']
+                if e['source'] == intel_id and e['target'] == amd_id)
+    assert edge['label'] == '同业', \
+        f"AMD 边 label 应保持 '同业' 默认，实际：{edge.get('label')}"
