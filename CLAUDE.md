@@ -422,7 +422,9 @@ TDSequentialService.calculate()
 
 - `docs/plans/` — 设计与实施计划，格式 `YYYY-MM-DD-<topic>-design.md`
 - `docs/analysis/` — 个股 buffett 风格深度分析，格式 `YYYY-MM-DD-<股票名>-buffett分析.md`
+- `docs/analysis/<NNqN>/` — 季报点评归档，格式 `YYYY-MM-DD-<股票名>-NNQN季报点评.md`（如 `docs/analysis/26q1/`）
 - `docs/financial-analysis/` — 多股横向对比 / comps / 估值，格式 `YYYY-MM-DD-<主题>-<细分>.md`
+- `docs/financial-analysis/<NNqN>/` — 该季度 comps / 横向对比归档，命名同上
 
 ## 盯盘告警推送格式
 
