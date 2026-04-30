@@ -152,7 +152,7 @@ def get_graph_data(name):
 
     # extra_core 的 supply_chain 配套边（延迟到所有公司节点建完后）
     for extra_node_id, supply_chain in pending_supply_edges:
-        for code, info in supply_chain.items():
+        for code in supply_chain:
             target_id = code_to_node_id.get(code)
             if target_id is None:
                 continue  # 配套公司未在上中下游出现，silently skip

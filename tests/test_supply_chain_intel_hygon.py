@@ -98,8 +98,7 @@ def test_hygon_has_five_supply_chain_edges(client):
     target_codes = set()
     for e in supply_edges:
         target_node = next(n for n in data['nodes'] if n['id'] == e['target'])
-        # node name 格式 '名称\n(code)'
-        code = target_node['name'].split('(')[-1].rstrip(')')
+        code = target_node['detail']['code']
         target_codes.add(code)
         assert e.get('relation') == 'supply', f"配套边 relation 应为 'supply'"
 
@@ -120,7 +119,7 @@ def test_hygon_no_longer_in_competitors_nodes(client):
     resp = client.get('/supply-chain/api/cpu')
     data = resp.get_json()
     competitor_codes = [
-        n['name'].split('(')[-1].rstrip(')')
+        n['detail']['code']
         for n in data['nodes'] if n['category'] == 'competitor'
     ]
     assert '688041' not in competitor_codes, '海光不应同时存在于 competitor 节点'
