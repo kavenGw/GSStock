@@ -54,7 +54,6 @@ def test_extra_core_uses_custom_relation_label(client):
     """海光 extra_core 与 Intel core 之间的边 label 应为 'Zen 授权'"""
     resp = client.get('/supply-chain/api/cpu')
     data = resp.get_json()
-    nodes = {n['id']: n for n in data['nodes']}
 
     intel_id = next(n['id'] for n in data['nodes']
                     if n['category'] == 'core' and 'INTC' in n['name'])
