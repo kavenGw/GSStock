@@ -13,8 +13,8 @@ def test_hygon_present_as_extra_core():
     assert hygon['name'] == '海光信息'
     assert hygon['market'] == 'A'
     assert hygon['relation_label'] == 'Zen 授权'
-    assert '海光' not in hygon.get('description', '') or 'C86' in hygon['description'], \
-        'description 应描述 C86/Zen 授权背景'
+    assert 'C86' in hygon['description'], 'description 应描述 C86 架构'
+    assert 'Zen' in hygon['description'], 'description 应描述 Zen 授权背景'
 
 
 def test_hygon_supply_chain_full_stack():
