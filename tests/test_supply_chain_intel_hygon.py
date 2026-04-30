@@ -1,4 +1,7 @@
 """Intel 产业链海光升级 + 国产配套关系契约测试"""
+import pytest
+from flask import Flask
+
 from app.config.supply_chain import SUPPLY_CHAIN_GRAPHS
 
 
@@ -36,9 +39,6 @@ def test_hygon_removed_from_competitors():
 
 
 # ============ 2. 路由 JSON 契约 ============
-
-import pytest
-from flask import Flask
 
 
 @pytest.fixture
