@@ -425,6 +425,7 @@ TDSequentialService.calculate()
 - `docs/analysis/<NNqN>/` — 季报点评归档，格式 `YYYY-MM-DD-<股票名>-NNQN季报点评.md`（如 `docs/analysis/26q1/`）
 - `docs/financial-analysis/` — 多股横向对比 / comps / 估值，格式 `YYYY-MM-DD-<主题>-<细分>.md`
 - `docs/financial-analysis/<NNqN>/` — 该季度 comps / 横向对比归档，命名同上
+- **跨目录引用惯例**：季报点评 / buffett 分析头部常见 `> 配套 comps：[..](../financial-analysis/...)` 相对链接互引；调整目录结构前先 `Grep "\.\./financial-analysis"` 和 `Grep "\.\./analysis"` 找出所有引用并同步修复，否则静默断链
 
 ## 盯盘告警推送格式
 
