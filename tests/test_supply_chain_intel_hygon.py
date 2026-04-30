@@ -80,3 +80,48 @@ def test_extra_core_default_label_unchanged(client):
                 if e['source'] == intel_id and e['target'] == amd_id)
     assert edge['label'] == '同业', \
         f"AMD 边 label 应保持 '同业' 默认，实际：{edge.get('label')}"
+
+
+def test_hygon_has_five_supply_chain_edges(client):
+    """海光应有 5 条 label='配套' 边连向通富/华天/深南/兴森/长电"""
+    resp = client.get('/supply-chain/api/cpu')
+    data = resp.get_json()
+
+    hygon_id = next(n['id'] for n in data['nodes']
+                    if n['category'] == 'core' and '688041' in n['name'])
+
+    supply_edges = [e for e in data['edges']
+                    if e['source'] == hygon_id and e.get('label') == '配套']
+    assert len(supply_edges) == 5, \
+        f"海光应有 5 条配套边，实际：{len(supply_edges)}"
+
+    target_codes = set()
+    for e in supply_edges:
+        target_node = next(n for n in data['nodes'] if n['id'] == e['target'])
+        # node name 格式 '名称\n(code)'
+        code = target_node['name'].split('(')[-1].rstrip(')')
+        target_codes.add(code)
+        assert e.get('relation') == 'supply', f"配套边 relation 应为 'supply'"
+
+    assert target_codes == {'002156', '002185', '002916', '002436', '600584'}, \
+        f"配套目标公司不匹配：{target_codes}"
+
+
+def test_no_supply_edges_for_graphs_without_supply_chain(client):
+    """未配置 supply_chain 的图谱（lumentum）不应产生 '配套' 边，零回归"""
+    resp = client.get('/supply-chain/api/lumentum')
+    data = resp.get_json()
+    supply_edges = [e for e in data['edges'] if e.get('label') == '配套']
+    assert supply_edges == [], f"lumentum 不应有配套边，实际：{len(supply_edges)} 条"
+
+
+def test_hygon_no_longer_in_competitors_nodes(client):
+    """海光升级后，nodes 中 category=competitor 的 688041 应消失"""
+    resp = client.get('/supply-chain/api/cpu')
+    data = resp.get_json()
+    competitor_codes = [
+        n['name'].split('(')[-1].rstrip(')')
+        for n in data['nodes'] if n['category'] == 'competitor'
+    ]
+    assert '688041' not in competitor_codes, '海光不应同时存在于 competitor 节点'
+    assert '688047' in competitor_codes, '龙芯应保留为 competitor 节点'

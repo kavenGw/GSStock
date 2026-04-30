@@ -25,6 +25,8 @@ def get_graph_data(name):
     nodes = []
     edges = []
     node_id = 0
+    code_to_node_id: dict[str, int] = {}
+    pending_supply_edges: list[tuple[int, dict]] = []
 
     # 核心节点
     core_id = node_id
@@ -60,6 +62,8 @@ def get_graph_data(name):
             'label': extra.get('relation_label', '同业'),
             'relation': 'alliance',
         })
+        if extra.get('supply_chain'):
+            pending_supply_edges.append((node_id, extra['supply_chain']))
         node_id += 1
 
     # 上游
@@ -83,6 +87,7 @@ def get_graph_data(name):
                 'detail': {'code': code, 'role': info['role'], 'tag': info.get('tag', '')},
             })
             edges.append({'source': node_id, 'target': group_id})
+            code_to_node_id[code] = node_id
             node_id += 1
 
     # 中游
@@ -106,6 +111,7 @@ def get_graph_data(name):
                 'detail': {'code': code, 'role': info['role'], 'tag': info.get('tag', '')},
             })
             edges.append({'source': group_id, 'target': node_id})
+            code_to_node_id[code] = node_id
             node_id += 1
 
     # 下游
@@ -129,6 +135,7 @@ def get_graph_data(name):
                 'detail': {'code': code, 'role': info['role'], 'tag': info.get('tag', '')},
             })
             edges.append({'source': group_id, 'target': node_id})
+            code_to_node_id[code] = node_id
             node_id += 1
 
     # 竞争对手
@@ -142,6 +149,19 @@ def get_graph_data(name):
         })
         edges.append({'source': node_id, 'target': core_id, 'relation': 'compete'})
         node_id += 1
+
+    # extra_core 的 supply_chain 配套边（延迟到所有公司节点建完后）
+    for extra_node_id, supply_chain in pending_supply_edges:
+        for code, info in supply_chain.items():
+            target_id = code_to_node_id.get(code)
+            if target_id is None:
+                continue  # 配套公司未在上中下游出现，silently skip
+            edges.append({
+                'source': extra_node_id,
+                'target': target_id,
+                'label': '配套',
+                'relation': 'supply',
+            })
 
     return jsonify({
         'name': graph['name'],
