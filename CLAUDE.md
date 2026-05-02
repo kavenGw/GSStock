@@ -316,7 +316,10 @@ TDSequentialService.calculate()
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
+| `GITHUB_RELEASE_ENABLED` | 是否启用 GitHub Release 监控 | `true` |
 | `CLAUDE_PLUGINS_DIR` | Claude Code 插件目录（动态发现本地已装插件所属仓库） | `~/.claude/plugins` |
+
+独立调度策略 `github_release`：每 6 小时检查一次新版本（`0 */6 * * *`），发现新 Release 立即推送到 `news_ai_tool` 频道。
 
 监控仓库列表 = 静态配置（`app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`） ∪ 本地已装 Claude Code 插件对应 marketplace 仓库，按 `repo` 去重（静态优先保留自定义 `name`/`emoji`/`key`）。
 
