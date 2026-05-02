@@ -421,11 +421,17 @@ TDSequentialService.calculate()
   - `ak.stock_a_indicator_lg` 已从 akshare 移除，AttributeError
   - `ak.stock_zh_a_spot_em` / `stock_individual_info_em` 频繁被东财限流（RemoteDisconnected）；实时价改用 `UnifiedStockDataService.get_realtime_prices()`
 
+## 研究取数约定
+
+- **新浪 IR 调研 PDF**（`file.finance.sina.com.cn/cn/diaoyan/...`）：WebFetch 返回二进制 blob 无法解析，**不要重试**。Fallback 顺序：① 新浪网页版同内容（`finance.sina.com.cn/stock/...`）② cninfo 直链 PDF（`static.cninfo.com.cn/finalpage/.../*.PDF`，多数可解析）③ 东财财富号 / stcn / 21 经济网摘要稿
+- 同一调研纪要常被多家媒体改写发布，交叉验证 2-3 家即可锁定核心数字
+
 ## 文档目录约定
 
 - `docs/plans/` — 设计与实施计划，格式 `YYYY-MM-DD-<topic>-design.md`
 - `docs/analysis/` — 个股 buffett 风格深度分析，格式 `YYYY-MM-DD-<股票名>-buffett分析.md`
 - `docs/analysis/<NNqN>/` — 季报点评归档，格式 `YYYY-MM-DD-<股票名>-NNQN季报点评.md`（如 `docs/analysis/26q1/`）
+- `docs/analysis/<NNqN>/` 同时收纳同期专题分析（产能/事件驱动/技术路线深度），命名 `YYYY-MM-DD-<股票名>-<主题>专题.md`，与季报点评互加 `> 配套专题` / `> 关联文档` 反向链接
 - `docs/financial-analysis/` — 多股横向对比 / comps / 估值，格式 `YYYY-MM-DD-<主题>-<细分>.md`
 - `docs/financial-analysis/<NNqN>/` — 该季度 comps / 横向对比归档，命名同上
 - **跨目录引用惯例**：季报点评 / buffett 分析头部常见 `> 配套 comps：[..](../financial-analysis/...)` 相对链接互引；调整目录结构前先 `Grep "\.\./financial-analysis"` 和 `Grep "\.\./analysis"` 找出所有引用并同步修复，否则静默断链
