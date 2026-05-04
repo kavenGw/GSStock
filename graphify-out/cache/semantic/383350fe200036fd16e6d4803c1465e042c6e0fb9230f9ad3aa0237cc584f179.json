@@ -1,0 +1,1 @@
+{"nodes": [{"id": "main_dashboard_endpoint", "label": "main.dashboard endpoint", "file_type": "code", "source_file": "app/routes/main.py", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

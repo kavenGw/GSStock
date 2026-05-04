@@ -1,0 +1,1 @@
+{"nodes": [{"id": "supply_chain_api", "label": "GET /supply-chain/api/<name>", "file_type": "code", "source_file": "app/routes/supply_chain.py", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

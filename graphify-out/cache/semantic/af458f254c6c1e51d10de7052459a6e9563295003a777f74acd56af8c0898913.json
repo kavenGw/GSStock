@@ -1,0 +1,1 @@
+{"nodes": [{"id": "circuit_breaker_service", "label": "CircuitBreaker", "file_type": "code", "source_file": "app/services/circuit_breaker.py", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}
