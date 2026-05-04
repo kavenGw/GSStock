@@ -18,6 +18,9 @@ SCHEDULER_ENABLED=0 python -c "from app import create_app; app = create_app(); .
 # Windows 下 python -c 打印含 emoji 的对象，需指定 UTF-8 避免 cp950 编码错误
 PYTHONIOENCODING=utf-8 python -c "..."
 
+# Windows: PYTHONIOENCODING 只管 stdout/stderr。Path.write_text()/open() 写含中文的文件
+# 默认仍用 cp950，必须显式 encoding='utf-8' 否则 UnicodeEncodeError。
+
 # Windows bash 管道（| grep）或 PowerShell Select-String 可能静默吞掉 python 脚本 stdout；
 # 验证脚本直接 open(path, 'w').write(...) 再用 Read 读取，稳过管道。
 
@@ -495,3 +498,4 @@ Rules:
 - Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current
+- Top god nodes are minified vendor bundles (echarts.min.js / chart.umd.min.js — `E()`, `T()`, `js()` etc.); skip them. Real architectural cores are `Stock`, `MarketIdentifier`, `UnifiedStockCache`, `UnifiedStockDataService`.
