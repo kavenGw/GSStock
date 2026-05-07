@@ -1,9 +1,16 @@
-"""每日赛事安排推送 — 每天 07:00 推送今日 NBA 和 LoL 赛程"""
+"""每日赛事安排推送 — 每天 07:00 推送今日 NBA 和 LoL 赛程
+
+失败联赛不直接推 "数据获取失败"，而是挂起 5min × 3 轮重试。
+详见 docs/plans/2026-05-07-esports-retry-queue-design.md
+"""
 import logging
+from datetime import datetime, timedelta, timezone
 
 from app.strategies.base import Strategy, Signal
 
 logger = logging.getLogger(__name__)
+
+_CST = timezone(timedelta(hours=8))
 
 
 class EsportsDailyScheduleStrategy(Strategy):
@@ -27,14 +34,16 @@ class EsportsDailyScheduleStrategy(Strategy):
         from app.services.notification import NotificationService
         from app.config.notification_config import CHANNEL_NBA
         from app.config.esports_config import NBA_TEAM_MONITOR, NBA_TEAM_NAMES
+        from app.services.esports_retry_queue import enqueue
 
         try:
             nba = EsportsService.get_nba_schedule()
             if nba is None:
-                NotificationService.send_slack('🏀 *今日 NBA 赛程*\n数据获取失败', CHANNEL_NBA)
+                today = datetime.now(_CST).date()
+                enqueue(today, 'nba', 'NBA')
                 return
-            games = nba.get('today') or []
 
+            games = nba.get('today') or []
             monitored_cn = {NBA_TEAM_NAMES.get(k, k) for k, v in NBA_TEAM_MONITOR.items() if v}
             if monitored_cn:
                 games = [g for g in games if g['home'] in monitored_cn or g['away'] in monitored_cn]
@@ -58,11 +67,14 @@ class EsportsDailyScheduleStrategy(Strategy):
         from app.services.notification import NotificationService
         from app.config.notification_config import CHANNEL_LOL
         from app.config.esports_config import LOL_ALWAYS_SHOW
+        from app.services.esports_retry_queue import enqueue
 
         try:
             lol = EsportsService.get_lol_schedule()
+            today = datetime.now(_CST).date()
             if lol is None:
-                NotificationService.send_slack('🎮 *今日 LoL 赛程*\n数据获取失败', CHANNEL_LOL)
+                for league in LOL_ALWAYS_SHOW:
+                    enqueue(today, 'lol', league)
                 return
 
             sections = []
@@ -72,7 +84,7 @@ class EsportsDailyScheduleStrategy(Strategy):
                     continue
                 data = lol[league]
                 if data is None:
-                    sections.append(f'*{league}*\n数据获取失败')
+                    enqueue(today, 'lol', league)
                     continue
                 matches = data.get('today') or []
                 if not matches and league not in LOL_ALWAYS_SHOW:
