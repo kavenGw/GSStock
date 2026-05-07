@@ -82,6 +82,8 @@ app/
 
 **数据获取服务失败语义二分**：`_fetch_*` 类方法返回 `None` 表示异常/获取失败（已重试耗尽），返回空数据字典如 `{'today': [], 'yesterday': []}` 表示 API 成功但当下无数据。推送/聚合层据此区分"数据获取失败" vs "今日无赛事"。涉及该约定的服务异常分支必须 `logger.warning(... exc_info=True)` + 含 `type(e).__name__` + 关键上下文（如 league_id / HTTP status / 响应体片段），否则吞异常会让两种场景在日志中无法区分。参考 `app/services/esports_service.py:_fetch_lol_esports_schedule`。
 
+**新闻推送多分支去重**：`InterestPipeline.process_new_items` 有 `_identify_and_notify_companies`（🔍 AI 公司识别）和 `_notify_interest_slack`（📰 兴趣关键词）两条独立 Slack 分支，同一条 NewsItem 可同时命中。前者推送时已包含原文全文，须按 `NewsItem.id` 集合去重避免重复推送；新增第三条推送路径时也要并入该去重链。
+
 **启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
 
 **产业链图谱约定**：配置在 `app/config/supply_chain.py` 的 `SUPPLY_CHAIN_GRAPHS` 字典，渲染路由 `/supply-chain/api/<name>`。`upstream/midstream/downstream` 三层均支持 `companies` 字段；公司条目可带 `tag` 承载非产业链语义，约定取值 `frontEC` / `don_buy` / `keep_watching` / `not_analyzed`，前端 `supply_chain.html` 的 `TAG_LABELS` 映射显示文案。主题型图谱（如赛事）的 `competitors` 可留 `{}`，`core.code` 用虚拟 slug（如 `WC2026`）。新增图谱只需在 `SUPPLY_CHAIN_GRAPHS` 加 dict key 即自动注册（路由按 dict 遍历），零路由/模板/seed 改动；跨链复用标的在 `role` 末尾标注「（同属 X 产业链）」与既有图谱保持一致。

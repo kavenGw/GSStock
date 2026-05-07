@@ -32,10 +32,10 @@ class InterestPipeline:
             db.session.commit()
 
             # 对所有含未具名公司的新闻做公司识别（不限于兴趣新闻）
-            InterestPipeline._identify_and_notify_companies(items)
+            pushed_ids = InterestPipeline._identify_and_notify_companies(items)
 
-            # Slack 推送兴趣新闻
-            interest_items = [n for n in items if n.is_interest]
+            # Slack 推送兴趣新闻（跳过已经在 AI 识别环节推送过的，避免同一条新闻发两次）
+            interest_items = [n for n in items if n.is_interest and n.id not in pushed_ids]
             if interest_items:
                 InterestPipeline._notify_interest_slack(interest_items)
 
@@ -372,19 +372,26 @@ class InterestPipeline:
             return None, f'异常: {e}'
 
     @staticmethod
-    def _identify_and_notify_companies(items: list[NewsItem]):
-        """对所有含未具名公司暗示的新闻做公司识别；仅成功时推送，失败只记日志避免噪音"""
+    def _identify_and_notify_companies(items: list[NewsItem]) -> set[int]:
+        """对所有含未具名公司暗示的新闻做公司识别；仅成功时推送，失败只记日志避免噪音
+
+        返回成功推送的 NewsItem.id 集合，供上游去重避免重复推送。
+        """
         from app.services.notification import NotificationService
+        pushed_ids: set[int] = set()
         for n in items:
             if not InterestPipeline._should_identify_company(n.content):
                 continue
             identified, error = InterestPipeline._identify_company(n.content)
             if identified:
-                msg = f"🔍 AI公司识别:\n{identified}\n\n{n.content}"
+                tag = f" [{n.matched_keywords}]" if n.matched_keywords else ""
+                msg = f"🔍 AI公司识别{tag}:\n{identified}\n\n{n.content}"
                 InterestPipeline._save_identified_companies(n.content, identified)
                 NotificationService.send_slack(msg)
+                pushed_ids.add(n.id)
             else:
                 logger.info(f'[兴趣] 公司识别跳过: {error}, 内容: {n.content[:80]}')
+        return pushed_ids
 
     @staticmethod
     def _notify_interest_slack(items: list[NewsItem]):
