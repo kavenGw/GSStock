@@ -225,3 +225,43 @@ def test_refetch_nba_dispatches_to_get_nba_schedule(_reset_state, monkeypatch):
 
     assert result == {'today': [], 'yesterday': []}
     assert captured['today'] == date(2026, 5, 7)
+
+
+def test_retry_unexpected_exception_treated_as_failure(_reset_state, monkeypatch):
+    today = datetime.now(_CST).date()
+    rq.enqueue(today, 'lol', 'LCK')
+    key = rq._key(today, 'lol', 'LCK')
+
+    def boom(unit):
+        raise KeyError('team1')
+    monkeypatch.setattr(rq, '_refetch', boom)
+
+    rq._retry_one(key)
+
+    assert key in rq._pending
+    assert rq._pending[key].attempts == 2
+    assert _reset_state == [key, key]
+
+
+def test_push_nba_supplement_filters_by_monitor(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    monkeypatch.setattr('app.config.esports_config.NBA_TEAM_MONITOR', {'Los Angeles Lakers': 1})
+    monkeypatch.setattr(
+        'app.config.esports_config.NBA_TEAM_NAMES',
+        {'Los Angeles Lakers': '湖人', 'Boston Celtics': '凯尔特人', 'Golden State Warriors': '勇士'},
+    )
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='nba', name='NBA', attempts=2)
+    games = {
+        'today': [
+            {'home': '湖人', 'away': '勇士', 'start_time': '09:00'},
+            {'home': '凯尔特人', 'away': '勇士', 'start_time': '11:00'},
+        ],
+        'yesterday': [],
+    }
+
+    rq._push_supplement(unit, games)
+
+    assert len(cap.calls) == 1
+    text = cap.calls[0][0]
+    assert '湖人' in text and '勇士 vs 湖人' in text
+    assert '凯尔特人' not in text and '11:00' not in text

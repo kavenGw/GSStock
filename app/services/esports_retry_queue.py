@@ -69,12 +69,18 @@ def _retry_one(key):
         logger.info(f'[赛事重试] 跨日丢弃 {key}')
         return
 
-    matches = _refetch(unit)
-    if matches is not None:
-        _push_supplement(unit, matches)
-        _pending.pop(key, None)
-        logger.info(f'[赛事重试] 补推成功 {key}')
-        return
+    try:
+        matches = _refetch(unit)
+        if matches is not None:
+            _push_supplement(unit, matches)
+            _pending.pop(key, None)
+            logger.info(f'[赛事重试] 补推成功 {key}')
+            return
+    except Exception as e:
+        logger.warning(
+            f'[赛事重试] {key} 拉取/推送异常 {type(e).__name__}: {e}',
+            exc_info=True,
+        )
 
     unit.attempts += 1
     if unit.attempts <= _MAX_ATTEMPTS:
@@ -169,11 +175,12 @@ def _push_failed(unit):
 def clear_for_date(date_):
     """测试 / 运维清理用，移除指定日期的所有挂起 unit 与对应 APScheduler job。"""
     from app.scheduler.engine import scheduler_engine
+    from apscheduler.jobstores.base import JobLookupError
 
     keys = [k for k, u in _pending.items() if u.date == date_]
     for k in keys:
         _pending.pop(k, None)
         try:
             scheduler_engine.scheduler.remove_job(f"esports_retry:{k}")
-        except Exception:
+        except JobLookupError:
             pass
