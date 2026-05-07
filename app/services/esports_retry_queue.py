@@ -76,7 +76,13 @@ def _retry_one(key):
         logger.info(f'[赛事重试] 补推成功 {key}')
         return
 
-    raise NotImplementedError  # Task 4-5 填充
+    unit.attempts += 1
+    if unit.attempts <= _MAX_ATTEMPTS:
+        _schedule_retry(key)
+        logger.info(f'[赛事重试] 第 {unit.attempts - 1} 轮失败 {key}，已挂下轮')
+        return
+
+    raise NotImplementedError  # Task 5 填充
 
 
 def _refetch(unit):

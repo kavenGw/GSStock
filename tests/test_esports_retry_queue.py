@@ -67,3 +67,19 @@ def test_retry_success_pushes_supplement_and_pops(_reset_state, monkeypatch):
 
     assert key not in rq._pending
     assert push_calls == [('LCK', fake_matches)]
+
+
+def test_retry_failure_under_max_reschedules(_reset_state, monkeypatch):
+    today = datetime.now(_CST).date()
+    rq.enqueue(today, 'lol', 'LCK')
+    key = rq._key(today, 'lol', 'LCK')
+
+    monkeypatch.setattr(rq, '_refetch', lambda u: None)
+    monkeypatch.setattr(rq, '_push_failed', lambda u: pytest.fail('should not push failed yet'))
+
+    rq._retry_one(key)
+
+    assert key in rq._pending
+    assert rq._pending[key].attempts == 2
+    # _schedule_retry 调用 2 次：enqueue 一次，_retry_one 重新挂一次
+    assert _reset_state == [key, key]
