@@ -800,8 +800,6 @@ class NotificationService:
     @staticmethod
     def _render_release_categorized(cfg: dict, releases: list[dict]) -> str | None:
         """调 LLM + 解析 JSON + 装组分类 bullet。失败返回 None。"""
-        import json
-
         try:
             from app.llm.router import llm_router
             from app.llm.prompts.github_release_update import (

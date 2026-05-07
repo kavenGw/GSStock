@@ -1,4 +1,7 @@
 """GitHub Release Slack 推送格式优化测试"""
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 def test_prompt_requests_json_with_features_and_fixes():
@@ -73,10 +76,6 @@ def test_format_release_block_skips_empty_fixes():
     assert '✨ *新功能*' in text
     assert '• 新增 A' in text
     assert '🐛 *修复*' not in text
-
-
-import pytest
-from unittest.mock import MagicMock, patch
 
 
 @pytest.fixture
