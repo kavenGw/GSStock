@@ -760,7 +760,7 @@ class NotificationService:
 
         Returns:
             (texts, pushed_versions)
-            - texts: 每个有更新的仓库一段文本
+            - texts: 每个有更新的仓库一段文本（分类 bullet 结构）
             - pushed_versions: [(key, version), ...] 需要标记已推送的版本
         """
         texts = []
@@ -777,53 +777,89 @@ class NotificationService:
 
                 latest_version = releases[0]['version']
                 pushed_versions.append((cfg['key'], latest_version))
-
                 release_url = releases[0].get('url', '')
                 has_body = any(r.get('body', '').strip() for r in releases)
 
-                # GLM 摘要（仅在有 changelog 内容时调用）
+                rendered = None
                 if has_body:
-                    try:
-                        from app.llm.router import llm_router
-                        from app.llm.prompts.github_release_update import (
-                            GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT, build_github_release_update_prompt,
-                        )
+                    rendered = NotificationService._render_release_categorized(cfg, releases)
 
-                        provider = llm_router.route('github_release_update')
-                        if provider:
-                            prompt = build_github_release_update_prompt(cfg['name'], releases)
-                            summary = provider.chat(
-                                [
-                                    {'role': 'system', 'content': GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT},
-                                    {'role': 'user', 'content': prompt},
-                                ],
-                                temperature=0.3,
-                                max_tokens=500,
-                            )
-                            text = f"{cfg['emoji']} {cfg['name']} 更新\n{summary.strip()}"
-                            if release_url:
-                                text += f"\n\n🔗 {release_url}"
-                            texts.append(text)
-                            continue
-                    except Exception as e:
-                        logger.warning(f"[通知.{cfg['name']}更新] GLM摘要失败: {e}")
-
-                # 降级：纯文本（含 changelog）
-                lines = [f"{cfg['emoji']} {cfg['name']} 更新"]
-                for r in releases:
-                    lines.append(f"{r['version']} ({r['published_at']})")
-                    if r.get('body'):
-                        body = r['body'].strip()
-                        if len(body) > 500:
-                            body = body[:500] + '…'
-                        lines.append(body)
-                if release_url:
-                    lines.append(f"\n🔗 {release_url}")
-                texts.append('\n'.join(lines))
+                if rendered:
+                    text = rendered
+                    if release_url:
+                        text += f"\n\n🔗 {release_url}"
+                    texts.append(text)
+                else:
+                    # 降级：纯文本（含 changelog 截断）
+                    texts.append(NotificationService._render_release_fallback(cfg, releases, release_url))
         except Exception as e:
             logger.warning(f'[通知.GitHub Release更新] 获取失败: {e}')
 
         return texts, pushed_versions
+
+    @staticmethod
+    def _render_release_categorized(cfg: dict, releases: list[dict]) -> str | None:
+        """调 LLM + 解析 JSON + 装组分类 bullet。失败返回 None。"""
+        import json
+
+        try:
+            from app.llm.router import llm_router
+            from app.llm.prompts.github_release_update import (
+                GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT, build_github_release_update_prompt,
+            )
+
+            provider = llm_router.route('github_release_update')
+            if not provider:
+                return None
+
+            prompt = build_github_release_update_prompt(cfg['name'], releases)
+            raw = provider.chat(
+                [
+                    {'role': 'system', 'content': GITHUB_RELEASE_UPDATE_SYSTEM_PROMPT},
+                    {'role': 'user', 'content': prompt},
+                ],
+                temperature=0.3,
+                max_tokens=800,
+            )
+
+            data = json.loads(raw.strip())
+            versions = data.get('versions') or []
+            if not versions:
+                logger.warning(f"[通知.{cfg['name']}更新] LLM 返回 versions 为空，降级")
+                return None
+
+            # 至少要有一个 version 含 features 或 fixes，否则降级
+            if not any((v.get('features') or v.get('fixes')) for v in versions):
+                logger.warning(f"[通知.{cfg['name']}更新] LLM 分类全空，降级")
+                return None
+
+            blocks = [
+                NotificationService._format_release_block(cfg['name'], cfg['emoji'], v)
+                for v in versions
+            ]
+            return '\n\n'.join(blocks)
+
+        except json.JSONDecodeError as e:
+            logger.warning(f"[通知.{cfg['name']}更新] LLM JSON 解析失败: {e}，降级")
+            return None
+        except Exception as e:
+            logger.warning(f"[通知.{cfg['name']}更新] LLM 调用失败: {e}，降级")
+            return None
+
+    @staticmethod
+    def _render_release_fallback(cfg: dict, releases: list[dict], release_url: str) -> str:
+        """降级路径：纯文本 changelog 截断"""
+        lines = [f"{cfg['emoji']} {cfg['name']} 更新"]
+        for r in releases:
+            lines.append(f"{r['version']} ({r['published_at']})")
+            if r.get('body'):
+                body = r['body'].strip()
+                if len(body) > 500:
+                    body = body[:500] + '…'
+                lines.append(body)
+        if release_url:
+            lines.append(f"\n🔗 {release_url}")
+        return '\n'.join(lines)
 
     @staticmethod
     def format_blog_updates() -> list[str]:
