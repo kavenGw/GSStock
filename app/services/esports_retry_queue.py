@@ -88,12 +88,92 @@ def _retry_one(key):
 
 
 def _refetch(unit):
-    raise NotImplementedError  # Task 6 填充
+    from app.services.esports_service import EsportsService
+    from app.config.esports_config import LOL_LEAGUES
+    yesterday = unit.date - timedelta(days=1)
+    if unit.kind == 'lol':
+        league_id = LOL_LEAGUES.get(unit.name)
+        if league_id is None:
+            return None
+        return EsportsService._fetch_lol_esports_schedule(league_id, unit.date, yesterday)
+    if unit.kind == 'nba':
+        return EsportsService.get_nba_schedule(today=unit.date)
+    return None
 
 
 def _push_supplement(unit, matches):
-    raise NotImplementedError  # Task 6 填充
+    if unit.kind == 'lol':
+        _push_lol_supplement(unit.name, matches)
+    elif unit.kind == 'nba':
+        _push_nba_supplement(matches)
+
+
+def _push_lol_supplement(league, matches):
+    from app.services.notification import NotificationService
+    from app.config.notification_config import CHANNEL_LOL
+    from app.config.esports_config import LOL_ALWAYS_SHOW
+
+    today_matches = matches.get('today') or []
+    if not today_matches:
+        if league in LOL_ALWAYS_SHOW:
+            NotificationService.send_slack(
+                f'🎮 *LoL 补充* — *{league}*\n今日无赛事',
+                CHANNEL_LOL,
+            )
+        return
+
+    lines = [f'🎮 *LoL 补充* — *{league}* ({len(today_matches)}场)']
+    for m in sorted(today_matches, key=lambda x: x.get('start_time') or '99:99'):
+        t = m.get('start_time') or '--:--'
+        lines.append(f'  · {t}  {m["team1"]} vs {m["team2"]}')
+    NotificationService.send_slack('\n'.join(lines), CHANNEL_LOL)
+
+
+def _push_nba_supplement(nba):
+    from app.services.notification import NotificationService
+    from app.config.notification_config import CHANNEL_NBA
+    from app.config.esports_config import NBA_TEAM_MONITOR, NBA_TEAM_NAMES
+
+    games = nba.get('today') or []
+    monitored_cn = {NBA_TEAM_NAMES.get(k, k) for k, v in NBA_TEAM_MONITOR.items() if v}
+    if monitored_cn:
+        games = [g for g in games if g['home'] in monitored_cn or g['away'] in monitored_cn]
+
+    if not games:
+        NotificationService.send_slack('🏀 *NBA 补充*\n无关注球队比赛', CHANNEL_NBA)
+        return
+
+    lines = [f'🏀 *NBA 补充* ({len(games)}场)']
+    for g in sorted(games, key=lambda x: x.get('start_time') or '99:99'):
+        t = g.get('start_time') or '--:--'
+        lines.append(f'  · {t}  {g["away"]} vs {g["home"]}')
+    NotificationService.send_slack('\n'.join(lines), CHANNEL_NBA)
 
 
 def _push_failed(unit):
-    raise NotImplementedError  # Task 6 填充
+    from app.services.notification import NotificationService
+    from app.config.notification_config import CHANNEL_LOL, CHANNEL_NBA
+
+    if unit.kind == 'lol':
+        NotificationService.send_slack(
+            f'🎮 *LoL — {unit.name}* 数据获取失败（已重试 {_MAX_ATTEMPTS} 次）',
+            CHANNEL_LOL,
+        )
+    elif unit.kind == 'nba':
+        NotificationService.send_slack(
+            f'🏀 *今日 NBA 赛程* 数据获取失败（已重试 {_MAX_ATTEMPTS} 次）',
+            CHANNEL_NBA,
+        )
+
+
+def clear_for_date(date_):
+    """测试 / 运维清理用，移除指定日期的所有挂起 unit 与对应 APScheduler job。"""
+    from app.scheduler.engine import scheduler_engine
+
+    keys = [k for k, u in _pending.items() if u.date == date_]
+    for k in keys:
+        _pending.pop(k, None)
+        try:
+            scheduler_engine.scheduler.remove_job(f"esports_retry:{k}")
+        except Exception:
+            pass

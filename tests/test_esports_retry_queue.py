@@ -99,3 +99,129 @@ def test_retry_failure_at_max_pushes_failed(_reset_state, monkeypatch):
 
     assert key not in rq._pending
     assert failed_calls == ['LCK']
+
+
+class _SlackCapture:
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, message, channel, blocks=None):
+        self.calls.append((message, channel))
+        return True
+
+
+def _patch_slack(monkeypatch):
+    cap = _SlackCapture()
+    from app.services import notification
+    monkeypatch.setattr(notification.NotificationService, 'send_slack', staticmethod(cap))
+    return cap
+
+
+def test_push_lol_supplement_with_matches(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='lol', name='LCK', attempts=2)
+    matches = {
+        'today': [
+            {'team1': 'T1', 'team2': 'Gen.G', 'start_time': '17:00'},
+            {'team1': 'KT', 'team2': 'DK', 'start_time': '20:00'},
+        ],
+        'yesterday': [],
+    }
+
+    rq._push_supplement(unit, matches)
+
+    assert len(cap.calls) == 1
+    text, channel = cap.calls[0]
+    assert 'LoL 补充' in text and 'LCK' in text and '(2场)' in text
+    assert 'T1 vs Gen.G' in text and '17:00' in text
+    from app.config.notification_config import CHANNEL_LOL
+    assert channel == CHANNEL_LOL
+
+
+def test_push_lol_supplement_empty_data_for_always_show(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='lol', name='LCK', attempts=2)
+
+    rq._push_supplement(unit, {'today': [], 'yesterday': []})
+
+    assert len(cap.calls) == 1
+    assert '今日无赛事' in cap.calls[0][0] and 'LCK' in cap.calls[0][0]
+
+
+def test_push_lol_supplement_empty_data_for_non_always_show(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='lol', name='Worlds', attempts=2)
+
+    rq._push_supplement(unit, {'today': [], 'yesterday': []})
+
+    assert cap.calls == []
+
+
+def test_push_nba_supplement_unfiltered_when_monitor_empty(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    monkeypatch.setattr('app.config.esports_config.NBA_TEAM_MONITOR', {})
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='nba', name='NBA', attempts=2)
+    games = {
+        'today': [{'home': '湖人', 'away': '勇士', 'start_time': '09:00'}],
+        'yesterday': [],
+    }
+
+    rq._push_supplement(unit, games)
+
+    assert len(cap.calls) == 1
+    assert 'NBA 补充' in cap.calls[0][0] and '勇士 vs 湖人' in cap.calls[0][0]
+
+
+def test_push_failed_lol(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='lol', name='LCK', attempts=4)
+
+    rq._push_failed(unit)
+
+    assert len(cap.calls) == 1
+    assert 'LoL' in cap.calls[0][0] and 'LCK' in cap.calls[0][0] and '数据获取失败' in cap.calls[0][0]
+
+
+def test_push_failed_nba(_reset_state, monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='nba', name='NBA', attempts=4)
+
+    rq._push_failed(unit)
+
+    assert len(cap.calls) == 1
+    assert '今日 NBA 赛程' in cap.calls[0][0] and '数据获取失败' in cap.calls[0][0]
+
+
+def test_refetch_lol_dispatches_to_fetch_lol(_reset_state, monkeypatch):
+    captured = {}
+    def fake_fetch(league_id, today, yesterday):
+        captured['args'] = (league_id, today, yesterday)
+        return {'today': [], 'yesterday': []}
+    monkeypatch.setattr(
+        'app.services.esports_service.EsportsService._fetch_lol_esports_schedule',
+        staticmethod(fake_fetch),
+    )
+
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='lol', name='LPL', attempts=2)
+    result = rq._refetch(unit)
+
+    assert result == {'today': [], 'yesterday': []}
+    from app.config.esports_config import LOL_LEAGUES
+    assert captured['args'] == (LOL_LEAGUES['LPL'], date(2026, 5, 7), date(2026, 5, 6))
+
+
+def test_refetch_nba_dispatches_to_get_nba_schedule(_reset_state, monkeypatch):
+    captured = {}
+    def fake_get(today=None):
+        captured['today'] = today
+        return {'today': [], 'yesterday': []}
+    monkeypatch.setattr(
+        'app.services.esports_service.EsportsService.get_nba_schedule',
+        staticmethod(fake_get),
+    )
+
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='nba', name='NBA', attempts=2)
+    result = rq._refetch(unit)
+
+    assert result == {'today': [], 'yesterday': []}
+    assert captured['today'] == date(2026, 5, 7)
