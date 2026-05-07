@@ -82,7 +82,9 @@ def _retry_one(key):
         logger.info(f'[赛事重试] 第 {unit.attempts - 1} 轮失败 {key}，已挂下轮')
         return
 
-    raise NotImplementedError  # Task 5 填充
+    _push_failed(unit)
+    _pending.pop(key, None)
+    logger.warning(f'[赛事重试] 终告失败 {key}')
 
 
 def _refetch(unit):

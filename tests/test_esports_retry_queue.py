@@ -83,3 +83,19 @@ def test_retry_failure_under_max_reschedules(_reset_state, monkeypatch):
     assert rq._pending[key].attempts == 2
     # _schedule_retry 调用 2 次：enqueue 一次，_retry_one 重新挂一次
     assert _reset_state == [key, key]
+
+
+def test_retry_failure_at_max_pushes_failed(_reset_state, monkeypatch):
+    today = datetime.now(_CST).date()
+    rq.enqueue(today, 'lol', 'LCK')
+    key = rq._key(today, 'lol', 'LCK')
+    rq._pending[key].attempts = rq._MAX_ATTEMPTS  # 当前 attempts=3，本次拉取失败后 attempts→4 超 _MAX_ATTEMPTS 触发终告
+
+    monkeypatch.setattr(rq, '_refetch', lambda u: None)
+    failed_calls = []
+    monkeypatch.setattr(rq, '_push_failed', lambda u: failed_calls.append(u.name))
+
+    rq._retry_one(key)
+
+    assert key not in rq._pending
+    assert failed_calls == ['LCK']
