@@ -29,3 +29,41 @@ def test_enqueue_idempotent(_reset_state):
     assert len(rq._pending) == 1
     assert _reset_state == [rq._key(today, 'lol', 'LCK')]
     assert rq._pending[rq._key(today, 'lol', 'LCK')].attempts == 1
+
+
+def test_retry_cross_day_discards(_reset_state, monkeypatch):
+    refetch_calls = []
+    push_calls = []
+    monkeypatch.setattr(rq, '_refetch', lambda u: refetch_calls.append(u.name) or 'should_not_use')
+    monkeypatch.setattr(rq, '_push_supplement', lambda u, m: push_calls.append('sup'))
+    monkeypatch.setattr(rq, '_push_failed', lambda u: push_calls.append('fail'))
+
+    yesterday = datetime.now(_CST).date() - timedelta(days=1)
+    rq.enqueue(yesterday, 'lol', 'LCK')
+    key = rq._key(yesterday, 'lol', 'LCK')
+
+    rq._retry_one(key)
+
+    assert key not in rq._pending
+    assert refetch_calls == []
+    assert push_calls == []
+
+
+def test_retry_success_pushes_supplement_and_pops(_reset_state, monkeypatch):
+    today = datetime.now(_CST).date()
+    rq.enqueue(today, 'lol', 'LCK')
+    key = rq._key(today, 'lol', 'LCK')
+
+    fake_matches = {
+        'today': [{'team1': 'T1', 'team2': 'Gen.G', 'start_time': '17:00'}],
+        'yesterday': [],
+    }
+    push_calls = []
+    monkeypatch.setattr(rq, '_refetch', lambda u: fake_matches)
+    monkeypatch.setattr(rq, '_push_supplement', lambda u, m: push_calls.append((u.name, m)))
+    monkeypatch.setattr(rq, '_push_failed', lambda u: push_calls.append(('failed', u.name)))
+
+    rq._retry_one(key)
+
+    assert key not in rq._pending
+    assert push_calls == [('LCK', fake_matches)]

@@ -59,4 +59,33 @@ def enqueue(date_, kind, name):
 
 
 def _retry_one(key):
-    raise NotImplementedError  # Task 2-5 填充
+    unit = _pending.get(key)
+    if unit is None:
+        return
+
+    today = datetime.now(_CST).date()
+    if unit.date != today:
+        _pending.pop(key, None)
+        logger.info(f'[赛事重试] 跨日丢弃 {key}')
+        return
+
+    matches = _refetch(unit)
+    if matches is not None:
+        _push_supplement(unit, matches)
+        _pending.pop(key, None)
+        logger.info(f'[赛事重试] 补推成功 {key}')
+        return
+
+    raise NotImplementedError  # Task 4-5 填充
+
+
+def _refetch(unit):
+    raise NotImplementedError  # Task 6 填充
+
+
+def _push_supplement(unit, matches):
+    raise NotImplementedError  # Task 6 填充
+
+
+def _push_failed(unit):
+    raise NotImplementedError  # Task 6 填充
