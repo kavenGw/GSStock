@@ -143,6 +143,11 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 **VOLUME_UNIT_SCHEMA_VERSION 机制**：`app/services/unified_stock_data.py` 顶部定义版本常量，启动时校验 `data/memory_cache/.schema_version`。版本不匹配则自动清理内存缓存（`ohlc_*/price/index` pkl）和数据库缓存（`UnifiedStockCache` 对应 `cache_type` 行）。单位契约变更时 bump 该常量触发全量清理。
 
+### A 股行情数据特征
+
+- **A 股节假日**：五一（5-1~5-5）/ 国庆（10-1~10-7）/ 春节多日连休，OHLC 序列会缺日期。跨市场事件分析（如 AMD 财报 → 002156 联动）必须识别假期错位 —— 美股仍在交易的窗口 A 股可能空白多日，节后第一日是情绪集中释放点
+- **一字涨停判定**：单日 OHLC 四值合一（O=H=L=C）+ 量比 < 1（典型 0.5-0.7x），表示开盘即封板无成交，常见于节后情绪集中释放或事件驱动；分析时不可当成正常 K 线计算技术指标
+
 ### 腾讯HTTP数据源
 
 实时价格和分时K线优先使用腾讯HTTP接口（并发安全、无需限速）：
@@ -165,6 +170,8 @@ MarketIdentifier.is_index(code)      # 判断是否指数
   - `clear_cache()` - 清除缓存
   - `_retry_fetch()` - 带重试的数据获取（3次，间隔1秒）
   - `_get_expired_cache()` - 降级返回过期缓存
+
+**API 返回结构契约**：`get_trend_data()` / `get_indices_data()` 返回 `{'stocks': [{stock_code, stock_name, data: [...]}, ...], 'date_range': {start, end}}` —— 是 list of dict，**不是按 code 索引的 dict**。批量调用后取 `{s['stock_code']: s for s in result['stocks']}` 转 dict 再访问。
 
 - **CacheValidator** - 缓存有效期验证
   - `is_cache_valid()` - 检查是否在8小时有效期内
@@ -463,6 +470,8 @@ TDSequentialService.calculate()
 ## 开发规范
 
 **测试目录布局**：单测放 `tests/test_*.py` 平铺，不用 `tests/services/` 等子目录（仅存空 `__pycache__`）
+
+**一次性脚本不入库**：仅用于本次任务数据采集 / 验证、不会复用的脚本（如 `scripts/verify_*_quotes.py`），任务结束后必须 `rm`，不进 git。逻辑通过 `.omc/plans/` 计划文件 + commit message 留痕；产物 JSON 可保留在 `.omc/artifacts/`（已 gitignore）。
 
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
 
