@@ -24,6 +24,9 @@ PYTHONIOENCODING=utf-8 python -c "..."
 # Windows bash 管道（| grep）或 PowerShell Select-String 可能静默吞掉 python 脚本 stdout；
 # 验证脚本直接 open(path, 'w').write(...) 再用 Read 读取，稳过管道。
 
+# 后台 bash + `2>&1 | tail -N` 时，并行调度的 stderr 日志（429 重试 / apscheduler shutdown）可能填满 N 行
+# 把你自己的 print 顶出去；只关心脚本输出时用 `2>/dev/null`，或把分隔标记写到固定文件再 Read。
+
 # create_app() 即便带 SCHEDULER_ENABLED=0 仍会启动调度器（17 任务）+ OCR + crawl4ai + LLM；
 # 只测路由/配置层时跳过 create_app：Flask() + register_blueprint(<bp>) 直接注入，秒级、零副作用。
 # 例外：渲染 HTML 的路由会因 base.html 跨 blueprint url_for（briefing.index 等）抛 BuildError → HTML 测试必须走 create_app()。
@@ -343,6 +346,8 @@ TDSequentialService.calculate()
 
 注意：不使用 GitHub Releases 发版的仓库（仅 commit 或 tag，如 `anthropics/claude-plugins-official`、`supabase/agent-skills`）纳入监控后不会产生推送，直到其首次发 Release。
 
+**smoke test 空列表 != 代码坏**：`format_github_release_updates` 返回 `([], [])` 通常是 `data/github_release_<key>_last_version.txt` 已被并行调度更新过。强制复测可临时删除该标记文件或写入更老版本号。
+
 ## Slack 推送配置
 
 | 环境变量 | 说明 | 默认值 |
@@ -378,6 +383,7 @@ TDSequentialService.calculate()
 - 比分变化：仅在比分发生变化时推送（避免重复通知）
 - 比赛结束：自动检测并推送最终比分
 - NBA晚间调度：每天18:00额外执行一次NBA监控设置，覆盖当晚比赛
+- 失败重试：单联赛 / 整 NBA 拉取失败时，挂起 5min × 3 轮调度层重试，期间任意一轮成功立即"补推"该联赛，3 轮全失败才推"数据获取失败（已重试 3 次）"。状态进程内 `app/services/esports_retry_queue.py` 维护，进程重启丢失（接受最多漏一次补推）。
 
 数据源：NBA 用 ESPN API（无需认证），LoL 用 LoL Esports API（LPL/LCK/国际赛事/先锋赛）。
 
@@ -478,6 +484,8 @@ TDSequentialService.calculate()
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
 
 **安装第三方仓库时**：无论是 Claude Code skill/plugin 还是其他工具仓库，完成安装后需同步添加到 `app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`，以便监控新版本
+
+**`git commit --amend` 前重新验证 HEAD**：long-running subagent 完成后做 amend，期间可能有并行 session 已落新 commit，HEAD 已不是你的目标。Amend 前先 `git rev-parse HEAD` 对比预期 SHA；不一致就改成新建 cleanup commit，避免污染他人提交。
 
 ### Slack 推送排版规范
 
