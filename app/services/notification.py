@@ -730,6 +730,31 @@ class NotificationService:
             return ''
 
     @staticmethod
+    def _format_release_block(name: str, emoji: str, version_data: dict) -> str:
+        """渲染单个 version 的 Slack mrkdwn 文本块
+
+        Args:
+            name: 项目名（如 "Claude Code"）
+            emoji: 项目 emoji（如 "🤖"）
+            version_data: {version, date, features, fixes}
+        """
+        version = version_data.get('version', '')
+        date = version_data.get('date', '')
+        features = version_data.get('features') or []
+        fixes = version_data.get('fixes') or []
+
+        lines = [f"{emoji} *{name} {version}* ({date})"]
+        if features:
+            lines.append('')
+            lines.append('✨ *新功能*')
+            lines.extend(f"• {item}" for item in features)
+        if fixes:
+            lines.append('')
+            lines.append('🐛 *修复*')
+            lines.extend(f"• {item}" for item in fixes)
+        return '\n'.join(lines)
+
+    @staticmethod
     def format_github_release_updates() -> tuple[list[str], list[tuple[str, str]]]:
         """格式化所有 GitHub 仓库的版本更新摘要
 
