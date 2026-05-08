@@ -453,6 +453,7 @@ TDSequentialService.calculate()
 - `docs/financial-analysis/` — 多股横向对比 / comps / 估值，格式 `YYYY-MM-DD-<主题>-<细分>.md`
 - `docs/financial-analysis/<NNqN>/` — 该季度 comps / 横向对比归档，命名同上
 - **跨目录引用惯例**：季报点评 / buffett 分析头部常见 `> 配套 comps：[..](../financial-analysis/...)` 相对链接互引；调整目录结构前先 `Grep "\.\./financial-analysis"` 和 `Grep "\.\./analysis"` 找出所有引用并同步修复，否则静默断链
+- **新建分析前先翻历史档案**：写新 buffett / 季报 / comps 文档前先 `Glob "docs/**/*<股票名>*"` 和 `Glob "docs/**/*<代码>*"`（含 ticker 与中文名两路），把已有专题 / 季报点评 / 联动分析全部纳入正文头部 `>` 反向引用 + §0 执行摘要复用其监控指标，避免重复测算或忽略已兑现/已失效的预设触发条件
 
 ## 盯盘告警推送格式
 
