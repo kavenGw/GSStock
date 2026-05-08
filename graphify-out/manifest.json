@@ -1,39 +1,847 @@
 {
+  "D:\\Git\\stock\\config.py": {
+    "mtime": 1773980039.1892545,
+    "hash": "79c6bf2d5bca9bea3381a306bda8d59e"
+  },
+  "D:\\Git\\stock\\gsstock": {
+    "mtime": 1773894497.5484,
+    "hash": "dc5e69698199f79d394dd49d11869ffe"
+  },
+  "D:\\Git\\stock\\gunicorn.conf.py": {
+    "mtime": 1774153946.032058,
+    "hash": "90547f17006a261db340c655ed86b546"
+  },
+  "D:\\Git\\stock\\run.py": {
+    "mtime": 1772100225.0245879,
+    "hash": "64bd42da9ddea9d9a73c63729563080b"
+  },
   "D:\\Git\\stock\\app\\__init__.py": {
     "mtime": 1778161001.1205394,
     "hash": "ea35ab47c1e6707c2b8977fabf423f59"
+  },
+  "D:\\Git\\stock\\app\\config\\blog_monitor.py": {
+    "mtime": 1774681423.4768047,
+    "hash": "bb3c188d12b4223c957fdc6b93e68f00"
+  },
+  "D:\\Git\\stock\\app\\config\\data_sources.py": {
+    "mtime": 1770807358.029952,
+    "hash": "c4e8733ec3dcf99c4a3a9b812bca8357"
+  },
+  "D:\\Git\\stock\\app\\config\\esports_config.py": {
+    "mtime": 1775099886.3148477,
+    "hash": "9ac0f5aa6e4e5869cf9953d0bdca4477"
+  },
+  "D:\\Git\\stock\\app\\config\\github_releases.py": {
+    "mtime": 1776747269.4064896,
+    "hash": "924f2840352231c64a980719e70110f3"
+  },
+  "D:\\Git\\stock\\app\\config\\github_trending.py": {
+    "mtime": 1774754207.1069405,
+    "hash": "d27d1707db04d0c241de7b63d02cbc44"
+  },
+  "D:\\Git\\stock\\app\\config\\news_config.py": {
+    "mtime": 1774068088.1967366,
+    "hash": "2392f77213dd374c7ca855a9e050fea7"
+  },
+  "D:\\Git\\stock\\app\\config\\notification_config.py": {
+    "mtime": 1775089937.3887968,
+    "hash": "71d019a4dddd3ec9109a158e6be3bbe2"
+  },
+  "D:\\Git\\stock\\app\\config\\sector_ratings.py": {
+    "mtime": 1770962654.4347,
+    "hash": "e1926a8b50e4a944e9a88fc60e70a7a1"
+  },
+  "D:\\Git\\stock\\app\\config\\stock_codes.py": {
+    "mtime": 1776748234.4478817,
+    "hash": "aadd4616312e1bb0ce6e45f288b09f27"
+  },
+  "D:\\Git\\stock\\app\\config\\supply_chain.py": {
+    "mtime": 1777510749.2468424,
+    "hash": "100472a589244ad36d9231a6d4df855e"
+  },
+  "D:\\Git\\stock\\app\\config\\__init__.py": {
+    "mtime": 1768956255.6178145,
+    "hash": "43955d2e15f4ab581596b127b9e6d7e2"
+  },
+  "D:\\Git\\stock\\app\\llm\\base.py": {
+    "mtime": 1774958371.5948122,
+    "hash": "b7e98bcd2372d68423045e70d3676e6a"
+  },
+  "D:\\Git\\stock\\app\\llm\\rate_limiter.py": {
+    "mtime": 1775008448.1941428,
+    "hash": "6e7f47f01d0398cb946ac89dd42d6979"
+  },
+  "D:\\Git\\stock\\app\\llm\\router.py": {
+    "mtime": 1775631437.383398,
+    "hash": "bd9c4609c504c9508ee0eea9580da214"
+  },
+  "D:\\Git\\stock\\app\\llm\\__init__.py": {
+    "mtime": 1771998733.9506717,
+    "hash": "f36119ace78f9a73461d2aaeba122f42"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\blog_summary.py": {
+    "mtime": 1774681441.9709249,
+    "hash": "8a971e165717d31dfa4f9be09e1de287"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\company_identify.py": {
+    "mtime": 1775000899.1618097,
+    "hash": "64a5647ca313b1dded27a84d7cd53c54"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\daily_briefing.py": {
+    "mtime": 1775195541.537361,
+    "hash": "24df2b1582a06e03b03e1a3b8f9ae2f5"
   },
   "D:\\Git\\stock\\app\\llm\\prompts\\github_release_update.py": {
     "mtime": 1778159277.3623898,
     "hash": "e6dd47490b07a4dd91834660bb18263f"
   },
+  "D:\\Git\\stock\\app\\llm\\prompts\\github_trending_summary.py": {
+    "mtime": 1774754219.9865224,
+    "hash": "e0a42e224d29680c2bf3f86f4723101b"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\market_summary.py": {
+    "mtime": 1771998733.963488,
+    "hash": "94e9531bc6db8b91804d28271b2f06c1"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\news_briefing.py": {
+    "mtime": 1772189453.406781,
+    "hash": "140375827ae8a2124c74f6ff67d3f614"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\news_classify.py": {
+    "mtime": 1772358448.6997247,
+    "hash": "50995a0774d03753f068a4bb0d304216"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\news_dedup.py": {
+    "mtime": 1774014621.661201,
+    "hash": "abc2792685110acbf04eb290ebcb535b"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\nomura_research.py": {
+    "mtime": 1775439817.0910258,
+    "hash": "444a06f03a39262955b5c0bdb7ea8f8b"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\stock_tags.py": {
+    "mtime": 1773191864.0378296,
+    "hash": "4da235eb9decb873af519b6a6af11c2a"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\wallstreet_news.py": {
+    "mtime": 1775089962.747417,
+    "hash": "6aead385d178ae3eb0d6a45ba1a03c22"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\watch_analysis.py": {
+    "mtime": 1773885269.4353838,
+    "hash": "040384572c2a1575caf236e78639e586"
+  },
+  "D:\\Git\\stock\\app\\llm\\prompts\\__init__.py": {
+    "mtime": 1771998733.9594834,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Git\\stock\\app\\llm\\providers\\gemini.py": {
+    "mtime": 1775617772.6216097,
+    "hash": "e756ad5d05e367af701128a154650760"
+  },
+  "D:\\Git\\stock\\app\\llm\\providers\\llamacpp.py": {
+    "mtime": 1773118761.6951652,
+    "hash": "603d9035e2af27502dea3bff39812b56"
+  },
+  "D:\\Git\\stock\\app\\llm\\providers\\zhipu.py": {
+    "mtime": 1775617849.8857381,
+    "hash": "684fff92c72813b8494d56db5ddaf509"
+  },
+  "D:\\Git\\stock\\app\\llm\\providers\\__init__.py": {
+    "mtime": 1771998733.963488,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Git\\stock\\app\\ml\\dataset.py": {
+    "mtime": 1772797180.9577668,
+    "hash": "c8b4a08be135de6e91055f4e8a382cfd"
+  },
+  "D:\\Git\\stock\\app\\ml\\features.py": {
+    "mtime": 1772797106.6048858,
+    "hash": "3f41bb7cf2d735295c9c40eac4bdd693"
+  },
+  "D:\\Git\\stock\\app\\ml\\predictor.py": {
+    "mtime": 1772797536.9936442,
+    "hash": "11c25a0a1d12683ff209175c815488e8"
+  },
+  "D:\\Git\\stock\\app\\ml\\trainer.py": {
+    "mtime": 1772797459.2962263,
+    "hash": "277142689cddd4330cfd27b46027e30c"
+  },
+  "D:\\Git\\stock\\app\\ml\\__init__.py": {
+    "mtime": 1772797082.1787322,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Git\\stock\\app\\ml\\models\\trend_transformer.py": {
+    "mtime": 1772797162.000241,
+    "hash": "f06bbe0e148712c1f874042a1926af02"
+  },
+  "D:\\Git\\stock\\app\\ml\\models\\__init__.py": {
+    "mtime": 1772797082.2800052,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Git\\stock\\app\\models\\advice.py": {
+    "mtime": 1771206155.6383107,
+    "hash": "d1af5ee5c54ebf874fa05047df85af1b"
+  },
+  "D:\\Git\\stock\\app\\models\\bank_transfer.py": {
+    "mtime": 1769831175.038343,
+    "hash": "2e7ed0c6539e9c6b62d0b7b48b188c6f"
+  },
+  "D:\\Git\\stock\\app\\models\\category.py": {
+    "mtime": 1771978716.8259022,
+    "hash": "ee6789b9cc76df1ceb0d948dfebf457f"
+  },
+  "D:\\Git\\stock\\app\\models\\config.py": {
+    "mtime": 1770429371.222053,
+    "hash": "18410cdb540101e49f58a850d2f472c3"
+  },
+  "D:\\Git\\stock\\app\\models\\daily_snapshot.py": {
+    "mtime": 1770439496.0129933,
+    "hash": "b1431629c108806ce19a0791ffe3f68d"
+  },
+  "D:\\Git\\stock\\app\\models\\dram_price.py": {
+    "mtime": 1772331765.9349697,
+    "hash": "ce827efd3ab6a88481daff673f6df4f6"
+  },
+  "D:\\Git\\stock\\app\\models\\earnings_snapshot.py": {
+    "mtime": 1774071483.5517569,
+    "hash": "0bd1afce2dd16859afa21797c523f812"
+  },
+  "D:\\Git\\stock\\app\\models\\index_trend_cache.py": {
+    "mtime": 1766203583.1909316,
+    "hash": "9fc5006a7b581e75b9e4ae69e9bd5fdd"
+  },
+  "D:\\Git\\stock\\app\\models\\metal_trend_cache.py": {
+    "mtime": 1765009953.173953,
+    "hash": "527ba3a48265d5fa5c46120e9d038710"
+  },
+  "D:\\Git\\stock\\app\\models\\news.py": {
+    "mtime": 1774068098.0857453,
+    "hash": "d8749347b8123c1fdcc9d12a7220fdd4"
+  },
+  "D:\\Git\\stock\\app\\models\\position.py": {
+    "mtime": 1771206154.7862382,
+    "hash": "7fe9178d99ab410c8f9e29102ec526bb"
+  },
+  "D:\\Git\\stock\\app\\models\\position_plan.py": {
+    "mtime": 1771206153.9552941,
+    "hash": "61d2ba99192c7d6460b9e7b2954820ad"
+  },
+  "D:\\Git\\stock\\app\\models\\rebalance_config.py": {
+    "mtime": 1766900726.341489,
+    "hash": "7471bf50119f950ce85d3b2863b160fc"
+  },
+  "D:\\Git\\stock\\app\\models\\settlement.py": {
+    "mtime": 1771206156.624276,
+    "hash": "6dff246a9526c97e217231a0392ff732"
+  },
+  "D:\\Git\\stock\\app\\models\\signal_cache.py": {
+    "mtime": 1768185210.4169893,
+    "hash": "b2ee121a72d52363e9e5846aca36bdc1"
+  },
+  "D:\\Git\\stock\\app\\models\\stock.py": {
+    "mtime": 1773191847.1370702,
+    "hash": "ff868dcac70cbaeac1d4c8e2cd6784f7"
+  },
+  "D:\\Git\\stock\\app\\models\\stock_alias.py": {
+    "mtime": 1768290320.1547601,
+    "hash": "82c9154109940a2cf7fa29e05d01cc5a"
+  },
+  "D:\\Git\\stock\\app\\models\\stock_weight.py": {
+    "mtime": 1771206153.0345826,
+    "hash": "1ea17b9788b8d9c1fe3b496b26318441"
+  },
+  "D:\\Git\\stock\\app\\models\\trade.py": {
+    "mtime": 1771206152.1146495,
+    "hash": "5975861b8e17236159a5407f7e90d2bb"
+  },
+  "D:\\Git\\stock\\app\\models\\unified_cache.py": {
+    "mtime": 1775730778.3232837,
+    "hash": "0ac0ce5d5bb7df839d7899c1a5ff8fd3"
+  },
+  "D:\\Git\\stock\\app\\models\\watch_list.py": {
+    "mtime": 1773037267.3249884,
+    "hash": "13f0a6cf5018599a5fc32f2c6ff44de6"
+  },
+  "D:\\Git\\stock\\app\\models\\wyckoff.py": {
+    "mtime": 1771206133.8666494,
+    "hash": "5bab681f38fe780f2fadc2ea5eb024df"
+  },
+  "D:\\Git\\stock\\app\\models\\__init__.py": {
+    "mtime": 1776850995.5679834,
+    "hash": "848c37e0591009b1fcd2e9db9eec6d18"
+  },
+  "D:\\Git\\stock\\app\\routes\\advice.py": {
+    "mtime": 1764838718.979434,
+    "hash": "96ffa3dde1650f5ef518b4dcadb58a00"
+  },
+  "D:\\Git\\stock\\app\\routes\\alert.py": {
+    "mtime": 1775195551.136323,
+    "hash": "ed731e1faf0028cb026425a68f0c56e5"
+  },
+  "D:\\Git\\stock\\app\\routes\\briefing.py": {
+    "mtime": 1775195557.575868,
+    "hash": "3e0f6e40a54169ecb94eb06777a5fe52"
+  },
+  "D:\\Git\\stock\\app\\routes\\category.py": {
+    "mtime": 1771978719.3571076,
+    "hash": "5162d1e6b8ac4c31d5f4e2469b2167f6"
+  },
+  "D:\\Git\\stock\\app\\routes\\daily_record.py": {
+    "mtime": 1773732089.6448543,
+    "hash": "19ac957cdfaad0f5b8bbbaa2298fb86f"
+  },
+  "D:\\Git\\stock\\app\\routes\\earnings_page.py": {
+    "mtime": 1774071669.5106876,
+    "hash": "7404eb1843fe8c211b05358281878d48"
+  },
+  "D:\\Git\\stock\\app\\routes\\heavy_metals.py": {
+    "mtime": 1773145371.1360712,
+    "hash": "f67b0f821170124165825bcb57cda2f7"
+  },
+  "D:\\Git\\stock\\app\\routes\\main.py": {
+    "mtime": 1773037286.3323512,
+    "hash": "37b28799152f636411e521eefa3b4ce8"
+  },
+  "D:\\Git\\stock\\app\\routes\\news.py": {
+    "mtime": 1774068071.1059241,
+    "hash": "0672f54b1d48cfcf2c511f0e3d17761a"
+  },
+  "D:\\Git\\stock\\app\\routes\\position.py": {
+    "mtime": 1771210704.9948273,
+    "hash": "8110b34cf2f5ebfe7149e05689f3caf1"
+  },
+  "D:\\Git\\stock\\app\\routes\\profit.py": {
+    "mtime": 1764944511.7177951,
+    "hash": "43b3e0e4ec1b589369f5367bac41b86f"
+  },
+  "D:\\Git\\stock\\app\\routes\\rebalance.py": {
+    "mtime": 1766900783.8368342,
+    "hash": "0454c1ab1d8bfc989cda536ff9b015df"
+  },
+  "D:\\Git\\stock\\app\\routes\\stock.py": {
+    "mtime": 1777118801.3815055,
+    "hash": "4d544bec7643269d5a2fbf79f86b389e"
+  },
+  "D:\\Git\\stock\\app\\routes\\stock_detail.py": {
+    "mtime": 1771210651.1313605,
+    "hash": "b0966a0e0aabf5a832b33bc3951824dc"
+  },
+  "D:\\Git\\stock\\app\\routes\\supply_chain.py": {
+    "mtime": 1777511544.9407692,
+    "hash": "f0e272ea53400121cfaae958e7766d74"
+  },
+  "D:\\Git\\stock\\app\\routes\\trade.py": {
+    "mtime": 1769831299.632276,
+    "hash": "97ccaf4d9a87cd84a0c3985e35e07054"
+  },
+  "D:\\Git\\stock\\app\\routes\\value_dip.py": {
+    "mtime": 1775002894.177855,
+    "hash": "c12539164dcf1887ccd241ea71f14bd3"
+  },
+  "D:\\Git\\stock\\app\\routes\\watch.py": {
+    "mtime": 1775636176.0407848,
+    "hash": "617905f8d8dbac7cec6e6acd16966187"
+  },
+  "D:\\Git\\stock\\app\\routes\\__init__.py": {
+    "mtime": 1776850989.1699533,
+    "hash": "0f7b5e60d7df357da1dc0987a8279053"
+  },
+  "D:\\Git\\stock\\app\\scheduler\\engine.py": {
+    "mtime": 1775217253.375384,
+    "hash": "68d8033b253a07a636622fe142b8c40b"
+  },
+  "D:\\Git\\stock\\app\\scheduler\\event_bus.py": {
+    "mtime": 1773191497.633068,
+    "hash": "4504dac3365a21529c7ac1140f102369"
+  },
+  "D:\\Git\\stock\\app\\scheduler\\__init__.py": {
+    "mtime": 1771998733.994687,
+    "hash": "6ce56b3c7327ca0cf565b8be18925aed"
+  },
+  "D:\\Git\\stock\\app\\seeds\\aerospace_materials_category.py": {
+    "mtime": 1777103432.6371584,
+    "hash": "3de28266c032544aa8699007be5e1ed6"
+  },
+  "D:\\Git\\stock\\app\\seeds\\apple_category.py": {
+    "mtime": 1777103708.5220792,
+    "hash": "6a5e982bfe0c9eab783f869c643b0571"
+  },
+  "D:\\Git\\stock\\app\\seeds\\ascend_category.py": {
+    "mtime": 1777012606.9638865,
+    "hash": "ab35e819aa8977ad67893a12858c9e80"
+  },
   "D:\\Git\\stock\\app\\seeds\\ccl_upstream_category.py": {
     "mtime": 1778161133.8950796,
     "hash": "25fdbed3f24664803e592902f0176fd8"
+  },
+  "D:\\Git\\stock\\app\\seeds\\copper_category.py": {
+    "mtime": 1777075817.9609308,
+    "hash": "2450962d061f7692fe130c55b0b71bab"
+  },
+  "D:\\Git\\stock\\app\\seeds\\cpu_category.py": {
+    "mtime": 1776946366.012164,
+    "hash": "32847363c37a5e74a52d17f207da1a87"
+  },
+  "D:\\Git\\stock\\app\\seeds\\photoresist_category.py": {
+    "mtime": 1777103997.55546,
+    "hash": "7f01de762a7bc621cf9149636c2671c0"
+  },
+  "D:\\Git\\stock\\app\\seeds\\worldcup_category.py": {
+    "mtime": 1777011809.435121,
+    "hash": "9871791a1fa2da4a53cedf89391be4e6"
   },
   "D:\\Git\\stock\\app\\seeds\\__init__.py": {
     "mtime": 1778160987.8973799,
     "hash": "164df8b635bd0f39c196e6899a970559"
   },
+  "D:\\Git\\stock\\app\\services\\ai_analyzer.py": {
+    "mtime": 1774229228.0964777,
+    "hash": "9fb27d4dd0f341642583ed9615a286aa"
+  },
+  "D:\\Git\\stock\\app\\services\\akshare_client.py": {
+    "mtime": 1773369115.8021526,
+    "hash": "94863c6f500a8ac0d734bfaa51b28521"
+  },
+  "D:\\Git\\stock\\app\\services\\backtest.py": {
+    "mtime": 1771211334.2871122,
+    "hash": "281babf6ecbe69dfa7349ab2e1539744"
+  },
+  "D:\\Git\\stock\\app\\services\\bank_transfer.py": {
+    "mtime": 1769831175.8712015,
+    "hash": "15a815466607870524a11a43b6f027e5"
+  },
+  "D:\\Git\\stock\\app\\services\\blog_monitor_service.py": {
+    "mtime": 1774681569.572177,
+    "hash": "24b046b59bb4be358343676236204fa7"
+  },
+  "D:\\Git\\stock\\app\\services\\briefing.py": {
+    "mtime": 1775195565.3716655,
+    "hash": "0a93da8ef30956922979882a4366afa7"
+  },
+  "D:\\Git\\stock\\app\\services\\buffett_analysis.py": {
+    "mtime": 1777118791.7936969,
+    "hash": "72666ba18eadac26355aa17c2b65dbee"
+  },
+  "D:\\Git\\stock\\app\\services\\cache_validator.py": {
+    "mtime": 1771211170.6280053,
+    "hash": "57360eb2ebbffdc8eb574ae1b542a3dd"
+  },
+  "D:\\Git\\stock\\app\\services\\category.py": {
+    "mtime": 1771978720.8903499,
+    "hash": "aea694d548ae6351203ed0fd390c5318"
+  },
+  "D:\\Git\\stock\\app\\services\\circuit_breaker.py": {
+    "mtime": 1771210990.7896338,
+    "hash": "0618d4c4869d915481826cadc0c5fad6"
+  },
+  "D:\\Git\\stock\\app\\services\\company_news_service.py": {
+    "mtime": 1774529724.8687093,
+    "hash": "b6644d3939d2f477354a50c3bf771ab4"
+  },
+  "D:\\Git\\stock\\app\\services\\daily_record.py": {
+    "mtime": 1770988480.1565633,
+    "hash": "db7d11a19204edc22400073a8e0978c8"
+  },
+  "D:\\Git\\stock\\app\\services\\data_source_providers.py": {
+    "mtime": 1771211006.2742243,
+    "hash": "0ecbdf3b37b99b8f815bdbee214f1c3a"
+  },
+  "D:\\Git\\stock\\app\\services\\dram_price.py": {
+    "mtime": 1772332075.1448958,
+    "hash": "a3f803a7e28832abb239c09d8f27b05a"
+  },
+  "D:\\Git\\stock\\app\\services\\earnings.py": {
+    "mtime": 1775195466.8201492,
+    "hash": "78e18070f7c760f18cfe5e3235edab99"
+  },
+  "D:\\Git\\stock\\app\\services\\earnings_service.py": {
+    "mtime": 1773369073.7737565,
+    "hash": "a992414cf9ff3218ba0dd2a89e846e80"
+  },
+  "D:\\Git\\stock\\app\\services\\esports_monitor_service.py": {
+    "mtime": 1776736316.5286887,
+    "hash": "d6554a6f649affe912e0bfdf51d8bcb7"
+  },
   "D:\\Git\\stock\\app\\services\\esports_retry_queue.py": {
     "mtime": 1778161460.777866,
     "hash": "083d3a3d36bc10669bb63b39e6f8edb2"
+  },
+  "D:\\Git\\stock\\app\\services\\esports_service.py": {
+    "mtime": 1777075358.1298542,
+    "hash": "b83b798afa059491d3f8ed05b1b79975"
+  },
+  "D:\\Git\\stock\\app\\services\\fed_rate.py": {
+    "mtime": 1771211320.4926755,
+    "hash": "a7ca7384e040bfc3bf69ed193b39bd94"
+  },
+  "D:\\Git\\stock\\app\\services\\futures.py": {
+    "mtime": 1773059085.04564,
+    "hash": "b03a12c6a3b09a6c76ce0785c9741f06"
+  },
+  "D:\\Git\\stock\\app\\services\\github_release.py": {
+    "mtime": 1776746386.316643,
+    "hash": "99e751be62a8466d8f109d60ff6579f8"
+  },
+  "D:\\Git\\stock\\app\\services\\github_trending_service.py": {
+    "mtime": 1774754629.3315876,
+    "hash": "8dd64bd5fed9a78b5647946dced0d5b9"
   },
   "D:\\Git\\stock\\app\\services\\interest_pipeline.py": {
     "mtime": 1778158101.0098228,
     "hash": "ed4c0bdf021cb75689f6b60816af48ab"
   },
+  "D:\\Git\\stock\\app\\services\\load_balancer.py": {
+    "mtime": 1771210982.549676,
+    "hash": "3b658d60fc142164e0fd4be185858b17"
+  },
+  "D:\\Git\\stock\\app\\services\\market_cap_service.py": {
+    "mtime": 1774071499.526973,
+    "hash": "bfc49728efbd39ff188bd0152442c9e0"
+  },
+  "D:\\Git\\stock\\app\\services\\market_session.py": {
+    "mtime": 1775299885.988492,
+    "hash": "aaeacdc24d534f6c4f21bdb5f89e8f69"
+  },
+  "D:\\Git\\stock\\app\\services\\market_status.py": {
+    "mtime": 1772080742.1311026,
+    "hash": "176bb34e223739debde65b0e176e3462"
+  },
+  "D:\\Git\\stock\\app\\services\\memory_cache.py": {
+    "mtime": 1770617621.4953547,
+    "hash": "5d5c674a7f6d810f62700b547c3c92ef"
+  },
+  "D:\\Git\\stock\\app\\services\\migration.py": {
+    "mtime": 1771211126.7548823,
+    "hash": "752f510c56a7c0a0fc66edce7356090f"
+  },
+  "D:\\Git\\stock\\app\\services\\news_dedup.py": {
+    "mtime": 1774014854.1617813,
+    "hash": "fff6aed17f55591ed80516554e064a6d"
+  },
+  "D:\\Git\\stock\\app\\services\\news_service.py": {
+    "mtime": 1773191506.036956,
+    "hash": "23417267bcb1767dd5312497b294e22f"
+  },
+  "D:\\Git\\stock\\app\\services\\nomura_research_service.py": {
+    "mtime": 1775439811.980736,
+    "hash": "e1e95ea4f6c8063118ce171671cc053b"
+  },
   "D:\\Git\\stock\\app\\services\\notification.py": {
     "mtime": 1778160489.264292,
     "hash": "ed2c2990ab40428c92ffabdd73b95ced"
+  },
+  "D:\\Git\\stock\\app\\services\\ocr.py": {
+    "mtime": 1772100262.3330786,
+    "hash": "a277aaf6777051573ad72cb333b3d4ef"
+  },
+  "D:\\Git\\stock\\app\\services\\plugin_discovery.py": {
+    "mtime": 1776746375.994923,
+    "hash": "f8c76b7d8925d0fdaa4fd868c6435f49"
+  },
+  "D:\\Git\\stock\\app\\services\\position.py": {
+    "mtime": 1775182389.6549892,
+    "hash": "b8ae1848f7c8622609320c0dc3f67d49"
+  },
+  "D:\\Git\\stock\\app\\services\\rebalance.py": {
+    "mtime": 1766900830.9196925,
+    "hash": "a3b0c6acbb299f6f28e0952506f7d153"
+  },
+  "D:\\Git\\stock\\app\\services\\signal_cache.py": {
+    "mtime": 1773055187.3045154,
+    "hash": "2ad4586180533e97c2bb12b70e586223"
+  },
+  "D:\\Git\\stock\\app\\services\\signal_detector.py": {
+    "mtime": 1773278906.3719718,
+    "hash": "5b4cbb2f14cb078d8a619fb74c559814"
+  },
+  "D:\\Git\\stock\\app\\services\\signal_service.py": {
+    "mtime": 1773982969.4572895,
+    "hash": "6b7fa9ec480d81787546baccbae1e7dc"
+  },
+  "D:\\Git\\stock\\app\\services\\stock.py": {
+    "mtime": 1773191904.292759,
+    "hash": "3bca5febe1d168f8decb9e9783b51edf"
+  },
+  "D:\\Git\\stock\\app\\services\\stock_meta.py": {
+    "mtime": 1770903893.7332096,
+    "hash": "d0caefa69356c6827c7514a3dd22c102"
+  },
+  "D:\\Git\\stock\\app\\services\\td_sequential.py": {
+    "mtime": 1773112161.6551557,
+    "hash": "08d54df4fdbcfa6b64249d1e6bebdca8"
+  },
+  "D:\\Git\\stock\\app\\services\\technical_indicators.py": {
+    "mtime": 1770682992.996408,
+    "hash": "3c3ebed38d5f841f07ed43d2d3de8932"
+  },
+  "D:\\Git\\stock\\app\\services\\trade.py": {
+    "mtime": 1771211047.3417683,
+    "hash": "8fb49b8e2757501925a76cc595a39286"
+  },
+  "D:\\Git\\stock\\app\\services\\trading_calendar.py": {
+    "mtime": 1775302081.668996,
+    "hash": "167820f8145b378c968ee6a43ae8f15d"
+  },
+  "D:\\Git\\stock\\app\\services\\unified_stock_data.py": {
+    "mtime": 1776939588.63761,
+    "hash": "4ddaf3a94c56c08f839b18ac2963897d"
+  },
+  "D:\\Git\\stock\\app\\services\\valuation.py": {
+    "mtime": 1766826087.435913,
+    "hash": "1cd882384df8f67d761d8a1d8dba5c5d"
+  },
+  "D:\\Git\\stock\\app\\services\\value_dip.py": {
+    "mtime": 1775002884.1405768,
+    "hash": "b74779cbfac55821395851c28e6bde6b"
+  },
+  "D:\\Git\\stock\\app\\services\\wallstreet_news_service.py": {
+    "mtime": 1775439833.0166214,
+    "hash": "f6844510443c6d55df239afe177f5a11"
+  },
+  "D:\\Git\\stock\\app\\services\\watch_alert_service.py": {
+    "mtime": 1775731059.9791894,
+    "hash": "3c9a8683de7a2b0071d6b58eaf2812e4"
+  },
+  "D:\\Git\\stock\\app\\services\\watch_analysis_service.py": {
+    "mtime": 1775093387.6116264,
+    "hash": "5c3d57aa6ba2c705a7a27165065b03bd"
+  },
+  "D:\\Git\\stock\\app\\services\\watch_service.py": {
+    "mtime": 1773037297.2817752,
+    "hash": "2bda9329f367b96100688bbada3bceba"
+  },
+  "D:\\Git\\stock\\app\\services\\wyckoff.py": {
+    "mtime": 1775195579.6546226,
+    "hash": "14e17b52cff34338fc451fa7fb8e2c4a"
+  },
+  "D:\\Git\\stock\\app\\services\\wyckoff_analyzer.py": {
+    "mtime": 1771154220.8329196,
+    "hash": "0e11e48b1c506a90f8e9dd6e480eb681"
+  },
+  "D:\\Git\\stock\\app\\services\\__init__.py": {
+    "mtime": 1768302536.1528103,
+    "hash": "36335e6915f3025ae19198a83d7fb36c"
+  },
+  "D:\\Git\\stock\\app\\services\\news_sources\\base.py": {
+    "mtime": 1773034443.1949549,
+    "hash": "180407e5a0739329e5f4350461503808"
+  },
+  "D:\\Git\\stock\\app\\services\\news_sources\\cls.py": {
+    "mtime": 1773034507.465577,
+    "hash": "2b3013258cbfb5d045700c175374a10a"
+  },
+  "D:\\Git\\stock\\app\\services\\news_sources\\kr36.py": {
+    "mtime": 1776771185.9699318,
+    "hash": "b46c24a395436252d47ceabc1ab380dc"
+  },
+  "D:\\Git\\stock\\app\\services\\news_sources\\smolai.py": {
+    "mtime": 1773034503.4340258,
+    "hash": "526bdbaf61f1b2115284be3cf588c887"
+  },
+  "D:\\Git\\stock\\app\\services\\news_sources\\wallstreetcn.py": {
+    "mtime": 1773034499.5309992,
+    "hash": "cd0f6121c5605e32d983fddbf191fe38"
+  },
+  "D:\\Git\\stock\\app\\services\\news_sources\\__init__.py": {
+    "mtime": 1772273962.270774,
+    "hash": "5447e38854acfca268a291008ebb91aa"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\alert-page.js": {
+    "mtime": 1775195642.194234,
+    "hash": "afd26ec7760418a584fc7b5bd5bbcf9e"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\briefing.js": {
+    "mtime": 1775195699.9006896,
+    "hash": "169171210e816b1075909351876f70a3"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\charts.js": {
+    "mtime": 1773145650.712701,
+    "hash": "61ba2595f39deefa777f1af5b1fe19b9"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\daily_record.js": {
+    "mtime": 1774606987.0802896,
+    "hash": "8e864f6abebe8540a02445a518f94dc7"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\earnings-page.js": {
+    "mtime": 1774071789.3562133,
+    "hash": "f63d6d2fc7c4a7aa210e161c6277de81"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\index.js": {
+    "mtime": 1766740512.86222,
+    "hash": "d0ad89a1ba5cb1c3bf775b03cf1071b7"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\main.js": {
+    "mtime": 1771998734.0154493,
+    "hash": "0afd1305e0de08c8b2e7c00324cfcaec"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\news.js": {
+    "mtime": 1774068063.712468,
+    "hash": "4a1cae6e69f44b5218d1f2a0f72c62a9"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\profit_charts.js": {
+    "mtime": 1764979863.5296614,
+    "hash": "c10a9ce742bf9213cd7708e4e3036a4d"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\rebalance.js": {
+    "mtime": 1766900855.9792314,
+    "hash": "b8fe0ac438405f552f32da1598526c22"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\relative.js": {
+    "mtime": 1766837103.6804194,
+    "hash": "7ad0c7e13a6d5c0385f18f7d8c9c1f21"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\signal-alert.js": {
+    "mtime": 1768210286.3696206,
+    "hash": "a10278ea4e06b53cdf040c177b68f20d"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\signal-detector.js": {
+    "mtime": 1773279279.8247702,
+    "hash": "a6c7e1f523ff6bed958199331b078d23"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\stock-detail.js": {
+    "mtime": 1771158237.1265132,
+    "hash": "babff6ea43ece1898f3d47c0f327a4af"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\trade_list.js": {
+    "mtime": 1769831469.657595,
+    "hash": "b4b9a93f236011b25ddfd5be70c30a07"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\trade_stats.js": {
+    "mtime": 1769122444.942718,
+    "hash": "33f4dcf564c2152ef3126368d259d90d"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\value_dip.js": {
+    "mtime": 1775002913.9472873,
+    "hash": "a75c9d4144a3ff3777c883f407a14376"
+  },
+  "D:\\Git\\stock\\app\\static\\js\\watch.js": {
+    "mtime": 1775538938.3594713,
+    "hash": "4c0ad88f800d03279318c3535eb0d07e"
+  },
+  "D:\\Git\\stock\\app\\static\\vendor\\js\\bootstrap.bundle.min.js": {
+    "mtime": 1773800355.7252593,
+    "hash": "6baf57f25796c332144ed58a2a0cd9ee"
+  },
+  "D:\\Git\\stock\\app\\static\\vendor\\js\\chart.umd.min.js": {
+    "mtime": 1773800356.997854,
+    "hash": "eeca2582f0217edc4ac85af347e0d4ad"
+  },
+  "D:\\Git\\stock\\app\\static\\vendor\\js\\echarts.min.js": {
+    "mtime": 1773800358.5713494,
+    "hash": "38588d6b8c7c30b9941c28c01b389b88"
+  },
+  "D:\\Git\\stock\\app\\strategies\\base.py": {
+    "mtime": 1771998734.0229652,
+    "hash": "a29ab8fe4dd7873110e9bd3916c21e66"
+  },
+  "D:\\Git\\stock\\app\\strategies\\registry.py": {
+    "mtime": 1771998734.046947,
+    "hash": "43fffaf03b3e73cdc4f0dcf74f8c2e58"
+  },
+  "D:\\Git\\stock\\app\\strategies\\__init__.py": {
+    "mtime": 1771998734.0194614,
+    "hash": "002ecad5982794e9621cbb510d0a30bc"
+  },
+  "D:\\Git\\stock\\app\\strategies\\blog_trending\\__init__.py": {
+    "mtime": 1775008566.7666159,
+    "hash": "649c8a0fbb919dd3aaa7a8bf1c79caf5"
+  },
+  "D:\\Git\\stock\\app\\strategies\\change_alert\\__init__.py": {
+    "mtime": 1772501462.1672456,
+    "hash": "b9bf843f73dab46660b1735b9099fab8"
+  },
+  "D:\\Git\\stock\\app\\strategies\\daily_briefing\\__init__.py": {
+    "mtime": 1775694609.7868783,
+    "hash": "1f9a3e642c5d9a9508a46935c4e8413a"
+  },
+  "D:\\Git\\stock\\app\\strategies\\earnings_snapshot\\__init__.py": {
+    "mtime": 1775008608.6619372,
+    "hash": "9571758f79c11a225985b67136dfbc38"
   },
   "D:\\Git\\stock\\app\\strategies\\esports_daily_schedule\\__init__.py": {
     "mtime": 1778161712.8146408,
     "hash": "8583c219201643f64b3879f0bd7a87a4"
   },
+  "D:\\Git\\stock\\app\\strategies\\github_release\\__init__.py": {
+    "mtime": 1777685500.2015061,
+    "hash": "64ffb4607308e1a5e974731b9b0958e8"
+  },
+  "D:\\Git\\stock\\app\\strategies\\nomura_research\\__init__.py": {
+    "mtime": 1775439819.5696268,
+    "hash": "f187860bdd956c84ef2ee272fce47f0f"
+  },
+  "D:\\Git\\stock\\app\\strategies\\price_alert\\__init__.py": {
+    "mtime": 1772501445.9976246,
+    "hash": "aaa1cbfdb977591f0539be39ae88479c"
+  },
+  "D:\\Git\\stock\\app\\strategies\\trend_signal\\__init__.py": {
+    "mtime": 1774061551.9252732,
+    "hash": "a9736caa23f52874456d8a8c42881d66"
+  },
+  "D:\\Git\\stock\\app\\strategies\\volume_alert\\__init__.py": {
+    "mtime": 1776939421.4012485,
+    "hash": "24a3e2f2730878060c3c42ab521d2e9d"
+  },
+  "D:\\Git\\stock\\app\\strategies\\wallstreet_news\\__init__.py": {
+    "mtime": 1775090185.219074,
+    "hash": "645981c3c011e94d5c90703a957369fd"
+  },
+  "D:\\Git\\stock\\app\\strategies\\watch_alert\\__init__.py": {
+    "mtime": 1775716751.6419666,
+    "hash": "da2d4bff44034c0e5371ee00d6af950b"
+  },
+  "D:\\Git\\stock\\app\\strategies\\watch_preload\\__init__.py": {
+    "mtime": 1775538910.5207877,
+    "hash": "80bcb5b9ad8fb405a2be288fc252e5b2"
+  },
+  "D:\\Git\\stock\\app\\strategies\\watch_realtime\\__init__.py": {
+    "mtime": 1773982954.846673,
+    "hash": "5488865ddc439cb6ef27ca25aa7bb68f"
+  },
+  "D:\\Git\\stock\\app\\strategies\\wyckoff_signal\\__init__.py": {
+    "mtime": 1772504185.68575,
+    "hash": "cd9bdba9f9ef9d92a66057f9e8129d04"
+  },
+  "D:\\Git\\stock\\app\\utils\\log_utils.py": {
+    "mtime": 1771210059.0564775,
+    "hash": "ec3ea9226d783e374b8e13ac1fd679ac"
+  },
+  "D:\\Git\\stock\\app\\utils\\market_identifier.py": {
+    "mtime": 1774072956.2307322,
+    "hash": "f27cdd3aee7db97640d5a11c7d3c2141"
+  },
+  "D:\\Git\\stock\\app\\utils\\readonly_mode.py": {
+    "mtime": 1770440162.6215713,
+    "hash": "c75ae98327335a0d89829c3b6e9efcd8"
+  },
+  "D:\\Git\\stock\\app\\utils\\support_resistance.py": {
+    "mtime": 1773037260.9558983,
+    "hash": "db956bb4b50cf4c6fff66fccbefd9ed1"
+  },
+  "D:\\Git\\stock\\app\\utils\\__init__.py": {
+    "mtime": 1768345050.5915046,
+    "hash": "593658efaab61df4297ad96df9cd86da"
+  },
+  "D:\\Git\\stock\\scripts\\fetch_solar_inverter_comps.py": {
+    "mtime": 1777336188.48799,
+    "hash": "49b101818f45848e5b65f502d4762cfa"
+  },
+  "D:\\Git\\stock\\scripts\\migrate_news.py": {
+    "mtime": 1772273962.2722766,
+    "hash": "e13a0174c104d95803fbd9bde208673c"
+  },
+  "D:\\Git\\stock\\tests\\test_buffett_analysis.py": {
+    "mtime": 1777118849.5439754,
+    "hash": "5569deec7af04c99a6ea36ced1bade2e"
+  },
   "D:\\Git\\stock\\tests\\test_esports_daily_schedule_routing.py": {
     "mtime": 1778161685.6698413,
     "hash": "eb7a42177e6042c96846e5a61654539b"
+  },
+  "D:\\Git\\stock\\tests\\test_esports_lol_fetch.py": {
+    "mtime": 1777075390.9185164,
+    "hash": "01e2a4fd0cb517a551aa49bb3a5467c2"
   },
   "D:\\Git\\stock\\tests\\test_esports_retry_queue.py": {
     "mtime": 1778161482.3728998,
@@ -43,17 +851,389 @@
     "mtime": 1778160489.2652946,
     "hash": "b3faa1df54211bdc4849324402898164"
   },
+  "D:\\Git\\stock\\tests\\test_supply_chain_intel_hygon.py": {
+    "mtime": 1777511929.0501,
+    "hash": "4c2b676ff351e7db62d1bbea27be68bc"
+  },
+  "D:\\Git\\stock\\tests\\test_volume_alert_unit_consistency.py": {
+    "mtime": 1776939374.4267924,
+    "hash": "dc4ecb4de98e5b5212e5d6e26d045d1a"
+  },
+  "D:\\Git\\stock\\tests\\__init__.py": {
+    "mtime": 1776939208.365266,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Git\\stock\\AGENTS.md": {
+    "mtime": 1770291650.380627,
+    "hash": "f06e76fe4cfc78e030746f976de96d1a"
+  },
   "D:\\Git\\stock\\CLAUDE.md": {
     "mtime": 1778205086.3499804,
     "hash": "407f507193b31e00ebeb50e6bd95b78b"
+  },
+  "D:\\Git\\stock\\README.md": {
+    "mtime": 1777685500.1978645,
+    "hash": "b078caba5f9dd0647eac5636cc0e0a93"
+  },
+  "D:\\Git\\stock\\requirements.txt": {
+    "mtime": 1777118764.9598143,
+    "hash": "81a125aee59f0a1f9638c28892219eec"
+  },
+  "D:\\Git\\stock\\app\\strategies\\blog_trending\\config.yaml": {
+    "mtime": 1775008559.4930108,
+    "hash": "030f1905e2cd1170db206a1979153680"
+  },
+  "D:\\Git\\stock\\app\\strategies\\change_alert\\config.yaml": {
+    "mtime": 1771998734.0301087,
+    "hash": "0547657d98b730cf33bc615e6b1fd0b2"
+  },
+  "D:\\Git\\stock\\app\\strategies\\daily_briefing\\config.yaml": {
+    "mtime": 1775008611.357446,
+    "hash": "50f67bd14b66a39ec901e08ed7e3331d"
+  },
+  "D:\\Git\\stock\\app\\strategies\\earnings_snapshot\\config.yaml": {
+    "mtime": 1775008609.56651,
+    "hash": "88e88bae6435ad1915942d25d9244392"
+  },
+  "D:\\Git\\stock\\app\\strategies\\price_alert\\config.yaml": {
+    "mtime": 1771998734.0439367,
+    "hash": "f734abd62313cc6b672c1841e8e97fce"
+  },
+  "D:\\Git\\stock\\app\\strategies\\trend_signal\\config.yaml": {
+    "mtime": 1772797590.3661723,
+    "hash": "107426a5851087adf0ac7e9d43435d28"
+  },
+  "D:\\Git\\stock\\app\\strategies\\watch_preload\\config.yaml": {
+    "mtime": 1775299885.988492,
+    "hash": "362d8e0f6d43808d4314555e13b30e19"
+  },
+  "D:\\Git\\stock\\app\\strategies\\wyckoff_signal\\config.yaml": {
+    "mtime": 1771998734.0535445,
+    "hash": "f173fb840cfd7800dbc4ddf1679a304b"
+  },
+  "D:\\Git\\stock\\app\\templates\\alert.html": {
+    "mtime": 1770953763.945864,
+    "hash": "ea70b85b50df7d2ad33fa4de026ff310"
+  },
+  "D:\\Git\\stock\\app\\templates\\base.html": {
+    "mtime": 1776850984.7129486,
+    "hash": "3b2e18bc129ee2ad7c7f08a08126b1b9"
+  },
+  "D:\\Git\\stock\\app\\templates\\briefing.html": {
+    "mtime": 1773905352.052034,
+    "hash": "ddca98c2bf590a233ac0f44e564d3940"
+  },
+  "D:\\Git\\stock\\app\\templates\\category.html": {
+    "mtime": 1771980646.559911,
+    "hash": "87a755b1ae61c87de533c1853ed67bf1"
+  },
+  "D:\\Git\\stock\\app\\templates\\daily_profit.html": {
+    "mtime": 1764980287.9894197,
+    "hash": "f3bf484d46780cd3e49de93096f256ee"
+  },
+  "D:\\Git\\stock\\app\\templates\\daily_record.html": {
+    "mtime": 1770641684.9074671,
+    "hash": "4fca407fc5742768f30d07ccffc5b1db"
+  },
+  "D:\\Git\\stock\\app\\templates\\daily_stats.html": {
+    "mtime": 1770988305.8673694,
+    "hash": "5f1fe987157b2e3d30a809bf08c611c0"
+  },
+  "D:\\Git\\stock\\app\\templates\\earnings_page.html": {
+    "mtime": 1774071718.0374742,
+    "hash": "69df69ea4b46b472b5fabee0a4d1b110"
+  },
+  "D:\\Git\\stock\\app\\templates\\heavy_metals.html": {
+    "mtime": 1771980646.5639322,
+    "hash": "0007ea5ab5bb3deeb35f3d6d7f7c2f61"
+  },
+  "D:\\Git\\stock\\app\\templates\\identified_companies.html": {
+    "mtime": 1774002272.5249176,
+    "hash": "6c0a355e0918f9381e221f19ad3eecc7"
+  },
+  "D:\\Git\\stock\\app\\templates\\index.html": {
+    "mtime": 1773037323.6221385,
+    "hash": "8accd2cdc306db9aba1ca6b11c60def5"
+  },
+  "D:\\Git\\stock\\app\\templates\\news.html": {
+    "mtime": 1774068072.9975822,
+    "hash": "156ddf08dd51d35dc6dc922b2a11e242"
+  },
+  "D:\\Git\\stock\\app\\templates\\overall_profit.html": {
+    "mtime": 1764980310.586791,
+    "hash": "1478f16afc924f0f9c173d39188eb5b9"
+  },
+  "D:\\Git\\stock\\app\\templates\\rebalance.html": {
+    "mtime": 1766900863.8010254,
+    "hash": "1c0ebf245d94dbfa07ed4ac5bb994c64"
+  },
+  "D:\\Git\\stock\\app\\templates\\stock_manage.html": {
+    "mtime": 1777118825.8087757,
+    "hash": "a1f8a29e7b6ceb0a5ca4514df2b39061"
+  },
+  "D:\\Git\\stock\\app\\templates\\supply_chain.html": {
+    "mtime": 1777011835.4276218,
+    "hash": "5f87dd316e160ff4edbaf827ef990b92"
+  },
+  "D:\\Git\\stock\\app\\templates\\trade_list.html": {
+    "mtime": 1773800379.2817395,
+    "hash": "6920fedd35e73cc026f6cf9c99750c6a"
+  },
+  "D:\\Git\\stock\\app\\templates\\trade_stats.html": {
+    "mtime": 1773800380.0465415,
+    "hash": "7a2a6b39a55fc374c8655c59c63416b7"
+  },
+  "D:\\Git\\stock\\app\\templates\\unsupported.html": {
+    "mtime": 1773732108.583649,
+    "hash": "f96784fba304ea0fe9b293ddf29adf42"
+  },
+  "D:\\Git\\stock\\app\\templates\\value_dip.html": {
+    "mtime": 1775002921.7732494,
+    "hash": "9d23079b38e47e81d62dcbb4d402fe08"
+  },
+  "D:\\Git\\stock\\app\\templates\\watch.html": {
+    "mtime": 1775538722.439742,
+    "hash": "77cb2f4a7a10ce70201c170b376438ce"
+  },
+  "D:\\Git\\stock\\app\\templates\\partials\\stock_detail_drawer.html": {
+    "mtime": 1771129728.9508834,
+    "hash": "b5e498779f7027bfc71112978dedee5f"
+  },
+  "D:\\Git\\stock\\app\\templates\\partials\\stock_row.html": {
+    "mtime": 1777118809.5286076,
+    "hash": "263eab14290654a079a267c5dd7dcfbb"
+  },
+  "D:\\Git\\stock\\data\\github_release_claude-code_last_version.txt": {
+    "mtime": 1775182086.7101939,
+    "hash": "d628efc1ebf483ce88ccf09783a4c2a3"
+  },
+  "D:\\Git\\stock\\data\\github_release_claude-relay-service_last_version.txt": {
+    "mtime": 1774583423.5496972,
+    "hash": "84fcfea74a1f5c8443380d59f9acf26e"
+  },
+  "D:\\Git\\stock\\data\\github_release_openclaw_last_version.txt": {
+    "mtime": 1775182086.7101939,
+    "hash": "4a1580aaed7b027e340b50a7b3b3f33b"
+  },
+  "D:\\Git\\stock\\data\\github_release_superpowers_last_version.txt": {
+    "mtime": 1775003983.4405212,
+    "hash": "46df77a8b192cb53c5a67381a701f8cb"
+  },
+  "D:\\Git\\stock\\doc\\architecture.md": {
+    "mtime": 1771161723.344671,
+    "hash": "93cd626f22429b0e4ab56202452c574e"
+  },
+  "D:\\Git\\stock\\doc\\data-flow.md": {
+    "mtime": 1771161751.233957,
+    "hash": "f959cb10f5423e579e84691906e642c7"
+  },
+  "D:\\Git\\stock\\docs\\TECHNICAL_DOCUMENTATION.md": {
+    "mtime": 1776851037.6359327,
+    "hash": "e11d39593fa91e379ec3508b38383e39"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-21-\u5146\u6613\u521b\u65b0-buffett\u5206\u6790.md": {
+    "mtime": 1778235709.1856327,
+    "hash": "b02faaf374a0b0167cb43495dbcc636c"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-21-\u5317\u4eac\u541b\u6b63-buffett\u5206\u6790.md": {
+    "mtime": 1776748591.5645711,
+    "hash": "c494f7bc4697561d2e827f50ee493f5b"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-22-\u5b89\u8e0f\u4f53\u80b2-buffett\u5206\u6790.md": {
+    "mtime": 1776825041.1875432,
+    "hash": "c83f903190c62e2e7f9eaeb50ee3a912"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-22-\u8d5b\u817e\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1776854187.0950892,
+    "hash": "b255945ef57d3525b486fc5cd02825c9"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-22-\u9752\u5c9b\u5564\u9152-buffett\u5206\u6790.md": {
+    "mtime": 1776824198.691156,
+    "hash": "fa3b826585032ff9bfc08826a52e6119"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-23-\u5f64\u7a0b\u65b0\u6750-buffett\u5206\u6790.md": {
+    "mtime": 1776905729.508598,
+    "hash": "b17fac9320d1dc48fa807e234f008fe2"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u4e2d\u4f53\u4ea7\u4e1a-buffett\u5206\u6790.md": {
+    "mtime": 1777001315.6170273,
+    "hash": "10c6a4ffa74380a17d112355bfc30fb9"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u4e2d\u91d1\u9ec4\u91d1-buffett\u5206\u6790.md": {
+    "mtime": 1777034993.7518964,
+    "hash": "5fcd3a9d4d194b97575dbb64f251609f"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u5171\u521b\u8349\u576a-buffett\u5206\u6790.md": {
+    "mtime": 1777001127.2245421,
+    "hash": "6877a2c4e87d6f05796a06c3af2b0a76"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u6d1b\u9633\u94bc\u4e1a-buffett\u5206\u6790.md": {
+    "mtime": 1777035004.8687747,
+    "hash": "be08843f0b36ebd94919d5004536b1e8"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u7ca4\u4f20\u5a92-buffett\u5206\u6790.md": {
+    "mtime": 1777001408.8429341,
+    "hash": "b132493c12f366012df0e30c6cc708a9"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u7d2b\u91d1\u77ff\u4e1a-buffett\u5206\u6790.md": {
+    "mtime": 1777035006.850979,
+    "hash": "54967dcc4cf260fed0932ba2147566b9"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u8212\u534e\u4f53\u80b2-buffett\u5206\u6790.md": {
+    "mtime": 1777001150.698934,
+    "hash": "bbe9b3cc94eab4f6702a0959629ba4de"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u91cd\u5e86\u5564\u9152-buffett\u5206\u6790.md": {
+    "mtime": 1777030031.7651677,
+    "hash": "851a32f5e0df81db77cda393ff925778"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u91d1\u9675\u4f53\u80b2-buffett\u5206\u6790.md": {
+    "mtime": 1777001158.2476735,
+    "hash": "cc0ffef42db2f06bd39b552d8e3b8ff6"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-24-\u9633\u5149\u7535\u6e90-buffett\u5206\u6790.md": {
+    "mtime": 1777034590.904295,
+    "hash": "341a9911f012cabafaeee87d519c5b9b"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u56fd\u82af\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1777105255.6646588,
+    "hash": "516a5766d959104b66263306947d95e1"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u590d\u65e6\u5fae\u7535-buffett\u5206\u6790.md": {
+    "mtime": 1777104900.874138,
+    "hash": "3d8bf363ed7ca8b25074df6ab4394245"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u592a\u6781\u5b9e\u4e1a-buffett\u5206\u6790.md": {
+    "mtime": 1777103591.5767875,
+    "hash": "0523ea8da76e3ca05d29cacd7a269a6a"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u5e0c\u837b\u5fae-buffett\u5206\u6790.md": {
+    "mtime": 1777105161.2888122,
+    "hash": "8fcb385581a9a411847e3c76148393cf"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u666e\u5189\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1777510195.2392147,
+    "hash": "a114869982befa6701640745268fc98a"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u6c5f\u6ce2\u9f99-buffett\u5206\u6790.md": {
+    "mtime": 1777094125.0349329,
+    "hash": "8bb7485f0ba8f0f6cb060ca3de4132e5"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-25-\u805a\u8fb0\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1777510194.0533319,
+    "hash": "1e0c482e4818fe6bf6c0bb98c937adb0"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-26-\u71d5\u4eac\u5564\u9152-buffett\u5206\u6790.md": {
+    "mtime": 1777510191.3891766,
+    "hash": "3bc97d26ae0100c2d7c7c15a80369a9f"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-04-26-\u9752\u5c9b\u5564\u9152-buffett\u5206\u6790.md": {
+    "mtime": 1777510192.5438657,
+    "hash": "3adbb5969fb201725fa6f1c0e1069b4d"
   },
   "D:\\Git\\stock\\docs\\analysis\\2026-05-07-\u9e3f\u535a\u80a1\u4efd-buffett\u5206\u6790.md": {
     "mtime": 1778160510.8067055,
     "hash": "dfca98f51fce4802273c5f81f8f9812b"
   },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u4e07\u534e\u5316\u5b66-buffett\u5206\u6790.md": {
+    "mtime": 1778235902.9846356,
+    "hash": "d3a1491aacebd8ba4d103e337f02f6bf"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u4e16\u754c\u676f2026-\u7092\u4f5c\u65f6\u95f4\u951a\u4e13\u9898.md": {
+    "mtime": 1778237517.5665777,
+    "hash": "60f4cc2e40819fc653d5c59705efe1c7"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u5357\u5927\u5149\u7535-buffett\u5206\u6790.md": {
+    "mtime": 1778236487.9318736,
+    "hash": "85c339b2ef97a883b8970db235fc2a4b"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u5de8\u5316\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1778236428.748056,
+    "hash": "8ac12eb984837999ca0f18cf8bfe34de"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u660a\u534e\u5316\u5b66-buffett\u5206\u6790.md": {
+    "mtime": 1778236609.1119168,
+    "hash": "5867c748e75be645e63533f183cf2744"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u836f\u660e\u5eb7\u5fb7-buffett\u5206\u6790.md": {
+    "mtime": 1778236868.738589,
+    "hash": "7872683a253349660f8004296e93d361"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u897f\u90e8\u6750\u6599-buffett\u5206\u6790.md": {
+    "mtime": 1778235886.4014118,
+    "hash": "482ee543b22d91319e771872252b9011"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-\u5317\u4eac\u541b\u6b63-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777376570.5998876,
+    "hash": "c8967fed339094dc92970a5e9aa27122"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-\u957f\u7535\u79d1\u6280-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777510184.1553133,
+    "hash": "6cc79f93dee7877bc1efc433703151c5"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-\u96c5\u514b\u79d1\u6280-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777510189.907486,
+    "hash": "0c3bd67dd7ba5046bb0804a290eae4c1"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u4e1c\u5434\u8bc1\u5238-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777438926.228168,
+    "hash": "7037f1363378c8cb442d47673d9eac98"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u4e2d\u91d1\u9ec4\u91d1-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777438281.067593,
+    "hash": "a959667a793d4aa0c93b38170de6cfe1"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u5146\u6613\u521b\u65b0-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1778235717.1116934,
+    "hash": "d43d794edcf33f2ca355cecd61d90e62"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u534e\u5929\u79d1\u6280-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777510185.712776,
+    "hash": "9de243cb64e76c86540e1583f40cb8b8"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u5f64\u7a0b\u65b0\u6750-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777439687.5845902,
+    "hash": "462be265944bda7a5e8a60fa141466f7"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u666e\u5189\u80a1\u4efd-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777510188.3852983,
+    "hash": "62665a79c1b7429b3a58d2ea3649aa38"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u6c5f\u6ce2\u9f99-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777431674.8409078,
+    "hash": "6346ae79544866902db6e86d4cef681b"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u6d1b\u9633\u94bc\u4e1a-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777440999.6624947,
+    "hash": "7759e39ba52868f200c21a2337890d44"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u80dc\u5b8f\u79d1\u6280-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777510186.868264,
+    "hash": "e5ec14ee427fcd87e1a9bc050cba5733"
+  },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-\u901a\u5bcc\u5fae\u7535-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
-    "mtime": 1778127901.6343217,
-    "hash": "4223d36b8e7d11e56c53c3675d7f3480"
+    "mtime": 1778237295.4339068,
+    "hash": "ad2ba20ecd6782066724c09442bd9175"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-30-\u6df1\u79d1\u6280-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777520305.3177018,
+    "hash": "3f7e28296418587c185d47c639c11b92"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-30-\u9752\u5c9b\u5564\u9152-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777541677.5756612,
+    "hash": "67ed48a53f03a471d069e68ca66e6fd9"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-01-\u6caa\u7535\u80a1\u4efd-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777686192.6469405,
+    "hash": "142c5fb9fd3b85b9b578619e2dd76c2c"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-01-\u76db\u5408\u6676\u5fae-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
+    "mtime": 1777601145.7452798,
+    "hash": "e5b54ab7275d6c894392ace84b4476b1"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-02-\u6caa\u7535\u80a1\u4efd-\u6cf0\u56fd\u5de5\u5382\u4e13\u9898.md": {
+    "mtime": 1777686181.721918,
+    "hash": "1613864d101265b4aa6e4ee2c30f6c82"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-02-\u901a\u5bcc\u5fae\u7535-TFAMD\u9a6c\u6765\u897f\u4e9a\u4e13\u9898.md": {
     "mtime": 1778127917.6425917,
@@ -64,8 +1244,8 @@
     "hash": "a0ceed0e4f3d32db1fffcd4e12cdc927"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-06-\u901a\u5bcc\u5fae\u7535-AMD26Q1\u8d22\u62a5\u8054\u52a8\u4e13\u9898.md": {
-    "mtime": 1778127955.9271038,
-    "hash": "bb43e8102424c34ef6fca8d9c07987aa"
+    "mtime": 1778237303.2841852,
+    "hash": "5f2bfab777ba142f02e72993757e714e"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-07-\u5357\u4e9a\u65b0\u6750-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
     "mtime": 1778160592.8443136,
@@ -87,6 +1267,10 @@
     "mtime": 1778160689.8105707,
     "hash": "bd212d38fd6b7ff29015c66dccc889a1"
   },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-08-\u901a\u5bcc\u5fae\u7535-5\u67088\u65e5\u884c\u60c5\u9a8c\u8bc1.md": {
+    "mtime": 1778237283.07592,
+    "hash": "8f87dab066ab16ff3f003ba416afa780"
+  },
   "D:\\Git\\stock\\docs\\financial-analysis\\2026-05-08-AMD-Intel-buffett\u5bf9\u6bd4\u5206\u6790.md": {
     "mtime": 1778204991.6420095,
     "hash": "d8d5c0c714d2323cdd87b2a924e5fc3c"
@@ -94,6 +1278,138 @@
   "D:\\Git\\stock\\docs\\financial-analysis\\2026-05-08-\u7acb\u6602\u5fae-\u6caa\u7845\u4ea7\u4e1a-buffett\u5bf9\u6bd4\u5206\u6790.md": {
     "mtime": 1778217784.5648897,
     "hash": "44a215d8ebd183b39459be897ab0dbb3"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-25-\u5146\u6613\u521b\u65b0-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
+    "mtime": 1777123600.2058644,
+    "hash": "7abc74859c04e386ac61505e0c96872c"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-26-\u5564\u9152\u677f\u5757-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
+    "mtime": 1777167720.0906506,
+    "hash": "c1f6a3f5f0eeb675497fe3bc87b44657"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-26-\u96c5\u514b\u79d1\u6280-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
+    "mtime": 1777180255.821751,
+    "hash": "e2402b70b8150141e4cdb2e57de469c9"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-27-\u5174\u68ee\u79d1\u6280-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
+    "mtime": 1777278362.4618192,
+    "hash": "509545d988c608768d7f09ecc36b0448"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-28-\u957f\u7535\u901a\u5bcc-comps-\u5c01\u6d4b\u8d5b\u9053\u6a2a\u5411\u5bf9\u6bd4.md": {
+    "mtime": 1777373789.6320362,
+    "hash": "094428f263514fe106af3aa2424d3281"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-28-\u9633\u5149\u7535\u6e90-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
+    "mtime": 1777336582.6989617,
+    "hash": "4f411538413556e80a32e27df778296f"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-05-08-\u5146\u6613\u521b\u65b0-\u901a\u5bcc\u5fae\u7535-\u51cf\u6301\u4e8b\u4ef6\u5bf9\u6bd4\u5206\u6790.md": {
+    "mtime": 1778237309.2742977,
+    "hash": "b0a05ccb0ff15cafa09a46a7cf9e7747"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-claude-code-version-briefing-design.md": {
+    "mtime": 1773921095.6103885,
+    "hash": "9c5e94ca9ce7a2c2eaf2453169a11fa3"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-claude-code-version-briefing-plan.md": {
+    "mtime": 1773921376.5358615,
+    "hash": "7101f4f8201c3ed7cd1afba3df6c04d1"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-company-news-table-format-design.md": {
+    "mtime": 1773923021.2411275,
+    "hash": "bbd01e3ebe3a59cc424a833bd530c72c"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-company-news-table-format-plan.md": {
+    "mtime": 1773923358.135946,
+    "hash": "f5a5d63cf1396dbf5b14170c1647904a"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-daily-briefing-push-enhancement-design.md": {
+    "mtime": 1773906356.8159566,
+    "hash": "94b03bfc1b04253edaded63ee76127e7"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-daily-briefing-push-enhancement-plan.md": {
+    "mtime": 1773906552.0812938,
+    "hash": "7d3b2aca9a2e3ae688ed3a41e4c3b7c3"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-news-dedup-fingerprint-design.md": {
+    "mtime": 1773920993.76199,
+    "hash": "79fcfce592153694573156d7a6b11c36"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-news-dedup-fingerprint-plan.md": {
+    "mtime": 1773920986.355904,
+    "hash": "f8c16baeb6a9cf82f5722429bbd9c688"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-news-dynamic-interval-design.md": {
+    "mtime": 1773907194.0092435,
+    "hash": "399420bc876df298a46b768f2dff2a52"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-19-realtime-analysis-push-design.md": {
+    "mtime": 1773901649.7331073,
+    "hash": "60c3cc3156cdb6b661fe89605a338025"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-21-esports-monitor-design.md": {
+    "mtime": 1774056283.0326016,
+    "hash": "5e9fbe985319cd0f832427d1d973345d"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-21-esports-monitor-plan.md": {
+    "mtime": 1774056844.1782205,
+    "hash": "014cfbb70934b1aaefbff7c3578cbf04"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-21-research-report-design.md": {
+    "mtime": 1774060532.4121425,
+    "hash": "13f9fdf7a6e43b50b90b7702fd6d67eb"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-21-research-report-plan.md": {
+    "mtime": 1774061209.6155057,
+    "hash": "e2fed6a9c9152ad6c27ea270c4f1ed4c"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-27-watch-merged-chart-plan.md": {
+    "mtime": 1774604624.1434343,
+    "hash": "3c441be022dfb70ecef03edba7940e6c"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-28-blog-monitor-design.md": {
+    "mtime": 1774681111.1824675,
+    "hash": "8c054e7b9f9bbd95079c213965bb2173"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-28-blog-monitor-plan.md": {
+    "mtime": 1774681321.7923605,
+    "hash": "d4c45948ccbd7c7c1cc5c0d75f3ffe62"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-29-github-trending-monitor-design.md": {
+    "mtime": 1774753614.2138977,
+    "hash": "a0bb509aababb6d2d2cb196ffd8290c5"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-03-29-github-trending-monitor-plan.md": {
+    "mtime": 1774753955.8653803,
+    "hash": "03280049c59286b3545c0034f64ed574"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-04-watch-enhancement-design.md": {
+    "mtime": 1775299885.988492,
+    "hash": "af9a85afb6b3ce2000f9c9c837c1be07"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-04-watch-enhancement-plan.md": {
+    "mtime": 1775299885.990019,
+    "hash": "b18440ab0f5dff7ba1601faa2fa7494f"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-05-stock-manage-ui-design.md": {
+    "mtime": 1775366587.6890602,
+    "hash": "465397debbaf93c31d8c477acdc0e943"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-06-nomura-research-design.md": {
+    "mtime": 1775439759.53563,
+    "hash": "ba1e952622cd4f390c5cb54986a14bdc"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-22-remove-trading-strategy-design.md": {
+    "mtime": 1776850838.4209666,
+    "hash": "0fd3704fa1d79b86f9381bdd06f1d19e"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-30-intel-\u6d77\u5149\u4ea7\u4e1a\u94fe\u5b8c\u5584-design.md": {
+    "mtime": 1777510186.5852656,
+    "hash": "4f703a86d2cccc24eed8ebe02fd00634"
+  },
+  "D:\\Git\\stock\\docs\\plans\\2026-04-30-intel-\u6d77\u5149\u4ea7\u4e1a\u94fe\u5b8c\u5584-plan.md": {
+    "mtime": 1777510374.393224,
+    "hash": "11d50c19ab088728186aac30eab92782"
   },
   "D:\\Git\\stock\\docs\\plans\\2026-05-03-\u901a\u5bcc\u5fae\u7535-AgentCPU\u4e13\u9898-design.md": {
     "mtime": 1778127973.3872128,
@@ -107,9 +1423,97 @@
     "mtime": 1778159576.1073375,
     "hash": "ee5f52c162f394b4c33a9f1224f6cb6a"
   },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-10-watch-alert-push.md": {
+    "mtime": 1773121353.2953243,
+    "hash": "0810cd1d6fb418a80b812e47014f54fd"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-10-watch-intraday-highlow.md": {
+    "mtime": 1773123778.4456656,
+    "hash": "f1f903e78e09655b93e3bd131e2b5bc7"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-11-news-stock-tag-association.md": {
+    "mtime": 1773191399.2586572,
+    "hash": "af9e6d63c0eee9346d1868cfe7248980"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-18-news-dedup.md": {
+    "mtime": 1773812049.7223635,
+    "hash": "f4cf71191185582da542b05353cc1d5c"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-18-watch-alert-enhance.md": {
+    "mtime": 1773798642.780162,
+    "hash": "46963629bbddfbf3181843db77ebfd25"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-19-github-release-monitor.md": {
+    "mtime": 1773924908.0755,
+    "hash": "13e60d6c15702c62d1a2f6f51a497f5e"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-20-news-dedup-llm.md": {
+    "mtime": 1774014503.3204484,
+    "hash": "2c5ff1f7ccdfb45eb3b56229b61ffe3d"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-21-earnings-valuation-page.md": {
+    "mtime": 1774070419.6155374,
+    "hash": "bd7e78755d6ed2d89f93af6eed782fb5"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-21-slack-channel-routing.md": {
+    "mtime": 1774061552.1264799,
+    "hash": "10700872c2b1f4d3fc7631f26843553e"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-03-21-value-dip.md": {
+    "mtime": 1774070166.8473034,
+    "hash": "30bfe95e20d26d6cd95074263f8df14a"
+  },
   "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-05-07-github-release-slack-format.md": {
     "mtime": 1778159103.9692976,
     "hash": "be434f95cf814fc83532cfe37f822d0b"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-10-watch-alert-push-design.md": {
+    "mtime": 1773119977.2966514,
+    "hash": "f3776d85238533b5255a8eda8098aaaf"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-10-watch-intraday-highlow-design.md": {
+    "mtime": 1773123585.5540717,
+    "hash": "654990adc1b692472b190d255d67b3cc"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-11-news-stock-tag-association-design.md": {
+    "mtime": 1773191266.742969,
+    "hash": "60450065c7634f41cb0efe3684317911"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-17-debian-systemd-deploy-design.md": {
+    "mtime": 1773723601.8978283,
+    "hash": "ff8d93dafc13b302145de9aacc68e059"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-18-news-dedup-design.md": {
+    "mtime": 1773811902.2092488,
+    "hash": "d1397e0b104fbd42b232d7f44ca720b6"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-18-watch-alert-enhance-design.md": {
+    "mtime": 1773798149.841976,
+    "hash": "da3640627ccd549e93b53a9c931111ac"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-19-github-release-monitor-design.md": {
+    "mtime": 1773924634.0775783,
+    "hash": "fd5244b9d07410172f4ebd343d764055"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-20-news-dedup-llm-design.md": {
+    "mtime": 1774014074.0834637,
+    "hash": "ec29c8f4a7bd9bc5658760908887a867"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-21-earnings-valuation-page-design.md": {
+    "mtime": 1774069741.0667953,
+    "hash": "c3a0d42f5bfba8a799fe740cb5829e56"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-21-slack-channel-routing-design.md": {
+    "mtime": 1774061552.0877528,
+    "hash": "2b20bb9c5a898b40cfae788fd36cd578"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-03-21-value-dip-design.md": {
+    "mtime": 1774069781.105176,
+    "hash": "28c8b1b5e3aae02b4924a92795160c76"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-04-30-\u8d22\u62a5\u6309\u5b63\u5ea6\u5f52\u6863-design.md": {
+    "mtime": 1777510245.2402308,
+    "hash": "5aacfd0b99e4053d3e7e744dfc099ac2"
   },
   "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-05-02-\u901a\u5bcc\u5fae\u7535-TFAMD\u9a6c\u6765\u897f\u4e9a\u4e13\u9898-design.md": {
     "mtime": 1778127982.6056242,
@@ -118,5 +1522,37 @@
   "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-05-07-github-release-slack-format-design.md": {
     "mtime": 1778158855.3796506,
     "hash": "12fb5264764e7d236743655d673120ad"
+  },
+  "D:\\Git\\stock\\scripts\\_solar_comps_data.txt": {
+    "mtime": 1777336208.9924977,
+    "hash": "710b57baf7492b902099d4281c493975"
+  },
+  "D:\\Git\\stock\\uploads\\0e89ac82097c4b7dbaad6db3ce894f43_038885252f5cbed3d8ed8d8e3ee646dc.jpg": {
+    "mtime": 1764918562.3714838,
+    "hash": "daf5ff36ab4a5014629a2d233266f3d0"
+  },
+  "D:\\Git\\stock\\uploads\\294d0af530314e7e9a84cbd98428ee7e_038885252f5cbed3d8ed8d8e3ee646dc.jpg": {
+    "mtime": 1764918522.64185,
+    "hash": "daf5ff36ab4a5014629a2d233266f3d0"
+  },
+  "D:\\Git\\stock\\uploads\\3c7a1314ea4c438782cafc5aa42e1016_0aa59d823ceb9b0c80e97cd0a306f459.jpg": {
+    "mtime": 1764918482.187281,
+    "hash": "bacc401c2a3e229cafdd5069d2a7ac52"
+  },
+  "D:\\Git\\stock\\uploads\\763acbf47f2f43658fc9f04cf7e1a54e_0aa59d823ceb9b0c80e97cd0a306f459.jpg": {
+    "mtime": 1764918440.317137,
+    "hash": "bacc401c2a3e229cafdd5069d2a7ac52"
+  },
+  "D:\\Git\\stock\\uploads\\942af40ece444613a9747d8bb48adb8d_0aa59d823ceb9b0c80e97cd0a306f459.jpg": {
+    "mtime": 1764918421.0592258,
+    "hash": "bacc401c2a3e229cafdd5069d2a7ac52"
+  },
+  "D:\\Git\\stock\\uploads\\bdd573a76df34e049d59439089b7542d_038885252f5cbed3d8ed8d8e3ee646dc.jpg": {
+    "mtime": 1764918583.8720627,
+    "hash": "daf5ff36ab4a5014629a2d233266f3d0"
+  },
+  "D:\\Git\\stock\\uploads\\e48ecc813d654793aef33a3fbfd5c43b_038885252f5cbed3d8ed8d8e3ee646dc.jpg": {
+    "mtime": 1764919131.8036213,
+    "hash": "daf5ff36ab4a5014629a2d233266f3d0"
   }
 }
