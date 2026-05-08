@@ -6,6 +6,7 @@ from app.seeds.copper_category import seed_copper_category
 from app.seeds.aerospace_materials_category import seed_aerospace_materials_category
 from app.seeds.apple_category import seed_apple_category
 from app.seeds.photoresist_category import seed_photoresist_category
+from app.seeds.ccl_upstream_category import seed_ccl_upstream_category
 
 __all__ = [
     'seed_cpu_category',
@@ -15,4 +16,5 @@ __all__ = [
     'seed_aerospace_materials_category',
     'seed_apple_category',
     'seed_photoresist_category',
+    'seed_ccl_upstream_category',
 ]

@@ -299,6 +299,7 @@ def create_app(config_class=None):
             seed_aerospace_materials_category,
             seed_apple_category,
             seed_photoresist_category,
+            seed_ccl_upstream_category,
         )
         seed_cpu_category()
         seed_worldcup_category()
@@ -307,6 +308,7 @@ def create_app(config_class=None):
         seed_aerospace_materials_category()
         seed_apple_category()
         seed_photoresist_category()
+        seed_ccl_upstream_category()
 
         # news 表重建：source_id 列类型从 INT 改为 VARCHAR
         from sqlalchemy import inspect as sa_inspect, text
