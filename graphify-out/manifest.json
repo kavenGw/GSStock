@@ -1155,6 +1155,10 @@
     "mtime": 1778236609.1119168,
     "hash": "5867c748e75be645e63533f183cf2744"
   },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u77f3\u82f1\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1778240652.2144525,
+    "hash": "304d732d71143f527a86bd7630a92a42"
+  },
   "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u836f\u660e\u5eb7\u5fb7-buffett\u5206\u6790.md": {
     "mtime": 1778236868.738589,
     "hash": "7872683a253349660f8004296e93d361"
@@ -1162,6 +1166,14 @@
   "D:\\Git\\stock\\docs\\analysis\\2026-05-08-\u897f\u90e8\u6750\u6599-buffett\u5206\u6790.md": {
     "mtime": 1778235886.4014118,
     "hash": "482ee543b22d91319e771872252b9011"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-09-\u5149\u8fc5\u79d1\u6280-\u5149\u5e93\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1778297508.2159104,
+    "hash": "5d52c460066ccd2e13cb3bf9cf241c6e"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\2026-05-09-\u6e90\u6770\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1778298369.0609176,
+    "hash": "cfcf541ce513b037ca356dd5a4c1a702"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-\u5317\u4eac\u541b\u6b63-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
     "mtime": 1777376570.5998876,
@@ -1224,16 +1236,16 @@
     "hash": "67ed48a53f03a471d069e68ca66e6fd9"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-01-\u6caa\u7535\u80a1\u4efd-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
-    "mtime": 1777686192.6469405,
-    "hash": "142c5fb9fd3b85b9b578619e2dd76c2c"
+    "mtime": 1778242674.4410896,
+    "hash": "33db5bdc849d5e8e8d20f4160e56efe6"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-01-\u76db\u5408\u6676\u5fae-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
     "mtime": 1777601145.7452798,
     "hash": "e5b54ab7275d6c894392ace84b4476b1"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-02-\u6caa\u7535\u80a1\u4efd-\u6cf0\u56fd\u5de5\u5382\u4e13\u9898.md": {
-    "mtime": 1777686181.721918,
-    "hash": "1613864d101265b4aa6e4ee2c30f6c82"
+    "mtime": 1778242679.9523287,
+    "hash": "1fab59d914e438f65e1e4601b2c43d8f"
   },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-02-\u901a\u5bcc\u5fae\u7535-TFAMD\u9a6c\u6765\u897f\u4e9a\u4e13\u9898.md": {
     "mtime": 1778127917.6425917,
@@ -1267,6 +1279,14 @@
     "mtime": 1778160689.8105707,
     "hash": "bd212d38fd6b7ff29015c66dccc889a1"
   },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-08-\u6caa\u7535\u80a1\u4efd-\u8fd1\u671f\u8d70\u52bf\u4e13\u9898.md": {
+    "mtime": 1778242666.3202715,
+    "hash": "3c5a2d13668bdb7e60e4afe81bf40c61"
+  },
+  "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-08-\u7acb\u8baf\u7cbe\u5bc6-\u6c7d\u8f66\u7ebf\u675f\u4e8c\u66f2\u7ebf\u4e13\u9898.md": {
+    "mtime": 1778240814.6470058,
+    "hash": "337d2c5143164894073b4a61a685d7cd"
+  },
   "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-08-\u901a\u5bcc\u5fae\u7535-5\u67088\u65e5\u884c\u60c5\u9a8c\u8bc1.md": {
     "mtime": 1778237283.07592,
     "hash": "8f87dab066ab16ff3f003ba416afa780"
@@ -1278,6 +1298,10 @@
   "D:\\Git\\stock\\docs\\financial-analysis\\2026-05-08-\u7acb\u6602\u5fae-\u6caa\u7845\u4ea7\u4e1a-buffett\u5bf9\u6bd4\u5206\u6790.md": {
     "mtime": 1778217784.5648897,
     "hash": "44a215d8ebd183b39459be897ab0dbb3"
+  },
+  "D:\\Git\\stock\\docs\\financial-analysis\\2026-05-08-\u7acb\u8baf\u7cbe\u5bc6-\u6b4c\u5c14\u80a1\u4efd-buffett\u5bf9\u6bd4\u5206\u6790.md": {
+    "mtime": 1778240823.781271,
+    "hash": "2077bb8bfbb32ed9aacee1a86bfb1436"
   },
   "D:\\Git\\stock\\docs\\financial-analysis\\26q1\\2026-04-25-\u5146\u6613\u521b\u65b0-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
     "mtime": 1777123600.2058644,
