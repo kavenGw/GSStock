@@ -1652,8 +1652,8 @@ SUPPLY_CHAIN_GRAPHS = {
                 'name': 'CoWoS 设备国产替代',
                 'description': 'CoWoS 先进封装设备国产替代（刻蚀/薄膜沉积/CMP）',
                 'companies': {
-                    '002371': {'name': '北方华创', 'role': '薄膜沉积/刻蚀（同属 nvidia 产业链）'},
-                    '688012': {'name': '中微公司', 'role': '刻蚀设备（同属 nvidia 产业链）'},
+                    '002371': {'name': '北方华创', 'role': '薄膜沉积/刻蚀（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '688012': {'name': '中微公司', 'role': '刻蚀设备（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
                     '688072': {'name': '拓荆科技', 'role': '薄膜沉积，CoWoS 替代关键节点', 'tag': 'not_analyzed'},
                     '688120': {'name': '华海清科', 'role': 'CMP 设备，国产唯一', 'tag': 'not_analyzed'},
                 },
