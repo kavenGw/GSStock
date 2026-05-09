@@ -1610,6 +1610,151 @@ SUPPLY_CHAIN_GRAPHS = {
                           'TI 关税与产能转移背景下国产份额持续提升',
         },
     },
+    'asic': {
+        'name': 'ASIC 算力芯片',
+        'code': 'AVGO',
+        'description': (
+            'ASIC（专用集成电路）算力芯片产业链，覆盖全球云厂自研 ASIC（Google TPU、'
+            'Meta MTIA、AWS Trainium、字节自研）与国产 AI ASIC（寒武纪、海光、华为昇腾、'
+            '平头哥、燧原、沐曦）两条主线。设计端由 Broadcom / Marvell / Alchip 主导'
+            '全球代工设计，国产以寒武纪 / 海光为核心。中国 A 股映射端聚焦 FCBGA 封装基板、'
+            '高多层 AI PCB、CoWoS 设备国产替代、HBM 接口与分销、光模块卡间互联、'
+            'AI 服务器整机六大配套环节，不少标的与 nvidia / ascend / cpu 产业链交叠。'
+        ),
+        'core': {
+            'name': 'Broadcom 博通',
+            'code': 'AVGO',
+            'market': 'US',
+            'technologies': ['ASIC 代工设计', 'CoWoS 先进封装', 'PCIe/SerDes IP',
+                             '5nm/3nm 制程', 'Google TPU / Meta MTIA / 字节自研'],
+            'products': ['ASIC 芯片代工设计', 'AI 训练推理 ASIC', 'TPU/MTIA/Trainium',
+                         '国产 ASIC（寒武纪/海光）', 'FCBGA 封装基板'],
+            'customers': ['Google', 'Meta', 'AWS', '字节跳动', '微软',
+                          '国内云厂商', 'AI 独角兽'],
+        },
+        'upstream': {
+            'design_ip': {
+                'name': '设计 IP / EDA',
+                'description': '国产 ASIC 芯片设计 IP 授权与 EDA 平台',
+                'companies': {
+                    '688521': {'name': '芯原股份', 'role': 'RISC-V/NPU IP，国产 ASIC 设计平台', 'tag': 'not_analyzed'},
+                },
+            },
+            'foundry': {
+                'name': '晶圆代工',
+                'description': '国产 ASIC 主要代工厂，14nm/28nm 制程承接',
+                'companies': {
+                    '688981': {'name': '中芯国际', 'role': '寒武纪/海光主要代工承接，14nm 已稳定（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                    '688347': {'name': '华虹半导体', 'role': '28nm 特色工艺，承接部分 ASIC', 'tag': 'not_analyzed'},
+                },
+            },
+            'cowos_equipment': {
+                'name': 'CoWoS 设备国产替代',
+                'description': 'CoWoS 先进封装设备国产替代（刻蚀/薄膜沉积/CMP）',
+                'companies': {
+                    '002371': {'name': '北方华创', 'role': '薄膜沉积/刻蚀（同属 nvidia 产业链）'},
+                    '688012': {'name': '中微公司', 'role': '刻蚀设备（同属 nvidia 产业链）'},
+                    '688072': {'name': '拓荆科技', 'role': '薄膜沉积，CoWoS 替代关键节点', 'tag': 'not_analyzed'},
+                    '688120': {'name': '华海清科', 'role': 'CMP 设备，国产唯一', 'tag': 'not_analyzed'},
+                },
+            },
+            'hbm': {
+                'name': 'HBM 配套',
+                'description': 'HBM 内存接口芯片与 SK 海力士 HBM 国内分销',
+                'companies': {
+                    '688008': {'name': '澜起科技', 'role': 'DDR5/HBM 内存接口 RCD/MRCD/MDB', 'tag': 'not_analyzed'},
+                    '300475': {'name': '香农芯创', 'role': 'SK 海力士 HBM 国内分销', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            'global_design': {
+                'name': '全球 ASIC 设计（云厂自研主力）',
+                'description': 'Google TPU、Meta MTIA、AWS Trainium、字节自研 ASIC 主要由 Broadcom / Marvell / Alchip 代工设计。Alchip（世芯，台股）未上市 A 股，仅文本说明。',
+                'companies': {
+                    'AVGO': {'name': 'Broadcom 博通', 'market': 'US', 'role': '全球 ASIC 代工设计龙头：Google TPU / Meta MTIA / 字节'},
+                    'MRVL': {'name': 'Marvell',       'market': 'US', 'role': 'AWS Trainium / Inferentia 设计代工'},
+                },
+            },
+            'domestic_design': {
+                'name': '国产 AI ASIC 设计',
+                'description': '寒武纪、海光为上市主力。华为昇腾深化链路见 ascend 图谱。平头哥（阿里含光）、燧原（邃思）、沐曦（曦云）均未上市，仅文本提及。',
+                'companies': {
+                    '688256': {'name': '寒武纪',   'role': '国产通用 AI ASIC 设计龙头，思元 590 量产', 'tag': 'not_analyzed'},
+                    '688041': {'name': '海光信息', 'role': 'DCU 加速卡（GPGPU 形态 ASIC），深算二号量产（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                },
+            },
+            'packaging': {
+                'name': '封测',
+                'description': '先进封装与 Chiplet，A 股三大封测配套海光/寒武纪主力订单',
+                'companies': {
+                    '002156': {'name': '通富微电', 'role': 'AMD 合资 TFAMD，海光/寒武纪封测主力（同属 cpu/nvidia 产业链）'},
+                    '600584': {'name': '长电科技', 'role': 'FCBGA/Chiplet/CoWoS-S 替代封装（同属 cpu/nvidia 产业链）'},
+                    '002185': {'name': '华天科技', 'role': '国产 ASIC/SoC 封测（同属 cpu 产业链）'},
+                    '688362': {'name': '甬矽电子', 'role': '中高端封测，承接寒武纪部分订单', 'tag': 'not_analyzed'},
+                },
+            },
+            'fcbga_substrate': {
+                'name': 'FCBGA 封装基板',
+                'description': 'AI ASIC 大尺寸高层数封装基板，国产替代核心环节',
+                'companies': {
+                    '002916': {'name': '深南电路', 'role': 'FCBGA 国产龙头，AI ASIC 大尺寸高层数（同属 cpu 产业链）'},
+                    '002436': {'name': '兴森科技', 'role': 'FCBGA 小批量供货北美 ASIC 客户（同属 cpu 产业链）'},
+                },
+            },
+        },
+        'downstream': {
+            'server_odm': {
+                'name': '服务器整机 ODM',
+                'description': 'AI ASIC 整机集成与国产 AI 服务器品牌',
+                'companies': {
+                    '601138': {'name': '工业富联', 'role': '全球最大 AI 服务器代工，TPU/Trainium 整机集成（同属 cpu/nvidia/ascend 产业链）'},
+                    '000977': {'name': '浪潮信息', 'role': '国产 AI 服务器龙头，海光/寒武纪整机（同属 cpu 产业链）', 'tag': 'not_analyzed'},
+                    '603019': {'name': '中科曙光', 'role': '海光大股东，DCU 整机捆绑', 'tag': 'not_analyzed'},
+                },
+            },
+            'ai_pcb': {
+                'name': 'AI PCB',
+                'description': 'ASIC 服务器高多层 PCB，800G/1.6T 板卡核心',
+                'companies': {
+                    '002463': {'name': '沪电股份', 'role': '800G/1.6T 板卡 PCB（同属 nvidia 产业链）'},
+                    '300476': {'name': '胜宏科技', 'role': '高多层 AI PCB', 'tag': 'not_analyzed'},
+                    '688183': {'name': '生益电子', 'role': 'AI 服务器 PCB', 'tag': 'not_analyzed'},
+                },
+            },
+            'optical_module': {
+                'name': '光模块卡间互联',
+                'description': 'ASIC 集群 Scale-out 光互连，800G/1.6T 主战场',
+                'companies': {
+                    '300308': {'name': '中际旭创', 'role': '800G/1.6T 光模块（同属 lumentum/nvidia 产业链）'},
+                    '300502': {'name': '新易盛',   'role': '400G/800G 光模块（同属 lumentum 产业链）'},
+                    '300394': {'name': '天孚通信', 'role': '光引擎/连接器（同属 lumentum 产业链）'},
+                    '002281': {'name': '光迅科技', 'role': '光芯片 EML/DFB（同属 lumentum 产业链）'},
+                },
+            },
+            'cooling_power': {
+                'name': '散热与电源',
+                'description': 'AI ASIC 服务器液冷温控与高功率电源',
+                'companies': {
+                    '002837': {'name': '英维克',   'role': '液冷温控龙头', 'tag': 'not_analyzed'},
+                    '300870': {'name': '欧陆通',   'role': 'AI 服务器电源', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'competitors': {
+            'AVGO':   {'name': 'Broadcom 博通', 'market': 'US'},
+            'MRVL':   {'name': 'Marvell',       'market': 'US'},
+            '688256': {'name': '寒武纪',         'market': 'A'},
+            '688041': {'name': '海光信息',       'market': 'A'},
+        },
+        'trends': {
+            'bandwidth': 'Google TPU7 / Meta MTIA3 / AWS Trainium2 → 国产寒武纪思元590 / 海光深算二号',
+            'technologies': ['云厂自研 ASIC 规模化', 'CoWoS 先进封装', 'FCBGA 大尺寸基板',
+                             '800G/1.6T 光互连', 'HBM4 配套', '液冷散热'],
+            'china_role': 'A 股映射：封测（通富/长电）+ FCBGA（深南/兴森）+ PCB（沪电/胜宏）'
+                          '+ 光模块（旭创/新易盛/天孚/光迅）+ 液冷（英维克）+ ODM（工业富联）',
+        },
+    },
 }
 
 
