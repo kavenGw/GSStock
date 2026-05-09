@@ -50,3 +50,30 @@ def test_asic_upstream_key_companies():
     assert '688981' in upstream['foundry']['companies'], '中芯国际应在晶圆代工'
     assert '002371' in upstream['cowos_equipment']['companies'], '北方华创应在 CoWoS 设备'
     assert '688008' in upstream['hbm']['companies'], '澜起科技应在 HBM'
+
+
+def test_asic_midstream_categories():
+    asic = SUPPLY_CHAIN_GRAPHS['asic']
+    midstream = asic['midstream']
+    expected_keys = {'global_design', 'domestic_design', 'packaging', 'fcbga_substrate'}
+    assert set(midstream.keys()) == expected_keys, \
+        f'midstream 应有 {expected_keys}，实际 {set(midstream.keys())}'
+
+
+def test_asic_midstream_key_companies():
+    asic = SUPPLY_CHAIN_GRAPHS['asic']
+    mid = asic['midstream']
+    assert 'AVGO' in mid['global_design']['companies'], 'Broadcom 应在全球设计层'
+    assert 'MRVL' in mid['global_design']['companies'], 'Marvell 应在全球设计层'
+    assert '688256' in mid['domestic_design']['companies'], '寒武纪应在国产设计层'
+    assert '688041' in mid['domestic_design']['companies'], '海光应在国产设计层'
+    assert '002156' in mid['packaging']['companies'], '通富微电应在封测层'
+    assert '002916' in mid['fcbga_substrate']['companies'], '深南电路应在 FCBGA 层'
+
+
+def test_asic_midstream_global_design_us_market():
+    asic = SUPPLY_CHAIN_GRAPHS['asic']
+    avgo = asic['midstream']['global_design']['companies']['AVGO']
+    assert avgo.get('market') == 'US', '全球设计 AVGO 必须标 market=US'
+    mrvl = asic['midstream']['global_design']['companies']['MRVL']
+    assert mrvl.get('market') == 'US'
