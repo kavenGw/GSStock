@@ -77,3 +77,30 @@ def test_asic_midstream_global_design_us_market():
     assert avgo.get('market') == 'US', '全球设计 AVGO 必须标 market=US'
     mrvl = asic['midstream']['global_design']['companies']['MRVL']
     assert mrvl.get('market') == 'US'
+
+
+def test_asic_downstream_categories():
+    asic = SUPPLY_CHAIN_GRAPHS['asic']
+    down = asic['downstream']
+    expected_keys = {'server_odm', 'ai_pcb', 'optical_module', 'cooling_power'}
+    assert set(down.keys()) == expected_keys
+
+
+def test_asic_downstream_key_companies():
+    asic = SUPPLY_CHAIN_GRAPHS['asic']
+    down = asic['downstream']
+    assert '601138' in down['server_odm']['companies'], '富联应在服务器 ODM'
+    assert '000977' in down['server_odm']['companies'], '浪潮信息应在服务器 ODM'
+    assert '603019' in down['server_odm']['companies'], '中科曙光应在服务器 ODM'
+    assert '002463' in down['ai_pcb']['companies'], '沪电应在 AI PCB'
+    assert '300308' in down['optical_module']['companies'], '旭创应在光模块'
+    assert '002837' in down['cooling_power']['companies'], '英维克应在散热'
+
+
+def test_asic_role_text_includes_cross_chain_marks():
+    """跨产业链标的 role 末尾应含「同属 X 产业链」反向引用"""
+    asic = SUPPLY_CHAIN_GRAPHS['asic']
+    fulian = asic['downstream']['server_odm']['companies']['601138']
+    assert '同属' in fulian['role'], '工业富联 role 应含跨链反向引用'
+    huadian = asic['downstream']['ai_pcb']['companies']['002463']
+    assert '同属 nvidia' in huadian['role'], '沪电股份应注明同属 nvidia'
