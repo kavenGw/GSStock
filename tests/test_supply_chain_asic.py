@@ -104,3 +104,38 @@ def test_asic_role_text_includes_cross_chain_marks():
     assert '同属' in fulian['role'], '工业富联 role 应含跨链反向引用'
     huadian = asic['downstream']['ai_pcb']['companies']['002463']
     assert '同属 nvidia' in huadian['role'], '沪电股份应注明同属 nvidia'
+
+
+@pytest.fixture
+def client():
+    """轻量路由测试：跳过 create_app（API 端点不渲染模板）"""
+    from app.routes import supply_chain_bp
+    app = Flask(__name__)
+    app.register_blueprint(supply_chain_bp, url_prefix='/supply-chain')
+    return app.test_client()
+
+
+def test_asic_api_returns_json(client):
+    resp = client.get('/supply-chain/api/asic')
+    assert resp.status_code == 200, f'路由返回 {resp.status_code}'
+    data = resp.get_json()
+    assert data is not None, 'API 未返回 JSON'
+
+
+def test_asic_api_contains_core_node(client):
+    resp = client.get('/supply-chain/api/asic')
+    data = resp.get_json()
+    nodes = data.get('nodes', [])
+    core_nodes = [n for n in nodes if n.get('category') == 'core']
+    assert len(core_nodes) >= 1, 'core 节点必须存在'
+    assert any('AVGO' in n.get('name', '') or 'Broadcom' in n.get('name', '') or '博通' in n.get('name', '')
+               for n in core_nodes), 'core 节点应是 Broadcom AVGO'
+
+
+def test_asic_api_contains_competitors(client):
+    resp = client.get('/supply-chain/api/asic')
+    data = resp.get_json()
+    nodes = data.get('nodes', [])
+    node_names = ' '.join(n.get('name', '') for n in nodes)
+    for keyword in ('寒武纪', '海光', 'Marvell'):
+        assert keyword in node_names, f'competitor {keyword} 未出现在节点中'
