@@ -147,7 +147,7 @@ def fallback_from_filename(md_path, config):
                         'stock_name': kw,
                         'stock_code': resolve_stock_code(kw),
                         'themes': [theme_key],
-                        'conviction_date': extract_date_from_filename(md_path),
+                        'conviction_date': extract_date_from_filename(md_path),  # 从文件名前缀 'YYYY-MM-DD-' 提取日期字符串；无前缀返回 '1970-01-01'
                         'thesis': ''}
     return None
 
@@ -189,9 +189,11 @@ def stock_meta_lookup(code):
 
     if code in _meta_cache:
         e = _meta_cache[code]
+        tk = e['themes'][0]
+        is_real_theme = tk in config['themes']
         return {'stock_name': e['stock_name'],
-                'theme_key': e['themes'][0],
-                'theme_name': config['themes'][e['themes'][0]]['name'],
+                'theme_key': tk if is_real_theme else None,
+                'theme_name': config['themes'][tk]['name'] if is_real_theme else '-',
                 'thesis': e.get('thesis', ''),
                 'doc_path': e['doc_path']}
 
@@ -219,7 +221,7 @@ def stock_meta_lookup(code):
             'thesis': '', 'doc_path': None}
 ```
 
-**所有 §3-§9 渲染表格行的代码必须用 `stock_meta_lookup(code).get('stock_name')`**，不要再走老路径 `stocks_dict.get(code, {}).get('name', code)`。
+**所有 §3-§8 渲染表格行的代码以及 §9 HTML 模板填充必须用 `stock_meta_lookup(code).get('stock_name')`**，不要再走老路径 `stocks_dict.get(code, {}).get('name', code)`。
 
 ### 第 4 步：算 diff
 
