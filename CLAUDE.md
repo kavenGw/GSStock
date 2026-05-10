@@ -34,6 +34,9 @@ PYTHONIOENCODING=utf-8 python -c "..."
 # 只读 DB 巡检不需要 create_app，直接 sqlite3 最快：
 # PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.db').cursor(); c.execute('SELECT ...'); ..."
 
+# 多行 python 嵌套引号 / heredoc 在 Windows bash 易 EOF 失配（unexpected EOF looking for matching `'`）
+# 改 Write → scripts/_xxx.py → `python scripts/_xxx.py` 跑完 rm，比 heredoc 稳
+
 # 运行单测（禁用调度器 + UTF-8 编码）
 PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
 
@@ -160,6 +163,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 - 分钟K线：`http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param=sh600519,m1,,240`
 - 日K线：`http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh600519,day,...`
 - **字段顺序**：`[datetime, open, close, high, low, volume]`（close在第2位，非标准OHLC）
+- **只取实时价的一次性脚本直连 HTTP 优先**：`urllib.request` 拉 `qt.gtimg.cn/q=sh600519,sz000001,...` 比走 `create_app() + UnifiedStockDataService` 快 5x+ 且无副作用（即便 `SCHEDULER_ENABLED=0`，create_app 仍会启 crawl4ai 抓 google 新闻产生数十行噪音日志）；服务化路径仅在需要缓存 / 指数 / OHLC 时才走
 
 ### 策略数据协作
 
@@ -200,6 +204,8 @@ MarketIdentifier.is_index(code)      # 判断是否指数
   "market": "A"
 }
 ```
+
+**实时价格返回字段实际命名**（与上方示例不一致，调用时按实际取）：`current_price`（不是 price）/ `change_percent`（不是 change_pct）/ `name`。Memory cache 可能缓存 `current_price=None` 的失败条目，"全部内存缓存命中" 不代表数据可用，新数据校验场景务必传 `force_refresh=True`。yfinance A 股兜底返回 `name=stock_code`（如 '601138' 而非 '工业富联'），需 fallback 到调用方提供的 stock_name。
 
 **OHLC走势**：
 ```json
@@ -440,6 +446,10 @@ TDSequentialService.calculate()
   - `ak.stock_a_indicator_lg` 已从 akshare 移除，AttributeError
   - `ak.stock_zh_a_spot_em` / `stock_individual_info_em` 频繁被东财限流（RemoteDisconnected）；实时价改用 `UnifiedStockDataService.get_realtime_prices()`
 
+## stock_name 反查 stock_code
+
+`Stock.stock_name` 是完整名（如 "光迅科技"/"舒华体育"），上层数据（supply_chain / docs frontmatter）常用半截关键词（"光迅"/"舒华"）。精确匹配 `WHERE stock_name=?` 经常返回空；推荐二级 fallback：先精确，失败 `WHERE stock_name LIKE ?||'%'`，多于 1 行视为冲突放弃。
+
 ## 研究取数约定
 
 - **新浪 IR 调研 PDF**（`file.finance.sina.com.cn/cn/diaoyan/...`）：WebFetch 返回二进制 blob 无法解析，**不要重试**。Fallback 顺序：① 新浪网页版同内容（`finance.sina.com.cn/stock/...`）② cninfo 直链 PDF（`static.cninfo.com.cn/finalpage/.../*.PDF`，多数可解析）③ 东财财富号 / stcn / 21 经济网摘要稿
@@ -456,6 +466,7 @@ TDSequentialService.calculate()
 - `docs/financial-analysis/<NNqN>/` — 该季度 comps / 横向对比归档，命名同上
 - **跨目录引用惯例**：季报点评 / buffett 分析头部常见 `> 配套 comps：[..](../financial-analysis/...)` 相对链接互引；调整目录结构前先 `Grep "\.\./financial-analysis"` 和 `Grep "\.\./analysis"` 找出所有引用并同步修复，否则静默断链
 - **新建分析前先翻历史档案**：写新 buffett / 季报 / comps 文档前先 `Glob "docs/**/*<股票名>*"` 和 `Glob "docs/**/*<代码>*"`（含 ticker 与中文名两路），把已有专题 / 季报点评 / 联动分析全部纳入正文头部 `>` 反向引用 + §0 执行摘要复用其监控指标，避免重复测算或忽略已兑现/已失效的预设触发条件
+- **`docs/analysis/**/*.md` frontmatter 约定**（portfolio-init/rebalance v2 数据源）：YAML 头必填 `stock_code`（**字符串引号必填**，否则 YAML 解析为 int 丢前导 0：`'000021'` → `21` 全链路失败）/ `stock_name` / `themes`（数组，themes[0] 为计仓主题）/ `rating`（core/config/watch/exclude）/ `conviction_date`（YYYY-MM-DD）/ `thesis`（1-2 句）；rating=watch 加 `watch_reason`，rating=exclude 加 `exclude_reason`。枚举见 `.claude/skills/portfolio-init/config.yaml` 的 `metadata_schema`。同股多 doc 时 skill 按 conviction_date desc 取首条作为权威评级，其余进 `related_docs`
 
 ## 持仓再平衡报告输出
 
@@ -464,6 +475,7 @@ TDSequentialService.calculate()
 - 报告文件名：`{output_dir}/portfolio-init-{YYYY-MM-DD}.html`（按日覆盖）/ `{output_dir}/portfolio-rebalance-{YYYY-MM-DD-HHMM}.html`（按时分留历史）。强烈建议 output_dir 设在 git 工程外
 - 共享 HTML 模板（git 跟踪）：`.claude/skills/portfolio-init/report-template.html`，rebalance skill 复用
 - 写库表：`RebalanceConfig.target_value` / `StockWeight` / `PositionPlan`（PositionPlan 无 unique，写前先 `DELETE FROM position_plans`）
+- `StockWeight.weight` 存原始 float（schema 写 NUMERIC(5,2) 但 SQLite 不强制），不要 `round(_, 4-6)`，否则 `target_mv = TARGET × weight` 经 floor 计算会少买一手。rebalance 的 shares 计算同时加 `floor(diff/price/100 + 1e-6)*100` / `ceil(.../100 - 1e-6)*100` 吸收 FP roundtrip 噪声
 
 ## 盯盘告警推送格式
 
