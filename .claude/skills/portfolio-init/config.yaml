@@ -31,3 +31,55 @@ rules:
   share_unit: 100                          # A 股 100 股一手
   buy_round: floor                         # 买入向下取整（避免超配）
   sell_round: ceil                         # 卖出向上取整（彻底清理超配）
+
+# ===== v2: frontmatter 元数据 schema =====
+# docs/analysis/*.md 顶部 YAML frontmatter 字段约定
+# 字段说明见 docs/superpowers/specs/2026-05-10-portfolio-init-v2-design.md §2
+metadata_schema:
+  rating: [core, config, watch, exclude]
+  watch_reason:
+    valuation_too_high: 估值偏高，等回调
+    await_quarterly: 等季报兑现
+    quality_marginal: 质地一般，主题驱动
+    size_too_large: 单股 100 股已超主题上限
+    thesis_unproven: 投资逻辑待验证
+  exclude_reason:
+    out_of_theme: 主题外
+    quality_concern: 质地差/盈利弱
+    overvalued: 估值已透支
+    cross_market: 跨市场（港股/美股）执行复杂
+    redundant: 主题内已有更优替代
+
+# ===== v2: 兼容期 fallback =====
+# 解析 docs/analysis/*.md 时若无 frontmatter，按文件名关键词匹配下表填默认评级与主题
+# 优先级：先查 migration_exclude，命中即标 exclude；再查 migration_fallback.themes
+# 全部 docs 都补上 frontmatter 后可删除本段
+migration_fallback:
+  ai_compute:
+    keywords: [工业富联, 光迅, 光库, 源杰, 阳光电源]
+    default_rating: config
+  cpu_pcb:
+    keywords: [通富微电, 长电科技, 华天科技, 盛合晶微, 胜宏科技, 沪电股份, 生益科技, 南亚新材, 金安国纪, 宏和科技, 彤程新材]
+    default_rating: config
+  memory:
+    keywords: [北京君正, 江波龙, 兆易创新, 聚辰股份, 普冉股份, 深科技, 太极实业, 雅克科技, 南大光电, 复旦微电, 希荻微, 国芯科技]
+    default_rating: config
+  world_cup:
+    keywords: [舒华, 金陵体育, 中体产业, 粤传媒, 共创草坪, 青岛啤酒, 燕京啤酒, 重庆啤酒, 鸿博股份]
+    default_rating: config
+  gold_defense:
+    keywords: [紫金矿业, 洛阳钼业, 中金黄金]
+    default_rating: config
+
+migration_exclude:
+  - { keyword: 万华化学,  reason: out_of_theme }
+  - { keyword: 巨化股份,  reason: out_of_theme }
+  - { keyword: 昊华化学,  reason: out_of_theme }
+  - { keyword: 药明康德,  reason: out_of_theme }
+  - { keyword: 东吴证券,  reason: out_of_theme }
+  - { keyword: 赛腾股份,  reason: out_of_theme }
+  - { keyword: 西部材料,  reason: out_of_theme }
+  - { keyword: 石英股份,  reason: out_of_theme }
+  - { keyword: 立讯精密,  reason: out_of_theme }
+  - { keyword: 安踏,      reason: cross_market }
+  - { keyword: 甲骨文,    reason: cross_market }
