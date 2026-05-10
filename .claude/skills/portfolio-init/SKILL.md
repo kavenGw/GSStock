@@ -77,7 +77,7 @@ def scan_universe(docs_root, config):
     migration_pending = []
 
     for md in glob('docs/analysis/**/*.md'):
-        fm = parse_frontmatter(md)  # YAML 头解析；失败返回 None
+        fm = parse_frontmatter(md)  # 解析文件开头 --- 之间的 YAML；无 --- 或解析失败返回 None
 
         if fm and 'stock_code' in fm:
             entry = {
@@ -114,9 +114,11 @@ def scan_universe(docs_root, config):
         else:
             by_code[code]['related_docs'].append(entry['doc_path'])
 
-    # 校验 themes[0] 必须在 config.themes 内
+    # 校验 themes[0] 必须在 config.themes 内（exclude 评级跳过：_fallback 是占位）
     valid_themes = set(config['themes'].keys())
     for entry in by_code.values():
+        if entry['rating'] == 'exclude':
+            continue
         if entry['themes'][0] not in valid_themes:
             raise ValueError(f"未知主题 {entry['themes'][0]} in {entry['doc_path']}")
 
@@ -133,7 +135,7 @@ def fallback_from_filename(md_path, config):
                     'stock_name': item['keyword'],
                     'stock_code': resolve_stock_code(item['keyword']),
                     'themes': ['_fallback'],  # 占位，不参与主题分组
-                    'conviction_date': extract_date_from_filename(md_path),
+                    'conviction_date': extract_date_from_filename(md_path),  # 从文件名前缀 'YYYY-MM-DD-' 提取日期字符串；无前缀返回 '1970-01-01'
                     'thesis': ''}
     # 2. 再查 migration_fallback.themes
     for theme_key, theme_cfg in config['migration_fallback'].items():
@@ -143,7 +145,7 @@ def fallback_from_filename(md_path, config):
                         'stock_name': kw,
                         'stock_code': resolve_stock_code(kw),
                         'themes': [theme_key],
-                        'conviction_date': extract_date_from_filename(md_path),
+                        'conviction_date': extract_date_from_filename(md_path),  # 从文件名前缀 'YYYY-MM-DD-' 提取日期字符串；无前缀返回 '1970-01-01'
                         'thesis': ''}
     return None
 ```
@@ -291,6 +293,7 @@ N 个 docs 缺 frontmatter，已用 fallback 填默认值，建议补全：
 
 1. Read 模板 `.claude/skills/portfolio-init/report-template.html`（v2，含 `{NAV}` 占位符）
 2. 渲染主题导航：
+   （按 config['themes'] 字典顺序生成主题 anchor，每个 `<a href="#{theme_key}">{theme.name}</a>`；前后再固定追加 `#overview` 和 `#watch` / `#exclude` / `#migration`。当前 5 主题渲染示例：）
    ```html
    <nav class="theme-anchor">
    <a href="#overview">总览</a>
@@ -309,7 +312,7 @@ N 个 docs 缺 frontmatter，已用 fallback 填默认值，建议补全：
    - 重点池每个 `<h3 id="{theme_key}">` 加锚点
    - 评级列 `<span class="tag tag-core">核心</span>` 等
    - 选股理由列 `<td class="thesis-cell" title="{thesis 全文}">{thesis 截断 80 字}</td>`
-   - 名称列 `<a class="doc-link" href="file:///{绝对路径}/docs/analysis/{conviction_doc}">{stock_name}</a>`
+   - 名称列 `<a class="doc-link" href="file:///{project_root_url}/{entry['doc_path']}">{stock_name}</a>`，其中 `project_root_url` = `Path('.').resolve().as_posix()`（保证 file:// URL 用正斜杠）
    - 观察池 `<h2 id="watch">`，每条加 `<span class="tag-reason">估值偏高</span>` 等中文映射（来自 `metadata_schema.watch_reason[reason]`）
    - 排除池 `<h2 id="exclude">`，按 reason 分组（reason→中文映射来自 `metadata_schema.exclude_reason[reason]`）
    - 迁移待办 `<h2 id="migration">`，每条 `<div class="migration-pending"><code>{path}</code> 建议：rating=…</div>`
