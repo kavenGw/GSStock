@@ -18,7 +18,7 @@ themes:
   world_cup:
     name: 世界杯
     weight: 0.15
-    description: 安踏/舒华/金陵体育/中体产业/粤传媒/共创草坪/青岛啤酒/燕京啤酒/重庆啤酒/鸿博股份
+    description: 舒华/金陵体育/中体产业/粤传媒/共创草坪/青岛啤酒/燕京啤酒/重庆啤酒/鸿博股份（安踏→跨市场排除）
   gold_defense:
     name: 黄金防御
     weight: 0.10
