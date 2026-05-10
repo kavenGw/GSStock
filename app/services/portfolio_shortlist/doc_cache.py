@@ -23,7 +23,7 @@ class DocCache:
         self,
         stock_code: str,
         stock_name: str,
-        doc_paths: list,
+        doc_paths: list[Path],
         extractor: ExtractorFn,
     ) -> dict:
         cache_file = self.cache_dir / f'{stock_code}.json'
