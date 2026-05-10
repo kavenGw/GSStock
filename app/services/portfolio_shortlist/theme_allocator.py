@@ -79,7 +79,7 @@ def _allocate_in_theme(
         })
         allocated_value += actual_value
 
-    cash_buffer = round(theme_budget - allocated_value + overflow, 2)
+    cash_buffer = round(theme_budget - allocated_value, 2)
     return allocations, cash_buffer
 
 

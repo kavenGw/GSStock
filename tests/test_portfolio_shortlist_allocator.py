@@ -45,7 +45,7 @@ def test_single_stock_cap_50pct():
     assert by['A']['target_value'] <= 15000 + 1
     assert by['A']['capped'] is True
     summary = {s['theme']: s for s in out['theme_summary']}
-    assert summary['ai']['cash_buffer'] >= 14000
+    assert summary['ai']['cash_buffer'] == pytest.approx(15000, abs=1)
 
 
 def test_theme_with_zero_selected_emits_warning():
