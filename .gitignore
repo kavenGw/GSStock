@@ -27,3 +27,6 @@ data
 .claude/skills/portfolio-init/local-config.yaml
 scripts/_*.txt
 .graphify_incremental.json
+
+# portfolio-shortlist 缓存（按股票 md5 命中跳过 docs 重读）
+.claude/skills/portfolio-init/.cache/
