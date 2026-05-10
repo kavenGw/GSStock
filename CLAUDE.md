@@ -426,7 +426,8 @@ TDSequentialService.calculate()
 
 ## 数据存储
 
-- 数据库：`data/stock.db`
+- 数据库：`data/stock.db`（公共：股票池 / 新闻 / 缓存）
+- 私密数据库：`data/private.db`（带 `__bind_key__ = 'private'` 的模型 → Position / RebalanceConfig / StockWeight / PositionPlan / DailySnapshot / Trade / Settlement / BankTransfer）。直连查询用 `sqlite3.connect('data/private.db')`，不要连 `stock.db`
 - 内存缓存持久化：`data/memory_cache/{stock_code}/{cache_type}.pkl`
 - 上传图片：`uploads/`
 
@@ -450,10 +451,19 @@ TDSequentialService.calculate()
 - `docs/analysis/` — 个股 buffett 风格深度分析，格式 `YYYY-MM-DD-<股票名>-buffett分析.md`
 - `docs/analysis/<NNqN>/` — 季报点评归档，格式 `YYYY-MM-DD-<股票名>-NNQN季报点评.md`（如 `docs/analysis/26q1/`）
 - `docs/analysis/<NNqN>/` 同时收纳同期专题分析（产能/事件驱动/技术路线深度），命名 `YYYY-MM-DD-<股票名>-<主题>专题.md`，与季报点评互加 `> 配套专题` / `> 关联文档` 反向链接
+- **`docs/analysis/` 同时是 portfolio skill 的隐式选股池索引** — 用 Glob `docs/analysis/**/*.md` + 解析 `YYYY-MM-DD-<股票名>-<类型>.md` 文件名提取候选标的，无需独立索引表
 - `docs/financial-analysis/` — 多股横向对比 / comps / 估值，格式 `YYYY-MM-DD-<主题>-<细分>.md`
 - `docs/financial-analysis/<NNqN>/` — 该季度 comps / 横向对比归档，命名同上
 - **跨目录引用惯例**：季报点评 / buffett 分析头部常见 `> 配套 comps：[..](../financial-analysis/...)` 相对链接互引；调整目录结构前先 `Grep "\.\./financial-analysis"` 和 `Grep "\.\./analysis"` 找出所有引用并同步修复，否则静默断链
 - **新建分析前先翻历史档案**：写新 buffett / 季报 / comps 文档前先 `Glob "docs/**/*<股票名>*"` 和 `Glob "docs/**/*<代码>*"`（含 ticker 与中文名两路），把已有专题 / 季报点评 / 联动分析全部纳入正文头部 `>` 反向引用 + §0 执行摘要复用其监控指标，避免重复测算或忽略已兑现/已失效的预设触发条件
+
+## 持仓再平衡报告输出
+
+- 入口：`/portfolio-init`（首次配置 / 主题大调）+ `/portfolio-rebalance`（日常算 diff，支持 `--dry-run`）
+- HTML 报告输出目录走本地配置 `.claude/skills/portfolio-init/local-config.yaml` 的 `portfolio.output_dir`（**已 gitignore**；模板：同目录 `local-config.yaml.example`）。skill 启动时缺该文件会立即报错并打印创建步骤
+- 报告文件名：`{output_dir}/portfolio-init-{YYYY-MM-DD}.html`（按日覆盖）/ `{output_dir}/portfolio-rebalance-{YYYY-MM-DD-HHMM}.html`（按时分留历史）。强烈建议 output_dir 设在 git 工程外
+- 共享 HTML 模板（git 跟踪）：`.claude/skills/portfolio-init/report-template.html`，rebalance skill 复用
+- 写库表：`RebalanceConfig.target_value` / `StockWeight` / `PositionPlan`（PositionPlan 无 unique，写前先 `DELETE FROM position_plans`）
 
 ## 盯盘告警推送格式
 

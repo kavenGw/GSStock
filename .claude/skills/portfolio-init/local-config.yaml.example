@@ -1,0 +1,15 @@
+# 私密本地配置 —— 复制本文件为 local-config.yaml 后填入实际路径
+# 本文件 (.example) 入 git 作为模板；local-config.yaml 在项目根 .gitignore 已排除
+#
+# 用法：
+#   cp .claude/skills/portfolio-init/local-config.yaml.example .claude/skills/portfolio-init/local-config.yaml
+#   # 编辑 local-config.yaml 填入实际路径
+#
+# 路径写法：
+#   - Windows 推荐用单引号 + 反斜杠：'D:\Git\GSStockHold'
+#   - 或双引号 + 双反斜杠：    "D:\\Git\\GSStockHold"
+#   - macOS/Linux：           '/Users/you/portfolio'
+
+portfolio:
+  # HTML 报告输出目录（必须是绝对路径，强烈建议在 git 工程外，避免私密数据误入版本控制）
+  output_dir: ''

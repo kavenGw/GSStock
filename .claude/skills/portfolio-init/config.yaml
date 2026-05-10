@@ -1,0 +1,33 @@
+# 主题权重 + 单股上限规则 + 再平衡阈值
+# 由 portfolio-init / portfolio-rebalance 两个 skill 共享读取
+# 调参留痕走 git commit
+
+themes:
+  ai_compute:
+    name: AI算力
+    weight: 0.30
+    description: 工业富联/光迅科技/光库科技/源杰科技/阳光电源 等 AI 算力 + 光模块 + 数据中心电源
+  cpu_pcb:
+    name: CPU+封测+PCB
+    weight: 0.30
+    description: 通富微电/长电科技/华天科技/盛合晶微/胜宏科技/沪电股份/生益科技/南亚新材/金安国纪/宏和科技/彤程新材
+  memory:
+    name: 存储涨价
+    weight: 0.15
+    description: 北京君正/江波龙/兆易创新/聚辰股份/普冉股份/深科技/太极实业/雅克科技/南大光电/复旦微电/希荻微/国芯科技
+  world_cup:
+    name: 世界杯
+    weight: 0.15
+    description: 安踏/舒华/金陵体育/中体产业/粤传媒/共创草坪/青岛啤酒/燕京啤酒/重庆啤酒/鸿博股份
+  gold_defense:
+    name: 黄金防御
+    weight: 0.10
+    description: 紫金矿业/洛阳钼业/中金黄金
+
+rules:
+  single_stock_max_pct_of_theme: 0.50    # 单股上限 = 该主题权重的 50%
+  rebalance_threshold_value: 2000         # 个股差额超 ¥2k 才提示调仓
+  theme_drift_threshold: 0.05             # 主题偏离 ±5% 标红
+  share_unit: 100                          # A 股 100 股一手
+  buy_round: floor                         # 买入向下取整（避免超配）
+  sell_round: ceil                         # 卖出向上取整（彻底清理超配）

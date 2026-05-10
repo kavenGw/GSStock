@@ -24,5 +24,6 @@ data
 .omc
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+.claude/skills/portfolio-init/local-config.yaml
 scripts/_*.txt
 .graphify_incremental.json
