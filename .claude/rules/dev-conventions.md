@@ -76,6 +76,8 @@ PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
 
 **一次性脚本不入库**：仅用于本次任务数据采集 / 验证、不会复用的脚本（如 `scripts/verify_*_quotes.py`），任务结束后必须 `rm`，不进 git。逻辑通过 `.omc/plans/` 计划文件 + commit message 留痕；产物 JSON 可保留在 `.omc/artifacts/`（已 gitignore）。
 
+**`scripts/_xxx.py` 内 import `app` 必加 sys.path**：`python scripts/_xxx.py` 默认只把 `scripts/` 加入 `sys.path`，repo root 不在其中，`from app import create_app` 会 `ModuleNotFoundError: No module named 'app'`。脚本顶部加 `sys.path.insert(0, str(Path(__file__).resolve().parent.parent))`。`run.py` 在 root 不受影响。
+
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
 
 **安装第三方仓库时**：无论是 Claude Code skill/plugin 还是其他工具仓库，完成安装后需同步添加到 `app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`，以便监控新版本

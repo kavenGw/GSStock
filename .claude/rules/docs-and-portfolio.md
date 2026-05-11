@@ -15,6 +15,8 @@
 - **跨目录引用惯例**：季报点评 / buffett 分析头部常见 `> 配套 comps：[..](../financial-analysis/...)` 相对链接互引；调整目录结构前先 `Grep "\.\./financial-analysis"` 和 `Grep "\.\./analysis"` 找出所有引用并同步修复，否则静默断链
 - **新建分析前先翻历史档案**：写新 buffett / 季报 / comps 文档前先 `Glob "docs/**/*<股票名>*"` 和 `Glob "docs/**/*<代码>*"`（含 ticker 与中文名两路），把已有专题 / 季报点评 / 联动分析全部纳入正文头部 `>` 反向引用 + §0 执行摘要复用其监控指标，避免重复测算或忽略已兑现/已失效的预设触发条件
 - **`docs/analysis/**/*.md` frontmatter 约定**（portfolio-init/rebalance v2 数据源）：YAML 头必填 `stock_code`（**字符串引号必填**，否则 YAML 解析为 int 丢前导 0：`'000021'` → `21` 全链路失败）/ `stock_name` / `themes`（数组，themes[0] 为计仓主题）/ `rating`（core/config/watch/exclude）/ `conviction_date`（YYYY-MM-DD）/ `thesis`（1-2 句）；rating=watch 加 `watch_reason`，rating=exclude 加 `exclude_reason`。枚举见 `.claude/skills/portfolio-init/config.yaml` 的 `metadata_schema`。同股多 doc 时 skill 按 conviction_date desc 取首条作为权威评级，其余进 `related_docs`
+- **`conviction_date` YAML 解析为 `datetime.date` 不是 str** — `yaml.safe_load` 把 `conviction_date: 2026-05-09` 转 `datetime.date` 对象。与字符串（如 placeholder `''`）做 `>` 比较会抛 `TypeError: '<' not supported between instances of 'datetime.date' and 'str'`。聚合多 doc 取最新时必须 `str(fm.get('conviction_date') or '')` 先转字符串
+- **持仓精选模块** `app/services/portfolio_shortlist/`：5 文件拆分（doc_cache + scoring + technical + theme_allocator + report_renderer），按"评级 + docs 证据 + 技术形态"全局打分取 Top N（不按主题分配名额）；与 portfolio-init/rebalance skill 互补；详见 spec `docs/superpowers/specs/2026-05-10-portfolio-shortlist-design.md`。一次性入口脚本驱动（跑完删），模块代码留库可复用
 
 ## 持仓再平衡报告输出
 

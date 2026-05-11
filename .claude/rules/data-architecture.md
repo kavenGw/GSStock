@@ -121,7 +121,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 - **UnifiedStockCache** - 数据库缓存模型
   - 唯一约束：`(stock_code, cache_type, cache_date)`
-  - JSON存储缓存数据
+  - JSON 存储缓存数据；列名 **`data_json`**（不是 `cache_data` / `cache_value`），直连 sqlite3 查缓存写 `SELECT data_json FROM unified_stock_cache WHERE stock_code=? AND cache_type='price' ORDER BY cache_date DESC LIMIT 1`
 
 ### 统一数据格式
 

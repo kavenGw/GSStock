@@ -12,6 +12,10 @@
   - `ak.stock_a_indicator_lg` 已从 akshare 移除，AttributeError
   - `ak.stock_zh_a_spot_em` / `stock_individual_info_em` 频繁被东财限流（RemoteDisconnected）；实时价改用 `UnifiedStockDataService.get_realtime_prices()`
 
+## get_realtime_prices 批量优先
+
+一次性脚本 / 批处理逻辑里**先用 `get_realtime_prices(all_codes)` 一次取所有，再字典查表**，不要在循环里逐 code 调。逐 code 调用偶发返回 `current_price=0` 或 `None`（疑似内存缓存层与并行 `force_refresh` 调度互动产生过期条目），批量调用稳定。下游计算（如 `target_shares = floor(target_value / price / 100) × 100`）只要 price=0 就静默给出 0 股，掩盖数据问题。
+
 ## stock_name 反查 stock_code
 
 `Stock.stock_name` 是完整名（如 "光迅科技"/"舒华体育"），上层数据（supply_chain / docs frontmatter）常用半截关键词（"光迅"/"舒华"）。精确匹配 `WHERE stock_name=?` 经常返回空；推荐二级 fallback：先精确，失败 `WHERE stock_name LIKE ?||'%'`，多于 1 行视为冲突放弃。

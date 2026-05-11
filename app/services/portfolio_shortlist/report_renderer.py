@@ -55,9 +55,9 @@ def _shortlist_rows(items):
     return '\n'.join(rows)
 
 
-def _allocations_rows(allocs):
+def _allocations_rows(allocs, name_by_code):
     return '\n'.join(
-        f'<tr><td>{_e(a["stock_code"])}</td>'
+        f'<tr><td>{_e(name_by_code.get(a["stock_code"], a["stock_code"]))}</td>'
         f'<td>{a["weight"]:.1%}</td>'
         f'<td>&#165;{a["target_value"]:,.0f}</td>'
         f'<td>{a["target_shares"]:,}</td>'
@@ -118,9 +118,9 @@ def render_html(payload: dict) -> str:
 <tbody>{_theme_rows(payload['theme_summary'])}</tbody></table>
 
 <h2>个股分配</h2>
-<table><thead><tr><th>代码</th><th>权重</th><th>目标市值</th><th>目标股数</th>
+<table><thead><tr><th>名称</th><th>权重</th><th>目标市值</th><th>目标股数</th>
 <th>现价</th><th>实际市值</th><th>触顶</th></tr></thead>
-<tbody>{_allocations_rows(payload['allocations'])}</tbody></table>
+<tbody>{_allocations_rows(payload['allocations'], {s['stock_code']: s['stock_name'] for s in payload['shortlist']})}</tbody></table>
 
 <h2>降级观察池（未入 Top）</h2>
 <table><thead><tr><th>代码</th><th>名称</th><th>得分</th><th>原因</th></tr></thead>

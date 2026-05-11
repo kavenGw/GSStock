@@ -63,3 +63,23 @@ def test_render_markdown_has_tables():
 def test_warning_block_visible():
     html = render_html(SAMPLE)
     assert re.search(r'class="[^"]*warn', html)
+
+
+def test_allocations_table_shows_stock_name():
+    html = render_html(SAMPLE)
+    m = re.search(r'<h2>个股分配</h2>(.*?)<h2>', html, re.DOTALL)
+    assert m, '个股分配 section not found'
+    section = m.group(1)
+    assert '工业富联' in section, 'stock name missing in allocations table'
+    assert '601138' not in section, 'stock code should not appear in allocations row'
+
+
+def test_allocations_table_fallbacks_to_code_when_name_missing():
+    payload = {**SAMPLE, 'allocations': [
+        {'stock_code': '999999', 'theme': 'x', 'weight': 0.1,
+         'target_value': 1000, 'target_shares': 100, 'actual_value': 1000,
+         'current_price': 10.0, 'score': 1, 'capped': False},
+    ]}
+    html = render_html(payload)
+    m = re.search(r'<h2>个股分配</h2>(.*?)<h2>', html, re.DOTALL)
+    assert '999999' in m.group(1)
