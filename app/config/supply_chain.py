@@ -1755,6 +1755,69 @@ SUPPLY_CHAIN_GRAPHS = {
                           '+ 光模块（旭创/新易盛/天孚/光迅）+ 液冷（英维克）+ ODM（工业富联）',
         },
     },
+    'inp': {
+        'name': '磷化铟产业链',
+        'code': 'INP',
+        'description': 'AI 光互联高速光模块核心化合物半导体上游材料（衬底/外延/芯片/模块）',
+        'core': {
+            'technologies': ['InP 衬底', 'DFB/EML 激光器芯片', 'VCSEL', 'CPO 共封装光学', '硅光集成'],
+            'products': ['800G/1.6T 光模块芯片', 'InP 衬底/外延片', '高速调制器'],
+            'customers': ['NVIDIA', 'Microsoft', 'Meta', 'AWS', 'Google', '思科'],
+        },
+        'upstream': {
+            '金属铟（大宗商品）': {
+                'description': '铟金属冶炼（铅锌锡副产，大宗商品定价）',
+                'companies': {
+                    '000960': {'name': '锡业股份', 'role': '全球最大铟副产商之一', 'tag': 'not_analyzed'},
+                    '002428': {'name': '云南锗业', 'role': '锗为主，InP 衬底研发布局', 'tag': 'not_analyzed'},
+                    '600497': {'name': '驰宏锌锗', 'role': '铅锌副产铟', 'tag': 'not_analyzed'},
+                    '600961': {'name': '株冶集团', 'role': '副产铟', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            'InP 衬底/外延': {
+                'description': '6 吋 InP 衬底与外延平台（国产替代关键环节）',
+                'companies': {
+                    '600703': {'name': '三安光电', 'role': '化合物半导体大平台 SiC+GaAs+InP，鄂州 InP 衬底产能', 'tag': 'frontEC'},
+                    '002023': {'name': '海特高新', 'role': '子公司海威华芯做 InP/GaAs 外延平台', 'tag': 'not_analyzed'},
+                },
+            },
+            'InP 激光器芯片': {
+                'description': 'DFB/EML 激光器芯片（高速光模块核心器件）',
+                'companies': {
+                    '688498': {'name': '源杰科技', 'role': '国内 25G/50G DFB 龙头，突破 EML', 'tag': 'keep_watching'},
+                    '002281': {'name': '光迅科技', 'role': '光器件 + 部分 InP 芯片自研', 'tag': 'frontEC'},
+                    '300620': {'name': '光库科技', 'role': '高速调制器（铌酸锂为主，部分 InP 集成）', 'tag': 'keep_watching'},
+                },
+            },
+        },
+        'downstream': {
+            '高速光模块': {
+                'description': '800G/1.6T 光模块组装（采购 InP 激光器芯片，周期高景气）',
+                'companies': {
+                    '300308': {'name': '中际旭创', 'role': '800G 出货龙头', 'tag': 'frontEC'},
+                    '300502': {'name': '新易盛', 'role': '400G/800G 光模块', 'tag': 'frontEC'},
+                    '300394': {'name': '天孚通信', 'role': 'CPO 光引擎、连接器', 'tag': 'frontEC'},
+                    '000988': {'name': '华工科技', 'role': '光模块业务', 'tag': 'not_analyzed'},
+                },
+            },
+            'AI 数据中心': {'description': '北美 hyperscale capex 驱动 800G→1.6T→3.2T 升级'},
+            'CPO 共封装光学': {'description': '2026-2028 量产爬坡，对 InP 芯片数量需求结构性提升'},
+        },
+        'competitors': {
+            'LITE': {'name': 'Lumentum',         'market': 'US'},
+            'COHR': {'name': 'Coherent (II-VI)', 'market': 'US'},
+            'AVGO': {'name': 'Broadcom 博通',     'market': 'US'},
+        },
+        'trends': {
+            'bandwidth': '800G → 1.6T → 3.2T，CPO 2026-2028 量产爬坡',
+            'technologies': ['6 吋 InP 衬底国产化', 'EML 激光器突破', 'CPO 共封装光学',
+                             '硅光 + InP 异质集成'],
+            'china_role': '上游铟金属（commodity）+ 中游衬底/外延（国产替代中）'
+                          '+ InP 芯片（源杰国内龙头）+ 下游光模块（旭创/新易盛景气周期）',
+        },
+    },
 }
 
 
