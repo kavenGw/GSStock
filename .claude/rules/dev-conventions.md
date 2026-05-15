@@ -52,6 +52,10 @@ PYTHONIOENCODING=utf-8 python -c "..."
 PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.db').cursor(); c.execute('SELECT ...'); ..."
 ```
 
+**不确定表名先查 sqlite_master**：表名不一定能从 SQLAlchemy model 名推（`Stock` 类 → 表 `stock` 单数；`StockCategory` 类 → 表 `stock_categories` 复数）。一句话列全表：`c.execute("SELECT name FROM sqlite_master WHERE type='table'"); [print(r[0]) for r in c.fetchall()]`。
+
+**Windows `wc -l` 不可靠**：Git Bash 的 `wc -l` 对 UTF-8 含中文的 markdown 文件偶发误报（实测 156 行报 91）。脚本里算行数用 `python -c "print(sum(1 for _ in open(path, encoding='utf-8')))"`。
+
 **多行 python 嵌套引号 / heredoc 在 Windows bash 易失配**：多行 python 嵌套引号 / heredoc 在 Windows bash 易 `EOF` 失配（`unexpected EOF looking for matching '`）。改用 `Write → scripts/_xxx.py → python scripts/_xxx.py` 跑完 `rm`，比 heredoc 稳。
 
 ## 开发规范
