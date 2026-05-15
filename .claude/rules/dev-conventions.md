@@ -5,23 +5,13 @@
 
 ## 技术栈
 
-- Flask + SQLAlchemy + SQLite
-- RapidOCR (ONNX Runtime)
-- Bootstrap 5 + 原生 JavaScript
-- akshare（A股数据）+ yfinance（美股/港股/期货数据）+ Twelve Data + Polygon
-- 智谱 GLM（LITE 层免费 glm-4-flash）+ Google Gemini（FLASH/PREMIUM 层主力）
-- APScheduler（策略调度）
-- PyTorch（AI走势预测，可选）— `app/ml/` 模块，未安装 torch 时自动跳过
+Flask + SQLAlchemy + SQLite + RapidOCR(ONNX) + Bootstrap5 + 原生 JS。数据：akshare（A股）+ yfinance（美股/港股/期货）+ Twelve Data + Polygon。LLM：智谱 GLM（LITE 免费 glm-4-flash）+ Google Gemini（FLASH/PREMIUM 主力）。调度：APScheduler。可选 PyTorch（`app/ml/` AI 走势预测，未安装自动跳过）。
 
 ## 股票代码配置
 
 期货、指数代码配置在 `app/config/stock_codes.py`，股票代码从数据库 `Stock` 和 `StockCategory` 表获取。
 
-**配置项**：
-- `FUTURES_CODES` - 期货代码映射（yfinance格式）
-- `INDEX_CODES` - 指数代码映射
-- `CATEGORY_CODES` - 分类代码列表
-- `CATEGORY_NAMES` - 分类显示名称
+**配置项**：期货 / 指数 / 分类代码常量见 `app/config/stock_codes.py`（`FUTURES_CODES` / `INDEX_CODES` / `CATEGORY_CODES` / `CATEGORY_NAMES`）。
 
 **股票代码管理**：
 - 股票代码存储在 `Stock` 表，可通过界面编辑
@@ -63,12 +53,6 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 ```
 
 **多行 python 嵌套引号 / heredoc 在 Windows bash 易失配**：多行 python 嵌套引号 / heredoc 在 Windows bash 易 `EOF` 失配（`unexpected EOF looking for matching '`）。改用 `Write → scripts/_xxx.py → python scripts/_xxx.py` 跑完 `rm`，比 heredoc 稳。
-
-**运行单测**（禁用调度器 + UTF-8 编码）：
-
-```bash
-PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
-```
 
 ## 开发规范
 
