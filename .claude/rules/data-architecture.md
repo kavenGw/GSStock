@@ -9,13 +9,11 @@
 
 **数据模型**：按日期保存持仓快照，`(date, stock_code)` 为唯一约束
 
-**Stock 表约定**：PK 是 `stock_code` 字符串（非自增 id），列 `(stock_code, stock_name, investment_advice, created_at, updated_at, tags)`；库只存用户关注池（~50 条），不是全 A 股。新标的通过 `app/seeds/` 幂等注入。
+**Stock 表约定**：PK 是 `stock_code` 字符串（非自增 id），列 `(stock_code, stock_name, investment_advice, created_at, updated_at, tags)`；库只存用户关注池（远小于全 A 股），不是全市场快照。新标的通过 `app/seeds/` 幂等注入。
 
 **多账户合并**：同一股票多次出现时，数量相加，成本按加权平均计算
 
 **OCR 流程**：图片上传 → Pillow 预处理 → Tesseract 识别 → 正则解析提取股票代码/名称/数量/价格
-
-**服务层模式**：业务逻辑放在 `services/`，路由保持简洁
 
 **模块级单例的 Flask context 陷阱**：`app/services/__init__.py` 的 `unified_stock_data_service = UnifiedStockDataService()` 在 import 期就会触发 `__init__`，此时无 Flask app context；任何访问 `db.session` 或 `<Model>.query` 的 init 期代码必须用 `has_app_context()` 守卫
 
@@ -72,6 +70,8 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 | OHLC走势 | `ohlc_{days}` | 交易时段30分钟 / 收盘后8小时 |
 | 指数数据 | `index` | 交易时段30分钟 / 收盘后8小时 |
 | 季度财报 | `quarterly_earnings` | 7天 |
+
+**缓存日期统一走 SmartCacheStrategy**：所有缓存 lookup/save 用 `SmartCacheStrategy.get_effective_cache_date(code)` 替代 `date.today()`；批量场景用 `_get_effective_cache_dates(codes)` 按市场分组。理由：处理跨市场时区错位（A 股 vs 美股），让缓存"今日"语义跟随该股票所属市场的有效交易日。API 查询日期范围（start_date/end_date）仍用 `date.today()`，API 自动截断。
 
 ### Volume 单位契约
 
@@ -153,46 +153,4 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 ### 调用链路
 
-所有服务统一通过 UnifiedStockDataService 获取数据：
-
-```
-PositionService.get_stock_history()
-    └── UnifiedStockDataService.get_trend_data()
-
-PositionService.get_trend_data()
-    └── UnifiedStockDataService.get_trend_data()
-
-WyckoffAutoService._fetch_ohlcv()
-    └── UnifiedStockDataService.get_trend_data()
-
-FuturesService._fetch_from_api()
-    └── UnifiedStockDataService.get_trend_data()
-
-FuturesService.get_custom_trend_data()
-    └── UnifiedStockDataService.get_trend_data()
-
-PreloadService.preload_indices()
-    └── UnifiedStockDataService.get_indices_data()
-
-PreloadService.preload_metals()
-    └── UnifiedStockDataService.get_trend_data()
-
-PreloadService.get_indices_data()
-    └── UnifiedStockDataService.get_indices_data()
-
-WatchAnalysisService.analyze_stocks()
-    └── UnifiedStockDataService.get_trend_data() / get_intraday_data() / get_realtime_prices()
-
-DailyBriefingStrategy.scan()
-    └── NotificationService.push_daily_report()
-        └── WatchAnalysisService.analyze_stocks('7d' / '30d')
-
-WatchRealtimeStrategy.scan()
-    └── WatchAnalysisService.analyze_stocks('realtime')
-
-QuarterlyEarningsService.get_earnings()
-    └── UnifiedStockDataService.get_trend_data() (季末股价)
-
-TDSequentialService.calculate()
-    ← watch.py chart-data 接口调用（复用60日趋势数据）
-```
+所有持仓 / 期货 / 盯盘 / 预加载 / 季报 / TD九转服务统一走 `UnifiedStockDataService` 的 `get_trend_data` / `get_realtime_prices` / `get_indices_data` / `get_intraday_data` 入口，缓存命中率与 force_refresh 语义由该服务统一裁决。`WatchAnalysisService` 是聚合层（不直连数据源），其余服务均直接消费 unified 入口。
