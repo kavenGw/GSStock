@@ -70,3 +70,16 @@ def test_get_html_returns_none_when_missing(analysis_dir):
 
 def test_build_index_returns_empty_for_missing_dir(tmp_path):
     assert BuffettAnalysisService.build_index(tmp_path / 'nope') == {}
+
+
+def test_build_index_recurses_nested_sector_subdirs(analysis_dir):
+    """生产目录布局 sectors/<sector>/<subsector>/*.md：build_index 必须递归。"""
+    nested = analysis_dir / 'semiconductor' / 'storage'
+    nested.mkdir(parents=True)
+    _write(nested, '2026-04-21-兆易创新-buffett分析.md')
+    (analysis_dir / 'consumer' / 'beer').mkdir(parents=True)
+    _write(analysis_dir / 'consumer' / 'beer', '2026-04-22-青岛啤酒-buffett分析.md')
+
+    index = BuffettAnalysisService.build_index(analysis_dir)
+
+    assert set(index.keys()) == {'兆易创新', '青岛啤酒'}

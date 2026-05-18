@@ -82,6 +82,17 @@ def test_validate_stock_codes_not_list():
     violations = validate_frontmatter(fm, Path('/dummy.md'))
     assert any('stock_codes must be a list' in v for v in violations)
 
+
+def test_validate_themes_not_list():
+    fm = {
+        'doc_type': 'buffett', 'stock_code': '600000', 'stock_name': 'X',
+        'sector': 'financial', 'subsector': 'bank', 'themes': 'NOR Flash',
+        'rating': 'core', 'conviction_date': '2026-01-01', 'thesis': 't',
+    }
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert any('themes must be a list' in v for v in violations)
+
+
 def test_validate_quarterly_period_matches_dir():
     fm = {
         'doc_type': 'quarterly', 'stock_code': '600000', 'stock_name': 'X',

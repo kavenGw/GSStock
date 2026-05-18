@@ -78,7 +78,7 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
     if 'stock_code' in fm and not isinstance(fm['stock_code'], str):
         violations.append(f"{p}: stock_code must be str (got {type(fm['stock_code']).__name__})")
 
-    for field in ('stock_codes', 'stock_names'):
+    for field in ('stock_codes', 'stock_names', 'themes', 'related_codes'):
         if field in fm:
             v = fm[field]
             if not isinstance(v, list):
