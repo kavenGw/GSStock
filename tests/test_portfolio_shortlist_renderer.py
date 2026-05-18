@@ -14,7 +14,7 @@ SAMPLE = {
                           'catalyst': 9, 'theme_fit': 5, 'realized': 2.5, 'technical': 5},
             'decision': 'keep',
             'evidence': '工业富联 × ORCL 走势相关性 465 配对交易日',
-            'doc_paths': ['docs/analysis/2026-05-09-工业富联-甲骨文-走势相关性专题.md'],
+            'doc_paths': ['docs/stock-analytics/cross-sector/2026-05-09-工业富联-甲骨文-走势相关性专题.md'],
         },
     ],
     'demoted': [
@@ -44,7 +44,7 @@ def test_render_html_returns_valid_doc():
     assert '工业富联' in html
     assert '92.5' in html
     assert '主题 gold_defense' in html
-    assert 'docs/analysis/2026-05-09-工业富联' in html
+    assert 'docs/stock-analytics/cross-sector/2026-05-09-工业富联' in html
 
 
 def test_render_html_demoted_section():
