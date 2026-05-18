@@ -1,3 +1,11 @@
+---
+doc_type: cross-sector
+stock_codes: ['AMD', 'INTC']
+stock_names: [AMD, Intel]
+themes: [CPU竞争, x86服务器, buffett对比]
+date: 2026-05-08
+related_docs: []
+---
 # AMD vs Intel — Buffett 框架对比分析
 
 > 撰写日期：2026-05-08（AMD 26Q1 财报后第 3 个交易日）

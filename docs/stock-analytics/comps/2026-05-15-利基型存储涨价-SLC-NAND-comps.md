@@ -1,3 +1,12 @@
+---
+doc_type: comps
+stock_codes: ['603986', '300223', '688766']
+stock_names: [兆易创新, 北京君正, 普冉股份]
+themes: [SLC NAND, 利基存储, 涨价周期]
+period: '2026-05'
+date: 2026-05-15
+related_docs: []
+---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
 
 > 分析日期：2026-05-15
