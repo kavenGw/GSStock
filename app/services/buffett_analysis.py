@@ -1,6 +1,6 @@
 """巴菲特分析文件索引与渲染
 
-扫描 docs/analysis/ 下的 `YYYY-MM-DD-{股票名称}-buffett分析.md` 文件，
+递归扫描 docs/stock-analytics/sectors/ 下的 `YYYY-MM-DD-{股票名称}-buffett分析.md` 文件，
 按股票名称索引；同名多份取日期最新。仅提供只读读取与 markdown 渲染。
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ from pathlib import Path
 
 import markdown
 
-ANALYSIS_DIR = Path('docs/analysis')
+ANALYSIS_DIR = Path('docs/stock-analytics/sectors')
 FILENAME_RE = re.compile(r'^(\d{4}-\d{2}-\d{2})-(.+?)-buffett分析\.md$')
 
 
@@ -23,7 +23,7 @@ class BuffettAnalysisService:
             return {}
 
         latest: dict[str, tuple[str, Path]] = {}
-        for path in directory.iterdir():
+        for path in directory.rglob('*.md'):
             if not path.is_file():
                 continue
             m = FILENAME_RE.match(path.name)
