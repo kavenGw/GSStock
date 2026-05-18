@@ -1,6 +1,6 @@
 ---
 name: portfolio-init
-description: 首次配置或主题权重大调时调用。从 docs/analysis/ 已分析的股票池中筛选 15-25 只重点池，按主题权重分配目标仓位（100 股倍数），写入 RebalanceConfig 和 StockWeight 表。v2: 评级与主题归属从 docs frontmatter 读取，HTML 报告含锚点导航 + 持仓盈亏 + 内联理由 + 文档链接。
+description: 首次配置或主题权重大调时调用。从 docs/stock-analytics/sectors/ + cross-sector/ 已分析的股票池中筛选 15-25 只重点池，按主题权重分配目标仓位（100 股倍数），写入 RebalanceConfig 和 StockWeight 表。v2: 评级与主题归属从 docs frontmatter 读取，HTML 报告含锚点导航 + 持仓盈亏 + 内联理由 + 文档链接。
 ---
 
 # Portfolio Init — 首次持仓配置（v2）
@@ -15,7 +15,7 @@ description: 首次配置或主题权重大调时调用。从 docs/analysis/ 已
 
 ## v2 关键变化
 
-- 评级（core/config/watch/exclude）+ 主题归属（themes[0]）+ 选股理由（thesis）从 `docs/analysis/*.md` 顶部 YAML frontmatter 读取
+- 评级（core/config/watch/exclude）+ 主题归属（themes[0]）+ 选股理由（thesis）从 `docs/stock-analytics/sectors/*.md` 顶部 YAML frontmatter 读取
 - SKILL.md 不再硬编码「主题 → 股票」对照表
 - stock_code 反查统一为单个函数：frontmatter > stock 表 > supply_chain.py
 - HTML 模板升级 v2：sticky 主题导航 + 持仓盈亏 + 内联理由 + 文档链接 + 迁移待办段
@@ -72,11 +72,12 @@ ORDER BY total_amount DESC;
 
 ```python
 def scan_universe(docs_root, config):
-    """扫 docs/analysis/**/*.md，返回 universe 列表 + 待迁移清单。"""
+    """扫 docs/stock-analytics/{sectors,cross-sector}/**/*.md，返回 universe 列表 + 待迁移清单。"""
     raw_entries = []
     migration_pending = []
 
-    for md in glob('docs/analysis/**/*.md'):
+    from itertools import chain
+    for md in chain(glob('docs/stock-analytics/sectors/**/*.md'), glob('docs/stock-analytics/cross-sector/**/*.md')):
         fm = parse_frontmatter(md)  # 解析文件开头 --- 之间的 YAML；无 --- 或解析失败返回 None
 
         if fm and 'stock_code' in fm:
@@ -276,7 +277,7 @@ VALUES (?, ?, ?, datetime('now'));
 
 ### 元数据迁移待办
 N 个 docs 缺 frontmatter，已用 fallback 填默认值，建议补全：
-- docs/analysis/2026-04-21-工业富联-buffett分析.md
+- docs/stock-analytics/sectors/electronics/ems/2026-04-21-工业富联-buffett分析.md
   建议：rating=core, themes=[ai_compute], thesis="…"
 
 ### 下一步
@@ -330,7 +331,7 @@ N 个 docs 缺 frontmatter，已用 fallback 填默认值，建议补全：
 | 场景 | 处理 |
 |------|------|
 | `rebalance_config` 表不存在 | 报错提示先启动 app 让迁移跑 |
-| `docs/analysis/` 全空 | 报错提示先做股票分析 |
+| `docs/stock-analytics/sectors/` 全空 | 报错提示先做股票分析 |
 | 实时价部分获取失败 | 用最近 cache 价并在表格价格列加 ⚠️ 注释 |
 | `themes[0]` 未在 config.yaml.themes 中 | 报错并停（防 typo） |
 | `migration_fallback` key ⊄ `themes` key | §0 schema 校验报错 |

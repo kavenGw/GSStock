@@ -33,7 +33,7 @@ rules:
   sell_round: ceil                         # 卖出向上取整（彻底清理超配）
 
 # ===== v2: frontmatter 元数据 schema =====
-# docs/analysis/*.md 顶部 YAML frontmatter 字段约定
+# docs/stock-analytics/sectors/*.md 顶部 YAML frontmatter 字段约定
 # 字段说明见 docs/superpowers/specs/2026-05-10-portfolio-init-v2-design.md §2
 metadata_schema:
   rating: [core, config, watch, exclude]
@@ -51,7 +51,7 @@ metadata_schema:
     redundant: 主题内已有更优替代
 
 # ===== v2: 兼容期 fallback =====
-# 解析 docs/analysis/*.md 时若无 frontmatter，按文件名关键词匹配下表填默认评级与主题
+# 解析 docs/stock-analytics/sectors/*.md 时若无 frontmatter，按文件名关键词匹配下表填默认评级与主题
 # 优先级：先查 migration_exclude，命中即标 exclude；再查 migration_fallback.themes
 # 全部 docs 都补上 frontmatter 后可删除本段
 migration_fallback:
