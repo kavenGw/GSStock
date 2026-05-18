@@ -78,10 +78,15 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
     if 'stock_code' in fm and not isinstance(fm['stock_code'], str):
         violations.append(f"{p}: stock_code must be str (got {type(fm['stock_code']).__name__})")
 
-    if 'stock_codes' in fm and isinstance(fm['stock_codes'], list):
-        for i, c in enumerate(fm['stock_codes']):
-            if not isinstance(c, str):
-                violations.append(f"{p}: stock_codes[{i}] must be str (got {type(c).__name__})")
+    for field in ('stock_codes', 'stock_names'):
+        if field in fm:
+            v = fm[field]
+            if not isinstance(v, list):
+                violations.append(f"{p}: {field} must be a list (got {type(v).__name__})")
+            else:
+                for i, c in enumerate(v):
+                    if not isinstance(c, str):
+                        violations.append(f"{p}: {field}[{i}] must be str (got {type(c).__name__})")
 
     for field in ('conviction_date', 'date'):
         if field in fm:
@@ -89,7 +94,7 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
             if not _DATE_RE.match(v):
                 violations.append(f"{p}: {field} '{v}' not YYYY-MM-DD")
 
-    if 'period' in fm and dt in ('quarterly', 'comps'):
+    if 'period' in fm:
         parts = path.parts
         for i, seg in enumerate(parts):
             if seg == 'quarterly' and i + 1 < len(parts):

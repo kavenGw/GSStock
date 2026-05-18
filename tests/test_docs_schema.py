@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 import sys
 
@@ -32,15 +31,12 @@ def test_parse_frontmatter_valid():
     assert fm['rating'] == 'watch'
     assert '# 正文' in body
 
-def test_parse_frontmatter_no_yaml():
-    p = FIXTURE_DIR / '_no_yaml.md'
+def test_parse_frontmatter_no_yaml(tmp_path):
+    p = tmp_path / '_no_yaml.md'
     p.write_text('# 纯正文\n', encoding='utf-8')
-    try:
-        fm, body = parse_frontmatter(p)
-        assert fm == {}
-        assert '# 纯正文' in body
-    finally:
-        p.unlink()
+    fm, body = parse_frontmatter(p)
+    assert fm == {}
+    assert '# 纯正文' in body
 
 def test_validate_valid():
     fm, _ = parse_frontmatter(FIXTURE_DIR / 'valid_buffett.md')
@@ -77,6 +73,14 @@ def test_validate_exclude_requires_exclude_reason():
     }
     violations = validate_frontmatter(fm, Path('/dummy.md'))
     assert any('exclude_reason' in v for v in violations)
+
+def test_validate_stock_codes_not_list():
+    fm = {
+        'doc_type': 'cross-sector', 'stock_codes': '600000',
+        'stock_names': ['X'], 'themes': ['t'], 'date': '2026-01-01',
+    }
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert any('stock_codes must be a list' in v for v in violations)
 
 def test_validate_quarterly_period_matches_dir():
     fm = {
