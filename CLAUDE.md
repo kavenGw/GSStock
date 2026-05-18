@@ -36,7 +36,7 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 - `.claude/rules/watch.md` — 盯盘前端架构 + AI 分析调度（realtime/7d/30d）— 改 watch 模块前
 - `.claude/rules/llm.md` — 智谱/Gemini/llama-server 环境变量 — 改 llm/ 前
 - `.claude/rules/data-fetch-conventions.md` — akshare/PDF/股票名查询坑 — 写新数据脚本前
-- `.claude/rules/docs-and-portfolio.md` — docs 命名 + frontmatter + portfolio skill — 写分析或调 portfolio 前
+- `.claude/rules/docs-and-portfolio.md` — docs/stock-analytics 目录 + frontmatter + lint + portfolio skill — 写分析、改 frontmatter、跑 lint、调 portfolio 前
 - `.claude/rules/dev-conventions.md` — 技术栈/双 DB/测试布局/commit 协议/第三方仓库监控 — 改 schema 或提 commit 前
 
 ## graphify
