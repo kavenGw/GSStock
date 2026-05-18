@@ -93,6 +93,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 实时价格和分时K线优先使用腾讯HTTP接口（并发安全、无需限速）：
 - 实时价格批量：`http://qt.gtimg.cn/q=sh600519,sz000001`（GBK编码，`~`分隔）
+  - `q=` 字段索引：`[1]=name [3]=price [4]=prev_close [5]=open [6]=volume(手) [32]=change_pct [38]=换手率 [39]=PE_TTM [41]=年高 [42]=年低 [45]=市值(亿) [46]=PB`（亏损股 PE 为负值，与 baidu 估值分位接口结合用来判当前 PB/PE 在历史分位）
 - 分钟K线：`http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param=sh600519,m1,,240`
 - 日K线：`http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh600519,day,...`
 - **字段顺序**：`[datetime, open, close, high, low, volume]`（close在第2位，非标准OHLC）

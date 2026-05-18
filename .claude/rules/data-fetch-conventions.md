@@ -7,6 +7,7 @@
 
 - **多年财务时序首选**：`ak.stock_financial_abstract_ths(symbol, indicator="按年度")` — 唯一对全市场（主板/创业板/科创板）稳定返回的接口，含 ROE/毛利率/净利率/营收/净利/现金流/周转/负债率
 - **PE/PB 5 年历史分位**：`ak.stock_zh_valuation_baidu(symbol, indicator="市盈率(TTM)"|"市净率", period="近5年")`
+- **主营业务构成**：`ak.stock_zygc_em(symbol='SZ300757')`（symbol 必带 `SZ`/`SH` 前缀）。同一 `(股票代码, 报告日期)` 返回多行，靠 `分类类型` 列区分三种切片：行业分类（NaN）/ 按产品分类 / 按地区分类。用途：buffett 分析定 sector/subsector、判"主业收入第一权重"、识别境内外占比与海外敞口。取最新一期：`df[df['报告日期']==df['报告日期'].max()]`
 - **避坑**：
   - `ak.stock_financial_analysis_indicator(symbol)` 对部分主板代码（如 603986）返回空，不可作默认
   - `ak.stock_a_indicator_lg` 已从 akshare 移除，AttributeError

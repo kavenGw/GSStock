@@ -17,6 +17,8 @@
 
 二级 subsector 自由起名。详细 schema + lint 用法见 `docs/stock-analytics/README.md` 与 `scripts/_docs_schema.py`。
 
+**跨板块标的 sector 归属准则**：标的横跨两个一级板块时（如罗博特科 51% 半导体 + 48% 光伏、工业富联 PCB+服务器），按**收入第一权重**归类，次要业务在 thesis / themes 中说明。仅在两业务旗鼓相当且核心叙事来自次要业务时，例外放 `cross-sector/`。判断主业权重用 `ak.stock_zygc_em(symbol='SZ<code>')` 取最新报告期的"按产品分类"切片。
+
 ## Frontmatter 约定（5 类 doc_type）
 
 所有文档必须有 YAML frontmatter，按 `scripts/_docs_schema.py:REQUIRED_FIELDS_BY_TYPE` 字段集补齐。
