@@ -5,9 +5,17 @@ stock_names: [兆易创新, 北京君正, 普冉股份]
 themes: [SLC NAND, 利基存储, 涨价周期]
 period: '2026-05'
 date: 2026-05-15
-related_docs: []
+related_docs:
+  - path: 2026-05-20-存储扩厂双雄受益链-comps.md
+    note: 存储扩厂双雄受益链 comps（产业链上游视角的对照）
+    symmetric: true
 ---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-05-20-存储扩厂双雄受益链-comps](2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂双雄受益链 comps（产业链上游视角的对照）
+<!-- END related_docs -->
 
 > 分析日期：2026-05-15
 > 视角：**行业专题 + 受益标的横向对比**
