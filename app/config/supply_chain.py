@@ -555,14 +555,20 @@ SUPPLY_CHAIN_GRAPHS = {
     'nvidia': {
         'name': 'NVIDIA',
         'code': 'NVDA',
-        'description': '全球 AI GPU 算力绝对龙头 + A 股间接供应链（服务器 ODM / PCB / 光模块 / 液冷）',
+        'description': '全球 AI GPU 算力绝对龙头 + A 股间接供应链（服务器 ODM / PCB / 光模块 / 液冷）。'
+                       'FY27 Q1（2026-05-20 发布）营收 $81.6B/+85% YoY，Data Center 占比 91%，'
+                       'non-GAAP 毛利率 75%；Q2 指引 $91B（不含中国 DC compute），'
+                       '同步派息 25 倍提升 + $80B 新回购。Jensen："Demand has gone parabolic"。',
         'core': {
-            'technologies': ['Blackwell B200/GB200', 'Hopper H100/H200', 'CUDA',
-                             'NVLink/NVSwitch', 'Spectrum-X', 'Grace CPU', 'CoWoS-L 封装'],
+            'technologies': ['Blackwell B200/B300/GB200', 'Rubin (2026H2)', 'Hopper H100/H200',
+                             'CUDA', 'NVLink/NVSwitch', 'Spectrum-X', 'Grace CPU', 'CoWoS-L 封装'],
             'products': ['AI 训练 GPU', 'AI 推理 GPU', 'DGX/HGX 系统',
-                         'NVLink Switch', 'BlueField DPU', 'Spectrum-X 以太网'],
-            'customers': ['微软/Meta/Google/AWS/Oracle/xAI', '戴尔/超微/联想/HPE 服务器 OEM',
-                          '中国云厂商（合规版 H20/B30A）'],
+                         'NVLink Switch', 'BlueField DPU', 'Spectrum-X 以太网',
+                         '中国合规版 H20 / B30A'],
+            'customers': ['微软/Meta/Google/AWS/Oracle/xAI（hyperscaler capex 主力）',
+                          '戴尔/超微/联想/HPE 服务器 OEM',
+                          '主权 AI（沙特/UAE/欧盟）',
+                          '中国云厂商（合规版 H20/B30A，FY27 Q2 指引暂不计入）'],
         },
         'upstream': {
             'PCB / CCL': {
@@ -655,10 +661,13 @@ SUPPLY_CHAIN_GRAPHS = {
             },
         },
         'competitors': {
-            'TSM':       {'name': '台积电', 'market': 'US'},
-            'AVGO':      {'name': '博通', 'market': 'US'},
-            'AMD':       {'name': 'AMD', 'market': 'US'},
-            'INTC':      {'name': 'Intel', 'market': 'US'},
+            'AMD':       {'name': 'AMD（MI300/MI350 系列）', 'market': 'US'},
+            'INTC':      {'name': 'Intel（Gaudi 3）', 'market': 'US'},
+            'AVGO':      {'name': '博通（Google TPU 代工 + 客户自研 ASIC 主推方）', 'market': 'US'},
+            'GOOGL':     {'name': 'Google（TPU v6/v7 自研，客户即对手）', 'market': 'US'},
+            'AMZN':      {'name': 'AWS（Trainium2/3 自研）', 'market': 'US'},
+            'META':      {'name': 'Meta（MTIA 自研）', 'market': 'US'},
+            'TSM':       {'name': '台积电（CoWoS 产能瓶颈方）', 'market': 'US'},
             '000660.KS': {'name': 'SK 海力士', 'market': 'KR'},
             'MU':        {'name': '美光', 'market': 'US'},
             '005930.KS': {'name': '三星电子', 'market': 'KR'},
@@ -666,11 +675,16 @@ SUPPLY_CHAIN_GRAPHS = {
             '688041':    {'name': '海光信息', 'market': 'A'},
         },
         'trends': {
-            'bandwidth': 'H100 → H200 → B200 → B300 → Rubin(2026)',
+            'bandwidth': 'H100 → H200 → B200 → B300（FY27 当下主力出货）→ Rubin (2026H2)',
             'technologies': ['NVLink 超节点', 'Blackwell/Rubin 架构', 'Spectrum-X 以太网',
-                             'CoWoS-L 封装', '液冷冷板 + 浸没式'],
+                             'CoWoS-L 封装', '液冷冷板 + 浸没式',
+                             'Jensen 公开预期 Blackwell+Rubin 2026-27 累计营收 $1T'],
             'china_role': '服务器 ODM（工业富联/浪潮）+ PCB（沪电/胜宏）+ 光模块（旭创/新易盛）'
                           '+ 液冷（英维克）+ 封测（长电/通富）全链条深度供应',
+            'risk_flags': ['客户自研 ASIC（Google TPU/AWS Trainium/Meta MTIA/OpenAI 自研）持续蚕食',
+                           'Hyperscaler capex 2027-28 拐点风险',
+                           '出口管制扩大（H20 已计提 $4.5B 库存减计先例）',
+                           '当前市值 ~$3.3-3.5T，PE TTM 50x+，安全边际为负'],
         },
     },
     'energy_storage': {
