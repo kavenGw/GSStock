@@ -28,6 +28,9 @@ related_docs:
   - path: quarterly/26q1/2026-04-27-兴森科技-comps-成长性与投资决策.md
     note: 4-27 PCB 同业横向对比基线
     symmetric: false
+  - path: ../themes/2026-05-24-H200-vs-Rubin-供应链对比专题.md
+    note: H200/Rubin 全供应链差异（含 PCB/光模块/液冷）
+    symmetric: true
 ---
 # 胜宏科技 vs 沪电股份 — 良率与 Rubin 份额 comps（2026-05-22）
 
