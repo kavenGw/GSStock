@@ -9,12 +9,16 @@ related_docs:
   - path: 2026-05-20-存储扩厂双雄受益链-comps.md
     note: 存储扩厂双雄受益链 comps（产业链上游视角的对照）
     symmetric: true
+  - path: 2026-05-25-兆易-君正-业务客户晶圆深度对比.md
+    note: 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
+    symmetric: true
 ---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-05-20-存储扩厂双雄受益链-comps](2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂双雄受益链 comps（产业链上游视角的对照）
+> - [2026-05-25-兆易-君正-业务客户晶圆深度对比](2026-05-25-兆易-君正-业务客户晶圆深度对比.md) — 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
 <!-- END related_docs -->
 
 > 分析日期：2026-05-15
