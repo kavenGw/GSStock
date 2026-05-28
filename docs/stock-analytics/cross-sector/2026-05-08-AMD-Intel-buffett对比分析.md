@@ -4,9 +4,17 @@ stock_codes: ['AMD', 'INTC']
 stock_names: [AMD, Intel]
 themes: [CPU竞争, x86服务器, buffett对比]
 date: 2026-05-08
-related_docs: []
+related_docs:
+  - path: 2026-05-28-中兴通讯-思科-buffett对比分析.md
+    note: 同框架：通信设备 commodity vs franchise + AI 主题对比
+    symmetric: true
 ---
 # AMD vs Intel — Buffett 框架对比分析
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-05-28-中兴通讯-思科-buffett对比分析](2026-05-28-中兴通讯-思科-buffett对比分析.md) — 同框架：通信设备 commodity vs franchise + AI 主题对比
+<!-- END related_docs -->
 
 > 撰写日期：2026-05-08（AMD 26Q1 财报后第 3 个交易日）
 > 数据截止：2026-05-07
