@@ -1832,6 +1832,99 @@ SUPPLY_CHAIN_GRAPHS = {
                           '+ InP 芯片（源杰国内龙头）+ 下游光模块（旭创/新易盛景气周期）',
         },
     },
+    'ai_server': {
+        'name': 'AI 服务器整机',
+        'code': 'AISERVER',
+        'description': 'AI 算力硬件「整机集成层」产业链（戴尔/浪潮/工业富联/中兴 等整机厂）。'
+                       'Buffett 视角：整机厂处在「三明治中间层」——上游英伟达 GPU + 内存厂 HBM/DRAM '
+                       '（2025-2026 内存超级周期「每天重定价」）拿走价值大头，下游 CSP/Neo Cloud 强议价，'
+                       '整机厂只赚集成/部署/服务的薄增值（AI 服务器经营利润率多在中个位数）。'
+                       '营收随 AI capex 爆发，但毛利率被 AI mix 结构性压低——commodity 中间层的宿命。'
+                       '与 nvidia/asic 图谱（GPU 为中心）互补，本图以整机厂为核心。',
+        'core': {
+            'technologies': ['整机柜集成（GB200/GB300 NVL72）', '直接液冷 DLC', 'AI Factory 参考架构',
+                             'PowerEdge XE / IR7000 机架', 'Scale-up/Scale-out 互连集成'],
+            'products': ['AI 训练服务器', 'AI 推理服务器', '整机柜方案', '传统通用服务器', '存储/网络'],
+            'customers': ['CSP（微软/Meta/Google/AWS/Oracle）', 'Neo Cloud（CoreWeave 类 GPU 云）',
+                          '主权 AI（各国政府）', '企业（含信创政企）'],
+        },
+        'upstream': {
+            'GPU / 加速器（价值大头）': {
+                'description': 'AI 服务器 BOM 大头，定价权全在英伟达；整机厂仅「搬运+集成」',
+                'companies': {
+                    'NVDA': {'name': 'NVIDIA', 'role': 'Blackwell GB200/GB300 → Vera Rubin，AI GPU 绝对龙头（见 nvidia 图谱）', 'tag': 'keep_watching'},
+                    'AMD': {'name': 'AMD', 'role': 'MI 系列加速卡，次选 GPU 供给（见 cpu 图谱）', 'tag': 'not_analyzed'},
+                    '688041': {'name': '海光信息', 'role': '国产 DCU AI 加速卡 + x86 CPU，信创/国产算力主力', 'tag': 'keep_watching'},
+                },
+            },
+            '内存（HBM/DRAM/NAND，超级周期涨价）': {
+                'description': '戴尔点名头号/次号约束，「几乎每天重新定价」，内存超级周期直击整机厂成本',
+                'companies': {
+                    '000660.KS': {'name': 'SK 海力士', 'role': 'HBM3e 龙头（见 storage 图谱）', 'tag': 'not_analyzed'},
+                    '005930.KS': {'name': '三星电子', 'role': 'HBM/DRAM/NAND 综合供给', 'tag': 'not_analyzed'},
+                    'MU': {'name': '美光', 'role': 'HBM/DRAM/NAND 美系供给', 'tag': 'not_analyzed'},
+                },
+            },
+            'CPU': {
+                'description': 'AI 服务器主机 CPU，亦被戴尔列为供给约束',
+                'companies': {
+                    'INTC': {'name': 'Intel', 'role': 'Xeon 服务器 CPU（见 cpu 图谱）', 'tag': 'not_analyzed'},
+                    'AMD': {'name': 'AMD', 'role': 'EPYC 服务器 CPU', 'tag': 'not_analyzed'},
+                },
+            },
+            '液冷散热': {
+                'description': 'GB300/Vera Rubin 机柜从风冷转直接液冷，抬高单机柜价值也成新瓶颈',
+                'companies': {
+                    'VRT': {'name': 'Vertiv', 'role': '数据中心液冷/电源（美股）', 'tag': 'not_analyzed'},
+                    '002837': {'name': '英维克', 'role': '数据中心液冷国产主力', 'tag': 'not_analyzed'},
+                    '300499': {'name': '高澜股份', 'role': '液冷温控配套', 'tag': 'not_analyzed'},
+                },
+            },
+            '先进封装（行业级瓶颈）': {
+                'description': 'HBM 堆叠 + CoWoS 封装是 Blackwell 放量的物理瓶颈',
+                'companies': {
+                    'TSM': {'name': '台积电', 'role': 'CoWoS-L 先进封装产能瓶颈', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'midstream': {
+            'AI 服务器整机厂（本图核心）': {
+                'description': '集成层：买 GPU/内存→整机柜集成+部署+服务+融资。Buffett 评级见 tag',
+                'companies': {
+                    'DELL': {'name': '戴尔科技', 'role': 'ISG 整机+AI Factory+DFS 融资，owner-operator，三家质地最佳；Q1FY27 AI 服务器 $16.1B/+757%、积压 $51.3B，但毛利率压到 18.1%（同属本组深挖）', 'tag': 'keep_watching'},
+                    '000977': {'name': '浪潮信息', 'role': '中国服务器出货龙头，最纯 commodity：服务器毛利率 4.5%/净利率 1.46%，ROE 靠 73.6% 杠杆 + 美国实体清单 GPU 断供风险', 'tag': 'don_buy'},
+                    '601138': {'name': '工业富联', 'role': '英伟达整机柜核心 ODM 代工，毛利率 10 年从 10.5% 滑到 6.76%，景气顶估值 + 现金流转负', 'tag': 'don_buy'},
+                    '000063': {'name': '中兴通讯', 'role': '5G 主设备 5 寡头（唯一有真护城河），但用低毛利服务器走量稀释电信存量，2025 净利 -33%/毛利率两年崩 11pct', 'tag': 'keep_watching'},
+                    '000938': {'name': '紫光股份', 'role': '新华三母公司，国产服务器/网络整机', 'tag': 'not_analyzed'},
+                    '00992': {'name': '联想集团', 'role': '全球 PC + 服务器整机（港股）', 'tag': 'not_analyzed'},
+                    'SMCI': {'name': '超微 Supermicro', 'role': 'AI 服务器整机，戴尔主要对手', 'tag': 'not_analyzed'},
+                    'HPE': {'name': '慧与', 'role': '企业服务器/HPC 整机，戴尔主要对手', 'tag': 'not_analyzed'},
+                },
+            },
+        },
+        'downstream': {
+            'CSP 超大规模云': {'description': '微软/Meta/Google/AWS/Oracle，AI capex 主力买方，集采强议价'},
+            'Neo Cloud / GPU 云': {'description': 'CoreWeave 类杠杆扩张算力租赁商，AI 循环融资链信用风险点'},
+            '主权 AI': {'description': '各国政府算力项目'},
+            '企业 / 信创': {'description': '企业 AI Factory + 国产信创政企'},
+        },
+        'competitors': {
+            'DELL': {'name': '戴尔科技', 'market': 'US'},
+            'SMCI': {'name': '超微 Supermicro', 'market': 'US'},
+            'HPE': {'name': '慧与', 'market': 'US'},
+            '00992': {'name': '联想集团', 'market': 'HK'},
+            '000977': {'name': '浪潮信息', 'market': 'A'},
+            '601138': {'name': '工业富联', 'market': 'A'},
+        },
+        'trends': {
+            'bandwidth': '整机柜功率密度 GB200→GB300→Vera Rubin 持续抬升，风冷→直接液冷 DLC',
+            'technologies': ['整机柜级集成（rack-scale）', '直接液冷渗透率上升',
+                             'AI Factory 参考架构', '多年期（最长 5 年）供货协议锁单'],
+            'china_role': '整机厂量增价崩（毛利率个位数）；价值大头被上游英伟达 GPU + 内存厂 HBM/DRAM 拿走，'
+                          '下游 CSP/Neo Cloud 强议价——A 股整机环节（浪潮/工业富联）是 commodity 中间层，'
+                          '真壁垒在上游内存/封装与液冷材料',
+        },
+    },
 }
 
 
