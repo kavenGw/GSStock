@@ -865,7 +865,8 @@ SUPPLY_CHAIN_GRAPHS = {
                     '601899': {'name': '紫金矿业', 'role': '全球前十铜矿商，金铜兼营（同 extra_cores）', 'tag': 'don_buy'},
                     '603993': {'name': '洛阳钼业', 'role': '刚果金 TFM/KFM 铜钴双矿（同 extra_cores）', 'tag': 'don_buy'},
                     '600362': {'name': '江西铜业', 'role': '国内最大铜矿+冶炼一体化（同 extra_cores）'},
-                    '601168': {'name': '西部矿业', 'role': '玉龙铜矿 + 铜锌铅多金属', 'tag': 'not_analyzed'},
+                    '601168': {'name': '西部矿业', 'role': '玉龙铜矿 + 铜锌铅多金属', 'tag': 'keep_watching'},
+                    '600711': {'name': '盛屯矿业', 'role': '刚果金铜钴 + 锌资源型，金属价弹性大', 'tag': 'keep_watching'},
                     '600489': {'name': '中金黄金', 'role': '黄金为主、铜为辅，金铜伴生（Don Buy）', 'tag': 'don_buy'},
                 },
             },
@@ -873,7 +874,8 @@ SUPPLY_CHAIN_GRAPHS = {
                 'description': '阴极铜（电解铜）冶炼龙头，全球产能 45%+ 集中于中国',
                 'companies': {
                     '000630': {'name': '铜陵有色', 'role': '国内第二大铜冶炼，安徽国资（同 extra_cores）'},
-                    '000878': {'name': '云南铜业', 'role': '国内第三大铜冶炼，西南龙头', 'tag': 'not_analyzed'},
+                    '000878': {'name': '云南铜业', 'role': '国内第三大铜冶炼，西南龙头', 'tag': 'keep_watching'},
+                    '000737': {'name': '北方铜业', 'role': '中条山采选冶一体，规模最小，压延铜带箔向 PCB 延伸', 'tag': 'keep_watching'},
                 },
             },
             '副产物（金/钴/钼）': {
