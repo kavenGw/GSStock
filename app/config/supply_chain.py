@@ -575,7 +575,7 @@ SUPPLY_CHAIN_GRAPHS = {
                 'description': 'AI 服务器高多层 PCB / HDI / FC-BGA 基板 / 覆铜板',
                 'companies': {
                     '002463': {'name': '沪电股份', 'role': 'AI 服务器高多层 PCB 龙头（同属 ascend 产业链）', 'tag': 'not_analyzed'},
-                    '300476': {'name': '胜宏科技', 'role': 'NVIDIA GB200 PCB 主力供应商', 'tag': 'not_analyzed'},
+                    '300476': {'name': '胜宏科技', 'role': 'Rubin GPU 算力主板 ~50% 份额 + 78 层正交背板独家，6 阶 24 层 HDI 良率 ~92%（行业 50-60%）；壁垒/卡位 PCB 链最硬，但 PE 71x/PB 18.5x（5y 96% 分位）安全边际深度负，顶部跟踪', 'tag': 'keep_watching'},
                     '600183': {'name': '生益科技', 'role': '高频高速覆铜板（同属 ascend 产业链）', 'tag': 'not_analyzed'},
                     '002916': {'name': '深南电路', 'role': 'FC-BGA 基板 / 通信 PCB（同属 cpu/ascend 产业链）', 'tag': 'not_analyzed'},
                     '002436': {'name': '兴森科技', 'role': 'FC-BGA 基板 / IC 载板（同属 cpu 产业链）', 'tag': 'not_analyzed'},
