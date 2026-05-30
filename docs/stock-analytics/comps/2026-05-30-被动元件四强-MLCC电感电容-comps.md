@@ -32,6 +32,9 @@ related_docs:
   - path: ../sectors/electronics/components/2026-05-30-风华高科-buffett分析.md
     note: 风华高科个股 buffett 深度（本篇四强横评中质量垫底标的的来源）
     symmetric: true
+  - path: ../themes/2026-05-30-被动元件四强-全球竞争力与AI弹性深度.md
+    note: 四强全球竞争力×AI/Rubin弹性深度（市场规模/全球市占/AI BOM 弹性）
+    symmetric: true
 ---
 # 被动元件四强横评：三环集团 / 顺络电子 / 江海股份 / 风华高科（25A）
 
