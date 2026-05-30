@@ -34,6 +34,9 @@ related_docs:
   - path: ../themes/2026-05-29-Rubin-VR200-BOM拆解-价值分配.md
     note: 大摩 VR200 BOM 拆解 ASP 翻倍与价值分配（胜宏 GPU 算力板卡位）
     symmetric: true
+  - path: ../sectors/semiconductor/pcb/2026-05-30-胜宏科技-buffett分析.md
+    note: 胜宏 buffett 个股深度分析（六维 + 多情景估值）
+    symmetric: true
 ---
 # 胜宏科技 vs 沪电股份 — 良率与 Rubin 份额 comps（2026-05-22）
 
@@ -45,6 +48,7 @@ related_docs:
 > - [2026-04-27-兴森科技-comps-成长性与投资决策](quarterly/26q1/2026-04-27-兴森科技-comps-成长性与投资决策.md) — 4-27 PCB 同业横向对比基线
 > - [2026-05-24-H200-vs-Rubin-供应链对比专题](../themes/2026-05-24-H200-vs-Rubin-供应链对比专题.md) — H200/Rubin 全供应链差异（含 PCB/光模块/液冷）
 > - [2026-05-29-Rubin-VR200-BOM拆解-价值分配](../themes/2026-05-29-Rubin-VR200-BOM拆解-价值分配.md) — 大摩 VR200 BOM 拆解 ASP 翻倍与价值分配（胜宏 GPU 算力板卡位）
+> - [2026-05-30-胜宏科技-buffett分析](../sectors/semiconductor/pcb/2026-05-30-胜宏科技-buffett分析.md) — 胜宏 buffett 个股深度分析（六维 + 多情景估值）
 <!-- END related_docs -->
 
 > 撰写日期：2026-05-22
