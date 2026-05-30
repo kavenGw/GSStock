@@ -43,6 +43,7 @@ related_docs:
 > - [2026-05-30-三环集团-buffett分析](../sectors/electronics/components/2026-05-30-三环集团-buffett分析.md) — 三环集团个股 buffett 深度（四强质量之王、唯一真实定价权）
 > - [2026-05-30-顺络电子-buffett分析](../sectors/electronics/components/2026-05-30-顺络电子-buffett分析.md) — 顺络电子个股 buffett 深度（四强性价比相对最优）
 > - [2026-05-30-风华高科-buffett分析](../sectors/electronics/components/2026-05-30-风华高科-buffett分析.md) — 风华高科个股 buffett 深度（本篇四强横评中质量垫底标的的来源）
+> - [2026-05-30-被动元件四强-全球竞争力与AI弹性深度](../themes/2026-05-30-被动元件四强-全球竞争力与AI弹性深度.md) — 四强全球竞争力×AI/Rubin弹性深度（市场规模/全球市占/AI BOM 弹性）
 <!-- END related_docs -->
 
 > 撰写日期：2026-05-30 ｜ 数据口径：财务时序来自 `stock_financial_abstract_ths`（截至 2025 年报），主营构成来自 `stock_zygc_em`（2025-12-31），估值锚 2026-05-29 收盘 / 盘中快照
