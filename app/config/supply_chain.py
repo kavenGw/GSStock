@@ -582,11 +582,13 @@ SUPPLY_CHAIN_GRAPHS = {
                 },
             },
             '连接器 / 铜缆': {
-                'description': '高速铜缆 / AI 高速背板连接器（NVLink Scale-up 互连）',
+                'description': '高速铜缆 / AI 高速背板连接器 / 有源铜缆 AEC（NVLink Scale-up 互连，机柜内 <2m 短距铜替代光）',
                 'companies': {
-                    '002130': {'name': '沃尔核材', 'role': '高速铜缆 / OAM Scale-up 互连', 'tag': 'not_analyzed'},
-                    '688668': {'name': '鼎通科技', 'role': 'AI 高速背板连接器', 'tag': 'not_analyzed'},
-                    '300252': {'name': '金信诺', 'role': '高速线缆组件', 'tag': 'not_analyzed'},
+                    '002130': {'name': '沃尔核材', 'role': '高速铜缆 / OAM Scale-up 互连；利润真引擎实为 42% 毛利的辐照改性电子材料，AI 铜缆藏在 22.5% 毛利的通信线缆分部（watch：PE 24-27x 已 price in AI 溢价，买点 ~15 元）', 'tag': 'keep_watching'},
+                    '688668': {'name': '鼎通科技', 'role': 'AI 高速背板连接器（PE 150x，贵、等回撤）', 'tag': 'not_analyzed'},
+                    '300252': {'name': '金信诺', 'role': '高速线缆组件（PE 310x，贵、等回撤）', 'tag': 'not_analyzed'},
+                    'ALAB': {'name': 'Astera Labs', 'role': '美股纯正参照：Aries retimer + Taurus AEC 模块 + Scorpio fabric，AI 服务器有源互连平台（壁垒最高）', 'tag': 'not_analyzed'},
+                    'CRDO': {'name': 'Credo', 'role': '美股纯正参照：AEC（有源电缆）龙头，自研 SerDes，铜替代部分光最纯标的', 'tag': 'not_analyzed'},
                 },
             },
             '光模块 / 光芯片': {
