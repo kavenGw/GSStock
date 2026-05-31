@@ -32,7 +32,7 @@ description: >-
 
 | 维度 | 默认 |
 |------|------|
-| 产出形态 | 新建一份 buffett 深度档（`conviction_date` = 今天），supersede 旧档（旧档保留，related_docs 互链） |
+| 产出形态 | 新建一份 buffett 深度档（`conviction_date` = 今天）+ `git rm` 该股**所有历史 buffett 档**（只删 buffett 档；comps/theme/quarterly 一律保留），目录只留最新一份 |
 | 证据深度 | **全量联网验证** + 实时行情锚 |
 | 估值框架 | **场景加权**：结构性重估(bull) / 基准(base) / 空头(bear)，概率由证据强度定 |
 | 分析框架 | 先调用 `buffett` skill 取框架，再动笔 |
@@ -52,6 +52,11 @@ description: >-
 1. 用 Glob 找该股已有底稿：`docs/stock-analytics/**/*<股票名>*.md`（buffett / comps / quarterly / theme）。
    挑出最新 buffett 档 + 最相关 comps 作为基线，传给后续 subagent。
 2. 确认股票代码、市场（A/US/HK）、sector/subsector 归属。
+3. **列待删旧档清单**：从上面 Glob 结果筛出该股所有历史 buffett 档（`*buffett*.md`）。删前**先 Read 一眼
+   确认确属同股旧 buffett 档**（判据：档名含目标股票名 **且** frontmatter `stock_code` 与目标一致；CLAUDE.md
+   铁律：删除前看目标。不满足判据、或内容与预期严重不符，停下 surface 给用户，不照删）。把确认后的待删清单传给 Phase C。
+4. **选 sector-lens**：按 subsector 从 `references/sector-lenses.md` 挑命中的 lens 节（**可叠加**：主 lens
+   如 PCB/存储 + 横切 AI lens 默认跑识别）。把命中节的【必查清单】【撰写落点】摘出，分别注入 Phase A / Phase B 提示。
 
 ### Phase A — 联网采证（派 1 个 subagent，opus）
 产出 `.omc/artifacts/<股票名>-<日期>-evidence.md`（gitignore，不入库）。要点：
@@ -59,25 +64,33 @@ description: >-
 - 实时行情直连腾讯 HTTP（比走 service 快且无副作用）：`qt.gtimg.cn/q=sh<code>`（A股 sh/sz 前缀），
   GBK 解码、`~` 分隔，字段 `[1]=name [3]=price [39]=PE_TTM [45]=市值(亿) [46]=PB`。脚本跑完即删。
 - **证据分级**：【硬】=公司公告/财报/官方 EOL；【软】=媒体/分析师推测；【缺】=未找到。找不到就写"未找到公开证据"，**绝不编造数字或来源**，每个关键数字挂一个真实 URL + 日期。
+- **注入命中 lens 的【必查清单】**（来自 `references/sector-lenses.md` 命中节）：要求逐条联网核实，
+  查不到就明写"未找到公开证据"，不许跳过。
 - 详细采证清单与字段见 `references/playbook.md`。
 
 ### Phase B — 撰写（派 1 个 subagent，opus）
 先 `Skill buffett` 取框架，读 evidence.md + 基线底稿，按 13 节结构写正文 + frontmatter，跑 frontmatter lint，提交。
 **只跑 `lint_docs_frontmatter.py`，不跑 refs**（对称留给 Phase C）。13 节模板、frontmatter 字段、场景加权
-估值机制、AI 四维度标签法、质量红线全部在 `references/playbook.md`，撰写 subagent 必须先读它。
+估值机制、AI 维度标签法、质量红线全部在 `references/playbook.md`，撰写 subagent 必须先读它。
+**注入命中 lens 的【撰写落点】**（来自 `references/sector-lenses.md` 命中节）：要求对应节按落点深化，
+命中 lens 的每个必查项都要在正文有回应（查无证据也要写明）。
 
 ### 两段式审查（每段派 1 个 read-only subagent，opus）
 顺序不能反——**先规格、后质量**：
-1. **规格符合性**：13 节齐全？frontmatter 合规？三情景概率 Σ=100% 且期望值算术对？AI 四维度都打了标？
-   供给侧双面写了吗？数字可追溯无造数？无范围外夹带？→ 输出 SPEC-COMPLIANT 或问题清单。
+1. **规格符合性**：13 节齐全？frontmatter 合规？三情景概率 Σ=100% 且期望值算术对？AI 维度都打了标？
+   供给侧双面写了吗？数字可追溯无造数？无范围外夹带？命中 lens 的必查项是否在正文均有回应（查无证据也写明）？
+   → 输出 SPEC-COMPLIANT 或问题清单。
 2. **分析质量**：内在一致性、概率可辩护性、供给侧双面是否走过场、"贵"是否被诚实消化、AI 是否蹭概念拔高、
    slop 检查、buffett 框架贴合度、监控指标是否带阈值可执行。→ APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED。
 有 Critical/Important 问题 → 让撰写 subagent 修 → 同一审查员复审，直到过。Minor nits 可修后控制者直接核验。
 
 ### Phase C — 收尾（派 1 个 subagent，sonnet 足够）
-- 给被链的旧档/comps 补反向 related_docs 条目（symmetric: true 的那些）。
+- **删除旧档**：对"先做"传来的待删清单逐个 `git rm`（该股历史 buffett 档）。
+- **反向链改指**：扫所有 `symmetric: true` 指向被删档的反向条目（别的 comps/theme/quarterly 的
+  related_docs）→ 改指到新档，或删除该条目（防 refs lint 悬空报错）。
+- 给指向新档的外部文档（comps/theme/quarterly）补反向 related_docs 条目（symmetric: true 的那些）。
 - `python scripts/lint_docs_refs.py --rewrite-blocks` 重生顶部块（别手编 `<!-- BEGIN/END related_docs -->`）。
-- `lint_docs_frontmatter.py` + `lint_docs_refs.py` **都要 exit 0**。
+- `lint_docs_frontmatter.py` + `lint_docs_refs.py` **都要 exit 0**；`--check-orphans` 确认新档非孤儿。
 - 确认一次性采证脚本已删、evidence.md 未被 add。
 - 提交终稿。
 
@@ -93,10 +106,13 @@ description: >-
 4. **诚实面对"贵"**：PB/PE/市值高就老实算安全边际，必要时对最乐观情景也做压力测试；不要用"护城河上修"稀释"价格太贵"。
 5. **AI/概念维度分"产品 vs 业绩"**：有产品能力不等于有业绩贡献；未兑现的概念不许偷渡进估值。每个 AI 维度打【真敏感】/【蹭概念】+理由。
 6. **数字可追溯**：正文每个关键数字能回指 evidence.md 或基线底稿；无裸断言、无造数。
+7. **替换=物理删除旧档**：新档落定后该股历史 buffett 档必须 `git rm`，且所有指向旧档的 symmetric 反向链
+   改指到新档——目录里同股只留最新一份，refs lint 无悬空引用。
 
 ## 参考文件
 
-- `references/playbook.md` — 13 节模板、frontmatter 字段集 + rating 枚举、场景加权估值机制、AI 四维度标签法、采证清单、qt.gtimg.cn 字段、lint 命令、各 subagent 派发提示骨架。**撰写/审查 subagent 必读。**
+- `references/playbook.md` — 13 节模板、frontmatter 字段集 + rating 枚举、场景加权估值机制、采证清单、qt.gtimg.cn 字段、lint 命令、各 subagent 派发提示骨架。**撰写/审查 subagent 必读。**
+- `references/sector-lenses.md` — 可扩展板块视角注册表（AI/PCB/存储…），每 subsector 一节五段式调查清单。**命中 lens 的撰写/审查 subagent 必读对应节。**
 - 项目既有 rules（按需指给 subagent）：`.claude/rules/docs-and-portfolio.md`（目录/frontmatter/lint/related_docs）、
   `.claude/rules/data-fetch-conventions.md`（akshare/实时价坑）、`.claude/rules/data-architecture.md`（qt.gtimg.cn/缓存）、
   `.claude/rules/dev-conventions.md`（Windows 编码/heredoc/create_app 副作用）。
