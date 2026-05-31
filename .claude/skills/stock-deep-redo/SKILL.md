@@ -56,7 +56,7 @@ description: >-
    确认确属同股旧 buffett 档**（判据：档名含目标股票名 **且** frontmatter `stock_code` 与目标一致；CLAUDE.md
    铁律：删除前看目标。不满足判据、或内容与预期严重不符，停下 surface 给用户，不照删）。把确认后的待删清单传给 Phase C。
 4. **选 sector-lens**：按 subsector 从 `references/sector-lenses.md` 挑命中的 lens 节（**可叠加**：主 lens
-   如 PCB/存储 + 横切 AI lens 默认跑识别）。把命中节的【必查清单】【撰写落点】摘出，分别注入 Phase A / Phase B 提示。
+   如 PCB/存储 + **两个横切 lens（AI、成长）默认对每只股跑识别**）。把命中节的【必查清单】【撰写落点】摘出，分别注入 Phase A / Phase B 提示。
 
 ### Phase A — 联网采证（派 1 个 subagent，opus）
 产出 `.omc/artifacts/<股票名>-<日期>-evidence.md`（gitignore，不入库）。要点：
@@ -79,8 +79,10 @@ description: >-
 顺序不能反——**先规格、后质量**：
 1. **规格符合性**：13 节齐全？frontmatter 合规？三情景概率 Σ=100% 且期望值算术对？AI 维度都打了标？
    供给侧双面写了吗？数字可追溯无造数？无范围外夹带？命中 lens 的必查项是否在正文均有回应（查无证据也写明）？
+   **命中成长 lens 时：扩产达产 / 客户增长预期（分层兑证）/ 跑道长度是否在正文均有回应？bull 是否被增长证据包门控（证据全软则概率封顶）？**
    → 输出 SPEC-COMPLIANT 或问题清单。
 2. **分析质量**：内在一致性、概率可辩护性、供给侧双面是否走过场、"贵"是否被诚实消化、AI 是否蹭概念拔高、
+   **增长是否被诚实证据化（非叙事）、bull 赋权是否与增长证据强度匹配、高增长是否稀释了"贵"**、
    slop 检查、buffett 框架贴合度、监控指标是否带阈值可执行。→ APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED。
 有 Critical/Important 问题 → 让撰写 subagent 修 → 同一审查员复审，直到过。Minor nits 可修后控制者直接核验。
 
@@ -108,6 +110,9 @@ description: >-
 6. **数字可追溯**：正文每个关键数字能回指 evidence.md 或基线底稿；无裸断言、无造数。
 7. **替换=物理删除旧档**：新档落定后该股历史 buffett 档必须 `git rm`，且所有指向旧档的 symmetric 反向链
    改指到新档——目录里同股只留最新一份，refs lint 无悬空引用。
+8. **看增长但不被增长拔高**：成长/扩产标的必查扩产达产 + 客户增长预期（分层：具名优先、终端兑底）；bull
+   情景的概率/倍数由「成长持续性证据包」门控（扩产达产确定性 + 客户 capex 能见度 + TAM 跑道），证据全软则
+   概率封顶；同时高增长不许稀释"贵"——这是红线 3（拒绝周期顶定价）的对偶，既防高估也防系统性低估真成长。
 
 ## 参考文件
 
