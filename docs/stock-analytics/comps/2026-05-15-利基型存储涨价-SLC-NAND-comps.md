@@ -12,6 +12,9 @@ related_docs:
   - path: 2026-05-25-兆易-君正-业务客户晶圆深度对比.md
     note: 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
     symmetric: true
+  - path: ../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md
+    note: 普冉 5-31 buffett 深度重做（Exclude/NOR 涨价 + SHM 收购）
+    symmetric: true
 ---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
 
@@ -19,6 +22,7 @@ related_docs:
 > **关联文档**
 > - [2026-05-20-存储扩厂双雄受益链-comps](2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂双雄受益链 comps（产业链上游视角的对照）
 > - [2026-05-25-兆易-君正-业务客户晶圆深度对比](2026-05-25-兆易-君正-业务客户晶圆深度对比.md) — 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
+> - [2026-05-31-普冉股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md) — 普冉 5-31 buffett 深度重做（Exclude/NOR 涨价 + SHM 收购）
 <!-- END related_docs -->
 
 > 分析日期：2026-05-15
@@ -33,7 +37,7 @@ related_docs:
 > - [2026-05-08 兆易-通富 减持事件对比](26q1/2026-05-08-兆易创新-通富微电-减持事件对比分析.md)（朱一明减持已硬触发 4-29 卖出线）
 > - [2026-04-21 北京君正 buffett 分析](../sectors/semiconductor/storage/2026-04-21-北京君正-buffett分析.md)（Pass）
 > - [2026-04-28 北京君正 26Q1 季报点评](../quarterly/26q1/2026-04-28-北京君正-26Q1季报点评.md)（应收 +50% 红线已触发）
-> - [2026-04-25 普冉股份 buffett 分析](../sectors/semiconductor/storage/2026-04-25-普冉股份-buffett分析.md)（Don't Buy）
+> - [2026-05-31 普冉股份 buffett 分析](../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md)（Exclude）
 > - [2026-04-29 普冉股份 26Q1 季报点评](../quarterly/26q1/2026-04-29-普冉股份-26Q1季报点评.md)（OCF/EPS 0.97 单季验证）
 
 ---
