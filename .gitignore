@@ -30,3 +30,4 @@ scripts/_*.txt
 
 # portfolio-shortlist 缓存（按股票 md5 命中跳过 docs 重读）
 .claude/skills/portfolio-init/.cache/
+.claude/skills/stock-deep-redo-workspace/optim.log
