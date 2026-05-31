@@ -1,0 +1,22 @@
+[
+  {"query": "兆易创新涨这么多了还能追吗，帮我重新分析一下", "should_trigger": true},
+  {"query": "存储又涨价了，把江波龙重新评估一遍，看结论要不要改", "should_trigger": true},
+  {"query": "结合 AI 服务器需求重新看看工业富联值不值得买", "should_trigger": true},
+  {"query": "重做一下立讯精密的深度分析，旧的那份过时了", "should_trigger": true},
+  {"query": "三星退出低端 CIS，重估一下韦尔股份的供给侧逻辑", "should_trigger": true},
+  {"query": "我想知道沪电股份现在内在价值大概多少，之前的判断是不是过时了", "should_trigger": true},
+  {"query": "信创政策加码，海光信息现在该重新承做吗", "should_trigger": true},
+  {"query": "中际旭创业绩兑现了，帮我把整个投资逻辑重新过一遍并更新它的分析文档", "should_trigger": true},
+  {"query": "光迅科技现在这个位置还能不能建仓", "should_trigger": true},
+  {"query": "用最新铜价和供给侧重新分析江西铜业", "should_trigger": true},
+  {"query": "帮我分析整个 PCB 板块的股票，做个二级分类加投资建议", "should_trigger": false},
+  {"query": "兆易创新的中报点评写一下，就 beat/miss 和关键指标", "should_trigger": false},
+  {"query": "根据最新持仓重新算一下各股目标仓位和买卖股数", "should_trigger": false},
+  {"query": "帮我设计一个分批清仓胜宏科技的方案，设利润目标", "should_trigger": false},
+  {"query": "把兆易和君正做个横向估值对比表", "should_trigger": false},
+  {"query": "兆易创新现在股价多少", "should_trigger": false},
+  {"query": "巴菲特说的安全边际到底什么意思", "should_trigger": false},
+  {"query": "盯盘帮我给兆易加个跌破 400 的告警", "should_trigger": false},
+  {"query": "把 get_realtime_prices 改成支持批量港股", "should_trigger": false},
+  {"query": "我要从头重新规划整个组合的持仓主题和配置", "should_trigger": false}
+]
