@@ -15,6 +15,9 @@ related_docs:
   - path: ../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md
     note: 普冉 5-31 buffett 深度重做（Exclude/NOR 涨价 + SHM 收购）
     symmetric: true
+  - path: ../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md
+    note: 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
+    symmetric: true
 ---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
 
@@ -23,6 +26,7 @@ related_docs:
 > - [2026-05-20-存储扩厂双雄受益链-comps](2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂双雄受益链 comps（产业链上游视角的对照）
 > - [2026-05-25-兆易-君正-业务客户晶圆深度对比](2026-05-25-兆易-君正-业务客户晶圆深度对比.md) — 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
 > - [2026-05-31-普冉股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md) — 普冉 5-31 buffett 深度重做（Exclude/NOR 涨价 + SHM 收购）
+> - [2026-05-31-东芯股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md) — 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
 <!-- END related_docs -->
 
 > 分析日期：2026-05-15
