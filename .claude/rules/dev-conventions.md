@@ -71,3 +71,5 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 **安装第三方仓库时**：无论是 Claude Code skill/plugin 还是其他工具仓库，完成安装后需同步添加到 `app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`，以便监控新版本
 
 **`git commit --amend` 前重新验证 HEAD**：long-running subagent 完成后做 amend，期间可能有并行 session 已落新 commit，HEAD 已不是你的目标。Amend 前先 `git rev-parse HEAD` 对比预期 SHA；不一致就改成新建 cleanup commit，避免污染他人提交。
+
+**并行 session 抢 git index**：多 Claude session 同跑一仓时，`git add` 暂存的文件会被另一 session 的 `git reset`/`git add` 在你两次 Bash 调用之间清空（实测 staged 下一条命令就消失，`git diff --cached` 变空 → 提交漏文件）。铁律：**`git add` 与 `git commit` 放进同一条 Bash 命令链**（`git add <精确路径...> && git commit -F .git/MSG.txt`，中文多行 message 走文件避免 heredoc 失配），切勿跨工具调用分开；提交后 `git show --stat <sha>` 确认只含本任务文件、未裹挟他人在写档。删除文件用 `git rm -q --ignore-unmatch <path>` 同链处理（文件已不在磁盘时 `git add` 该路径会 pathspec 报错）。
