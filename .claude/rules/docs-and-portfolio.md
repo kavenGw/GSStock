@@ -53,6 +53,10 @@ python scripts/lint_docs_refs.py --check-orphans   # 列孤儿文档
 
 退出码 0 = 全过；非 0 = 列违例清单。新写或迁移文档后跑 lint 自检。
 
+**Lint 坑（Windows + 并发）**：
+- `--check-orphans` 会因 print 含中文（如「铜」）的孤儿路径撞 cp950 抛 `UnicodeEncodeError` 返回 exit 1，**而 orphan 判定逻辑其实已跑完**——加 `PYTHONIOENCODING=utf-8` 才得真实 exit 0，别误判为 lint 失败。
+- `--rewrite-blocks` 会重生**所有** block 与 frontmatter 失步的文档（含并行 session 未提交的在写档），易产生跨任务连带 diff。跑完**只精确 `git add` 本任务的档**，**勿 `git add -A`**，避免裹挟他人半成品。
+
 ## 持仓再平衡报告输出
 
 - 入口：`/portfolio-init`（首次配置 / 主题大调）+ `/portfolio-rebalance`（日常算 diff，支持 `--dry-run`）
