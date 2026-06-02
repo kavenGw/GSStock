@@ -56,6 +56,7 @@ python scripts/lint_docs_refs.py --check-orphans   # 列孤儿文档
 **Lint 坑（Windows + 并发）**：
 - `--check-orphans` 会因 print 含中文（如「铜」）的孤儿路径撞 cp950 抛 `UnicodeEncodeError` 返回 exit 1，**而 orphan 判定逻辑其实已跑完**——加 `PYTHONIOENCODING=utf-8` 才得真实 exit 0，别误判为 lint 失败。
 - `--rewrite-blocks` 会重生**所有** block 与 frontmatter 失步的文档（含并行 session 未提交的在写档），易产生跨任务连带 diff。跑完**只精确 `git add` 本任务的档**，**勿 `git add -A`**，避免裹挟他人半成品。
+- 但"精确 add"仍有盲区：refs `symmetric: true` **强制**你 touch 兄弟档补反向条目才过 lint，若该兄弟档正被并行 session 改（带未提交分析改动），`git add <兄弟档>` 会连其未提交改动一并裹挟进你的 commit。add 前先 `git diff <兄弟档>`：若有 `related_docs` 块以外的改动即对方在写，归其自行提交（其后续 commit 会干净收尾、非破坏性，但勿误判为本任务产物）。**对偶情形**：并行 session 同跑 stock-deep-redo 于同板块兄弟股、共享同一 comps 时，指向你新档的反向条目可能已被对方抢先写入并 committed——补反向链前先 `grep <新档名> <兄弟档>`，已在则跳过（勿重复追加），以 `refs lint exit 0` 为真闸而非"必须由我添加"。
 
 ## 持仓再平衡报告输出
 
