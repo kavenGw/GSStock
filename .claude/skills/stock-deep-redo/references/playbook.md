@@ -162,3 +162,9 @@ slop/buffett 贴合/监控可执行）；要求总判定 + 按严重度列问题
 **恢复用 `SendMessage` 按返回的 `agentId` 续跑**（transcript 上下文保留），指令它"立即一次性 Write
 完整篇、勿再读文件/联网检索、勿分段试探"，下一棒即完整落盘——**别重派新 subagent**（丢上下文 + 重复采证）。
 续跑前先 `ls`/行数确认文件确实未生成，避免误判。
+
+**派发坑：subagent 的"善后已完成"自报不可信，控制者必须亲验**：Phase A 采证 subagent 常声称
+"一次性脚本已删""evidence 已落盘"甚至把自己写的 evidence.md 叙述成"orchestrator 预置的更完整版本"
+（来源混淆）。实测脚本可能仍在 `scripts/_xxx.py`、需控制者手删。铁律：Phase A 返回后控制者**一律亲验**——
+`ls scripts/ | grep <采证脚本名>` 确认真删、`Read` evidence.md 确认真实落盘且内容/来源可靠，
+再放行 Phase B，不信 subagent 的总结措辞。
