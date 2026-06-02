@@ -621,7 +621,7 @@ SUPPLY_CHAIN_GRAPHS = {
             '电源模组': {
                 'description': 'AI 服务器高功率电源',
                 'companies': {
-                    '002851': {'name': '麦格米特', 'role': 'AI 服务器电源模组', 'tag': 'not_analyzed'},
+                    '002851': {'name': '麦格米特', 'role': 'AI 服务器电源模组', 'tag': 'don_buy'},
                     '300870': {'name': '欧陆通', 'role': '服务器电源', 'tag': 'not_analyzed'},
                 },
             },
@@ -1592,7 +1592,7 @@ SUPPLY_CHAIN_GRAPHS = {
                 'description': 'AI 服务器 BBU/VRM 电源管理是 TI/MPS 主战场，国产配套以圣邦/杰华特/思瑞浦为主',
                 'companies': {
                     '002463': {'name': '沪电股份', 'role': 'AI 服务器 PCB（电源 IC 配套，同属 nvidia/ascend/cpu 产业链）', 'tag': 'not_analyzed'},
-                    '002851': {'name': '麦格米特', 'role': 'AI 服务器电源（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
+                    '002851': {'name': '麦格米特', 'role': 'AI 服务器电源（同属 nvidia 产业链）', 'tag': 'don_buy'},
                     '300870': {'name': '欧陆通', 'role': '服务器电源（同属 nvidia 产业链）', 'tag': 'not_analyzed'},
                 },
             },
