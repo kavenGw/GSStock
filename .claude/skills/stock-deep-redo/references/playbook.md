@@ -156,3 +156,9 @@ slop/buffett 贴合/监控可执行）；要求总判定 + 按严重度列问题
 **把所有 symmetric 指向被删档的反向链改指到新档或删条目**；给要补反向条目的被链档路径 + 反向 YAML；
 跑 `--rewrite-blocks` + 双 lint exit 0 + `--check-orphans` 确认新档非孤儿；确认采证脚本已删、evidence.md 未 add；
 提交终稿；汇报双 lint 退出码 + SHA + 状态。
+
+**派发坑：长文撰写 subagent 的 stream idle timeout**：Phase B（opus 写 300+ 行）可能中途报
+`Stream idle timeout - partial response received`、文件 0 落盘（多发生在它还在读基线/取框架阶段）。
+**恢复用 `SendMessage` 按返回的 `agentId` 续跑**（transcript 上下文保留），指令它"立即一次性 Write
+完整篇、勿再读文件/联网检索、勿分段试探"，下一棒即完整落盘——**别重派新 subagent**（丢上下文 + 重复采证）。
+续跑前先 `ls`/行数确认文件确实未生成，避免误判。
