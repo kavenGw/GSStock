@@ -19,6 +19,9 @@ related_docs:
 - path: 2026-05-22-正泰电源-buffett分析.md
   note: 同光伏链不同环节对比；正泰偏逆变器/电气箱柜
   symmetric: false
+- path: ../../electronics/display/2026-06-02-TCL科技-buffett分析.md
+  note: TCL中环控股母公司，光伏业务是TCL科技最大拖累项
+  symmetric: true
 ---
 # TCL中环（002129.SZ）Buffett 投资分析
 
@@ -26,6 +29,7 @@ related_docs:
 > **关联文档**
 > - [2026-04-24-阳光电源-buffett分析](2026-04-24-阳光电源-buffett分析.md) — 同光伏链不同环节对比；阳光电源逆变器+储能护城河更强
 > - [2026-05-22-正泰电源-buffett分析](2026-05-22-正泰电源-buffett分析.md) — 同光伏链不同环节对比；正泰偏逆变器/电气箱柜
+> - [2026-06-02-TCL科技-buffett分析](../../electronics/display/2026-06-02-TCL科技-buffett分析.md) — TCL中环控股母公司，光伏业务是TCL科技最大拖累项
 <!-- END related_docs -->
 
 **分析日期**：2026-05-28
