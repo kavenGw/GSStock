@@ -83,6 +83,9 @@ related_docs:
 - 期望内在价值 = Σ(情景内在价值 × 概率)，Σ概率 = 100%（自检算术）。
 - 安全边际 = (期望内在价值 − 实时市值) / 实时市值。必要时对最乐观 bull 单独再算一次安全边际做压力测试。
 - 实时市值用 Phase A 采证的真实值，不用估。
+- **跨币种标的（港股/美股）币种统一**：市值币种 ≠ 财报币种时（如港股市值计 HKD、财报利润计 RMB，接口 PE 为混合口径），
+  场景加权前先把正常化利润按当期汇率折算到市值币种（如 RMB→HKD ~×1.08），三档与期望内在价值、安全边际全程同一币种，
+  并在 §9 注明汇率假设。否则 Σ(内在价值×概率) 与市值不同币种，安全边际算错。
 - **bull 情景增长证据包门控**（命中成长横切 lens 时必算）：bull 的概率与倍数上修必须由「成长持续性
   证据包」三要素支撑——(a) **扩产达产确定性**（产线已开工 / 设备到位 / 达产路线清晰=硬；仅规划=软）、
   (b) **客户 capex / 出货能见度**（具名客户公开 guidance=硬；终端市场总量=中；卖方一致预期=软）、
@@ -117,6 +120,10 @@ print(f[1], f[3], f[39], f[45], f[46])  # name, price, PE_TTM, 市值(亿), PB
 ```
 A股前缀：6 开头 `sh`、0/3 开头 `sz`。脚本跑完即删，不入库（`scripts/_xxx.py` 一次性脚本约定见 dev-conventions.md）。
 若直连失败再用 `UnifiedStockDataService.get_realtime_prices([code], force_refresh=True)` 兜底。
+
+**港股/美股行情**：腾讯 `q=hk01810` 港股字段索引**异于 A 股**（勿照搬 [39]PE/[45]市值/[46]PB，详见 `.claude/rules/data-architecture.md` 腾讯HTTP节）。
+港股/美股市值、PE(TTM)、PB、52 周区间优先用 WebFetch `stockanalysis.com/quote/hkg|nasdaq/<code>/statistics/` 或 Yahoo，**交叉验证 2 源**（市值口径常分歧）。
+亏损标的 PE(TTM)=N/A，估值锚改看 PS / PB / Forward PE。**市值=现价×总股本自洽校验**是兜底（曾靠此兜住港股字段索引误读）。
 
 **多年财务时序**：`ak.stock_financial_abstract_ths(symbol, indicator="按年度")`（全市场稳定）。
 **PE/PB 5 年分位**：`ak.stock_zh_valuation_baidu(symbol, indicator=..., period="近5年")`。
