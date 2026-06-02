@@ -101,6 +101,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 - **字段顺序**：`[datetime, open, close, high, low, volume]`（close在第2位，非标准OHLC）
 - **XD（除息日）字段失真**：分红除息当日 `q=` 接口 name 带 `XD` 前缀，且 52 周高/低字段 `[41]/[42]` 返回失真值（如现价 51.7 却报 52.92/50.78），**不可信**；price/PE_TTM/市值/PB 仍可靠。需 52 周区间改用 baidu 估值接口。
 - **只取实时价的一次性脚本直连 HTTP 优先**：`urllib.request` 拉 `qt.gtimg.cn/q=sh600519,sz000001,...` 比走 `create_app() + UnifiedStockDataService` 快 5x+ 且无副作用（即便 `SCHEDULER_ENABLED=0`，create_app 仍会启 crawl4ai 抓 google 新闻产生数十行噪音日志）；服务化路径仅在需要缓存 / 指数 / OHLC 时才走
+- **港股取数字段不同**：`q=hk03690`（GBK/`~`分隔）字段索引与 A 股不一致，**勿照搬 A 股 [39]PE/[45]市值/[46]PB**；港股市值/PE(TTM)/PB/PS/52周区间改用 WebFetch `stockanalysis.com/quote/hkg/<code>/statistics/` 或 Yahoo `<code>.HK`，交叉验证 2 源（市值口径常分歧）。亏损港股 PE(TTM)=N/A，估值锚改看 PS / PB / Forward PE
 
 ### 策略数据协作
 
