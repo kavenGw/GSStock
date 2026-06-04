@@ -824,14 +824,13 @@
   stock_name: 光迅科技
   market: A
   currency: CNY
-  sector: other
-  rating: 
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-09'
-  source_doc: cross-sector/2026-05-09-光迅科技-光库科技-buffett分析.md
-  note: 光迅；文档给回调买入区~45元非三档内在价值，安全边际为负
+  sector: semiconductor
+  rating: watch
+  bear: 10.8
+  base: 30.1
+  bull: 54.2
+  conviction_date: '2026-06-04'
+  source_doc: sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md
 - stock_code: '300620'
   stock_name: 光库科技
   market: A
