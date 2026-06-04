@@ -340,6 +340,18 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/electronics/pcb/2026-06-03-兴森科技-buffett分析.md
   note: 三情景市值bear≈70亿/base≈143亿/bull≈279亿；股本按市值/现价换算
+- stock_code: '603920'
+  stock_name: 世运电路
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  bear: 4.15
+  base: 9.73
+  bull: 22.34
+  conviction_date: '2026-06-04'
+  source_doc: sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md
+  note: 股本按市值257亿/股价35.49推算约7.24亿股，期望价值108亿
 - stock_code: '002475'
   stock_name: 立讯精密
   market: A
