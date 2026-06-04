@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 from pathlib import Path
 from typing import Optional
 
@@ -67,7 +68,14 @@ def index():
             prices = unified_stock_data_service.get_realtime_prices(codes)
         except Exception as e:
             logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
-    return render_template('valuations.html', rows=_enrich(rows, prices))
+    enriched = _enrich(rows, prices)
+    market_counts = Counter(r.get('market') for r in enriched)
+    return render_template(
+        'valuations.html',
+        rows=enriched,
+        market_counts=market_counts,
+        total=len(enriched),
+    )
 
 
 @valuations_bp.route('/api/prices')
