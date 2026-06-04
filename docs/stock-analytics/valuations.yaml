@@ -836,14 +836,13 @@
   stock_name: 光库科技
   market: A
   currency: CNY
-  sector: other
-  rating: 
-  bear: null
-  base: 396.8
-  bull: 607.3
-  conviction_date: '2026-05-09'
-  source_doc: cross-sector/2026-05-09-光迅科技-光库科技-buffett分析.md
-  note: 光库；仅乐观1500亿/中性980亿两档÷2.47亿股，无bear
+  sector: semiconductor
+  rating: watch
+  bear: 19.0
+  base: 47.0
+  bull: 76.0
+  conviction_date: '2026-06-04'
+  source_doc: sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md
 - stock_code: '600600'
   stock_name: 青岛啤酒
   market: A
