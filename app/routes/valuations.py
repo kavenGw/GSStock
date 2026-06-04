@@ -25,3 +25,14 @@ def compute_margin(value: Optional[float], price: Optional[float]) -> Optional[f
     if value is None or not price:
         return None
     return value / price - 1
+
+
+def load_valuations(path: Path = VALUATIONS_PATH) -> list[dict]:
+    """读 valuations.yaml，返回 list[dict]；文件缺失/空返回 []。"""
+    path = Path(path)
+    if not path.exists():
+        return []
+    data = yaml.safe_load(path.read_text(encoding='utf-8'))
+    if not isinstance(data, list):
+        return []
+    return data

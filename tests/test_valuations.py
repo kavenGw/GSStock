@@ -38,3 +38,38 @@ def test_extract_price_missing():
 
 def test_extract_price_zero_is_none():
     assert _extract_price({'price': 0}) is None
+
+
+def test_load_valuations_parses(tmp_path):
+    from app.routes.valuations import load_valuations
+    p = tmp_path / 'valuations.yaml'
+    p.write_text(
+        "- stock_code: '000878'\n"
+        "  stock_name: 云南铜业\n"
+        "  market: A\n"
+        "  currency: CNY\n"
+        "  rating: watch\n"
+        "  bear: 6.50\n"
+        "  base: 7.78\n"
+        "  bull: 8.87\n"
+        "  conviction_date: '2026-06-02'\n"
+        "  source_doc: sectors/materials/nonferrous/2026-06-02-云南铜业-buffett分析.md\n",
+        encoding='utf-8',
+    )
+    rows = load_valuations(p)
+    assert len(rows) == 1
+    assert rows[0]['stock_code'] == '000878'
+    assert rows[0]['base'] == 7.78
+    assert rows[0]['stock_name'] == '云南铜业'
+
+
+def test_load_valuations_missing_returns_empty(tmp_path):
+    from app.routes.valuations import load_valuations
+    assert load_valuations(tmp_path / 'nope.yaml') == []
+
+
+def test_load_valuations_empty_file_returns_empty(tmp_path):
+    from app.routes.valuations import load_valuations
+    p = tmp_path / 'empty.yaml'
+    p.write_text('', encoding='utf-8')
+    assert load_valuations(p) == []
