@@ -44,7 +44,7 @@
         {{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '—' }}
       </td>
       <td>{{ r.conviction_date or '—' }}</td>
-      <td>{% if r.source_doc %}<a href="https://github.com" onclick="return false" title="{{ r.source_doc }}">📄</a>{% else %}—{% endif %}</td>
+      <td>{% if r.source_doc %}<span title="{{ r.source_doc }}" style="cursor:help">📄</span>{% else %}—{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>

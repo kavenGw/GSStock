@@ -129,3 +129,25 @@ def test_index_has_table_headers_and_refresh(app_client):
     for col in ('Bear', 'Base', 'Bull', '当前价', '安全边际'):
         assert col in html, f'缺列头 {col}'
     assert 'id="refresh-btn"' in html
+
+
+def test_load_valuations_filters_rows_without_code(tmp_path):
+    from app.routes.valuations import load_valuations
+    p = tmp_path / 'v.yaml'
+    p.write_text(
+        "- stock_code: '000001'\n  base: 1.0\n"
+        "- note: 没有 stock_code 的脏行\n"
+        "- stock_code: '000002'\n  base: 2.0\n",
+        encoding='utf-8',
+    )
+    rows = load_valuations(p)
+    assert [r['stock_code'] for r in rows] == ['000001', '000002']
+
+
+def test_index_degrades_when_price_fetch_raises(app_client, monkeypatch):
+    from app.services import unified_stock_data_service
+    def boom(codes, force_refresh=False):
+        raise RuntimeError('network down')
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices', boom)
+    resp = app_client.get('/valuations/')
+    assert resp.status_code == 200  # 降级渲染而非 500

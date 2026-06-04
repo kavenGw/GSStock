@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -6,6 +7,8 @@ from flask import render_template, jsonify, request
 
 from app.routes import valuations_bp
 from app.services import unified_stock_data_service
+
+logger = logging.getLogger(__name__)
 
 VALUATIONS_PATH = Path(__file__).resolve().parents[2] / 'docs' / 'stock-analytics' / 'valuations.yaml'
 
@@ -35,7 +38,7 @@ def load_valuations(path: Path = VALUATIONS_PATH) -> list[dict]:
     data = yaml.safe_load(path.read_text(encoding='utf-8'))
     if not isinstance(data, list):
         return []
-    return data
+    return [r for r in data if isinstance(r, dict) and r.get('stock_code')]
 
 
 def _enrich(rows: list[dict], prices: dict) -> list[dict]:
@@ -58,7 +61,12 @@ def _enrich(rows: list[dict], prices: dict) -> list[dict]:
 def index():
     rows = load_valuations()
     codes = [r['stock_code'] for r in rows]
-    prices = unified_stock_data_service.get_realtime_prices(codes) if codes else {}
+    prices = {}
+    if codes:
+        try:
+            prices = unified_stock_data_service.get_realtime_prices(codes)
+        except Exception as e:
+            logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
     return render_template('valuations.html', rows=_enrich(rows, prices))
 
 
