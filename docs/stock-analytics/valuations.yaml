@@ -328,6 +328,17 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/electronics/pcb/2026-06-02-东山精密-buffett分析.md
   note: 东山精密；三情景市值180/450/1050亿÷18.32亿股；exclude，安全边际-86.6%
+- stock_code: '002463'
+  stock_name: 沪电股份
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  bear: 37.40
+  base: 67.01
+  bull: 94.29
+  conviction_date: '2026-06-04'
+  source_doc: sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md
 - stock_code: '002436'
   stock_name: 兴森科技
   market: A
