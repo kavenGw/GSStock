@@ -73,3 +73,23 @@ def test_load_valuations_empty_file_returns_empty(tmp_path):
     p = tmp_path / 'empty.yaml'
     p.write_text('', encoding='utf-8')
     assert load_valuations(p) == []
+
+
+@pytest.fixture
+def app_client(monkeypatch):
+    import os
+    os.environ['SCHEDULER_ENABLED'] = '0'
+    from app import create_app
+    from app.services import unified_stock_data_service
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices',
+                        lambda codes, force_refresh=False: {})
+    app = create_app()
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
+
+def test_index_route_smoke(app_client):
+    resp = app_client.get('/valuations/')
+    assert resp.status_code == 200
+    assert '估值'.encode('utf-8') in resp.data

@@ -1,0 +1,11 @@
+- stock_code: '000878'
+  stock_name: 云南铜业
+  market: A
+  currency: CNY
+  rating: watch
+  bear: 6.50
+  base: 7.78
+  bull: 8.87
+  conviction_date: '2026-06-02'
+  source_doc: sectors/materials/nonferrous/2026-06-02-云南铜业-buffett分析.md
+  note: 三情景加权 base 7.78

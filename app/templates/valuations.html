@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}估值汇总 - 股票管理{% endblock %}
+{% block content %}
+<h4>估值汇总</h4>
+<table class="table"><tbody>
+{% for r in rows %}
+<tr><td>{{ r.stock_code }}</td><td>{{ r.stock_name }}</td></tr>
+{% endfor %}
+</tbody></table>
+{% endblock %}

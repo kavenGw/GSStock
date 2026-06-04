@@ -4,8 +4,8 @@ from typing import Optional
 import yaml
 from flask import render_template, jsonify, request
 
-# from app.routes import valuations_bp  # Task 3 启用
-# from app.services import unified_stock_data_service  # Task 3 启用
+from app.routes import valuations_bp
+from app.services import unified_stock_data_service
 
 VALUATIONS_PATH = Path(__file__).resolve().parents[2] / 'docs' / 'stock-analytics' / 'valuations.yaml'
 
@@ -36,3 +36,27 @@ def load_valuations(path: Path = VALUATIONS_PATH) -> list[dict]:
     if not isinstance(data, list):
         return []
     return data
+
+
+def _enrich(rows: list[dict], prices: dict) -> list[dict]:
+    out = []
+    for r in rows:
+        data = prices.get(r['stock_code']) or {}
+        price = _extract_price(data)
+        out.append({
+            **r,
+            'current_price': price,
+            'margin_bear': compute_margin(r.get('bear'), price),
+            'margin_base': compute_margin(r.get('base'), price),
+            'margin_bull': compute_margin(r.get('bull'), price),
+        })
+    out.sort(key=lambda x: (x['margin_base'] is None, -(x['margin_base'] or 0)))
+    return out
+
+
+@valuations_bp.route('/')
+def index():
+    rows = load_valuations()
+    codes = [r['stock_code'] for r in rows]
+    prices = unified_stock_data_service.get_realtime_prices(codes) if codes else {}
+    return render_template('valuations.html', rows=_enrich(rows, prices))
