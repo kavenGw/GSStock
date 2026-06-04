@@ -75,21 +75,49 @@ def test_load_valuations_empty_file_returns_empty(tmp_path):
     assert load_valuations(p) == []
 
 
-@pytest.fixture
-def app_client(monkeypatch):
+@pytest.fixture(scope='module')
+def app_client():
     import os
     os.environ['SCHEDULER_ENABLED'] = '0'
     from app import create_app
     from app.services import unified_stock_data_service
-    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices',
-                        lambda codes, force_refresh=False: {})
+    _orig = unified_stock_data_service.get_realtime_prices
+    unified_stock_data_service.get_realtime_prices = lambda codes, force_refresh=False: {}
     app = create_app()
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
+    unified_stock_data_service.get_realtime_prices = _orig
 
 
 def test_index_route_smoke(app_client):
     resp = app_client.get('/valuations/')
     assert resp.status_code == 200
     assert '估值'.encode('utf-8') in resp.data
+
+
+def test_api_prices_structure(app_client, monkeypatch):
+    from app.services import unified_stock_data_service
+
+    def fake_prices(codes, force_refresh=False):
+        assert force_refresh is True  # ?force=1 必须透传
+        return {'000878': {'price': 17.90, 'name': '云南铜业'}}
+
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices', fake_prices)
+    resp = app_client.get('/valuations/api/prices?force=1')
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert '000878' in body
+    row = body['000878']
+    assert row['current_price'] == 17.90
+    assert row['margin_base'] == pytest.approx(7.78 / 17.90 - 1)
+
+
+def test_api_prices_missing_price_yields_none(app_client, monkeypatch):
+    from app.services import unified_stock_data_service
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices',
+                        lambda codes, force_refresh=False: {'000878': {'price': 0}})
+    resp = app_client.get('/valuations/api/prices?force=1')
+    row = resp.get_json()['000878']
+    assert row['current_price'] is None
+    assert row['margin_base'] is None

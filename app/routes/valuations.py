@@ -60,3 +60,22 @@ def index():
     codes = [r['stock_code'] for r in rows]
     prices = unified_stock_data_service.get_realtime_prices(codes) if codes else {}
     return render_template('valuations.html', rows=_enrich(rows, prices))
+
+
+@valuations_bp.route('/api/prices')
+def api_prices():
+    force = request.args.get('force') == '1'
+    rows = load_valuations()
+    codes = [r['stock_code'] for r in rows]
+    prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=force) if codes else {}
+    out = {}
+    for r in rows:
+        data = prices.get(r['stock_code']) or {}
+        price = _extract_price(data)
+        out[r['stock_code']] = {
+            'current_price': price,
+            'margin_bear': compute_margin(r.get('bear'), price),
+            'margin_base': compute_margin(r.get('base'), price),
+            'margin_bull': compute_margin(r.get('bull'), price),
+        }
+    return jsonify(out)
