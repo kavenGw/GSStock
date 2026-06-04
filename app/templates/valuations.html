@@ -16,6 +16,12 @@
     <button id="refresh-btn" class="btn btn-sm btn-primary" onclick="refreshPrices()">🔄 刷新实时价</button>
   </div>
 </div>
+<ul class="nav nav-tabs mb-3" id="market-tabs">
+  <li class="nav-item"><a class="nav-link active" href="#" data-market="all" onclick="switchTab(event,'all')">全部 ({{ total }})</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-market="A" onclick="switchTab(event,'A')">A股 ({{ market_counts['A'] or 0 }})</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-market="HK" onclick="switchTab(event,'HK')">港股 ({{ market_counts['HK'] or 0 }})</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-market="US" onclick="switchTab(event,'US')">美股 ({{ market_counts['US'] or 0 }})</a></li>
+</ul>
 {% if not rows %}
 <div class="alert alert-warning">暂无估值数据（docs/stock-analytics/valuations.yaml 为空或缺失）。</div>
 {% else %}
@@ -23,7 +29,7 @@
 <table class="table table-sm table-hover val-table">
   <thead class="table-light">
     <tr>
-      <th>代码</th><th>名称</th><th>板块</th><th>评级</th>
+      <th>代码</th><th>名称</th><th>币种</th><th>板块</th><th>评级</th>
       <th class="text-end">Bear</th><th class="text-end">Base</th><th class="text-end">Bull</th>
       <th class="text-end">当前价</th><th class="text-end">Base安全边际</th>
       <th>日期</th><th>文档</th>
@@ -31,9 +37,10 @@
   </thead>
   <tbody>
   {% for r in rows %}
-    <tr data-code="{{ r.stock_code }}">
+    <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}">
       <td>{{ r.stock_code }}</td>
       <td>{{ r.stock_name }}</td>
+      <td>{{ r.currency or '—' }}</td>
       <td>{{ r.sector or '—' }}</td>
       <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
       <td class="text-end">{{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}</td>
@@ -81,6 +88,16 @@ async function refreshPrices() {
   } finally {
     btn.disabled = false;
   }
+}
+
+function switchTab(ev, market) {
+  ev.preventDefault();
+  document.querySelectorAll('#market-tabs .nav-link').forEach(a => {
+    a.classList.toggle('active', a.dataset.market === market);
+  });
+  document.querySelectorAll('tr[data-code]').forEach(tr => {
+    tr.style.display = (market === 'all' || tr.dataset.market === market) ? '' : 'none';
+  });
 }
 </script>
 {% endblock %}

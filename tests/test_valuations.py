@@ -151,3 +151,24 @@ def test_index_degrades_when_price_fetch_raises(app_client, monkeypatch):
     monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices', boom)
     resp = app_client.get('/valuations/')
     assert resp.status_code == 200  # 降级渲染而非 500
+
+
+def test_index_renders_market_tabs_with_counts(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    for label in ('全部', 'A股', '港股', '美股'):
+        assert label in html, f'缺 tab 文案 {label}'
+    from collections import Counter
+    from app.routes.valuations import load_valuations
+    rows = load_valuations()
+    counts = Counter(r.get('market') for r in rows)
+    assert f'全部 ({len(rows)})' in html
+    assert f"A股 ({counts.get('A', 0)})" in html
+    assert f"港股 ({counts.get('HK', 0)})" in html
+    assert f"美股 ({counts.get('US', 0)})" in html
+
+
+def test_index_has_currency_column_and_data_market(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert '币种' in html, '缺币种列头'
+    assert 'data-market=' in html, '缺行 data-market 属性'
+    assert 'switchTab' in html, '缺 switchTab JS'
