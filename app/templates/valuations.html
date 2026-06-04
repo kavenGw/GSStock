@@ -16,15 +16,15 @@
     <button id="refresh-btn" class="btn btn-sm btn-primary" onclick="refreshPrices()">🔄 刷新实时价</button>
   </div>
 </div>
-<ul class="nav nav-tabs mb-3" id="market-tabs">
-  <li class="nav-item"><a class="nav-link active" href="#" data-market="all" onclick="switchTab(event,'all')">全部 ({{ total }})</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" data-market="A" onclick="switchTab(event,'A')">A股 ({{ market_counts['A'] or 0 }})</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" data-market="HK" onclick="switchTab(event,'HK')">港股 ({{ market_counts['HK'] or 0 }})</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" data-market="US" onclick="switchTab(event,'US')">美股 ({{ market_counts['US'] or 0 }})</a></li>
-</ul>
 {% if not rows %}
 <div class="alert alert-warning">暂无估值数据（docs/stock-analytics/valuations.yaml 为空或缺失）。</div>
 {% else %}
+<ul class="nav nav-tabs mb-3" id="market-tabs">
+  <li class="nav-item"><a class="nav-link active" href="#" data-market="all" onclick="switchTab(event,'all')">全部 ({{ total }})</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-market="A" onclick="switchTab(event,'A')">A股 ({{ market_counts.get('A', 0) }})</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-market="HK" onclick="switchTab(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</a></li>
+  <li class="nav-item"><a class="nav-link" href="#" data-market="US" onclick="switchTab(event,'US')">美股 ({{ market_counts.get('US', 0) }})</a></li>
+</ul>
 <div class="table-responsive">
 <table class="table table-sm table-hover val-table">
   <thead class="table-light">
