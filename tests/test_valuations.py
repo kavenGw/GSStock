@@ -121,3 +121,11 @@ def test_api_prices_missing_price_yields_none(app_client, monkeypatch):
     row = resp.get_json()['000878']
     assert row['current_price'] is None
     assert row['margin_base'] is None
+
+
+def test_index_has_table_headers_and_refresh(app_client):
+    resp = app_client.get('/valuations/')
+    html = resp.data.decode('utf-8')
+    for col in ('Bear', 'Base', 'Bull', '当前价', '安全边际'):
+        assert col in html, f'缺列头 {col}'
+    assert 'id="refresh-btn"' in html

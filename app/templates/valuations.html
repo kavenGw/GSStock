@@ -1,10 +1,86 @@
 {% extends "base.html" %}
 {% block title %}估值汇总 - 股票管理{% endblock %}
+{% block extra_css %}
+<style>
+.margin-pos { color: #198754; font-weight: 600; }
+.margin-neg { color: #dc3545; font-weight: 600; }
+.val-table th, .val-table td { font-size: 13px; white-space: nowrap; vertical-align: middle; }
+.rating-badge { font-size: 11px; }
+</style>
+{% endblock %}
 {% block content %}
-<h4>估值汇总</h4>
-<table class="table"><tbody>
-{% for r in rows %}
-<tr><td>{{ r.stock_code }}</td><td>{{ r.stock_name }}</td></tr>
-{% endfor %}
-</tbody></table>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-cash-stack"></i> 估值汇总</h4>
+  <div>
+    <span id="refresh-status" class="text-muted small me-2"></span>
+    <button id="refresh-btn" class="btn btn-sm btn-primary" onclick="refreshPrices()">🔄 刷新实时价</button>
+  </div>
+</div>
+{% if not rows %}
+<div class="alert alert-warning">暂无估值数据（docs/stock-analytics/valuations.yaml 为空或缺失）。</div>
+{% else %}
+<div class="table-responsive">
+<table class="table table-sm table-hover val-table">
+  <thead class="table-light">
+    <tr>
+      <th>代码</th><th>名称</th><th>板块</th><th>评级</th>
+      <th class="text-end">Bear</th><th class="text-end">Base</th><th class="text-end">Bull</th>
+      <th class="text-end">当前价</th><th class="text-end">Base安全边际</th>
+      <th>日期</th><th>文档</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in rows %}
+    <tr data-code="{{ r.stock_code }}">
+      <td>{{ r.stock_code }}</td>
+      <td>{{ r.stock_name }}</td>
+      <td>{{ r.sector or '—' }}</td>
+      <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
+      <td class="text-end">{{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}</td>
+      <td class="text-end">{{ '%.2f'|format(r.base) if r.base is not none else '—' }}</td>
+      <td class="text-end">{{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}</td>
+      <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
+      <td class="text-end cell-margin {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">
+        {{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '—' }}
+      </td>
+      <td>{{ r.conviction_date or '—' }}</td>
+      <td>{% if r.source_doc %}<a href="https://github.com" onclick="return false" title="{{ r.source_doc }}">📄</a>{% else %}—{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+
+<script>
+function fmtPrice(v) { return v === null || v === undefined ? '—' : v.toFixed(2); }
+function fmtMargin(v) { return v === null || v === undefined ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
+
+async function refreshPrices() {
+  const btn = document.getElementById('refresh-btn');
+  const status = document.getElementById('refresh-status');
+  btn.disabled = true; status.textContent = '刷新中…';
+  try {
+    const resp = await fetch('/valuations/api/prices?force=1');
+    if (!resp.ok) throw new Error('http ' + resp.status);
+    const data = await resp.json();
+    document.querySelectorAll('tr[data-code]').forEach(tr => {
+      const row = data[tr.dataset.code];
+      if (!row) return;
+      tr.querySelector('.cell-price').textContent = fmtPrice(row.current_price);
+      const m = tr.querySelector('.cell-margin');
+      m.textContent = fmtMargin(row.margin_base);
+      m.classList.remove('margin-pos', 'margin-neg');
+      if (row.margin_base !== null && row.margin_base !== undefined) {
+        m.classList.add(row.margin_base >= 0 ? 'margin-pos' : 'margin-neg');
+      }
+    });
+    status.textContent = '已更新 ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    status.textContent = '刷新失败';
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
 {% endblock %}
