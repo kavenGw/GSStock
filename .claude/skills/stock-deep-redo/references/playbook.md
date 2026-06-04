@@ -8,7 +8,8 @@
 5. [联网采证清单](#5-联网采证清单)
 6. [数据获取：实时行情 + 坑](#6-数据获取)
 7. [lint 与 related_docs 对称](#7-lint-与-related_docs-对称)
-8. [各阶段 subagent 派发提示骨架](#8-subagent-派发提示骨架)
+8. [valuations.yaml 同步](#8-valuationsyaml-同步)
+9. [各阶段 subagent 派发提示骨架](#9-subagent-派发提示骨架)
 
 ---
 
@@ -142,7 +143,51 @@ python scripts/lint_docs_refs.py --rewrite-blocks  # 重生所有文档顶部 ma
 退出码 0 = 全过。`symmetric: true` 的 related_docs 条目要求被链文档有反向条目，否则 refs lint 报错——
 Phase C 给被链档补反向条目后跑 `--rewrite-blocks` 再跑两支 lint 确认 exit 0。
 
-## 8. subagent 派发提示骨架
+## 8. valuations.yaml 同步
+
+Phase C 必须将新档的估值数据同步到 `docs/stock-analytics/valuations.yaml`，供 `/valuations` 页面实时安全边际计算。
+
+### 提取规则
+
+从新档 §0（结论摘要）或 §9（估值）提取 **bear / base / bull 每股内在价值**：
+
+1. **A 股**：正文中 `X.XX 元/股` 或 `每股 X.XX 元` 格式
+2. **港股/美股**：正文中 `X.XX 港元/股` / `X.XX 美元/股`，或从 `内在价值 XXX 亿 / 股本 Y 亿股` 反推每股
+3. **无法估值**：正文明确写"无法可靠估算"→ bear/base/bull 均填 `null`
+
+### YAML 条目格式
+
+```yaml
+- stock_code: '000878'        # 字符串引号，防 YAML int 化丢前导 0
+  stock_name: 云南铜业
+  market: A                   # A / US / HK
+  currency: CNY               # CNY / USD / HKD（与每股估值币种一致）
+  sector: materials           # 一级 sector
+  rating: watch               # core / config / watch / exclude
+  bear: 6.50                  # 每股内在价值（原币），无法估算填 null
+  base: 7.78
+  bull: 8.87
+  conviction_date: '2026-06-02'  # 字符串引号
+  source_doc: sectors/materials/nonferrous/2026-06-02-云南铜业-buffett分析.md
+  note: 可选备注（如"每股由市值反推股本，不确定性偏高"）
+```
+
+### 同步操作
+
+1. **读取现有 valuations.yaml**（用 `yaml.safe_load`）
+2. **按 `stock_code` 查找**：已存在 → 更新该条目；不存在 → 追加到末尾
+3. **保持列表结构**：不要改变其他条目的顺序
+4. **写回时用 `yaml.dump(..., allow_unicode=True, sort_keys=False)`** 保持中文可读 + 键顺序
+
+### 特殊情况
+
+- **港股代码格式**：`valuations.yaml` 中部分港股用 `03690`（5 位纯数字），部分用 `09992.HK`（带后缀）。
+  新条目按 frontmatter `stock_code` 原样写入；若与已有条目 `stock_code` 不一致但实为同股，**以新档为准覆盖**。
+- **市值口径→每股**：若正文只给市值内在价值（如 `~643 亿港元`）未给每股，需用 `市值 / 股本` 反推；
+  股本从实时行情或正文推算（如 `市值 711 亿 / 现价 12.76 = 55.7 亿股`）。此时 `note` 字段标注
+  `每股由市值/股价推算股本，不确定性偏高`。
+
+## 9. subagent 派发提示骨架
 
 每个 subagent 都要给**完整自包含上下文**（别让它读本计划/SKILL，直接喂它需要的）。骨架：
 
@@ -161,8 +206,10 @@ slop/buffett 贴合/监控可执行）；要求总判定 + 按严重度列问题
 
 **Phase C 收尾**：先 `git status` 查遗留改动；**`git rm` 控制者传来的待删旧 buffett 档清单**；
 **把所有 symmetric 指向被删档的反向链改指到新档或删条目**；给要补反向条目的被链档路径 + 反向 YAML；
-跑 `--rewrite-blocks` + 双 lint exit 0 + `--check-orphans` 确认新档非孤儿；确认采证脚本已删、evidence.md 未 add；
-提交终稿；汇报双 lint 退出码 + SHA + 状态。
+跑 `--rewrite-blocks` + 双 lint exit 0 + `--check-orphans` 确认新档非孤儿；
+**同步 valuations.yaml**（见 §8）：从新档提取 bear/base/bull 每股内在价值，upsert 到
+`docs/stock-analytics/valuations.yaml`；确认采证脚本已删、evidence.md 未 add；
+提交终稿；汇报双 lint 退出码 + valuations 同步状态 + SHA + 状态。
 
 **派发坑：长文撰写 subagent 的 stream idle timeout**：Phase B（opus 写 300+ 行）可能中途报
 `Stream idle timeout - partial response received`、文件 0 落盘（多发生在它还在读基线/取框架阶段）。
