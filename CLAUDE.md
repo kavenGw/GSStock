@@ -21,8 +21,8 @@ start.bat
 ./update_and_run.sh
 # 安装依赖
 pip install -r requirements.txt
-# 单测（禁用调度器 + UTF-8 编码）
-rtk PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 python -m pytest tests/ -v
+# 单测（禁用调度器 + UTF-8 编码）—— env 赋值必须在 rtk 之前
+PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/ -v
 # 只读 DB 巡检（不走 create_app —— 会启 17 任务 + crawl4ai + LLM）
 PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.db').cursor(); c.execute('SELECT ...'); ..."
 ```

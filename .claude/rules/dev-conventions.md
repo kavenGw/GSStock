@@ -58,6 +58,10 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 **多行 python 嵌套引号 / heredoc 在 Windows bash 易失配**：多行 python 嵌套引号 / heredoc 在 Windows bash 易 `EOF` 失配（`unexpected EOF looking for matching '`）。改用 `Write → scripts/_xxx.py → python scripts/_xxx.py` 跑完 `rm`，比 heredoc 稳。
 
+**`rtk` 与 env 前缀顺序**：env 赋值必须在 `rtk` 之前 —— `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python ...`。写成 `rtk PYTHONIOENCODING=utf-8 ... python` 会让 rtk 把 `PYTHONIOENCODING=utf-8` 当程序名报 `Binary not found`。
+
+**Bash 工具 cwd 跨调用持久**：一次 `cd 子目录 && ...` 会泄漏到后续所有 Bash 调用的 cwd，导致相对路径（`.omc/artifacts/` 等）解析到错目录、文件散落。脚本/校验一律用绝对路径，避免裸 `cd`。
+
 ## 开发规范
 
 **测试目录布局**：单测放 `tests/test_*.py` 平铺，不用 `tests/services/` 等子目录（仅存空 `__pycache__`）
