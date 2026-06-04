@@ -1,0 +1,27 @@
+from pathlib import Path
+from typing import Any, Optional
+
+import yaml
+from flask import render_template, jsonify, request
+
+# from app.routes import valuations_bp  # Task 3 启用
+# from app.services import unified_stock_data_service  # Task 3 启用
+
+VALUATIONS_PATH = Path(__file__).resolve().parents[2] / 'docs' / 'stock-analytics' / 'valuations.yaml'
+
+
+def _extract_price(data: dict) -> Optional[float]:
+    """防御读价：PriceData 用 'price'，内存缓存层可能用 'current_price'；0/None 均视为无效。"""
+    price = data.get('price')
+    if price is None:
+        price = data.get('current_price')
+    if not price:  # None 或 0
+        return None
+    return float(price)
+
+
+def compute_margin(value: Optional[float], price: Optional[float]) -> Optional[float]:
+    """安全边际 = value / price - 1（正=上行空间，负=高估）。value 缺或 price 无效返回 None。"""
+    if value is None or not price:
+        return None
+    return value / price - 1
