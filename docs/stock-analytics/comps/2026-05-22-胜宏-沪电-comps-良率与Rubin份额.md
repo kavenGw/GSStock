@@ -40,6 +40,9 @@ related_docs:
   - path: ../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md
     note: 世运电路 buffett 深度分析
     symmetric: true
+  - path: ../sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md
+    note: 沪电 buffett 深度分析
+    symmetric: true
 ---
 # 胜宏科技 vs 沪电股份 — 良率与 Rubin 份额 comps（2026-05-22）
 
@@ -53,6 +56,7 @@ related_docs:
 > - [2026-05-29-Rubin-VR200-BOM拆解-价值分配](../themes/2026-05-29-Rubin-VR200-BOM拆解-价值分配.md) — 大摩 VR200 BOM 拆解 ASP 翻倍与价值分配（胜宏 GPU 算力板卡位）
 > - [2026-05-30-胜宏科技-buffett分析](../sectors/semiconductor/pcb/2026-05-30-胜宏科技-buffett分析.md) — 胜宏 buffett 个股深度分析（六维 + 多情景估值）
 > - [2026-06-04-世运电路-buffett分析](../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md) — 世运电路 buffett 深度分析
+> - [2026-06-04-沪电股份-buffett分析](../sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md) — 沪电 buffett 深度分析
 <!-- END related_docs -->
 
 > 撰写日期：2026-05-22
