@@ -93,9 +93,9 @@ description: >-
 - 给指向新档的外部文档（comps/theme/quarterly）补反向 related_docs 条目（symmetric: true 的那些）。
 - `python scripts/lint_docs_refs.py --rewrite-blocks` 重生顶部块（别手编 `<!-- BEGIN/END related_docs -->`）。
 - `lint_docs_frontmatter.py` + `lint_docs_refs.py` **都要 exit 0**；`--check-orphans` 确认新档非孤儿。
-- **同步 valuations.yaml**：从新档 §0/§9 提取 bear/base/bull 每股内在价值，upsert 到
+- **同步 valuations.yaml**：从新档 §0/§9 提取 bear/base/bull 每股内在价值 + §3/§11 提取 dividend_yield 分红率，upsert 到
   `docs/stock-analytics/valuations.yaml`（按 `stock_code` 去重，更新已有条目或追加新条目）。
-  详见 `references/playbook.md` §9「valuations.yaml 同步」。
+  详见 `references/playbook.md` §8「valuations.yaml 同步」。
 - 确认一次性采证脚本已删、evidence.md 未被 add。
 - 提交终稿。
 

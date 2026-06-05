@@ -155,6 +155,12 @@ Phase C 必须将新档的估值数据同步到 `docs/stock-analytics/valuations
 2. **港股/美股**：正文中 `X.XX 港元/股` / `X.XX 美元/股`，或从 `内在价值 XXX 亿 / 股本 Y 亿股` 反推每股
 3. **无法估值**：正文明确写"无法可靠估算"→ bear/base/bull 均填 `null`
 
+从新档 §3（盈利能力）或 §11（风险/监控）提取 **dividend_yield（分红率）**：
+
+1. **有明确分红率**：正文中 `分红率 X.X%` / `股息率 X.X%` / `dividend yield X.X%` → 填数值（如 `3.5`）
+2. **无分红 / 未提及**：填 `null`（成长股 / 亏损股通常无分红）
+3. **消费/传统股必填**：sector 为 `consumer` / `materials` / `energy` / `industrial` / `financial` 的标的，分红率是重要收益来源，Phase A 采证时须联网查最新年度分红（东财/同花顺/公司公告），Phase B 撰写时在 §3 或 §11 明确写出
+
 ### YAML 条目格式
 
 ```yaml
@@ -167,6 +173,7 @@ Phase C 必须将新档的估值数据同步到 `docs/stock-analytics/valuations
   bear: 6.50                  # 每股内在价值（原币），无法估算填 null
   base: 7.78
   bull: 8.87
+  dividend_yield: 2.8         # 分红率（%），无分红填 null
   conviction_date: '2026-06-02'  # 字符串引号
   source_doc: sectors/materials/nonferrous/2026-06-02-云南铜业-buffett分析.md
   note: 可选备注（如"每股由市值反推股本，不确定性偏高"）
@@ -207,7 +214,7 @@ slop/buffett 贴合/监控可执行）；要求总判定 + 按严重度列问题
 **Phase C 收尾**：先 `git status` 查遗留改动；**`git rm` 控制者传来的待删旧 buffett 档清单**；
 **把所有 symmetric 指向被删档的反向链改指到新档或删条目**；给要补反向条目的被链档路径 + 反向 YAML；
 跑 `--rewrite-blocks` + 双 lint exit 0 + `--check-orphans` 确认新档非孤儿；
-**同步 valuations.yaml**（见 §8）：从新档提取 bear/base/bull 每股内在价值，upsert 到
+**同步 valuations.yaml**（见 §8）：从新档提取 bear/base/bull 每股内在价值 + dividend_yield 分红率，upsert 到
 `docs/stock-analytics/valuations.yaml`；确认采证脚本已删、evidence.md 未 add；
 提交终稿；汇报双 lint 退出码 + valuations 同步状态 + SHA + 状态。
 
