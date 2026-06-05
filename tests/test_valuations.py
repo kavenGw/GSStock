@@ -227,3 +227,10 @@ def test_group_by_sector_tiebreak_by_sector_name():
     ]
     groups = group_by_sector(rows)
     assert [g['sector'] for g in groups] == ['electronics', 'semiconductor']
+
+
+def test_index_renders_sector_group_headers(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'group-header' in html, '缺板块组头'
+    assert 'data-sector=' in html, '缺行/组头 data-sector 属性'
+    assert '半导体' in html

@@ -16,32 +16,36 @@
     <button id="refresh-btn" class="btn btn-sm btn-primary" onclick="refreshPrices()">🔄 刷新实时价</button>
   </div>
 </div>
-{% if not rows %}
+{% if not groups %}
 <div class="alert alert-warning">暂无估值数据（docs/stock-analytics/valuations.yaml 为空或缺失）。</div>
 {% else %}
-<ul class="nav nav-tabs mb-3" id="market-tabs">
-  <li class="nav-item"><a class="nav-link active" href="#" data-market="all" onclick="switchTab(event,'all')">全部 ({{ total }})</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" data-market="A" onclick="switchTab(event,'A')">A股 ({{ market_counts.get('A', 0) }})</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" data-market="HK" onclick="switchTab(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</a></li>
-  <li class="nav-item"><a class="nav-link" href="#" data-market="US" onclick="switchTab(event,'US')">美股 ({{ market_counts.get('US', 0) }})</a></li>
-</ul>
+<div class="mb-3" id="market-chips">
+  <button class="btn btn-sm btn-primary chip" data-market="all" onclick="switchMarket(event,'all')">全部 ({{ total }})</button>
+  <button class="btn btn-sm btn-outline-primary chip" data-market="A" onclick="switchMarket(event,'A')">A股 ({{ market_counts.get('A', 0) }})</button>
+  <button class="btn btn-sm btn-outline-primary chip" data-market="HK" onclick="switchMarket(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</button>
+  <button class="btn btn-sm btn-outline-primary chip" data-market="US" onclick="switchMarket(event,'US')">美股 ({{ market_counts.get('US', 0) }})</button>
+</div>
 <div class="table-responsive">
 <table class="table table-sm table-hover val-table">
   <thead class="table-light">
     <tr>
-      <th>代码</th><th>名称</th><th>币种</th><th>板块</th><th>评级</th>
+      <th>代码</th><th>名称</th><th>币种</th><th>评级</th>
       <th class="text-end">Bear</th><th class="text-end">Base</th><th class="text-end">Bull</th>
       <th class="text-end">当前价</th><th class="text-end">Base安全边际</th>
       <th>日期</th><th>文档</th>
     </tr>
   </thead>
   <tbody>
-  {% for r in rows %}
-    <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}">
+  {% for g in groups %}
+    <tr class="group-header" data-sector="{{ g.sector }}" onclick="toggleGroup('{{ g.sector }}')">
+      <th colspan="11"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
+    </tr>
+    {% for r in g.rows %}
+    <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}"
+        class="grp-{{ g.sector }}{% if r.rating == 'exclude' %} row-muted{% endif %}">
       <td>{{ r.stock_code }}</td>
       <td>{{ r.stock_name }}</td>
       <td>{{ r.currency or '—' }}</td>
-      <td>{{ r.sector or '—' }}</td>
       <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
       <td class="text-end">{{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}</td>
       <td class="text-end">{{ '%.2f'|format(r.base) if r.base is not none else '—' }}</td>
@@ -53,6 +57,7 @@
       <td>{{ r.conviction_date or '—' }}</td>
       <td>{% if r.source_doc %}<span title="{{ r.source_doc }}" style="cursor:help">📄</span>{% else %}—{% endif %}</td>
     </tr>
+    {% endfor %}
   {% endfor %}
   </tbody>
 </table>

@@ -100,10 +100,11 @@ def index():
         except Exception as e:
             logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
     enriched = _enrich(rows, prices)
+    groups = group_by_sector(enriched)
     market_counts = Counter(r.get('market') for r in enriched)
     return render_template(
         'valuations.html',
-        rows=enriched,
+        groups=groups,
         market_counts=market_counts,
         total=len(enriched),
     )
