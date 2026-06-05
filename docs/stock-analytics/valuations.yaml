@@ -842,6 +842,18 @@
   bull: 76.0
   conviction_date: '2026-06-04'
   source_doc: sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md
+- stock_code: '688127'
+  stock_name: 蓝特光学
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  bear: 44.3
+  base: 69.0
+  bull: 123.2
+  conviction_date: '2026-06-04'
+  source_doc: sectors/semiconductor/optical-components/2026-06-04-蓝特光学-buffett分析.md
+  note: 蓝特光学；三情景市值180/280/500亿÷4.06亿股(423亿市值/104.29元)
 - stock_code: '600600'
   stock_name: 青岛啤酒
   market: A
