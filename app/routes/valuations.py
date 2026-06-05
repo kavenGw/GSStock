@@ -58,6 +58,37 @@ def _enrich(rows: list[dict], prices: dict) -> list[dict]:
     return out
 
 
+SECTOR_LABELS = {
+    'semiconductor': '半导体',
+    'electronics': '电子',
+    'consumer': '消费',
+    'materials': '材料',
+    'energy': '能源',
+    'healthcare': '医疗',
+    'media': '媒体',
+    'financial': '金融',
+    'industrial': '工业',
+    'ai-application': 'AI应用',
+    'other': '其他',
+}
+
+
+def group_by_sector(rows: list[dict]) -> list[dict]:
+    """按 sector 分组：组按标的数降序（并列按 sector 名稳定），组内按 Base 安全边际降序（None 末位）。
+    sector 缺失归入「未分类」组；未知 sector 回退原始值。"""
+    buckets: dict[str, list] = {}
+    for r in rows:
+        key = r.get('sector') or '__none__'
+        buckets.setdefault(key, []).append(r)
+    groups = []
+    for key, items in buckets.items():
+        items = sorted(items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
+        label = '未分类' if key == '__none__' else SECTOR_LABELS.get(key, key)
+        groups.append({'sector': key, 'label': label, 'count': len(items), 'rows': items})
+    groups.sort(key=lambda g: (-g['count'], g['sector']))
+    return groups
+
+
 @valuations_bp.route('/')
 def index():
     rows = load_valuations()

@@ -172,3 +172,48 @@ def test_index_has_currency_column_and_data_market(app_client):
     assert '币种' in html, '缺币种列头'
     assert 'data-market=' in html, '缺行 data-market 属性'
     assert 'switchTab' in html, '缺 switchTab JS'
+
+
+def test_group_by_sector_orders_groups_by_count_desc():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': 'a', 'sector': 'electronics', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': 'semiconductor', 'margin_base': 0.2},
+        {'stock_code': 'c', 'sector': 'semiconductor', 'margin_base': 0.3},
+        {'stock_code': 'd', 'sector': 'semiconductor', 'margin_base': 0.1},
+    ]
+    groups = group_by_sector(rows)
+    assert [g['sector'] for g in groups] == ['semiconductor', 'electronics']
+    assert groups[0]['count'] == 3
+    assert groups[0]['label'] == '半导体'
+    assert groups[1]['label'] == '电子'
+
+
+def test_group_by_sector_sorts_rows_within_group_by_base_margin_desc():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': 'lo', 'sector': 'materials', 'margin_base': 0.05},
+        {'stock_code': 'hi', 'sector': 'materials', 'margin_base': 0.50},
+        {'stock_code': 'none', 'sector': 'materials', 'margin_base': None},
+        {'stock_code': 'mid', 'sector': 'materials', 'margin_base': 0.20},
+    ]
+    [grp] = group_by_sector(rows)
+    assert [r['stock_code'] for r in grp['rows']] == ['hi', 'mid', 'lo', 'none']
+
+
+def test_group_by_sector_unknown_sector_falls_back_to_raw():
+    from app.routes.valuations import group_by_sector
+    [grp] = group_by_sector([{'stock_code': 'x', 'sector': 'weird-thing', 'margin_base': 0.1}])
+    assert grp['sector'] == 'weird-thing'
+    assert grp['label'] == 'weird-thing'
+
+
+def test_group_by_sector_none_sector_grouped_as_unclassified():
+    from app.routes.valuations import group_by_sector
+    [grp] = group_by_sector([{'stock_code': 'x', 'sector': None, 'margin_base': 0.1}])
+    assert grp['label'] == '未分类'
+
+
+def test_group_by_sector_empty_returns_empty():
+    from app.routes.valuations import group_by_sector
+    assert group_by_sector([]) == []
