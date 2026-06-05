@@ -493,9 +493,9 @@
   bear: null
   base: null
   bull: null
-  conviction_date: '2026-05-26'
-  source_doc: sectors/industrial/ev/2026-05-26-零跑汽车-buffett分析.md
-  note: 持续亏损，文中明确无法可靠估算
+  conviction_date: '2026-06-04'
+  source_doc: sectors/industrial/ev/2026-06-04-零跑汽车-buffett分析.md
+  note: '内在价值无法可靠估算；期望内在价值 221 亿港元仅供参考（bear 65 / base 163 / bull 815 亿港元市值口径）'
 - stock_code: '09868'
   stock_name: 小鹏汽车
   market: HK
