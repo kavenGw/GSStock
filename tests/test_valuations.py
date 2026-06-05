@@ -217,3 +217,13 @@ def test_group_by_sector_none_sector_grouped_as_unclassified():
 def test_group_by_sector_empty_returns_empty():
     from app.routes.valuations import group_by_sector
     assert group_by_sector([]) == []
+
+
+def test_group_by_sector_tiebreak_by_sector_name():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': 'a', 'sector': 'semiconductor', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': 'electronics', 'margin_base': 0.2},
+    ]
+    groups = group_by_sector(rows)
+    assert [g['sector'] for g in groups] == ['electronics', 'semiconductor']
