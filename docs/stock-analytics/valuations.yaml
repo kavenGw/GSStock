@@ -465,12 +465,13 @@
   currency: CNY
   sector: energy
   rating: watch
-  bear: 86.8
-  base: 115.8
-  bull: 195.4
-  conviction_date: '2026-04-24'
-  source_doc: sectors/energy/solar/2026-04-24-阳光电源-buffett分析.md
-  note: 三情景市值1800/2400/4050亿；股本按市值/现价换算
+  bear: 123.0
+  base: 164.0
+  bull: 215.0
+  dividend_yield: 1.3
+  conviction_date: '2026-06-07'
+  source_doc: sectors/energy/solar/2026-06-07-阳光电源-buffett分析.md
+  note: 三情景市值2400/3200/4200亿；股本按3000亿市值/153.75元换算≈19.5亿股
 - stock_code: '603259'
   stock_name: 药明康德
   market: A
