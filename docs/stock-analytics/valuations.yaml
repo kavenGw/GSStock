@@ -551,12 +551,13 @@
   currency: CNY
   sector: industrial
   rating: watch
-  bear: 9.1
-  base: 13.8
-  bull: 16.4
-  conviction_date: '2026-05-28'
-  source_doc: sectors/industrial/cable/2026-05-28-中天科技-buffett分析.md
-  note: 三情景市值310/470/560亿；股本34.1亿股
+  bear: 14.7
+  base: 23.5
+  bull: 35.2
+  dividend_yield: null
+  conviction_date: '2026-06-07'
+  source_doc: sectors/industrial/cable/2026-06-07-中天科技-buffett分析.md
+  note: 三情景市值500/800/1200亿；股本34.1亿股
 - stock_code: '688676'
   stock_name: 金盘科技
   market: A
