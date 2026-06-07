@@ -1455,3 +1455,16 @@
   conviction_date: '2026-05-21'
   source_doc: sectors/semiconductor/design/2026-05-21-英伟达-buffett分析.md
   note: 情景市值$2.2T/$3.75T/$5.5T÷约244亿股；USD/股
+- stock_code: '688017'
+  stock_name: 绿的谐波
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: watch
+  bear: 13.5
+  base: 43.0
+  bull: 147.2
+  dividend_yield: null
+  conviction_date: '2026-06-07'
+  source_doc: sectors/industrial/precision-components/2026-06-07-绿的谐波-buffett分析.md
+  note: 三情景市值22/70/240亿÷1.63亿股；PE 484x极端透支，watch等估值回归
