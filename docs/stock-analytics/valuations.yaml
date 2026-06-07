@@ -1455,3 +1455,16 @@
   conviction_date: '2026-05-21'
   source_doc: sectors/semiconductor/design/2026-05-21-英伟达-buffett分析.md
   note: 情景市值$2.2T/$3.75T/$5.5T÷约244亿股；USD/股
+- stock_code: '002056'
+  stock_name: 横店东磁
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 10.80
+  base: 17.28
+  bull: 24.69
+  dividend_yield: 2.83
+  conviction_date: '2026-06-07'
+  source_doc: sectors/materials/magnetic-materials/2026-06-07-横店东磁-buffett分析.md
+  note: 情景市值175/280/400亿÷16.2亿股；股息率2.83%；当前市值380亿已高于Base，安全边际-17.9%
