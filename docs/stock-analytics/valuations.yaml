@@ -1,4 +1,4 @@
-- stock_code: '03888'
+- stock_code: 03888
   stock_name: 金山软件
   market: HK
   currency: HKD
@@ -9,7 +9,7 @@
   bull: 38.24
   conviction_date: '2026-06-03'
   source_doc: sectors/ai-application/software/2026-06-03-金山软件-buffett分析.md
-- stock_code: '03896'
+- stock_code: 03896
   stock_name: 金山云
   market: HK
   currency: HKD
@@ -32,7 +32,7 @@
   bull: 48.44
   conviction_date: '2026-06-04'
   source_doc: sectors/ai-application/cloud/2026-06-04-优刻得-buffett分析.md
-- stock_code: 'ORCL'
+- stock_code: ORCL
   stock_name: 甲骨文
   market: US
   currency: USD
@@ -44,7 +44,7 @@
   conviction_date: '2026-05-09'
   source_doc: sectors/ai-application/database/2026-05-09-甲骨文-buffett分析.md
   note: 12M目标价口径，非DCF每股
-- stock_code: '002594'
+- stock_code: 002594
   stock_name: 比亚迪
   market: A
   currency: CNY
@@ -56,7 +56,7 @@
   conviction_date: '2026-05-29'
   source_doc: sectors/consumer/auto-ev/2026-05-29-比亚迪-buffett分析.md
   note: 整车薄利价格战，正常化盈利难可靠估算
-- stock_code: '01810'
+- stock_code: 01810
   stock_name: 小米集团-W
   market: HK
   currency: HKD
@@ -79,7 +79,7 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/mobility/2026-06-03-曹操出行-buffett分析.md
   note: 每股由市值/股价推算股本，不确定性偏高
-- stock_code: '03690'
+- stock_code: 03690
   stock_name: 美团
   market: HK
   currency: HKD
@@ -90,7 +90,7 @@
   bull: 123.0
   conviction_date: '2026-06-02'
   source_doc: sectors/consumer/local-services/2026-06-02-美团-buffett分析.md
-- stock_code: '06862'
+- stock_code: 06862
   stock_name: 海底捞
   market: HK
   currency: HKD
@@ -102,7 +102,7 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/restaurant/2026-06-03-海底捞-buffett分析.md
   note: 每股由市值反推股本，不确定性偏高
-- stock_code: '09992.HK'
+- stock_code: 09992.HK
   stock_name: 泡泡玛特
   market: HK
   currency: HKD
@@ -114,7 +114,7 @@
   conviction_date: '2026-05-28'
   source_doc: sectors/consumer/designer-toy/2026-05-28-泡泡玛特-buffett分析.md
   note: 无法可靠估算内在价值
-- stock_code: '2020.HK'
+- stock_code: 2020.HK
   stock_name: 安踏体育
   market: HK
   currency: HKD
@@ -125,7 +125,7 @@
   bull: 114.41
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/sportswear/2026-06-03-安踏体育-buffett分析.md
-- stock_code: '2331.HK'
+- stock_code: 2331.HK
   stock_name: 李宁
   market: HK
   currency: HKD
@@ -197,7 +197,7 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/consumer/sportswear/2026-04-24-舒华体育-buffett分析.md
   note: Don't Buy，商品型企业，无估值
-- stock_code: 'LI'
+- stock_code: LI
   stock_name: 理想汽车
   market: US
   currency: USD
@@ -256,7 +256,7 @@
   conviction_date: '2026-06-01'
   source_doc: sectors/electronics/display/2026-06-01-京东方-buffett分析.md
   note: 京东方A；三情景市值1495/2040/2446亿÷370.8亿股
-- stock_code: '000977'
+- stock_code: 000977
   stock_name: 浪潮信息
   market: A
   currency: CNY
@@ -292,7 +292,7 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/electronics/components/2026-05-30-沃尔核材-buffett分析.md
   note: 沃尔核材；内在价值中枢260-300亿/bull400亿÷14.0亿股
-- stock_code: '002138'
+- stock_code: 002138
   stock_name: 顺络电子
   market: A
   currency: CNY
@@ -304,7 +304,7 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/electronics/components/2026-05-30-顺络电子-buffett分析.md
   note: 顺络电子；内在价值220-300亿÷8.07亿股
-- stock_code: '002229'
+- stock_code: 002229
   stock_name: 鸿博股份
   market: A
   currency: CNY
@@ -316,7 +316,7 @@
   conviction_date: '2026-05-07'
   source_doc: sectors/electronics/consumer/2026-05-07-鸿博股份-buffett分析.md
   note: 鸿博；Pass，连续负Owner Earnings，DCF不适用
-- stock_code: '002384'
+- stock_code: 002384
   stock_name: 东山精密
   market: A
   currency: CNY
@@ -334,7 +334,7 @@
   currency: CNY
   sector: electronics
   rating: watch
-  bear: 37.40
+  bear: 37.4
   base: 67.01
   bull: 94.29
   conviction_date: '2026-06-04'
@@ -375,7 +375,7 @@
   conviction_date: '2026-05-31'
   source_doc: sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md
   note: 立讯；纪律轨内在价值1500-2500亿÷72.9亿股；成长轨为博弈非内在价值，bull null
-- stock_code: '002851'
+- stock_code: 002851
   stock_name: 麦格米特
   market: A
   currency: CNY
@@ -411,7 +411,7 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/electronics/functional-materials/2026-06-04-隆扬电子-buffett分析.md
   note: 隆扬电子；三情景市值12/22/60亿÷2.835亿股；exclude，安全边际-89.5%
-- stock_code: 'CSCO'
+- stock_code: CSCO
   stock_name: 思科
   market: US
   currency: USD
@@ -423,7 +423,7 @@
   conviction_date: '2026-05-28'
   source_doc: sectors/electronics/networking/2026-05-28-思科-buffett分析.md
   note: 思科；合理市值$332-400B对应每股$84-101；USD
-- stock_code: 'DELL'
+- stock_code: DELL
   stock_name: 戴尔科技
   market: US
   currency: USD
@@ -435,7 +435,7 @@
   conviction_date: '2026-05-29'
   source_doc: sectors/electronics/servers/2026-05-29-戴尔科技-buffett分析.md
   note: 正常化区间近似，无明确三档分档
-- stock_code: '002129'
+- stock_code: 002129
   stock_name: TCL中环
   market: A
   currency: CNY
@@ -484,7 +484,7 @@
   conviction_date: '2026-05-08'
   source_doc: sectors/healthcare/cro/2026-05-08-药明康德-buffett分析.md
   note: 三情景内在价值取各档中值；股本按市值/现价换算
-- stock_code: '002196'
+- stock_code: 002196
   stock_name: 方正电机
   market: A
   currency: CNY
@@ -508,7 +508,7 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/industrial/power-electronics/2026-05-18-中恒电气-buffett分析.md
   note: 买入价<9对应50亿/乐观100亿；股本5.58亿股
-- stock_code: '09863'
+- stock_code: 09863
   stock_name: 零跑汽车
   market: HK
   currency: HKD
@@ -519,8 +519,8 @@
   bull: null
   conviction_date: '2026-06-04'
   source_doc: sectors/industrial/ev/2026-06-04-零跑汽车-buffett分析.md
-  note: '内在价值无法可靠估算；期望内在价值 221 亿港元仅供参考（bear 65 / base 163 / bull 815 亿港元市值口径）'
-- stock_code: '09868'
+  note: 内在价值无法可靠估算；期望内在价值 221 亿港元仅供参考（bear 65 / base 163 / bull 815 亿港元市值口径）
+- stock_code: 09868
   stock_name: 小鹏汽车
   market: HK
   currency: HKD
@@ -606,7 +606,7 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/materials/nonferrous/2026-06-02-北方铜业-buffett分析.md
   note: 文中直接给每股：70/96/130亿
-- stock_code: '000807'
+- stock_code: 000807
   stock_name: 云铝股份
   market: A
   currency: CNY
@@ -618,7 +618,7 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-云铝股份-buffett分析.md
   note: 总市值区间350-540亿，除以总股本34.68亿股
-- stock_code: '000878'
+- stock_code: 000878
   stock_name: 云南铜业
   market: A
   currency: CNY
@@ -750,7 +750,7 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/materials/nonferrous/2026-04-24-洛阳钼业-buffett分析.md
   note: 大宗周期股，文中未给可量化三档
-- stock_code: '002181'
+- stock_code: 002181
   stock_name: 粤传媒
   market: A
   currency: CNY
@@ -774,7 +774,7 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/media/digital-marketing/2026-05-18-万润科技-buffett分析.md
   note: exclude；PE539x主业连亏，无需精确估值
-- stock_code: '01024.HK'
+- stock_code: 01024.HK
   stock_name: 快手-W
   market: HK
   currency: HKD
@@ -810,7 +810,7 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/media/music-streaming/2026-06-04-网易云音乐-buffett分析.md
   note: 文中仅给总市值HKD(130/305/545亿)，未披露股本，无法换算每股
-- stock_code: 'TME'
+- stock_code: TME
   stock_name: 腾讯音乐
   market: US
   currency: USD
@@ -822,12 +822,12 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/media/music-streaming/2026-06-04-腾讯音乐-buffett分析.md
   note: 文中仅给总市值USD(80/180/270亿)，未披露股本，无法换算每股
-- stock_code: '000729'
+- stock_code: 000729
   stock_name: 燕京啤酒
   market: A
   currency: CNY
   sector: other
-  rating: 
+  rating: null
   bear: 8.0
   base: 11.3
   bull: null
@@ -839,14 +839,14 @@
   market: A
   currency: CNY
   sector: other
-  rating: 
+  rating: null
   bear: null
   base: null
   bull: null
   conviction_date: '2026-05-08'
   source_doc: cross-sector/2026-05-08-立讯精密-歌尔股份-buffett对比分析.md
   note: 歌尔；cross-sector对比未给估值数字，Don't Buy护城河已证伪
-- stock_code: '002281'
+- stock_code: 002281
   stock_name: 光迅科技
   market: A
   currency: CNY
@@ -885,7 +885,7 @@
   market: A
   currency: CNY
   sector: other
-  rating: 
+  rating: null
   bear: 44.0
   base: 55.1
   bull: null
@@ -897,7 +897,7 @@
   market: A
   currency: CNY
   sector: other
-  rating: 
+  rating: null
   bear: null
   base: null
   bull: null
@@ -909,7 +909,7 @@
   market: A
   currency: CNY
   sector: other
-  rating: 
+  rating: null
   bear: null
   base: null
   bull: null
@@ -921,38 +921,38 @@
   market: A
   currency: CNY
   sector: other
-  rating: 
+  rating: null
   bear: null
   base: null
   bull: null
   conviction_date: '2026-05-08'
   source_doc: cross-sector/2026-05-08-立昂微-沪硅产业-buffett对比分析.md
   note: Don't Buy；9年8年扣非为负，2025毛利率-17%
-- stock_code: 'AMD'
+- stock_code: AMD
   stock_name: AMD
   market: US
   currency: USD
   sector: other
-  rating: 
+  rating: null
   bear: 100.0
   base: 175.0
   bull: 225.0
   conviction_date: '2026-05-08'
   source_doc: cross-sector/2026-05-08-AMD-Intel-buffett对比分析.md
   note: 合理估值上限$200($8EPS×25x)；C情景/A情景推算bear/bull；文档结论无安全边际
-- stock_code: 'INTC'
+- stock_code: INTC
   stock_name: Intel
   market: US
   currency: USD
   sector: other
-  rating: 
+  rating: null
   bear: null
   base: null
   bull: null
   conviction_date: '2026-05-08'
   source_doc: cross-sector/2026-05-08-AMD-Intel-buffett对比分析.md
   note: Don't Buy价值陷阱，文档明确不给估值；Foundry持续负FCF
-- stock_code: '00189'
+- stock_code: 00189
   stock_name: 东岳集团
   market: HK
   currency: HKD
@@ -964,7 +964,7 @@
   conviction_date: '2026-05-27'
   source_doc: sectors/semiconductor/materials/2026-05-27-东岳集团-buffett分析.md
   note: 三情景总市值HKD 64/156/330亿，文档未披露股本，无法换算每股
-- stock_code: '002149'
+- stock_code: 002149
   stock_name: 西部材料
   market: A
   currency: CNY
@@ -976,7 +976,7 @@
   conviction_date: '2026-05-08'
   source_doc: sectors/semiconductor/materials/2026-05-08-西部材料-buffett分析.md
   note: 文档直接给每股内在价值2.6-3.9元/股
-- stock_code: '002409'
+- stock_code: 002409
   stock_name: 雅克科技
   market: A
   currency: CNY
@@ -1000,7 +1000,7 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/semiconductor/power/2026-06-03-英诺赛科-buffett分析.md
   note: 英诺赛科；文档只给总市值HKD 270/480/1080亿，无股本，无法换算每股
-- stock_code: '1384.HK'
+- stock_code: 1384.HK
   stock_name: 大普微
   market: HK
   currency: HKD
@@ -1012,7 +1012,7 @@
   conviction_date: '2026-05-12'
   source_doc: sectors/semiconductor/storage/2026-05-12-大普微-buffett分析.md
   note: 大普微；文档明确无法可靠估算内在价值
-- stock_code: '1888.HK'
+- stock_code: 1888.HK
   stock_name: 建滔积层板
   market: HK
   currency: HKD
@@ -1420,7 +1420,7 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/semiconductor/foundry/2026-05-14-中芯国际-buffett分析.md
   note: Owner Earnings显著为负，文档明确无法计算内在价值
-- stock_code: 'CXMT'
+- stock_code: CXMT
   stock_name: 长鑫科技
   market: US
   currency: USD
@@ -1432,7 +1432,7 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/semiconductor/storage/2026-05-18-长鑫科技-buffett分析.md
   note: 长鑫科技；科创板IPO申报中，无三档每股估值；价值买点市值1500-2500亿
-- stock_code: 'MRVL'
+- stock_code: MRVL
   stock_name: 迈威尔科技
   market: US
   currency: USD
@@ -1444,7 +1444,7 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/semiconductor/design/2026-05-14-迈威尔科技-buffett分析.md
   note: USD/股；正常化市值18/40/70B÷8.65亿股
-- stock_code: 'NVDA'
+- stock_code: NVDA
   stock_name: 英伟达
   market: US
   currency: USD
@@ -1482,3 +1482,16 @@
   conviction_date: '2026-06-07'
   source_doc: sectors/materials/magnetic-materials/2026-06-07-横店东磁-buffett分析.md
   note: 情景市值175/280/400亿÷16.2亿股；股息率2.83%；当前市值380亿已高于Base，安全边际-17.9%
+- stock_code: '300285'
+  stock_name: 国瓷材料
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 9.1
+  base: 16.2
+  bull: 25.3
+  dividend_yield: null
+  conviction_date: '2026-06-07'
+  source_doc: sectors/materials/ceramics/2026-06-07-国瓷材料-buffett分析.md
+  note: null
