@@ -101,18 +101,27 @@ SECTOR_LABELS = {
     'other': '其他',
 }
 
+CARVE_OUT_CATEGORIES = {'啤酒'}
+
 
 def group_by_sector(rows: list[dict]) -> list[dict]:
-    """按 sector 分组：组按标的数降序（并列按 sector 名稳定），组内按 Base 安全边际降序（None 末位）。
+    """分组：category 命中 CARVE_OUT_CATEGORIES 则用分类名作独立顶级组，否则按 sector。
+    组按标的数降序（并列按 key 稳定），组内按 Base 安全边际降序（None 末位）。
     sector 缺失归入「未分类」组；未知 sector 回退原始值。"""
     buckets: dict[str, list] = {}
     for r in rows:
-        key = r.get('sector') or '__none__'
+        cat = r.get('category')
+        key = cat if cat in CARVE_OUT_CATEGORIES else (r.get('sector') or '__none__')
         buckets.setdefault(key, []).append(r)
     groups = []
     for key, items in buckets.items():
         items = sorted(items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
-        label = '未分类' if key == '__none__' else SECTOR_LABELS.get(key, key)
+        if key in CARVE_OUT_CATEGORIES:
+            label = key
+        elif key == '__none__':
+            label = '未分类'
+        else:
+            label = SECTOR_LABELS.get(key, key)
         for r in items:
             r['sector_label'] = label
         groups.append({'sector': key, 'label': label, 'count': len(items), 'rows': items})

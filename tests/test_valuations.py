@@ -348,3 +348,32 @@ def test_enrich_category_none_without_map():
     from app.routes.valuations import _enrich
     out = _enrich([{'stock_code': 'x', 'base': 1.0}], {})
     assert out[0]['category'] is None
+
+
+def test_group_by_sector_carves_out_whitelisted_category():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': '600600', 'sector': 'other', 'category': '啤酒', 'margin_base': 0.1},
+        {'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'margin_base': 0.3},
+        {'stock_code': '000001', 'sector': 'consumer', 'category': None, 'margin_base': 0.2},
+    ]
+    groups = {g['sector']: g for g in group_by_sector(rows)}
+    assert '啤酒' in groups
+    beer = groups['啤酒']
+    assert beer['label'] == '啤酒'
+    assert beer['count'] == 2
+    assert [r['stock_code'] for r in beer['rows']] == ['600132', '600600']
+    assert [r['stock_code'] for r in groups['consumer']['rows']] == ['000001']
+
+
+def test_group_by_sector_non_whitelisted_category_uses_sector():
+    from app.routes.valuations import group_by_sector
+    [grp] = group_by_sector([{'stock_code': 'x', 'sector': 'consumer', 'category': '赛事消费', 'margin_base': 0.1}])
+    assert grp['sector'] == 'consumer'
+    assert grp['label'] == '消费'
+
+
+def test_group_by_sector_carveout_row_gets_category_label():
+    from app.routes.valuations import group_by_sector
+    [grp] = group_by_sector([{'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'margin_base': 0.1}])
+    assert grp['rows'][0]['sector_label'] == '啤酒'
