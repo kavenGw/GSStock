@@ -1,7 +1,7 @@
 """估值汇总页测试"""
 import pytest
 
-from app.routes.valuations import compute_margin, _extract_price
+from app.routes.valuations import compute_margin, _extract_price, _fetch_code
 
 
 def test_compute_margin_normal():
@@ -267,3 +267,50 @@ def test_index_has_sort_and_mode_js(app_client):
     assert 'function setMode' in html, '缺 setMode'
     assert 'valuationsSortPref' in html, '缺 localStorage 键'
     assert "setMode('flat')" in html, '缺平铺模式按钮绑定'
+
+
+def test_fetch_code_hk_zero_padded_numeric():
+    assert _fetch_code({'stock_code': '01810', 'market': 'HK'}) == '1810.HK'
+    assert _fetch_code({'stock_code': '02643', 'market': 'HK'}) == '2643.HK'
+    assert _fetch_code({'stock_code': '03690', 'market': 'HK'}) == '3690.HK'
+    assert _fetch_code({'stock_code': '06862', 'market': 'HK'}) == '6862.HK'
+
+
+def test_fetch_code_a_share_untouched():
+    assert _fetch_code({'stock_code': '600519', 'market': 'A'}) == '600519'
+    assert _fetch_code({'stock_code': '000878', 'market': 'A'}) == '000878'
+
+
+def test_fetch_code_us_untouched():
+    assert _fetch_code({'stock_code': 'AMD', 'market': 'US'}) == 'AMD'
+
+
+def test_fetch_code_already_hk_suffixed_untouched():
+    assert _fetch_code({'stock_code': '1810.HK', 'market': 'HK'}) == '1810.HK'
+
+
+def test_fetch_code_missing_market_untouched():
+    assert _fetch_code({'stock_code': '01810'}) == '01810'
+
+
+def test_api_prices_hk_normalizes_and_maps_back(app_client, monkeypatch):
+    from app.services import unified_stock_data_service
+
+    seen = {}
+
+    def fake_prices(codes, force_refresh=False):
+        seen['codes'] = list(codes)
+        return {'1810.HK': {'price': 27.32, 'name': '小米集团-W'}}
+
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices', fake_prices)
+    resp = app_client.get('/valuations/api/prices?force=1')
+    assert resp.status_code == 200
+    assert '1810.HK' in seen['codes']
+    assert '01810' not in seen['codes']
+    body = resp.get_json()
+    assert body['01810']['current_price'] == 27.32
+
+
+def test_fetch_code_hk_zero_padded_with_suffix():
+    assert _fetch_code({'stock_code': '09992.HK', 'market': 'HK'}) == '9992.HK'
+    assert _fetch_code({'stock_code': '01024.HK', 'market': 'HK'}) == '1024.HK'

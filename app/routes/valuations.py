@@ -24,6 +24,18 @@ def _extract_price(data: dict) -> Optional[float]:
     return float(price)
 
 
+def _fetch_code(row: dict) -> str:
+    """港股 yaml code 形态不一（01810 / 09992.HK），yfinance 需 4 位补零的 1810.HK / 9992.HK。
+    把港股数字部分统一归一为 4 位 + .HK；非港股原样。"""
+    code = row['stock_code']
+    if row.get('market') != 'HK':
+        return code
+    digits = code.upper().removesuffix('.HK')
+    if digits.isdigit():
+        return f"{int(digits):04d}.HK"
+    return code
+
+
 def compute_margin(value: Optional[float], price: Optional[float]) -> Optional[float]:
     """安全边际 = value / price - 1（正=上行空间，负=高估）。value 缺或 price 无效返回 None。"""
     if value is None or not price:
@@ -94,11 +106,12 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
 @valuations_bp.route('/')
 def index():
     rows = load_valuations()
-    codes = [r['stock_code'] for r in rows]
+    fetch_map = {r['stock_code']: _fetch_code(r) for r in rows}
     prices = {}
-    if codes:
+    if fetch_map:
         try:
-            prices = unified_stock_data_service.get_realtime_prices(codes)
+            raw = unified_stock_data_service.get_realtime_prices(list(fetch_map.values()))
+            prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
         except Exception as e:
             logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
     enriched = _enrich(rows, prices)
@@ -116,8 +129,9 @@ def index():
 def api_prices():
     force = request.args.get('force') == '1'
     rows = load_valuations()
-    codes = [r['stock_code'] for r in rows]
-    prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=force) if codes else {}
+    fetch_map = {r['stock_code']: _fetch_code(r) for r in rows}
+    raw = unified_stock_data_service.get_realtime_prices(list(fetch_map.values()), force_refresh=force) if fetch_map else {}
+    prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
     out = {}
     for r in rows:
         data = prices.get(r['stock_code']) or {}
