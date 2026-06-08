@@ -44,6 +44,8 @@ PYTHONIOENCODING=utf-8 python -c "..."
 
 **后台 bash 日志填满输出缓冲**：`2>&1 | tail -N` 时，并行调度的 stderr 日志（429 重试 / apscheduler shutdown）可能填满 N 行，把你的 print 顶出去。解决方案：只关心脚本输出时用 `2>/dev/null`，或把分隔标记写到固定文件再 Read。
 
+**crawl4ai 进度条走 STDOUT 不是 stderr**：create_app 触发的 crawl4ai 抓新闻进度条打到 **stdout**，`2>/dev/null` 挡不住，会把 pytest 的 `N passed` 摘要顶出可见区。跑测试要看结果时：`pytest ... > 文件 2>&1; grep -E "passed|failed" 文件`，别指望 `2>/dev/null | tail`。
+
 **create_app() 启动链路开销**：即便带 `SCHEDULER_ENABLED=0`，`create_app()` 仍会启动调度器（17 任务）+ OCR + crawl4ai + LLM。只测路由/配置层时直接用 `Flask() + register_blueprint(<bp>)` 直接注入，秒级、零副作用。例外：渲染 HTML 的路由会因 base.html 跨 blueprint url_for（briefing.index 等）抛 BuildError → HTML 测试必须走 `create_app()`。
 
 **只读 DB 巡检最快方案**：不需要 `create_app()`，直接 sqlite3 最快：

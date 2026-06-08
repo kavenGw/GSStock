@@ -73,3 +73,13 @@ python scripts/lint_docs_refs.py --check-orphans   # 列孤儿文档
 - 评级 / 主题 / 选股理由从 frontmatter 读
 - 同股多 doc 时按 `conviction_date` desc 取首条作为权威评级，其余进 `related_docs`
 - 季报点评（`quarterly/`）不进选股池，只作为同期事件清单源（见 portfolio-rebalance SKILL）
+
+## 估值汇总页（/valuations，即"价值洼地"）
+
+路由 `app/routes/valuations.py`，数据源 `docs/stock-analytics/valuations.yaml`（与 frontmatter 分离的独立聚合文件，不被 docs linter 约束）。
+
+分组规则（`group_by_sector`）：行的 DB 分类命中白名单 `CARVE_OUT_CATEGORIES`（如 `{'啤酒'}`）→ 抬成独立顶级组覆盖 sector；否则按 `sector`→`SECTOR_LABELS`。
+
+**新增一个主题/二级板块分组**：① 在 `CARVE_OUT_CATEGORIES` 加分类名 ② 在分类管理（`StockCategory`，stock_code 唯一约束=一股一类）把目标股设为该分类。模板零改动（数据驱动）。
+
+分类数据是用户数据非 seed（seed 铁律"不覆盖已存在归属"，而改挂分类恰需覆盖）；建/改分类走分类管理 UI 或一次性 DB 写入。
