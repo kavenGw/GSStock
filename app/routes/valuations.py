@@ -84,6 +84,8 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
     for key, items in buckets.items():
         items = sorted(items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
         label = '未分类' if key == '__none__' else SECTOR_LABELS.get(key, key)
+        for r in items:
+            r['sector_label'] = label
         groups.append({'sector': key, 'label': label, 'count': len(items), 'rows': items})
     groups.sort(key=lambda g: (-g['count'], g['sector']))
     return groups

@@ -14,6 +14,13 @@
 .group-header .caret { display: inline-block; width: 1em; transition: transform .15s; }
 .group-header.collapsed .caret { transform: rotate(-90deg); }
 #market-chips .chip { margin-right: 6px; }
+.val-table th.sortable { cursor: pointer; user-select: none; }
+.val-table th.sortable:hover { background: #e9ecef; }
+.sort-arrow { display: inline-block; width: 1em; text-align: left; }
+.mg { font-size: 11px; margin-left: 4px; }
+table.mode-grouped .col-sector { display: none; }
+table.mode-flat .group-header { display: none; }
+#mode-toggle .btn { padding: .15rem .55rem; }
 </style>
 {% endblock %}
 {% block content %}
@@ -27,19 +34,27 @@
 {% if not groups %}
 <div class="alert alert-warning">暂无估值数据（docs/stock-analytics/valuations.yaml 为空或缺失）。</div>
 {% else %}
-<div class="mb-3" id="market-chips">
-  <button class="btn btn-sm btn-primary chip" data-market="all" onclick="switchMarket(event,'all')">全部 ({{ total }})</button>
-  <button class="btn btn-sm btn-outline-primary chip" data-market="A" onclick="switchMarket(event,'A')">A股 ({{ market_counts.get('A', 0) }})</button>
-  <button class="btn btn-sm btn-outline-primary chip" data-market="HK" onclick="switchMarket(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</button>
-  <button class="btn btn-sm btn-outline-primary chip" data-market="US" onclick="switchMarket(event,'US')">美股 ({{ market_counts.get('US', 0) }})</button>
+<div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div id="market-chips">
+    <button class="btn btn-sm btn-primary chip" data-market="all" onclick="switchMarket(event,'all')">全部 ({{ total }})</button>
+    <button class="btn btn-sm btn-outline-primary chip" data-market="A" onclick="switchMarket(event,'A')">A股 ({{ market_counts.get('A', 0) }})</button>
+    <button class="btn btn-sm btn-outline-primary chip" data-market="HK" onclick="switchMarket(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</button>
+    <button class="btn btn-sm btn-outline-primary chip" data-market="US" onclick="switchMarket(event,'US')">美股 ({{ market_counts.get('US', 0) }})</button>
+  </div>
+  <div id="mode-toggle" class="btn-group btn-group-sm">
+    <button class="btn btn-primary" data-mode="grouped" onclick="setMode('grouped')">▣ 分组</button>
+    <button class="btn btn-outline-primary" data-mode="flat" onclick="setMode('flat')">▤ 平铺</button>
+  </div>
 </div>
 <div class="table-responsive">
-<table class="table table-sm table-hover val-table">
+<table id="val-table" class="table table-sm table-hover val-table mode-grouped">
   <thead class="table-light">
     <tr>
-      <th>代码</th><th>名称</th><th>币种</th><th>评级</th>
-      <th class="text-end">Bear</th><th class="text-end">Base</th><th class="text-end">Bull</th>
-      <th class="text-end">当前价</th><th class="text-end">Base安全边际</th>
+      <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th><th>评级</th>
+      <th class="text-end sortable" data-sort="bear" onclick="sortBy('bear')">Bear<span class="sort-arrow"></span></th>
+      <th class="text-end sortable" data-sort="base" onclick="sortBy('base')">Base<span class="sort-arrow"></span></th>
+      <th class="text-end sortable" data-sort="bull" onclick="sortBy('bull')">Bull<span class="sort-arrow"></span></th>
+      <th class="text-end">当前价</th>
       <th>日期</th><th>文档</th>
     </tr>
   </thead>
@@ -50,18 +65,28 @@
     </tr>
     {% for r in g.rows %}
     <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}"
+        data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
+        data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
+        data-mbull="{{ r.margin_bull if r.margin_bull is not none else '' }}"
         class="grp-{{ g.sector }}{% if r.rating == 'exclude' %} row-muted{% endif %}">
       <td>{{ r.stock_code }}</td>
       <td>{{ r.stock_name }}</td>
+      <td class="col-sector"><span class="badge bg-light text-secondary">{{ r.sector_label }}</span></td>
       <td>{{ r.currency or '—' }}</td>
       <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
-      <td class="text-end">{{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}</td>
-      <td class="text-end">{{ '%.2f'|format(r.base) if r.base is not none else '—' }}</td>
-      <td class="text-end">{{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}</td>
-      <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
-      <td class="text-end cell-margin {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">
-        {{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '—' }}
+      <td class="text-end">
+        {{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}
+        <span class="mg cell-mbear {% if r.margin_bear is not none and r.margin_bear >= 0 %}margin-pos{% elif r.margin_bear is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bear * 100) if r.margin_bear is not none else '' }}</span>
       </td>
+      <td class="text-end">
+        {{ '%.2f'|format(r.base) if r.base is not none else '—' }}
+        <span class="mg cell-mbase {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '' }}</span>
+      </td>
+      <td class="text-end">
+        {{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}
+        <span class="mg cell-mbull {% if r.margin_bull is not none and r.margin_bull >= 0 %}margin-pos{% elif r.margin_bull is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bull * 100) if r.margin_bull is not none else '' }}</span>
+      </td>
+      <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
       <td>{{ r.conviction_date or '—' }}</td>
       <td>{% if r.source_doc %}<span title="{{ r.source_doc }}" style="cursor:help">📄</span>{% else %}—{% endif %}</td>
     </tr>
@@ -74,36 +99,93 @@
 
 <script>
 function fmtPrice(v) { return v === null || v === undefined ? '—' : v.toFixed(2); }
-function fmtMargin(v) { return v === null || v === undefined ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
+function fmtMargin(v) { return v === null || v === undefined ? '' : (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
 
-async function refreshPrices() {
-  const btn = document.getElementById('refresh-btn');
-  const status = document.getElementById('refresh-status');
-  btn.disabled = true; status.textContent = '刷新中…';
+const PREF_KEY = 'valuationsSortPref';
+let sortKey = 'base';
+let sortDir = 'desc';
+let mode = 'grouped';
+let currentMarket = 'all';
+
+function loadPref() {
   try {
-    const resp = await fetch('/valuations/api/prices?force=1');
-    if (!resp.ok) throw new Error('http ' + resp.status);
-    const data = await resp.json();
-    document.querySelectorAll('tr[data-code]').forEach(tr => {
-      const row = data[tr.dataset.code];
-      if (!row) return;
-      tr.querySelector('.cell-price').textContent = fmtPrice(row.current_price);
-      const m = tr.querySelector('.cell-margin');
-      m.textContent = fmtMargin(row.margin_base);
-      m.classList.remove('margin-pos', 'margin-neg');
-      if (row.margin_base !== null && row.margin_base !== undefined) {
-        m.classList.add(row.margin_base >= 0 ? 'margin-pos' : 'margin-neg');
-      }
+    const p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
+    if (['bear', 'base', 'bull'].includes(p.sortKey)) sortKey = p.sortKey;
+    if (['asc', 'desc'].includes(p.dir)) sortDir = p.dir;
+    if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;
+  } catch (e) {}
+}
+function savePref() {
+  localStorage.setItem(PREF_KEY, JSON.stringify({ sortKey, dir: sortDir, mode }));
+}
+
+function marginOf(tr, key) {
+  const v = tr.dataset['m' + key];
+  return (v === '' || v === undefined) ? null : parseFloat(v);
+}
+
+function sortRows(rows) {
+  const dir = sortDir === 'asc' ? 1 : -1;
+  return rows.slice().sort((a, b) => {
+    const va = marginOf(a, sortKey), vb = marginOf(b, sortKey);
+    if (va === null && vb === null) return 0;
+    if (va === null) return 1;   // null 边际恒末位
+    if (vb === null) return -1;
+    return (va - vb) * dir;
+  });
+}
+
+function updateArrows() {
+  document.querySelectorAll('#val-table th.sortable').forEach(th => {
+    const arrow = th.querySelector('.sort-arrow');
+    arrow.textContent = (th.dataset.sort === sortKey) ? (sortDir === 'asc' ? '▲' : '▼') : '';
+  });
+}
+
+function applySort() {
+  updateArrows();
+  const tbody = document.querySelector('#val-table tbody');
+  if (mode === 'flat') {
+    sortRows([...tbody.querySelectorAll('tr[data-code]')]).forEach(r => tbody.appendChild(r));
+  } else {
+    document.querySelectorAll('#val-table .group-header').forEach(header => {
+      const sector = header.dataset.sector;
+      const rows = sortRows([...tbody.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]')]);
+      let ref = header;
+      rows.forEach(r => { ref.after(r); ref = r; });
     });
-    status.textContent = '已更新 ' + new Date().toLocaleTimeString();
-  } catch (e) {
-    status.textContent = '刷新失败';
-  } finally {
-    btn.disabled = false;
   }
 }
 
-let currentMarket = 'all';
+function sortBy(key) {
+  if (sortKey === key) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey = key;
+    sortDir = 'desc';
+  }
+  savePref();
+  applySort();
+}
+
+function setMode(m) {
+  mode = m;
+  const table = document.getElementById('val-table');
+  table.classList.toggle('mode-grouped', m === 'grouped');
+  table.classList.toggle('mode-flat', m === 'flat');
+  document.querySelectorAll('#mode-toggle .btn').forEach(b => {
+    const on = b.dataset.mode === m;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
+  });
+  if (m === 'flat') {
+    document.querySelectorAll('#val-table tr[data-code]').forEach(tr => tr.classList.remove('hidden-by-group'));
+    document.querySelectorAll('#val-table .group-header').forEach(h => h.classList.remove('collapsed'));
+  }
+  savePref();
+  applySort();
+  applyMarketFilter();
+}
 
 function switchMarket(ev, market) {
   ev.preventDefault();
@@ -117,30 +199,69 @@ function switchMarket(ev, market) {
 }
 
 function applyMarketFilter() {
-  document.querySelectorAll('tr[data-code]').forEach(tr => {
+  document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
     const mOk = currentMarket === 'all' || tr.dataset.market === currentMarket;
     const collapsed = tr.classList.contains('hidden-by-group');
     tr.style.display = (mOk && !collapsed) ? '' : 'none';
     tr.dataset.marketHidden = mOk ? '' : '1';
   });
-  document.querySelectorAll('.group-header').forEach(h => {
-    const sector = h.dataset.sector;
-    const rows = document.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]');
-    let visible = 0;
-    rows.forEach(r => { if (r.dataset.marketHidden !== '1') visible++; });
-    h.style.display = visible > 0 ? '' : 'none';
-    const badge = h.querySelector('.group-count');
-    if (badge) badge.textContent = visible;
-  });
+  if (mode === 'grouped') {
+    document.querySelectorAll('#val-table .group-header').forEach(h => {
+      const sector = h.dataset.sector;
+      const rows = document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]');
+      let visible = 0;
+      rows.forEach(r => { if (r.dataset.marketHidden !== '1') visible++; });
+      h.style.display = visible > 0 ? '' : 'none';
+      const badge = h.querySelector('.group-count');
+      if (badge) badge.textContent = visible;
+    });
+  }
 }
 
 function toggleGroup(sector) {
-  const header = document.querySelector('.group-header[data-sector="' + sector + '"]');
+  if (mode !== 'grouped') return;
+  const header = document.querySelector('#val-table .group-header[data-sector="' + sector + '"]');
   const collapsed = header.classList.toggle('collapsed');
-  document.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]').forEach(tr => {
+  document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]').forEach(tr => {
     tr.classList.toggle('hidden-by-group', collapsed);
   });
   applyMarketFilter();
 }
+
+async function refreshPrices() {
+  const btn = document.getElementById('refresh-btn');
+  const status = document.getElementById('refresh-status');
+  btn.disabled = true; status.textContent = '刷新中…';
+  try {
+    const resp = await fetch('/valuations/api/prices?force=1');
+    if (!resp.ok) throw new Error('http ' + resp.status);
+    const data = await resp.json();
+    document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
+      const row = data[tr.dataset.code];
+      if (!row) return;
+      tr.querySelector('.cell-price').textContent = fmtPrice(row.current_price);
+      [['bear', 'margin_bear'], ['base', 'margin_base'], ['bull', 'margin_bull']].forEach(([k, mk]) => {
+        const span = tr.querySelector('.cell-m' + k);
+        const v = row[mk];
+        span.textContent = fmtMargin(v);
+        span.classList.remove('margin-pos', 'margin-neg');
+        if (v !== null && v !== undefined) span.classList.add(v >= 0 ? 'margin-pos' : 'margin-neg');
+        tr.dataset['m' + k] = (v === null || v === undefined) ? '' : v;
+      });
+    });
+    applySort();
+    status.textContent = '已更新 ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    status.textContent = '刷新失败';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function initValuations() {
+  loadPref();
+  setMode(mode);  // 应用 table class + 模式按钮态 + applySort + applyMarketFilter
+}
+document.addEventListener('DOMContentLoaded', initValuations);
 </script>
 {% endblock %}

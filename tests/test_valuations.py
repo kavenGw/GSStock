@@ -126,7 +126,7 @@ def test_api_prices_missing_price_yields_none(app_client, monkeypatch):
 def test_index_has_table_headers_and_refresh(app_client):
     resp = app_client.get('/valuations/')
     html = resp.data.decode('utf-8')
-    for col in ('Bear', 'Base', 'Bull', '当前价', '安全边际'):
+    for col in ('Bear', 'Base', 'Bull', '当前价'):
         assert col in html, f'缺列头 {col}'
     assert 'id="refresh-btn"' in html
 
@@ -235,3 +235,35 @@ def test_index_renders_sector_group_headers(app_client):
     assert 'group-header' in html, '缺板块组头'
     assert 'data-sector=' in html, '缺行/组头 data-sector 属性'
     assert '半导体' in html
+
+
+def test_group_by_sector_assigns_sector_label_to_rows():
+    from app.routes.valuations import group_by_sector
+    groups = group_by_sector([
+        {'stock_code': 'a', 'sector': 'semiconductor', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': None, 'margin_base': 0.2},
+    ])
+    by_sector = {g['sector']: g for g in groups}
+    assert by_sector['semiconductor']['rows'][0]['sector_label'] == '半导体'
+    assert by_sector['__none__']['rows'][0]['sector_label'] == '未分类'
+
+
+def test_index_has_sortable_headers_and_sector_column(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'data-sort="bear"' in html, '缺 Bear 可排序列头'
+    assert 'data-sort="base"' in html, '缺 Base 可排序列头'
+    assert 'data-sort="bull"' in html, '缺 Bull 可排序列头'
+    assert 'data-mbase=' in html, '缺行 base 边际 data 属性'
+    assert 'data-mbear=' in html, '缺行 bear 边际 data 属性'
+    assert 'data-mbull=' in html, '缺行 bull 边际 data 属性'
+    assert 'col-sector' in html, '缺板块列'
+    assert 'sortBy(' in html, '缺 sortBy 列头绑定'
+
+
+def test_index_has_sort_and_mode_js(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'function sortBy' in html, '缺 sortBy'
+    assert 'function applySort' in html, '缺 applySort'
+    assert 'function setMode' in html, '缺 setMode'
+    assert 'valuationsSortPref' in html, '缺 localStorage 键'
+    assert "setMode('flat')" in html, '缺平铺模式按钮绑定'
