@@ -309,3 +309,8 @@ def test_api_prices_hk_normalizes_and_maps_back(app_client, monkeypatch):
     assert '01810' not in seen['codes']
     body = resp.get_json()
     assert body['01810']['current_price'] == 27.32
+
+
+def test_fetch_code_hk_zero_padded_with_suffix():
+    assert _fetch_code({'stock_code': '09992.HK', 'market': 'HK'}) == '9992.HK'
+    assert _fetch_code({'stock_code': '01024.HK', 'market': 'HK'}) == '1024.HK'

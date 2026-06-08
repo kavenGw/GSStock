@@ -25,11 +25,14 @@ def _extract_price(data: dict) -> Optional[float]:
 
 
 def _fetch_code(row: dict) -> str:
-    """港股 yaml 存 5 位补零纯数字（01810），实时价需 yfinance 的 .HK 格式。
-    用 row 已有的 market 字段判断，转 1810.HK；其余原样。"""
+    """港股 yaml code 形态不一（01810 / 09992.HK），yfinance 需 4 位补零的 1810.HK / 9992.HK。
+    把港股数字部分统一归一为 4 位 + .HK；非港股原样。"""
     code = row['stock_code']
-    if row.get('market') == 'HK' and code.isdigit():
-        return f"{int(code):04d}.HK"
+    if row.get('market') != 'HK':
+        return code
+    digits = code.upper().removesuffix('.HK')
+    if digits.isdigit():
+        return f"{int(digits):04d}.HK"
     return code
 
 
