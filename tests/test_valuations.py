@@ -235,3 +235,14 @@ def test_index_renders_sector_group_headers(app_client):
     assert 'group-header' in html, '缺板块组头'
     assert 'data-sector=' in html, '缺行/组头 data-sector 属性'
     assert '半导体' in html
+
+
+def test_group_by_sector_assigns_sector_label_to_rows():
+    from app.routes.valuations import group_by_sector
+    groups = group_by_sector([
+        {'stock_code': 'a', 'sector': 'semiconductor', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': None, 'margin_base': 0.2},
+    ])
+    by_sector = {g['sector']: g for g in groups}
+    assert by_sector['semiconductor']['rows'][0]['sector_label'] == '半导体'
+    assert by_sector['__none__']['rows'][0]['sector_label'] == '未分类'
