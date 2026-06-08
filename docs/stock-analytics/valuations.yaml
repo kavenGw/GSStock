@@ -525,13 +525,14 @@
   market: HK
   currency: HKD
   sector: industrial
-  rating: exclude
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-26'
-  source_doc: sectors/industrial/ev/2026-05-26-小鹏汽车-buffett分析.md
-  note: 持续亏损无定价权，文中明确无内在价值可估
+  rating: watch
+  bear: 21.7
+  base: 43.5
+  bull: 78.0
+  dividend_yield: null
+  conviction_date: '2026-06-07'
+  source_doc: sectors/industrial/ev/2026-06-07-小鹏汽车-buffett分析.md
+  note: PS估值法，三情景PS 0.5x/1.0x/1.8x × 2025营收767亿RMB × 1.08汇率
 - stock_code: '600353'
   stock_name: 旭光电子
   market: A
