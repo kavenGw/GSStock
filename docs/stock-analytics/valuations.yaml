@@ -1572,3 +1572,16 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/energy/waste-to-energy/2026-06-08-伟明环保-buffett分析.md
   note: 每股由市值口径÷总股本~22.4亿股折算；2025分红预案含每股转增0.2股，除权后股本/每股口径有不确定性
+- stock_code: '603600'
+  stock_name: 永艺股份
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: watch
+  watch_reason: 2025增收不增利(归母-21.41%)叠加越南关税优势永久削弱，估值无折让(安全边际-16.9%)，待利润企稳或股价回落再评
+  bear: 5.75
+  base: 9.08
+  bull: 11.80
+  dividend_yield: 4.4
+  conviction_date: '2026-06-08'
+  source_doc: sectors/consumer/furniture/2026-06-08-永艺股份-buffett分析.md
