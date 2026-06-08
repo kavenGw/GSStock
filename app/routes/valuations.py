@@ -24,6 +24,15 @@ def _extract_price(data: dict) -> Optional[float]:
     return float(price)
 
 
+def _fetch_code(row: dict) -> str:
+    """港股 yaml 存 5 位补零纯数字（01810），实时价需 yfinance 的 .HK 格式。
+    用 row 已有的 market 字段判断，转 1810.HK；其余原样。"""
+    code = row['stock_code']
+    if row.get('market') == 'HK' and code.isdigit():
+        return f"{int(code):04d}.HK"
+    return code
+
+
 def compute_margin(value: Optional[float], price: Optional[float]) -> Optional[float]:
     """安全边际 = value / price - 1（正=上行空间，负=高估）。value 缺或 price 无效返回 None。"""
     if value is None or not price:
