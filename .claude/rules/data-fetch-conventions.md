@@ -21,6 +21,12 @@
 
 `Stock.stock_name` 是完整名（如 "光迅科技"/"舒华体育"），上层数据（supply_chain / docs frontmatter）常用半截关键词（"光迅"/"舒华"）。精确匹配 `WHERE stock_name=?` 经常返回空；推荐二级 fallback：先精确，失败 `WHERE stock_name LIKE ?||'%'`，多于 1 行视为冲突放弃。
 
+## yfinance 港股代码格式
+
+yfinance 港股（实时价/历史）**只认 4 位补零** `<4位>.HK`：`1810.HK` / `9992.HK` / `0189.HK`。裸数字（`01810`）或 5 位补零（`09992.HK`、`01024.HK`）一律 `KeyError` 无价。归一：`f"{int(code.upper().removesuffix('.HK')):04d}.HK"`。
+
+`MarketIdentifier.identify` **只认 `.HK` 后缀**——裸数字港股（`01810`）会 fallback 成美股走 yfinance 无效 ticker。消费来自 yaml/frontmatter 的 HK 代码（其形态不统一）喂给 `get_realtime_prices` 前必须先归一为 `.HK`，或用上游已有的 `market` 字段判断（参考 `app/routes/valuations.py:_fetch_code`）。
+
 ## 研究取数约定
 
 - **新浪 IR 调研 PDF**（`file.finance.sina.com.cn/cn/diaoyan/...`）：WebFetch 返回二进制 blob 无法解析，**不要重试**。Fallback 顺序：① 新浪网页版同内容（`finance.sina.com.cn/stock/...`）② cninfo 直链 PDF（`static.cninfo.com.cn/finalpage/.../*.PDF`，多数可解析）③ 东财财富号 / stcn / 21 经济网摘要稿
