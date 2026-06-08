@@ -314,3 +314,25 @@ def test_api_prices_hk_normalizes_and_maps_back(app_client, monkeypatch):
 def test_fetch_code_hk_zero_padded_with_suffix():
     assert _fetch_code({'stock_code': '09992.HK', 'market': 'HK'}) == '9992.HK'
     assert _fetch_code({'stock_code': '01024.HK', 'market': 'HK'}) == '1024.HK'
+
+
+def test_load_category_map_degrades_to_empty_on_error(monkeypatch):
+    from app.routes.valuations import load_category_map
+
+    class _BoomQuery:
+        @staticmethod
+        def all():
+            raise RuntimeError('db down')
+
+    class _BoomModel:
+        query = _BoomQuery()
+
+    monkeypatch.setattr('app.models.category.StockCategory', _BoomModel)
+    assert load_category_map() == {}
+
+
+def test_load_category_map_returns_dict(app_client):
+    from app.routes.valuations import load_category_map
+    with app_client.application.app_context():
+        m = load_category_map()
+    assert isinstance(m, dict)

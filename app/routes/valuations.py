@@ -43,6 +43,21 @@ def compute_margin(value: Optional[float], price: Optional[float]) -> Optional[f
     return value / price - 1
 
 
+def load_category_map() -> dict[str, str]:
+    """返回 {stock_code: category_name}，来自 StockCategory join Category。
+    app-context / 异常守卫：任何失败返回 {}（与取价失败降级同款，不让分类问题打挂整页）。"""
+    try:
+        from app.models.category import StockCategory
+        return {
+            sc.stock_code: sc.category.name
+            for sc in StockCategory.query.all()
+            if sc.category is not None
+        }
+    except Exception as e:
+        logger.warning(f'[估值页] 取分类失败，降级无分类: {type(e).__name__}: {e}', exc_info=True)
+        return {}
+
+
 def load_valuations(path: Path = VALUATIONS_PATH) -> list[dict]:
     """读 valuations.yaml，返回 list[dict]；文件缺失/空返回 []。"""
     path = Path(path)
