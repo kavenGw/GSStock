@@ -336,3 +336,15 @@ def test_load_category_map_returns_dict(app_client):
     with app_client.application.app_context():
         m = load_category_map()
     assert isinstance(m, dict)
+
+
+def test_enrich_attaches_category_from_cat_map():
+    from app.routes.valuations import _enrich
+    out = _enrich([{'stock_code': '600132', 'base': 10.0}], {'600132': {'price': 5.0}}, {'600132': '啤酒'})
+    assert out[0]['category'] == '啤酒'
+
+
+def test_enrich_category_none_without_map():
+    from app.routes.valuations import _enrich
+    out = _enrich([{'stock_code': 'x', 'base': 1.0}], {})
+    assert out[0]['category'] is None

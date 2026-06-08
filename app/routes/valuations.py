@@ -69,13 +69,15 @@ def load_valuations(path: Path = VALUATIONS_PATH) -> list[dict]:
     return [r for r in data if isinstance(r, dict) and r.get('stock_code')]
 
 
-def _enrich(rows: list[dict], prices: dict) -> list[dict]:
+def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> list[dict]:
+    cat_map = cat_map or {}
     out = []
     for r in rows:
         data = prices.get(r['stock_code']) or {}
         price = _extract_price(data)
         out.append({
             **r,
+            'category': cat_map.get(r['stock_code']),
             'current_price': price,
             'margin_bear': compute_margin(r.get('bear'), price),
             'margin_base': compute_margin(r.get('base'), price),
