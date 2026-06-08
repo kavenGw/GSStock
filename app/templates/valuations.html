@@ -6,6 +6,14 @@
 .margin-neg { color: #dc3545; font-weight: 600; }
 .val-table th, .val-table td { font-size: 13px; white-space: nowrap; vertical-align: middle; }
 .rating-badge { font-size: 11px; }
+.row-muted td { color: #adb5bd; }
+.row-muted .rating-badge { opacity: .6; }
+.group-header { cursor: pointer; background: #f1f3f5; }
+.group-header:hover { background: #e9ecef; }
+.group-header th { font-size: 13px; }
+.group-header .caret { display: inline-block; width: 1em; transition: transform .15s; }
+.group-header.collapsed .caret { transform: rotate(-90deg); }
+#market-chips .chip { margin-right: 6px; }
 </style>
 {% endblock %}
 {% block content %}
@@ -95,14 +103,44 @@ async function refreshPrices() {
   }
 }
 
-function switchTab(ev, market) {
+let currentMarket = 'all';
+
+function switchMarket(ev, market) {
   ev.preventDefault();
-  document.querySelectorAll('#market-tabs .nav-link').forEach(a => {
-    a.classList.toggle('active', a.dataset.market === market);
+  currentMarket = market;
+  document.querySelectorAll('#market-chips .chip').forEach(b => {
+    const on = b.dataset.market === market;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
   });
+  applyMarketFilter();
+}
+
+function applyMarketFilter() {
   document.querySelectorAll('tr[data-code]').forEach(tr => {
-    tr.style.display = (market === 'all' || tr.dataset.market === market) ? '' : 'none';
+    const mOk = currentMarket === 'all' || tr.dataset.market === currentMarket;
+    const collapsed = tr.classList.contains('hidden-by-group');
+    tr.style.display = (mOk && !collapsed) ? '' : 'none';
+    tr.dataset.marketHidden = mOk ? '' : '1';
   });
+  document.querySelectorAll('.group-header').forEach(h => {
+    const sector = h.dataset.sector;
+    const rows = document.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]');
+    let visible = 0;
+    rows.forEach(r => { if (r.dataset.marketHidden !== '1') visible++; });
+    h.style.display = visible > 0 ? '' : 'none';
+    const badge = h.querySelector('.group-count');
+    if (badge) badge.textContent = visible;
+  });
+}
+
+function toggleGroup(sector) {
+  const header = document.querySelector('.group-header[data-sector="' + sector + '"]');
+  const collapsed = header.classList.toggle('collapsed');
+  document.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]').forEach(tr => {
+    tr.classList.toggle('hidden-by-group', collapsed);
+  });
+  applyMarketFilter();
 }
 </script>
 {% endblock %}

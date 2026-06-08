@@ -171,7 +171,8 @@ def test_index_has_currency_column_and_data_market(app_client):
     html = app_client.get('/valuations/').data.decode('utf-8')
     assert '币种' in html, '缺币种列头'
     assert 'data-market=' in html, '缺行 data-market 属性'
-    assert 'switchTab' in html, '缺 switchTab JS'
+    assert 'switchMarket' in html, '缺 switchMarket JS'
+    assert 'toggleGroup' in html, '缺 toggleGroup JS'
 
 
 def test_group_by_sector_orders_groups_by_count_desc():
