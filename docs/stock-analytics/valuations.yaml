@@ -1,3 +1,16 @@
+- stock_code: '00992.HK'
+  stock_name: 联想集团
+  market: HK
+  currency: HKD
+  sector: electronics
+  rating: watch
+  watch_reason: PC+ISG+SSG三引擎转型期，ISG/SSG高毛利占比提升中，AI服务器订单可见，但PC周期波动大、净利率薄、港股折价，待ISG盈利拐点确认
+  bear: 7.58
+  base: 18.87
+  bull: 28.31
+  dividend_yield: 2.7
+  conviction_date: '2026-06-08'
+  source_doc: sectors/electronics/pc-server/2026-06-08-联想集团-buffett分析.md
 - stock_code: 03888
   stock_name: 金山软件
   market: HK
