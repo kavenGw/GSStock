@@ -291,3 +291,21 @@ def test_fetch_code_already_hk_suffixed_untouched():
 
 def test_fetch_code_missing_market_untouched():
     assert _fetch_code({'stock_code': '01810'}) == '01810'
+
+
+def test_api_prices_hk_normalizes_and_maps_back(app_client, monkeypatch):
+    from app.services import unified_stock_data_service
+
+    seen = {}
+
+    def fake_prices(codes, force_refresh=False):
+        seen['codes'] = list(codes)
+        return {'1810.HK': {'price': 27.32, 'name': '小米集团-W'}}
+
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices', fake_prices)
+    resp = app_client.get('/valuations/api/prices?force=1')
+    assert resp.status_code == 200
+    assert '1810.HK' in seen['codes']
+    assert '01810' not in seen['codes']
+    body = resp.get_json()
+    assert body['01810']['current_price'] == 27.32

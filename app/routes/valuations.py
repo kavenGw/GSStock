@@ -103,11 +103,12 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
 @valuations_bp.route('/')
 def index():
     rows = load_valuations()
-    codes = [r['stock_code'] for r in rows]
+    fetch_map = {r['stock_code']: _fetch_code(r) for r in rows}
     prices = {}
-    if codes:
+    if fetch_map:
         try:
-            prices = unified_stock_data_service.get_realtime_prices(codes)
+            raw = unified_stock_data_service.get_realtime_prices(list(fetch_map.values()))
+            prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
         except Exception as e:
             logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
     enriched = _enrich(rows, prices)
@@ -125,8 +126,9 @@ def index():
 def api_prices():
     force = request.args.get('force') == '1'
     rows = load_valuations()
-    codes = [r['stock_code'] for r in rows]
-    prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=force) if codes else {}
+    fetch_map = {r['stock_code']: _fetch_code(r) for r in rows}
+    raw = unified_stock_data_service.get_realtime_prices(list(fetch_map.values()), force_refresh=force) if fetch_map else {}
+    prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
     out = {}
     for r in rows:
         data = prices.get(r['stock_code']) or {}
