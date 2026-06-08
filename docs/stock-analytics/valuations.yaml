@@ -1476,7 +1476,7 @@
   currency: CNY
   sector: materials
   rating: watch
-  bear: 10.80
+  bear: 10.8
   base: 17.28
   bull: 24.69
   dividend_yield: 2.83
@@ -1509,3 +1509,15 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/materials/copper-foil/2026-06-08-铜冠铜箔-buffett分析.md
   note: 市值估算约 970 亿元（2026-05），安全边际为负
+- stock_code: '000021'
+  stock_name: 深科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  bear: 26.68
+  base: 31.45
+  bull: 45.11
+  dividend_yield: 0.6
+  conviction_date: '2026-06-08'
+  source_doc: sectors/semiconductor/packaging/2026-06-08-深科技-buffett分析.md
