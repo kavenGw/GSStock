@@ -14,6 +14,13 @@
 .group-header .caret { display: inline-block; width: 1em; transition: transform .15s; }
 .group-header.collapsed .caret { transform: rotate(-90deg); }
 #market-chips .chip { margin-right: 6px; }
+.val-table th.sortable { cursor: pointer; user-select: none; }
+.val-table th.sortable:hover { background: #e9ecef; }
+.sort-arrow { display: inline-block; width: 1em; text-align: left; }
+.mg { font-size: 11px; margin-left: 4px; }
+table.mode-grouped .col-sector { display: none; }
+table.mode-flat .group-header { display: none; }
+#mode-toggle .btn { padding: .15rem .55rem; }
 </style>
 {% endblock %}
 {% block content %}
@@ -27,19 +34,27 @@
 {% if not groups %}
 <div class="alert alert-warning">暂无估值数据（docs/stock-analytics/valuations.yaml 为空或缺失）。</div>
 {% else %}
-<div class="mb-3" id="market-chips">
-  <button class="btn btn-sm btn-primary chip" data-market="all" onclick="switchMarket(event,'all')">全部 ({{ total }})</button>
-  <button class="btn btn-sm btn-outline-primary chip" data-market="A" onclick="switchMarket(event,'A')">A股 ({{ market_counts.get('A', 0) }})</button>
-  <button class="btn btn-sm btn-outline-primary chip" data-market="HK" onclick="switchMarket(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</button>
-  <button class="btn btn-sm btn-outline-primary chip" data-market="US" onclick="switchMarket(event,'US')">美股 ({{ market_counts.get('US', 0) }})</button>
+<div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div id="market-chips">
+    <button class="btn btn-sm btn-primary chip" data-market="all" onclick="switchMarket(event,'all')">全部 ({{ total }})</button>
+    <button class="btn btn-sm btn-outline-primary chip" data-market="A" onclick="switchMarket(event,'A')">A股 ({{ market_counts.get('A', 0) }})</button>
+    <button class="btn btn-sm btn-outline-primary chip" data-market="HK" onclick="switchMarket(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</button>
+    <button class="btn btn-sm btn-outline-primary chip" data-market="US" onclick="switchMarket(event,'US')">美股 ({{ market_counts.get('US', 0) }})</button>
+  </div>
+  <div id="mode-toggle" class="btn-group btn-group-sm">
+    <button class="btn btn-primary" data-mode="grouped" onclick="setMode('grouped')">▣ 分组</button>
+    <button class="btn btn-outline-primary" data-mode="flat" onclick="setMode('flat')">▤ 平铺</button>
+  </div>
 </div>
 <div class="table-responsive">
-<table class="table table-sm table-hover val-table">
+<table id="val-table" class="table table-sm table-hover val-table mode-grouped">
   <thead class="table-light">
     <tr>
-      <th>代码</th><th>名称</th><th>币种</th><th>评级</th>
-      <th class="text-end">Bear</th><th class="text-end">Base</th><th class="text-end">Bull</th>
-      <th class="text-end">当前价</th><th class="text-end">Base安全边际</th>
+      <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th><th>评级</th>
+      <th class="text-end sortable" data-sort="bear" onclick="sortBy('bear')">Bear<span class="sort-arrow"></span></th>
+      <th class="text-end sortable" data-sort="base" onclick="sortBy('base')">Base<span class="sort-arrow"></span></th>
+      <th class="text-end sortable" data-sort="bull" onclick="sortBy('bull')">Bull<span class="sort-arrow"></span></th>
+      <th class="text-end">当前价</th>
       <th>日期</th><th>文档</th>
     </tr>
   </thead>
@@ -50,18 +65,28 @@
     </tr>
     {% for r in g.rows %}
     <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}"
+        data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
+        data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
+        data-mbull="{{ r.margin_bull if r.margin_bull is not none else '' }}"
         class="grp-{{ g.sector }}{% if r.rating == 'exclude' %} row-muted{% endif %}">
       <td>{{ r.stock_code }}</td>
       <td>{{ r.stock_name }}</td>
+      <td class="col-sector"><span class="badge bg-light text-secondary">{{ r.sector_label }}</span></td>
       <td>{{ r.currency or '—' }}</td>
       <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
-      <td class="text-end">{{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}</td>
-      <td class="text-end">{{ '%.2f'|format(r.base) if r.base is not none else '—' }}</td>
-      <td class="text-end">{{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}</td>
-      <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
-      <td class="text-end cell-margin {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">
-        {{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '—' }}
+      <td class="text-end">
+        {{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}
+        <span class="mg cell-mbear {% if r.margin_bear is not none and r.margin_bear >= 0 %}margin-pos{% elif r.margin_bear is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bear * 100) if r.margin_bear is not none else '' }}</span>
       </td>
+      <td class="text-end">
+        {{ '%.2f'|format(r.base) if r.base is not none else '—' }}
+        <span class="mg cell-mbase {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '' }}</span>
+      </td>
+      <td class="text-end">
+        {{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}
+        <span class="mg cell-mbull {% if r.margin_bull is not none and r.margin_bull >= 0 %}margin-pos{% elif r.margin_bull is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bull * 100) if r.margin_bull is not none else '' }}</span>
+      </td>
+      <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
       <td>{{ r.conviction_date or '—' }}</td>
       <td>{% if r.source_doc %}<span title="{{ r.source_doc }}" style="cursor:help">📄</span>{% else %}—{% endif %}</td>
     </tr>
