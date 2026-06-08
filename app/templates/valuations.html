@@ -99,36 +99,93 @@ table.mode-flat .group-header { display: none; }
 
 <script>
 function fmtPrice(v) { return v === null || v === undefined ? '—' : v.toFixed(2); }
-function fmtMargin(v) { return v === null || v === undefined ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
+function fmtMargin(v) { return v === null || v === undefined ? '' : (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
 
-async function refreshPrices() {
-  const btn = document.getElementById('refresh-btn');
-  const status = document.getElementById('refresh-status');
-  btn.disabled = true; status.textContent = '刷新中…';
+const PREF_KEY = 'valuationsSortPref';
+let sortKey = 'base';
+let sortDir = 'desc';
+let mode = 'grouped';
+let currentMarket = 'all';
+
+function loadPref() {
   try {
-    const resp = await fetch('/valuations/api/prices?force=1');
-    if (!resp.ok) throw new Error('http ' + resp.status);
-    const data = await resp.json();
-    document.querySelectorAll('tr[data-code]').forEach(tr => {
-      const row = data[tr.dataset.code];
-      if (!row) return;
-      tr.querySelector('.cell-price').textContent = fmtPrice(row.current_price);
-      const m = tr.querySelector('.cell-margin');
-      m.textContent = fmtMargin(row.margin_base);
-      m.classList.remove('margin-pos', 'margin-neg');
-      if (row.margin_base !== null && row.margin_base !== undefined) {
-        m.classList.add(row.margin_base >= 0 ? 'margin-pos' : 'margin-neg');
-      }
+    const p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
+    if (['bear', 'base', 'bull'].includes(p.sortKey)) sortKey = p.sortKey;
+    if (['asc', 'desc'].includes(p.dir)) sortDir = p.dir;
+    if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;
+  } catch (e) {}
+}
+function savePref() {
+  localStorage.setItem(PREF_KEY, JSON.stringify({ sortKey, dir: sortDir, mode }));
+}
+
+function marginOf(tr, key) {
+  const v = tr.dataset['m' + key];
+  return (v === '' || v === undefined) ? null : parseFloat(v);
+}
+
+function sortRows(rows) {
+  const dir = sortDir === 'asc' ? 1 : -1;
+  return rows.slice().sort((a, b) => {
+    const va = marginOf(a, sortKey), vb = marginOf(b, sortKey);
+    if (va === null && vb === null) return 0;
+    if (va === null) return 1;   // null 边际恒末位
+    if (vb === null) return -1;
+    return (va - vb) * dir;
+  });
+}
+
+function updateArrows() {
+  document.querySelectorAll('#val-table th.sortable').forEach(th => {
+    const arrow = th.querySelector('.sort-arrow');
+    arrow.textContent = (th.dataset.sort === sortKey) ? (sortDir === 'asc' ? '▲' : '▼') : '';
+  });
+}
+
+function applySort() {
+  updateArrows();
+  const tbody = document.querySelector('#val-table tbody');
+  if (mode === 'flat') {
+    sortRows([...tbody.querySelectorAll('tr[data-code]')]).forEach(r => tbody.appendChild(r));
+  } else {
+    document.querySelectorAll('#val-table .group-header').forEach(header => {
+      const sector = header.dataset.sector;
+      const rows = sortRows([...tbody.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]')]);
+      let ref = header;
+      rows.forEach(r => { ref.after(r); ref = r; });
     });
-    status.textContent = '已更新 ' + new Date().toLocaleTimeString();
-  } catch (e) {
-    status.textContent = '刷新失败';
-  } finally {
-    btn.disabled = false;
   }
 }
 
-let currentMarket = 'all';
+function sortBy(key) {
+  if (sortKey === key) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey = key;
+    sortDir = 'desc';
+  }
+  savePref();
+  applySort();
+}
+
+function setMode(m) {
+  mode = m;
+  const table = document.getElementById('val-table');
+  table.classList.toggle('mode-grouped', m === 'grouped');
+  table.classList.toggle('mode-flat', m === 'flat');
+  document.querySelectorAll('#mode-toggle .btn').forEach(b => {
+    const on = b.dataset.mode === m;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
+  });
+  if (m === 'flat') {
+    document.querySelectorAll('#val-table tr[data-code]').forEach(tr => tr.classList.remove('hidden-by-group'));
+    document.querySelectorAll('#val-table .group-header').forEach(h => h.classList.remove('collapsed'));
+  }
+  savePref();
+  applySort();
+  applyMarketFilter();
+}
 
 function switchMarket(ev, market) {
   ev.preventDefault();
@@ -142,30 +199,69 @@ function switchMarket(ev, market) {
 }
 
 function applyMarketFilter() {
-  document.querySelectorAll('tr[data-code]').forEach(tr => {
+  document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
     const mOk = currentMarket === 'all' || tr.dataset.market === currentMarket;
     const collapsed = tr.classList.contains('hidden-by-group');
     tr.style.display = (mOk && !collapsed) ? '' : 'none';
     tr.dataset.marketHidden = mOk ? '' : '1';
   });
-  document.querySelectorAll('.group-header').forEach(h => {
-    const sector = h.dataset.sector;
-    const rows = document.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]');
-    let visible = 0;
-    rows.forEach(r => { if (r.dataset.marketHidden !== '1') visible++; });
-    h.style.display = visible > 0 ? '' : 'none';
-    const badge = h.querySelector('.group-count');
-    if (badge) badge.textContent = visible;
-  });
+  if (mode === 'grouped') {
+    document.querySelectorAll('#val-table .group-header').forEach(h => {
+      const sector = h.dataset.sector;
+      const rows = document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]');
+      let visible = 0;
+      rows.forEach(r => { if (r.dataset.marketHidden !== '1') visible++; });
+      h.style.display = visible > 0 ? '' : 'none';
+      const badge = h.querySelector('.group-count');
+      if (badge) badge.textContent = visible;
+    });
+  }
 }
 
 function toggleGroup(sector) {
-  const header = document.querySelector('.group-header[data-sector="' + sector + '"]');
+  if (mode !== 'grouped') return;
+  const header = document.querySelector('#val-table .group-header[data-sector="' + sector + '"]');
   const collapsed = header.classList.toggle('collapsed');
-  document.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]').forEach(tr => {
+  document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]').forEach(tr => {
     tr.classList.toggle('hidden-by-group', collapsed);
   });
   applyMarketFilter();
 }
+
+async function refreshPrices() {
+  const btn = document.getElementById('refresh-btn');
+  const status = document.getElementById('refresh-status');
+  btn.disabled = true; status.textContent = '刷新中…';
+  try {
+    const resp = await fetch('/valuations/api/prices?force=1');
+    if (!resp.ok) throw new Error('http ' + resp.status);
+    const data = await resp.json();
+    document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
+      const row = data[tr.dataset.code];
+      if (!row) return;
+      tr.querySelector('.cell-price').textContent = fmtPrice(row.current_price);
+      [['bear', 'margin_bear'], ['base', 'margin_base'], ['bull', 'margin_bull']].forEach(([k, mk]) => {
+        const span = tr.querySelector('.cell-m' + k);
+        const v = row[mk];
+        span.textContent = fmtMargin(v);
+        span.classList.remove('margin-pos', 'margin-neg');
+        if (v !== null && v !== undefined) span.classList.add(v >= 0 ? 'margin-pos' : 'margin-neg');
+        tr.dataset['m' + k] = (v === null || v === undefined) ? '' : v;
+      });
+    });
+    applySort();
+    status.textContent = '已更新 ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    status.textContent = '刷新失败';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function initValuations() {
+  loadPref();
+  setMode(mode);  // 应用 table class + 模式按钮态 + applySort + applyMarketFilter
+}
+document.addEventListener('DOMContentLoaded', initValuations);
 </script>
 {% endblock %}

@@ -254,5 +254,16 @@ def test_index_has_sortable_headers_and_sector_column(app_client):
     assert 'data-sort="base"' in html, '缺 Base 可排序列头'
     assert 'data-sort="bull"' in html, '缺 Bull 可排序列头'
     assert 'data-mbase=' in html, '缺行 base 边际 data 属性'
+    assert 'data-mbear=' in html, '缺行 bear 边际 data 属性'
+    assert 'data-mbull=' in html, '缺行 bull 边际 data 属性'
     assert 'col-sector' in html, '缺板块列'
     assert 'sortBy(' in html, '缺 sortBy 列头绑定'
+
+
+def test_index_has_sort_and_mode_js(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'function sortBy' in html, '缺 sortBy'
+    assert 'function applySort' in html, '缺 applySort'
+    assert 'function setMode' in html, '缺 setMode'
+    assert 'valuationsSortPref' in html, '缺 localStorage 键'
+    assert "setMode('flat')" in html, '缺平铺模式按钮绑定'
