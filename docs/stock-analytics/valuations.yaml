@@ -1585,3 +1585,17 @@
   dividend_yield: 4.4
   conviction_date: '2026-06-08'
   source_doc: sectors/consumer/furniture/2026-06-08-永艺股份-buffett分析.md
+- stock_code: '300994'
+  stock_name: 久祺股份
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: exclude
+  exclude_reason: 低毛利无定价权的出口ODM代工，美国~56%/欧盟延至2030关税逆风，PE(TTM)~35x下机械加权期望内在价值16.4亿安全边际约-50%，纺织厂式商品业务落能力圈外
+  bear: 3.86
+  base: 6.86
+  bull: 15.02
+  dividend_yield: 2.86
+  conviction_date: '2026-06-08'
+  source_doc: sectors/consumer/bicycle/2026-06-08-久祺股份-buffett分析.md
+  note: 每股内在价值由情景市值(亿)/总股本2.33亿股反推；dividend_yield为2025中期口径(0.40元/股÷~14元)，非全年；行情为多源快照
