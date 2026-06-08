@@ -1013,18 +1013,18 @@
   conviction_date: '2026-05-12'
   source_doc: sectors/semiconductor/storage/2026-05-12-大普微-buffett分析.md
   note: 大普微；文档明确无法可靠估算内在价值
-- stock_code: 1888.HK
+- stock_code: '1888.HK'
   stock_name: 建滔积层板
   market: HK
   currency: HKD
   sector: semiconductor
-  rating: exclude
-  bear: 3.8
-  base: 6.4
-  bull: 16.8
-  conviction_date: '2026-05-28'
-  source_doc: sectors/semiconductor/materials/2026-05-28-建滔积层板-buffett分析.md
-  note: 文档直接给每股港元：3.8/6.4/16.8
+  rating: watch
+  bear: 38.5
+  base: 70.5
+  bull: 107.7
+  dividend_yield: 3.34
+  conviction_date: '2026-06-08'
+  source_doc: sectors/semiconductor/materials/2026-06-08-建滔积层板-buffett分析.md
 - stock_code: '300054'
   stock_name: 鼎龙股份
   market: A
