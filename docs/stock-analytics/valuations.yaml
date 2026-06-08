@@ -739,6 +739,19 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-中国铝业-buffett分析.md
   note: 总市值情景200/660/1000亿，除以总股本171.5亿股
+- stock_code: '01378'
+  stock_name: 中国宏桥
+  market: HK
+  currency: HKD
+  sector: materials
+  rating: watch
+  bear: 6.97
+  base: 5.35
+  bull: 24.04
+  dividend_yield: 13.25
+  conviction_date: '2026-06-08'
+  source_doc: sectors/materials/nonferrous/2026-06-08-中国宏桥-buffett分析.md
+  note: 三情景市值HKD 690/530/2380亿÷99亿股；base为穿越周期正常化情景（530亿），低于bear（690亿）系铝价回落正常化导致
 - stock_code: '601899'
   stock_name: 紫金矿业
   market: A
