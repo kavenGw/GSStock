@@ -1534,3 +1534,15 @@
   dividend_yield: 0.6
   conviction_date: '2026-06-08'
   source_doc: sectors/semiconductor/packaging/2026-06-08-深科技-buffett分析.md
+- stock_code: '00388'
+  stock_name: 香港交易所
+  market: HK
+  currency: HKD
+  sector: financial
+  rating: watch
+  bear: 252
+  base: 339
+  bull: 433
+  dividend_yield: 3.1
+  conviction_date: '2026-06-08'
+  source_doc: sectors/financial/exchange/2026-06-08-香港交易所-buffett分析.md
