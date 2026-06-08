@@ -908,14 +908,15 @@
   stock_name: 立昂微
   market: A
   currency: CNY
-  sector: other
-  rating: null
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-08'
-  source_doc: cross-sector/2026-05-08-立昂微-沪硅产业-buffett对比分析.md
-  note: Don't Buy；硅片commodity无定价权，负安全边际
+  sector: semiconductor
+  rating: exclude
+  bear: 11.48
+  base: 17.88
+  bull: 10.73
+  dividend_yield: null
+  conviction_date: '2026-06-08'
+  source_doc: sectors/semiconductor/wafer/2026-06-08-立昂微-buffett分析.md
+  note: 商品业务 Exclude，安全边际-26%；三情景市值77/120/72亿÷6.71亿股；连续亏损无分红
 - stock_code: '688126'
   stock_name: 沪硅产业
   market: A
