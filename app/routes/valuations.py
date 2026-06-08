@@ -140,7 +140,8 @@ def index():
             prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
         except Exception as e:
             logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
-    enriched = _enrich(rows, prices)
+    cat_map = load_category_map()
+    enriched = _enrich(rows, prices, cat_map)
     groups = group_by_sector(enriched)
     market_counts = Counter(r.get('market') for r in enriched)
     return render_template(

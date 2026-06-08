@@ -377,3 +377,12 @@ def test_group_by_sector_carveout_row_gets_category_label():
     from app.routes.valuations import group_by_sector
     [grp] = group_by_sector([{'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'margin_base': 0.1}])
     assert grp['rows'][0]['sector_label'] == '啤酒'
+
+
+def test_index_renders_beer_group_when_categorized(app_client, monkeypatch):
+    from app.routes import valuations as val
+    monkeypatch.setattr(val, 'load_category_map',
+                        lambda: {'600132': '啤酒', '600600': '啤酒', '000729': '啤酒'})
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert '啤酒' in html
+    assert 'data-sector="啤酒"' in html
