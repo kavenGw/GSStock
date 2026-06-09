@@ -985,12 +985,13 @@
   currency: HKD
   sector: semiconductor
   rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-27'
-  source_doc: sectors/semiconductor/materials/2026-05-27-东岳集团-buffett分析.md
-  note: 三情景总市值HKD 64/156/330亿，文档未披露股本，无法换算每股
+  bear: 3.47
+  base: 7.22
+  bull: 10.98
+  conviction_date: '2026-06-09'
+  source_doc: sectors/semiconductor/materials/2026-06-09-东岳集团-buffett分析.md
+  note: 每股=情景市值HKD÷17.3亿股(bear 60/base 125/bull 190亿)；股息率按现价16.34算
+  dividend_yield: 1.84
 - stock_code: 002149
   stock_name: 西部材料
   market: A
@@ -1581,7 +1582,7 @@
   watch_reason: 2025增收不增利(归母-21.41%)叠加越南关税优势永久削弱，估值无折让(安全边际-16.9%)，待利润企稳或股价回落再评
   bear: 5.75
   base: 9.08
-  bull: 11.80
+  bull: 11.8
   dividend_yield: 4.4
   conviction_date: '2026-06-08'
   source_doc: sectors/consumer/furniture/2026-06-08-永艺股份-buffett分析.md
