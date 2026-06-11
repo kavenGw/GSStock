@@ -1614,3 +1614,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
   note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
+- stock_code: 002428
+  stock_name: 云南锗业
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 4.6
+  base: 13.02
+  bull: 26.8
+  dividend_yield: 0.01
+  conviction_date: '2026-06-11'
+  source_doc: sectors/materials/minor-metals/2026-06-11-云南锗业-buffett分析.md
+  note: 每股=市值内在价值/6.53亿股（bear 30亿/base 85亿/bull 175亿）；期望内在价值约81亿 vs 市值约536亿，安全边际-85%；exclude
