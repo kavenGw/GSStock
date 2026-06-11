@@ -1262,13 +1262,14 @@
   market: A
   currency: CNY
   sector: semiconductor
-  rating: exclude
-  bear: 3.7
-  base: 4.6
-  bull: 9.2
-  conviction_date: '2026-05-08'
-  source_doc: sectors/semiconductor/materials/2026-05-08-石英股份-buffett分析.md
-  note: 正常化内在价值20-30亿/bull封顶50亿÷5.42亿股
+  rating: watch
+  bear: 4.5
+  base: 10.4
+  bull: 42.4
+  conviction_date: '2026-06-11'
+  source_doc: sectors/semiconductor/materials/2026-06-11-石英股份-buffett分析.md
+  note: 半导体franchise切换重估；实时市值~350亿/PE~229，安全边际约-72%；6-11精确收盘/PB分位为采证缺口
+  dividend_yield: 1.3
 - stock_code: '603986'
   stock_name: 兆易创新
   market: A
