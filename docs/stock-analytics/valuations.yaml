@@ -1614,3 +1614,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
   note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
+- stock_code: '688775'
+  stock_name: 影石创新
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: watch
+  bear: 20.2
+  base: 43.64
+  bull: 74.81
+  dividend_yield: null
+  conviction_date: '2026-06-11'
+  source_doc: sectors/consumer/consumer-electronics/2026-06-11-影石创新-buffett分析.md
+  note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；高成长投入期无分红
