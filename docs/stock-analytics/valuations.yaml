@@ -1601,3 +1601,16 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/consumer/bicycle/2026-06-08-久祺股份-buffett分析.md
   note: 每股内在价值由情景市值(亿)/总股本2.33亿股反推；dividend_yield为2025中期口径(0.40元/股÷~14元)，非全年；行情为多源快照
+- stock_code: '603929'
+  stock_name: 亚翔集成
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: watch
+  bear: 39
+  base: 86
+  bull: 155
+  dividend_yield: 1.0
+  conviction_date: '2026-06-11'
+  source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
+  note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
