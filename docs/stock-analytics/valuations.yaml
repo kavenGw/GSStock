@@ -685,12 +685,13 @@
   currency: CNY
   sector: materials
   rating: watch
-  bear: 15.61
-  base: 24.0
-  bull: 41.6
-  conviction_date: '2026-05-30'
-  source_doc: sectors/materials/nonferrous/2026-05-30-江西铜业-buffett分析.md
-  note: bear熊情景540亿/股本；base文中中枢22-26元中值；bull文中牛市~41.6元
+  bear: 9.9
+  base: 15.9
+  bull: 28.6
+  dividend_yield: 2.47
+  conviction_date: '2026-06-11'
+  source_doc: sectors/materials/nonferrous/2026-06-11-江西铜业-buffett分析.md
+  note: 三情景每股内在价值来自§9表格显式值(bear~9.9/base~15.9/bull~28.6)；期望值586亿~16.9元/股；安全边际-58%
 - stock_code: '600489'
   stock_name: 中金黄金
   market: A
