@@ -1614,3 +1614,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
   note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
+- stock_code: '301071'
+  stock_name: 力量钻石
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 2.68
+  base: 8.62
+  bull: 22.99
+  dividend_yield: 1.64
+  conviction_date: '2026-06-11'
+  source_doc: sectors/materials/superhard/2026-06-11-力量钻石-buffett分析.md
+  note: 每股由情景市值(亿)÷总股本2.61亿股(135亿市值÷51.71元)反推；培育钻周期底反转+半导体散热概念,PE_TTM~153x安全边际约-80%;行情为第三方口径快照
