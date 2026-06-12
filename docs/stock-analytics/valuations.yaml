@@ -1627,3 +1627,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/materials/nonferrous/2026-06-11-章源钨业-buffett分析.md
   note: 每股内在价值来自§9场景加权；钨价见顶腰斩-58%、Q1暴利为周期顶不可外推；现价PB约12-13x/PE约126x安全边际深度为负（约-77%）；行情锚2026-06-09收盘非实时、PB为估算
+- stock_code: 002428
+  stock_name: 云南锗业
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 4.6
+  base: 13.02
+  bull: 26.8
+  dividend_yield: 0.01
+  conviction_date: '2026-06-11'
+  source_doc: sectors/materials/minor-metals/2026-06-11-云南锗业-buffett分析.md
+  note: 每股=市值内在价值/6.53亿股（bear 30亿/base 85亿/bull 175亿）；期望内在价值约81亿 vs 市值约536亿，安全边际-85%；exclude
