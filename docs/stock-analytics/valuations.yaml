@@ -807,12 +807,13 @@
   currency: HKD
   sector: media
   rating: watch
-  bear: 22.89
-  base: 46.43
-  bull: 68.76
-  conviction_date: '2026-06-03'
-  source_doc: sectors/media/short-video/2026-06-03-快手-buffett分析.md
-  note: 三情景市值HKD(调整前)864/1752/2595亿÷37.74亿股；期望含净现金调整后1820亿
+  bear: 28.74
+  base: 43.69
+  bull: 64.95
+  dividend_yield: 1.5
+  conviction_date: '2026-06-11'
+  source_doc: sectors/media/short-video/2026-06-11-快手-buffett分析.md
+  note: 三情景市值HKD 1230/1870/2780亿÷约42.8亿股(市值1990÷现价46.5反推)；期望内在价值1940亿，安全边际-2.5%；分红率取HK$30亿分红÷市值(总股东回报payout约4%含回购)
 - stock_code: '0772'
   stock_name: 阅文集团
   market: HK
