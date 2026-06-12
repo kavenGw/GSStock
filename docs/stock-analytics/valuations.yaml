@@ -1614,3 +1614,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
   note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
+- stock_code: '002378'
+  stock_name: 章源钨业
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 3.2
+  base: 6.7
+  bull: 15.3
+  dividend_yield: 0.39
+  conviction_date: '2026-06-11'
+  source_doc: sectors/materials/nonferrous/2026-06-11-章源钨业-buffett分析.md
+  note: 每股内在价值来自§9场景加权；钨价见顶腰斩-58%、Q1暴利为周期顶不可外推；现价PB约12-13x/PE约126x安全边际深度为负（约-77%）；行情锚2026-06-09收盘非实时、PB为估算
