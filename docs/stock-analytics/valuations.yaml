@@ -1653,3 +1653,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/materials/superhard/2026-06-11-力量钻石-buffett分析.md
   note: 每股由情景市值(亿)÷总股本2.61亿股(135亿市值÷51.71元)反推；培育钻周期底反转+半导体散热概念,PE_TTM~153x安全边际约-80%;行情为第三方口径快照
+- stock_code: '688775'
+  stock_name: 影石创新
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: watch
+  bear: 20.2
+  base: 43.64
+  bull: 74.81
+  dividend_yield: null
+  conviction_date: '2026-06-11'
+  source_doc: sectors/consumer/consumer-electronics/2026-06-11-影石创新-buffett分析.md
+  note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；高成长投入期无分红
