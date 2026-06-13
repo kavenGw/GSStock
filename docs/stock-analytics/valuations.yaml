@@ -1616,7 +1616,7 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
   note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
-- stock_code: '002378'
+- stock_code: 002378
   stock_name: 章源钨业
   market: A
   currency: CNY
@@ -1668,7 +1668,7 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/consumer/consumer-electronics/2026-06-11-影石创新-buffett分析.md
   note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；高成长投入期无分红
-- stock_code: '000519'
+- stock_code: 000519
   stock_name: 中兵红箭
   market: A
   currency: CNY
@@ -1681,3 +1681,16 @@
   conviction_date: '2026-06-13'
   source_doc: sectors/industrial/defense/2026-06-13-中兵红箭-buffett分析.md
   note: 每股内在价值由市值情景内在价值/总股本13.93亿股推算；行情单源(证券之星2026-06-03)、最新PB及2024-2025派息额未取到
+- stock_code: '000657'
+  stock_name: 中钨高新
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 6.3
+  base: 13.7
+  bull: 30.9
+  dividend_yield: 0.23
+  conviction_date: '2026-06-13'
+  source_doc: sectors/materials/nonferrous/2026-06-13-中钨高新-buffett分析.md
+  note: 每股内在价值场景加权（bear/base/bull）；2026Q1为钨价周期顶利润不可外推
