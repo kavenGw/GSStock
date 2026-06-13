@@ -1668,3 +1668,16 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/consumer/consumer-electronics/2026-06-11-影石创新-buffett分析.md
   note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；高成长投入期无分红
+- stock_code: '000519'
+  stock_name: 中兵红箭
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: watch
+  bear: 1.18
+  base: 4.02
+  bull: 7.75
+  dividend_yield: 0.27
+  conviction_date: '2026-06-13'
+  source_doc: sectors/industrial/defense/2026-06-13-中兵红箭-buffett分析.md
+  note: 每股内在价值由市值情景内在价值/总股本13.93亿股推算；行情单源(证券之星2026-06-03)、最新PB及2024-2025派息额未取到
