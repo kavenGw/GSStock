@@ -1694,3 +1694,16 @@
   conviction_date: '2026-06-13'
   source_doc: sectors/materials/nonferrous/2026-06-13-中钨高新-buffett分析.md
   note: 每股内在价值场景加权（bear/base/bull）；2026Q1为钨价周期顶利润不可外推
+- stock_code: '000333'
+  stock_name: 美的集团
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: config
+  bear: 59.0
+  base: 82.0
+  bull: 105.1
+  dividend_yield: 5.1
+  conviction_date: '2026-06-13'
+  source_doc: sectors/consumer/home-appliance/2026-06-13-美的集团-buffett分析.md
+  note: 每股内在价值由市值情景内在价值（bear4485/base6235/bull7990亿）÷估算总股本约76亿股推算；实时行情为第三方快照(gurufocus 2026-06-13)、PB及H股0300.HK口径未交叉验证
