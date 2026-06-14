@@ -10,6 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **通用约定**：响应中文；不写多余注释；不写 backup 文件（git 留痕足够）；所有 git/cargo/npm/pytest 命令前加 `rtk`，链式 `&&` 中也要。
 
+**投研 skill 路由**：个股/持仓/板块投研一律走本仓 skill（`buffett` / `stock-deep-redo` / `analyze-category` / `portfolio-init` / `portfolio-rebalance` / `news-impact` / `liquidation-strategy`）。全局插件 `equity-research` / `investment-banking` / `private-equity` 面向卖方/PE 工作流，**不适用于本仓**，勿因"分析某股"等模糊请求误触发。
+
 ## 常用命令
 
 ```bash
@@ -44,7 +46,7 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 This project has a graphify knowledge graph at graphify-out/.
 
 Rules:
-- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- When answering architecture or codebase questions, consult graphify-out/GRAPH_REPORT.md for god nodes and community structure — but the graph may lag recent edits, so treat current source as authoritative on any conflict
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
-- After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current
+- The graph is a navigation aid, not a source of truth. Optionally refresh after substantial code changes (skip for small edits): `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"`
 - Top god nodes are minified vendor bundles (echarts.min.js / chart.umd.min.js — `E()`, `T()`, `js()` etc.); skip them. Real architectural cores are `Stock`, `MarketIdentifier`, `UnifiedStockCache`, `UnifiedStockDataService`.
