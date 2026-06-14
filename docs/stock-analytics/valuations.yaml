@@ -1719,4 +1719,18 @@
   dividend_yield: 5.1
   conviction_date: '2026-06-13'
   source_doc: sectors/consumer/home-appliance/2026-06-13-美的集团-buffett分析.md
-  note: 每股内在价值由市值情景内在价值（bear4485/base6235/bull7990亿）÷估算总股本约76亿股推算；实时行情为第三方快照(gurufocus 2026-06-13)、PB及H股0300.HK口径未交叉验证
+  note: 每股内在价值由市值情景内在价值（bear4485/base6235/bull7990亿）÷估算总股本约76亿股推算；实时行情为第三方快照(gurufocus
+    2026-06-13)、PB及H股0300.HK口径未交叉验证
+- stock_code: '600690'
+  stock_name: 海尔智家
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: config
+  bear: 14.95
+  base: 22.68
+  bull: 26.6
+  dividend_yield: 4.5
+  conviction_date: '2026-06-14'
+  source_doc: sectors/consumer/home-appliance/2026-06-14-海尔智家-buffett分析.md
+  note: 每股由市值内在价值/总股本93.84亿股反推；股息率口径分歧（4.15%~5.2%）取中值4.5；6/14当日价缺(沙箱403)行情为2026-03~04口径
