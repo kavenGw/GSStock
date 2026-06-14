@@ -1694,6 +1694,19 @@
   conviction_date: '2026-06-13'
   source_doc: sectors/materials/nonferrous/2026-06-13-中钨高新-buffett分析.md
   note: 每股内在价值场景加权（bear/base/bull）；2026Q1为钨价周期顶利润不可外推
+- stock_code: '600487'
+  stock_name: 亨通光电
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: watch
+  bear: 20.5
+  base: 32.8
+  bull: 61.6
+  dividend_yield: 0.26
+  conviction_date: '2026-06-14'
+  source_doc: sectors/industrial/cable/2026-06-14-亨通光电-buffett分析.md
+  note: 每股=情景内在价值(亿)/股本约24.36亿股；当前股价极端高估(PE TTM~80x)
 - stock_code: '000333'
   stock_name: 美的集团
   market: A
