@@ -1734,3 +1734,16 @@
   conviction_date: '2026-06-14'
   source_doc: sectors/consumer/home-appliance/2026-06-14-海尔智家-buffett分析.md
   note: 每股由市值内在价值/总股本93.84亿股反推；股息率口径分歧（4.15%~5.2%）取中值4.5；6/14当日价缺(沙箱403)行情为2026-03~04口径
+- stock_code: '002460'
+  stock_name: 赣锋锂业
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 5.72
+  base: 25.37
+  bull: 45.78
+  dividend_yield: 0.28
+  conviction_date: '2026-06-15'
+  source_doc: sectors/materials/lithium/2026-06-15-赣锋锂业-buffett分析.md
+  note: 每股内在价值由市值口径内在价值/股本(20.97亿股,市值1474亿/价70.31)折算；周期反弹中段,安全边际-64%
