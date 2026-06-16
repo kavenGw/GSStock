@@ -19,6 +19,8 @@
 
 **跨板块标的 sector 归属准则**：标的横跨两个一级板块时（如罗博特科 51% 半导体 + 48% 光伏、工业富联 PCB+服务器），按**收入第一权重**归类，次要业务在 thesis / themes 中说明。仅在两业务旗鼓相当且核心叙事来自次要业务时，例外放 `cross-sector/`。判断主业权重用 `ak.stock_zygc_em(symbol='SZ<code>')` 取最新报告期的"按产品分类"切片。
 
+**锂电/储能成品制造归 `energy`/`battery`，不归 `materials`**：电芯/电池系统/动力/储能/消费电池制造（如亿纬锂能）属 energy；`materials` 仅放上游锂盐/正负极/隔膜/电解液（如赣锋锂业=materials/lithium）。中游电池厂 vs 上游锂资源成本传导方向相反（电池厂是锂买方，锂价涨=成本压力）。采证 subagent 易误判电池厂为 materials/industrial，控制者需纠。
+
 ## Frontmatter 约定（5 类 doc_type）
 
 所有文档必须有 YAML frontmatter，按 `scripts/_docs_schema.py:REQUIRED_FIELDS_BY_TYPE` 字段集补齐。
