@@ -1747,3 +1747,16 @@
   conviction_date: '2026-06-15'
   source_doc: sectors/materials/lithium/2026-06-15-赣锋锂业-buffett分析.md
   note: 每股内在价值由市值口径内在价值/股本(20.97亿股,市值1474亿/价70.31)折算；周期反弹中段,安全边际-64%
+- stock_code: '300014'
+  stock_name: 亿纬锂能
+  market: A
+  currency: CNY
+  sector: energy
+  rating: watch
+  bear: 16.3
+  base: 31.3
+  bull: 45.3
+  dividend_yield: 0.37
+  conviction_date: '2026-06-16'
+  source_doc: sectors/energy/battery/2026-06-16-亿纬锂能-buffett分析.md
+  note: 每股=(电池主业情景内在价值+思摩尔SOTP120亿)/股本约21.73亿股(市值1453.5亿/价66.88)；期望内在价值656亿vs市值1453.5亿安全边际约-55%；储能放量+盈利反转但增收不增利,正常化PE约30x不便宜
