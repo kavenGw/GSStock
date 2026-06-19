@@ -1764,16 +1764,16 @@
   conviction_date: '2026-06-16'
   source_doc: sectors/energy/battery/2026-06-16-亿纬锂能-buffett分析.md
   note: 每股=(电池主业情景内在价值+思摩尔SOTP120亿)/股本约21.73亿股(市值1453.5亿/价66.88)；期望内在价值656亿vs市值1453.5亿安全边际约-55%；储能放量+盈利反转但增收不增利,正常化PE约30x不便宜
-- stock_code: '688234'
+- stock_code: '02631'
   stock_name: 天岳先进
-  market: A
-  currency: CNY
+  market: HK
+  currency: HKD
   sector: semiconductor
   rating: watch
-  bear: 61.9
-  base: 111.3
-  bull: 185.6
+  bear: 66.9
+  base: 120.2
+  bull: 200.4
   dividend_yield: null
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md
-  note: 亏损成长股，每股内在价值=场景市值/总股本4.85亿股；期望内在价值121元，现价149.2无安全边际
+  note: A→H口径切换；H股现价98.75HKD/市值478.6亿HKD/AH折价-38.7%；每股内在价值=场景市值(CNY×1.08)/总股本4.846亿股；期望130.9HKD安全边际+32.7%
