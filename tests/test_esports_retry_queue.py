@@ -265,3 +265,31 @@ def test_push_nba_supplement_filters_by_monitor(_reset_state, monkeypatch):
     text = cap.calls[0][0]
     assert '湖人' in text and '勇士 vs 湖人' in text
     assert '凯尔特人' not in text and '11:00' not in text
+
+
+def test_worldcup_supplement_pushes(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='worldcup', name='WorldCup', attempts=2)
+    fake = {'today': [{'home': '巴西', 'away': '中国', 'start_time': '08:00'}],
+            'yesterday': []}
+
+    rq._push_supplement(unit, fake)
+
+    assert len(cap.calls) == 1
+    text, channel = cap.calls[0]
+    assert 'LoL 补充' not in text and '⚽' in text
+    assert '巴西 vs 中国' in text
+    from app.config.notification_config import CHANNEL_WORLDCUP
+    assert channel == CHANNEL_WORLDCUP
+
+
+def test_worldcup_refetch_calls_service(monkeypatch):
+    sentinel = {'today': [], 'yesterday': []}
+    monkeypatch.setattr(
+        'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
+        staticmethod(lambda today=None: sentinel),
+    )
+    unit = rq._PendingUnit(date=date(2026, 5, 7), kind='worldcup', name='WorldCup', attempts=2)
+    out = rq._refetch(unit)
+
+    assert out is sentinel

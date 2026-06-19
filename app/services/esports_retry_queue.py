@@ -17,7 +17,7 @@ _MAX_ATTEMPTS = 3
 @dataclass
 class _PendingUnit:
     date: date
-    kind: str  # 'lol' | 'nba'
+    kind: str  # 'lol' | 'nba' | 'worldcup'
     name: str
     attempts: int = 1
 
@@ -104,6 +104,9 @@ def _refetch(unit):
         return EsportsService._fetch_lol_esports_schedule(league_id, unit.date, yesterday)
     if unit.kind == 'nba':
         return EsportsService.get_nba_schedule(today=unit.date)
+    if unit.kind == 'worldcup':
+        from app.services.worldcup_service import WorldCupService
+        return WorldCupService.get_worldcup_schedule(today=unit.date)
     return None
 
 
@@ -112,6 +115,8 @@ def _push_supplement(unit, matches):
         _push_lol_supplement(unit.name, matches)
     elif unit.kind == 'nba':
         _push_nba_supplement(matches)
+    elif unit.kind == 'worldcup':
+        _push_worldcup_supplement(matches)
 
 
 def _push_lol_supplement(league, matches):
@@ -156,9 +161,24 @@ def _push_nba_supplement(nba):
     NotificationService.send_slack('\n'.join(lines), CHANNEL_NBA)
 
 
+def _push_worldcup_supplement(sched):
+    from app.services.notification import NotificationService
+    from app.config.notification_config import CHANNEL_WORLDCUP
+
+    games = sched.get('today') or []
+    if not games:
+        NotificationService.send_slack('⚽ *世界杯 补充*\n今日无比赛', CHANNEL_WORLDCUP)
+        return
+    lines = [f'⚽ *世界杯 补充* ({len(games)}场)']
+    for g in sorted(games, key=lambda x: x.get('start_time') or '99:99'):
+        t = g.get('start_time') or '--:--'
+        lines.append(f'  · {t}  {g["home"]} vs {g["away"]}')
+    NotificationService.send_slack('\n'.join(lines), CHANNEL_WORLDCUP)
+
+
 def _push_failed(unit):
     from app.services.notification import NotificationService
-    from app.config.notification_config import CHANNEL_LOL, CHANNEL_NBA
+    from app.config.notification_config import CHANNEL_LOL, CHANNEL_NBA, CHANNEL_WORLDCUP
 
     if unit.kind == 'lol':
         NotificationService.send_slack(
@@ -169,6 +189,11 @@ def _push_failed(unit):
         NotificationService.send_slack(
             f'🏀 *今日 NBA 赛程* 数据获取失败（已重试 {_MAX_ATTEMPTS} 次）',
             CHANNEL_NBA,
+        )
+    elif unit.kind == 'worldcup':
+        NotificationService.send_slack(
+            f'⚽ *今日世界杯赛程* 数据获取失败（已重试 {_MAX_ATTEMPTS} 次）',
+            CHANNEL_WORLDCUP,
         )
 
 
