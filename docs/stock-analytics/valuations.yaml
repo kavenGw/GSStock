@@ -1816,3 +1816,29 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md
   note: PB法估值（周期底净利失真），每股=情景市值/13.1亿股
+- stock_code: '600460'
+  stock_name: 士兰微
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  bear: 21.6
+  base: 30.0
+  bull: 43.3
+  dividend_yield: 0.1
+  conviction_date: '2026-06-19'
+  source_doc: sectors/semiconductor/power/2026-06-19-士兰微-buffett分析.md
+  note: 重资产IDM低净利率，PE失真，估值锚PS/PB+正常化净利；期望内在价值502亿/30.2元，安全边际-27.9%
+- stock_code: '688396'
+  stock_name: 华润微
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  bear: 10.84
+  base: 28.46
+  bull: 50.08
+  dividend_yield: 0.08
+  conviction_date: '2026-06-19'
+  source_doc: sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md
+  note: 每股由情景内在价值÷13.28亿股反推；PE107x因周期底利润失真，按正常化利润+PB估值
