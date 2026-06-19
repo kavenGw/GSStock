@@ -1024,12 +1024,13 @@
   currency: HKD
   sector: semiconductor
   rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-06-03'
-  source_doc: sectors/semiconductor/power/2026-06-03-英诺赛科-buffett分析.md
-  note: 英诺赛科；文档只给总市值HKD 270/480/1080亿，无股本，无法换算每股
+  bear: 31.8
+  base: 63.5
+  bull: 126.0
+  dividend_yield: null
+  conviction_date: '2026-06-19'
+  source_doc: sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md
+  note: 每股由市值(亿港元)÷总股本9.13亿股反推；无分红成长亏损股
 - stock_code: 1384.HK
   stock_name: 大普微
   market: HK
