@@ -1790,3 +1790,16 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/electronics/display-glass/2026-06-19-沃格光电-buffett分析.md
   note: 连亏5年/PE无意义,估值锚=现金牛玻璃精加工正常化owner earnings+玻璃基板期权价值场景加权；每股=情景市值/总股本约2.248亿股(市值370.17亿/价164.70)；期望118亿vs市值370亿安全边际-68%,bull压测仍-43%；玻璃基板/TGV纯送样0营收,概念博弈品exclude
+- stock_code: '688388'
+  stock_name: 嘉元科技
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  bear: 1.67
+  base: 6.21
+  bull: 13.33
+  dividend_yield: null
+  conviction_date: '2026-06-19'
+  source_doc: sectors/materials/copper-foil/2026-06-19-嘉元科技-buffett分析.md
+  note: 每股由情景市值÷反推股本(6.60亿股)换算；周期底加工费反转故事，安全边际深度为负
