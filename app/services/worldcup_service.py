@@ -53,7 +53,7 @@ class WorldCupService:
         else:
             w1, w2 = s1 > s2, s2 > s1
 
-        trophy = '🏆 ' if final else ''
+        trophy = '🏆 ' if (final and (w1 or w2)) else ''
         if w1:
             body = f'*{trophy}{t1} {s1}{p1}* - {s2}{p2} {t2}'
         elif w2:

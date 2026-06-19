@@ -102,6 +102,13 @@ def test_format_in_progress_bolds_leader():
     assert "67'" in s and '终场' not in s
 
 
+def test_format_in_progress_bolds_away_leader():
+    s = WorldCupService.format_score(_g('巴西', '中国', 0, 2, status_detail="80'"))
+    assert s.startswith('⚽')
+    assert '*2 中国*' in s
+    assert '🏆' not in s
+
+
 def test_format_in_progress_translates_ht():
     s = WorldCupService.format_score(_g('巴西', '中国', 0, 0, status_detail='HT'))
     assert '中场' in s
