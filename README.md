@@ -82,7 +82,7 @@ cp .env.sample .env
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |
 | `ESPORTS_LOL_MONITOR_INTERVAL` | LoL 比分轮询间隔（分钟） | `30` |
-| `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `10` |
+| `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `30` |
 | `WORLDCUP_ENABLED` | 是否启用世界杯推送（2026 FIFA，临时） | `true` |
 | `ESPORTS_WORLDCUP_MONITOR_INTERVAL` | 世界杯比分轮询间隔（分钟） | `5` |
 
