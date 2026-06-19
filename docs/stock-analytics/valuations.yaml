@@ -1777,3 +1777,16 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md
   note: A→H口径切换；H股现价98.75HKD/市值478.6亿HKD/AH折价-38.7%；每股内在价值=场景市值(CNY×1.08)/总股本4.846亿股；期望130.9HKD安全边际+32.7%
+- stock_code: '603773'
+  stock_name: 沃格光电
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: exclude
+  bear: 24.0
+  base: 49.0
+  bull: 93.0
+  dividend_yield: 0.2
+  conviction_date: '2026-06-19'
+  source_doc: sectors/electronics/display-glass/2026-06-19-沃格光电-buffett分析.md
+  note: 连亏5年/PE无意义,估值锚=现金牛玻璃精加工正常化owner earnings+玻璃基板期权价值场景加权；每股=情景市值/总股本约2.248亿股(市值370.17亿/价164.70)；期望118亿vs市值370亿安全边际-68%,bull压测仍-43%；玻璃基板/TGV纯送样0营收,概念博弈品exclude
