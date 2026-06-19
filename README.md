@@ -83,6 +83,8 @@ cp .env.sample .env
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |
 | `ESPORTS_LOL_MONITOR_INTERVAL` | LoL 比分轮询间隔（分钟） | `30` |
 | `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `10` |
+| `WORLDCUP_ENABLED` | 是否启用世界杯推送（2026 FIFA，临时） | `true` |
+| `ESPORTS_WORLDCUP_MONITOR_INTERVAL` | 世界杯比分轮询间隔（分钟） | `5` |
 
 ### 3. GPU 加速（可选）
 
@@ -296,7 +298,7 @@ SLACK_BOT_TOKEN=xoxb-your-bot-token
 
 6. 在 Slack 中将 Bot 邀请到目标频道（`/invite @Stock Alert`）
 
-配置后自动启用，消息按类型路由到 `news`、`news_ai_tool`、`news_lol`、`news_nba` 频道。
+配置后自动启用，消息按类型路由到 `news`、`news_ai_tool`、`news_lol`、`news_nba`、`news_worldcup` 频道。
 
 ## 技术栈
 
