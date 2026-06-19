@@ -36,6 +36,7 @@ description: >-
 | 证据深度 | **全量联网验证** + 实时行情锚 |
 | 估值框架 | **场景加权**：结构性重估(bull) / 基准(base) / 空头(bear)，概率由证据强度定 |
 | 分析框架 | 先调用 `buffett` skill 取框架，再动笔 |
+| A+H 口径 | A+H 双重上市标的**取 A/H 两地中估值更低（安全边际更大）一侧**作跟踪主体，**不强行 A 股**；H 股通常折价更优。frontmatter `stock_code` + valuations `market`/`currency`/每股内在价值按选定口径写，币种统一见 playbook §3、H 口径市值自洽校验见 `.claude/rules/data-architecture.md` 港股节 |
 | 语言 | 中文 |
 
 **只有这些情况才回头问用户**（歧义门）：
