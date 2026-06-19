@@ -293,18 +293,20 @@
   conviction_date: '2026-05-13'
   source_doc: sectors/electronics/components/2026-05-13-三花智控-buffett分析.md
   note: 三花智控；文档直接给每股保守14.7/中性20.4/乐观30.4元
-- stock_code: '002130'
+- stock_code: 09981
   stock_name: 沃尔核材
-  market: A
-  currency: CNY
+  market: HK
+  currency: HKD
   sector: electronics
   rating: watch
-  bear: 18.6
-  base: 20.0
-  bull: 28.6
-  conviction_date: '2026-05-30'
-  source_doc: sectors/electronics/components/2026-05-30-沃尔核材-buffett分析.md
-  note: 沃尔核材；内在价值中枢260-300亿/bull400亿÷14.0亿股
+  watch_reason: H股口径下安全边际由负翻正——同一家42%毛利辐照改性材料franchise+全球#2高速铜缆双引擎公司，H股9981因新上市破发+AH折价-46%，12.80
+    HKD等价市值约155亿RMB深落base内在价值中枢下方40%+，期望内在价值约22.3 HKD/股、安全边际+74%；翻正系折价兑现而非基本面变便宜，仍定watch待中报确认增收不增利能否修复
+  bear: 12.41
+  base: 21.52
+  bull: 35.51
+  dividend_yield: 1.44
+  conviction_date: '2026-06-19'
+  source_doc: sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md
 - stock_code: 002138
   stock_name: 顺络电子
   market: A
@@ -679,19 +681,20 @@
   conviction_date: '2026-05-08'
   source_doc: sectors/materials/chemicals/2026-05-08-万华化学-buffett分析.md
   note: 三情景1300/1885/2600亿；股本~31.5亿股估算
-- stock_code: '600362'
+- stock_code: 00358
   stock_name: 江西铜业
-  market: A
-  currency: CNY
+  market: HK
+  currency: HKD
   sector: materials
   rating: watch
-  bear: 9.9
-  base: 15.9
-  bull: 28.6
-  dividend_yield: 2.47
-  conviction_date: '2026-06-11'
-  source_doc: sectors/materials/nonferrous/2026-06-11-江西铜业-buffett分析.md
-  note: 三情景每股内在价值来自§9表格显式值(bear~9.9/base~15.9/bull~28.6)；期望值586亿~16.9元/股；安全边际-58%
+  watch_reason: 跟踪主体由A股600362切换至H股00358.HK——H股41.06 HKD/PE15.61/PB1.66，较A股折价约-33.5%，把同一份江铜资产买入价压低约三分之一、股息率从A股1.88%抬到2.82%，AH折价是本次切换的核心安全边际放大器；但折价≠便宜到位，铜价周期顶+price-taker无定价权的硬伤未解；H股口径安全边际约-56%（vs
+    A股口径约-71%，AH折价把负安全边际收窄约15pp），维持watch不买，等铜价回落+PB向1x回归
+  bear: 10.8
+  base: 17.7
+  bull: 28.1
+  dividend_yield: 2.82
+  conviction_date: '2026-06-19'
+  source_doc: sectors/materials/nonferrous/2026-06-19-江西铜业-buffett分析.md
 - stock_code: '600489'
   stock_name: 中金黄金
   market: A
@@ -908,18 +911,18 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/semiconductor/optical-components/2026-06-04-蓝特光学-buffett分析.md
   note: 蓝特光学；三情景市值180/280/500亿÷4.06亿股(423亿市值/104.29元)
-- stock_code: '600600'
+- stock_code: 00168
   stock_name: 青岛啤酒
-  market: A
-  currency: CNY
-  sector: other
-  rating: null
-  bear: 44.0
-  base: 55.1
-  bull: null
-  conviction_date: '2026-05-31'
-  source_doc: cross-sector/2026-05-31-青岛啤酒-燕京啤酒-buffett对比.md
-  note: 青岛啤酒A；内在价值中枢~750亿，入场价重仓<44/加仓<54；无明确bull；RMB
+  market: HK
+  currency: HKD
+  sector: consumer
+  rating: core
+  bear: 51.15
+  base: 66.27
+  bull: 81.57
+  dividend_yield: 6.0
+  conviction_date: '2026-06-19'
+  source_doc: sectors/consumer/beer/2026-06-19-青岛啤酒-buffett分析.md
 - stock_code: '601138'
   stock_name: 工业富联
   market: A
