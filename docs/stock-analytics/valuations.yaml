@@ -210,17 +210,19 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/consumer/sportswear/2026-04-24-舒华体育-buffett分析.md
   note: Don't Buy，商品型企业，无估值
-- stock_code: LI
+- stock_code: '2015'
   stock_name: 理想汽车
-  market: US
-  currency: USD
+  market: HK
+  currency: HKD
   sector: consumer
   rating: watch
-  bear: 2.13
-  base: 10.66
-  bull: 21.32
-  conviction_date: '2026-05-31'
-  source_doc: sectors/consumer/auto/2026-05-31-理想汽车-buffett分析.md
+  bear: 12
+  base: 37
+  bull: 72
+  dividend_yield: null
+  conviction_date: '2026-06-20'
+  source_doc: sectors/consumer/auto/2026-06-20-理想汽车-buffett分析.md
+  note: 港股口径（fungible 与 ADR 无折价）；每股=情景IV(HKD亿)÷20.4亿股；无分红
 - stock_code: '000063'
   stock_name: 中兴通讯
   market: A
@@ -841,18 +843,19 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/media/music-streaming/2026-06-04-网易云音乐-buffett分析.md
   note: 文中仅给总市值HKD(130/305/545亿)，未披露股本，无法换算每股
-- stock_code: TME
+- stock_code: '1698'
   stock_name: 腾讯音乐
-  market: US
-  currency: USD
+  market: HK
+  currency: HKD
   sector: media
   rating: config
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-06-04'
-  source_doc: sectors/media/music-streaming/2026-06-04-腾讯音乐-buffett分析.md
-  note: 文中仅给总市值USD(80/180/270亿)，未披露股本，无法换算每股
+  bear: 22.3
+  base: 38.5
+  bull: 66.2
+  dividend_yield: 2.70
+  conviction_date: '2026-06-20'
+  source_doc: sectors/media/music-streaming/2026-06-20-腾讯音乐-buffett分析.md
+  note: 港股口径（fungible 与 ADR 无折价）；每股=情景IV(HKD亿)÷31.4亿股
 - stock_code: 000729
   stock_name: 燕京啤酒
   market: A
