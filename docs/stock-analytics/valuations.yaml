@@ -1842,3 +1842,16 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md
   note: 每股由情景内在价值÷13.28亿股反推；PE107x因周期底利润失真，按正常化利润+PB估值
+- stock_code: '06613'
+  stock_name: 蓝思科技
+  market: HK
+  currency: HKD
+  sector: electronics
+  rating: watch
+  bear: 7.4
+  base: 14.7
+  bull: 29.5
+  dividend_yield: 1.6
+  conviction_date: '2026-06-19'
+  source_doc: sectors/electronics/precision-manufacturing/2026-06-19-蓝思科技-buffett分析.md
+  note: A+H 双重上市取 H 口径（较 A 折价~50%）；每股内在价值为 HKD 口径三情景值；dividend_yield 为 H 口径(每股息0.45元RMB×1.08÷29.96HKD)
