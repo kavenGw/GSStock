@@ -14,6 +14,9 @@ from app.config.esports_config import (
     ESPORTS_ENABLED, ESPORTS_NBA_MONITOR_INTERVAL, ESPORTS_LOL_MONITOR_INTERVAL,
     ESPORTS_PRE_MATCH_MINUTES, NBA_TEAM_MONITOR, NBA_TEAM_NAMES,
 )
+from app.config.worldcup_config import (
+    ESPORTS_WORLDCUP_MONITOR_INTERVAL, WORLDCUP_MAX_DURATION_HOURS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +98,7 @@ class EsportsMonitorService:
     MAX_MONITOR_JOBS = 20
     NBA_MAX_DURATION_HOURS = 5
     LOL_MAX_DURATION_HOURS = 8
+    WC_MAX_DURATION_HOURS = WORLDCUP_MAX_DURATION_HOURS
 
     def __init__(self, app):
         self.app = app
@@ -175,6 +179,28 @@ class EsportsMonitorService:
                                 })
             except Exception as e:
                 logger.warning(f'[赛事监控] LoL赛程获取失败: {e}')
+
+        if not match_type or match_type == 'worldcup':
+            try:
+                from app.services.worldcup_service import WorldCupService
+                if is_today:
+                    wc = WorldCupService.get_worldcup_schedule()
+                    wc_games = wc.get('today', []) if wc else []
+                else:
+                    wc_games = WorldCupService.get_worldcup_schedule_by_date(target_date) or []
+                for game in wc_games:
+                    if game.get('match_id') and game['status'] != 'completed':
+                        matches.append({
+                            'match_id': game['match_id'],
+                            'match_type': 'worldcup',
+                            'status': game['status'],
+                            'start_time': game.get('start_time', ''),
+                            'game_date': target_date,
+                            'teams_desc': f"{game['home']} vs {game['away']}",
+                            'league': 'WorldCup',
+                        })
+            except Exception as e:
+                logger.warning(f'[赛事监控] 世界杯赛程获取失败: {type(e).__name__}: {e}')
 
         if not matches:
             type_desc = match_type or '全部'
@@ -257,10 +283,16 @@ class EsportsMonitorService:
         with self.app.app_context():
             try:
                 from app.services.notification import NotificationService
-                from app.config.notification_config import CHANNEL_NBA, CHANNEL_LOL
+                from app.config.notification_config import (
+                    CHANNEL_NBA, CHANNEL_LOL, CHANNEL_WORLDCUP,
+                )
 
-                channel = CHANNEL_NBA if match_type == 'nba' else CHANNEL_LOL
-                emoji = '🏀' if match_type == 'nba' else '🎮'
+                if match_type == 'nba':
+                    channel, emoji = CHANNEL_NBA, '🏀'
+                elif match_type == 'lol':
+                    channel, emoji = CHANNEL_LOL, '🎮'
+                else:
+                    channel, emoji = CHANNEL_WORLDCUP, '⚽'
                 league_prefix = f'[{league}] ' if match_type == 'lol' else ''
 
                 msg = f"{emoji} {league_prefix}{teams_desc} | ⏰ 比赛将于 {start_time} 开始"
@@ -277,7 +309,12 @@ class EsportsMonitorService:
         match_type = match_info['match_type']
         match_id = match_info['match_id']
         job_id = f'{self.JOB_PREFIX}{match_type}_{match_id}'
-        interval = ESPORTS_NBA_MONITOR_INTERVAL if match_type == 'nba' else ESPORTS_LOL_MONITOR_INTERVAL
+        if match_type == 'nba':
+            interval = ESPORTS_NBA_MONITOR_INTERVAL
+        elif match_type == 'lol':
+            interval = ESPORTS_LOL_MONITOR_INTERVAL
+        else:
+            interval = ESPORTS_WORLDCUP_MONITOR_INTERVAL
 
         now = datetime.now(_CST)
         game_date = match_info.get('game_date', now.date())
@@ -293,7 +330,12 @@ class EsportsMonitorService:
                     deadline = now
             except (ValueError, TypeError):
                 pass
-        max_hours = self.NBA_MAX_DURATION_HOURS if match_type == 'nba' else self.LOL_MAX_DURATION_HOURS
+        if match_type == 'nba':
+            max_hours = self.NBA_MAX_DURATION_HOURS
+        elif match_type == 'lol':
+            max_hours = self.LOL_MAX_DURATION_HOURS
+        else:
+            max_hours = self.WC_MAX_DURATION_HOURS
         deadline = deadline + timedelta(hours=max_hours)
 
         try:
@@ -347,12 +389,16 @@ class EsportsMonitorService:
             try:
                 from app.services.esports_service import EsportsService
                 from app.services.notification import NotificationService
-                from app.config.notification_config import CHANNEL_NBA, CHANNEL_LOL
+                from app.config.notification_config import (
+                    CHANNEL_NBA, CHANNEL_LOL, CHANNEL_WORLDCUP,
+                )
 
                 if match_type == 'nba':
                     self._poll_nba_match(match_id, job_id, EsportsService, NotificationService, CHANNEL_NBA, scheduler_engine)
-                else:
+                elif match_type == 'lol':
                     self._poll_lol_match(match_id, job_id, league, EsportsService, NotificationService, CHANNEL_LOL, scheduler_engine)
+                else:
+                    self._poll_worldcup_match(match_id, job_id, NotificationService, CHANNEL_WORLDCUP, scheduler_engine)
 
             except Exception as e:
                 logger.error(f'[赛事监控] {job_id} 轮询失败: {e}')
@@ -448,6 +494,43 @@ class EsportsMonitorService:
                 logger.info(f'[赛事监控] LoL比分变化: {match["team1"]} {score1}-{score2} {match["team2"]}')
             else:
                 _update_score('lol', match_id, score1, score2, status)
+                logger.debug(f'[赛事监控] {job_id} 比分未变化，跳过推送')
+
+    def _poll_worldcup_match(self, match_id, job_id, NotificationService, channel, scheduler_engine):
+        """轮询世界杯比赛（进行中比分变化推送 + 终场比分）"""
+        from app.services.worldcup_service import WorldCupService
+
+        scores = WorldCupService.get_worldcup_live_scores()
+        if scores is None:
+            logger.warning('[赛事监控] 世界杯比分获取失败')
+            return
+
+        game = scores.get(match_id)
+        if game is None:
+            logger.warning(f'[赛事监控] 未找到比赛 {match_id}')
+            return
+
+        home_score = game.get('home_score') or 0
+        away_score = game.get('away_score') or 0
+        status = game['status']
+
+        if status == 'completed':
+            # 足球可 0:0 收场（小组赛平局），终场一律推送
+            msg = WorldCupService.format_score(game, final=True)
+            NotificationService.send_slack(msg, channel)
+            _clear_score('worldcup', match_id)
+            scheduler_engine.scheduler.remove_job(job_id)
+            logger.info(f'[赛事监控] {job_id} 比赛结束，移除')
+            return
+
+        if status == 'in_progress':
+            if _has_score_changed('worldcup', match_id, home_score, away_score, status):
+                msg = WorldCupService.format_score(game, final=False)
+                NotificationService.send_slack(msg, channel)
+                _update_score('worldcup', match_id, home_score, away_score, status)
+                logger.info(f'[赛事监控] 世界杯比分变化: {game["home"]} '
+                            f'{home_score}-{away_score} {game["away"]}')
+            else:
                 logger.debug(f'[赛事监控] {job_id} 比分未变化，跳过推送')
 
     def _cleanup_monitors(self, match_type=None):
