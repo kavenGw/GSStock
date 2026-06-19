@@ -1803,3 +1803,16 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/materials/copper-foil/2026-06-19-嘉元科技-buffett分析.md
   note: 每股由情景市值÷反推股本(6.60亿股)换算；周期底加工费反转故事，安全边际深度为负
+- stock_code: '300316'
+  stock_name: 晶盛机电
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  bear: 21.4
+  base: 42.8
+  bull: 62.6
+  dividend_yield: 0.28
+  conviction_date: '2026-06-19'
+  source_doc: sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md
+  note: PB法估值（周期底净利失真），每股=情景市值/13.1亿股
