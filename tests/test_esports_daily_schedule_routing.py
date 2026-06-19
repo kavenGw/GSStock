@@ -155,3 +155,18 @@ def test_worldcup_empty_pushes_no_match(monkeypatch):
     EsportsDailyScheduleStrategy._push_worldcup_today()
     assert len(cap.calls) == 1
     assert '今日无比赛' in cap.calls[0][0]
+
+
+def test_worldcup_disabled_skips(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    monkeypatch.setattr('app.config.worldcup_config.WORLDCUP_ENABLED', False)
+    called = []
+    monkeypatch.setattr(
+        'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
+        staticmethod(lambda today=None: called.append(1) or {'today': [], 'yesterday': []}),
+    )
+    EsportsDailyScheduleStrategy._push_worldcup_today()
+    assert cap.calls == []
+    assert called == []  # short-circuits before any fetch
+    today = datetime.now(_CST).date()
+    assert rq._key(today, 'worldcup', 'WorldCup') not in rq._pending

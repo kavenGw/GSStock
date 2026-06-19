@@ -110,6 +110,9 @@ class EsportsDailyScheduleStrategy(Strategy):
 
     @staticmethod
     def _push_worldcup_today():
+        from app.config.worldcup_config import WORLDCUP_ENABLED
+        if not WORLDCUP_ENABLED:
+            return
         from app.services.worldcup_service import WorldCupService
         from app.services.notification import NotificationService
         from app.config.notification_config import CHANNEL_WORLDCUP

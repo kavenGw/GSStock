@@ -107,7 +107,7 @@ class EsportsMonitorService:
         """为指定日期的比赛创建监控 job
 
         Args:
-            match_type: 'nba' 或 'lol'，None 表示全部
+            match_type: 'nba' / 'lol' / 'worldcup'，None 表示全部
             target_date: 目标北京日期，None 表示今天
         """
         if not ESPORTS_ENABLED:
@@ -180,7 +180,8 @@ class EsportsMonitorService:
             except Exception as e:
                 logger.warning(f'[赛事监控] LoL赛程获取失败: {e}')
 
-        if not match_type or match_type == 'worldcup':
+        from app.config.worldcup_config import WORLDCUP_ENABLED
+        if (not match_type or match_type == 'worldcup') and WORLDCUP_ENABLED:
             try:
                 from app.services.worldcup_service import WorldCupService
                 if is_today:
@@ -537,7 +538,7 @@ class EsportsMonitorService:
         """清理赛事监控 job
 
         Args:
-            match_type: 'nba' 或 'lol'，None 表示全部清理
+            match_type: 'nba' / 'lol' / 'worldcup'，None 表示全部清理
         """
         from app.scheduler.engine import scheduler_engine
         jobs_to_remove = []
