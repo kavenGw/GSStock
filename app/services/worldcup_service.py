@@ -189,8 +189,10 @@ class WorldCupService:
             }
             if state in ('post', 'in'):
                 try:
-                    game['home_score'] = int(home_info.get('score', 0))
-                    game['away_score'] = int(away_info.get('score', 0))
+                    raw_h = home_info.get('score')
+                    raw_a = away_info.get('score')
+                    game['home_score'] = int(raw_h) if raw_h is not None else None
+                    game['away_score'] = int(raw_a) if raw_a is not None else None
                 except (ValueError, TypeError):
                     pass
                 hp = home_info.get('shootoutScore')
