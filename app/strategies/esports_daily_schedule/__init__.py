@@ -26,6 +26,7 @@ class EsportsDailyScheduleStrategy(Strategy):
 
         self._push_nba_today()
         self._push_lol_today()
+        self._push_worldcup_today()
         return []
 
     @staticmethod
@@ -106,3 +107,33 @@ class EsportsDailyScheduleStrategy(Strategy):
             logger.info(f'[赛事安排] LoL 推送 {total} 场')
         except Exception as e:
             logger.error(f'[赛事安排] LoL 推送失败: {type(e).__name__}: {e}', exc_info=True)
+
+    @staticmethod
+    def _push_worldcup_today():
+        from app.services.worldcup_service import WorldCupService
+        from app.services.notification import NotificationService
+        from app.config.notification_config import CHANNEL_WORLDCUP
+        from app.services.esports_retry_queue import enqueue
+
+        try:
+            sched = WorldCupService.get_worldcup_schedule()
+            if sched is None:
+                today = datetime.now(_CST).date()
+                enqueue(today, 'worldcup', 'WorldCup')
+                return
+
+            games = sched.get('today') or []
+            if not games:
+                NotificationService.send_slack(
+                    '⚽ *今日世界杯赛程*\n今日无比赛', CHANNEL_WORLDCUP)
+                return
+
+            lines = [f'⚽ *今日世界杯赛程* ({len(games)}场)', '']
+            for g in sorted(games, key=lambda x: x.get('start_time') or '99:99'):
+                t = g.get('start_time') or '--:--'
+                lines.append(f'  · {t}  {g["home"]} vs {g["away"]}')
+            NotificationService.send_slack('\n'.join(lines), CHANNEL_WORLDCUP)
+            logger.info(f'[赛事安排] 世界杯 推送 {len(games)} 场')
+        except Exception as e:
+            logger.error(f'[赛事安排] 世界杯 推送失败: {type(e).__name__}: {e}',
+                         exc_info=True)

@@ -116,3 +116,42 @@ def test_nba_failure_enqueues(monkeypatch):
     assert cap.calls == []
     today = datetime.now(_CST).date()
     assert rq._key(today, 'nba', 'NBA') in rq._pending
+
+
+def test_worldcup_failure_enqueues(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    monkeypatch.setattr(
+        'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
+        staticmethod(lambda today=None: None),
+    )
+    EsportsDailyScheduleStrategy._push_worldcup_today()
+    assert cap.calls == []
+    today = datetime.now(_CST).date()
+    assert rq._key(today, 'worldcup', 'WorldCup') in rq._pending
+
+
+def test_worldcup_success_pushes(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    fake = {'today': [{'home': '巴西', 'away': '中国', 'start_time': '08:00'}],
+            'yesterday': []}
+    monkeypatch.setattr(
+        'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
+        staticmethod(lambda today=None: fake),
+    )
+    EsportsDailyScheduleStrategy._push_worldcup_today()
+    assert len(cap.calls) == 1
+    text, channel = cap.calls[0]
+    assert channel == 'news_worldcup'
+    assert '巴西 vs 中国' in text and '08:00' in text
+    assert rq._pending == {}
+
+
+def test_worldcup_empty_pushes_no_match(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    monkeypatch.setattr(
+        'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
+        staticmethod(lambda today=None: {'today': [], 'yesterday': []}),
+    )
+    EsportsDailyScheduleStrategy._push_worldcup_today()
+    assert len(cap.calls) == 1
+    assert '今日无比赛' in cap.calls[0][0]
