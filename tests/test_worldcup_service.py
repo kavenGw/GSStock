@@ -85,3 +85,50 @@ def test_get_schedule_all_fail_returns_none(monkeypatch):
     monkeypatch.setattr(WorldCupService, '_fetch_soccer_scoreboard',
                         staticmethod(lambda d, _max_retries=2: None))
     assert WorldCupService.get_worldcup_schedule() is None
+
+
+def _g(home, away, hs, aws, **kw):
+    base = {'home': home, 'away': away, 'home_score': hs, 'away_score': aws,
+            'status_detail': '', 'pens': None, 'home_winner': False,
+            'away_winner': False}
+    base.update(kw)
+    return base
+
+
+def test_format_in_progress_bolds_leader():
+    s = WorldCupService.format_score(_g('巴西', '中国', 1, 0, status_detail="67'"))
+    assert s.startswith('⚽')
+    assert '*巴西 1*' in s
+    assert "67'" in s and '终场' not in s
+
+
+def test_format_in_progress_translates_ht():
+    s = WorldCupService.format_score(_g('巴西', '中国', 0, 0, status_detail='HT'))
+    assert '中场' in s
+
+
+def test_format_final_draw_no_trophy():
+    s = WorldCupService.format_score(_g('中国', '巴西', 1, 1, status_detail='FT'), final=True)
+    assert '🏆' not in s
+    assert '终场' in s
+    assert '中国 1 - 1 巴西' in s
+
+
+def test_format_final_winner_trophy():
+    s = WorldCupService.format_score(
+        _g('巴西', '中国', 2, 1, status_detail='FT', home_winner=True), final=True)
+    assert '🏆' in s and '*' in s
+    assert '巴西' in s and '终场' in s
+    # 胜方在加粗段内
+    bold = s.split('*')[1]
+    assert '巴西' in bold and '2' in bold
+
+
+def test_format_penalty_winner_by_pens():
+    s = WorldCupService.format_score(
+        _g('巴西', '中国', 1, 1, status_detail='FT', pens=(4, 2)), final=True)
+    assert '点球' in s
+    assert '(4)' in s and '(2)' in s
+    assert '🏆' in s
+    bold = s.split('*')[1]
+    assert '巴西' in bold  # 点球胜方加粗

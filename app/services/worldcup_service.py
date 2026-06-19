@@ -24,6 +24,45 @@ class WorldCupService:
     """获取 2026 世界杯赛程与实时比分"""
 
     @staticmethod
+    def format_score(game, final=False):
+        """足球比分文案。主队在左。final 时胜方加 🏆+加粗，平局无 🏆。
+
+        进行中：⚽ *巴西 1* - 0 中国 | 67'
+        平局终场：⚽ 中国 1 - 1 巴西 | 终场
+        胜负终场：⚽ *🏆 巴西 2* - 1 中国 | 终场
+        点球：  ⚽ *🏆 巴西 1(4)* - 1(2) 中国 | 点球
+        """
+        t1, s1 = game['home'], game.get('home_score') or 0
+        t2, s2 = game['away'], game.get('away_score') or 0
+        pens = game.get('pens')
+        p1 = f'({pens[0]})' if pens else ''
+        p2 = f'({pens[1]})' if pens else ''
+
+        if final:
+            tail = ' | 点球' if pens else ' | 终场'
+        else:
+            detail = game.get('status_detail') or ''
+            cn = _STATUS_CN.get(detail, detail)
+            tail = f' | {cn}' if cn else ''
+
+        if pens:
+            w1, w2 = pens[0] > pens[1], pens[1] > pens[0]
+        elif final:
+            w1 = bool(game.get('home_winner')) or s1 > s2
+            w2 = bool(game.get('away_winner')) or s2 > s1
+        else:
+            w1, w2 = s1 > s2, s2 > s1
+
+        trophy = '🏆 ' if final else ''
+        if w1:
+            body = f'*{trophy}{t1} {s1}{p1}* - {s2}{p2} {t2}'
+        elif w2:
+            body = f'{t1} {s1}{p1} - *{s2}{p2} {trophy}{t2}*'
+        else:
+            body = f'{t1} {s1}{p1} - {s2}{p2} {t2}'
+        return f'⚽ {body}{tail}'
+
+    @staticmethod
     def get_worldcup_schedule(today=None):
         """今日赛程 + 昨日结果；全部失败返回 None"""
         if today is None:
