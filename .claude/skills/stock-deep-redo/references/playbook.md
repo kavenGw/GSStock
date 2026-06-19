@@ -123,7 +123,7 @@ print(f[1], f[3], f[39], f[45], f[46])  # name, price, PE_TTM, 市值(亿), PB
 A股前缀：6 开头 `sh`、0/3 开头 `sz`。脚本跑完即删，不入库（`scripts/_xxx.py` 一次性脚本约定见 dev-conventions.md）。
 若直连失败再用 `UnifiedStockDataService.get_realtime_prices([code], force_refresh=True)` 兜底。
 
-**港股/美股行情**：腾讯 `q=hk01810` 港股字段索引**异于 A 股**（勿照搬 [39]PE/[45]市值/[46]PB，详见 `.claude/rules/data-architecture.md` 腾讯HTTP节）。
+**港股/美股行情**：腾讯 `q=hk01810` 港股字段索引**异于 A 股**（勿照搬 [39]PE/[45]市值/[46]PB，详见 `.claude/rules/data-fetch-conventions.md` 腾讯HTTP节）。
 港股/美股市值、PE(TTM)、PB、52 周区间优先用 WebFetch `stockanalysis.com/quote/hkg|nasdaq/<code>/statistics/` 或 Yahoo，**交叉验证 2 源**（市值口径常分歧）。
 亏损标的 PE(TTM)=N/A，估值锚改看 PS / PB / Forward PE。**市值=现价×总股本自洽校验**是兜底（曾靠此兜住港股字段索引误读）。
 

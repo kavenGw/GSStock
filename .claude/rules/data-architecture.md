@@ -1,6 +1,6 @@
 # 数据架构与缓存
 
-> **何时读**：改 app/services/ 下任何 fetcher、写涉及 Stock/UnifiedStockCache 的 SQL、调试缓存命中率、新增市场支持、修改 Volume / OCR / 多账户合并 / 产业链图谱
+> **何时读**：改 app/services/ 下任何 fetcher、写涉及 Stock/UnifiedStockCache 的 SQL、调试缓存命中率、新增市场支持、修改 Volume / OCR / 多账户合并
 > **不必读**：纯前端改动 / 纯通知格式 / 文档撰写 / LLM 路由
 
 ## 核心设计
@@ -22,10 +22,6 @@
 **新闻推送多分支去重**：`InterestPipeline.process_new_items` 有 `_identify_and_notify_companies`（🔍 AI 公司识别）和 `_notify_interest_slack`（📰 兴趣关键词）两条独立 Slack 分支，同一条 NewsItem 可同时命中。前者推送时已包含原文全文，须按 `NewsItem.id` 集合去重避免重复推送；新增第三条推送路径时也要并入该去重链。
 
 **启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
-
-**产业链图谱约定**：配置在 `app/config/supply_chain.py` 的 `SUPPLY_CHAIN_GRAPHS` 字典，渲染路由 `/supply-chain/api/<name>`。`upstream/midstream/downstream` 三层均支持 `companies` 字段；公司条目可带 `tag` 承载非产业链语义，约定取值 `frontEC` / `don_buy` / `keep_watching` / `not_analyzed`，前端 `supply_chain.html` 的 `TAG_LABELS` 映射显示文案。主题型图谱（如赛事）的 `competitors` 可留 `{}`，`core.code` 用虚拟 slug（如 `WC2026`）。新增图谱只需在 `SUPPLY_CHAIN_GRAPHS` 加 dict key 即自动注册（路由按 dict 遍历），零路由/模板/seed 改动；跨链复用标的在 `role` 末尾标注「（同属 X 产业链）」与既有图谱保持一致。
-
-**tag 与分析档同步**：标的在 supply_chain 标 `not_analyzed` 且已建 buffett/分析档时，回写 `tag` 反映结论（至少从 `not_analyzed` 改为已分析态），避免图谱与 docs/stock-analytics 评级长期脱节。stock-deep-redo / analyze-category 收尾时一并检查该股是否在 `SUPPLY_CHAIN_GRAPHS` 里、tag 是否需更新。
 
 ## 统一股票数据API
 
@@ -91,19 +87,9 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 - **A 股节假日**：五一（5-1~5-5）/ 国庆（10-1~10-7）/ 春节多日连休，OHLC 序列会缺日期。跨市场事件分析（如 AMD 财报 → 002156 联动）必须识别假期错位 —— 美股仍在交易的窗口 A 股可能空白多日，节后第一日是情绪集中释放点
 - **一字涨停判定**：单日 OHLC 四值合一（O=H=L=C）+ 量比 < 1（典型 0.5-0.7x），表示开盘即封板无成交，常见于节后情绪集中释放或事件驱动；分析时不可当成正常 K 线计算技术指标
 
-### 腾讯HTTP数据源
+### 数据源
 
-实时价格和分时K线优先使用腾讯HTTP接口（并发安全、无需限速）：
-- 实时价格批量：`http://qt.gtimg.cn/q=sh600519,sz000001`（GBK编码，`~`分隔）
-  - `q=` 字段索引：`[1]=name [3]=price [4]=prev_close [5]=open [6]=volume(手) [32]=change_pct [38]=换手率 [39]=PE_TTM [41]=年高 [42]=年低 [45]=市值(亿) [46]=PB`（亏损股 PE 为负值，与 baidu 估值分位接口结合用来判当前 PB/PE 在历史分位）
-- 分钟K线：`http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param=sh600519,m1,,240`
-- 日K线：`http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh600519,day,...`
-- **字段顺序**：`[datetime, open, close, high, low, volume]`（close在第2位，非标准OHLC）
-- **XD（除息日）字段失真**：分红除息当日 `q=` 接口 name 带 `XD` 前缀，且 52 周高/低字段 `[41]/[42]` 返回失真值（如现价 51.7 却报 52.92/50.78），**不可信**；price/PE_TTM/市值/PB 仍可靠。需 52 周区间改用 baidu 估值接口。
-- **[41]/[42] 非除息日也可能失真**：即便非 XD 日，年高/年低字段偶尔返回**近现价窄区间**（实测 600362 现价 40.49 却报年高 40.90/年低 39.65，明显非真实 52 周），疑为近期区间而非 52 周口径；判 52 周区间/分位一律以 baidu 估值接口为准，勿信 [41]/[42]。
-- **只取实时价的一次性脚本直连 HTTP 优先**：`urllib.request` 拉 `qt.gtimg.cn/q=sh600519,sz000001,...` 比走 `create_app() + UnifiedStockDataService` 快 5x+ 且无副作用（即便 `SCHEDULER_ENABLED=0`，create_app 仍会启 crawl4ai 抓 google 新闻产生数十行噪音日志）；服务化路径仅在需要缓存 / 指数 / OHLC 时才走
-- **港股取数字段不同**：`q=hk03690`（GBK/`~`分隔）字段索引与 A 股不一致，**勿照搬 A 股 [39]PE/[45]市值/[46]PB**；港股市值/PE(TTM)/PB/PS/52周区间改用 WebFetch `stockanalysis.com/quote/hkg/<code>/statistics/`（URL 用**去前导 0** 代码：`hkg/2631` 通、`hkg/02631` 报 404）或 Yahoo `<code>.HK`，交叉验证 2 源（市值口径常分歧）。亏损港股 PE(TTM)=N/A，估值锚改看 PS / PB / Forward PE
-  - **A+H 标的 H 口径市值自洽校验**：stockanalysis 的 market cap 对 A+H 双重上市股**股本口径可能错**（实测 02631 报 794 亿 HKD→反推 8 亿股，与 A 股总市值÷A股价自洽总股本 4.85 亿矛盾）；H 口径全公司市值一律用「**A 股总市值 ÷ A 股价反推总股本 × H 股现价**」自洽校验，**AH 折价 = H 口径市值 ÷ (A 市值×1.08) − 1**（RMB→HKD）。腾讯 `q=hk<code>` 取 H 股现价可靠，但勿 `print` 其中文 name 字段（cp950 报错），只取 `f[3]` 价。
+A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速），美股/港股走 yfinance；选源与负载均衡见下方「核心组件」。腾讯字段索引 / XD除息失真 / `[41][42]`年高低失真 / 港股 `q=hk` 字段 / A+H 市值自洽校验等取数坑见 `data-fetch-conventions.md`。
 
 ### 策略数据协作
 

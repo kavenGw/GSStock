@@ -36,7 +36,7 @@ description: >-
 | 证据深度 | **全量联网验证** + 实时行情锚 |
 | 估值框架 | **场景加权**：结构性重估(bull) / 基准(base) / 空头(bear)，概率由证据强度定 |
 | 分析框架 | 先调用 `buffett` skill 取框架，再动笔 |
-| A+H 口径 | A+H 双重上市标的**取 A/H 两地中估值更低（安全边际更大）一侧**作跟踪主体，**不强行 A 股**；H 股通常折价更优。frontmatter `stock_code` + valuations `market`/`currency`/每股内在价值按选定口径写，币种统一见 playbook §3、H 口径市值自洽校验见 `.claude/rules/data-architecture.md` 港股节 |
+| A+H 口径 | A+H 双重上市标的**取 A/H 两地中估值更低（安全边际更大）一侧**作跟踪主体，**不强行 A 股**；H 股通常折价更优。frontmatter `stock_code` + valuations `market`/`currency`/每股内在价值按选定口径写，币种统一见 playbook §3、H 口径市值自洽校验见 `.claude/rules/data-fetch-conventions.md` 港股节 |
 | 语言 | 中文 |
 
 **只有这些情况才回头问用户**（歧义门）：
@@ -123,5 +123,5 @@ description: >-
 - `references/playbook.md` — 13 节模板、frontmatter 字段集 + rating 枚举、场景加权估值机制、采证清单、qt.gtimg.cn 字段、lint 命令、各 subagent 派发提示骨架。**撰写/审查 subagent 必读。**
 - `references/sector-lenses.md` — 可扩展板块视角注册表（AI/PCB/存储…），每 subsector 一节五段式调查清单。**命中 lens 的撰写/审查 subagent 必读对应节。**
 - 项目既有 rules（按需指给 subagent）：`.claude/rules/docs-and-portfolio.md`（目录/frontmatter/lint/related_docs）、
-  `.claude/rules/data-fetch-conventions.md`（akshare/实时价坑）、`.claude/rules/data-architecture.md`（qt.gtimg.cn/缓存）、
+  `.claude/rules/data-fetch-conventions.md`（akshare/实时价/qt.gtimg.cn 字段坑）、`.claude/rules/data-architecture.md`（缓存）、
   `.claude/rules/dev-conventions.md`（Windows 编码/heredoc/create_app 副作用）。
