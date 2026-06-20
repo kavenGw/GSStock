@@ -1127,12 +1127,13 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 73.3
-  base: 171.0
-  bull: 267.1
-  conviction_date: '2026-05-30'
-  source_doc: sectors/semiconductor/pcb/2026-05-30-胜宏科技-buffett分析.md
-  note: 胜宏科技；熊720/基准1680/牛2625亿(2027E)÷9.83亿股
+  bear: 33.0
+  base: 106.8
+  bull: 183.1
+  dividend_yield: null
+  conviction_date: '2026-06-20'
+  source_doc: sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md
+  note: 每股内在价值=情景市值/9.829亿股反推；A股口径(H股2476.HK反溢价+3.3%故不切)
 - stock_code: '300666'
   stock_name: 江丰电子
   market: A
@@ -1884,7 +1885,7 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/financial/securities/2026-06-20-中信证券-buffett分析.md
   note: H 口径(PB×正常化ROE)；A+H 取较低估值 H 侧，AH折价-6.85%轻度；股息率按A股现价口径
-- stock_code: '0522.HK'
+- stock_code: 0522.HK
   stock_name: ASMPT
   market: HK
   currency: HKD
@@ -1897,6 +1898,19 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/equipment/2026-06-20-ASMPT-buffett分析.md
   note: 期望内在价值 HK$63.2B(纯加权)/每股~HK$151，安全边际 -27.9%；纯港股非A+H，全程HKD
+- stock_code: '01070'
+  stock_name: TCL电子
+  market: HK
+  currency: HKD
+  sector: consumer
+  rating: watch
+  bear: 5.71
+  base: 9.17
+  bull: 13.41
+  dividend_yield: 3.7
+  conviction_date: '2026-06-20'
+  source_doc: sectors/consumer/consumer-electronics/2026-06-20-TCL电子-buffett分析.md
+  note: 每股内在价值=情景市值/25.2亿股；HKD口径
 - stock_code: '03200'
   stock_name: 大族数控
   market: HK

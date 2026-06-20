@@ -24,6 +24,9 @@ related_docs:
 # ASMPT（0522.HK）buffett 深度分析——AI 把 TCB 推到业绩层，护城河真、价格太贵
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-05-24-H200-vs-Rubin-供应链对比专题](../../../themes/2026-05-24-H200-vs-Rubin-供应链对比专题.md) — ASMPT 是 TCB/先进封装设备端，供给 AI GPU 封装供应链
+> - [2026-05-01-盛合晶微-26Q1季报点评](../../../quarterly/26q1/2026-05-01-盛合晶微-26Q1季报点评.md) — 先进封装 OSAT，ASMPT 设备下游客户
 <!-- END related_docs -->
 
 
