@@ -1150,11 +1150,11 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: null
-  base: 42.0
-  bull: null
-  conviction_date: '2026-06-04'
-  source_doc: sectors/semiconductor/equipment/2026-05-30-罗博特科-buffett分析.md
+  bear: 22
+  base: 32
+  bull: 42
+  conviction_date: '2026-06-20'
+  source_doc: sectors/semiconductor/equipment/2026-06-20-罗博特科-buffett分析.md
   note: SOTP单点公允价约70亿/每股42元，无三档拆分
 - stock_code: '301308'
   stock_name: 江波龙
