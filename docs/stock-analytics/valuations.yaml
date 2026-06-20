@@ -121,11 +121,13 @@
   currency: HKD
   sector: consumer
   rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-28'
-  source_doc: sectors/consumer/designer-toy/2026-05-28-泡泡玛特-buffett分析.md
+  watch_reason: 15-16.5x PE对应2025峰值盈利；Labubu退潮已转硬数据（转售价-50~80%、Trends 86→8、主动放量3000万只/月）；穿越周期正常化后期望内在价值≈95 HKD/股（市值≈1,254亿HKD），相对现价2,170-2,417亿HKD安全边际-42~-48%，平台护城河耐久性与"下一个Labubu"未被证实
+  bear: 45
+  base: 104
+  bull: 162
+  dividend_yield: 1.68
+  conviction_date: '2026-06-20'
+  source_doc: sectors/consumer/designer-toy/2026-06-20-泡泡玛特-buffett分析.md
   note: 无法可靠估算内在价值
 - stock_code: 2020.HK
   stock_name: 安踏体育
