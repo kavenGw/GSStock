@@ -165,7 +165,7 @@ Phase C 用确定性脚本 upsert 到 `docs/stock-analytics/valuations.yaml`，*
 
 撰写纪律：
 - 三档每股内在价值与正文 §0/§9 一致；分红率与 §3/§11 一致（规格审查核对镜像同步）。
-- **消费/材料/能源/工业/金融**标的分红率是重要收益来源，Phase A 须联网查最新年度分红，Phase B 在 §3/§11 写出并填入 `valuation.dividend_yield`。
+- **消费/材料/能源/工业/金融**标的分红率是重要收益来源，Phase A 须联网查最新年度分红（东财/同花顺/公司公告），Phase B 在 §3/§11 写出并填入 `valuation.dividend_yield`。
 - **港股/美股**每股估值用对应币种（HKD/USD）；A+H 选定口径由 frontmatter `stock_code` 本身体现，`currency` 随之。
 
 ### 同步操作（Phase C）
@@ -194,6 +194,7 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 数字可追溯/无范围外夹带）输出 SPEC-COMPLIANT 或问题清单；质量段给质量维度（内在一致/概率可辩护/双面性/"贵"诚实度/
 AI 不拔高/增长证据化/slop/buffett 贴合/监控可执行）输出 APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED + 2-3 条做得好的点。
 控制者收到 CHANGES-REQUESTED 或 Critical 规格问题时追派 1 个 opus 只读审查员复核该结论再放行修复。
+APPROVED-WITH-NITS 的 Minor 可修后控制者直接核验。
 
 **Phase C 收尾**：先 `git status` 查遗留改动；**`git rm` 控制者传来的待删旧 buffett 档清单**；
 **把所有 symmetric 指向被删档的反向链改指到新档或删条目**；给要补反向条目的被链档路径 + 反向 YAML；
