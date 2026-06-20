@@ -1945,3 +1945,14 @@
   dividend_yield: 2.0
   conviction_date: '2026-06-20'
   source_doc: sectors/consumer/consumer-electronics/2026-06-20-安克创新-buffett分析.md
+- stock_code: '688167'
+  stock_name: 炬光科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 90
+  base: 215
+  bull: 540
+  conviction_date: '2026-06-20'
+  source_doc: sectors/semiconductor/photonics/2026-06-20-炬光科技-buffett分析.md
