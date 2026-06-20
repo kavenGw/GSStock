@@ -852,7 +852,7 @@
   bear: 22.3
   base: 38.5
   bull: 66.2
-  dividend_yield: 2.70
+  dividend_yield: 2.7
   conviction_date: '2026-06-20'
   source_doc: sectors/media/music-streaming/2026-06-20-腾讯音乐-buffett分析.md
   note: 港股口径（fungible 与 ADR 无折价）；每股=情景IV(HKD亿)÷31.4亿股
@@ -1858,3 +1858,16 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/electronics/precision-manufacturing/2026-06-19-蓝思科技-buffett分析.md
   note: A+H 双重上市取 H 口径（较 A 折价~50%）；每股内在价值为 HKD 口径三情景值；dividend_yield 为 H 口径(每股息0.45元RMB×1.08÷29.96HKD)
+- stock_code: 00666.HK
+  stock_name: 瑞浦兰钧
+  market: HK
+  currency: HKD
+  sector: energy
+  rating: watch
+  bear: 6.5
+  base: 10.01
+  bull: 13.44
+  dividend_yield: null
+  conviction_date: '2026-06-20'
+  source_doc: sectors/energy/battery/2026-06-20-瑞浦兰钧-buffett分析.md
+  note: 每股内在价值由各情景内在价值(亿HKD)÷总股本23.37亿股算得；港股口径HKD，财报RMB×1.08；首次盈利可持续性未证、无分红dividend_yield=null
