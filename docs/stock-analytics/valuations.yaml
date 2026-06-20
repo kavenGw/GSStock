@@ -174,42 +174,6 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/consumer/beer/2026-04-24-重庆啤酒-buffett分析.md
   note: 仅定性买入锚点15x以下
-- stock_code: '600158'
-  stock_name: 中体产业
-  market: A
-  currency: CNY
-  sector: consumer
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/consumer/sportswear/2026-04-24-中体产业-buffett分析.md
-  note: Don't Buy，护城河缺失，无估值
-- stock_code: '605099'
-  stock_name: 共创草坪
-  market: A
-  currency: CNY
-  sector: consumer
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/consumer/sportswear/2026-04-24-共创草坪-buffett分析.md
-  note: 仅定性normalized owner earnings×8-10x
-- stock_code: '605299'
-  stock_name: 舒华体育
-  market: A
-  currency: CNY
-  sector: consumer
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/consumer/sportswear/2026-04-24-舒华体育-buffett分析.md
-  note: Don't Buy，商品型企业，无估值
 - stock_code: '2015'
   stock_name: 理想汽车
   market: HK
@@ -780,18 +744,6 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/materials/nonferrous/2026-04-24-洛阳钼业-buffett分析.md
   note: 大宗周期股，文中未给可量化三档
-- stock_code: 002181
-  stock_name: 粤传媒
-  market: A
-  currency: CNY
-  sector: media
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/media/advertising/2026-04-24-粤传媒-buffett分析.md
-  note: 不建议买入；内在价值可能低于账面净资产，无可靠估值
 - stock_code: '002654'
   stock_name: 万润科技
   market: A
@@ -1596,20 +1548,6 @@
   dividend_yield: 4.4
   conviction_date: '2026-06-08'
   source_doc: sectors/consumer/furniture/2026-06-08-永艺股份-buffett分析.md
-- stock_code: '300994'
-  stock_name: 久祺股份
-  market: A
-  currency: CNY
-  sector: consumer
-  rating: exclude
-  exclude_reason: 低毛利无定价权的出口ODM代工，美国~56%/欧盟延至2030关税逆风，PE(TTM)~35x下机械加权期望内在价值16.4亿安全边际约-50%，纺织厂式商品业务落能力圈外
-  bear: 3.86
-  base: 6.86
-  bull: 15.02
-  dividend_yield: 2.86
-  conviction_date: '2026-06-08'
-  source_doc: sectors/consumer/bicycle/2026-06-08-久祺股份-buffett分析.md
-  note: 每股内在价值由情景市值(亿)/总股本2.33亿股反推；dividend_yield为2025中期口径(0.40元/股÷~14元)，非全年；行情为多源快照
 - stock_code: '603929'
   stock_name: 亚翔集成
   market: A
