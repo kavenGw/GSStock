@@ -1499,12 +1499,13 @@
   currency: CNY
   sector: industrial
   rating: watch
-  bear: 13.5
-  base: 43.0
-  bull: 147.2
-  dividend_yield: null
-  conviction_date: '2026-06-07'
-  source_doc: sectors/industrial/precision-components/2026-06-07-绿的谐波-buffett分析.md
+  watch_reason: PE(TTM) 547x / 市值 748 亿 / PB 20.96x，13 天内市值再涨 25%，期望内在价值约 91 亿对应安全边际 -88%（深度负），人形订单证据弱、客户层硬订单缺位，毛利率仍在低位（33.62%）未修复；买点触发条件——PE < 80x 或市值 < 250 亿，且毛利率连续 2 季 > 35%、特斯拉 Optimus 实际量产爬坡（非 guidance）
+  bear: 18
+  base: 50
+  bull: 137
+  dividend_yield: 0.024
+  conviction_date: '2026-06-20'
+  source_doc: sectors/industrial/precision-components/2026-06-20-绿的谐波-buffett分析.md
   note: 三情景市值22/70/240亿÷1.63亿股；PE 484x极端透支，watch等估值回归
 - stock_code: '002056'
   stock_name: 横店东磁
@@ -1956,3 +1957,15 @@
   bull: 540
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/photonics/2026-06-20-炬光科技-buffett分析.md
+- stock_code: '300785'
+  stock_name: 值得买
+  market: A
+  currency: CNY
+  sector: media
+  rating: exclude
+  bear: 13.6
+  base: 20.6
+  bull: 30.2
+  dividend_yield: 0.46
+  conviction_date: '2026-06-20'
+  source_doc: sectors/media/shopping-guide/2026-06-20-值得买-buffett分析.md
