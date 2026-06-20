@@ -1897,3 +1897,16 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/equipment/2026-06-20-ASMPT-buffett分析.md
   note: 期望内在价值 HK$63.2B(纯加权)/每股~HK$151，安全边际 -27.9%；纯港股非A+H，全程HKD
+- stock_code: '03200'
+  stock_name: 大族数控
+  market: HK
+  currency: HKD
+  sector: electronics
+  rating: watch
+  bear: 49
+  base: 68
+  bull: 141
+  dividend_yield: 0.36
+  conviction_date: '2026-06-20'
+  source_doc: sectors/electronics/pcb-equipment/2026-06-20-大族数控-buffett分析.md
+  note: H口径(03200.HK,折价约47%)；每股=情景市值/4.89亿股；81HKD为让步上限锚,纯周期股锚仅~15HKD
