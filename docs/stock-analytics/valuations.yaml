@@ -1363,18 +1363,6 @@
   conviction_date: '2026-05-31'
   source_doc: sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md
   note: 普冉股份；bear45/base90/bull240亿÷1.48亿股
-- stock_code: '688981'
-  stock_name: 中芯国际
-  market: A
-  currency: CNY
-  sector: semiconductor
-  rating: exclude
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-14'
-  source_doc: sectors/semiconductor/foundry/2026-05-14-中芯国际-buffett分析.md
-  note: Owner Earnings显著为负，文档明确无法计算内在价值
 - stock_code: CXMT
   stock_name: 长鑫科技
   market: US
@@ -1886,3 +1874,15 @@
   dividend_yield: 0.51
   conviction_date: '2026-06-20'
   source_doc: sectors/consumer/auto-ev/2026-06-20-比亚迪-buffett分析.md
+- stock_code: 00981
+  stock_name: 中芯国际
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 切 H 股口径（00981.HK，HKD），AH 折价约 -50% 把 A 股口径的"严重高估"压成"贵但没那么离谱"；2025/Q1'26 营收+净利增长兑现为真、稼动率 93%+ 景气回升，但 Owner Earnings 仍为负（capex/营收 80%+ 吞利润）、估值锚只能退守 PB/PS、期望内在价值 49 HKD 仍低于现价 76.50 HKD（安全边际 -36%），未达买入安全边际。相对旧档 exclude 上调一档至 watch（折价兑现而非基本面变便宜），等待毛利突破 25% 或 OCF/Capex>0.6 的质变信号。
+  bear: 30
+  base: 50
+  bull: 80
+  conviction_date: '2026-06-20'
+  source_doc: sectors/semiconductor/foundry/2026-06-20-中芯国际-buffett分析.md
