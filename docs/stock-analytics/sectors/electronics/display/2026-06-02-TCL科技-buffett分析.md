@@ -22,6 +22,9 @@ related_docs:
 - path: ../../consumer/consumer-electronics/2026-06-20-TCL电子-buffett分析.md
   note: 同属 TCL 集团；TCL电子(01070.HK)是消费电子终端主体，本公司(华星)为其面板供应方
   symmetric: true
+- path: ../../../themes/2026-06-20-面板折旧capex拐点.md
+  note: 京东方IR确认行业成熟期+扩产已过，背书双寡头供给侧逻辑但不解光伏拖累，维持watch
+  symmetric: true
 ---
 # TCL科技（000100.SZ）Buffett 投资分析
 
@@ -30,6 +33,7 @@ related_docs:
 > - [2026-05-28-TCL中环-buffett分析](../../energy/solar/2026-05-28-TCL中环-buffett分析.md) — TCL科技控股子公司，光伏业务主要拖累因素
 > - [2026-06-01-京东方-buffett分析](2026-06-01-京东方-buffett分析.md) — 面板双寡头另一极，市占率26%vs华星23%，同周期同估值逻辑
 > - [2026-06-20-TCL电子-buffett分析](../../consumer/consumer-electronics/2026-06-20-TCL电子-buffett分析.md) — 同属 TCL 集团；TCL电子(01070.HK)是消费电子终端主体，本公司(华星)为其面板供应方
+> - [2026-06-20-面板折旧capex拐点](../../../themes/2026-06-20-面板折旧capex拐点.md) — 京东方IR确认行业成熟期+扩产已过，背书双寡头供给侧逻辑但不解光伏拖累，维持watch
 <!-- END related_docs -->
 
 **分析日期**：2026-06-02
