@@ -44,7 +44,7 @@ description: >-
 - 用户明确要的是 comps 横评或 theme 专题，而非个股 buffett 档
 - 旧档结论与近期已有底稿（comps/theme/quarterly）出现冗列冲突，不确定以谁为准
 
-## 总编排：3 阶段 subagent + 两段式审查
+## 总编排：3 阶段 subagent + 合并审查
 
 为什么拆 subagent：联网采证、长文撰写、lint 收尾是三种不同的认知活；分开派能让每棒上下文干净，
 也满足"撰写与审查分属不同上下文、不在同一上下文自审"（见 CLAUDE.md）。**串行**，不要并行派实现者。
@@ -76,16 +76,19 @@ description: >-
 **注入命中 lens 的【撰写落点】**（来自 `references/sector-lenses.md` 命中节）：要求对应节按落点深化，
 命中 lens 的每个必查项都要在正文有回应（查无证据也要写明）。
 
-### 两段式审查（每段派 1 个 read-only subagent，opus）
-顺序不能反——**先规格、后质量**：
-1. **规格符合性**：13 节齐全？frontmatter 合规？三情景概率 Σ=100% 且期望值算术对？AI 维度都打了标？
-   供给侧双面写了吗？数字可追溯无造数？无范围外夹带？命中 lens 的必查项是否在正文均有回应（查无证据也写明）？
-   **命中成长 lens 时：扩产达产 / 客户增长预期（分层兑证）/ 跑道长度是否在正文均有回应？bull 是否被增长证据包门控（证据全软则概率封顶）？**
-   → 输出 SPEC-COMPLIANT 或问题清单。
+### 合并审查（派 1 个 read-only subagent，sonnet；异常升 opus）
+一个 sonnet 只读 subagent，单 prompt 内**先规格、后质量**两段顺序输出（顺序不可反）：
+1. **规格符合性**：13 节齐全？frontmatter 合规（含 `valuation` 块与正文 §0/§9/§3 数字一致）？三情景概率 Σ=100%
+   且期望值算术对？AI 维度都打了标？供给侧双面写了吗？数字可追溯无造数？无范围外夹带？命中 lens 的必查项是否
+   在正文均有回应（查无证据也写明）？**命中成长 lens 时**：扩产达产 / 客户增长预期（分层兑证）/ 跑道长度是否
+   均有回应？bull 是否被增长证据包门控？→ 输出 SPEC-COMPLIANT 或问题清单。
 2. **分析质量**：内在一致性、概率可辩护性、供给侧双面是否走过场、"贵"是否被诚实消化、AI 是否蹭概念拔高、
-   **增长是否被诚实证据化（非叙事）、bull 赋权是否与增长证据强度匹配、高增长是否稀释了"贵"**、
-   slop 检查、buffett 框架贴合度、监控指标是否带阈值可执行。→ APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED。
-有 Critical/Important 问题 → 让撰写 subagent 修 → 同一审查员复审，直到过。Minor nits 可修后控制者直接核验。
+   增长是否被诚实证据化、bull 赋权是否与增长证据强度匹配、slop 检查、buffett 框架贴合度、监控指标是否带阈值可执行。
+   → APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED。
+
+**纪律保持**：审查员是独立 subagent（非撰写者自审），撰写≠审查上下文铁律不变。
+**异常升级**：sonnet 给出 `CHANGES-REQUESTED`，或规格段发现 Critical 问题 → 控制者**追派 1 个 opus 只读审查员
+复核该结论**，再据复核让撰写 subagent 修；同一审查上下文复审直到过。Minor nits 可修后控制者直接核验。
 
 ### Phase C — 收尾（派 1 个 subagent，sonnet 足够）
 - **删除旧档**：对"先做"传来的待删清单逐个 `git rm`（该股历史 buffett 档）。
@@ -94,9 +97,9 @@ description: >-
 - 给指向新档的外部文档（comps/theme/quarterly）补反向 related_docs 条目（symmetric: true 的那些）。
 - `python scripts/lint_docs_refs.py --rewrite-blocks` 重生顶部块（别手编 `<!-- BEGIN/END related_docs -->`）。
 - `lint_docs_frontmatter.py` + `lint_docs_refs.py` **都要 exit 0**；`--check-orphans` 确认新档非孤儿。
-- **同步 valuations.yaml**：从新档 §0/§9 提取 bear/base/bull 每股内在价值 + §3/§11 提取 dividend_yield 分红率，upsert 到
-  `docs/stock-analytics/valuations.yaml`（按 `stock_code` 去重，更新已有条目或追加新条目）。
-  详见 `references/playbook.md` §8「valuations.yaml 同步」。
+- **同步 valuations.yaml**：估值数字已由 Phase B 写进 buffett 档 frontmatter 的 `valuation` 块，
+  此处只需运行 `PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>`
+  确定性 upsert（无需 LLM 再从正文提取）。详见 `references/playbook.md` §8。
 - 确认一次性采证脚本已删、evidence.md 未被 add。
 - 提交终稿。
 
