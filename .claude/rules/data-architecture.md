@@ -99,6 +99,7 @@ A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速
 
 - **UnifiedStockDataService** - 统一数据获取入口（单例模式）
   - `get_realtime_prices(stock_codes, force_refresh)` - A股用腾讯HTTP批量+akshare负载均衡，美股/港股用yfinance
+    - `cache_only=True`：只读内存+DB 缓存、跳过第三层 API，未命中 code 不在返回里（前端显「—」）。首屏秒开/只读渲染用它避免 yfinance 逐只串行阻塞（港股/美股冷缓存可卡数十秒）；要最新价才走 force_refresh
   - `get_trend_data(stock_codes, days)` - OHLC走势数据
   - `get_indices_data(target_date)` - 指数数据
   - `get_cache_stats()` - 缓存命中率统计
