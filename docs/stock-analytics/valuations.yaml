@@ -1884,3 +1884,16 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/financial/securities/2026-06-20-中信证券-buffett分析.md
   note: H 口径(PB×正常化ROE)；A+H 取较低估值 H 侧，AH折价-6.85%轻度；股息率按A股现价口径
+- stock_code: '0522.HK'
+  stock_name: ASMPT
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: watch
+  bear: 79
+  base: 138
+  bull: 229
+  dividend_yield: 0.67
+  conviction_date: '2026-06-20'
+  source_doc: sectors/semiconductor/equipment/2026-06-20-ASMPT-buffett分析.md
+  note: 期望内在价值 HK$63.2B(纯加权)/每股~HK$151，安全边际 -27.9%；纯港股非A+H，全程HKD
