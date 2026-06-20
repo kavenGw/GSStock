@@ -62,9 +62,11 @@ def build_entry(fm: dict, source_doc: str) -> dict:
 
 
 def upsert(entries: list[dict], new_entry: dict) -> list[dict]:
-    """按 stock_code 原地替换已有条目，不存在则追加。"""
+    """按 stock_code 原地替换已有条目，不存在则追加；保留旧条目手工 note。"""
     for i, e in enumerate(entries):
         if e.get('stock_code') == new_entry['stock_code']:
+            if 'note' in e and 'note' not in new_entry:
+                new_entry = {**new_entry, 'note': e['note']}
             entries[i] = new_entry
             return entries
     entries.append(new_entry)

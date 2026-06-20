@@ -82,6 +82,19 @@ def test_upsert_appends_new():
     assert len(entries) == 2 and entries[1]['stock_code'] == '000001'
 
 
+def test_upsert_preserves_existing_note():
+    entries = [{'stock_code': '603986', 'base': 1, 'note': '手工备注'}]
+    upsert(entries, {'stock_code': '603986', 'base': 99})
+    assert entries[0]['base'] == 99
+    assert entries[0]['note'] == '手工备注'
+
+
+def test_upsert_new_note_overrides_old():
+    entries = [{'stock_code': '603986', 'note': '旧'}]
+    upsert(entries, {'stock_code': '603986', 'note': '新'})
+    assert entries[0]['note'] == '新'
+
+
 def _write_doc(d: Path, name: str, code: str, base: float):
     d.mkdir(parents=True, exist_ok=True)
     (d / name).write_text(
