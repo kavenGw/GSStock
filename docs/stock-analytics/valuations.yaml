@@ -301,8 +301,7 @@
   currency: HKD
   sector: electronics
   rating: watch
-  watch_reason: H股口径下安全边际由负翻正——同一家42%毛利辐照改性材料franchise+全球#2高速铜缆双引擎公司，H股9981因新上市破发+AH折价-46%，12.80
-    HKD等价市值约155亿RMB深落base内在价值中枢下方40%+，期望内在价值约22.3 HKD/股、安全边际+74%；翻正系折价兑现而非基本面变便宜，仍定watch待中报确认增收不增利能否修复
+  watch_reason: H股口径下安全边际由负翻正——同一家42%毛利辐照改性材料franchise+全球#2高速铜缆双引擎公司，H股9981因新上市破发+AH折价-46%，12.80 HKD等价市值约155亿RMB深落base内在价值中枢下方40%+，期望内在价值约22.3 HKD/股、安全边际+74%；翻正系折价兑现而非基本面变便宜，仍定watch待中报确认增收不增利能否修复
   bear: 12.41
   base: 21.52
   bull: 35.51
@@ -689,8 +688,7 @@
   currency: HKD
   sector: materials
   rating: watch
-  watch_reason: 跟踪主体由A股600362切换至H股00358.HK——H股41.06 HKD/PE15.61/PB1.66，较A股折价约-33.5%，把同一份江铜资产买入价压低约三分之一、股息率从A股1.88%抬到2.82%，AH折价是本次切换的核心安全边际放大器；但折价≠便宜到位，铜价周期顶+price-taker无定价权的硬伤未解；H股口径安全边际约-56%（vs
-    A股口径约-71%，AH折价把负安全边际收窄约15pp），维持watch不买，等铜价回落+PB向1x回归
+  watch_reason: 跟踪主体由A股600362切换至H股00358.HK——H股41.06 HKD/PE15.61/PB1.66，较A股折价约-33.5%，把同一份江铜资产买入价压低约三分之一、股息率从A股1.88%抬到2.82%，AH折价是本次切换的核心安全边际放大器；但折价≠便宜到位，铜价周期顶+price-taker无定价权的硬伤未解；H股口径安全边际约-56%（vs A股口径约-71%，AH折价把负安全边际收窄约15pp），维持watch不买，等铜价回落+PB向1x回归
   bear: 10.8
   base: 17.7
   bull: 28.1
@@ -1727,8 +1725,7 @@
   dividend_yield: 5.1
   conviction_date: '2026-06-13'
   source_doc: sectors/consumer/home-appliance/2026-06-13-美的集团-buffett分析.md
-  note: 每股内在价值由市值情景内在价值（bear4485/base6235/bull7990亿）÷估算总股本约76亿股推算；实时行情为第三方快照(gurufocus
-    2026-06-13)、PB及H股0300.HK口径未交叉验证
+  note: 每股内在价值由市值情景内在价值（bear4485/base6235/bull7990亿）÷估算总股本约76亿股推算；实时行情为第三方快照(gurufocus 2026-06-13)、PB及H股0300.HK口径未交叉验证
 - stock_code: '600690'
   stock_name: 海尔智家
   market: A
@@ -1924,3 +1921,14 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/electronics/pcb-equipment/2026-06-20-大族数控-buffett分析.md
   note: H口径(03200.HK,折价约47%)；每股=情景市值/4.89亿股；81HKD为让步上限锚,纯周期股锚仅~15HKD
+- stock_code: '300456'
+  stock_name: 赛微电子
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 6.0
+  base: 11.7
+  bull: 26.0
+  conviction_date: '2026-06-20'
+  source_doc: sectors/semiconductor/mems/2026-06-20-赛微电子-buffett分析.md
