@@ -150,18 +150,6 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/sportswear/2026-06-03-李宁-buffett分析.md
   note: 李宁；三情景市值225/377/495亿RMB换HKD÷25.59亿股；HKD
-- stock_code: '300651'
-  stock_name: 金陵体育
-  market: A
-  currency: CNY
-  sector: consumer
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/consumer/sportswear/2026-04-24-金陵体育-buffett分析.md
-  note: Don't Buy，商品型B2B，无估值
 - stock_code: '600132'
   stock_name: 重庆啤酒
   market: A
@@ -284,18 +272,6 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/electronics/components/2026-05-30-顺络电子-buffett分析.md
   note: 顺络电子；内在价值220-300亿÷8.07亿股
-- stock_code: 002229
-  stock_name: 鸿博股份
-  market: A
-  currency: CNY
-  sector: electronics
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-07'
-  source_doc: sectors/electronics/consumer/2026-05-07-鸿博股份-buffett分析.md
-  note: 鸿博；Pass，连续负Owner Earnings，DCF不适用
 - stock_code: 002384
   stock_name: 东山精密
   market: A
