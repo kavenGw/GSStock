@@ -112,9 +112,10 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
             violations.append(f"{p}: valuation must be a mapping (got {type(val).__name__})")
         else:
             for k in ('bear', 'base', 'bull', 'dividend_yield'):
-                if k in val and val[k] is not None and not isinstance(val[k], (int, float)):
+                v = val.get(k)
+                if k in val and v is not None and (isinstance(v, bool) or not isinstance(v, (int, float))):
                     violations.append(
-                        f"{p}: valuation.{k} must be number or null (got {type(val[k]).__name__})")
+                        f"{p}: valuation.{k} must be number or null (got {type(v).__name__})")
             cur = val.get('currency')
             if cur is not None and cur not in VALUATION_CURRENCIES:
                 violations.append(

@@ -150,3 +150,9 @@ def test_valuation_bad_currency():
     fm = _buffett_fm(valuation={'bear': 1.0, 'base': 2.0, 'bull': 3.0, 'currency': 'JPY'})
     violations = validate_frontmatter(fm, Path('/dummy.md'))
     assert any("valuation.currency 'JPY'" in v for v in violations)
+
+
+def test_valuation_rejects_bool():
+    fm = _buffett_fm(valuation={'bear': True, 'base': 1.0, 'bull': 2.0, 'currency': 'CNY'})
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert any('valuation.bear must be number or null' in v for v in violations)
