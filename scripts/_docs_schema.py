@@ -19,6 +19,8 @@ SECTORS: set[str] = {
 
 RATINGS: set[str] = {'core', 'config', 'watch', 'exclude'}
 
+VALUATION_CURRENCIES: set[str] = {'CNY', 'USD', 'HKD'}
+
 REQUIRED_FIELDS_BY_TYPE: dict[str, set[str]] = {
     'buffett':      {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',
                      'themes', 'rating', 'conviction_date', 'thesis'},
@@ -103,5 +105,19 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
                     violations.append(
                         f"{p}: period '{fm['period']}' != dir '{dir_period}'")
                 break
+
+    if 'valuation' in fm:
+        val = fm['valuation']
+        if not isinstance(val, dict):
+            violations.append(f"{p}: valuation must be a mapping (got {type(val).__name__})")
+        else:
+            for k in ('bear', 'base', 'bull', 'dividend_yield'):
+                if k in val and val[k] is not None and not isinstance(val[k], (int, float)):
+                    violations.append(
+                        f"{p}: valuation.{k} must be number or null (got {type(val[k]).__name__})")
+            cur = val.get('currency')
+            if cur is not None and cur not in VALUATION_CURRENCIES:
+                violations.append(
+                    f"{p}: valuation.currency '{cur}' not in {sorted(VALUATION_CURRENCIES)}")
 
     return violations

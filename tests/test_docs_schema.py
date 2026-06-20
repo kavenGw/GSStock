@@ -102,3 +102,51 @@ def test_validate_quarterly_period_matches_dir():
     path = Path('docs/stock-analytics/quarterly/26q1/foo.md')
     violations = validate_frontmatter(fm, path)
     assert any('period' in v and '26q1' in v for v in violations)
+
+
+def _buffett_fm(**extra):
+    fm = {
+        'doc_type': 'buffett', 'stock_code': '603986', 'stock_name': '兆易创新',
+        'sector': 'semiconductor', 'subsector': 'storage', 'themes': ['memory'],
+        'rating': 'core', 'conviction_date': '2026-05-31', 'thesis': 't',
+    }
+    fm.update(extra)
+    return fm
+
+
+def test_valuation_absent_ok():
+    violations = validate_frontmatter(_buffett_fm(), Path('/dummy.md'))
+    assert not any('valuation' in v for v in violations)
+
+
+def test_valuation_valid_ok():
+    fm = _buffett_fm(valuation={
+        'bear': 100.0, 'base': 120.0, 'bull': 150.0,
+        'currency': 'CNY', 'dividend_yield': 1.2,
+    })
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert not any('valuation' in v for v in violations)
+
+
+def test_valuation_null_values_ok():
+    fm = _buffett_fm(valuation={'bear': None, 'base': None, 'bull': None, 'currency': 'HKD'})
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert not any('valuation' in v for v in violations)
+
+
+def test_valuation_not_mapping():
+    fm = _buffett_fm(valuation=[1, 2, 3])
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert any('valuation must be a mapping' in v for v in violations)
+
+
+def test_valuation_bad_number_type():
+    fm = _buffett_fm(valuation={'bear': '便宜', 'base': 1.0, 'bull': 2.0, 'currency': 'CNY'})
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert any('valuation.bear must be number or null' in v for v in violations)
+
+
+def test_valuation_bad_currency():
+    fm = _buffett_fm(valuation={'bear': 1.0, 'base': 2.0, 'bull': 3.0, 'currency': 'JPY'})
+    violations = validate_frontmatter(fm, Path('/dummy.md'))
+    assert any("valuation.currency 'JPY'" in v for v in violations)
