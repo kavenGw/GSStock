@@ -1932,3 +1932,16 @@
   bull: 26.0
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/mems/2026-06-20-赛微电子-buffett分析.md
+- stock_code: '300866'
+  stock_name: 安克创新
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: watch
+  watch_reason: 充电配件全球品牌龙头、品牌+研发迭代速度护城河真实、储能/Eufy 第二三曲线已落地，质地够进持续跟踪池；但 2025 经营性现金流仅 4.81 亿（同比 -82.49%、现金含量仅 ~19%）+ 全年分红 12 亿 > 经营现金流靠融资补、北美 ~44% 敞口撞充电器类目 ~45% 关税且越南转产在途未完成、2025 召回 187 万枚暴露电芯安全短板，三重压制使正常化 owner earnings 必须大幅打折。期望内在价值约 407 亿对应当前 628 亿市值安全边际 -35.2%，即便最乐观 bull 情景每股内在价值 116.4 元仍略低于现价 117.11——好公司未到好价格；待现金流回正 + 关税路径明朗 + 储能业绩单列兑现后再重估买点。
+  bear: 39.0
+  base: 78.0
+  bull: 116.4
+  dividend_yield: 2.0
+  conviction_date: '2026-06-20'
+  source_doc: sectors/consumer/consumer-electronics/2026-06-20-安克创新-buffett分析.md
