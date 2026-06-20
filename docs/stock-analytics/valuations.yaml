@@ -1506,7 +1506,7 @@
   dividend_yield: 0.024
   conviction_date: '2026-06-20'
   source_doc: sectors/industrial/precision-components/2026-06-20-绿的谐波-buffett分析.md
-  note: 三情景市值22/70/240亿÷1.63亿股；PE 484x极端透支，watch等估值回归
+  note: 三情景市值33/92/251亿÷1.833亿股；PE 547x极端透支，watch等估值回归
 - stock_code: '002056'
   stock_name: 横店东磁
   market: A
