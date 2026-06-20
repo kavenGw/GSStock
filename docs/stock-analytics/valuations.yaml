@@ -57,18 +57,6 @@
   conviction_date: '2026-05-09'
   source_doc: sectors/ai-application/database/2026-05-09-甲骨文-buffett分析.md
   note: 12M目标价口径，非DCF每股
-- stock_code: 002594
-  stock_name: 比亚迪
-  market: A
-  currency: CNY
-  sector: consumer
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-29'
-  source_doc: sectors/consumer/auto-ev/2026-05-29-比亚迪-buffett分析.md
-  note: 整车薄利价格战，正常化盈利难可靠估算
 - stock_code: 01810
   stock_name: 小米集团-W
   market: HK
@@ -1885,3 +1873,16 @@
   dividend_yield: 0.46
   conviction_date: '2026-06-20'
   source_doc: sectors/media/shopping-guide/2026-06-20-值得买-buffett分析.md
+- stock_code: '01211'
+  stock_name: 比亚迪
+  market: HK
+  currency: HKD
+  sector: consumer
+  rating: watch
+  watch_reason: 切 H 口径 01211 享 AH 折价 −15%（PE23.8/PB2.85<A股），但整车准商品按穿越周期正常化业主盈余定价仍深度高估——期望内在价值约 38.6 HKD vs 现价 80.85，安全边际 −52%，最乐观 bull 单档仍 −26%；切口径未翻转评级。
+  bear: 21.3
+  base: 38.4
+  bull: 59.7
+  dividend_yield: 0.51
+  conviction_date: '2026-06-20'
+  source_doc: sectors/consumer/auto-ev/2026-06-20-比亚迪-buffett分析.md
