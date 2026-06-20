@@ -136,7 +136,7 @@ def index():
     prices = {}
     if fetch_map:
         try:
-            raw = unified_stock_data_service.get_realtime_prices(list(fetch_map.values()))
+            raw = unified_stock_data_service.get_realtime_prices(list(fetch_map.values()), cache_only=True)
             prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
         except Exception as e:
             logger.warning(f'[估值页] 取实时价失败，降级渲染: {type(e).__name__}: {e}', exc_info=True)
