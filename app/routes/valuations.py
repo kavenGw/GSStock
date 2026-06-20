@@ -43,6 +43,15 @@ def compute_margin(value: Optional[float], price: Optional[float]) -> Optional[f
     return value / price - 1
 
 
+RATING_RANK = {'core': 4, 'config': 3, 'watch': 2, 'exclude': 1}
+
+
+def _date_rank(d) -> Optional[int]:
+    """conviction_date（str 或 yaml 解析出的 date）归一为 YYYYMMDD 整数，非法/缺失返回 None。"""
+    digits = str(d or '').replace('-', '')[:8]
+    return int(digits) if len(digits) == 8 and digits.isdigit() else None
+
+
 def load_category_map() -> dict[str, str]:
     """返回 {stock_code: category_name}，来自 StockCategory join Category。
     app-context / 异常守卫：任何失败返回 {}（与取价失败降级同款，不让分类问题打挂整页）。"""
@@ -79,6 +88,8 @@ def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> l
             **r,
             'category': cat_map.get(r['stock_code']),
             'current_price': price,
+            'rating_rank': RATING_RANK.get(r.get('rating')),
+            'date_rank': _date_rank(r.get('conviction_date')),
             'margin_bear': compute_margin(r.get('bear'), price),
             'margin_base': compute_margin(r.get('base'), price),
             'margin_bull': compute_margin(r.get('bull'), price),

@@ -50,12 +50,13 @@ table.mode-flat .group-header { display: none; }
 <table id="val-table" class="table table-sm table-hover val-table mode-grouped">
   <thead class="table-light">
     <tr>
-      <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th><th>评级</th>
+      <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th>
+      <th class="sortable" data-sort="rating" onclick="sortBy('rating')">评级<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="bear" onclick="sortBy('bear')">Bear<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="base" onclick="sortBy('base')">Base<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="bull" onclick="sortBy('bull')">Bull<span class="sort-arrow"></span></th>
       <th class="text-end">当前价</th>
-      <th>日期</th><th>文档</th>
+      <th class="sortable" data-sort="date" onclick="sortBy('date')">日期<span class="sort-arrow"></span></th><th>文档</th>
     </tr>
   </thead>
   <tbody>
@@ -65,6 +66,8 @@ table.mode-flat .group-header { display: none; }
     </tr>
     {% for r in g.rows %}
     <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}"
+        data-mrating="{{ r.rating_rank if r.rating_rank is not none else '' }}"
+        data-mdate="{{ r.date_rank if r.date_rank is not none else '' }}"
         data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
         data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
         data-mbull="{{ r.margin_bull if r.margin_bull is not none else '' }}"
@@ -110,7 +113,7 @@ let currentMarket = 'all';
 function loadPref() {
   try {
     const p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
-    if (['bear', 'base', 'bull'].includes(p.sortKey)) sortKey = p.sortKey;
+    if (['bear', 'base', 'bull', 'rating', 'date'].includes(p.sortKey)) sortKey = p.sortKey;
     if (['asc', 'desc'].includes(p.dir)) sortDir = p.dir;
     if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;
   } catch (e) {}
