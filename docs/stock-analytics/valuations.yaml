@@ -1353,11 +1353,11 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 30.4
-  base: 60.8
-  bull: 162.2
-  conviction_date: '2026-05-31'
-  source_doc: sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md
+  bear: 47.1
+  base: 87.4
+  bull: 161.4
+  conviction_date: '2026-06-21'
+  source_doc: sectors/semiconductor/storage/2026-06-21-普冉股份-buffett分析.md
   note: 普冉股份；bear45/base90/bull240亿÷1.48亿股
 - stock_code: CXMT
   stock_name: 长鑫科技

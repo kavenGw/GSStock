@@ -12,8 +12,8 @@ related_docs:
   - path: 2026-05-25-兆易-君正-业务客户晶圆深度对比.md
     note: 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
     symmetric: true
-  - path: ../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md
-    note: 普冉 5-31 buffett 深度重做（Exclude/NOR 涨价 + SHM 收购）
+  - path: ../sectors/semiconductor/storage/2026-06-21-普冉股份-buffett分析.md
+    note: 普冉 6-21 buffett 深度重做（Exclude/NOR 供给结构化 vs 估值透支）
     symmetric: true
   - path: ../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md
     note: 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
