@@ -394,6 +394,7 @@ def test_index_has_group_reorder_js(app_client):
     assert 'defaultGroupOrder' in html, '缺默认组顺序捕获'
     assert 'function groupRepresentative' in html, '缺板块代表值函数'
 
+
 def test_switch_market_triggers_resort(app_client):
     import re
     html = app_client.get('/valuations/').data.decode('utf-8')
