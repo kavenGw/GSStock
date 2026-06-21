@@ -970,13 +970,14 @@
   market: HK
   currency: HKD
   sector: semiconductor
-  rating: watch
-  bear: 38.5
-  base: 70.5
-  bull: 107.7
-  dividend_yield: 3.34
-  conviction_date: '2026-06-08'
+  rating: exclude
+  bear: 3.1
+  base: 5.3
+  bull: 9.2
+  dividend_yield: 0.74
+  conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/materials/2026-06-08-建滔积层板-buffett分析.md
+  note: 旧档 PE 6.3x 系净利 10 倍单位错误（HKD 2.44B 误记 24.4B）；实际 PE-TTM 117.8x@91.85，commodity 合理 8-12x，期望内在价值仅 HKD 5.4，现价高估约 94%，exclude
 - stock_code: '300054'
   stock_name: 鼎龙股份
   market: A
