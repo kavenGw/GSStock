@@ -630,13 +630,14 @@
   market: A
   currency: CNY
   sector: materials
-  rating: config
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/materials/nonferrous/2026-04-24-中金黄金-buffett分析.md
-  note: 大宗商品零定价权，文中明确无法可靠估算
+  rating: exclude
+  bear: 2.70
+  base: 7.15
+  bull: 12.75
+  dividend_yield: 2.1
+  conviction_date: '2026-06-21'
+  source_doc: sectors/materials/nonferrous/2026-06-21-中金黄金-buffett分析.md
+  note: 周期顶部定价，金价回调期安全边际 -69%，纱岭增量 2026H2 才释放
 - stock_code: '600711'
   stock_name: 盛屯矿业
   market: A
@@ -698,18 +699,6 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/materials/nonferrous/2026-04-24-紫金矿业-buffett分析.md
   note: 内在价值1200-1800亿/bull 3000亿；股本约155亿股(公开数据近似)
-- stock_code: '603993'
-  stock_name: 洛阳钼业
-  market: A
-  currency: CNY
-  sector: materials
-  rating: config
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/materials/nonferrous/2026-04-24-洛阳钼业-buffett分析.md
-  note: 大宗周期股，文中未给可量化三档
 - stock_code: '002654'
   stock_name: 万润科技
   market: A
@@ -1889,3 +1878,16 @@
   bull: 80
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/foundry/2026-06-20-中芯国际-buffett分析.md
+- stock_code: 03993
+  stock_name: 洛阳钼业
+  market: HK
+  currency: HKD
+  sector: materials
+  rating: watch
+  watch_reason: 周期高位估值无安全边际（H口径PB~4.5x/A股PB5.18x，期望内在价值≈7.66 HKD vs H现价18.87 HKD，安全边际约-59%），商业模式仍为commodity price-taker无定价权；等铜价回落+PB跌破1.5x阈值再进入买入研究
+  bear: 4.37
+  base: 7.13
+  bull: 12.1
+  dividend_yield: 1.43
+  conviction_date: '2026-06-21'
+  source_doc: sectors/materials/nonferrous/2026-06-21-洛阳钼业-buffett分析.md
