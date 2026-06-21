@@ -1904,3 +1904,14 @@
   bull: 27.46
   conviction_date: '2026-06-21'
   source_doc: sectors/electronics/thermal-management/2026-06-21-富信科技-buffett分析.md
+- stock_code: '688048'
+  stock_name: 长光华芯
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 2.27
+  base: 8.74
+  bull: 56.72
+  conviction_date: '2026-06-21'
+  source_doc: sectors/semiconductor/laser-chip/2026-06-21-长光华芯-buffett分析.md
