@@ -1893,3 +1893,14 @@
   dividend_yield: 1.43
   conviction_date: '2026-06-21'
   source_doc: sectors/materials/nonferrous/2026-06-21-洛阳钼业-buffett分析.md
+- stock_code: '688662'
+  stock_name: 富信科技
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: exclude
+  bear: 2.62
+  base: 9.59
+  bull: 27.46
+  conviction_date: '2026-06-21'
+  source_doc: sectors/electronics/thermal-management/2026-06-21-富信科技-buffett分析.md
