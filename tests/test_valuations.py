@@ -393,3 +393,10 @@ def test_index_has_group_reorder_js(app_client):
     assert 'MARGIN_SORT_KEYS' in html, '缺组联动触发列常量'
     assert 'defaultGroupOrder' in html, '缺默认组顺序捕获'
     assert 'function groupRepresentative' in html, '缺板块代表值函数'
+
+def test_switch_market_triggers_resort(app_client):
+    import re
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    m = re.search(r'function switchMarket\([^)]*\)\s*\{(.*?)\n\}', html, re.S)
+    assert m, '找不到 switchMarket 函数体'
+    assert 'applySort()' in m.group(1), 'switchMarket 未调用 applySort'
