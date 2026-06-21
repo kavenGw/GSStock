@@ -146,11 +146,13 @@
   currency: CNY
   sector: consumer
   rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-04-24'
-  source_doc: sectors/consumer/beer/2026-04-24-重庆啤酒-buffett分析.md
+  watch_reason: valuation_rich
+  bear: 27.27
+  base: 34.42
+  bull: 41.32
+  dividend_yield: 5.64
+  conviction_date: '2026-06-21'
+  source_doc: sectors/consumer/beer/2026-06-21-重庆啤酒-buffett分析.md
   note: 仅定性买入锚点15x以下
 - stock_code: '2015'
   stock_name: 理想汽车
@@ -631,7 +633,7 @@
   currency: CNY
   sector: materials
   rating: exclude
-  bear: 2.70
+  bear: 2.7
   base: 7.15
   bull: 12.75
   dividend_yield: 2.1
