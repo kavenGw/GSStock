@@ -839,13 +839,15 @@
   stock_name: 工业富联
   market: A
   currency: CNY
-  sector: other
-  rating: null
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-29'
-  source_doc: cross-sector/2026-05-29-戴尔-工业富联-buffett对比分析.md
+  sector: electronics
+  rating: watch
+  watch_reason: 全球 AI 服务器整机柜 ODM 份额第一（~40%，领先 Quanta ~30%）+ 垂直整合纵深真实领先，AI 业绩层已硬兑现（2026Q1 净利 +102.55%、云计算占 66.7%、AI GPU 机柜出货 +3.8x、CSP 2026 capex +79%）。但商业本质仍是规模型 commodity 代工——毛利率 6.98%/7.35% 薄利走量、量增未带来定价权、客户极致集中、份额每代重排、提价即丢单。现价 PE_TTM 38.12 / PB 8.79（5y 顶部区）。三情景加权期望内在价值 9432 亿（47.52 元/股），对应安全边际 -39.1%；即便最乐观 bull（13640 亿）单独压测仍 -12.0%，无任何安全边际。买点上修到约 PE 20x（base 口径 ~48 元）才进入观察区、PE 14–15x（~33 元）才是合格买点。相对旧档"PE 16x/-48%"的过苛买点上修，但评级仍维持 watch 不翻转
+  bear: 20.55
+  base: 48.36
+  bull: 68.72
+  dividend_yield: 0.83
+  conviction_date: '2026-06-21'
+  source_doc: sectors/electronics/ems/2026-06-21-工业富联-buffett分析.md
   note: 工业富联；戴尔对比档仅定性'无安全边际/博弈'，无三档数字
 - stock_code: '605358'
   stock_name: 立昂微
@@ -1927,3 +1929,15 @@
   bull: 159
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/networking/2026-06-21-盛科通信-buffett分析.md
+- stock_code: '688403'
+  stock_name: 汇成股份
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 1.51
+  base: 3.43
+  bull: 7.57
+  dividend_yield: 0.26
+  conviction_date: '2026-06-21'
+  source_doc: sectors/semiconductor/advanced-packaging/2026-06-21-汇成股份-buffett分析.md
