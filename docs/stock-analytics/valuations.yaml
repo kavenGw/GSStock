@@ -788,13 +788,15 @@
   stock_name: 歌尔股份
   market: A
   currency: CNY
-  sector: other
-  rating: null
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-08'
-  source_doc: cross-sector/2026-05-08-立讯精密-歌尔股份-buffett对比分析.md
+  sector: electronics
+  rating: watch
+  watch_reason: AI眼镜接力VR的产品层卡位已坐实（Meta Ray-Ban主力ODM+全球最大XR ODM），2026Q1扣非+19.57%>营收增速、毛利率创新高，是真实经营拐点；但业绩层未单独披露、薄代工利润、单一超级客户Meta决定生死，且当前849亿市值已是期望内在价值的约2.3倍（安全边际-57%），AI叙事已被price-in。维持观察，待AI眼镜可量化营收/毛利披露+市值回落至300亿下方再重判。
+  bear: 4.5
+  base: 10.2
+  bull: 17.1
+  dividend_yield: 1.4
+  conviction_date: '2026-06-21'
+  source_doc: sectors/electronics/ems/2026-06-21-歌尔股份-buffett分析.md
   note: 歌尔；cross-sector对比未给估值数字，Don't Buy护城河已证伪
 - stock_code: 002281
   stock_name: 光迅科技
