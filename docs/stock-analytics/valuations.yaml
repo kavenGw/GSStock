@@ -989,11 +989,11 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 13.7
-  base: 24.9
-  bull: 41.4
-  conviction_date: '2026-05-31'
-  source_doc: sectors/semiconductor/storage/2026-05-31-北京君正-buffett分析.md
+  bear: 12.5
+  base: 27.9
+  bull: 52.1
+  conviction_date: '2026-06-21'
+  source_doc: sectors/semiconductor/storage/2026-06-21-北京君正-buffett分析.md
   note: 北京君正；bear66/base120/bull200亿÷4.83亿股
 - stock_code: '300327'
   stock_name: 中颖电子
@@ -1915,3 +1915,15 @@
   bull: 56.72
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/laser-chip/2026-06-21-长光华芯-buffett分析.md
+- stock_code: '688702'
+  stock_name: 盛科通信
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 真国产以太网交换芯片稀缺龙头，但 120x PS、PB 62x 已 price-in 未兑现的 Scale Up 1800 亿叙事，核心芯片业务零增长、51.2T 未量产、运营商芯片级中标无实锤；安全边际深度为负（约 -81%）。等三个实锤：51.2T 量产落地 + 运营商/大厂芯片级中标公告 + 核心以太网交换芯片营收重回双位数增长。市值跌回 ~350 亿（base 内在价值上沿附近、安全边际转正）方进入可买区。
+  bear: 22
+  base: 61
+  bull: 159
+  conviction_date: '2026-06-21'
+  source_doc: sectors/semiconductor/networking/2026-06-21-盛科通信-buffett分析.md
