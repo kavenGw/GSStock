@@ -109,6 +109,8 @@ let sortKey = 'base';
 let sortDir = 'desc';
 let mode = 'grouped';
 let currentMarket = 'all';
+let defaultGroupOrder = [];
+const MARGIN_SORT_KEYS = ['bear', 'base', 'bull'];
 
 function loadPref() {
   try {
@@ -138,6 +140,17 @@ function sortRows(rows) {
   });
 }
 
+function rowMatchesMarket(tr) {
+  return currentMarket === 'all' || tr.dataset.market === currentMarket;
+}
+
+function groupRepresentative(sortedRows) {
+  for (const tr of sortedRows) {
+    if (rowMatchesMarket(tr)) return marginOf(tr, sortKey);
+  }
+  return null;
+}
+
 function updateArrows() {
   document.querySelectorAll('#val-table th.sortable').forEach(th => {
     const arrow = th.querySelector('.sort-arrow');
@@ -150,14 +163,33 @@ function applySort() {
   const tbody = document.querySelector('#val-table tbody');
   if (mode === 'flat') {
     sortRows([...tbody.querySelectorAll('tr[data-code]')]).forEach(r => tbody.appendChild(r));
-  } else {
-    document.querySelectorAll('#val-table .group-header').forEach(header => {
-      const sector = header.dataset.sector;
-      const rows = sortRows([...tbody.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]')]);
-      let ref = header;
-      rows.forEach(r => { ref.after(r); ref = r; });
+    return;
+  }
+  const headers = [...tbody.querySelectorAll('.group-header')];
+  const groupRows = new Map();
+  headers.forEach(h => {
+    const sector = h.dataset.sector;
+    groupRows.set(sector, sortRows([...tbody.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]')]));
+  });
+  let order = defaultGroupOrder;
+  if (MARGIN_SORT_KEYS.includes(sortKey)) {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    order = [...groupRows.keys()].sort((sa, sb) => {
+      const va = groupRepresentative(groupRows.get(sa));
+      const vb = groupRepresentative(groupRows.get(sb));
+      if (va === null && vb === null) return 0;
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      return (va - vb) * dir;
     });
   }
+  const headerBySector = new Map(headers.map(h => [h.dataset.sector, h]));
+  order.forEach(sector => {
+    const header = headerBySector.get(sector);
+    if (!header) return;
+    tbody.appendChild(header);
+    (groupRows.get(sector) || []).forEach(r => tbody.appendChild(r));
+  });
 }
 
 function sortBy(key) {
@@ -263,6 +295,7 @@ async function refreshPrices() {
 
 function initValuations() {
   loadPref();
+  defaultGroupOrder = [...document.querySelectorAll('#val-table .group-header')].map(h => h.dataset.sector);
   setMode(mode);  // 应用 table class + 模式按钮态 + applySort + applyMarketFilter
 }
 document.addEventListener('DOMContentLoaded', initValuations);

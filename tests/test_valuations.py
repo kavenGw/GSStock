@@ -386,3 +386,10 @@ def test_index_renders_beer_group_when_categorized(app_client, monkeypatch):
     html = app_client.get('/valuations/').data.decode('utf-8')
     assert '啤酒' in html
     assert 'data-sector="啤酒"' in html
+
+
+def test_index_has_group_reorder_js(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'MARGIN_SORT_KEYS' in html, '缺组联动触发列常量'
+    assert 'defaultGroupOrder' in html, '缺默认组顺序捕获'
+    assert 'function groupRepresentative' in html, '缺板块代表值函数'
