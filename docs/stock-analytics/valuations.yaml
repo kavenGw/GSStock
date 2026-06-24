@@ -1979,3 +1979,15 @@
   dividend_yield: 0.59
   conviction_date: '2026-06-24'
   source_doc: sectors/semiconductor/mcu/2026-06-24-中微半导体-buffett分析.md
+- stock_code: '688072'
+  stock_name: 拓荆科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 国产薄膜沉积龙头逻辑硬（在手订单110亿=1.69x营收+合同负债48.52亿锁定12-18月收入、实体清单是国产替代最强催化、混合键合Dione已用于HBM且国内装机第一），扩产达产确定性硬（46亿定增6/22落地+沈阳基地2028达产），但估值贴近5年顶（PB≈32=5年最高位、PE(TTM)141、Forward PE≈137x）已把全部结构故事打满；26Q1扣非仅1.02亿（非经常占>82%、单季利润质量低、经营现金流恶化），按穿越周期正常化利润算期望内在价值约1185亿、安全边际约-49%，bull压测安全边际仍为-21%无任何折扣空间；存储端（长存/长鑫）2026 capex仅机构推测无公司guidance、大基金1月减持30.18亿+中微4月减持是利空。优秀公司但太贵，待估值回撤或正常化利润抬升再上车。
+  bear: 232
+  base: 410
+  bull: 660
+  conviction_date: '2026-06-24'
+  source_doc: sectors/semiconductor/equipment/2026-06-24-拓荆科技-buffett分析.md

@@ -23,6 +23,9 @@ related_docs:
 - path: ../../../themes/2026-06-24-长电科技78亿临港先进封测扩产-封测板块影响.md
   note: 长电78亿先进封测厂的设备采购入TCB潜在订单池，但单厂量级弱、2027-2028后验，不改 watch
   symmetric: true
+- path: ./2026-06-24-拓荆科技-buffett分析.md
+  note: 同属半导体设备国产替代赛道 peer（拓荆前道薄膜沉积 PECVD/ALD，ASMPT 后道封装 TCB），均 watch、均估值贴顶
+  symmetric: true
 ---
 # ASMPT（0522.HK）buffett 深度分析——AI 把 TCB 推到业绩层，护城河真、价格太贵
 
@@ -31,6 +34,7 @@ related_docs:
 > - [2026-05-24-H200-vs-Rubin-供应链对比专题](../../../themes/2026-05-24-H200-vs-Rubin-供应链对比专题.md) — ASMPT 是 TCB/先进封装设备端，供给 AI GPU 封装供应链
 > - [2026-05-01-盛合晶微-26Q1季报点评](../../../quarterly/26q1/2026-05-01-盛合晶微-26Q1季报点评.md) — 先进封装 OSAT，ASMPT 设备下游客户
 > - [2026-06-24-长电科技78亿临港先进封测扩产-封测板块影响](../../../themes/2026-06-24-长电科技78亿临港先进封测扩产-封测板块影响.md) — 长电78亿先进封测厂的设备采购入TCB潜在订单池，但单厂量级弱、2027-2028后验，不改 watch
+> - [2026-06-24-拓荆科技-buffett分析](./2026-06-24-拓荆科技-buffett分析.md) — 同属半导体设备国产替代赛道 peer（拓荆前道薄膜沉积 PECVD/ALD，ASMPT 后道封装 TCB），均 watch、均估值贴顶
 <!-- END related_docs -->
 
 
