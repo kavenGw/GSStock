@@ -17,8 +17,6 @@
 
 **启动数据种子**：`app/seeds/` 放幂等数据 seed（区别于 `migrate_*` 改 schema），在 `create_app()` 里紧跟迁移调用。铁律：已存在的 `Stock.stock_name` / `investment_advice` / `StockCategory` 归属**一律不覆盖**，失败只记 warning 不抛出。`StockCategory.stock_code` 唯一约束 → 一只股票只能归属一个分类；跨板块引用（如 002916 深南电路在 PCB 同时被 CPU 产业链引用）只能保留现状并在 advice 文案里描述关联。
 
-## 存储与代码配置
-
 ## 股票代码配置
 
 期货、指数代码配置在 `app/config/stock_codes.py`，股票代码从数据库 `Stock` 和 `StockCategory` 表获取。
