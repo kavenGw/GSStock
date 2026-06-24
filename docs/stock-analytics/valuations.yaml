@@ -1140,11 +1140,11 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 5.5
-  base: 5.5
-  bull: 8.5
-  conviction_date: '2026-05-12'
-  source_doc: sectors/semiconductor/optical/2026-05-12-烽火通信-buffett分析.md
+  bear: 2.21
+  base: 4.31
+  bull: 10.13
+  conviction_date: '2026-06-25'
+  source_doc: sectors/semiconductor/optical/2026-06-25-烽火通信-buffett分析.md
   note: 烽火通信；正常化IV75亿→5.5元，乐观115亿→8.5元；无明确bear/base分档
 - stock_code: '600667'
   stock_name: 太极实业
