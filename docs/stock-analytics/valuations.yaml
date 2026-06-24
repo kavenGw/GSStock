@@ -1991,3 +1991,15 @@
   bull: 660
   conviction_date: '2026-06-24'
   source_doc: sectors/semiconductor/equipment/2026-06-24-拓荆科技-buffett分析.md
+- stock_code: '300623'
+  stock_name: 捷捷微电
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 业务质地中上（晶闸管国内龙头现金牛+MOS国产替代成长），但 PE(TTM) 75.8/PB 5.75 已充分 price-in 涨价与周期反转，期望内在价值 21.25 元 / 市值 176.8 亿，对当前 42.38 元安全边际 -49.9%；连最乐观 bull 情景仍 -15.2%，无安全边际。待估值回落或 2026Q2/Q3 毛利率随涨价修复至 35%+ 验证后再评估。
+  bear: 10.82
+  base: 22.83
+  bull: 35.93
+  conviction_date: '2026-06-24'
+  source_doc: sectors/semiconductor/power/2026-06-24-捷捷微电-buffett分析.md
