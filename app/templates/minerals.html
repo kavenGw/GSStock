@@ -43,10 +43,16 @@ let DAYS = 7;
 function fmtPct(x){ return x==null ? '—' : (x>=0?'+':'') + (x*100).toFixed(1) + '%'; }
 function fmtPrice(x){ return x==null ? '—' : Number(x).toFixed(2); }
 
-function normalize(series){
-  if(!series.length) return [];
-  const base = series[0];
-  return base ? series.map(v => v/base*100) : series;
+function toTimeSeries(points, getDate, getClose){
+  let base = null;
+  const out = [];
+  for(const p of points){
+    const v = getClose(p);
+    if(v == null) continue;
+    if(base === null) base = v;
+    out.push([getDate(p), base ? v/base*100 : 100]);
+  }
+  return out;
 }
 
 function impactBadge(impact){
@@ -69,7 +75,6 @@ function sparkline(cell, trend){
 async function loadBoard(commodity, force){
   const url = `/minerals/api/board/${commodity}?days=${DAYS}` + (force?'&force=1':'');
   const data = await (await fetch(url)).json();
-  // 期货走势图
   const fEl = document.getElementById('futures-'+commodity);
   const fdata = (data.futures && data.futures.data) || [];
   const fChart = echarts.init(fEl);
@@ -81,20 +86,18 @@ async function loadBoard(commodity, force){
     yAxis:{type:'value',scale:true},
     series:[{type:'line',data:fdata.map(d=>d.close),showSymbol:false,
       name:data.futures && data.futures.stock_code}]});
-  // 归一化叠图：期货 + 正面股
   const oEl = document.getElementById('overlay-'+commodity);
   const oChart = echarts.init(oEl);
-  const dates = fdata.map(d=>d.date);
-  const series = [{type:'line',name:'期货',showSymbol:false,data:normalize(fdata.map(d=>d.close)),lineStyle:{width:2}}];
+  const series = [{type:'line',name:'期货',showSymbol:false,lineStyle:{width:2},
+    data:toTimeSeries(fdata, d=>d.date, d=>d.close)}];
   (data.stocks||[]).filter(s=>s.impact==='positive').forEach(s=>{
-    const closes=(s.trend||[]).map(d=>d.close);
-    if(closes.length) series.push({type:'line',name:s.stock_name,showSymbol:false,data:normalize(closes)});
+    const pts = toTimeSeries(s.trend||[], d=>d.date, d=>d.close);
+    if(pts.length) series.push({type:'line',name:s.stock_name,showSymbol:false,data:pts});
   });
   oChart.setOption({title:{text:'期货 vs 正面股（归一化=100）',textStyle:{fontSize:13}},
     tooltip:{trigger:'axis'}, legend:{type:'scroll',top:0,right:0},
-    grid:{left:40,right:12,top:36,bottom:28}, xAxis:{type:'category',data:dates},
+    grid:{left:40,right:12,top:36,bottom:28}, xAxis:{type:'time'},
     yAxis:{type:'value',scale:true}, series});
-  // 股票列表
   const tb = document.getElementById('rows-'+commodity);
   tb.innerHTML='';
   (data.stocks||[]).forEach(s=>{

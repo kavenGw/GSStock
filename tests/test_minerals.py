@@ -177,7 +177,8 @@ def test_minerals_template_has_charts_and_impact(app_client):
     assert 'data-commodity="copper"' in html and 'data-commodity="lithium"' in html
     assert 'futures-chart' in html
     assert 'overlay-chart' in html
-    assert 'impact-positive' in html and 'impact-negative' in html and 'impact-neutral' in html
+    assert 'impact-positive' in html and 'impact-negative' in html
+    assert 'impact-neutral bg-secondary' in html and '⚪中性' in html
     assert '/minerals/api/board/' in html
 
 
