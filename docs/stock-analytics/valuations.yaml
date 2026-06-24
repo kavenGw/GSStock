@@ -1941,3 +1941,15 @@
   dividend_yield: 0.26
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/advanced-packaging/2026-06-21-汇成股份-buffett分析.md
+- stock_code: '688380'
+  stock_name: 中微半导体
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 6.0
+  base: 11.8
+  bull: 24.5
+  dividend_yield: 0.59
+  conviction_date: '2026-06-24'
+  source_doc: sectors/semiconductor/mcu/2026-06-24-中微半导体-buffett分析.md
