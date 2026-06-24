@@ -538,7 +538,7 @@
   currency: CNY
   sector: materials
   commodity: copper
-  commodity_impact: positive
+  commodity_impact: neutral
   rating: watch
   bear: 1.42
   base: 2.24
@@ -578,7 +578,7 @@
   currency: CNY
   sector: materials
   commodity: copper
-  commodity_impact: positive
+  commodity_impact: neutral
   rating: watch
   bear: 6.8
   base: 7.78
@@ -628,7 +628,7 @@
   currency: HKD
   sector: materials
   commodity: copper
-  commodity_impact: positive
+  commodity_impact: neutral
   rating: watch
   watch_reason: 跟踪主体由A股600362切换至H股00358.HK——H股41.06 HKD/PE15.61/PB1.66，较A股折价约-33.5%，把同一份江铜资产买入价压低约三分之一、股息率从A股1.88%抬到2.82%，AH折价是本次切换的核心安全边际放大器；但折价≠便宜到位，铜价周期顶+price-taker无定价权的硬伤未解；H股口径安全边际约-56%（vs A股口径约-71%，AH折价把负安全边际收窄约15pp），维持watch不买，等铜价回落+PB向1x回归
   bear: 10.8

@@ -114,3 +114,31 @@ def test_schema_rejects_bad_commodity():
     out = s.validate_frontmatter(fm, Path('x.md'))
     assert any("commodity 'gold-typo'" in v for v in out)
     assert any("commodity_impact 'up'" in v for v in out)
+
+
+def test_schema_accepts_neutral_impact():
+    import scripts._docs_schema as s
+    fm = {'doc_type': 'buffett', 'stock_code': '000878', 'stock_name': '云南铜业',
+          'sector': 'materials', 'subsector': 'nonferrous', 'themes': ['copper'],
+          'rating': 'watch', 'watch_reason': 'x', 'conviction_date': '2026-06-02', 'thesis': 'x',
+          'commodity': 'copper', 'commodity_impact': 'neutral'}
+    out = s.validate_frontmatter(fm, Path('x.md'))
+    assert not [v for v in out if 'commodity_impact' in v]
+
+
+def test_get_board_data_neutral_sorts_between(monkeypatch, tmp_path):
+    from app.services import minerals_data as md
+    p = tmp_path / 'v.yaml'
+    p.write_text(
+        "- stock_code: '601899'\n  stock_name: 紫金\n  market: A\n  commodity: copper\n  commodity_impact: positive\n  base: 12.0\n"
+        "- stock_code: '000878'\n  stock_name: 云南铜业\n  market: A\n  commodity: copper\n  commodity_impact: neutral\n  base: 50.0\n"
+        "- stock_code: '301217'\n  stock_name: 铜冠铜箔\n  market: A\n  commodity: copper\n  commodity_impact: negative\n  base: 99.0\n",
+        encoding='utf-8')
+    monkeypatch.setattr(md, 'VALUATIONS_PATH', p)
+    monkeypatch.setattr(md, 'get_board_futures', lambda commodity, days=30: {'data': [], 'is_fallback': False})
+    monkeypatch.setattr(md.FuturesService, 'get_custom_trend_data',
+                        staticmethod(lambda codes, days=30, cached_only=False: {'stocks': []}))
+    monkeypatch.setattr(md.unified_stock_data_service, 'get_realtime_prices',
+                        lambda codes, cache_only=False: {c: {'price': 10.0} for c in codes})
+    out = md.get_board_data('copper', days=30)
+    assert [s['stock_code'] for s in out['stocks']] == ['601899', '000878', '301217']

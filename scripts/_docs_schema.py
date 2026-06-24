@@ -22,7 +22,7 @@ RATINGS: set[str] = {'core', 'config', 'watch', 'exclude'}
 VALUATION_CURRENCIES: set[str] = {'CNY', 'USD', 'HKD'}
 
 COMMODITIES: set[str] = {'copper', 'lithium'}
-COMMODITY_IMPACTS: set[str] = {'positive', 'negative'}
+COMMODITY_IMPACTS: set[str] = {'positive', 'neutral', 'negative'}
 
 REQUIRED_FIELDS_BY_TYPE: dict[str, set[str]] = {
     'buffett':      {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',

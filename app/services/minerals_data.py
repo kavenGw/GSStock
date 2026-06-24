@@ -71,7 +71,7 @@ def get_board_futures(commodity, days=30):
             'futures_name': name, 'is_fallback': False, 'note': None}
 
 
-IMPACT_RANK = {'positive': 0, 'negative': 1}
+IMPACT_RANK = {'positive': 0, 'neutral': 1, 'negative': 2}
 
 
 def load_board_stocks(commodity, path=None):
@@ -116,6 +116,6 @@ def get_board_data(commodity, days=30, force_refresh=False):
             'margin_base': compute_margin(r.get('base'), price),
             'trend': trend_map.get(fc, []),
         })
-    stocks.sort(key=lambda s: (IMPACT_RANK.get(s['impact'], 2),
+    stocks.sort(key=lambda s: (IMPACT_RANK.get(s['impact'], 3),
                                s['margin_base'] is None, -(s['margin_base'] or 0)))
     return {'commodity': commodity, 'name': board['name'], 'futures': futures, 'stocks': stocks}
