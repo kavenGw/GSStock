@@ -1,6 +1,6 @@
-# Slack 推送与告警格式
+# Slack 推送、告警格式与推送语义
 
-> **何时读**：改 app/services/notification.py、新增推送策略、修改盯盘告警格式、调整 Slack 频道路由、修改推送排版
+> **何时读**：改 app/services/notification.py、新增推送策略、改盯盘告警格式/排版、调 Slack 频道路由、改 _fetch_* 失败语义或新闻推送去重
 > **不必读**：数据获取 / 调度配置 / 数据库变更
 
 ## Slack 推送配置
@@ -64,3 +64,9 @@
 **避免**：
 - 同一信息重复出现（如标题行已截断描述 + 下方再输出完整描述）
 - 同一 emoji 表达不同含义（如 ⭐ 既标记标题又标记星数）
+
+## 数据获取失败语义与去重
+
+**数据获取服务失败语义二分**：`_fetch_*` 类方法返回 `None` 表示异常/获取失败（已重试耗尽），返回空数据字典如 `{'today': [], 'yesterday': []}` 表示 API 成功但当下无数据。推送/聚合层据此区分"数据获取失败" vs "今日无赛事"。涉及该约定的服务异常分支必须 `logger.warning(... exc_info=True)` + 含 `type(e).__name__` + 关键上下文（如 league_id / HTTP status / 响应体片段），否则吞异常会让两种场景在日志中无法区分。参考 `app/services/esports_service.py:_fetch_lol_esports_schedule`。
+
+**新闻推送多分支去重**：`InterestPipeline.process_new_items` 有 `_identify_and_notify_companies`（🔍 AI 公司识别）和 `_notify_interest_slack`（📰 兴趣关键词）两条独立 Slack 分支，同一条 NewsItem 可同时命中。前者推送时已包含原文全文，须按 `NewsItem.id` 集合去重避免重复推送；新增第三条推送路径时也要并入该去重链。
