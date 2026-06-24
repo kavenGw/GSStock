@@ -75,21 +75,6 @@ def test_load_valuations_empty_file_returns_empty(tmp_path):
     assert load_valuations(p) == []
 
 
-@pytest.fixture(scope='module')
-def app_client():
-    import os
-    os.environ['SCHEDULER_ENABLED'] = '0'
-    from app import create_app
-    from app.services import unified_stock_data_service
-    _orig = unified_stock_data_service.get_realtime_prices
-    unified_stock_data_service.get_realtime_prices = lambda codes, force_refresh=False, cache_only=False: {}
-    app = create_app()
-    app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
-    unified_stock_data_service.get_realtime_prices = _orig
-
-
 def test_index_route_smoke(app_client):
     resp = app_client.get('/valuations/')
     assert resp.status_code == 200

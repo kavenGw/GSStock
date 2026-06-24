@@ -1,5 +1,3 @@
-import pytest
-
 
 def test_mineral_boards_has_copper_and_lithium():
     from app.config.minerals import MINERAL_BOARDS
@@ -142,21 +140,6 @@ def test_get_board_data_neutral_sorts_between(monkeypatch, tmp_path):
                         lambda codes, cache_only=False: {c: {'price': 10.0} for c in codes})
     out = md.get_board_data('copper', days=30)
     assert [s['stock_code'] for s in out['stocks']] == ['601899', '000878', '301217']
-
-
-@pytest.fixture(scope='module')
-def app_client():
-    import os
-    os.environ['SCHEDULER_ENABLED'] = '0'
-    from app import create_app
-    from app.services import unified_stock_data_service
-    _orig = unified_stock_data_service.get_realtime_prices
-    unified_stock_data_service.get_realtime_prices = lambda codes, force_refresh=False, cache_only=False: {}
-    app = create_app()
-    app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
-    unified_stock_data_service.get_realtime_prices = _orig
 
 
 def test_minerals_index_smoke(app_client):
