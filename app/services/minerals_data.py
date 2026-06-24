@@ -1,7 +1,7 @@
 import logging
 
 from app.config.minerals import MINERAL_BOARDS
-from app.routes.valuations import (
+from app.services.valuations_helpers import (
     VALUATIONS_PATH, load_valuations, _fetch_code, _extract_price, compute_margin,
 )
 from app.services.futures import FuturesService
