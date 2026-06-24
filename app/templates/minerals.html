@@ -1,5 +1,121 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>矿产看板</h2>
-{% for b in boards %}<section data-commodity="{{ b.commodity }}"><h3>{{ b.name }} · {{ b.futures_name }}</h3></section>{% endfor %}
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center my-3">
+    <h2 class="mb-0">矿产看板</h2>
+    <div>
+      <div class="btn-group btn-group-sm me-2" role="group">
+        <button type="button" class="btn btn-outline-secondary active" data-days="7">7天</button>
+        <button type="button" class="btn btn-outline-secondary" data-days="30">30天</button>
+      </div>
+      <button id="refresh-btn" class="btn btn-sm btn-primary">刷新</button>
+    </div>
+  </div>
+
+  {% for b in boards %}
+  <section class="mineral-board mb-5" data-commodity="{{ b.commodity }}">
+    <h4 class="board-title"><span class="badge bg-dark">{{ b.name }}</span>
+      <span class="futures-head text-muted ms-2">{{ b.futures_name }}</span></h4>
+    <div class="row">
+      <div class="col-lg-6"><div class="futures-chart" id="futures-{{ b.commodity }}" style="height:280px;"></div></div>
+      <div class="col-lg-6"><div class="overlay-chart" id="overlay-{{ b.commodity }}" style="height:280px;"></div></div>
+    </div>
+    <div class="table-responsive mt-2">
+      <table class="table table-sm align-middle">
+        <thead><tr><th>影响</th><th>股票</th><th>走势</th><th class="text-end">现价</th><th class="text-end">Base安全边际</th></tr></thead>
+        <tbody id="rows-{{ b.commodity }}"></tbody>
+      </table>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+
+<style>
+.impact-positive { }
+.impact-negative { }
+.impact-neutral { }
+</style>
+
+<script>
+const BOARDS = {{ boards | map(attribute='commodity') | list | tojson }};
+let DAYS = 7;
+
+function fmtPct(x){ return x==null ? '—' : (x>=0?'+':'') + (x*100).toFixed(1) + '%'; }
+function fmtPrice(x){ return x==null ? '—' : Number(x).toFixed(2); }
+
+function normalize(series){
+  if(!series.length) return [];
+  const base = series[0];
+  return base ? series.map(v => v/base*100) : series;
+}
+
+function impactBadge(impact){
+  if(impact==='positive') return '<span class="badge impact-positive bg-success">🟢正面</span>';
+  if(impact==='negative') return '<span class="badge impact-negative bg-danger">🔴负面</span>';
+  if(impact==='neutral') return '<span class="badge impact-neutral bg-secondary">⚪中性</span>';
+  return '<span class="badge bg-light text-muted">未标注</span>';
+}
+
+function sparkline(cell, trend){
+  const closes = (trend||[]).map(d=>d.close).filter(v=>v!=null);
+  if(closes.length < 2){ cell.textContent='—'; return; }
+  const c = echarts.init(cell, null, {height:32, width:90});
+  const up = closes[closes.length-1] >= closes[0];
+  c.setOption({grid:{left:0,right:0,top:2,bottom:2}, xAxis:{show:false,type:'category'},
+    yAxis:{show:false,scale:true}, series:[{type:'line',data:closes,showSymbol:false,
+    lineStyle:{width:1.2,color:up?'#198754':'#dc3545'}}]});
+}
+
+async function loadBoard(commodity, force){
+  const url = `/minerals/api/board/${commodity}?days=${DAYS}` + (force?'&force=1':'');
+  const data = await (await fetch(url)).json();
+  // 期货走势图
+  const fEl = document.getElementById('futures-'+commodity);
+  const fdata = (data.futures && data.futures.data) || [];
+  const fChart = echarts.init(fEl);
+  const ftitle = (data.futures && data.futures.futures_name || '') +
+    (data.futures && data.futures.is_fallback ? '（'+(data.futures.note||'代理')+'）' : '');
+  fChart.setOption({title:{text:ftitle,textStyle:{fontSize:13}}, tooltip:{trigger:'axis'},
+    grid:{left:48,right:12,top:36,bottom:28},
+    xAxis:{type:'category',data:fdata.map(d=>d.date)},
+    yAxis:{type:'value',scale:true},
+    series:[{type:'line',data:fdata.map(d=>d.close),showSymbol:false,
+      name:data.futures && data.futures.stock_code}]});
+  // 归一化叠图：期货 + 正面股
+  const oEl = document.getElementById('overlay-'+commodity);
+  const oChart = echarts.init(oEl);
+  const dates = fdata.map(d=>d.date);
+  const series = [{type:'line',name:'期货',showSymbol:false,data:normalize(fdata.map(d=>d.close)),lineStyle:{width:2}}];
+  (data.stocks||[]).filter(s=>s.impact==='positive').forEach(s=>{
+    const closes=(s.trend||[]).map(d=>d.close);
+    if(closes.length) series.push({type:'line',name:s.stock_name,showSymbol:false,data:normalize(closes)});
+  });
+  oChart.setOption({title:{text:'期货 vs 正面股（归一化=100）',textStyle:{fontSize:13}},
+    tooltip:{trigger:'axis'}, legend:{type:'scroll',top:0,right:0},
+    grid:{left:40,right:12,top:36,bottom:28}, xAxis:{type:'category',data:dates},
+    yAxis:{type:'value',scale:true}, series});
+  // 股票列表
+  const tb = document.getElementById('rows-'+commodity);
+  tb.innerHTML='';
+  (data.stocks||[]).forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${impactBadge(s.impact)}</td>`+
+      `<td>${s.stock_name||''} <small class="text-muted">${s.stock_code}</small></td>`+
+      `<td class="spark"></td>`+
+      `<td class="text-end">${fmtPrice(s.current_price)}</td>`+
+      `<td class="text-end">${fmtPct(s.margin_base)}</td>`;
+    tb.appendChild(tr);
+    sparkline(tr.querySelector('.spark'), s.trend);
+  });
+}
+
+function loadAll(force){ BOARDS.forEach(c=>loadBoard(c, force)); }
+
+document.querySelectorAll('[data-days]').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('[data-days]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); DAYS=parseInt(btn.dataset.days,10); loadAll(false);
+}));
+document.getElementById('refresh-btn').addEventListener('click',()=>loadAll(true));
+loadAll(false);
+</script>
 {% endblock %}

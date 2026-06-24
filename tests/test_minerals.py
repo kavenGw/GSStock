@@ -168,3 +168,20 @@ def test_minerals_api_board_returns_json(app_client, monkeypatch):
 def test_minerals_api_board_unknown_404(app_client):
     resp = app_client.get('/minerals/api/board/uranium')
     assert resp.status_code == 404
+
+
+def test_minerals_template_has_charts_and_impact(app_client):
+    html = app_client.get('/minerals/').data.decode('utf-8')
+    assert 'echarts' in html.lower()
+    assert 'id="refresh-btn"' in html
+    assert 'data-commodity="copper"' in html and 'data-commodity="lithium"' in html
+    assert 'futures-chart' in html
+    assert 'overlay-chart' in html
+    assert 'impact-positive' in html and 'impact-negative' in html and 'impact-neutral' in html
+    assert '/minerals/api/board/' in html
+
+
+def test_base_nav_has_minerals_link(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert "url_for('minerals.index')" in html or '/minerals/' in html
+    assert '矿产' in html
