@@ -1,7 +1,11 @@
 import logging
 
 from app.config.minerals import MINERAL_BOARDS
+from app.routes.valuations import (
+    VALUATIONS_PATH, load_valuations, _fetch_code, _extract_price, compute_margin,
+)
 from app.services.futures import FuturesService
+from app.services.unified_stock_data import unified_stock_data_service
 
 logger = logging.getLogger(__name__)
 
@@ -65,3 +69,53 @@ def get_board_futures(commodity, days=30):
     data = s.get('data', []) if s else []
     return {'stock_code': board['futures_code'], 'stock_name': name, 'data': data,
             'futures_name': name, 'is_fallback': False, 'note': None}
+
+
+IMPACT_RANK = {'positive': 0, 'negative': 1}
+
+
+def load_board_stocks(commodity, path=None):
+    rows = load_valuations(path or VALUATIONS_PATH)
+    return [r for r in rows if r.get('commodity') == commodity]
+
+
+def get_board_data(commodity, days=30, force_refresh=False):
+    board = MINERAL_BOARDS[commodity]
+    futures = get_board_futures(commodity, days)
+    rows = load_board_stocks(commodity)
+    fetch_map = {r['stock_code']: _fetch_code(r) for r in rows}
+    codes = list(fetch_map.values())
+
+    prices = {}
+    trend_map = {}
+    if codes:
+        try:
+            if force_refresh:
+                raw = unified_stock_data_service.get_realtime_prices(codes, force_refresh=True)
+            else:
+                raw = unified_stock_data_service.get_realtime_prices(codes, cache_only=True)
+            prices = {orig: raw.get(fc) for orig, fc in fetch_map.items()}
+        except Exception as e:
+            logger.warning(f'[矿产] 取实时价失败，降级: {type(e).__name__}: {e}', exc_info=True)
+        try:
+            tr = FuturesService.get_custom_trend_data(codes, days)
+            trend_map = {s['stock_code']: s.get('data', []) for s in (tr or {}).get('stocks', [])}
+        except Exception as e:
+            logger.warning(f'[矿产] 取股票走势失败，降级: {type(e).__name__}: {e}', exc_info=True)
+
+    stocks = []
+    for r in rows:
+        fc = fetch_map[r['stock_code']]
+        price = _extract_price(prices.get(r['stock_code']) or {})
+        stocks.append({
+            'stock_code': r['stock_code'],
+            'stock_name': r.get('stock_name'),
+            'market': r.get('market'),
+            'impact': r.get('commodity_impact'),
+            'current_price': price,
+            'margin_base': compute_margin(r.get('base'), price),
+            'trend': trend_map.get(fc, []),
+        })
+    stocks.sort(key=lambda s: (IMPACT_RANK.get(s['impact'], 2),
+                               s['margin_base'] is None, -(s['margin_base'] or 0)))
+    return {'commodity': commodity, 'name': board['name'], 'futures': futures, 'stocks': stocks}

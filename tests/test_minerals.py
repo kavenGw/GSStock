@@ -58,3 +58,35 @@ def test_get_board_futures_lithium_degrades_when_akshare_fails(monkeypatch):
     assert out['is_fallback'] is True
     assert out['data'] == []
     assert '暂缺' in out['note']
+
+
+def test_load_board_stocks_filters_by_commodity(tmp_path):
+    from app.services.minerals_data import load_board_stocks
+    p = tmp_path / 'v.yaml'
+    p.write_text(
+        "- stock_code: '601899'\n  stock_name: 紫金矿业\n  market: A\n  commodity: copper\n  commodity_impact: positive\n  base: 9.7\n"
+        "- stock_code: '002460'\n  stock_name: 赣锋锂业\n  market: A\n  commodity: lithium\n  commodity_impact: positive\n  base: 25.37\n"
+        "- stock_code: '600519'\n  stock_name: 贵州茅台\n  market: A\n  base: 1.0\n",
+        encoding='utf-8')
+    rows = load_board_stocks('copper', path=p)
+    assert [r['stock_code'] for r in rows] == ['601899']
+
+
+def test_get_board_data_sorts_positive_first_then_margin(monkeypatch, tmp_path):
+    from app.services import minerals_data as md
+    p = tmp_path / 'v.yaml'
+    p.write_text(
+        "- stock_code: '601899'\n  stock_name: 紫金矿业\n  market: A\n  commodity: copper\n  commodity_impact: positive\n  base: 12.0\n"
+        "- stock_code: '000630'\n  stock_name: 铜陵有色\n  market: A\n  commodity: copper\n  commodity_impact: positive\n  base: 20.0\n"
+        "- stock_code: '301217'\n  stock_name: 铜冠铜箔\n  market: A\n  commodity: copper\n  commodity_impact: negative\n  base: 30.0\n",
+        encoding='utf-8')
+    monkeypatch.setattr(md, 'VALUATIONS_PATH', p)
+    monkeypatch.setattr(md, 'get_board_futures', lambda commodity, days=30: {'data': [], 'is_fallback': False})
+    monkeypatch.setattr(md.FuturesService, 'get_custom_trend_data',
+                        staticmethod(lambda codes, days=30, cached_only=False: {'stocks': []}))
+    monkeypatch.setattr(md.unified_stock_data_service, 'get_realtime_prices',
+                        lambda codes, cache_only=False: {c: {'price': 10.0} for c in codes})
+    out = md.get_board_data('copper', days=30)
+    # 正面在前，正面组内 base 安全边际(=base/price-1)降序：000630(20/10-1=1.0) > 601899(0.2)，负面 301217 垫底
+    assert [s['stock_code'] for s in out['stocks']] == ['000630', '601899', '301217']
+    assert out['name'] == '铜'
