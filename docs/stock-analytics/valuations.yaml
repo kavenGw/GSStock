@@ -2003,3 +2003,15 @@
   bull: 35.93
   conviction_date: '2026-06-24'
   source_doc: sectors/semiconductor/power/2026-06-24-捷捷微电-buffett分析.md
+- stock_code: '0700'
+  stock_name: 腾讯控股
+  market: HK
+  currency: HKD
+  sector: media
+  rating: core
+  bear: 360
+  base: 545
+  bull: 720
+  dividend_yield: 1.05
+  conviction_date: '2026-06-24'
+  source_doc: sectors/media/internet-platform/2026-06-24-腾讯控股-buffett分析.md
