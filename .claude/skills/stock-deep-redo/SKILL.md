@@ -100,6 +100,11 @@ description: >-
 - **同步 valuations.yaml**：估值数字已由 Phase B 写进 buffett 档 frontmatter 的 `valuation` 块，
   此处只需运行 `PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>`
   确定性 upsert（无需 LLM 再从正文提取）。详见 `references/playbook.md` §8。
+- **矿产/商品标的加 `commodity` 字段**：若标的属铜/锂等矿产板块（受某商品期货价格驱动），在 frontmatter 与 valuations.yaml 条目**同步**写：
+  - `commodity`: `copper` | `lithium`（枚举见 `scripts/_docs_schema.py:COMMODITIES`；非矿产标的不写）
+  - `commodity_impact`: `positive`（上游资源/矿/锂盐——商品涨价利好，卖方如紫金/赣锋）| `negative`（下游加工/电池/消费——商品涨价是成本，买方如铜冠铜箔/亿纬锂能）| `neutral`（中游冶炼厂——低自给率，铜价 pass-through、利润由 TC/RC 加工费驱动，如云南铜业/铜陵有色/江西铜业）
+  - 判据来自产业链位置（与 `.claude/rules/docs-and-portfolio.md`「电池厂是锂买方，锂价涨=成本压力」一致）；本字段驱动 `/minerals` 矿产看板的板块归属与影响徽章。
+  - 枚举权威源：`scripts/_docs_schema.py` 的 `COMMODITIES`/`COMMODITY_IMPACTS`（含 neutral）。
 - 确认一次性采证脚本已删、evidence.md 未被 add。
 - 提交终稿。
 

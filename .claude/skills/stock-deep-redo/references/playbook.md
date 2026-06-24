@@ -38,6 +38,8 @@ valuation:                   # 可选；Phase B 写入，Phase C 用 sync_valuat
   bull: 8.87
   currency: CNY              # CNY / USD / HKD，与每股估值币种一致
   dividend_yield: 2.8        # 分红率（%），无分红填 null
+commodity: copper            # 可选，仅矿产/商品标的；枚举 copper|lithium（见 scripts/_docs_schema.py:COMMODITIES）
+commodity_impact: positive   # 可选，仅矿产/商品标的；positive=上游资源/矿/锂盐（商品涨价利好）/ negative=下游买方/电池/消费（商品涨价是成本）/ neutral=中游冶炼（TC/RC 加工费驱动，铜价 pass-through）；同步写 valuations.yaml，供 /minerals 看板使用
 related_docs:
 - path: <相对路径>
   note: ...

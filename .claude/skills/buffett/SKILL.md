@@ -133,6 +133,10 @@ After identifying the industry, jump directly to the corresponding chapter in `r
 
 ---
 
+## 矿产/商品标的附加产出
+
+- 矿产/商品标的（受铜/锂等商品期货价格驱动）：frontmatter 加 `commodity`（`copper|lithium`）+ `commodity_impact`（上游资源=`positive` / 下游买方=`negative` / 中游冶炼 pass-through=`neutral`），供 `/minerals` 看板使用。判据：上游矿/锂盐→`positive`；下游电池/消费→`negative`；中游冶炼厂低自给率 TC/RC 驱动→`neutral`。非矿产标的不写这两字段。
+
 ## Standard Output Format
 
 **All sections are required outputs and cannot be omitted.** Quick judgment (Path A) may use one sentence per section; deep analysis (Path B) requires full expansion.
