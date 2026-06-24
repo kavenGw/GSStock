@@ -2015,3 +2015,40 @@
   dividend_yield: 1.05
   conviction_date: '2026-06-24'
   source_doc: sectors/media/internet-platform/2026-06-24-腾讯控股-buffett分析.md
+- stock_code: '002617'
+  stock_name: 露笑科技
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: exclude
+  bear: 2.88
+  base: 3.67
+  bull: 5.76
+  conviction_date: '2026-06-25'
+  source_doc: sectors/industrial/diversified-industrial/2026-06-25-露笑科技-buffett分析.md
+- stock_code: '300373'
+  stock_name: 扬杰科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 业务质地中上偏好（二极管/整流桥全球前二的现金牛 + SiC/车规/IGBT 高端化成长 + 外销高毛利双循环），2025/2026Q1 财报兑现确凿，但 PE(TTM) 52.72/PB 7.50 处自身近 5 年 75.6%/80.7% 历史中高位，已 price-in 2026 高增长指引；期望内在价值每股约 84.4 元 / 市值 458.6 亿，对当前 132.99 元 / 722.6 亿安全边际 -36.5%，连最乐观 bull 情景仍 -8.6%，无安全边际。待估值回落或 SiC/AI 服务器电源营收单列坐实后再评估。
+  bear: 50.6
+  base: 88.5
+  bull: 121.5
+  dividend_yield: 0.3
+  conviction_date: '2026-06-25'
+  source_doc: sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md
+- stock_code: '603290'
+  stock_name: 斯达半导
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 业务质地中上（车规 IGBT 国内龙头 + SiC 自主芯片批量装车的成长引擎），但增收不增利、毛利率三连降至 26% 且 2026Q1 净利同比 -74%、经营现金流转负，公司层面尚未见底；期望内在价值 80.33 元 / 市值约 192 亿，对当前 139.20 元安全边际 -42.3%，连最乐观 bull 情景对现价仅 +1.4% 几无空间。待估值回落至 base 60-70% 安全边际买点（约 54-58 元），或 2026Q2/Q3 毛利率随涨价修复 + SiC 占比突破验证后再评估。
+  bear: 46.76
+  base: 83.51
+  bull: 141.13
+  dividend_yield: 0.36
+  conviction_date: '2026-06-25'
+  source_doc: sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md
