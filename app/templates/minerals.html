@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>矿产看板</h2>
+{% for b in boards %}<section data-commodity="{{ b.commodity }}"><h3>{{ b.name }} · {{ b.futures_name }}</h3></section>{% endfor %}
+{% endblock %}

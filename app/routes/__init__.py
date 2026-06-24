@@ -19,5 +19,6 @@ value_dip_bp = Blueprint('value_dip', __name__, url_prefix='/value-dip')
 earnings_page_bp = Blueprint('earnings_page', __name__, url_prefix='/earnings')
 supply_chain_bp = Blueprint('supply_chain', __name__, url_prefix='/supply-chain')
 valuations_bp = Blueprint('valuations', __name__, url_prefix='/valuations')
+minerals_bp = Blueprint('minerals', __name__, url_prefix='/minerals')
 
-from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, stock_detail, watch, news, value_dip, earnings_page, supply_chain, valuations
+from app.routes import main, position, advice, category, trade, stock, daily_record, profit, rebalance, heavy_metals, alert, briefing, stock_detail, watch, news, value_dip, earnings_page, supply_chain, valuations, minerals

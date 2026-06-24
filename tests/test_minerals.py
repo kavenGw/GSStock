@@ -142,3 +142,46 @@ def test_get_board_data_neutral_sorts_between(monkeypatch, tmp_path):
                         lambda codes, cache_only=False: {c: {'price': 10.0} for c in codes})
     out = md.get_board_data('copper', days=30)
     assert [s['stock_code'] for s in out['stocks']] == ['601899', '000878', '301217']
+
+
+@pytest.fixture(scope='module')
+def app_client():
+    import os
+    os.environ['SCHEDULER_ENABLED'] = '0'
+    from app import create_app
+    from app.services import unified_stock_data_service
+    _orig = unified_stock_data_service.get_realtime_prices
+    unified_stock_data_service.get_realtime_prices = lambda codes, force_refresh=False, cache_only=False: {}
+    app = create_app()
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+    unified_stock_data_service.get_realtime_prices = _orig
+
+
+def test_minerals_index_smoke(app_client):
+    resp = app_client.get('/minerals/')
+    assert resp.status_code == 200
+    html = resp.data.decode('utf-8')
+    assert '矿产' in html
+    assert '铜' in html and '锂' in html
+
+
+def test_minerals_api_board_returns_json(app_client, monkeypatch):
+    from app.routes import minerals as mod
+    monkeypatch.setattr(mod, 'get_board_data', lambda commodity, days=30, force_refresh=False: {
+        'commodity': commodity, 'name': '铜',
+        'futures': {'stock_code': 'HG=F', 'data': [{'date': '2026-06-24', 'close': 4.82}],
+                    'is_fallback': False, 'note': None, 'futures_name': 'COMEX铜'},
+        'stocks': [{'stock_code': '601899', 'stock_name': '紫金矿业', 'impact': 'positive',
+                    'current_price': 18.2, 'margin_base': -0.46, 'trend': []}]})
+    resp = app_client.get('/minerals/api/board/copper')
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body['futures']['stock_code'] == 'HG=F'
+    assert body['stocks'][0]['impact'] == 'positive'
+
+
+def test_minerals_api_board_unknown_404(app_client):
+    resp = app_client.get('/minerals/api/board/uranium')
+    assert resp.status_code == 404
