@@ -1007,7 +1007,7 @@ Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 - **矿产/商品标的加 `commodity` 字段**：若标的属铜/锂等矿产板块（受某商品期货价格驱动），在 frontmatter 与 valuations.yaml 条目**同步**写：
   - `commodity`: `copper` | `lithium`（枚举见 `scripts/_docs_schema.py:COMMODITIES`；非矿产标的不写）
   - `commodity_impact`: `positive`（上游资源/矿/锂盐——商品涨价利好）| `negative`（下游加工/电池/消费——商品涨价是成本）
-  - 判据来自产业链位置（与 `.claude/rules/docs-and-portfolio.md`「电池厂是锂买方，锂价涨=成本压力」一致）；本字段驱动 `/minerals` 矿产看板的板块归属与影响徽章。
+  - 判据来自产业链位置（与 `.claude/rules/docs-conventions.md`「电池厂是锂买方，锂价涨=成本压力」一致）；本字段驱动 `/minerals` 矿产看板的板块归属与影响徽章。
 ```
 
 - [ ] **Step 2: 在 playbook.md frontmatter 字段集补充**

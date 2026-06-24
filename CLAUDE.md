@@ -31,16 +31,18 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 ## Rules（按需 Read，路径用反引号、不用 @ 触发自动 import）
 
-- `.claude/rules/data-architecture.md` — 数据/缓存/Volume/A 股特征/统一数据 API — 改 services/ 或写 SQL 前
-- `.claude/rules/supply-chain.md` — 产业链图谱 SUPPLY_CHAIN_GRAPHS 配置 + tag 同步 — 改 supply_chain.py 或加图谱前
-- `.claude/rules/notification-formatting.md` — Slack 频道/盯盘告警 7 类格式/排版规范 — 改推送前
-- `.claude/rules/news-and-research.md` — 新闻/公司/华尔街/野村/博客/Trending/Release 配置 — 调轮询或加新源前
-- `.claude/rules/esports.md` — NBA/LoL 推送 + 失败重试队列 — 改 esports_service.py 前
+- `.claude/rules/stock-data-cache.md` — 缓存/统一数据API/Volume/SmartCacheStrategy/A股特征 — 改 services/ fetcher 或调缓存前
+- `.claude/rules/stock-data-model.md` — schema/Stock表/seeds/多账户合并/OCR入库/双DB/代码配置 — 改 schema 或写入库逻辑前
+- `.claude/rules/data-fetch-conventions.md` — akshare/腾讯HTTP/yfinance港股/PDF/A+H市值自洽校验 — 写新取数脚本前
+- `.claude/rules/notifications.md` — Slack频道/盯盘告警7类格式/排版/失败语义二分/推送去重 — 改推送前
+- `.claude/rules/news-and-research.md` — 新闻轮询/公司/华尔街/野村/博客/Trending/Release(GITHUB_RELEASE_REPOS) — 调轮询或加新源前
+- `.claude/rules/esports.md` — NBA/LoL/worldcup(2026并入) 推送 + 失败重试队列 — 改 esports_service.py 前
 - `.claude/rules/watch.md` — 盯盘前端架构 + AI 分析调度（realtime/7d/30d）— 改 watch 模块前
+- `.claude/rules/supply-chain.md` — 产业链图谱 SUPPLY_CHAIN_GRAPHS + tag 同步 — 改 supply_chain.py 或加图谱前
+- `.claude/rules/docs-conventions.md` — docs目录/frontmatter/lint/related_docs/sector归属 — 写分析文档、改 frontmatter、跑 lint 前
+- `.claude/rules/portfolio-valuations.md` — portfolio-init/rebalance/valuations页/A+H口径铁律 — 跑 portfolio 或改 RebalanceConfig 前
+- `.claude/rules/dev-environment.md` — Windows编码/heredoc/create_app副作用/commit协议(并行session抢index)/测试布局 — 跑脚本或提 commit 前
 - `.claude/rules/llm.md` — 智谱/Gemini/llama-server 环境变量 — 改 llm/ 前
-- `.claude/rules/data-fetch-conventions.md` — akshare/PDF/股票名查询坑/腾讯HTTP/港股/A+H 取数 — 写新数据脚本前
-- `.claude/rules/docs-and-portfolio.md` — docs/stock-analytics 目录 + frontmatter + lint + portfolio skill — 写分析、改 frontmatter、跑 lint、调 portfolio 前
-- `.claude/rules/dev-conventions.md` — 技术栈/双 DB/测试布局/commit 协议/第三方仓库监控 — 改 schema 或提 commit 前
 
 ## graphify
 
