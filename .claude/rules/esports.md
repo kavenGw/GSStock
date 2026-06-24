@@ -21,6 +21,8 @@
 - NBA晚间调度：每天18:00额外执行一次NBA监控设置，覆盖当晚比赛
 - 失败重试：单联赛 / 整 NBA 拉取失败时，挂起 5min × 3 轮调度层重试，期间任意一轮成功立即"补推"该联赛，3 轮全失败才推"数据获取失败（已重试 3 次）"。状态进程内 `app/services/esports_retry_queue.py` 维护，进程重启丢失（接受最多漏一次补推）。
 
+> `_fetch_*` 返回 None vs 空 dict 的失败语义、exc_info 日志要求见 notifications.md。
+
 数据源：NBA 用 ESPN API（无需认证），LoL 用 LoL Esports API（LPL/LCK/国际赛事/先锋赛）。
 
 ## 世界杯推送（2026 FIFA，临时）

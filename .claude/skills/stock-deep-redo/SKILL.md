@@ -40,7 +40,7 @@ description: >-
 | 语言 | 中文 |
 
 **只有这些情况才回头问用户**（歧义门）：
-- 标的跨两个一级 sector 且收入权重接近，归属不明（按主业权重判，见 `.claude/rules/docs-and-portfolio.md`）
+- 标的跨两个一级 sector 且收入权重接近，归属不明（按主业权重判，见 `.claude/rules/docs-conventions.md`）
 - 用户明确要的是 comps 横评或 theme 专题，而非个股 buffett 档
 - 旧档结论与近期已有底稿（comps/theme/quarterly）出现冗列冲突，不确定以谁为准
 
@@ -103,7 +103,7 @@ description: >-
 - **矿产/商品标的加 `commodity` 字段**：若标的属铜/锂等矿产板块（受某商品期货价格驱动），在 frontmatter 与 valuations.yaml 条目**同步**写：
   - `commodity`: `copper` | `lithium`（枚举见 `scripts/_docs_schema.py:COMMODITIES`；非矿产标的不写）
   - `commodity_impact`: `positive`（上游资源/矿/锂盐——商品涨价利好，卖方如紫金/赣锋）| `negative`（下游加工/电池/消费——商品涨价是成本，买方如铜冠铜箔/亿纬锂能）| `neutral`（中游冶炼厂——低自给率，铜价 pass-through、利润由 TC/RC 加工费驱动，如云南铜业/铜陵有色/江西铜业）
-  - 判据来自产业链位置（与 `.claude/rules/docs-and-portfolio.md`「电池厂是锂买方，锂价涨=成本压力」一致）；本字段驱动 `/minerals` 矿产看板的板块归属与影响徽章。
+  - 判据来自产业链位置（与 `.claude/rules/docs-conventions.md`「电池厂是锂买方，锂价涨=成本压力」一致）；本字段驱动 `/minerals` 矿产看板的板块归属与影响徽章。
   - 枚举权威源：`scripts/_docs_schema.py` 的 `COMMODITIES`/`COMMODITY_IMPACTS`（含 neutral）。
 - 确认一次性采证脚本已删、evidence.md 未被 add。
 - 提交终稿。
@@ -130,6 +130,6 @@ description: >-
 
 - `references/playbook.md` — 13 节模板、frontmatter 字段集 + rating 枚举、场景加权估值机制、采证清单、qt.gtimg.cn 字段、lint 命令、各 subagent 派发提示骨架。**撰写/审查 subagent 必读。**
 - `references/sector-lenses.md` — 可扩展板块视角注册表（AI/PCB/存储…），每 subsector 一节五段式调查清单。**命中 lens 的撰写/审查 subagent 必读对应节。**
-- 项目既有 rules（按需指给 subagent）：`.claude/rules/docs-and-portfolio.md`（目录/frontmatter/lint/related_docs）、
-  `.claude/rules/data-fetch-conventions.md`（akshare/实时价/qt.gtimg.cn 字段坑）、`.claude/rules/data-architecture.md`（缓存）、
-  `.claude/rules/dev-conventions.md`（Windows 编码/heredoc/create_app 副作用）。
+- 项目既有 rules（按需指给 subagent）：`.claude/rules/docs-conventions.md`（目录/frontmatter/lint/related_docs）、
+  `.claude/rules/data-fetch-conventions.md`（akshare/实时价/qt.gtimg.cn 字段坑）、`.claude/rules/stock-data-cache.md`（缓存）、
+  `.claude/rules/dev-environment.md`（Windows 编码/heredoc/create_app 副作用）。

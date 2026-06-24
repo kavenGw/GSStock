@@ -1,7 +1,7 @@
 # 盯盘助手
 
 > **何时读**：改 app/templates/watch.html、修改盯盘前端 JS、调整 watch_realtime / watch_alert 策略、改 WatchAnalysisService、调整 AI 分析调度（realtime/7d/30d）
-> **不必读**：通知格式（见 notification-formatting.md）/ 数据获取主链路
+> **不必读**：通知格式（见 notifications.md）/ 数据获取主链路
 
 ## 盯盘助手配置
 

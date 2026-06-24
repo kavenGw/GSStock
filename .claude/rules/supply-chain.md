@@ -11,4 +11,4 @@
 
 标的在 supply_chain 标 `not_analyzed` 且已建 buffett/分析档时，回写 `tag` 反映结论（至少从 `not_analyzed` 改为已分析态），避免图谱与 docs/stock-analytics 评级长期脱节。stock-deep-redo / analyze-category 收尾时一并检查该股是否在 `SUPPLY_CHAIN_GRAPHS` 里、tag 是否需更新。
 
-> 关联：tag 与 docs/stock-analytics 评级的同步细节见 `docs-and-portfolio.md`。
+> 关联：tag 与 docs/stock-analytics 评级的同步细节见 `docs-conventions.md`。
