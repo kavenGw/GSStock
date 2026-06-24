@@ -39,3 +39,11 @@ def load_valuations(path: Path = VALUATIONS_PATH) -> list[dict]:
     if not isinstance(data, list):
         return []
     return [r for r in data if isinstance(r, dict) and r.get('stock_code')]
+
+
+def subsector_of(row: dict) -> Optional[str]:
+    """从 source_doc 路径提取二级 slug：sectors/<sector>/<subsector>/<file> → parts[2]，否则 None。"""
+    parts = (row.get('source_doc') or '').split('/')
+    if len(parts) >= 4 and parts[0] == 'sectors':
+        return parts[2]
+    return None

@@ -386,3 +386,23 @@ def test_switch_market_triggers_resort(app_client):
     m = re.search(r'function switchMarket\([^)]*\)\s*\{(.*?)\n\}', html, re.S)
     assert m, '找不到 switchMarket 函数体'
     assert 'applySort()' in m.group(1), 'switchMarket 未调用 applySort'
+
+
+def test_subsector_of_extracts_from_source_doc():
+    from app.routes.valuations import subsector_of
+    assert subsector_of({'source_doc': 'sectors/semiconductor/storage/2026-x.md'}) == 'storage'
+
+
+def test_subsector_of_missing_doc_returns_none():
+    from app.routes.valuations import subsector_of
+    assert subsector_of({}) is None
+
+
+def test_subsector_of_short_path_returns_none():
+    from app.routes.valuations import subsector_of
+    assert subsector_of({'source_doc': 'sectors/semiconductor'}) is None
+
+
+def test_subsector_of_non_sectors_path_returns_none():
+    from app.routes.valuations import subsector_of
+    assert subsector_of({'source_doc': 'cross-sector/2026-x.md'}) is None
