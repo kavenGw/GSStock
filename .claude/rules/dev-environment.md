@@ -1,28 +1,7 @@
-# 开发规范与项目元信息
+# 开发环境与工作流
 
-> **何时读**：改 schema、加测试、提 commit、安装第三方仓库（同步 GITHUB_RELEASE_REPOS）、配置环境变量、踩 Windows 编码 / heredoc / 管道吞 stdout / create_app 副作用 等坑
-> **不必读**：纯业务逻辑实现（除非需要 commit）
-
-## 技术栈
-
-Flask + SQLAlchemy + SQLite + RapidOCR(ONNX) + Bootstrap5 + 原生 JS。数据：akshare（A股）+ yfinance（美股/港股/期货）+ Twelve Data + Polygon。LLM：智谱 GLM（LITE 免费 glm-4-flash）+ Google Gemini（FLASH/PREMIUM 主力）。调度：APScheduler。可选 PyTorch（`app/ml/` AI 走势预测，未安装自动跳过）。
-
-## 股票代码配置
-
-期货、指数代码配置在 `app/config/stock_codes.py`，股票代码从数据库 `Stock` 和 `StockCategory` 表获取。
-
-**配置项**：期货 / 指数 / 分类代码常量见 `app/config/stock_codes.py`（`FUTURES_CODES` / `INDEX_CODES` / `CATEGORY_CODES` / `CATEGORY_NAMES`）。
-
-**股票代码管理**：
-- 股票代码存储在 `Stock` 表，可通过界面编辑
-- 股票分类存储在 `StockCategory` 表，关联 `Category` 表
-
-## 数据存储
-
-- 数据库：`data/stock.db`（公共：股票池 / 新闻 / 缓存）
-- 私密数据库：`data/private.db`（带 `__bind_key__ = 'private'` 的模型 → Position / RebalanceConfig / StockWeight / PositionPlan / DailySnapshot / Trade / Settlement / BankTransfer）。直连查询用 `sqlite3.connect('data/private.db')`，不要连 `stock.db`
-- 内存缓存持久化：`data/memory_cache/{stock_code}/{cache_type}.pkl`
-- 上传图片：`uploads/`
+> **何时读**：跑脚本/查 DB、提 commit、踩 Windows 编码/heredoc/管道吞 stdout/create_app 副作用、git 协议（amend 重验、并行 session 抢 index）、测试布局
+> **不必读**：纯业务逻辑实现（除非需 commit）
 
 ## 常用命令的 Windows 坑点
 
@@ -74,7 +53,7 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 **配置变更同步**：新增/修改环境变量配置时，需同步更新 `CLAUDE.md`、`README.md`、`.env.sample` 三处
 
-**安装第三方仓库时**：无论是 Claude Code skill/plugin 还是其他工具仓库，完成安装后需同步添加到 `app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`，以便监控新版本
+> 装第三方仓库后需同步 GITHUB_RELEASE_REPOS，见 news-and-research.md
 
 **`git commit --amend` 前重新验证 HEAD**：long-running subagent 完成后做 amend，期间可能有并行 session 已落新 commit，HEAD 已不是你的目标。Amend 前先 `git rev-parse HEAD` 对比预期 SHA；不一致就改成新建 cleanup commit，避免污染他人提交。
 

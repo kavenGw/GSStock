@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-个人股票管理工具（Flask + SQLAlchemy + SQLite + akshare/yfinance + 智谱GLM/Gemini + APScheduler）。
+个人股票管理工具（Flask + SQLAlchemy + SQLite + akshare/yfinance + 智谱GLM/Gemini + APScheduler），OCR 识别用 RapidOCR(ONNX)，行情补充数据源 Twelve Data / Polygon，可选 PyTorch（`app/ml/` AI 走势预测，未安装自动跳过）。
 管理多个证券账户的持仓情况，支持上传持仓截图自动识别、多账户合并、操作建议记录。
 访问地址：http://127.0.0.1:5000
 
