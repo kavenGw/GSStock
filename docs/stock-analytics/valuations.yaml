@@ -425,12 +425,14 @@
   market: A
   currency: CNY
   sector: healthcare
-  rating: exclude
-  bear: 36.2
-  base: 44.6
-  bull: 60.8
-  conviction_date: '2026-05-08'
-  source_doc: sectors/healthcare/cro/2026-05-08-药明康德-buffett分析.md
+  rating: watch
+  watch_reason: 优质 CRDMO 龙头且经营拐点已兑现（Q1 扣非 +83.56%、TIDES +96%、毛利率创新高），但现价对应扣非 PE≈26x 无安全边际；BIOSECURE 1260H 列名（2026-06-08）是持续估值压制项而非翻盘性断单利空，需待价格回落或地缘路径明朗
+  bear: 64.3
+  base: 92.9
+  bull: 134.0
+  dividend_yield: 1.6
+  conviction_date: '2026-06-24'
+  source_doc: sectors/healthcare/cro/2026-06-24-药明康德-buffett分析.md
   note: 三情景内在价值取各档中值；股本按市值/现价换算
 - stock_code: 002196
   stock_name: 方正电机
