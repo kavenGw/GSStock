@@ -21,6 +21,9 @@ RATINGS: set[str] = {'core', 'config', 'watch', 'exclude'}
 
 VALUATION_CURRENCIES: set[str] = {'CNY', 'USD', 'HKD'}
 
+COMMODITIES: set[str] = {'copper', 'lithium'}
+COMMODITY_IMPACTS: set[str] = {'positive', 'negative'}
+
 REQUIRED_FIELDS_BY_TYPE: dict[str, set[str]] = {
     'buffett':      {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',
                      'themes', 'rating', 'conviction_date', 'thesis'},
@@ -120,5 +123,12 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
             if cur is not None and cur not in VALUATION_CURRENCIES:
                 violations.append(
                     f"{p}: valuation.currency '{cur}' not in {sorted(VALUATION_CURRENCIES)}")
+
+    if 'commodity' in fm and fm['commodity'] not in COMMODITIES:
+        violations.append(f"{p}: commodity '{fm['commodity']}' not in {sorted(COMMODITIES)}")
+
+    if 'commodity_impact' in fm and fm['commodity_impact'] not in COMMODITY_IMPACTS:
+        violations.append(
+            f"{p}: commodity_impact '{fm['commodity_impact']}' not in {sorted(COMMODITY_IMPACTS)}")
 
     return violations

@@ -90,3 +90,27 @@ def test_get_board_data_sorts_positive_first_then_margin(monkeypatch, tmp_path):
     # 正面在前，正面组内 base 安全边际(=base/price-1)降序：000630(20/10-1=1.0) > 601899(0.2)，负面 301217 垫底
     assert [s['stock_code'] for s in out['stocks']] == ['000630', '601899', '301217']
     assert out['name'] == '铜'
+
+
+from pathlib import Path
+
+
+def test_schema_accepts_valid_commodity_fields():
+    import scripts._docs_schema as s
+    fm = {'doc_type': 'buffett', 'stock_code': '601899', 'stock_name': '紫金矿业',
+          'sector': 'materials', 'subsector': 'nonferrous', 'themes': ['copper'],
+          'rating': 'core', 'conviction_date': '2026-04-24', 'thesis': 'x',
+          'commodity': 'copper', 'commodity_impact': 'positive'}
+    out = s.validate_frontmatter(fm, Path('x.md'))
+    assert not [v for v in out if 'commodity' in v]
+
+
+def test_schema_rejects_bad_commodity():
+    import scripts._docs_schema as s
+    fm = {'doc_type': 'buffett', 'stock_code': '601899', 'stock_name': '紫金矿业',
+          'sector': 'materials', 'subsector': 'nonferrous', 'themes': ['copper'],
+          'rating': 'core', 'conviction_date': '2026-04-24', 'thesis': 'x',
+          'commodity': 'gold-typo', 'commodity_impact': 'up'}
+    out = s.validate_frontmatter(fm, Path('x.md'))
+    assert any("commodity 'gold-typo'" in v for v in out)
+    assert any("commodity_impact 'up'" in v for v in out)
