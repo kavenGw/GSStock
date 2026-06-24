@@ -406,3 +406,21 @@ def test_subsector_of_short_path_returns_none():
 def test_subsector_of_non_sectors_path_returns_none():
     from app.routes.valuations import subsector_of
     assert subsector_of({'source_doc': 'cross-sector/2026-x.md'}) is None
+
+
+def test_subsector_labels_maps_common_slugs():
+    from app.routes.valuations import SUBSECTOR_LABELS
+    assert SUBSECTOR_LABELS['storage'] == '存储'
+    assert SUBSECTOR_LABELS['nonferrous'] == '有色'
+
+
+def test_enrich_attaches_subsector_from_source_doc():
+    from app.routes.valuations import _enrich
+    out = _enrich([{'stock_code': 'a', 'base': 1.0, 'source_doc': 'sectors/materials/nonferrous/x.md'}], {})
+    assert out[0]['subsector'] == 'nonferrous'
+
+
+def test_enrich_subsector_none_without_doc():
+    from app.routes.valuations import _enrich
+    out = _enrich([{'stock_code': 'a', 'base': 1.0}], {})
+    assert out[0]['subsector'] is None

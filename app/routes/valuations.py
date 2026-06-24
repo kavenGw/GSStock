@@ -45,6 +45,7 @@ def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> l
         out.append({
             **r,
             'category': cat_map.get(r['stock_code']),
+            'subsector': subsector_of(r),
             'current_price': price,
             'rating_rank': RATING_RANK.get(r.get('rating')),
             'date_rank': _date_rank(r.get('conviction_date')),
@@ -71,6 +72,28 @@ SECTOR_LABELS = {
 }
 
 CARVE_OUT_CATEGORIES = {'啤酒'}
+
+SUBSECTOR_LABELS = {
+    'storage': '存储', 'design': '设计', 'equipment': '设备', 'optical': '光学',
+    'power': '功率', 'mcu': 'MCU', 'optical-components': '光学元件', 'wafer': '晶圆',
+    'pcb': 'PCB', 'packaging': '封装', 'sic-substrate': '碳化硅衬底', 'mems': 'MEMS',
+    'photonics': '光子', 'foundry': '晶圆代工', 'laser-chip': '激光芯片', 'networking': '网络',
+    'advanced-packaging': '先进封装', 'materials': '材料', 'components': '元器件', 'ems': 'EMS',
+    'display': '显示', 'servers': '服务器', 'pc-server': 'PC服务器', 'power-electronics': '功率电子',
+    'functional-materials': '功能材料', 'display-glass': '显示玻璃', 'precision-manufacturing': '精密制造',
+    'pcb-equipment': 'PCB设备', 'thermal-management': '热管理', 'nonferrous': '有色',
+    'copper-foil': '铜箔', 'chemicals': '化工', 'magnetic-materials': '磁材', 'ceramics': '陶瓷',
+    'minor-metals': '小金属', 'superhard': '超硬材料', 'lithium': '锂', 'consumer-electronics': '消费电子',
+    'sportswear': '运动服饰', 'beer': '啤酒', 'home-appliance': '家电', 'mobility': '出行',
+    'local-services': '本地生活', 'restaurant': '餐饮', 'designer-toy': '潮玩', 'auto': '汽车',
+    'furniture': '家居', 'auto-ev': '新能源车', 'ev': '电动车', 'power-equipment': '电力设备',
+    'cable': '线缆', 'auto-parts': '汽车零部件', 'precision-components': '精密零件',
+    'cleanroom-epc': '洁净室EPC', 'defense': '国防军工', 'music-streaming': '音乐流媒体',
+    'digital-marketing': '数字营销', 'short-video': '短视频', 'online-literature': '网络文学',
+    'shopping-guide': '导购', 'internet-platform': '互联网平台', 'solar': '光伏', 'battery': '电池',
+    'waste-to-energy': '垃圾发电', 'cloud': '云计算', 'software': '软件', 'database': '数据库',
+    'exchange': '交易所', 'securities': '证券', 'cro': 'CRO',
+}
 
 
 def group_by_sector(rows: list[dict]) -> list[dict]:
