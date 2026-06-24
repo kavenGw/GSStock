@@ -39,7 +39,9 @@ yfinance 港股（实时价/历史）**只认 4 位补零** `<4位>.HK`：`1810.
 - **[41]/[42] 非除息日也可能失真**：即便非 XD 日，年高/年低字段偶尔返回**近现价窄区间**（实测 600362 现价 40.49 却报年高 40.90/年低 39.65，明显非真实 52 周），疑为近期区间而非 52 周口径；判 52 周区间/分位一律以 baidu 估值接口为准，勿信 [41]/[42]。
 - **只取实时价的一次性脚本直连 HTTP 优先**：`urllib.request` 拉 `qt.gtimg.cn/q=sh600519,sz000001,...` 比走 `create_app() + UnifiedStockDataService` 快 5x+ 且无副作用（即便 `SCHEDULER_ENABLED=0`，create_app 仍会启 crawl4ai 抓 google 新闻产生数十行噪音日志）；服务化路径仅在需要缓存 / 指数 / OHLC 时才走
 - **港股取数字段不同**：`q=hk03690`（GBK/`~`分隔）字段索引与 A 股不一致，**勿照搬 A 股 [39]PE/[45]市值/[46]PB**；港股市值/PE(TTM)/PB/PS/52周区间改用 WebFetch `stockanalysis.com/quote/hkg/<code>/statistics/`（URL 用**去前导 0** 代码：`hkg/2631` 通、`hkg/02631` 报 404）或 Yahoo `<code>.HK`，交叉验证 2 源（市值口径常分歧）。亏损港股 PE(TTM)=N/A，估值锚改看 PS / PB / Forward PE
-  - **A+H 标的 H 口径市值自洽校验**：stockanalysis 的 market cap 对 A+H 双重上市股**股本口径可能错**（实测 02631 报 794 亿 HKD→反推 8 亿股，与 A 股总市值÷A股价自洽总股本 4.85 亿矛盾）；H 口径全公司市值一律用「**A 股总市值 ÷ A 股价反推总股本 × H 股现价**」自洽校验，**AH 折价 = H 口径市值 ÷ (A 市值×1.08) − 1**（RMB→HKD）。腾讯 `q=hk<code>` 取 H 股现价可靠，但勿 `print` 其中文 name 字段（cp950 报错），只取 `f[3]` 价。
+  - **A+H 标的 H 口径市值自洽校验**：
+    > A+H 选哪一地口径作跟踪主体的**决策铁律**见 portfolio-valuations.md；此处只讲 H 口径市值的取数自洽校验。
+    stockanalysis 的 market cap 对 A+H 双重上市股**股本口径可能错**（实测 02631 报 794 亿 HKD→反推 8 亿股，与 A 股总市值÷A股价自洽总股本 4.85 亿矛盾）；H 口径全公司市值一律用「**A 股总市值 ÷ A 股价反推总股本 × H 股现价**」自洽校验，**AH 折价 = H 口径市值 ÷ (A 市值×1.08) − 1**（RMB→HKD）。腾讯 `q=hk<code>` 取 H 股现价可靠，但勿 `print` 其中文 name 字段（cp950 报错），只取 `f[3]` 价。
 
 ## 研究取数约定
 

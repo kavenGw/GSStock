@@ -64,6 +64,8 @@
 
 监控仓库列表 = 静态配置（`app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`） ∪ 本地已装 Claude Code 插件对应 marketplace 仓库，按 `repo` 去重（静态优先保留自定义 `name`/`emoji`/`key`）。
 
+> 安装任何第三方仓库（skill/plugin/工具）后，需把对应 marketplace 仓库加入 `GITHUB_RELEASE_REPOS`。
+
 动态发现逻辑见 `app/services/plugin_discovery.py`：读 `$CLAUDE_PLUGINS_DIR/installed_plugins.json` → 查 marketplace `source`（支持 github/git 两种）→ 动态条目 `key` 加 `marketplace_` 前缀避免冲突。非 github 源 / 目录缺失 / JSON 损坏均静默降级为空列表（只用静态配置）。
 
 注意：不使用 GitHub Releases 发版的仓库（仅 commit 或 tag，如 `anthropics/claude-plugins-official`、`supabase/agent-skills`）纳入监控后不会产生推送，直到其首次发 Release。
