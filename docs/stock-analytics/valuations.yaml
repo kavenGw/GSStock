@@ -537,6 +537,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: watch
   bear: 1.42
   base: 2.24
@@ -549,6 +551,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: watch
   bear: 3.67
   base: 5.04
@@ -573,6 +577,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: watch
   bear: 6.8
   base: 7.78
@@ -621,6 +627,8 @@
   market: HK
   currency: HKD
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: watch
   watch_reason: 跟踪主体由A股600362切换至H股00358.HK——H股41.06 HKD/PE15.61/PB1.66，较A股折价约-33.5%，把同一份江铜资产买入价压低约三分之一、股息率从A股1.88%抬到2.82%，AH折价是本次切换的核心安全边际放大器；但折价≠便宜到位，铜价周期顶+price-taker无定价权的硬伤未解；H股口径安全边际约-56%（vs A股口径约-71%，AH折价把负安全边际收窄约15pp），维持watch不买，等铜价回落+PB向1x回归
   bear: 10.8
@@ -647,6 +655,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: exclude
   bear: null
   base: null
@@ -659,6 +669,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: watch
   bear: null
   base: 9.2
@@ -696,6 +708,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: core
   bear: 7.7
   base: 9.7
@@ -1442,6 +1456,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: negative
   rating: watch
   bear: 5.43
   base: 15.1
@@ -1635,6 +1651,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: lithium
+  commodity_impact: positive
   rating: watch
   bear: 5.72
   base: 25.37
@@ -1648,6 +1666,8 @@
   market: A
   currency: CNY
   sector: energy
+  commodity: lithium
+  commodity_impact: negative
   rating: watch
   bear: 16.3
   base: 31.3
@@ -1752,6 +1772,8 @@
   market: HK
   currency: HKD
   sector: energy
+  commodity: lithium
+  commodity_impact: negative
   rating: watch
   bear: 6.5
   base: 10.01
@@ -1889,6 +1911,8 @@
   market: HK
   currency: HKD
   sector: materials
+  commodity: copper
+  commodity_impact: positive
   rating: watch
   watch_reason: 周期高位估值无安全边际（H口径PB~4.5x/A股PB5.18x，期望内在价值≈7.66 HKD vs H现价18.87 HKD，安全边际约-59%），商业模式仍为commodity price-taker无定价权；等铜价回落+PB跌破1.5x阈值再进入买入研究
   bear: 4.37
