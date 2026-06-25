@@ -144,6 +144,159 @@ rtk git add docs/stock-analytics/valuations.yaml && rtk git commit -m "data(valu
 
 ---
 
+### Task 2.5: 修正——全量 source_doc 主题回填（覆盖 31→157）
+
+> **为何存在**：执行中发现 `sync_valuations.py` 只对**含 `valuation:` 块的 buffett 档**（仅 31 个）跑 `build_entry`，而 valuations.yaml 共 166 条，其余 135 条是 source_doc 指向无 valuation 块的档的「遗留/手维护」条目。原 Task 1 把 themes 写在 `build_entry` 里只能覆盖 31 条。但**全部 165 个 buffett 档都有 themes**，且每条 yaml 都有 `source_doc`。改为「按 source_doc 全量回填」可覆盖 157 条 → ≥2 主题 83 个，符合 spec 原意（~77）。本任务取代 Task 1 的 build_entry themes 写入与 Task 2 的产物。
+
+**Files:**
+- Modify: `scripts/sync_valuations.py`（撤销 build_entry 的 themes 写入；新增 `backfill_themes`；wire 进 `sync`）
+- Modify: `docs/stock-analytics/valuations.yaml`（重生成，全量回填）
+- Test: `tests/test_sync_valuations.py`
+
+**Interfaces:**
+- Consumes: `_clean_themes`（Task 1 已建，保留）、`parse_frontmatter`（已 import）。
+- Produces: `backfill_themes(entries: list[dict], docs_root: Path) -> bool` —— 按 `entry['source_doc']` 读对应档 frontmatter 的 themes 写回 `entry['themes']`（空则 pop），返回是否有变更；覆盖**所有** entry（不止含 valuation 块的）。`sync()` 在 upsert 循环后调用它，并在 `count or changed` 时写文件。`build_entry` **不再**写 themes（单一数据源=backfill）。
+
+- [ ] **Step 1: 写失败测试**
+
+先把 Task 1 加的两个 build_entry themes 用例删掉（`test_build_entry_includes_cleaned_themes` / `test_build_entry_omits_themes_when_empty`），它们的语义被 backfill 取代。然后在 `tests/test_sync_valuations.py` 末尾追加：
+
+```python
+def test_backfill_themes_from_source_doc(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    d = docs / 'sectors/x'
+    d.mkdir(parents=True)
+    (d / 'a-buffett分析.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '600000'\nstock_name: A\n"
+        "sector: x\nthemes: ['memory', '_excluded', 'memory', 'cpu_pcb']\n"
+        "rating: core\nconviction_date: 2026-01-01\nthesis: t\n---\n# 正文\n",
+        encoding='utf-8')
+    entries = [{'stock_code': '600000', 'source_doc': 'sectors/x/a-buffett分析.md'}]
+    changed = backfill_themes(entries, docs)
+    assert changed is True
+    assert entries[0]['themes'] == ['memory', 'cpu_pcb']
+
+
+def test_backfill_themes_pops_when_source_has_none(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    d = docs / 'sectors/x'
+    d.mkdir(parents=True)
+    (d / 'b-buffett分析.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '600001'\nstock_name: B\n"
+        "sector: x\nrating: core\nconviction_date: 2026-01-01\nthesis: t\n---\n# 正文\n",
+        encoding='utf-8')
+    entries = [{'stock_code': '600001', 'source_doc': 'sectors/x/b-buffett分析.md', 'themes': ['stale']}]
+    changed = backfill_themes(entries, docs)
+    assert changed is True
+    assert 'themes' not in entries[0]
+
+
+def test_backfill_themes_missing_source_doc_is_noop(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    docs.mkdir()
+    entries = [{'stock_code': '600002', 'source_doc': 'nope.md'}, {'stock_code': '600003'}]
+    assert backfill_themes(entries, docs) is False
+    assert 'themes' not in entries[0] and 'themes' not in entries[1]
+
+
+def test_backfill_themes_idempotent(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    d = docs / 'sectors/x'
+    d.mkdir(parents=True)
+    (d / 'a-buffett分析.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '600000'\nstock_name: A\n"
+        "sector: x\nthemes: [memory]\nrating: core\nconviction_date: 2026-01-01\nthesis: t\n---\n# 正文\n",
+        encoding='utf-8')
+    entries = [{'stock_code': '600000', 'source_doc': 'sectors/x/a-buffett分析.md'}]
+    backfill_themes(entries, docs)
+    assert backfill_themes(entries, docs) is False  # 第二次无变更
+```
+
+并把 Task 1 写的端到端用例 `_write_doc` fixture 中已含 `themes: [memory]`——`test_sync_end_to_end_creates_yaml` 现在应额外断言 `data[0]['themes'] == ['memory']`（sync 末尾 backfill 写入）。在该测试末尾加：`assert data[0]['themes'] == ['memory']`。
+
+- [ ] **Step 2: 运行测试确认失败**
+
+Run: `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/test_sync_valuations.py -v -k "backfill or end_to_end"`
+Expected: FAIL（`backfill_themes` 未定义 / end_to_end 无 themes 断言失败）
+
+- [ ] **Step 3: 实现**
+
+撤销 Task 1 在 `build_entry` 内加的 themes 写入（删掉那 3 行 `themes = _clean_themes(...)` / `if themes:` / `entry['themes'] = themes`），保留 `_clean_themes`。
+
+在 `build_entry` 之后新增 `backfill_themes`：
+
+```python
+def backfill_themes(entries: list[dict], docs_root: Path) -> bool:
+    """按 entry['source_doc'] 读对应 buffett 档 frontmatter themes 回填到每条 entry（覆盖全部条目，
+    不止含 valuation 块的）。源无 themes 则删除既有 themes 键。返回是否有变更。"""
+    changed = False
+    for e in entries:
+        sd = e.get('source_doc')
+        themes: list[str] = []
+        if sd:
+            f = docs_root / sd
+            if f.exists():
+                fm, _ = parse_frontmatter(f)
+                themes = _clean_themes((fm or {}).get('themes'))
+        if themes:
+            if e.get('themes') != themes:
+                e['themes'] = themes
+                changed = True
+        elif 'themes' in e:
+            del e['themes']
+            changed = True
+    return changed
+```
+
+在 `sync()` 内，upsert 循环之后、写文件之前，插入 backfill 并放宽写入条件。把：
+
+```python
+    if count:
+        yaml_path.write_text(
+            yaml.dump(entries, allow_unicode=True, sort_keys=False, width=4096),
+            encoding='utf-8')
+    return count
+```
+
+改为：
+
+```python
+    changed = backfill_themes(entries, docs_root)
+    if count or changed:
+        yaml_path.write_text(
+            yaml.dump(entries, allow_unicode=True, sort_keys=False, width=4096),
+            encoding='utf-8')
+    return count
+```
+
+（`parse_frontmatter` 已在文件顶部 import，无需新增。）
+
+- [ ] **Step 4: 运行测试确认通过**
+
+Run: `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/test_sync_valuations.py -v`
+Expected: PASS（全绿）
+
+- [ ] **Step 5: 重生成 yaml 并校验**
+
+Run: `PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py`
+然后校验：`PYTHONIOENCODING=utf-8 rtk python -c "import yaml; d=yaml.safe_load(open('docs/stock-analytics/valuations.yaml',encoding='utf-8')); n=sum(1 for r in d if r.get('themes')); print('total',len(d),'with themes',n)"`
+Expected: `with themes` ≈ **157**/166（未覆盖的 9 条 = 2 条 source_doc 文件缺失 + 7 条档无 themes，可接受）。
+
+Run: `rtk git status --short` → 仅 `scripts/sync_valuations.py`、`tests/test_sync_valuations.py`、`docs/stock-analytics/valuations.yaml` 三者变更（忽略并行 session 的 untracked `scripts/_*.py`，勿动）。
+
+- [ ] **Step 6: 提交**
+
+```bash
+rtk git add scripts/sync_valuations.py tests/test_sync_valuations.py docs/stock-analytics/valuations.yaml && rtk git commit -m "fix(valuations): themes 改全量 source_doc 回填（覆盖 31→157）"
+```
+提交后 `rtk git show --stat HEAD` 确认只含这 3 个文件。
+
+---
+
 ### Task 3: 路由聚合主题选项（`app/routes/valuations.py`）
 
 **Files:**
