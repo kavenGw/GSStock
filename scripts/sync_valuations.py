@@ -36,6 +36,19 @@ def default_currency(market: str) -> str:
     return _CURRENCY_BY_MARKET.get(market, 'CNY')
 
 
+def _clean_themes(raw) -> list[str]:
+    if not isinstance(raw, list):
+        return []
+    out, seen = [], set()
+    for t in raw:
+        s = str(t).strip()
+        if not s or s.startswith('_') or s in seen:
+            continue
+        seen.add(s)
+        out.append(s)
+    return out
+
+
 def build_entry(fm: dict, source_doc: str) -> dict:
     """从 buffett frontmatter + valuation 块组装扁平 valuations.yaml 条目。"""
     val = fm.get('valuation') or {}
@@ -58,6 +71,9 @@ def build_entry(fm: dict, source_doc: str) -> dict:
         entry['dividend_yield'] = val['dividend_yield']
     entry['conviction_date'] = _as_str_date(fm.get('conviction_date'))
     entry['source_doc'] = source_doc
+    themes = _clean_themes(fm.get('themes'))
+    if themes:
+        entry['themes'] = themes
     return entry
 
 

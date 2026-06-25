@@ -174,3 +174,36 @@ def test_sync_only_stock_code_filter(tmp_path):
     assert n == 1
     data = yaml.safe_load(yaml_path.read_text(encoding='utf-8'))
     assert [r['stock_code'] for r in data] == ['603986']
+
+
+def test_clean_themes_drops_empty_sentinel_and_dedups():
+    from scripts.sync_valuations import _clean_themes
+    assert _clean_themes(['memory', '_excluded', '', 'memory', ' 国产替代 ']) == ['memory', '国产替代']
+
+
+def test_clean_themes_non_list_returns_empty():
+    from scripts.sync_valuations import _clean_themes
+    assert _clean_themes(None) == []
+    assert _clean_themes('memory') == []
+
+
+def test_build_entry_includes_cleaned_themes():
+    from scripts.sync_valuations import build_entry
+    fm = {
+        'stock_code': '603986', 'stock_name': 'X', 'sector': 'semiconductor',
+        'rating': 'core', 'conviction_date': '2026-05-31',
+        'themes': ['memory', '_excluded', 'memory', 'cpu_pcb'],
+        'valuation': {'bear': 1.0, 'base': 2.0, 'bull': 3.0, 'currency': 'CNY'},
+    }
+    e = build_entry(fm, 'foo.md')
+    assert e['themes'] == ['memory', 'cpu_pcb']
+
+
+def test_build_entry_omits_themes_when_empty():
+    from scripts.sync_valuations import build_entry
+    fm = {
+        'stock_code': '603986', 'stock_name': 'X', 'sector': 'semiconductor',
+        'rating': 'core', 'conviction_date': '2026-05-31', 'themes': ['_excluded'],
+        'valuation': {'bear': 1.0, 'base': 2.0, 'bull': 3.0, 'currency': 'CNY'},
+    }
+    assert 'themes' not in build_entry(fm, 'foo.md')
