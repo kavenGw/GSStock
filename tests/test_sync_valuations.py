@@ -129,6 +129,7 @@ def test_sync_end_to_end_creates_yaml(tmp_path):
     assert data[0]['stock_code'] == '603986'
     assert data[0]['base'] == 120.0
     assert data[0]['source_doc'] == 'sectors/semiconductor/storage/2026-05-31-兆易创新-buffett分析.md'
+    assert data[0]['themes'] == ['memory']
 
 
 def test_sync_skips_docs_without_valuation(tmp_path):
@@ -187,23 +188,55 @@ def test_clean_themes_non_list_returns_empty():
     assert _clean_themes('memory') == []
 
 
-def test_build_entry_includes_cleaned_themes():
-    from scripts.sync_valuations import build_entry
-    fm = {
-        'stock_code': '603986', 'stock_name': 'X', 'sector': 'semiconductor',
-        'rating': 'core', 'conviction_date': '2026-05-31',
-        'themes': ['memory', '_excluded', 'memory', 'cpu_pcb'],
-        'valuation': {'bear': 1.0, 'base': 2.0, 'bull': 3.0, 'currency': 'CNY'},
-    }
-    e = build_entry(fm, 'foo.md')
-    assert e['themes'] == ['memory', 'cpu_pcb']
+def test_backfill_themes_from_source_doc(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    d = docs / 'sectors/x'
+    d.mkdir(parents=True)
+    (d / 'a-buffett分析.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '600000'\nstock_name: A\n"
+        "sector: x\nthemes: ['memory', '_excluded', 'memory', 'cpu_pcb']\n"
+        "rating: core\nconviction_date: 2026-01-01\nthesis: t\n---\n# 正文\n",
+        encoding='utf-8')
+    entries = [{'stock_code': '600000', 'source_doc': 'sectors/x/a-buffett分析.md'}]
+    changed = backfill_themes(entries, docs)
+    assert changed is True
+    assert entries[0]['themes'] == ['memory', 'cpu_pcb']
 
 
-def test_build_entry_omits_themes_when_empty():
-    from scripts.sync_valuations import build_entry
-    fm = {
-        'stock_code': '603986', 'stock_name': 'X', 'sector': 'semiconductor',
-        'rating': 'core', 'conviction_date': '2026-05-31', 'themes': ['_excluded'],
-        'valuation': {'bear': 1.0, 'base': 2.0, 'bull': 3.0, 'currency': 'CNY'},
-    }
-    assert 'themes' not in build_entry(fm, 'foo.md')
+def test_backfill_themes_pops_when_source_has_none(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    d = docs / 'sectors/x'
+    d.mkdir(parents=True)
+    (d / 'b-buffett分析.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '600001'\nstock_name: B\n"
+        "sector: x\nrating: core\nconviction_date: 2026-01-01\nthesis: t\n---\n# 正文\n",
+        encoding='utf-8')
+    entries = [{'stock_code': '600001', 'source_doc': 'sectors/x/b-buffett分析.md', 'themes': ['stale']}]
+    changed = backfill_themes(entries, docs)
+    assert changed is True
+    assert 'themes' not in entries[0]
+
+
+def test_backfill_themes_missing_source_doc_is_noop(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    docs.mkdir()
+    entries = [{'stock_code': '600002', 'source_doc': 'nope.md'}, {'stock_code': '600003'}]
+    assert backfill_themes(entries, docs) is False
+    assert 'themes' not in entries[0] and 'themes' not in entries[1]
+
+
+def test_backfill_themes_idempotent(tmp_path):
+    from scripts.sync_valuations import backfill_themes
+    docs = tmp_path / 'docs'
+    d = docs / 'sectors/x'
+    d.mkdir(parents=True)
+    (d / 'a-buffett分析.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '600000'\nstock_name: A\n"
+        "sector: x\nthemes: [memory]\nrating: core\nconviction_date: 2026-01-01\nthesis: t\n---\n# 正文\n",
+        encoding='utf-8')
+    entries = [{'stock_code': '600000', 'source_doc': 'sectors/x/a-buffett分析.md'}]
+    backfill_themes(entries, docs)
+    assert backfill_themes(entries, docs) is False  # 第二次无变更

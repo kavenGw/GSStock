@@ -71,10 +71,29 @@ def build_entry(fm: dict, source_doc: str) -> dict:
         entry['dividend_yield'] = val['dividend_yield']
     entry['conviction_date'] = _as_str_date(fm.get('conviction_date'))
     entry['source_doc'] = source_doc
-    themes = _clean_themes(fm.get('themes'))
-    if themes:
-        entry['themes'] = themes
     return entry
+
+
+def backfill_themes(entries: list[dict], docs_root: Path) -> bool:
+    """按 entry['source_doc'] 读对应 buffett 档 frontmatter themes 回填到每条 entry（覆盖全部条目，
+    不止含 valuation 块的）。源无 themes 则删除既有 themes 键。返回是否有变更。"""
+    changed = False
+    for e in entries:
+        sd = e.get('source_doc')
+        themes: list[str] = []
+        if sd:
+            f = docs_root / sd
+            if f.exists():
+                fm, _ = parse_frontmatter(f)
+                themes = _clean_themes((fm or {}).get('themes'))
+        if themes:
+            if e.get('themes') != themes:
+                e['themes'] = themes
+                changed = True
+        elif 'themes' in e:
+            del e['themes']
+            changed = True
+    return changed
 
 
 def upsert(entries: list[dict], new_entry: dict) -> list[dict]:
@@ -109,7 +128,8 @@ def sync(docs_root: Path, yaml_path: Path, only_code: Optional[str] = None) -> i
         source_doc = md.relative_to(docs_root).as_posix()
         upsert(entries, build_entry(fm, source_doc))
         count += 1
-    if count:
+    changed = backfill_themes(entries, docs_root)
+    if count or changed:
         yaml_path.write_text(
             yaml.dump(entries, allow_unicode=True, sort_keys=False, width=4096),
             encoding='utf-8')

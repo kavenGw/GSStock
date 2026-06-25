@@ -11,6 +11,10 @@
   dividend_yield: 2.7
   conviction_date: '2026-06-08'
   source_doc: sectors/electronics/pc-server/2026-06-08-联想集团-buffett分析.md
+  themes:
+  - AI服务器
+  - PC龙头
+  - 分红
 - stock_code: 03888
   stock_name: 金山软件
   market: HK
@@ -22,6 +26,10 @@
   bull: 38.24
   conviction_date: '2026-06-03'
   source_doc: sectors/ai-application/software/2026-06-03-金山软件-buffett分析.md
+  themes:
+  - 信创
+  - AI办公
+  - 雷军系
 - stock_code: 03896
   stock_name: 金山云
   market: HK
@@ -34,6 +42,9 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/ai-application/cloud/2026-06-03-金山云-buffett分析.md
   note: 每股由市值/股价推算股本，不确定性偏高
+  themes:
+  - AI云
+  - 生态绑定
 - stock_code: '688158'
   stock_name: 优刻得
   market: A
@@ -45,6 +56,11 @@
   bull: 48.44
   conviction_date: '2026-06-04'
   source_doc: sectors/ai-application/cloud/2026-06-04-优刻得-buffett分析.md
+  themes:
+  - 智算
+  - AI算力
+  - 云计算
+  - 供给侧涨价
 - stock_code: ORCL
   stock_name: 甲骨文
   market: US
@@ -68,6 +84,11 @@
   bull: 33.12
   conviction_date: '2026-06-02'
   source_doc: sectors/consumer/consumer-electronics/2026-06-02-小米集团-buffett分析.md
+  themes:
+  - 智能电动汽车
+  - 人车家全生态
+  - 存储涨价
+  - 自研芯片
 - stock_code: '02643'
   stock_name: 曹操出行
   market: HK
@@ -80,6 +101,10 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/mobility/2026-06-03-曹操出行-buffett分析.md
   note: 每股由市值/股价推算股本，不确定性偏高
+  themes:
+  - 网约车
+  - Robotaxi
+  - 吉利生态
 - stock_code: 03690
   stock_name: 美团
   market: HK
@@ -91,6 +116,11 @@
   bull: 123.0
   conviction_date: '2026-06-02'
   source_doc: sectors/consumer/local-services/2026-06-02-美团-buffett分析.md
+  themes:
+  - 即时零售
+  - 外卖大战
+  - 海外扩张
+  - 反内卷
 - stock_code: 06862
   stock_name: 海底捞
   market: HK
@@ -103,6 +133,10 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/restaurant/2026-06-03-海底捞-buffett分析.md
   note: 每股由市值反推股本，不确定性偏高
+  themes:
+  - 餐饮
+  - 消费复苏
+  - 创始人回归
 - stock_code: 09992.HK
   stock_name: 泡泡玛特
   market: HK
@@ -116,11 +150,11 @@
   dividend_yield: 1.68
   conviction_date: '2026-06-20'
   source_doc: sectors/consumer/designer-toy/2026-06-20-泡泡玛特-buffett分析.md
+  note: 无法可靠估算内在价值
   themes:
   - 潮玩IP
   - 盲盒经济
   - 消费出海
-  note: 无法可靠估算内在价值
 - stock_code: 2020.HK
   stock_name: 安踏体育
   market: HK
@@ -132,6 +166,10 @@
   bull: 114.41
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/sportswear/2026-06-03-安踏体育-buffett分析.md
+  themes:
+  - 国产替代
+  - 多品牌矩阵
+  - 高端户外
 - stock_code: 2331.HK
   stock_name: 李宁
   market: HK
@@ -144,6 +182,9 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/consumer/sportswear/2026-06-03-李宁-buffett分析.md
   note: 李宁；三情景市值225/377/495亿RMB换HKD÷25.59亿股；HKD
+  themes:
+  - 国潮品牌
+  - 专业运动
 - stock_code: '600132'
   stock_name: 重庆啤酒
   market: A
@@ -157,12 +198,12 @@
   dividend_yield: 5.64
   conviction_date: '2026-06-21'
   source_doc: sectors/consumer/beer/2026-06-21-重庆啤酒-buffett分析.md
+  note: 仅定性买入锚点15x以下
   themes:
   - 啤酒
   - 高股息
   - 零成长
   - 高端化见顶
-  note: 仅定性买入锚点15x以下
 - stock_code: '2015'
   stock_name: 理想汽车
   market: HK
@@ -176,6 +217,10 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/consumer/auto/2026-06-20-理想汽车-buffett分析.md
   note: 港股口径（fungible 与 ADR 无折价）；每股=情景IV(HKD亿)÷20.4亿股；无分红
+  themes:
+  - 纯电转型
+  - 智能驾驶
+  - 充电桩
 - stock_code: '000063'
   stock_name: 中兴通讯
   market: A
@@ -188,6 +233,11 @@
   conviction_date: '2026-05-29'
   source_doc: sectors/electronics/networking/2026-05-29-中兴通讯-buffett分析.md
   note: 中兴；内在价值600-750亿÷47.83亿股
+  themes:
+  - 通信设备
+  - 5G主设备
+  - AI算力服务器
+  - 政企算力转型
 - stock_code: '000100'
   stock_name: TCL科技
   market: A
@@ -200,6 +250,10 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/electronics/display/2026-06-02-TCL科技-buffett分析.md
   note: TCL科技；三情景市值750/1000/1250亿÷213.8亿股
+  themes:
+  - display_panel
+  - duopoly
+  - cycle_recovery
 - stock_code: '000636'
   stock_name: 风华高科
   market: A
@@ -212,6 +266,12 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/electronics/components/2026-05-30-风华高科-buffett分析.md
   note: 风华高科；内在价值80-150亿÷11.57亿股
+  themes:
+  - MLCC
+  - 被动元件
+  - 国产替代
+  - AI服务器需求
+  - 周期股
 - stock_code: '000725'
   stock_name: 京东方A
   market: A
@@ -224,6 +284,11 @@
   conviction_date: '2026-06-01'
   source_doc: sectors/electronics/display/2026-06-01-京东方-buffett分析.md
   note: 京东方A；三情景市值1495/2040/2446亿÷370.8亿股
+  themes:
+  - 面板周期
+  - 玻璃基板
+  - OLED
+  - 先进封装
 - stock_code: 000977
   stock_name: 浪潮信息
   market: A
@@ -236,6 +301,11 @@
   conviction_date: '2026-05-29'
   source_doc: sectors/electronics/servers/2026-05-29-浪潮信息-buffett分析.md
   note: 区间内均分近似，无三档分拆
+  themes:
+  - AI服务器
+  - 算力硬件
+  - 服务器组装
+  - 实体清单风险
 - stock_code: '002050'
   stock_name: 三花智控
   market: A
@@ -248,6 +318,9 @@
   conviction_date: '2026-05-13'
   source_doc: sectors/electronics/components/2026-05-13-三花智控-buffett分析.md
   note: 三花智控；文档直接给每股保守14.7/中性20.4/乐观30.4元
+  themes:
+  - 机器人
+  - 新能源车热管理
 - stock_code: 09981
   stock_name: 沃尔核材
   market: HK
@@ -261,6 +334,14 @@
   dividend_yield: 1.44
   conviction_date: '2026-06-19'
   source_doc: sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md
+  themes:
+  - AI铜连接
+  - 高速铜缆
+  - AH折价
+  - Rubin
+  - 辐照改性材料
+  - 安费诺
+  - 新能源线束
 - stock_code: 002138
   stock_name: 顺络电子
   market: A
@@ -273,6 +354,12 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/electronics/components/2026-05-30-顺络电子-buffett分析.md
   note: 顺络电子；内在价值220-300亿÷8.07亿股
+  themes:
+  - 片式电感
+  - 一体成型电感
+  - 国产替代
+  - AI服务器需求
+  - 汽车电子
 - stock_code: 002384
   stock_name: 东山精密
   market: A
@@ -285,6 +372,12 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/electronics/pcb/2026-06-02-东山精密-buffett分析.md
   note: 东山精密；三情景市值180/450/1050亿÷18.32亿股；exclude，安全边际-86.6%
+  themes:
+  - PCB
+  - FPC
+  - 苹果链
+  - AI光模块
+  - 供给侧
 - stock_code: '002463'
   stock_name: 沪电股份
   market: A
@@ -296,6 +389,11 @@
   bull: 94.29
   conviction_date: '2026-06-04'
   source_doc: sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md
+  themes:
+  - AI-PCB
+  - Rubin
+  - 扩产
+  - 高多层
 - stock_code: '002436'
   stock_name: 兴森科技
   market: A
@@ -308,6 +406,12 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/electronics/pcb/2026-06-03-兴森科技-buffett分析.md
   note: 三情景市值bear≈70亿/base≈143亿/bull≈279亿；股本按市值/现价换算
+  themes:
+  - PCB
+  - IC载板
+  - FC-BGA
+  - 华为昇腾
+  - 半导体测试板
 - stock_code: '603920'
   stock_name: 世运电路
   market: A
@@ -320,6 +424,11 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md
   note: 股本按市值257亿/股价35.49推算约7.24亿股，期望价值108亿
+  themes:
+  - AI服务器
+  - PCB
+  - 扩产
+  - 汽车电子
 - stock_code: '002475'
   stock_name: 立讯精密
   market: A
@@ -332,6 +441,10 @@
   conviction_date: '2026-05-31'
   source_doc: sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md
   note: 立讯；纪律轨内在价值1500-2500亿÷72.9亿股；成长轨为博弈非内在价值，bull null
+  themes:
+  - 消费电子
+  - ai_compute
+  - 汽车线束
 - stock_code: 002851
   stock_name: 麦格米特
   market: A
@@ -344,6 +457,10 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/electronics/power-electronics/2026-06-02-麦格米特-buffett分析.md
   note: 三情景市值42/99/240亿；股本按市值/现价换算
+  themes:
+  - AI服务器电源
+  - 电力电子
+  - 增收不增利
 - stock_code: '300408'
   stock_name: 三环集团
   market: A
@@ -356,6 +473,13 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/electronics/components/2026-05-30-三环集团-buffett分析.md
   note: 三环集团；内在价值800-1100亿÷19.17亿股
+  themes:
+  - MLCC
+  - 陶瓷插芯
+  - 陶瓷材料
+  - PKG陶瓷封装
+  - 国产替代
+  - AI服务器需求
 - stock_code: '301389'
   stock_name: 隆扬电子
   market: A
@@ -368,6 +492,11 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/electronics/functional-materials/2026-06-04-隆扬电子-buffett分析.md
   note: 隆扬电子；三情景市值12/22/60亿÷2.835亿股；exclude，安全边际-89.5%
+  themes:
+  - HVLP铜箔
+  - AI算力
+  - 电磁屏蔽材料
+  - 供给侧
 - stock_code: CSCO
   stock_name: 思科
   market: US
@@ -380,6 +509,11 @@
   conviction_date: '2026-05-28'
   source_doc: sectors/electronics/networking/2026-05-28-思科-buffett分析.md
   note: 思科；合理市值$332-400B对应每股$84-101；USD
+  themes:
+  - 企业网络设备
+  - AI数据中心组网
+  - AI Agent安全可观测
+  - Splunk软件化转型
 - stock_code: DELL
   stock_name: 戴尔科技
   market: US
@@ -392,6 +526,11 @@
   conviction_date: '2026-05-29'
   source_doc: sectors/electronics/servers/2026-05-29-戴尔科技-buffett分析.md
   note: 正常化区间近似，无明确三档分档
+  themes:
+  - AI服务器
+  - 算力硬件
+  - 企业基础设施
+  - owner-operator
 - stock_code: 002129
   stock_name: TCL中环
   market: A
@@ -404,6 +543,10 @@
   conviction_date: '2026-05-28'
   source_doc: sectors/energy/solar/2026-05-28-TCL中环-buffett分析.md
   note: 主业亏损，无法可靠估算每股内在价值
+  themes:
+  - photovoltaic_wafer
+  - semiconductor_material
+  - capacity_clearing
 - stock_code: '002150'
   stock_name: 正泰电源
   market: A
@@ -416,6 +559,9 @@
   conviction_date: '2026-05-22'
   source_doc: sectors/energy/solar/2026-05-22-正泰电源-buffett分析.md
   note: 区间低中高近似，无三档分拆
+  themes:
+  - solar_storage
+  - export_chain
 - stock_code: '300274'
   stock_name: 阳光电源
   market: A
@@ -429,6 +575,10 @@
   conviction_date: '2026-06-07'
   source_doc: sectors/energy/solar/2026-06-07-阳光电源-buffett分析.md
   note: 三情景市值2400/3200/4200亿；股本按3000亿市值/153.75元换算≈19.5亿股
+  themes:
+  - 储能
+  - 新能源
+  - 海外
 - stock_code: '603259'
   stock_name: 药明康德
   market: A
@@ -442,11 +592,11 @@
   dividend_yield: 1.6
   conviction_date: '2026-06-24'
   source_doc: sectors/healthcare/cro/2026-06-24-药明康德-buffett分析.md
+  note: 三情景内在价值取各档中值；股本按市值/现价换算
   themes:
   - cxo
   - glp-1
   - 供给侧地缘
-  note: 三情景内在价值取各档中值；股本按市值/现价换算
 - stock_code: 002196
   stock_name: 方正电机
   market: A
@@ -459,6 +609,9 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/industrial/auto-parts/2026-05-18-方正电机-buffett分析.md
   note: 保守6-7.5亿/乐观26亿；股本按市值/现价换算
+  themes:
+  - 新能源车驱动电机
+  - 智能控制器
 - stock_code: '002364'
   stock_name: 中恒电气
   market: A
@@ -471,6 +624,9 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/industrial/power-electronics/2026-05-18-中恒电气-buffett分析.md
   note: 买入价<9对应50亿/乐观100亿；股本5.58亿股
+  themes:
+  - HVDC
+  - AI数据中心电源
 - stock_code: 09863
   stock_name: 零跑汽车
   market: HK
@@ -483,6 +639,10 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/industrial/ev/2026-06-04-零跑汽车-buffett分析.md
   note: 内在价值无法可靠估算；期望内在价值 221 亿港元仅供参考（bear 65 / base 163 / bull 815 亿港元市值口径）
+  themes:
+  - ev
+  - stellantis_partnership
+  - overseas_expansion
 - stock_code: 09868
   stock_name: 小鹏汽车
   market: HK
@@ -496,6 +656,10 @@
   conviction_date: '2026-06-07'
   source_doc: sectors/industrial/ev/2026-06-07-小鹏汽车-buffett分析.md
   note: PS估值法，三情景PS 0.5x/1.0x/1.8x × 2025营收767亿RMB × 1.08汇率
+  themes:
+  - ev
+  - autonomous_driving
+  - 大众合作
 - stock_code: '600353'
   stock_name: 旭光电子
   market: A
@@ -508,6 +672,11 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/industrial/power-equipment/2026-05-18-旭光电子-buffett分析.md
   note: 合理估值30-40亿；股本8.29亿股
+  themes:
+  - 真空灭弧室
+  - 新型电力系统
+  - 可控核聚变概念
+  - 军工航天结构件
 - stock_code: '600522'
   stock_name: 中天科技
   market: A
@@ -521,6 +690,11 @@
   conviction_date: '2026-06-07'
   source_doc: sectors/industrial/cable/2026-06-07-中天科技-buffett分析.md
   note: 三情景市值500/800/1200亿；股本34.1亿股
+  themes:
+  - 海缆
+  - 海上风电
+  - 光纤涨价
+  - AI光通信
 - stock_code: '688676'
   stock_name: 金盘科技
   market: A
@@ -533,6 +707,11 @@
   conviction_date: '2026-05-28'
   source_doc: sectors/industrial/power-equipment/2026-05-28-金盘科技-buffett分析.md
   note: 内在价值约165亿，买点35-55元；股本按市值/现价换算
+  themes:
+  - 干式变压器
+  - 北美AI数据中心
+  - 出海
+  - 固态变压器
 - stock_code: '000603'
   stock_name: 盛达资源
   market: A
@@ -545,6 +724,9 @@
   conviction_date: '2026-05-13'
   source_doc: sectors/materials/nonferrous/2026-05-13-盛达资源-buffett分析.md
   note: 正常化净利3.3亿×12-15x=40-50亿
+  themes:
+  - 白银
+  - 有色金属
 - stock_code: '000630'
   stock_name: 铜陵有色
   market: A
@@ -559,6 +741,14 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/materials/nonferrous/2026-06-02-铜陵有色-buffett分析.md
   note: 三情景市值191/300/667亿，除以总股本134.1亿股
+  themes:
+  - 铜
+  - commodity-cyclical
+  - 铜价周期
+  - TC-RC坍塌
+  - 铜冠铜箔
+  - AI算力用铜
+  - 金价副产
 - stock_code: '000737'
   stock_name: 北方铜业
   market: A
@@ -573,6 +763,13 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/materials/nonferrous/2026-06-02-北方铜业-buffett分析.md
   note: 文中直接给每股：70/96/130亿
+  themes:
+  - 铜
+  - commodity-cyclical
+  - 铜价周期
+  - 自有矿
+  - 贵金属副产
+  - AI铜箔证伪
 - stock_code: 000807
   stock_name: 云铝股份
   market: A
@@ -585,6 +782,10 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-云铝股份-buffett分析.md
   note: 总市值区间350-540亿，除以总股本34.68亿股
+  themes:
+  - 电解铝
+  - 绿电铝
+  - 有色金属
 - stock_code: 000878
   stock_name: 云南铜业
   market: A
@@ -599,6 +800,12 @@
   conviction_date: '2026-06-02'
   source_doc: sectors/materials/nonferrous/2026-06-02-云南铜业-buffett分析.md
   note: 文中直接给每股：165亿/189亿/215亿÷24.25亿股
+  themes:
+  - 铜
+  - commodity-cyclical
+  - 铜价周期
+  - TC-RC加工费
+  - 纯冶炼
 - stock_code: '002532'
   stock_name: 天山铝业
   market: A
@@ -611,6 +818,9 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-天山铝业-buffett分析.md
   note: 内在价值350-480亿，除以总股本46.29亿股
+  themes:
+  - 有色金属
+  - 电解铝
 - stock_code: '600219'
   stock_name: 南山铝业
   market: A
@@ -623,6 +833,10 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-南山铝业-buffett分析.md
   note: 内在价值350-460亿/上限500亿，除以总股本114.84亿股
+  themes:
+  - 有色金属
+  - 电解铝
+  - 高端铝材
 - stock_code: '600309'
   stock_name: 万华化学
   market: A
@@ -650,6 +864,14 @@
   dividend_yield: 2.82
   conviction_date: '2026-06-19'
   source_doc: sectors/materials/nonferrous/2026-06-19-江西铜业-buffett分析.md
+  themes:
+  - 铜
+  - commodity-cyclical
+  - AH折价
+  - 海外主权风险
+  - Cascabel
+  - AI算力用铜
+  - First-Quantum
 - stock_code: '600489'
   stock_name: 中金黄金
   market: A
@@ -662,11 +884,11 @@
   dividend_yield: 2.1
   conviction_date: '2026-06-21'
   source_doc: sectors/materials/nonferrous/2026-06-21-中金黄金-buffett分析.md
+  note: 周期顶部定价，金价回调期安全边际 -69%，纱岭增量 2026H2 才释放
   themes:
   - gold_defense
   - 央行购金
   - 供给侧
-  note: 周期顶部定价，金价回调期安全边际 -69%，纱岭增量 2026H2 才释放
 - stock_code: '600711'
   stock_name: 盛屯矿业
   market: A
@@ -681,6 +903,9 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-盛屯矿业-buffett分析.md
   note: exclude；两估值法差一数量级，文中明确估值不可靠
+  themes:
+  - 有色金属
+  - 海外资源
 - stock_code: '601168'
   stock_name: 西部矿业
   market: A
@@ -695,6 +920,8 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-西部矿业-buffett分析.md
   note: base正常化EPS0.77×12x；bull乐观14-16中值；bear未给明确数字
+  themes:
+  - copper_cycle
 - stock_code: '601600'
   stock_name: 中国铝业
   market: A
@@ -707,6 +934,10 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/materials/nonferrous/2026-05-14-中国铝业-buffett分析.md
   note: 总市值情景200/660/1000亿，除以总股本171.5亿股
+  themes:
+  - 有色金属
+  - 电解铝
+  - 氧化铝
 - stock_code: 01378
   stock_name: 中国宏桥
   market: HK
@@ -720,6 +951,10 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/materials/nonferrous/2026-06-08-中国宏桥-buffett分析.md
   note: 三情景市值HKD 690/530/2380亿÷99亿股；base为穿越周期正常化情景（530亿），低于bear（690亿）系铝价回落正常化导致
+  themes:
+  - 有色金属
+  - 电解铝
+  - 高股息
 - stock_code: '601899'
   stock_name: 紫金矿业
   market: A
@@ -734,6 +969,8 @@
   conviction_date: '2026-04-24'
   source_doc: sectors/materials/nonferrous/2026-04-24-紫金矿业-buffett分析.md
   note: 内在价值1200-1800亿/bull 3000亿；股本约155亿股(公开数据近似)
+  themes:
+  - gold_defense
 - stock_code: '002654'
   stock_name: 万润科技
   market: A
@@ -746,6 +983,10 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/media/digital-marketing/2026-05-18-万润科技-buffett分析.md
   note: exclude；PE539x主业连亏，无需精确估值
+  themes:
+  - digital_marketing
+  - led_packaging
+  - semiconductor_trading
 - stock_code: 01024.HK
   stock_name: 快手-W
   market: HK
@@ -759,6 +1000,10 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/media/short-video/2026-06-11-快手-buffett分析.md
   note: 三情景市值HKD 1230/1870/2780亿÷约42.8亿股(市值1990÷现价46.5反推)；期望内在价值1940亿，安全边际-2.5%；分红率取HK$30亿分红÷市值(总股东回报payout约4%含回购)
+  themes:
+  - AI
+  - 短视频
+  - 直播电商
 - stock_code: '0772'
   stock_name: 阅文集团
   market: HK
@@ -771,6 +1016,11 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/media/online-literature/2026-06-04-阅文集团-buffett分析.md
   note: 三情景市值HKD 89/187/280亿，除以总股本10.21亿股
+  themes:
+  - 网络文学
+  - IP运营
+  - AI内容
+  - 中概股
 - stock_code: '9899'
   stock_name: 网易云音乐
   market: HK
@@ -783,6 +1033,10 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/media/music-streaming/2026-06-04-网易云音乐-buffett分析.md
   note: 文中仅给总市值HKD(130/305/545亿)，未披露股本，无法换算每股
+  themes:
+  - 付费用户增长
+  - 流媒体订阅
+  - 音乐社区
 - stock_code: '1698'
   stock_name: 腾讯音乐
   market: HK
@@ -796,6 +1050,11 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/media/music-streaming/2026-06-20-腾讯音乐-buffett分析.md
   note: 港股口径（fungible 与 ADR 无折价）；每股=情景IV(HKD亿)÷31.4亿股
+  themes:
+  - 付费用户增长
+  - 流媒体订阅
+  - 中概股
+  - 透明度折价
 - stock_code: 000729
   stock_name: 燕京啤酒
   market: A
@@ -821,11 +1080,11 @@
   dividend_yield: 1.4
   conviction_date: '2026-06-21'
   source_doc: sectors/electronics/ems/2026-06-21-歌尔股份-buffett分析.md
+  note: 歌尔；cross-sector对比未给估值数字，Don't Buy护城河已证伪
   themes:
   - 消费电子
   - AI眼镜
   - 智能硬件ODM
-  note: 歌尔；cross-sector对比未给估值数字，Don't Buy护城河已证伪
 - stock_code: 002281
   stock_name: 光迅科技
   market: A
@@ -837,6 +1096,9 @@
   bull: 54.2
   conviction_date: '2026-06-04'
   source_doc: sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md
+  themes:
+  - ai_compute
+  - 光模块
 - stock_code: '300620'
   stock_name: 光库科技
   market: A
@@ -848,6 +1110,9 @@
   bull: 76.0
   conviction_date: '2026-06-04'
   source_doc: sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md
+  themes:
+  - ai_compute
+  - optical
 - stock_code: '688127'
   stock_name: 蓝特光学
   market: A
@@ -860,6 +1125,11 @@
   conviction_date: '2026-06-04'
   source_doc: sectors/semiconductor/optical-components/2026-06-04-蓝特光学-buffett分析.md
   note: 蓝特光学；三情景市值180/280/500亿÷4.06亿股(423亿市值/104.29元)
+  themes:
+  - AR眼镜
+  - 玻璃基板
+  - 光通信
+  - AI
 - stock_code: 00168
   stock_name: 青岛啤酒
   market: HK
@@ -872,6 +1142,12 @@
   dividend_yield: 6.0
   conviction_date: '2026-06-19'
   source_doc: sectors/consumer/beer/2026-06-19-青岛啤酒-buffett分析.md
+  themes:
+  - 啤酒
+  - AH折价
+  - 高股息
+  - 高端化
+  - 减量提质
 - stock_code: '601138'
   stock_name: 工业富联
   market: A
@@ -885,10 +1161,10 @@
   dividend_yield: 0.83
   conviction_date: '2026-06-21'
   source_doc: sectors/electronics/ems/2026-06-21-工业富联-buffett分析.md
+  note: 工业富联；戴尔对比档仅定性'无安全边际/博弈'，无三档数字
   themes:
   - ai_compute
   - ai服务器
-  note: 工业富联；戴尔对比档仅定性'无安全边际/博弈'，无三档数字
 - stock_code: '605358'
   stock_name: 立昂微
   market: A
@@ -902,6 +1178,11 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/semiconductor/wafer/2026-06-08-立昂微-buffett分析.md
   note: 商品业务 Exclude，安全边际-26%；三情景市值77/120/72亿÷6.71亿股；连续亏损无分红
+  themes:
+  - 硅片
+  - 国产替代
+  - 周期
+  - AI电源
 - stock_code: '688126'
   stock_name: 沪硅产业
   market: A
@@ -926,6 +1207,10 @@
   conviction_date: '2026-05-08'
   source_doc: cross-sector/2026-05-08-AMD-Intel-buffett对比分析.md
   note: 合理估值上限$200($8EPS×25x)；C情景/A情景推算bear/bull；文档结论无安全边际
+  themes:
+  - CPU竞争
+  - x86服务器
+  - buffett对比
 - stock_code: INTC
   stock_name: Intel
   market: US
@@ -938,6 +1223,10 @@
   conviction_date: '2026-05-08'
   source_doc: cross-sector/2026-05-08-AMD-Intel-buffett对比分析.md
   note: Don't Buy价值陷阱，文档明确不给估值；Foundry持续负FCF
+  themes:
+  - CPU竞争
+  - x86服务器
+  - buffett对比
 - stock_code: 00189
   stock_name: 东岳集团
   market: HK
@@ -951,6 +1240,10 @@
   source_doc: sectors/semiconductor/materials/2026-06-09-东岳集团-buffett分析.md
   note: 每股=情景市值HKD÷17.3亿股(bear 60/base 125/bull 190亿)；股息率按现价16.34算
   dividend_yield: 1.84
+  themes:
+  - fluorochemical-quota
+  - ptfe
+  - rubin-ai-ccl
 - stock_code: 002149
   stock_name: 西部材料
   market: A
@@ -975,6 +1268,11 @@
   conviction_date: '2026-06-01'
   source_doc: sectors/semiconductor/materials/2026-06-01-雅克科技-buffett分析.md
   note: 雅克科技；市值135/294/490亿÷4.76亿股
+  themes:
+  - 半导体材料
+  - 前驱体
+  - 存储
+  - LNG材料
 - stock_code: '02577'
   stock_name: 英诺赛科
   market: HK
@@ -988,6 +1286,10 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md
   note: 每股由市值(亿港元)÷总股本9.13亿股反推；无分红成长亏损股
+  themes:
+  - GaN功率半导体
+  - AI服务器电源
+  - 第三代半导体
 - stock_code: 1384.HK
   stock_name: 大普微
   market: HK
@@ -1013,6 +1315,11 @@
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/materials/2026-06-08-建滔积层板-buffett分析.md
   note: 旧档 PE 6.3x 系净利 10 倍单位错误（HKD 2.44B 误记 24.4B）；实际 PE-TTM 117.8x@91.85，commodity 合理 8-12x，期望内在价值仅 HKD 5.4，现价高估约 94%，exclude
+  themes:
+  - CCL
+  - 涨价周期
+  - AI高速CCL
+  - 港股周期股
 - stock_code: '300054'
   stock_name: 鼎龙股份
   market: A
@@ -1025,6 +1332,10 @@
   conviction_date: '2026-05-26'
   source_doc: sectors/semiconductor/materials/2026-05-26-鼎龙股份-buffett分析.md
   note: 合理市值285-380亿对应股价30-40元；股本9.48亿股
+  themes:
+  - CMP抛光垫国产替代
+  - 半导体显示PI/TFE-INK
+  - 先进封装临时键合胶
 - stock_code: '300223'
   stock_name: 北京君正
   market: A
@@ -1036,12 +1347,12 @@
   bull: 52.1
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/storage/2026-06-21-北京君正-buffett分析.md
+  note: 北京君正；bear60.5/base135/bull252亿÷4.836亿股
   themes:
   - memory
   - 供给侧
   - 车规存储
   - SBW
-  note: 北京君正；bear60.5/base135/bull252亿÷4.836亿股
 - stock_code: '300327'
   stock_name: 中颖电子
   market: A
@@ -1054,6 +1365,8 @@
   conviction_date: '2026-05-15'
   source_doc: sectors/semiconductor/mcu/2026-05-15-中颖电子-buffett分析.md
   note: 中颖电子；内在价值26-37亿/合理股价7.7-10.8元，base取中值
+  themes:
+  - mcu
 - stock_code: '300346'
   stock_name: 南大光电
   market: A
@@ -1066,6 +1379,8 @@
   conviction_date: '2026-05-08'
   source_doc: sectors/semiconductor/materials/2026-05-08-南大光电-buffett分析.md
   note: 内在价值30-75亿，文档未披露股本，无法换算每股
+  themes:
+  - memory
 - stock_code: '300458'
   stock_name: 全志科技
   market: A
@@ -1078,6 +1393,8 @@
   conviction_date: '2026-05-15'
   source_doc: sectors/semiconductor/design/2026-05-15-全志科技-buffett分析.md
   note: exclude；利润波动极大，无三档可靠拆分
+  themes:
+  - AIoT-SoC
 - stock_code: '300476'
   stock_name: 胜宏科技
   market: A
@@ -1091,6 +1408,14 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md
   note: 每股内在价值=情景市值/9.829亿股反推；A股口径(H股2476.HK反溢价+3.3%故不切)
+  themes:
+  - AI-PCB
+  - Rubin
+  - HDI
+  - NVIDIA链
+  - 供给侧
+  - 增速断档
+  - AH溢价
 - stock_code: '300666'
   stock_name: 江丰电子
   market: A
@@ -1103,6 +1428,8 @@
   conviction_date: '2026-05-19'
   source_doc: sectors/semiconductor/materials/2026-05-19-江丰电子-buffett分析.md
   note: 仅乐观稳态情景，买入区53-68元，无独立bear每股值
+  themes:
+  - cpu_pcb
 - stock_code: '300757'
   stock_name: 罗博特科
   market: A
@@ -1114,6 +1441,7 @@
   bull: 42
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/equipment/2026-06-20-罗博特科-buffett分析.md
+  note: SOTP单点公允价约70亿/每股42元，无三档拆分
   themes:
   - CPO
   - 光子封装
@@ -1122,7 +1450,6 @@
   - 硅光
   - AI
   - 供给侧
-  note: SOTP单点公允价约70亿/每股42元，无三档拆分
 - stock_code: '301308'
   stock_name: 江波龙
   market: A
@@ -1135,6 +1462,10 @@
   conviction_date: '2026-05-31'
   source_doc: sectors/semiconductor/storage/2026-05-31-江波龙-buffett分析.md
   note: 江波龙；base/bull每股文档直接给；bear48亿÷4.23亿股
+  themes:
+  - memory
+  - 供给侧
+  - 存储涨价
 - stock_code: '301629'
   stock_name: 矽电股份
   market: A
@@ -1182,11 +1513,11 @@
   bull: 10.13
   conviction_date: '2026-06-25'
   source_doc: sectors/semiconductor/optical/2026-06-25-烽火通信-buffett分析.md
+  note: 烽火通信；正常化IV75亿→5.5元，乐观115亿→8.5元；无明确bear/base分档
   themes:
   - optical_communication
   - coherent_dsp
   - satellite_internet
-  note: 烽火通信；正常化IV75亿→5.5元，乐观115亿→8.5元；无明确bear/base分档
 - stock_code: '600667'
   stock_name: 太极实业
   market: A
@@ -1199,6 +1530,8 @@
   conviction_date: '2026-04-25'
   source_doc: sectors/semiconductor/storage/2026-04-25-太极实业-buffett分析.md
   note: 太极实业；周期+commodity属性无法可靠估值，放弃估值
+  themes:
+  - memory
 - stock_code: '603256'
   stock_name: 宏和科技
   market: A
@@ -1211,6 +1544,8 @@
   conviction_date: '2026-05-07'
   source_doc: sectors/semiconductor/materials/2026-05-07-宏和科技-buffett分析.md
   note: 内在价值72-120亿（端点为bear/bull中点为base）÷9.05亿股
+  themes:
+  - cpu_pcb
 - stock_code: '603283'
   stock_name: 赛腾股份
   market: A
@@ -1223,6 +1558,10 @@
   conviction_date: '2026-06-01'
   source_doc: sectors/semiconductor/equipment/2026-06-01-赛腾股份-buffett分析.md
   note: 三情景22.5/56/106亿÷3.525亿股
+  themes:
+  - 半导体设备
+  - HBM检测
+  - 存储扩产
 - stock_code: '603650'
   stock_name: 彤程新材
   market: A
@@ -1235,6 +1574,10 @@
   conviction_date: '2026-06-01'
   source_doc: sectors/semiconductor/materials/2026-06-01-彤程新材-buffett分析.md
   note: 三情景总市值90/186/280亿÷6.16亿股
+  themes:
+  - 光刻胶国产替代
+  - 半导体材料
+  - ah上市
 - stock_code: '603688'
   stock_name: 石英股份
   market: A
@@ -1248,6 +1591,10 @@
   source_doc: sectors/semiconductor/materials/2026-06-11-石英股份-buffett分析.md
   note: 半导体franchise切换重估；实时市值~350亿/PE~229，安全边际约-72%；6-11精确收盘/PB分位为采证缺口
   dividend_yield: 1.3
+  themes:
+  - 半导体材料
+  - 国产替代
+  - 供给侧
 - stock_code: '603986'
   stock_name: 兆易创新
   market: A
@@ -1260,6 +1607,13 @@
   conviction_date: '2026-05-31'
   source_doc: sectors/semiconductor/storage/2026-05-31-兆易创新-buffett分析.md
   note: 兆易创新；bear280/base650/bull1300亿÷~7.01亿股
+  themes:
+  - memory
+  - 利基存储
+  - 供给侧
+  - AI
+  - 国产替代
+  - 超级周期
 - stock_code: '605589'
   stock_name: 圣泉集团
   market: A
@@ -1272,6 +1626,9 @@
   conviction_date: '2026-05-12'
   source_doc: sectors/semiconductor/materials/2026-05-12-圣泉集团-buffett分析.md
   note: 内在价值180-300亿，文档未给股本，无法换算每股
+  themes:
+  - cpu_pcb
+  - ai_compute
 - stock_code: '688008'
   stock_name: 澜起科技
   market: A
@@ -1284,6 +1641,9 @@
   conviction_date: '2026-05-30'
   source_doc: sectors/semiconductor/storage/2026-05-30-澜起科技-buffett分析.md
   note: 澜起科技；公允市值550-750亿÷12.22亿股(建议买入33-43元为7折价)
+  themes:
+  - memory
+  - ai-server
 - stock_code: '688041'
   stock_name: 海光信息
   market: A
@@ -1296,6 +1656,10 @@
   conviction_date: '2026-05-19'
   source_doc: sectors/semiconductor/design/2026-05-19-海光信息-buffett分析.md
   note: 内在价值1000-1800亿/中枢1400亿÷23.24亿股；文档给股价区间43-77元
+  themes:
+  - domestic-cpu
+  - ai-chip
+  - 信创
 - stock_code: '688110'
   stock_name: 东芯股份
   market: A
@@ -1308,6 +1672,12 @@
   conviction_date: '2026-05-31'
   source_doc: sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md
   note: 东芯股份；空头40/基准80/多头205亿中值÷4.42亿股
+  themes:
+  - memory
+  - SLC-NAND
+  - NOR涨价
+  - 供给侧
+  - AI-GPU
 - stock_code: '688123'
   stock_name: 聚辰股份
   market: A
@@ -1320,6 +1690,8 @@
   conviction_date: '2026-04-25'
   source_doc: sectors/semiconductor/storage/2026-04-25-聚辰股份-buffett分析.md
   note: 聚辰股份；保守30/基准54/乐观68亿÷1.59亿股
+  themes:
+  - memory
 - stock_code: '688173'
   stock_name: 希荻微
   market: A
@@ -1331,11 +1703,11 @@
   bull: 18.5
   conviction_date: '2026-06-24'
   source_doc: sectors/semiconductor/design/2026-06-24-希荻微-buffett分析.md
+  note: Don't Buy；持续亏损无法可靠估值
   themes:
   - 模拟芯片涨价
   - 国产替代
   - 成长亏损
-  note: Don't Buy；持续亏损无法可靠估值
 - stock_code: '688262'
   stock_name: 国芯科技
   market: A
@@ -1348,6 +1720,8 @@
   conviction_date: '2026-04-25'
   source_doc: sectors/semiconductor/design/2026-04-25-国芯科技-buffett分析.md
   note: Don't Buy；亏损公司无法可靠估值
+  themes:
+  - memory
 - stock_code: '688385'
   stock_name: 复旦微电
   market: A
@@ -1360,6 +1734,8 @@
   conviction_date: '2026-04-25'
   source_doc: sectors/semiconductor/storage/2026-04-25-复旦微电-buffett分析.md
   note: 复旦微电；内在价值80-160亿，推算~8亿股
+  themes:
+  - memory
 - stock_code: '688498'
   stock_name: 源杰科技
   market: A
@@ -1372,6 +1748,8 @@
   conviction_date: '2026-05-09'
   source_doc: sectors/semiconductor/optical/2026-05-09-源杰科技-buffett分析.md
   note: 源杰科技；悲观230/中性1050/乐观1500亿÷0.86亿股；估值不可靠PE380x题材定价
+  themes:
+  - ai_compute
 - stock_code: '688521'
   stock_name: 芯原股份
   market: A
@@ -1384,6 +1762,10 @@
   conviction_date: '2026-05-15'
   source_doc: sectors/semiconductor/design/2026-05-15-芯原股份-buffett分析.md
   note: 长期亏损，文档明确无法用Buffett框架估值
+  themes:
+  - 半导体IP
+  - Chiplet
+  - 端侧AI
 - stock_code: '688525'
   stock_name: 佰维存储
   market: A
@@ -1396,6 +1778,10 @@
   conviction_date: '2026-06-03'
   source_doc: sectors/semiconductor/storage/2026-06-03-佰维存储-buffett分析.md
   note: 佰维存储；bear73/base240/bull625亿中值÷4.36亿股
+  themes:
+  - 存储模组
+  - AI端侧
+  - 存储周期
 - stock_code: '688549'
   stock_name: 中巨芯-U
   market: A
@@ -1408,6 +1794,10 @@
   conviction_date: '2026-05-15'
   source_doc: sectors/semiconductor/materials/2026-05-15-中巨芯-buffett分析.md
   note: 仍亏损-U，PS框架给市值区间非每股内在价值
+  themes:
+  - 半导体材料
+  - 电子级氢氟酸
+  - 湿电子化学品
 - stock_code: '688766'
   stock_name: 普冉股份
   market: A
@@ -1419,13 +1809,13 @@
   bull: 161.4
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/storage/2026-06-21-普冉股份-buffett分析.md
+  note: 普冉股份；bear45/base90/bull240亿÷1.48亿股
   themes:
   - memory
   - NOR涨价
   - 供给侧
   - 利基存储
   - SHM收购
-  note: 普冉股份；bear45/base90/bull240亿÷1.48亿股
 - stock_code: CXMT
   stock_name: 长鑫科技
   market: US
@@ -1438,6 +1828,10 @@
   conviction_date: '2026-05-18'
   source_doc: sectors/semiconductor/storage/2026-05-18-长鑫科技-buffett分析.md
   note: 长鑫科技；科创板IPO申报中，无三档每股估值；价值买点市值1500-2500亿
+  themes:
+  - 存储芯片
+  - 国产替代
+  - 半导体制造
 - stock_code: MRVL
   stock_name: 迈威尔科技
   market: US
@@ -1450,6 +1844,10 @@
   conviction_date: '2026-05-14'
   source_doc: sectors/semiconductor/design/2026-05-14-迈威尔科技-buffett分析.md
   note: USD/股；正常化市值18/40/70B÷8.65亿股
+  themes:
+  - AI半导体
+  - 光通信
+  - 定制ASIC
 - stock_code: NVDA
   stock_name: 英伟达
   market: US
@@ -1462,6 +1860,11 @@
   conviction_date: '2026-05-21'
   source_doc: sectors/semiconductor/design/2026-05-21-英伟达-buffett分析.md
   note: 情景市值$2.2T/$3.75T/$5.5T÷约244亿股；USD/股
+  themes:
+  - ai-infra
+  - gpu
+  - cuda
+  - hyperscaler-capex
 - stock_code: '688017'
   stock_name: 绿的谐波
   market: A
@@ -1475,11 +1878,11 @@
   dividend_yield: 0.024
   conviction_date: '2026-06-20'
   source_doc: sectors/industrial/precision-components/2026-06-20-绿的谐波-buffett分析.md
+  note: 三情景市值33/92/251亿÷1.833亿股；PE 547x极端透支，watch等估值回归
   themes:
   - 人形机器人
   - 国产替代
   - 成长股
-  note: 三情景市值33/92/251亿÷1.833亿股；PE 547x极端透支，watch等估值回归
 - stock_code: '002056'
   stock_name: 横店东磁
   market: A
@@ -1493,6 +1896,11 @@
   conviction_date: '2026-06-07'
   source_doc: sectors/materials/magnetic-materials/2026-06-07-横店东磁-buffett分析.md
   note: 情景市值175/280/400亿÷16.2亿股；股息率2.83%；当前市值380亿已高于Base，安全边际-17.9%
+  themes:
+  - 磁性材料
+  - 光伏
+  - AI服务器
+  - 分红
 - stock_code: '300285'
   stock_name: 国瓷材料
   market: A
@@ -1506,6 +1914,10 @@
   conviction_date: '2026-06-07'
   source_doc: sectors/materials/ceramics/2026-06-07-国瓷材料-buffett分析.md
   note: null
+  themes:
+  - MLCC
+  - AI服务器
+  - 国产替代
 - stock_code: '301217'
   stock_name: 铜冠铜箔
   market: A
@@ -1521,6 +1933,11 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/materials/copper-foil/2026-06-08-铜冠铜箔-buffett分析.md
   note: 市值估算约 970 亿元（2026-05），安全边际为负
+  themes:
+  - AI服务器
+  - HVLP铜箔
+  - 国产替代
+  - PCB涨价
 - stock_code: '000021'
   stock_name: 深科技
   market: A
@@ -1533,6 +1950,11 @@
   dividend_yield: 0.6
   conviction_date: '2026-06-08'
   source_doc: sectors/semiconductor/packaging/2026-06-08-深科技-buffett分析.md
+  themes:
+  - HBM
+  - 存储周期
+  - 供给侧
+  - 国产替代
 - stock_code: 00388
   stock_name: 香港交易所
   market: HK
@@ -1545,6 +1967,10 @@
   dividend_yield: 3.1
   conviction_date: '2026-06-08'
   source_doc: sectors/financial/exchange/2026-06-08-香港交易所-buffett分析.md
+  themes:
+  - 交易所
+  - 分红价值
+  - 互联互通
 - stock_code: '603568'
   stock_name: 伟明环保
   market: A
@@ -1558,6 +1984,11 @@
   conviction_date: '2026-06-08'
   source_doc: sectors/energy/waste-to-energy/2026-06-08-伟明环保-buffett分析.md
   note: 每股由市值口径÷总股本~22.4亿股折算；2025分红预案含每股转增0.2股，除权后股本/每股口径有不确定性
+  themes:
+  - 垃圾焚烧
+  - 新能源材料
+  - 高冰镍
+  - 供给侧
 - stock_code: '603600'
   stock_name: 永艺股份
   market: A
@@ -1571,6 +2002,11 @@
   dividend_yield: 4.4
   conviction_date: '2026-06-08'
   source_doc: sectors/consumer/furniture/2026-06-08-永艺股份-buffett分析.md
+  themes:
+  - 出口ODM
+  - 关税
+  - 海外产能
+  - 分红
 - stock_code: '603929'
   stock_name: 亚翔集成
   market: A
@@ -1584,6 +2020,10 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/industrial/cleanroom-epc/2026-06-11-亚翔集成-buffett分析.md
   note: 每股由市值÷2.13亿股反推；好生意错价格，现价安全边际深度为负
+  themes:
+  - 半导体资本开支
+  - 洁净室EPC
+  - 成长
 - stock_code: 002378
   stock_name: 章源钨业
   market: A
@@ -1597,6 +2037,13 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/materials/nonferrous/2026-06-11-章源钨业-buffett分析.md
   note: 每股内在价值来自§9场景加权；钨价见顶腰斩-58%、Q1暴利为周期顶不可外推；现价PB约12-13x/PE约126x安全边际深度为负（约-77%）；行情锚2026-06-09收盘非实时、PB为估算
+  themes:
+  - 钨
+  - 小金属
+  - 供给侧
+  - 出口管制
+  - 光伏钨丝
+  - commodity-cyclical
 - stock_code: 002428
   stock_name: 云南锗业
   market: A
@@ -1610,6 +2057,12 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/materials/minor-metals/2026-06-11-云南锗业-buffett分析.md
   note: 每股=市值内在价值/6.53亿股（bear 30亿/base 85亿/bull 175亿）；期望内在价值约81亿 vs 市值约536亿，安全边际-85%；exclude
+  themes:
+  - 小金属
+  - 出口管制
+  - 磷化铟
+  - 光模块
+  - AI概念
 - stock_code: '301071'
   stock_name: 力量钻石
   market: A
@@ -1623,6 +2076,11 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/materials/superhard/2026-06-11-力量钻石-buffett分析.md
   note: 每股由情景市值(亿)÷总股本2.61亿股(135亿市值÷51.71元)反推；培育钻周期底反转+半导体散热概念,PE_TTM~153x安全边际约-80%;行情为第三方口径快照
+  themes:
+  - 培育钻石
+  - 超硬材料
+  - 半导体散热
+  - 成长
 - stock_code: '688775'
   stock_name: 影石创新
   market: A
@@ -1636,6 +2094,11 @@
   conviction_date: '2026-06-11'
   source_doc: sectors/consumer/consumer-electronics/2026-06-11-影石创新-buffett分析.md
   note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；高成长投入期无分红
+  themes:
+  - 智能影像
+  - 全景相机龙头
+  - 第二曲线无人机
+  - 次新股解禁
 - stock_code: 000519
   stock_name: 中兵红箭
   market: A
@@ -1649,6 +2112,11 @@
   conviction_date: '2026-06-13'
   source_doc: sectors/industrial/defense/2026-06-13-中兵红箭-buffett分析.md
   note: 每股内在价值由市值情景内在价值/总股本13.93亿股推算；行情单源(证券之星2026-06-03)、最新PB及2024-2025派息额未取到
+  themes:
+  - 军工
+  - 特种装备
+  - 超硬材料
+  - 培育钻石
 - stock_code: '000657'
   stock_name: 中钨高新
   market: A
@@ -1662,6 +2130,14 @@
   conviction_date: '2026-06-13'
   source_doc: sectors/materials/nonferrous/2026-06-13-中钨高新-buffett分析.md
   note: 每股内在价值场景加权（bear/base/bull）；2026Q1为钨价周期顶利润不可外推
+  themes:
+  - 钨
+  - 小金属
+  - 供给侧
+  - 出口管制
+  - 硬质合金
+  - 数控刀片
+  - commodity-cyclical
 - stock_code: '600487'
   stock_name: 亨通光电
   market: A
@@ -1675,6 +2151,12 @@
   conviction_date: '2026-06-14'
   source_doc: sectors/industrial/cable/2026-06-14-亨通光电-buffett分析.md
   note: 每股=情景内在价值(亿)/股本约24.36亿股；当前股价极端高估(PE TTM~80x)
+  themes:
+  - 海缆
+  - 海上风电
+  - 光纤涨价
+  - AI光通信
+  - 空芯光纤
 - stock_code: '000333'
   stock_name: 美的集团
   market: A
@@ -1688,6 +2170,12 @@
   conviction_date: '2026-06-13'
   source_doc: sectors/consumer/home-appliance/2026-06-13-美的集团-buffett分析.md
   note: 每股内在价值由市值情景内在价值（bear4485/base6235/bull7990亿）÷估算总股本约76亿股推算；实时行情为第三方快照(gurufocus 2026-06-13)、PB及H股0300.HK口径未交叉验证
+  themes:
+  - 白色家电
+  - 高分红
+  - 出海OBM
+  - ToB转型
+  - 机器人
 - stock_code: '600690'
   stock_name: 海尔智家
   market: A
@@ -1701,6 +2189,11 @@
   conviction_date: '2026-06-14'
   source_doc: sectors/consumer/home-appliance/2026-06-14-海尔智家-buffett分析.md
   note: 每股由市值内在价值/总股本93.84亿股反推；股息率口径分歧（4.15%~5.2%）取中值4.5；6/14当日价缺(沙箱403)行情为2026-03~04口径
+  themes:
+  - 白色家电
+  - 海外OBM
+  - 高端化
+  - 高分红
 - stock_code: '002460'
   stock_name: 赣锋锂业
   market: A
@@ -1716,6 +2209,11 @@
   conviction_date: '2026-06-15'
   source_doc: sectors/materials/lithium/2026-06-15-赣锋锂业-buffett分析.md
   note: 每股内在价值由市值口径内在价值/股本(20.97亿股,市值1474亿/价70.31)折算；周期反弹中段,安全边际-64%
+  themes:
+  - 锂
+  - 周期反弹
+  - 供给侧
+  - 资源自给率
 - stock_code: '300014'
   stock_name: 亿纬锂能
   market: A
@@ -1731,6 +2229,11 @@
   conviction_date: '2026-06-16'
   source_doc: sectors/energy/battery/2026-06-16-亿纬锂能-buffett分析.md
   note: 每股=(电池主业情景内在价值+思摩尔SOTP120亿)/股本约21.73亿股(市值1453.5亿/价66.88)；期望内在价值656亿vs市值1453.5亿安全边际约-55%；储能放量+盈利反转但增收不增利,正常化PE约30x不便宜
+  themes:
+  - 储能
+  - 动力电池
+  - 成长
+  - 盈利反转
 - stock_code: '02631'
   stock_name: 天岳先进
   market: HK
@@ -1744,6 +2247,12 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md
   note: A→H口径切换；H股现价98.75HKD/市值478.6亿HKD/AH折价-38.7%；每股内在价值=场景市值(CNY×1.08)/总股本4.846亿股；期望130.9HKD安全边际+32.7%
+  themes:
+  - 第三代半导体
+  - 碳化硅衬底
+  - 成长扩产
+  - AI电源概念
+  - AH折价
 - stock_code: '603773'
   stock_name: 沃格光电
   market: A
@@ -1757,6 +2266,11 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/electronics/display-glass/2026-06-19-沃格光电-buffett分析.md
   note: 连亏5年/PE无意义,估值锚=现金牛玻璃精加工正常化owner earnings+玻璃基板期权价值场景加权；每股=情景市值/总股本约2.248亿股(市值370.17亿/价164.70)；期望118亿vs市值370亿安全边际-68%,bull压测仍-43%；玻璃基板/TGV纯送样0营收,概念博弈品exclude
+  themes:
+  - 玻璃基板
+  - 先进封装
+  - TGV
+  - AI概念
 - stock_code: '688388'
   stock_name: 嘉元科技
   market: A
@@ -1770,6 +2284,12 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/materials/copper-foil/2026-06-19-嘉元科技-buffett分析.md
   note: 每股由情景市值÷反推股本(6.60亿股)换算；周期底加工费反转故事，安全边际深度为负
+  themes:
+  - 锂电铜箔
+  - 加工费周期
+  - 复合铜箔
+  - AI铜箔
+  - 供给侧
 - stock_code: '300316'
   stock_name: 晶盛机电
   market: A
@@ -1783,6 +2303,11 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md
   note: PB法估值（周期底净利失真），每股=情景市值/13.1亿股
+  themes:
+  - 半导体设备
+  - 碳化硅
+  - 光伏周期
+  - 国产替代
 - stock_code: '600460'
   stock_name: 士兰微
   market: A
@@ -1796,6 +2321,11 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/power/2026-06-19-士兰微-buffett分析.md
   note: 重资产IDM低净利率，PE失真，估值锚PS/PB+正常化净利；期望内在价值502亿/30.2元，安全边际-27.9%
+  themes:
+  - 功率半导体
+  - SiC
+  - 国产替代
+  - 周期复苏
 - stock_code: '688396'
   stock_name: 华润微
   market: A
@@ -1809,6 +2339,11 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md
   note: 每股由情景内在价值÷13.28亿股反推；PE107x因周期底利润失真，按正常化利润+PB估值
+  themes:
+  - 功率半导体
+  - 第三代半导体
+  - 国产替代
+  - 周期复苏
 - stock_code: '06613'
   stock_name: 蓝思科技
   market: HK
@@ -1822,6 +2357,11 @@
   conviction_date: '2026-06-19'
   source_doc: sectors/electronics/precision-manufacturing/2026-06-19-蓝思科技-buffett分析.md
   note: A+H 双重上市取 H 口径（较 A 折价~50%）；每股内在价值为 HKD 口径三情景值；dividend_yield 为 H 口径(每股息0.45元RMB×1.08÷29.96HKD)
+  themes:
+  - 果链精密制造
+  - 折叠屏
+  - 具身智能
+  - A+H折价
 - stock_code: 00666.HK
   stock_name: 瑞浦兰钧
   market: HK
@@ -1837,6 +2377,11 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/energy/battery/2026-06-20-瑞浦兰钧-buffett分析.md
   note: 每股内在价值由各情景内在价值(亿HKD)÷总股本23.37亿股算得；港股口径HKD，财报RMB×1.08；首次盈利可持续性未证、无分红dividend_yield=null
+  themes:
+  - 储能
+  - 动力电池
+  - 成长
+  - 盈利反转
 - stock_code: '06030'
   stock_name: 中信证券
   market: HK
@@ -1850,6 +2395,11 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/financial/securities/2026-06-20-中信证券-buffett分析.md
   note: H 口径(PB×正常化ROE)；A+H 取较低估值 H 侧，AH折价-6.85%轻度；股息率按A股现价口径
+  themes:
+  - 券商
+  - 周期
+  - 龙头集中度
+  - A+H
 - stock_code: 0522.HK
   stock_name: ASMPT
   market: HK
@@ -1863,6 +2413,11 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/equipment/2026-06-20-ASMPT-buffett分析.md
   note: 期望内在价值 HK$63.2B(纯加权)/每股~HK$151，安全边际 -27.9%；纯港股非A+H，全程HKD
+  themes:
+  - 先进封装
+  - TCB热压键合
+  - AI算力
+  - 半导体设备
 - stock_code: '01070'
   stock_name: TCL电子
   market: HK
@@ -1876,6 +2431,13 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/consumer/consumer-electronics/2026-06-20-TCL电子-buffett分析.md
   note: 每股内在价值=情景市值/25.2亿股；HKD口径
+  themes:
+  - 消费电子
+  - 全球电视
+  - Mini-LED
+  - AIoT
+  - AR眼镜
+  - 高分红
 - stock_code: '03200'
   stock_name: 大族数控
   market: HK
@@ -1889,6 +2451,11 @@
   conviction_date: '2026-06-20'
   source_doc: sectors/electronics/pcb-equipment/2026-06-20-大族数控-buffett分析.md
   note: H口径(03200.HK,折价约47%)；每股=情景市值/4.89亿股；81HKD为让步上限锚,纯周期股锚仅~15HKD
+  themes:
+  - AI服务器
+  - PCB设备
+  - 国产替代
+  - 周期
 - stock_code: '300456'
   stock_name: 赛微电子
   market: A
