@@ -519,3 +519,31 @@ def test_build_theme_options_keeps_only_multi_stock_sorted():
     opts = build_theme_options(rows)
     assert opts == [{'name': 'memory', 'count': 3}, {'name': 'cpu_pcb', 'count': 2}]
     assert all(o['count'] >= 2 for o in opts)
+
+
+def test_index_passes_theme_options(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'theme-filter' in html, '缺主题筛选下拉容器'
+    assert 'data-themes=' in html, '缺行 data-themes 属性'
+
+
+def test_index_has_theme_dropdown_and_column(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'id="theme-filter"' in html, '缺主题下拉'
+    assert 'id="theme-search"' in html, '缺主题搜索框'
+    assert 'col-theme' in html, '缺主题列'
+    assert 'function themeMatches' in html, '缺 themeMatches'
+    assert 'onThemeToggle' in html, '缺主题勾选回调'
+
+
+def test_index_group_headers_colspan_updated(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    # 两级组头（lvl1 sector + lvl2 subgroup）都要随主题列扩到 12
+    assert html.count('colspan="12"') >= 2, '两级组头 colspan 未都改为 12'
+    assert 'colspan="11"' not in html, '仍有未更新的 colspan=11'
+
+
+def test_recompute_integrates_theme_filter(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'themeMatches(tr)' in html, 'recompute/repRows 未并入主题筛选'
+    assert 'filterHidden' in html, '未改用合并筛选标记 filterHidden'

@@ -25,6 +25,7 @@
 table.mode-grouped .col-sector { display: none; }
 table.mode-flat .group-header { display: none; }
 #mode-toggle .btn { padding: .15rem .55rem; }
+.col-theme { max-width: 320px; white-space: normal; }
 </style>
 {% endblock %}
 {% block content %}
@@ -45,6 +46,26 @@ table.mode-flat .group-header { display: none; }
     <button class="btn btn-sm btn-outline-primary chip" data-market="HK" onclick="switchMarket(event,'HK')">港股 ({{ market_counts.get('HK', 0) }})</button>
     <button class="btn btn-sm btn-outline-primary chip" data-market="US" onclick="switchMarket(event,'US')">美股 ({{ market_counts.get('US', 0) }})</button>
   </div>
+  <div class="dropdown" id="theme-filter">
+    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+            id="theme-filter-btn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">主题</button>
+    <div class="dropdown-menu p-2" style="max-height:340px;overflow-y:auto;min-width:260px">
+      <input type="text" class="form-control form-control-sm mb-2" id="theme-search"
+             placeholder="搜索主题…" oninput="filterThemeSearch(this.value)">
+      <div id="theme-options">
+        {% for t in theme_options %}
+        <div class="form-check theme-option" data-theme="{{ t.name }}">
+          <input class="form-check-input" type="checkbox" value="{{ t.name }}"
+                 id="th-{{ loop.index }}" onchange="onThemeToggle()">
+          <label class="form-check-label" for="th-{{ loop.index }}">{{ t.name }} <span class="text-muted">({{ t.count }})</span></label>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="border-top mt-2 pt-1">
+        <button type="button" class="btn btn-sm btn-link px-0 text-decoration-none" onclick="clearThemes()">清除</button>
+      </div>
+    </div>
+  </div>
   <div id="mode-toggle" class="btn-group btn-group-sm">
     <button class="btn btn-primary" data-mode="grouped" onclick="setMode('grouped')">▣ 分组</button>
     <button class="btn btn-outline-primary" data-mode="flat" onclick="setMode('flat')">▤ 平铺</button>
@@ -54,7 +75,7 @@ table.mode-flat .group-header { display: none; }
 <table id="val-table" class="table table-sm table-hover val-table mode-grouped">
   <thead class="table-light">
     <tr>
-      <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th>
+      <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th><th class="col-theme">主题</th>
       <th class="sortable" data-sort="rating" onclick="sortBy('rating')">评级<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="bear" onclick="sortBy('bear')">Bear<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="base" onclick="sortBy('base')">Base<span class="sort-arrow"></span></th>
@@ -66,11 +87,11 @@ table.mode-flat .group-header { display: none; }
   <tbody>
   {% for g in groups %}
     <tr class="group-header lvl1" data-sector="{{ g.sector }}" onclick="toggleSector('{{ g.sector }}')">
-      <th colspan="11"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
+      <th colspan="12"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
     </tr>
     {% for sg in g.subgroups %}
     <tr class="group-header lvl2" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}" onclick="toggleSub('{{ sg.subgroup_id }}')">
-      <th colspan="11"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
+      <th colspan="12"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
     </tr>
       {% for r in sg.rows %}
       <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}"
@@ -79,11 +100,15 @@ table.mode-flat .group-header { display: none; }
           data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
           data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
           data-mbull="{{ r.margin_bull if r.margin_bull is not none else '' }}"
+          data-themes='{{ r.themes | tojson }}'
           class="sub-{{ sg.subgroup_id }}{% if r.rating == 'exclude' %} row-muted{% endif %}">
         <td>{{ r.stock_code }}</td>
         <td>{{ r.stock_name }}</td>
         <td class="col-sector"><span class="badge bg-light text-secondary">{{ r.sector_label }}</span></td>
         <td>{{ r.currency or '—' }}</td>
+        <td class="col-theme">
+          {% for t in r.themes %}<span class="badge bg-light text-secondary me-1" style="font-weight:400">{{ t }}</span>{% endfor %}
+        </td>
         <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
         <td class="text-end">
           {{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}
@@ -118,6 +143,7 @@ let sortKey = 'base';
 let sortDir = 'desc';
 let mode = 'grouped';
 let currentMarket = 'all';
+let selectedThemes = new Set();
 let defaultSectorOrder = [];
 let defaultSubOrder = {};
 const MARGIN_SORT_KEYS = ['bear', 'base', 'bull'];
@@ -128,10 +154,11 @@ function loadPref() {
     if (['bear', 'base', 'bull', 'rating', 'date'].includes(p.sortKey)) sortKey = p.sortKey;
     if (['asc', 'desc'].includes(p.dir)) sortDir = p.dir;
     if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;
+    if (Array.isArray(p.themes)) p.themes.forEach(t => selectedThemes.add(t));
   } catch (e) {}
 }
 function savePref() {
-  localStorage.setItem(PREF_KEY, JSON.stringify({ sortKey, dir: sortDir, mode }));
+  localStorage.setItem(PREF_KEY, JSON.stringify({ sortKey, dir: sortDir, mode, themes: [...selectedThemes] }));
 }
 
 function marginOf(tr, key) {
@@ -154,9 +181,48 @@ function sortRows(rows) {
   });
 }
 
+function themeMatches(tr) {
+  if (selectedThemes.size === 0) return true;
+  let arr = [];
+  try { arr = JSON.parse(tr.dataset.themes || '[]'); } catch (e) {}
+  return arr.some(t => selectedThemes.has(t));
+}
+
+function updateThemeButton() {
+  const btn = document.getElementById('theme-filter-btn');
+  if (btn) btn.textContent = selectedThemes.size ? '主题 (' + selectedThemes.size + ')' : '主题';
+}
+
+function onThemeToggle() {
+  selectedThemes = new Set(
+    [...document.querySelectorAll('#theme-options input:checked')].map(c => c.value)
+  );
+  updateThemeButton();
+  savePref();
+  applySort();
+  recompute();
+}
+
+function clearThemes() {
+  document.querySelectorAll('#theme-options input:checked').forEach(c => { c.checked = false; });
+  selectedThemes.clear();
+  updateThemeButton();
+  savePref();
+  applySort();
+  recompute();
+}
+
+function filterThemeSearch(q) {
+  const kw = (q || '').trim().toLowerCase();
+  document.querySelectorAll('#theme-options .theme-option').forEach(el => {
+    const name = (el.dataset.theme || '').toLowerCase();
+    el.style.display = (!kw || name.includes(kw)) ? '' : 'none';
+  });
+}
+
 function repRows(rows) {
   for (const tr of rows) {
-    if (rowMatchesMarket(tr)) return marginOf(tr, sortKey);
+    if (rowMatchesMarket(tr) && themeMatches(tr)) return marginOf(tr, sortKey);
   }
   return null;
 }
@@ -272,13 +338,13 @@ function recompute() {
   tbody.querySelectorAll('.group-header.lvl2.collapsed').forEach(h => collapsedSub.add(h.dataset.subgroup));
 
   tbody.querySelectorAll('tr[data-code]').forEach(tr => {
-    const mOk = rowMatchesMarket(tr);
-    tr.dataset.marketHidden = mOk ? '' : '1';
+    const fOk = rowMatchesMarket(tr) && themeMatches(tr);
+    tr.dataset.filterHidden = fOk ? '' : '1';
     let show;
     if (mode === 'flat') {
-      show = mOk;
+      show = fOk;
     } else {
-      show = mOk && !collapsedSec.has(tr.dataset.sector) && !collapsedSub.has(tr.dataset.subgroup);
+      show = fOk && !collapsedSec.has(tr.dataset.sector) && !collapsedSub.has(tr.dataset.subgroup);
     }
     tr.style.display = show ? '' : 'none';
   });
@@ -290,7 +356,7 @@ function recompute() {
 
   const subVisible = {}, secVisible = {};
   tbody.querySelectorAll('tr[data-code]').forEach(tr => {
-    if (tr.dataset.marketHidden === '1') return;
+    if (tr.dataset.filterHidden === '1') return;
     subVisible[tr.dataset.subgroup] = (subVisible[tr.dataset.subgroup] || 0) + 1;
     secVisible[tr.dataset.sector] = (secVisible[tr.dataset.sector] || 0) + 1;
   });
@@ -364,6 +430,11 @@ function initValuations() {
   tbody.querySelectorAll('.group-header.lvl2').forEach(h => {
     (defaultSubOrder[h.dataset.sector] = defaultSubOrder[h.dataset.sector] || []).push(h.dataset.subgroup);
   });
+  selectedThemes.forEach(t => {
+    const cb = document.querySelector('#theme-options input[value="' + CSS.escape(t) + '"]');
+    if (cb) cb.checked = true;
+  });
+  updateThemeButton();
   setMode(mode);
 }
 document.addEventListener('DOMContentLoaded', initValuations);
