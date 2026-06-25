@@ -175,16 +175,17 @@ def test_group_by_sector_orders_groups_by_count_desc():
     assert groups[1]['label'] == '电子'
 
 
-def test_group_by_sector_sorts_rows_within_group_by_base_margin_desc():
+def test_group_by_sector_sorts_rows_within_subgroup_by_base_margin_desc():
     from app.routes.valuations import group_by_sector
     rows = [
-        {'stock_code': 'lo', 'sector': 'materials', 'margin_base': 0.05},
-        {'stock_code': 'hi', 'sector': 'materials', 'margin_base': 0.50},
-        {'stock_code': 'none', 'sector': 'materials', 'margin_base': None},
-        {'stock_code': 'mid', 'sector': 'materials', 'margin_base': 0.20},
+        {'stock_code': 'lo', 'sector': 'materials', 'subsector': 'nonferrous', 'margin_base': 0.05},
+        {'stock_code': 'hi', 'sector': 'materials', 'subsector': 'nonferrous', 'margin_base': 0.50},
+        {'stock_code': 'none', 'sector': 'materials', 'subsector': 'nonferrous', 'margin_base': None},
+        {'stock_code': 'mid', 'sector': 'materials', 'subsector': 'nonferrous', 'margin_base': 0.20},
     ]
     [grp] = group_by_sector(rows)
-    assert [r['stock_code'] for r in grp['rows']] == ['hi', 'mid', 'lo', 'none']
+    [sg] = grp['subgroups']
+    assert [r['stock_code'] for r in sg['rows']] == ['hi', 'mid', 'lo', 'none']
 
 
 def test_group_by_sector_unknown_sector_falls_back_to_raw():
@@ -225,12 +226,12 @@ def test_index_renders_sector_group_headers(app_client):
 def test_group_by_sector_assigns_sector_label_to_rows():
     from app.routes.valuations import group_by_sector
     groups = group_by_sector([
-        {'stock_code': 'a', 'sector': 'semiconductor', 'margin_base': 0.1},
-        {'stock_code': 'b', 'sector': None, 'margin_base': 0.2},
+        {'stock_code': 'a', 'sector': 'semiconductor', 'subsector': 'storage', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': None, 'subsector': None, 'margin_base': 0.2},
     ])
     by_sector = {g['sector']: g for g in groups}
-    assert by_sector['semiconductor']['rows'][0]['sector_label'] == '半导体'
-    assert by_sector['__none__']['rows'][0]['sector_label'] == '未分类'
+    assert by_sector['semiconductor']['subgroups'][0]['rows'][0]['sector_label'] == '半导体'
+    assert by_sector['__none__']['subgroups'][0]['rows'][0]['sector_label'] == '未分类'
 
 
 def test_index_has_sortable_headers_and_sector_column(app_client):
@@ -338,17 +339,19 @@ def test_enrich_category_none_without_map():
 def test_group_by_sector_carves_out_whitelisted_category():
     from app.routes.valuations import group_by_sector
     rows = [
-        {'stock_code': '600600', 'sector': 'other', 'category': '啤酒', 'margin_base': 0.1},
-        {'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'margin_base': 0.3},
-        {'stock_code': '000001', 'sector': 'consumer', 'category': None, 'margin_base': 0.2},
+        {'stock_code': '600600', 'sector': 'other', 'category': '啤酒', 'subsector': 'beer', 'margin_base': 0.1},
+        {'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'subsector': 'beer', 'margin_base': 0.3},
+        {'stock_code': '000001', 'sector': 'consumer', 'category': None, 'subsector': None, 'margin_base': 0.2},
     ]
     groups = {g['sector']: g for g in group_by_sector(rows)}
     assert '啤酒' in groups
     beer = groups['啤酒']
     assert beer['label'] == '啤酒'
     assert beer['count'] == 2
-    assert [r['stock_code'] for r in beer['rows']] == ['600132', '600600']
-    assert [r['stock_code'] for r in groups['consumer']['rows']] == ['000001']
+    [beer_sg] = beer['subgroups']
+    assert [r['stock_code'] for r in beer_sg['rows']] == ['600132', '600600']
+    [cons_sg] = groups['consumer']['subgroups']
+    assert [r['stock_code'] for r in cons_sg['rows']] == ['000001']
 
 
 def test_group_by_sector_non_whitelisted_category_uses_sector():
@@ -360,8 +363,8 @@ def test_group_by_sector_non_whitelisted_category_uses_sector():
 
 def test_group_by_sector_carveout_row_gets_category_label():
     from app.routes.valuations import group_by_sector
-    [grp] = group_by_sector([{'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'margin_base': 0.1}])
-    assert grp['rows'][0]['sector_label'] == '啤酒'
+    [grp] = group_by_sector([{'stock_code': '600132', 'sector': 'consumer', 'category': '啤酒', 'subsector': 'beer', 'margin_base': 0.1}])
+    assert grp['subgroups'][0]['rows'][0]['sector_label'] == '啤酒'
 
 
 def test_index_renders_beer_group_when_categorized(app_client, monkeypatch):
@@ -424,3 +427,51 @@ def test_enrich_subsector_none_without_doc():
     from app.routes.valuations import _enrich
     out = _enrich([{'stock_code': 'a', 'base': 1.0}], {})
     assert out[0]['subsector'] is None
+
+
+def test_group_by_sector_builds_subgroups_by_subsector():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': 'a', 'sector': 'semiconductor', 'subsector': 'storage', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': 'semiconductor', 'subsector': 'storage', 'margin_base': 0.2},
+        {'stock_code': 'c', 'sector': 'semiconductor', 'subsector': 'design', 'margin_base': 0.3},
+    ]
+    [grp] = group_by_sector(rows)
+    assert grp['count'] == 3
+    subs = {sg['key']: sg for sg in grp['subgroups']}
+    assert subs['storage']['count'] == 2
+    assert subs['storage']['label'] == '存储'
+    assert subs['design']['count'] == 1
+    assert [sg['key'] for sg in grp['subgroups']] == ['storage', 'design']
+
+
+def test_group_by_sector_none_subsector_is_unclassified_subgroup():
+    from app.routes.valuations import group_by_sector
+    [grp] = group_by_sector([{'stock_code': 'a', 'sector': 'energy', 'subsector': None, 'margin_base': 0.1}])
+    [sg] = grp['subgroups']
+    assert sg['key'] == '__none__'
+    assert sg['label'] == '未分类'
+
+
+def test_group_by_sector_subgroup_id_is_sector_scoped():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': 'a', 'sector': 'semiconductor', 'subsector': 'pcb', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': 'electronics', 'subsector': 'pcb', 'margin_base': 0.2},
+    ]
+    groups = {g['sector']: g for g in group_by_sector(rows)}
+    sem_id = groups['semiconductor']['subgroups'][0]['subgroup_id']
+    ele_id = groups['electronics']['subgroups'][0]['subgroup_id']
+    assert sem_id == 'semiconductor__pcb'
+    assert ele_id == 'electronics__pcb'
+    assert sem_id != ele_id
+
+
+def test_group_by_sector_subgroups_tiebreak_by_key():
+    from app.routes.valuations import group_by_sector
+    rows = [
+        {'stock_code': 'a', 'sector': 'media', 'subsector': 'short-video', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': 'media', 'subsector': 'digital-marketing', 'margin_base': 0.2},
+    ]
+    [grp] = group_by_sector(rows)
+    assert [sg['key'] for sg in grp['subgroups']] == ['digital-marketing', 'short-video']

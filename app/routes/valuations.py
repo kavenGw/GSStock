@@ -97,9 +97,9 @@ SUBSECTOR_LABELS = {
 
 
 def group_by_sector(rows: list[dict]) -> list[dict]:
-    """分组：category 命中 CARVE_OUT_CATEGORIES 则用分类名作独立顶级组，否则按 sector。
-    组按标的数降序（并列按 key 稳定），组内按 Base 安全边际降序（None 末位）。
-    sector 缺失归入「未分类」组；未知 sector 回退原始值。"""
+    """两级分组：一级 category 命中 CARVE_OUT_CATEGORIES 用分类名，否则按 sector；
+    一级内再按 subsector 分二级组（None→未分类）。一级/二级均按标的数降序（key 兜底），
+    行内按 Base 安全边际降序（None 末位）。每行写 sector_label。"""
     buckets: dict[str, list] = {}
     for r in rows:
         cat = r.get('category')
@@ -107,7 +107,6 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
         buckets.setdefault(key, []).append(r)
     groups = []
     for key, items in buckets.items():
-        items = sorted(items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
         if key in CARVE_OUT_CATEGORIES:
             label = key
         elif key == '__none__':
@@ -116,7 +115,22 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
             label = SECTOR_LABELS.get(key, key)
         for r in items:
             r['sector_label'] = label
-        groups.append({'sector': key, 'label': label, 'count': len(items), 'rows': items})
+        sub_buckets: dict[str, list] = {}
+        for r in items:
+            sub_buckets.setdefault(r.get('subsector') or '__none__', []).append(r)
+        subgroups = []
+        for sub_key, sub_items in sub_buckets.items():
+            sub_items = sorted(sub_items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
+            sub_label = '未分类' if sub_key == '__none__' else SUBSECTOR_LABELS.get(sub_key, sub_key)
+            subgroups.append({
+                'key': sub_key,
+                'subgroup_id': f"{key}__{sub_key}",
+                'label': sub_label,
+                'count': len(sub_items),
+                'rows': sub_items,
+            })
+        subgroups.sort(key=lambda sg: (-sg['count'], sg['key']))
+        groups.append({'sector': key, 'label': label, 'count': len(items), 'subgroups': subgroups})
     groups.sort(key=lambda g: (-g['count'], g['sector']))
     return groups
 
