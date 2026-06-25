@@ -1556,7 +1556,7 @@ SUPPLY_CHAIN_GRAPHS = {
                     '600460': {'name': '士兰微', 'role': 'IDM 模拟+IGBT+MEMS', 'tag': 'not_analyzed'},
                     '605111': {'name': '新洁能', 'role': 'MOSFET/IGBT 设计', 'tag': 'not_analyzed'},
                     '688396': {'name': '华润微', 'role': 'IDM 功率龙头（IGBT/MOSFET/SiC）', 'tag': 'not_analyzed'},
-                    '300373': {'name': '扬杰科技', 'role': '二极管/MOSFET/SiC', 'tag': 'not_analyzed'},
+                    '300373': {'name': '扬杰科技', 'role': '二极管/MOSFET/SiC', 'tag': 'keep_watching'},
                     '603290': {'name': '斯达半导', 'role': '车规 IGBT 模块龙头', 'tag': 'not_analyzed'},
                     '300623': {'name': '捷捷微电', 'role': '晶闸管/MOSFET', 'tag': 'not_analyzed'},
                 },

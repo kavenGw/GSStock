@@ -7,7 +7,7 @@ from flask import render_template, jsonify, request
 from app.routes import valuations_bp
 from app.services import unified_stock_data_service
 from app.services.valuations_helpers import (
-    VALUATIONS_PATH, load_valuations, _fetch_code, _extract_price, compute_margin,
+    VALUATIONS_PATH, load_valuations, _fetch_code, _extract_price, compute_margin, subsector_of,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,6 +45,7 @@ def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> l
         out.append({
             **r,
             'category': cat_map.get(r['stock_code']),
+            'subsector': subsector_of(r),
             'current_price': price,
             'rating_rank': RATING_RANK.get(r.get('rating')),
             'date_rank': _date_rank(r.get('conviction_date')),
@@ -72,11 +73,33 @@ SECTOR_LABELS = {
 
 CARVE_OUT_CATEGORIES = {'啤酒'}
 
+SUBSECTOR_LABELS = {
+    'storage': '存储', 'design': '设计', 'equipment': '设备', 'optical': '光学',
+    'power': '功率', 'mcu': 'MCU', 'optical-components': '光学元件', 'wafer': '晶圆',
+    'pcb': 'PCB', 'packaging': '封装', 'sic-substrate': '碳化硅衬底', 'mems': 'MEMS',
+    'photonics': '光子', 'foundry': '晶圆代工', 'laser-chip': '激光芯片', 'networking': '网络',
+    'advanced-packaging': '先进封装', 'materials': '材料', 'components': '元器件', 'ems': 'EMS',
+    'display': '显示', 'servers': '服务器', 'pc-server': 'PC服务器', 'power-electronics': '功率电子',
+    'functional-materials': '功能材料', 'display-glass': '显示玻璃', 'precision-manufacturing': '精密制造',
+    'pcb-equipment': 'PCB设备', 'thermal-management': '热管理', 'nonferrous': '有色',
+    'copper-foil': '铜箔', 'chemicals': '化工', 'magnetic-materials': '磁材', 'ceramics': '陶瓷',
+    'minor-metals': '小金属', 'superhard': '超硬材料', 'lithium': '锂', 'consumer-electronics': '消费电子',
+    'sportswear': '运动服饰', 'beer': '啤酒', 'home-appliance': '家电', 'mobility': '出行',
+    'local-services': '本地生活', 'restaurant': '餐饮', 'designer-toy': '潮玩', 'auto': '汽车',
+    'furniture': '家居', 'auto-ev': '新能源车', 'ev': '电动车', 'power-equipment': '电力设备',
+    'cable': '线缆', 'auto-parts': '汽车零部件', 'precision-components': '精密零件',
+    'cleanroom-epc': '洁净室EPC', 'defense': '国防军工', 'music-streaming': '音乐流媒体',
+    'digital-marketing': '数字营销', 'short-video': '短视频', 'online-literature': '网络文学',
+    'shopping-guide': '导购', 'internet-platform': '互联网平台', 'solar': '光伏', 'battery': '电池',
+    'waste-to-energy': '垃圾发电', 'cloud': '云计算', 'software': '软件', 'database': '数据库',
+    'exchange': '交易所', 'securities': '证券', 'cro': 'CRO',
+}
+
 
 def group_by_sector(rows: list[dict]) -> list[dict]:
-    """分组：category 命中 CARVE_OUT_CATEGORIES 则用分类名作独立顶级组，否则按 sector。
-    组按标的数降序（并列按 key 稳定），组内按 Base 安全边际降序（None 末位）。
-    sector 缺失归入「未分类」组；未知 sector 回退原始值。"""
+    """两级分组：一级 category 命中 CARVE_OUT_CATEGORIES 用分类名，否则按 sector；
+    一级内再按 subsector 分二级组（None→未分类）。一级/二级均按标的数降序（key 兜底），
+    行内按 Base 安全边际降序（None 末位）。每行写 sector_label。"""
     buckets: dict[str, list] = {}
     for r in rows:
         cat = r.get('category')
@@ -84,7 +107,6 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
         buckets.setdefault(key, []).append(r)
     groups = []
     for key, items in buckets.items():
-        items = sorted(items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
         if key in CARVE_OUT_CATEGORIES:
             label = key
         elif key == '__none__':
@@ -93,7 +115,22 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
             label = SECTOR_LABELS.get(key, key)
         for r in items:
             r['sector_label'] = label
-        groups.append({'sector': key, 'label': label, 'count': len(items), 'rows': items})
+        sub_buckets: dict[str, list] = {}
+        for r in items:
+            sub_buckets.setdefault(r.get('subsector') or '__none__', []).append(r)
+        subgroups = []
+        for sub_key, sub_items in sub_buckets.items():
+            sub_items = sorted(sub_items, key=lambda x: (x.get('margin_base') is None, -(x.get('margin_base') or 0)))
+            sub_label = '未分类' if sub_key == '__none__' else SUBSECTOR_LABELS.get(sub_key, sub_key)
+            subgroups.append({
+                'key': sub_key,
+                'subgroup_id': f"{key}__{sub_key}",
+                'label': sub_label,
+                'count': len(sub_items),
+                'rows': sub_items,
+            })
+        subgroups.sort(key=lambda sg: (-sg['count'], sg['key']))
+        groups.append({'sector': key, 'label': label, 'count': len(items), 'subgroups': subgroups})
     groups.sort(key=lambda g: (-g['count'], g['sector']))
     return groups
 
