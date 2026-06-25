@@ -493,3 +493,29 @@ def test_index_subgroup_id_is_sector_scoped_in_html(app_client):
     ids = set(re.findall(r'data-subgroup="([^"]+)"', html))
     assert ids, '页面无 data-subgroup'
     assert all('__' in i for i in ids), 'subgroup_id 应为 sector__sub 形态'
+
+
+def test_enrich_carries_themes():
+    from app.routes.valuations import _enrich
+    out = _enrich([{'stock_code': 'x', 'base': 1.0, 'themes': ['memory', 'cpu_pcb']}], {})
+    assert out[0]['themes'] == ['memory', 'cpu_pcb']
+
+
+def test_enrich_themes_default_empty():
+    from app.routes.valuations import _enrich
+    out = _enrich([{'stock_code': 'x', 'base': 1.0}], {})
+    assert out[0]['themes'] == []
+
+
+def test_build_theme_options_keeps_only_multi_stock_sorted():
+    from app.routes.valuations import build_theme_options
+    rows = [
+        {'themes': ['memory', 'solo']},
+        {'themes': ['memory', 'cpu_pcb']},
+        {'themes': ['memory', 'cpu_pcb']},
+        {'themes': []},
+        {'stock_code': 'nokey'},
+    ]
+    opts = build_theme_options(rows)
+    assert opts == [{'name': 'memory', 'count': 3}, {'name': 'cpu_pcb', 'count': 2}]
+    assert all(o['count'] >= 2 for o in opts)

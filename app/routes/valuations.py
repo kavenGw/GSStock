@@ -45,6 +45,7 @@ def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> l
         out.append({
             **r,
             'category': cat_map.get(r['stock_code']),
+            'themes': r.get('themes') or [],
             'subsector': subsector_of(r),
             'current_price': price,
             'rating_rank': RATING_RANK.get(r.get('rating')),
@@ -135,6 +136,16 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
     return groups
 
 
+def build_theme_options(rows: list[dict]) -> list[dict]:
+    c = Counter()
+    for r in rows:
+        for t in (r.get('themes') or []):
+            c[t] += 1
+    opts = [{'name': name, 'count': n} for name, n in c.items() if n >= 2]
+    opts.sort(key=lambda o: (-o['count'], o['name']))
+    return opts
+
+
 @valuations_bp.route('/')
 def index():
     rows = load_valuations()
@@ -150,11 +161,13 @@ def index():
     enriched = _enrich(rows, prices, cat_map)
     groups = group_by_sector(enriched)
     market_counts = Counter(r.get('market') for r in enriched)
+    theme_options = build_theme_options(enriched)
     return render_template(
         'valuations.html',
         groups=groups,
         market_counts=market_counts,
         total=len(enriched),
+        theme_options=theme_options,
     )
 
 
