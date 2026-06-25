@@ -154,7 +154,10 @@ function loadPref() {
     if (['bear', 'base', 'bull', 'rating', 'date'].includes(p.sortKey)) sortKey = p.sortKey;
     if (['asc', 'desc'].includes(p.dir)) sortDir = p.dir;
     if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;
-    if (Array.isArray(p.themes)) p.themes.forEach(t => selectedThemes.add(t));
+    if (Array.isArray(p.themes)) {
+      const valid = new Set([...document.querySelectorAll('#theme-options input')].map(c => c.value));
+      p.themes.forEach(t => { if (valid.has(t)) selectedThemes.add(t); });
+    }
   } catch (e) {}
 }
 function savePref() {

@@ -547,3 +547,10 @@ def test_recompute_integrates_theme_filter(app_client):
     html = app_client.get('/valuations/').data.decode('utf-8')
     assert 'themeMatches(tr)' in html, 'recompute/repRows 未并入主题筛选'
     assert 'filterHidden' in html, '未改用合并筛选标记 filterHidden'
+
+
+def test_loadpref_validates_persisted_themes(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    # 持久化 themes 恢复时须先校验仍是当前渲染的选项（防 phantom 筛选态）
+    assert "querySelectorAll('#theme-options input')" in html, '缺 loadPref 对 theme_options 的校验'
+    assert 'valid.has(t)' in html, '缺持久化 themes 有效性过滤'
