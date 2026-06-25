@@ -1,6 +1,6 @@
 # 开发环境与工作流
 
-> **何时读**：跑脚本/查 DB、提 commit、踩 Windows 编码/heredoc/管道吞 stdout/create_app 副作用、git 协议（amend 重验、并行 session 抢 index）、测试布局
+> **何时读**：跑脚本/查 DB、提 commit、踩 Windows 编码/heredoc/管道吞 stdout/create_app 副作用、git 协议（amend 重验、并行 session 抢 index）、分支策略（投研写档 vs 功能开 worktree）、测试布局
 > **不必读**：纯业务逻辑实现（除非需 commit）
 
 ## 常用命令的 Windows 坑点
@@ -44,6 +44,8 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 **Bash 工具 cwd 跨调用持久**：一次 `cd 子目录 && ...` 会泄漏到后续所有 Bash 调用的 cwd，导致相对路径（`.omc/artifacts/` 等）解析到错目录、文件散落。脚本/校验一律用绝对路径，避免裸 `cd`。
 
 ## 开发规范
+
+**分支策略：投研写档在 main，其他功能开 worktree**：投研写档类 skill 一律在 **main 分支**直接进行，不开 worktree —— `stock-deep-redo` / `news-impact` / `buffett` / `analyze-category` / `portfolio-rebalance` / `liquidation-strategy`（凡主要往 `docs/stock-analytics/` 写分析档/主题档的 skill 都算）。理由：这些 skill 共享同一份 docs/stock-analytics doc 池，跨文档 `related_docs` 对称、lint 引用校验都依赖在同一工作树里看到全部兄弟档；开 worktree 会让反向链引用错位、对称收尾踩坑。其他功能（尤其改 `app/` 代码的）→ 先新建**独立 git worktree** 隔离再动手，避免污染 main、避免并行 session 抢 git index。
 
 **测试目录布局**：单测放 `tests/test_*.py` 平铺，不用 `tests/services/` 等子目录（仅存空 `__pycache__`）
 
