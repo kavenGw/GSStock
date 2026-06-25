@@ -157,7 +157,8 @@ def test_index_has_currency_column_and_data_market(app_client):
     assert '币种' in html, '缺币种列头'
     assert 'data-market=' in html, '缺行 data-market 属性'
     assert 'switchMarket' in html, '缺 switchMarket JS'
-    assert 'toggleGroup' in html, '缺 toggleGroup JS'
+    assert 'toggleSector' in html, '缺 toggleSector JS'
+    assert 'toggleSub' in html, '缺 toggleSub JS'
 
 
 def test_group_by_sector_orders_groups_by_count_desc():
@@ -379,8 +380,9 @@ def test_index_renders_beer_group_when_categorized(app_client, monkeypatch):
 def test_index_has_group_reorder_js(app_client):
     html = app_client.get('/valuations/').data.decode('utf-8')
     assert 'MARGIN_SORT_KEYS' in html, '缺组联动触发列常量'
-    assert 'defaultGroupOrder' in html, '缺默认组顺序捕获'
-    assert 'function groupRepresentative' in html, '缺板块代表值函数'
+    assert 'defaultSectorOrder' in html, '缺默认一级组顺序捕获'
+    assert 'defaultSubOrder' in html, '缺默认二级组顺序捕获'
+    assert 'function repRows' in html, '缺组代表值函数'
 
 
 def test_switch_market_triggers_resort(app_client):
@@ -475,3 +477,19 @@ def test_group_by_sector_subgroups_tiebreak_by_key():
     ]
     [grp] = group_by_sector(rows)
     assert [sg['key'] for sg in grp['subgroups']] == ['digital-marketing', 'short-video']
+
+
+def test_index_renders_nested_subgroup_headers(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'group-header lvl1' in html, '缺一级组头'
+    assert 'group-header lvl2' in html, '缺二级组头'
+    assert 'data-subgroup=' in html, '缺二级组头/行 data-subgroup'
+    assert 'function recompute' in html, '缺统一可见性重算函数'
+
+
+def test_index_subgroup_id_is_sector_scoped_in_html(app_client):
+    import re
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    ids = set(re.findall(r'data-subgroup="([^"]+)"', html))
+    assert ids, '页面无 data-subgroup'
+    assert all('__' in i for i in ids), 'subgroup_id 应为 sector__sub 形态'

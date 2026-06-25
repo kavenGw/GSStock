@@ -8,11 +8,15 @@
 .rating-badge { font-size: 11px; }
 .row-muted td { color: #adb5bd; }
 .row-muted .rating-badge { opacity: .6; }
-.group-header { cursor: pointer; background: #f1f3f5; }
-.group-header:hover { background: #e9ecef; }
-.group-header th { font-size: 13px; }
+.group-header { cursor: pointer; }
 .group-header .caret { display: inline-block; width: 1em; transition: transform .15s; }
 .group-header.collapsed .caret { transform: rotate(-90deg); }
+.group-header.lvl1 { background: #e9ecef; }
+.group-header.lvl1:hover { background: #dee2e6; }
+.group-header.lvl1 th { font-size: 13px; }
+.group-header.lvl2 { background: #f8f9fa; }
+.group-header.lvl2:hover { background: #eef1f4; }
+.group-header.lvl2 th { font-size: 12px; font-weight: 500; padding-left: 2.4rem; }
 #market-chips .chip { margin-right: 6px; }
 .val-table th.sortable { cursor: pointer; user-select: none; }
 .val-table th.sortable:hover { background: #e9ecef; }
@@ -61,38 +65,43 @@ table.mode-flat .group-header { display: none; }
   </thead>
   <tbody>
   {% for g in groups %}
-    <tr class="group-header" data-sector="{{ g.sector }}" onclick="toggleGroup('{{ g.sector }}')">
+    <tr class="group-header lvl1" data-sector="{{ g.sector }}" onclick="toggleSector('{{ g.sector }}')">
       <th colspan="11"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
     </tr>
-    {% for r in g.rows %}
-    <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}"
-        data-mrating="{{ r.rating_rank if r.rating_rank is not none else '' }}"
-        data-mdate="{{ r.date_rank if r.date_rank is not none else '' }}"
-        data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
-        data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
-        data-mbull="{{ r.margin_bull if r.margin_bull is not none else '' }}"
-        class="grp-{{ g.sector }}{% if r.rating == 'exclude' %} row-muted{% endif %}">
-      <td>{{ r.stock_code }}</td>
-      <td>{{ r.stock_name }}</td>
-      <td class="col-sector"><span class="badge bg-light text-secondary">{{ r.sector_label }}</span></td>
-      <td>{{ r.currency or '—' }}</td>
-      <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
-      <td class="text-end">
-        {{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}
-        <span class="mg cell-mbear {% if r.margin_bear is not none and r.margin_bear >= 0 %}margin-pos{% elif r.margin_bear is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bear * 100) if r.margin_bear is not none else '' }}</span>
-      </td>
-      <td class="text-end">
-        {{ '%.2f'|format(r.base) if r.base is not none else '—' }}
-        <span class="mg cell-mbase {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '' }}</span>
-      </td>
-      <td class="text-end">
-        {{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}
-        <span class="mg cell-mbull {% if r.margin_bull is not none and r.margin_bull >= 0 %}margin-pos{% elif r.margin_bull is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bull * 100) if r.margin_bull is not none else '' }}</span>
-      </td>
-      <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
-      <td>{{ r.conviction_date or '—' }}</td>
-      <td>{% if r.source_doc %}<span title="{{ r.source_doc }}" style="cursor:help">📄</span>{% else %}—{% endif %}</td>
+    {% for sg in g.subgroups %}
+    <tr class="group-header lvl2" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}" onclick="toggleSub('{{ sg.subgroup_id }}')">
+      <th colspan="11"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
     </tr>
+      {% for r in sg.rows %}
+      <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}"
+          data-mrating="{{ r.rating_rank if r.rating_rank is not none else '' }}"
+          data-mdate="{{ r.date_rank if r.date_rank is not none else '' }}"
+          data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
+          data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
+          data-mbull="{{ r.margin_bull if r.margin_bull is not none else '' }}"
+          class="sub-{{ sg.subgroup_id }}{% if r.rating == 'exclude' %} row-muted{% endif %}">
+        <td>{{ r.stock_code }}</td>
+        <td>{{ r.stock_name }}</td>
+        <td class="col-sector"><span class="badge bg-light text-secondary">{{ r.sector_label }}</span></td>
+        <td>{{ r.currency or '—' }}</td>
+        <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
+        <td class="text-end">
+          {{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}
+          <span class="mg cell-mbear {% if r.margin_bear is not none and r.margin_bear >= 0 %}margin-pos{% elif r.margin_bear is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bear * 100) if r.margin_bear is not none else '' }}</span>
+        </td>
+        <td class="text-end">
+          {{ '%.2f'|format(r.base) if r.base is not none else '—' }}
+          <span class="mg cell-mbase {% if r.margin_base is not none and r.margin_base >= 0 %}margin-pos{% elif r.margin_base is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_base * 100) if r.margin_base is not none else '' }}</span>
+        </td>
+        <td class="text-end">
+          {{ '%.2f'|format(r.bull) if r.bull is not none else '—' }}
+          <span class="mg cell-mbull {% if r.margin_bull is not none and r.margin_bull >= 0 %}margin-pos{% elif r.margin_bull is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bull * 100) if r.margin_bull is not none else '' }}</span>
+        </td>
+        <td class="text-end cell-price">{{ '%.2f'|format(r.current_price) if r.current_price is not none else '—' }}</td>
+        <td>{{ r.conviction_date or '—' }}</td>
+        <td>{% if r.source_doc %}<span title="{{ r.source_doc }}" style="cursor:help">📄</span>{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
     {% endfor %}
   {% endfor %}
   </tbody>
@@ -109,7 +118,8 @@ let sortKey = 'base';
 let sortDir = 'desc';
 let mode = 'grouped';
 let currentMarket = 'all';
-let defaultGroupOrder = [];
+let defaultSectorOrder = [];
+let defaultSubOrder = {};
 const MARGIN_SORT_KEYS = ['bear', 'base', 'bull'];
 
 function loadPref() {
@@ -129,26 +139,33 @@ function marginOf(tr, key) {
   return (v === '' || v === undefined) ? null : parseFloat(v);
 }
 
+function rowMatchesMarket(tr) {
+  return currentMarket === 'all' || tr.dataset.market === currentMarket;
+}
+
 function sortRows(rows) {
   const dir = sortDir === 'asc' ? 1 : -1;
   return rows.slice().sort((a, b) => {
     const va = marginOf(a, sortKey), vb = marginOf(b, sortKey);
     if (va === null && vb === null) return 0;
-    if (va === null) return 1;   // null 边际恒末位
+    if (va === null) return 1;
     if (vb === null) return -1;
     return (va - vb) * dir;
   });
 }
 
-function rowMatchesMarket(tr) {
-  return currentMarket === 'all' || tr.dataset.market === currentMarket;
-}
-
-function groupRepresentative(sortedRows) {
-  for (const tr of sortedRows) {
+function repRows(rows) {
+  for (const tr of rows) {
     if (rowMatchesMarket(tr)) return marginOf(tr, sortKey);
   }
   return null;
+}
+
+function cmpRep(va, vb, dir) {
+  if (va === null && vb === null) return 0;
+  if (va === null) return 1;
+  if (vb === null) return -1;
+  return (va - vb) * dir;
 }
 
 function updateArrows() {
@@ -165,30 +182,43 @@ function applySort() {
     sortRows([...tbody.querySelectorAll('tr[data-code]')]).forEach(r => tbody.appendChild(r));
     return;
   }
-  const headers = [...tbody.querySelectorAll('.group-header')];
-  const groupRows = new Map();
-  headers.forEach(h => {
-    const sector = h.dataset.sector;
-    groupRows.set(sector, sortRows([...tbody.querySelectorAll('tr.grp-' + CSS.escape(sector) + '[data-code]')]));
+  const isMargin = MARGIN_SORT_KEYS.includes(sortKey);
+  const dir = sortDir === 'asc' ? 1 : -1;
+  const lvl1 = new Map([...tbody.querySelectorAll('.group-header.lvl1')].map(h => [h.dataset.sector, h]));
+  const lvl2 = new Map([...tbody.querySelectorAll('.group-header.lvl2')].map(h => [h.dataset.subgroup, h]));
+  const subRows = new Map();
+  lvl2.forEach((h, subId) => {
+    subRows.set(subId, sortRows([...tbody.querySelectorAll('tr.sub-' + CSS.escape(subId) + '[data-code]')]));
   });
-  let order = defaultGroupOrder;
-  if (MARGIN_SORT_KEYS.includes(sortKey)) {
-    const dir = sortDir === 'asc' ? 1 : -1;
-    order = [...groupRows.keys()].sort((sa, sb) => {
-      const va = groupRepresentative(groupRows.get(sa));
-      const vb = groupRepresentative(groupRows.get(sb));
-      if (va === null && vb === null) return 0;
-      if (va === null) return 1;
-      if (vb === null) return -1;
-      return (va - vb) * dir;
-    });
+  const subOrderBySector = {};
+  Object.keys(defaultSubOrder).forEach(sec => {
+    let order = defaultSubOrder[sec].slice();
+    if (isMargin) {
+      order.sort((a, b) => cmpRep(repRows(subRows.get(a) || []), repRows(subRows.get(b) || []), dir));
+    }
+    subOrderBySector[sec] = order;
+  });
+  function repSector(sec) {
+    for (const subId of (subOrderBySector[sec] || [])) {
+      const r = repRows(subRows.get(subId) || []);
+      if (r !== null) return r;
+    }
+    return null;
   }
-  const headerBySector = new Map(headers.map(h => [h.dataset.sector, h]));
-  order.forEach(sector => {
-    const header = headerBySector.get(sector);
-    if (!header) return;
-    tbody.appendChild(header);
-    (groupRows.get(sector) || []).forEach(r => tbody.appendChild(r));
+  let sectorOrder = defaultSectorOrder.slice();
+  if (isMargin) {
+    sectorOrder.sort((a, b) => cmpRep(repSector(a), repSector(b), dir));
+  }
+  sectorOrder.forEach(sec => {
+    const h1 = lvl1.get(sec);
+    if (!h1) return;
+    tbody.appendChild(h1);
+    (subOrderBySector[sec] || []).forEach(subId => {
+      const h2 = lvl2.get(subId);
+      if (!h2) return;
+      tbody.appendChild(h2);
+      (subRows.get(subId) || []).forEach(r => tbody.appendChild(r));
+    });
   });
 }
 
@@ -201,6 +231,7 @@ function sortBy(key) {
   }
   savePref();
   applySort();
+  recompute();
 }
 
 function setMode(m) {
@@ -214,12 +245,11 @@ function setMode(m) {
     b.classList.toggle('btn-outline-primary', !on);
   });
   if (m === 'flat') {
-    document.querySelectorAll('#val-table tr[data-code]').forEach(tr => tr.classList.remove('hidden-by-group'));
     document.querySelectorAll('#val-table .group-header').forEach(h => h.classList.remove('collapsed'));
   }
   savePref();
   applySort();
-  applyMarketFilter();
+  recompute();
 }
 
 function switchMarket(ev, market) {
@@ -231,37 +261,67 @@ function switchMarket(ev, market) {
     b.classList.toggle('btn-outline-primary', !on);
   });
   applySort();
-  applyMarketFilter();
+  recompute();
 }
 
-function applyMarketFilter() {
-  document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
-    const mOk = currentMarket === 'all' || tr.dataset.market === currentMarket;
-    const collapsed = tr.classList.contains('hidden-by-group');
-    tr.style.display = (mOk && !collapsed) ? '' : 'none';
+function recompute() {
+  const tbody = document.querySelector('#val-table tbody');
+  const collapsedSec = new Set();
+  tbody.querySelectorAll('.group-header.lvl1.collapsed').forEach(h => collapsedSec.add(h.dataset.sector));
+  const collapsedSub = new Set();
+  tbody.querySelectorAll('.group-header.lvl2.collapsed').forEach(h => collapsedSub.add(h.dataset.subgroup));
+
+  tbody.querySelectorAll('tr[data-code]').forEach(tr => {
+    const mOk = rowMatchesMarket(tr);
     tr.dataset.marketHidden = mOk ? '' : '1';
+    let show;
+    if (mode === 'flat') {
+      show = mOk;
+    } else {
+      show = mOk && !collapsedSec.has(tr.dataset.sector) && !collapsedSub.has(tr.dataset.subgroup);
+    }
+    tr.style.display = show ? '' : 'none';
   });
-  if (mode === 'grouped') {
-    document.querySelectorAll('#val-table .group-header').forEach(h => {
-      const sector = h.dataset.sector;
-      const rows = document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]');
-      let visible = 0;
-      rows.forEach(r => { if (r.dataset.marketHidden !== '1') visible++; });
-      h.style.display = visible > 0 ? '' : 'none';
-      const badge = h.querySelector('.group-count');
-      if (badge) badge.textContent = visible;
-    });
+
+  if (mode === 'flat') {
+    tbody.querySelectorAll('.group-header').forEach(h => { h.style.display = 'none'; });
+    return;
   }
+
+  const subVisible = {}, secVisible = {};
+  tbody.querySelectorAll('tr[data-code]').forEach(tr => {
+    if (tr.dataset.marketHidden === '1') return;
+    subVisible[tr.dataset.subgroup] = (subVisible[tr.dataset.subgroup] || 0) + 1;
+    secVisible[tr.dataset.sector] = (secVisible[tr.dataset.sector] || 0) + 1;
+  });
+  tbody.querySelectorAll('.group-header.lvl2').forEach(h => {
+    const v = subVisible[h.dataset.subgroup] || 0;
+    h.style.display = (v > 0 && !collapsedSec.has(h.dataset.sector)) ? '' : 'none';
+    const badge = h.querySelector('.subgroup-count');
+    if (badge) badge.textContent = v;
+  });
+  tbody.querySelectorAll('.group-header.lvl1').forEach(h => {
+    const v = secVisible[h.dataset.sector] || 0;
+    h.style.display = v > 0 ? '' : 'none';
+    const badge = h.querySelector('.group-count');
+    if (badge) badge.textContent = v;
+  });
 }
 
-function toggleGroup(sector) {
+function toggleSector(sector) {
   if (mode !== 'grouped') return;
-  const header = document.querySelector('#val-table .group-header[data-sector="' + sector + '"]');
-  const collapsed = header.classList.toggle('collapsed');
-  document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]').forEach(tr => {
-    tr.classList.toggle('hidden-by-group', collapsed);
-  });
-  applyMarketFilter();
+  const h = [...document.querySelectorAll('#val-table .group-header.lvl1')].find(x => x.dataset.sector === sector);
+  if (!h) return;
+  h.classList.toggle('collapsed');
+  recompute();
+}
+
+function toggleSub(subId) {
+  if (mode !== 'grouped') return;
+  const h = [...document.querySelectorAll('#val-table .group-header.lvl2')].find(x => x.dataset.subgroup === subId);
+  if (!h) return;
+  h.classList.toggle('collapsed');
+  recompute();
 }
 
 async function refreshPrices() {
@@ -286,6 +346,7 @@ async function refreshPrices() {
       });
     });
     applySort();
+    recompute();
     status.textContent = '已更新 ' + new Date().toLocaleTimeString();
   } catch (e) {
     status.textContent = '刷新失败';
@@ -296,8 +357,14 @@ async function refreshPrices() {
 
 function initValuations() {
   loadPref();
-  defaultGroupOrder = [...document.querySelectorAll('#val-table .group-header')].map(h => h.dataset.sector);
-  setMode(mode);  // 应用 table class + 模式按钮态 + applySort + applyMarketFilter
+  const tbody = document.querySelector('#val-table tbody');
+  if (!tbody) return;
+  defaultSectorOrder = [...tbody.querySelectorAll('.group-header.lvl1')].map(h => h.dataset.sector);
+  defaultSubOrder = {};
+  tbody.querySelectorAll('.group-header.lvl2').forEach(h => {
+    (defaultSubOrder[h.dataset.sector] = defaultSubOrder[h.dataset.sector] || []).push(h.dataset.subgroup);
+  });
+  setMode(mode);
 }
 document.addEventListener('DOMContentLoaded', initValuations);
 </script>
