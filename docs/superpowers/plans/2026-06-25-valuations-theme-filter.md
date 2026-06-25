@@ -265,7 +265,9 @@ rtk git add app/routes/valuations.py tests/test_valuations.py && rtk git commit 
 
 **Interfaces:**
 - Consumes: 模板上下文 `theme_options`（Task 3）、行 `r.themes`（Task 2/3）。
-- Produces: 行 `data-themes`（JSON 数组）；下拉容器 `#theme-filter`；JS `applyFilters()` / `themeMatches()` / `onThemeToggle()` / `clearThemes()`。
+- Produces: 行 `data-themes`（JSON 数组）；下拉容器 `#theme-filter`；JS `themeMatches()` / `onThemeToggle()` / `clearThemes()` / `filterThemeSearch()`；主题筛选并入既有 `recompute()` 与 `repRows()`（本页过滤核心函数是 `recompute`，**不是** applyFilters）。
+
+> **本任务针对当前嵌套两级分组模板**（sector→subsector）：有 **两条** group-header（lvl1/lvl2，各 `colspan="11"`），过滤/计数函数是 `recompute()`，分组排序代表值函数是 `repRows()`。下方编辑均按此结构给出。
 
 - [ ] **Step 1: 写失败测试**
 
@@ -276,21 +278,28 @@ def test_index_has_theme_dropdown_and_column(app_client):
     html = app_client.get('/valuations/').data.decode('utf-8')
     assert 'id="theme-filter"' in html, '缺主题下拉'
     assert 'id="theme-search"' in html, '缺主题搜索框'
-    assert '主题' in html, '缺主题列头/按钮文案'
-    assert 'function applyFilters' in html, '缺 applyFilters'
+    assert 'col-theme' in html, '缺主题列'
     assert 'function themeMatches' in html, '缺 themeMatches'
     assert 'onThemeToggle' in html, '缺主题勾选回调'
 
 
-def test_index_group_header_colspan_updated(app_client):
+def test_index_group_headers_colspan_updated(app_client):
     html = app_client.get('/valuations/').data.decode('utf-8')
-    assert 'colspan="12"' in html, '组头 colspan 未随主题列改为 12'
+    # 两级组头（lvl1 sector + lvl2 subgroup）都要随主题列扩到 12
+    assert html.count('colspan="12"') >= 2, '两级组头 colspan 未都改为 12'
+    assert 'colspan="11"' not in html, '仍有未更新的 colspan=11'
+
+
+def test_recompute_integrates_theme_filter(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'themeMatches(tr)' in html, 'recompute/repRows 未并入主题筛选'
+    assert 'filterHidden' in html, '未改用合并筛选标记 filterHidden'
 ```
 
 - [ ] **Step 2: 运行测试确认失败**
 
-Run: `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/test_valuations.py -v -k "theme_options or theme_dropdown or colspan"`
-Expected: FAIL（HTML 无下拉 / 无 applyFilters / colspan 仍 11）
+Run: `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/test_valuations.py -v -k "theme_dropdown or colspan or recompute_integrates"`
+Expected: FAIL（HTML 无下拉 / 无 themeMatches / colspan 仍 11）
 
 - [ ] **Step 3a: 加主题筛选下拉控件**
 
@@ -327,13 +336,16 @@ Expected: FAIL（HTML 无下拉 / 无 applyFilters / colspan 仍 11）
       <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th><th class="col-theme">主题</th>
 ```
 
-组头 `colspan`：把 `<th colspan="11">` 改为 `<th colspan="12">`：
+组头 `colspan`：**两条** group-header 的 `<th colspan="11">` 都改为 `<th colspan="12">`——lvl1（sector，`{{ g.label }}`）与 lvl2（subgroup，`{{ sg.label }}`）各一处：
 
 ```html
       <th colspan="12"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
 ```
+```html
+      <th colspan="12"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
+```
 
-数据行 `<tr ...>` 上加 `data-themes` 属性（在 `data-sector` 之后）：
+数据行 `<tr ...>` 上加 `data-themes` 属性（在 `data-subgroup="{{ sg.subgroup_id }}"` 之后）：
 
 ```html
         data-themes='{{ r.themes | tojson }}'
@@ -349,7 +361,9 @@ Expected: FAIL（HTML 无下拉 / 无 applyFilters / colspan 仍 11）
 
 > 顺序须与表头一致：代码/名称/板块/币种/**主题**/评级/Bear/Bull…。币种单元格 `<td>{{ r.currency or '—' }}</td>` 保持原位，主题列紧随其后。
 
-- [ ] **Step 3c: JS——筛选态 + 双条件过滤 + 搜索 + 持久化**
+- [ ] **Step 3c: JS——筛选态 + 主题过滤并入 recompute/repRows + 搜索 + 持久化**
+
+> 本页过滤/计数核心函数是 **`recompute()`**，分组排序代表值函数是 **`repRows()`**（无 applyFilters / 无 grp- 扁平类）。主题筛选并入这两个函数，与现有市场筛选 AND。
 
 在 `<script>` 内 `let currentMarket = 'all';` 之后加：
 
@@ -357,7 +371,7 @@ Expected: FAIL（HTML 无下拉 / 无 applyFilters / colspan 仍 11）
 let selectedThemes = new Set();
 ```
 
-把 `PREF_KEY` 的 `loadPref` / `savePref` 扩展为带 themes。将 `savePref` 改为：
+将 `savePref` 改为带 themes：
 
 ```javascript
 function savePref() {
@@ -365,13 +379,13 @@ function savePref() {
 }
 ```
 
-将 `loadPref` 内 `} catch (e) {}` 之前补一段恢复 themes（在 mode 校验之后）：
+在 `loadPref` 内 `if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;` 之后补恢复 themes：
 
 ```javascript
     if (Array.isArray(p.themes)) p.themes.forEach(t => selectedThemes.add(t));
 ```
 
-新增主题相关函数（放在 `applyMarketFilter` 函数定义附近）：
+新增主题相关函数（放在 `recompute` 函数定义之前）。注意 `onThemeToggle`/`clearThemes` 调 `applySort(); recompute();`（与 `switchMarket` 同款，先重排分组再重算可见/计数）：
 
 ```javascript
 function themeMatches(tr) {
@@ -392,7 +406,8 @@ function onThemeToggle() {
   );
   updateThemeButton();
   savePref();
-  applyFilters();
+  applySort();
+  recompute();
 }
 
 function clearThemes() {
@@ -400,7 +415,8 @@ function clearThemes() {
   selectedThemes.clear();
   updateThemeButton();
   savePref();
-  applyFilters();
+  applySort();
+  recompute();
 }
 
 function filterThemeSearch(q) {
@@ -412,43 +428,59 @@ function filterThemeSearch(q) {
 }
 ```
 
-把现有 `applyMarketFilter` **整体替换**为 `applyFilters`（合并市场 + 主题双条件，dataset 改名 `filterHidden`）：
+让分组排序代表值函数 `repRows` 也尊重主题筛选。把：
 
 ```javascript
-function applyFilters() {
-  document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
-    const fOk = rowMatchesMarket(tr) && themeMatches(tr);
-    const collapsed = tr.classList.contains('hidden-by-group');
-    tr.style.display = (fOk && !collapsed) ? '' : 'none';
-    tr.dataset.filterHidden = fOk ? '' : '1';
-  });
-  if (mode === 'grouped') {
-    document.querySelectorAll('#val-table .group-header').forEach(h => {
-      const sector = h.dataset.sector;
-      const rows = document.querySelectorAll('#val-table tr.grp-' + CSS.escape(sector) + '[data-code]');
-      let visible = 0;
-      rows.forEach(r => { if (r.dataset.filterHidden !== '1') visible++; });
-      h.style.display = visible > 0 ? '' : 'none';
-      const badge = h.querySelector('.group-count');
-      if (badge) badge.textContent = visible;
-    });
-  }
-}
-```
-
-把所有 `applyMarketFilter()` 调用点改为 `applyFilters()`——共 3 处：`setMode` 末尾、`switchMarket` 末尾、`toggleGroup` 末尾。
-
-让 `groupRepresentative` 也尊重主题筛选，把：
-
-```javascript
+function repRows(rows) {
+  for (const tr of rows) {
     if (rowMatchesMarket(tr)) return marginOf(tr, sortKey);
+  }
+  return null;
+}
 ```
 
 改为：
 
 ```javascript
+function repRows(rows) {
+  for (const tr of rows) {
     if (rowMatchesMarket(tr) && themeMatches(tr)) return marginOf(tr, sortKey);
+  }
+  return null;
+}
 ```
+
+把 `recompute()` 内市场单条件改为市场 AND 主题，并把标记 `marketHidden` 统一改名 `filterHidden`。两处精确替换：
+
+**（1）行可见性主循环**——把：
+
+```javascript
+    const mOk = rowMatchesMarket(tr);
+    tr.dataset.marketHidden = mOk ? '' : '1';
+    let show;
+    if (mode === 'flat') {
+      show = mOk;
+    } else {
+      show = mOk && !collapsedSec.has(tr.dataset.sector) && !collapsedSub.has(tr.dataset.subgroup);
+    }
+```
+
+改为：
+
+```javascript
+    const fOk = rowMatchesMarket(tr) && themeMatches(tr);
+    tr.dataset.filterHidden = fOk ? '' : '1';
+    let show;
+    if (mode === 'flat') {
+      show = fOk;
+    } else {
+      show = fOk && !collapsedSec.has(tr.dataset.sector) && !collapsedSub.has(tr.dataset.subgroup);
+    }
+```
+
+**（2）可见计数循环**——把 `if (tr.dataset.marketHidden === '1') return;` 改为 `if (tr.dataset.filterHidden === '1') return;`
+
+（改完后 `recompute` 内不应再出现 `marketHidden` 或 `mOk`。）
 
 在 `initValuations()` 内 `setMode(mode);` **之前**补：恢复勾选态 + 按钮文案：
 
@@ -460,7 +492,7 @@ function applyFilters() {
   updateThemeButton();
 ```
 
-> `setMode` 末尾会调用 `applyFilters()`，故无需在 init 里再单独调一次。
+> `setMode` 末尾已调用 `applySort()` + `recompute()`，故 init 里无需再单独调。
 
 - [ ] **Step 3d: 加列显隐 CSS（与现有 col-sector 一致，平铺模式可见、不被模式切换隐藏）**
 
@@ -494,7 +526,8 @@ rtk git add app/templates/valuations.html tests/test_valuations.py && rtk git co
 
 ## 自检（Self-Review）记录
 
-- **Spec 覆盖**：数据源回填（Task 1/2）✓；≥2 主题聚合（Task 3 `build_theme_options`）✓；可搜索多选下拉（Task 4 Step 3a/3c）✓；OR + 市场 AND（`applyFilters`/`themeMatches`）✓；行内全部主题 badge（Task 4 Step 3b）✓；持久化（`savePref`/`loadPref`/init 恢复）✓；A+H 切口径边界（Task 2 Step 2 校验说明）✓。
+- **结构对齐（关键修订）**：本计划最初按估值页**扁平单层**分组编写；执行前发现当前 main 已合入**嵌套两级分组**（sector→subsector，过滤核心函数 `recompute()`、排序代表值 `repRows()`、两条 `colspan="11"` 组头）。Task 4 已整体改写为针对嵌套结构：主题筛选并入 `recompute()`/`repRows()`（非 applyFilters），两条组头 colspan 同改 12，`marketHidden`→`filterHidden`。Task 1–3（后端）与结构无关，不受影响。
+- **Spec 覆盖**：数据源回填（Task 1/2）✓；≥2 主题聚合（Task 3 `build_theme_options`）✓；可搜索多选下拉（Task 4 Step 3a/3c）✓；OR + 市场 AND（`recompute`/`themeMatches`）✓；行内全部主题 badge（Task 4 Step 3b）✓；持久化（`savePref`/`loadPref`/init 恢复）✓；A+H 切口径边界（Task 2 Step 2 校验说明）✓。
 - **占位符**：无 TBD/TODO；每个改码步骤均给完整代码。
-- **类型一致**：`build_theme_options` 返回 `[{'name','count'}]` 与模板 `t.name`/`t.count` 一致；`applyFilters`/`themeMatches`/`onThemeToggle`/`clearThemes`/`filterThemeSearch`/`updateThemeButton` 命名前后一致；dataset `filterHidden` 统一替换旧 `marketHidden`（3 处调用点 + 组头计数）。
+- **类型一致**：`build_theme_options` 返回 `[{'name','count'}]` 与模板 `t.name`/`t.count` 一致；`themeMatches`/`onThemeToggle`/`clearThemes`/`filterThemeSearch`/`updateThemeButton` 命名前后一致；dataset `filterHidden` 统一替换 `recompute` 内旧 `marketHidden`（赋值 + 计数循环 2 处）；`repRows` 同步并入主题条件。
 - **执行顺序注意**：`test_index_passes_theme_options`（Task 3 写）的 HTML 断言依赖 Task 4 模板，Task 3 Step 4 只跑路由层子集，完整 HTML 断言在 Task 4 Step 4 转绿。
