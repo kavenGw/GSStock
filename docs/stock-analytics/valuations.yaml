@@ -2859,3 +2859,21 @@
   - 周期
   - 电子玻璃转型
   - 光伏玻璃
+- stock_code: '002407'
+  stock_name: 多氟多
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 成本最低梯队的 LiPF6 全球第二 + 真实半导体级 HF 期权，业务质量不差；但估值已 price-in 周期峰值（PB 5.79x、对峰值利润动态 PE 17-22x），正常化场景加权内在价值仅约 11.9 元、安全边际约 -71%，且 2026Q1 OCF -6.88 亿、资产负债率 59.8%、利润现金质量差——非买点，等周期回落 + 第二曲线兑现再重估。
+  bear: 3.4
+  base: 9.8
+  bull: 25.7
+  dividend_yield: 0.48
+  conviction_date: '2026-06-26'
+  source_doc: sectors/semiconductor/materials/2026-06-26-多氟多-buffett分析.md
+  themes:
+  - 六氟磷酸锂
+  - 半导体材料
+  - 电子级氢氟酸
+  - 锂电材料周期
