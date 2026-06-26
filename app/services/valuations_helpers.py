@@ -47,3 +47,16 @@ def subsector_of(row: dict) -> Optional[str]:
     if len(parts) >= 4 and parts[0] == 'sectors':
         return parts[2]
     return None
+
+
+RATING_TO_QUALITY = {'core': 5, 'config': 4, 'watch': 3, 'exclude': 2}
+QUALITY_FALLBACK = 3
+
+
+def resolve_quality(row: dict) -> tuple[int, bool]:
+    """返回 (星级 1-5, 是否由 rating 推算)。row['quality'] 为合法 1-5 整数→手动覆写；
+    否则按 rating 映射，未知 rating 兜底 QUALITY_FALLBACK。"""
+    q = row.get('quality')
+    if isinstance(q, int) and not isinstance(q, bool) and 1 <= q <= 5:
+        return q, False
+    return RATING_TO_QUALITY.get(row.get('rating'), QUALITY_FALLBACK), True

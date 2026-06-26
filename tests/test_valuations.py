@@ -554,3 +554,33 @@ def test_loadpref_validates_persisted_themes(app_client):
     # 持久化 themes 恢复时须先校验仍是当前渲染的选项（防 phantom 筛选态）
     assert "querySelectorAll('#theme-options input')" in html, '缺 loadPref 对 theme_options 的校验'
     assert 'valid.has(t)' in html, '缺持久化 themes 有效性过滤'
+
+
+def test_resolve_quality_manual_override():
+    from app.routes.valuations import resolve_quality
+    assert resolve_quality({'quality': 1, 'rating': 'core'}) == (1, False)
+    assert resolve_quality({'quality': 5, 'rating': 'exclude'}) == (5, False)
+
+
+def test_resolve_quality_derived_from_rating():
+    from app.routes.valuations import resolve_quality
+    assert resolve_quality({'rating': 'core'}) == (5, True)
+    assert resolve_quality({'rating': 'config'}) == (4, True)
+    assert resolve_quality({'rating': 'watch'}) == (3, True)
+    assert resolve_quality({'rating': 'exclude'}) == (2, True)
+
+
+def test_resolve_quality_unknown_rating_fallback():
+    from app.routes.valuations import resolve_quality
+    assert resolve_quality({'rating': None}) == (3, True)
+    assert resolve_quality({}) == (3, True)
+    assert resolve_quality({'rating': 'mystery'}) == (3, True)
+
+
+def test_resolve_quality_illegal_value_falls_back():
+    from app.routes.valuations import resolve_quality
+    assert resolve_quality({'quality': 0, 'rating': 'core'}) == (5, True)
+    assert resolve_quality({'quality': 6, 'rating': 'watch'}) == (3, True)
+    assert resolve_quality({'quality': 'x', 'rating': 'config'}) == (4, True)
+    assert resolve_quality({'quality': 3.5, 'rating': 'core'}) == (5, True)
+    assert resolve_quality({'quality': None, 'rating': 'exclude'}) == (2, True)

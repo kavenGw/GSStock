@@ -8,6 +8,7 @@ from app.routes import valuations_bp
 from app.services import unified_stock_data_service
 from app.services.valuations_helpers import (
     VALUATIONS_PATH, load_valuations, _fetch_code, _extract_price, compute_margin, subsector_of,
+    resolve_quality,
 )
 
 logger = logging.getLogger(__name__)
