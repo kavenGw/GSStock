@@ -2778,3 +2778,21 @@
   - 磷化铟
   - 化合物半导体IDM
   - AI算力
+- stock_code: '688233'
+  stock_name: 神工股份
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 生意优质（零负债/速动16.58/硅零部件国产替代实兑）但价格极端透支——PE278x/PB14.6处5年97–98分位、一年+505%今日新高，期望内在价值/股约20元、安全边际约−87%，即便给最乐观bull情景仍−74%，等大幅回撤进合理区间
+  bear: 3.5
+  base: 17.6
+  bull: 42.3
+  dividend_yield: 0.11
+  conviction_date: '2026-06-26'
+  source_doc: sectors/semiconductor/silicon-material/2026-06-26-神工股份-buffett分析.md
+  themes:
+  - 半导体材料
+  - 刻蚀耗材
+  - 国产替代
+  - 大硅片
