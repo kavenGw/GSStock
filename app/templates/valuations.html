@@ -6,6 +6,8 @@
 .margin-neg { color: #dc3545; font-weight: 600; }
 .val-table th, .val-table td { font-size: 13px; white-space: nowrap; vertical-align: middle; }
 .rating-badge { font-size: 11px; }
+.stars { color: #f0ad4e; letter-spacing: 1px; }
+.q-derived { opacity: .55; }
 .row-muted td { color: #adb5bd; }
 .row-muted .rating-badge { opacity: .6; }
 .group-header { cursor: pointer; }
@@ -77,6 +79,7 @@ table.mode-flat .group-header { display: none; }
     <tr>
       <th>代码</th><th>名称</th><th class="col-sector">板块</th><th>币种</th><th class="col-theme">主题</th>
       <th class="sortable" data-sort="rating" onclick="sortBy('rating')">评级<span class="sort-arrow"></span></th>
+      <th class="sortable text-center" data-sort="quality" onclick="sortBy('quality')">质地<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="bear" onclick="sortBy('bear')">Bear<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="base" onclick="sortBy('base')">Base<span class="sort-arrow"></span></th>
       <th class="text-end sortable" data-sort="bull" onclick="sortBy('bull')">Bull<span class="sort-arrow"></span></th>
@@ -87,15 +90,16 @@ table.mode-flat .group-header { display: none; }
   <tbody>
   {% for g in groups %}
     <tr class="group-header lvl1" data-sector="{{ g.sector }}" onclick="toggleSector('{{ g.sector }}')">
-      <th colspan="12"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
+      <th colspan="13"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
     </tr>
     {% for sg in g.subgroups %}
     <tr class="group-header lvl2" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}" onclick="toggleSub('{{ sg.subgroup_id }}')">
-      <th colspan="12"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
+      <th colspan="13"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
     </tr>
       {% for r in sg.rows %}
       <tr data-code="{{ r.stock_code }}" data-market="{{ r.market }}" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}"
           data-mrating="{{ r.rating_rank if r.rating_rank is not none else '' }}"
+          data-mquality="{{ r.quality }}"
           data-mdate="{{ r.date_rank if r.date_rank is not none else '' }}"
           data-mbear="{{ r.margin_bear if r.margin_bear is not none else '' }}"
           data-mbase="{{ r.margin_base if r.margin_base is not none else '' }}"
@@ -110,6 +114,7 @@ table.mode-flat .group-header { display: none; }
           {% for t in r.themes %}<span class="badge bg-light text-secondary me-1" style="font-weight:400">{{ t }}</span>{% endfor %}
         </td>
         <td><span class="badge bg-secondary rating-badge">{{ r.rating or '—' }}</span></td>
+        <td class="text-center"><span class="stars{% if r.quality_derived %} q-derived{% endif %}" title="{{ '由评级推算' if r.quality_derived else '手动' }}">{{ '★' * r.quality }}{{ '☆' * (5 - r.quality) }}</span></td>
         <td class="text-end">
           {{ '%.2f'|format(r.bear) if r.bear is not none else '—' }}
           <span class="mg cell-mbear {% if r.margin_bear is not none and r.margin_bear >= 0 %}margin-pos{% elif r.margin_bear is not none %}margin-neg{% endif %}">{{ '%+.1f%%'|format(r.margin_bear * 100) if r.margin_bear is not none else '' }}</span>
@@ -151,7 +156,7 @@ const MARGIN_SORT_KEYS = ['bear', 'base', 'bull'];
 function loadPref() {
   try {
     const p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
-    if (['bear', 'base', 'bull', 'rating', 'date'].includes(p.sortKey)) sortKey = p.sortKey;
+    if (['bear', 'base', 'bull', 'rating', 'date', 'quality'].includes(p.sortKey)) sortKey = p.sortKey;
     if (['asc', 'desc'].includes(p.dir)) sortDir = p.dir;
     if (['grouped', 'flat'].includes(p.mode)) mode = p.mode;
     if (Array.isArray(p.themes)) {

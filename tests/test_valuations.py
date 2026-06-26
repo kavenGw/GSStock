@@ -538,8 +538,9 @@ def test_index_has_theme_dropdown_and_column(app_client):
 
 def test_index_group_headers_colspan_updated(app_client):
     html = app_client.get('/valuations/').data.decode('utf-8')
-    # 两级组头（lvl1 sector + lvl2 subgroup）都要随主题列扩到 12
-    assert html.count('colspan="12"') >= 2, '两级组头 colspan 未都改为 12'
+    # 两级组头（lvl1 sector + lvl2 subgroup）都要随质地列扩到 13
+    assert html.count('colspan="13"') >= 2, '两级组头 colspan 未都改为 13'
+    assert 'colspan="12"' not in html, '仍有未更新的 colspan=12'
     assert 'colspan="11"' not in html, '仍有未更新的 colspan=11'
 
 
@@ -600,3 +601,12 @@ def test_enrich_quality_manual_override():
     out = _enrich(rows, prices={}, cat_map={})
     assert out[0]['quality'] == 5
     assert out[0]['quality_derived'] is False
+
+
+def test_index_route_renders_quality_column(app_client):
+    resp = app_client.get('/valuations/')
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert '质地' in html
+    assert 'data-sort="quality"' in html
+    assert '★' in html
