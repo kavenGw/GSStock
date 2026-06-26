@@ -44,6 +44,8 @@ related_docs:
 
 h1 之后的 `<!-- BEGIN related_docs -->` / `<!-- END related_docs -->` 块由脚本生成，**不要手编**。
 
+**首建档 `related_docs: []` 的预期行为**：`--rewrite-blocks` 会移除空的 `<!-- BEGIN/END related_docs -->` 占位块（empty list 无内容可渲染），不是脏 diff；`--check-orphans` 会把无反向链的首建档列为孤儿——**属预期，非硬错误**，frontmatter lint 仍 exit 0 即合规。
+
 ## Lint 脚本（手动 run）
 
 ```bash

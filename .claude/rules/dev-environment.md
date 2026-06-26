@@ -59,4 +59,6 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 **`git commit --amend` 前重新验证 HEAD**：long-running subagent 完成后做 amend，期间可能有并行 session 已落新 commit，HEAD 已不是你的目标。Amend 前先 `git rev-parse HEAD` 对比预期 SHA；不一致就改成新建 cleanup commit，避免污染他人提交。
 
+**验证自己的 commit 没脱链用 `merge-base` 而非 `git log -N`**：并行 session 的 commit 在拓扑上交错插入，`git log --oneline -3` 短列表可能跳过你刚落的 commit，看似脱链。别据此惊慌——用 `git merge-base --is-ancestor <你的SHA> HEAD`（exit 0=仍在链上）确认，再 `git show --stat <SHA>` 核对内容。
+
 **并行 session 抢 git index**：多 Claude session 同跑一仓时，`git add` 暂存的文件会被另一 session 的 `git reset`/`git add` 在你两次 Bash 调用之间清空（实测 staged 下一条命令就消失，`git diff --cached` 变空 → 提交漏文件）。铁律：**`git add` 与 `git commit` 放进同一条 Bash 命令链**（`git add <精确路径...> && git commit -F .git/MSG.txt`，中文多行 message 走文件避免 heredoc 失配），切勿跨工具调用分开；提交后 `git show --stat <sha>` 确认只含本任务文件、未裹挟他人在写档。删除文件用 `git rm -q --ignore-unmatch <path>` 同链处理（文件已不在磁盘时 `git add` 该路径会 pathspec 报错）。
