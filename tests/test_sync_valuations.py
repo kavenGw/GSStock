@@ -240,3 +240,17 @@ def test_backfill_themes_idempotent(tmp_path):
     entries = [{'stock_code': '600000', 'source_doc': 'sectors/x/a-buffett分析.md'}]
     backfill_themes(entries, docs)
     assert backfill_themes(entries, docs) is False  # 第二次无变更
+
+
+def test_upsert_preserves_quality():
+    entries = [{'stock_code': '600519', 'rating': 'core', 'quality': 5, 'note': '老笔记'}]
+    upsert(entries, {'stock_code': '600519', 'rating': 'watch'})
+    assert entries[0]['quality'] == 5
+    assert entries[0]['note'] == '老笔记'
+    assert entries[0]['rating'] == 'watch'
+
+
+def test_upsert_new_entry_has_no_quality():
+    entries = []
+    upsert(entries, {'stock_code': '000001', 'rating': 'config'})
+    assert 'quality' not in entries[0]
