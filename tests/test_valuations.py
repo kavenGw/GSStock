@@ -584,3 +584,19 @@ def test_resolve_quality_illegal_value_falls_back():
     assert resolve_quality({'quality': 'x', 'rating': 'config'}) == (4, True)
     assert resolve_quality({'quality': 3.5, 'rating': 'core'}) == (5, True)
     assert resolve_quality({'quality': None, 'rating': 'exclude'}) == (2, True)
+
+
+def test_enrich_adds_quality_derived_from_rating():
+    from app.routes.valuations import _enrich
+    rows = [{'stock_code': '600519', 'rating': 'core'}]
+    out = _enrich(rows, prices={}, cat_map={})
+    assert out[0]['quality'] == 5
+    assert out[0]['quality_derived'] is True
+
+
+def test_enrich_quality_manual_override():
+    from app.routes.valuations import _enrich
+    rows = [{'stock_code': '600519', 'rating': 'watch', 'quality': 5}]
+    out = _enrich(rows, prices={}, cat_map={})
+    assert out[0]['quality'] == 5
+    assert out[0]['quality_derived'] is False

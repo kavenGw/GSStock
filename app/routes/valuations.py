@@ -43,6 +43,7 @@ def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> l
     for r in rows:
         data = prices.get(r['stock_code']) or {}
         price = _extract_price(data)
+        quality, quality_derived = resolve_quality(r)
         out.append({
             **r,
             'category': cat_map.get(r['stock_code']),
@@ -51,6 +52,8 @@ def _enrich(rows: list[dict], prices: dict, cat_map: Optional[dict] = None) -> l
             'current_price': price,
             'rating_rank': RATING_RANK.get(r.get('rating')),
             'date_rank': _date_rank(r.get('conviction_date')),
+            'quality': quality,
+            'quality_derived': quality_derived,
             'margin_bear': compute_margin(r.get('bear'), price),
             'margin_base': compute_margin(r.get('base'), price),
             'margin_bull': compute_margin(r.get('bull'), price),
