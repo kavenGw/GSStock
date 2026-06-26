@@ -100,6 +100,7 @@ description: >-
 - **同步 valuations.yaml**：估值数字已由 Phase B 写进 buffett 档 frontmatter 的 `valuation` 块，
   此处只需运行 `PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>`
   确定性 upsert（无需 LLM 再从正文提取）。详见 `references/playbook.md` §8。
+- **质地星级覆写（仅当与 rating 背离）**：估值页质地列默认按 rating 现算星级（core5/config4/watch3/exclude2）。**仅当**业务质地与该默认背离时——典型即红线 #4 的对偶：护城河顶级的好公司仅因太贵被评 `watch`/`config`——在 valuations.yaml 该条目手工加 `quality: N`（1-5），sync 已保留不冲掉。一致则留空。详见 `references/playbook.md` §8「quality 质地星级」。
 - **矿产/商品标的加 `commodity` 字段**：若标的属铜/锂等矿产板块（受某商品期货价格驱动），在 frontmatter 与 valuations.yaml 条目**同步**写：
   - `commodity`: `copper` | `lithium`（枚举见 `scripts/_docs_schema.py:COMMODITIES`；非矿产标的不写）
   - `commodity_impact`: `positive`（上游资源/矿/锂盐——商品涨价利好，卖方如紫金/赣锋）| `negative`（下游加工/电池/消费——商品涨价是成本，买方如铜冠铜箔/亿纬锂能）| `neutral`（中游冶炼厂——低自给率，铜价 pass-through、利润由 TC/RC 加工费驱动，如云南铜业/铜陵有色/江西铜业）

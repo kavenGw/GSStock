@@ -180,6 +180,15 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 按 `stock_code` upsert valuations.yaml（已存在→更新、不存在→追加），**不删除未匹配的存量条目**。
 无参数则全量扫描 upsert。详见 `scripts/sync_valuations.py`。
 
+### quality 质地星级（valuations.yaml 专属字段，按需覆写）
+
+估值页 `/valuations`「质地」列：★1-5 星，**抛开当前价格谈公司本身好坏**（与 bear/base/bull 的价格维度正交）。
+
+- **不在 frontmatter**，是 valuations.yaml 条目的可选整数字段（1-5）。**多数标的不必写**：渲染层缺省按 `rating` 现算（`core`→5 / `config`→4 / `watch`→3 / `exclude`→2，未知→3）。
+- **何时显式写（覆写默认）**：当**业务质地与 rating 隐含星级背离**时——典型即红线 #4「诚实面对贵」的对偶面：一家护城河顶级的好公司**仅因当前太贵**被你评 `watch`/`config`，rating 现算只给 3/4 星，会把"好公司"误显示成"一般"。此时在该条目显式写 `quality: 5`，让质地列把「好公司」与「便宜」分开。反向亦然：平庸生意因超跌进 `config`（现算 4 星）但质地实差 → 写 `quality: 2`。**★1 星保留给"质地很差"**。
+- **怎么写**：先跑 `sync_valuations.py` 建/更新条目，再在 valuations.yaml 该条目手工加一行 `quality: N`（1-5）。`sync_valuations.upsert` 已把 `quality` 列入保留名单（同 `note`），后续任何 re-sync **不会冲掉**手写值。
+- **怎么不写**：质地与 rating 隐含星级一致时（绝大多数情形）留空即可，靠现算，避免 167 条 yaml 噪音。
+
 ## 9. subagent 派发提示骨架
 
 每个 subagent 都要给**完整自包含上下文**（别让它读本计划/SKILL，直接喂它需要的）。骨架：
