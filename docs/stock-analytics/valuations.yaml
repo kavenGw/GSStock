@@ -1765,16 +1765,17 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-15'
-  source_doc: sectors/semiconductor/design/2026-05-15-芯原股份-buffett分析.md
+  bear: 28
+  base: 40
+  bull: 110
+  conviction_date: '2026-06-26'
+  source_doc: sectors/semiconductor/design/2026-06-26-芯原股份-buffett分析.md
   note: 长期亏损，文档明确无法用Buffett框架估值
   themes:
   - 半导体IP
+  - AI算力ASIC
+  - RISC-V
   - Chiplet
-  - 端侧AI
 - stock_code: '688525'
   stock_name: 佰维存储
   market: A
