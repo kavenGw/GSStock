@@ -1187,14 +1187,19 @@
   stock_name: 沪硅产业
   market: A
   currency: CNY
-  sector: other
-  rating: null
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-08'
-  source_doc: cross-sector/2026-05-08-立昂微-沪硅产业-buffett对比分析.md
+  sector: semiconductor
+  rating: exclude
+  bear: 1.8
+  base: 3.2
+  bull: 9.1
+  conviction_date: '2026-06-26'
+  source_doc: sectors/semiconductor/wafer/2026-06-26-沪硅产业-buffett分析.md
   note: Don't Buy；9年8年扣非为负，2025毛利率-17%
+  themes:
+  - 硅片
+  - 国产替代
+  - AI
+  - 周期
 - stock_code: AMD
   stock_name: AMD
   market: US
