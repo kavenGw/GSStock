@@ -1422,14 +1422,18 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: null
-  base: 60.0
-  bull: 68.0
-  conviction_date: '2026-05-19'
-  source_doc: sectors/semiconductor/materials/2026-05-19-江丰电子-buffett分析.md
+  watch_reason: 估值反向暴走至 PE TTM 165-177x、PB 14-17.6、forward PE 114-146x，期望内在价值约 89 元/股对应安全边际深度负值（约 -75%）；基本面两红旗虽部分修复但被市场过度定价，现价已透支至 2028 年之后。
+  bear: 40
+  base: 68
+  bull: 190
+  dividend_yield: 0.11
+  conviction_date: '2026-06-26'
+  source_doc: sectors/semiconductor/materials/2026-06-26-江丰电子-buffett分析.md
   note: 仅乐观稳态情景，买入区53-68元，无独立bear每股值
   themes:
-  - cpu_pcb
+  - 半导体材料
+  - 供给侧涨价
+  - 国产替代
 - stock_code: '300757'
   stock_name: 罗博特科
   market: A
@@ -2796,3 +2800,20 @@
   - 刻蚀耗材
   - 国产替代
   - 大硅片
+- stock_code: '301611'
+  stock_name: 珂玛科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 生意优质但价格极端透支。本土先进结构陶瓷龙头（2021 年本土供应总额份额约 72%、北方华创全球金牌供应商、2025 毛利率 51.55%）护城河真实，国产替代跑道长（设备用先进结构陶瓷国产化率仅约 19%）；但 PE_TTM≈294.9、PB≈40.91（同业组最高、远超第二名富创 18.6）、总市值 731 亿对 2025 归母净利仅 2.89 亿——估值处上市以来绝对顶部。基本面反向走弱：2025 增收不增利（净利 −7.04%、毛利率 58.49%→51.55%）、26Q1 净利 4588.74 万（−47.31%）近腰斩；今日 +11.46% 暴涨是设备零部件板块 β（创指跌超 4% 日同业富创/正帆 +20%、新莱 +14.5% 普涨），未找到公司层面具名催化。按穿越周期正常化 owner earnings（绝不取 2024 顶部年化）场景加权，期望内在价值约 174 亿（每股约 40 元）、安全边际约 −76%，即便最乐观 bull（342 亿/每股约 78 元）压测安全边际仍 −53%。好生意、坏价格、近期盈利恶化，待估值大幅回撤或正常化利润实质修复再评估。
+  bear: 20.6
+  base: 41.7
+  bull: 78.4
+  conviction_date: '2026-06-26'
+  source_doc: sectors/semiconductor/parts/2026-06-26-珂玛科技-buffett分析.md
+  themes:
+  - 半导体设备零部件
+  - 国产替代
+  - 先进陶瓷
+  - 设备超级周期
