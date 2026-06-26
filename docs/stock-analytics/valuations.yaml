@@ -2841,3 +2841,21 @@
   - 化合物半导体
   - LED芯片
   - 京东方系
+- stock_code: '601636'
+  stock_name: 旗滨集团
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: AI/TGV玻璃基板题材爆炒推PB至1.81、创52周新高，期望内在价值约6.1元、安全边际-32%已透支转型预期；浮法+光伏处周期底、H2 2025由盈转亏，AI载板系公司已辟谣的纯概念（无量产无营收），定增"玻璃基板"实为RF/汽车基板名实不符。等周期与估值回落至PB~1.1-1.2（约5.4-6.0元）或光伏止亏拐点确认再评估。
+  bear: 5.1
+  base: 5.4
+  bull: 9.3
+  dividend_yield: 1.2
+  conviction_date: '2026-06-26'
+  source_doc: sectors/materials/glass/2026-06-26-旗滨集团-buffett分析.md
+  themes:
+  - 玻璃
+  - 周期
+  - 电子玻璃转型
+  - 光伏玻璃
