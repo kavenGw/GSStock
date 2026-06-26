@@ -585,6 +585,7 @@ def test_resolve_quality_illegal_value_falls_back():
     assert resolve_quality({'quality': 'x', 'rating': 'config'}) == (4, True)
     assert resolve_quality({'quality': 3.5, 'rating': 'core'}) == (5, True)
     assert resolve_quality({'quality': None, 'rating': 'exclude'}) == (2, True)
+    assert resolve_quality({'quality': True, 'rating': 'core'}) == (5, True)
 
 
 def test_enrich_adds_quality_derived_from_rating():
