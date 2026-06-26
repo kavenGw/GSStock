@@ -18,6 +18,9 @@ related_docs:
   - path: ../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md
     note: 三安横跨 SiC+GaN 两条材料，本工艺对比 comps 的全产业链 IDM 背景标的
     symmetric: true
+  - path: 2026-06-26-三安光电-天岳先进-SiC价值链对比-comps.md
+    note: 三安(IDM) vs 天岳(纯衬底) SiC 价值链对比 comps，本工艺对比 comps 的价值链层姊妹切片
+    symmetric: true
 ---
 # SiC 衬底（天岳）vs GaN 器件（英诺）晶圆工艺对比 comps
 
@@ -27,6 +30,7 @@ related_docs:
 > - [2026-06-19-英诺赛科-buffett分析](../sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md) — 英诺 GaN 器件 buffett 档，本 comps 工艺对比的 GaN 侧标的（估值见该档）
 > - [2026-06-19-碳化硅-氮化镓-第三代半导体板块专题](../themes/2026-06-19-碳化硅-氮化镓-第三代半导体板块专题.md) — SiC+GaN 板块格局专题（投资格局/价值链），本 comps 为其工艺层细化切片
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安横跨 SiC+GaN 两条材料，本工艺对比 comps 的全产业链 IDM 背景标的
+> - [2026-06-26-三安光电-天岳先进-SiC价值链对比-comps](2026-06-26-三安光电-天岳先进-SiC价值链对比-comps.md) — 三安(IDM) vs 天岳(纯衬底) SiC 价值链对比 comps，本工艺对比 comps 的价值链层姊妹切片
 <!-- END related_docs -->
 
 ## §0 工艺层裁定（一句话结论）
