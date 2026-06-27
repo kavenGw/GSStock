@@ -2894,3 +2894,21 @@
   - 国产替代
   - AI
   - 周期
+- stock_code: '688691'
+  stock_name: 灿芯股份
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 收入连续两季 YoY 转正(2025Q4 +12.9% / 2026Q1 +23.4%)且在手订单 8.72亿覆盖度 >1x，复苏叙事有硬底；但 2026Q1 仍亏(扣非 -3205万)、毛利率 16% 远低于 2023 峰值 26%，盈利拐点未现，PE 失效改用 PB/PS——PB 10.25(IPO 以来 78 分位) / PS ~16x 给亏损股高估值。场景加权期望内在价值约 52 元(≈62亿市值)对现价 103 元安全边际约 -49.5%，即便最乐观 bull(80元)压力测试仍 -22.3%。中芯绑定(持股 14.23% + 关联采购 2026 预计升至 90%)是护城河也是风险集中双刃，AI 仅产品层(28nm 端侧 / DDR5 高速接口 IP)布局、业绩层无具名算力客户 / 无可量化 AI 营收。等扣非单季连续转正 + 毛利率重回 20%+ + AI 出现具名算力订单再重估，现价不买。
+  bear: 38
+  base: 52
+  bull: 80
+  dividend_yield: 0.16
+  conviction_date: '2026-06-27'
+  source_doc: sectors/semiconductor/design/2026-06-27-灿芯股份-buffett分析.md
+  themes:
+  - ASIC设计服务
+  - AI算力定制
+  - 国产替代
+  - 中芯生态
