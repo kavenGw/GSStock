@@ -2877,3 +2877,20 @@
   - 半导体材料
   - 电子级氢氟酸
   - 锂电材料周期
+- stock_code: '688783'
+  stock_name: 西安奕材
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 1.2
+  base: 2.0
+  bull: 6.9
+  conviction_date: '2026-06-27'
+  source_doc: sectors/semiconductor/wafer/2026-06-27-西安奕材-buffett分析.md
+  themes:
+  - 硅片
+  - 大硅片
+  - 国产替代
+  - AI
+  - 周期
