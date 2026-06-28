@@ -3037,3 +3037,20 @@
   - 半导体设备
   - 国产替代
   - 困境反转
+- stock_code: '300671'
+  stock_name: 富满微
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  quality: 2
+  watch_reason: 业绩拐点真实（2026Q1扣非转正+毛利率6.6%→20.6%双印证）但属强周期涨价beta而非稳态成长；PB 9.9处5年高位、拐点已大幅price-in，叠加治理警示函红旗+模拟二线无护城河+四年累计亏约9.5亿，期望内在价值较市值折让逾80%、即便最乐观bull仍-52%，无安全边际。等价格回调至接近净资产或拐点经3-4季度持续验证且治理整改落实后再评。
+  bear: 5.6
+  base: 10.2
+  bull: 33.9
+  conviction_date: '2026-06-28'
+  source_doc: sectors/semiconductor/analog-power/2026-06-28-富满微-buffett分析.md
+  themes:
+  - 涨价周期
+  - 国产替代
+  - 业绩拐点
