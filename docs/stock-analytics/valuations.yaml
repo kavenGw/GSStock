@@ -2934,3 +2934,38 @@
   - 光芯片
   - CPO
   - 国产替代
+- stock_code: '603893'
+  stock_name: 瑞芯微
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 高质量成长 fabless（ROE26%/毛利42%/扣非≈归母）质地远强于同业，但估值极贵（PE66x/PB16.3x），期望内在价值约60元 vs 现价182元、安全边际约-67%，连 bull 情景(112元)安全边际仍 -38%，待大幅回调
+  bear: 26.6
+  base: 52.0
+  bull: 112.5
+  dividend_yield: 0.82
+  quality: 4
+  conviction_date: '2026-06-28'
+  source_doc: sectors/semiconductor/design/2026-06-28-瑞芯微-buffett分析.md
+  themes:
+  - 端侧AI-SoC
+  - AIoT
+  - 国产替代
+- stock_code: '300814'
+  stock_name: 中富电路
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  watch_reason: PE_TTM~998/PB 23.19 均贴5年绝对顶部，AI电源PCB仅产品层认证、营收未独立兑现，弱护城河+增收不增利历史；仅跟踪2026Q1毛利27%拐点能否持续与AI营收是否首披露，当前价绝对不可买
+  bear: 6.9
+  base: 8.2
+  bull: 20.5
+  dividend_yield: 0.0005
+  conviction_date: '2026-06-28'
+  source_doc: sectors/electronics/pcb/2026-06-28-中富电路-buffett分析.md
+  themes:
+  - AI算力PCB
+  - AI电源
+  - 供给侧
