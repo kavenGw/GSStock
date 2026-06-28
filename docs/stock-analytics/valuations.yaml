@@ -3005,3 +3005,35 @@
   - 稀有气体
   - 国产替代
   - 供给侧
+- stock_code: '688106'
+  stock_name: 金宏气体
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 2.07
+  base: 4.59
+  bull: 9.34
+  dividend_yield: 0.3
+  conviction_date: '2026-06-28'
+  source_doc: sectors/materials/industrial-gas/2026-06-28-金宏气体-buffett分析.md
+  themes:
+  - 工业气体
+  - 电子特气
+  - 国产替代
+- stock_code: '603690'
+  stock_name: 至纯科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 这是困境反转命题而非成长设备股——主业是晶圆厂高纯工艺系统集成（特气/化学品/洁净室国内第一，占收入80%），不是对标盛美的清洗设备公司（设备仅10%、第二三梯队）。订单前瞻向好（2026Q1单季新签19.77亿、IC占94.4%≈2025全年78%，全年目标45-55亿翻倍，深绑中芯/华虹/长鑫/长存+长存三期洁净室招标）与财务现实深度背离（2025归母巨亏7.77亿、扣非自2023即转负、2026Q1仍亏0.84亿扣非、PE_TTM为负），叠加财务脆弱（短债35.27亿vs现金10.06亿、负债率73%、经营现金流常年为负、营业周期1118天）+治理红旗（实体清单+大股东套现12.6亿+2025Q4单季暴雷7.44亿减值）。订单≠收入≠利润、系统集成低毛利（23%）垫资重转化滞后1-2年；按穿越周期正常化利润算期望内在价值约82.8亿/每股21.6元、安全边际-39%，即便bull全兑现压测安全边际仍-15%。逻辑真实但扭亏未兑现、当前价反而把反转提前定价，给watch——等扣非转正确认+价格提供安全边际。
+  bear: 14.4
+  base: 23.5
+  bull: 30.0
+  conviction_date: '2026-06-28'
+  source_doc: sectors/semiconductor/process-systems/2026-06-28-至纯科技-buffett分析.md
+  themes:
+  - 半导体设备
+  - 国产替代
+  - 困境反转
