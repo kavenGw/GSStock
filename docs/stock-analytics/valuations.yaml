@@ -2474,9 +2474,9 @@
   rating: exclude
   bear: 6.0
   base: 11.7
-  bull: 26.0
-  conviction_date: '2026-06-20'
-  source_doc: sectors/semiconductor/mems/2026-06-20-赛微电子-buffett分析.md
+  bull: 25.7
+  conviction_date: '2026-06-28'
+  source_doc: sectors/semiconductor/mems/2026-06-28-赛微电子-buffett分析.md
   themes:
   - MEMS
   - 光交换OCS
