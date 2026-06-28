@@ -2986,3 +2986,22 @@
   - pcb
   - AI算力
   - 困境反转
+- stock_code: 002549
+  stock_name: 凯美特气
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: CO2 基本盘（石化尾气回收低成本 + 食品级 40% 份额 + 可乐供应商）是真护城河好生意，但 277x PE / 对正常化扣非约 0.64 亿估值约 200x，整张溢价押注仅占营收 2.06%、毛利率 -39.7% 的电子特气远期兑现；三情景期望内在价值约 22 亿（每股 3.19 元），对 132 亿市值（18.99 元）安全边际约 -83%，即便最乐观 bull 单独压测仍 -58%。执行兑现差（2022 股权激励考核 1.8/2.5/3.5 亿全落空）+ 强周期叙事（稀有气体已走完一轮 boom-bust），现价无任何安全垫，仅在股价回落至 CO2 基本盘合理估值的远低位（约 3-4 元区）方重看。
+  bear: 1.15
+  base: 2.88
+  bull: 7.91
+  dividend_yield: 0.27
+  conviction_date: '2026-06-28'
+  source_doc: sectors/materials/specialty-gas/2026-06-28-凯美特气-buffett分析.md
+  themes:
+  - 工业气体
+  - 电子特气
+  - 稀有气体
+  - 国产替代
+  - 供给侧
