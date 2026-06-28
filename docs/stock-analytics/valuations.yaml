@@ -1377,15 +1377,18 @@
   market: A
   currency: CNY
   sector: semiconductor
-  rating: watch
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-08'
-  source_doc: sectors/semiconductor/materials/2026-05-08-南大光电-buffett分析.md
+  rating: exclude
+  bear: 2.6
+  base: 5.73
+  bull: 12.97
+  dividend_yield: 0.36
+  conviction_date: '2026-06-28'
+  source_doc: sectors/semiconductor/materials/2026-06-28-南大光电-buffett分析.md
   note: 内在价值30-75亿，文档未披露股本，无法换算每股
   themes:
-  - memory
+  - 国产替代
+  - 电子特气
+  - 光刻胶
 - stock_code: '300458'
   stock_name: 全志科技
   market: A
@@ -2912,3 +2915,22 @@
   - AI算力定制
   - 国产替代
   - 中芯生态
+- stock_code: '688313'
+  stock_name: 仕佳光子
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: AI光芯片真成长已进业绩兑现期，但PE205x/PB53x、市值812亿处上市以来最贵分位，三情景加权内在价值约38元，对现价179.70安全边际约-79%；连最乐观bull口径压力测试仍-51%。基本面优、价格极贵，等大幅回调或盈利持续放量再议。
+  bear: 12
+  base: 37
+  bull: 88
+  dividend_yield: 0.17
+  quality: 4
+  conviction_date: '2026-06-28'
+  source_doc: sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md
+  themes:
+  - AI算力
+  - 光芯片
+  - CPO
+  - 国产替代
