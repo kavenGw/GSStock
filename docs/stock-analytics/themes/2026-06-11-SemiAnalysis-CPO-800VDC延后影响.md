@@ -43,6 +43,9 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-06-25-烽火通信-buffett分析.md
     note: 烽火通信深度档：DSP仅产品层维持exclude
     symmetric: true
+  - path: ../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md
+    note: 仕佳光子（光芯片）buffett——无源AWG/PLC强、有源EML早期，PE205x极贵定watch
+    symmetric: true
 ---
 # SemiAnalysis CPO/800VDC 落地延后 — 影响专题（2026-06-11）
 
@@ -55,6 +58,7 @@ related_docs:
 > - [2026-05-30-AI机柜铜连接-DAC-AEC产业链专题](./2026-05-30-AI机柜铜连接-DAC-AEC产业链专题.md) — 铜 vs 光的边界——CPO 延后利好铜连接的逻辑底料
 > - [2026-05-13-磷化铟-板块分析](./2026-05-13-磷化铟-板块分析.md) — InP 激光器是可插拔光模块上游，跑道延长的间接受益
 > - [2026-06-25-烽火通信-buffett分析](../sectors/semiconductor/optical/2026-06-25-烽火通信-buffett分析.md) — 烽火通信深度档：DSP仅产品层维持exclude
+> - [2026-06-28-仕佳光子-buffett分析](../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 仕佳光子（光芯片）buffett——无源AWG/PLC强、有源EML早期，PE205x极贵定watch
 <!-- END related_docs -->
 
 > 撰写日期：2026-06-11
