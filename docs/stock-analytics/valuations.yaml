@@ -2969,3 +2969,20 @@
   - AI算力PCB
   - AI电源
   - 供给侧
+- stock_code: '600601'
+  stock_name: 方正科技
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  watch_reason: PE_TTM 88.84/PB 11.39（5年中位3.25的3.5倍）严重透支；困境反转+毛利率16%→30.5%单边改善是硬实证，但市场定价的英伟达GB300 8亿美元大单纯属股吧/财富号自媒体传闻、无任何公司公告或权威背书，5年维度营收零增长、45亿扩产未达产+19.8亿定增摊薄；期望内在价值~123亿 vs 555.59亿市值安全边际约-78%，当前价不可买，仅跟踪困境反转盈利持续性+AI营收首披露+扩产达产
+  bear: 1.31
+  base: 2.95
+  bull: 5.57
+  dividend_yield: 0
+  conviction_date: '2026-06-28'
+  source_doc: sectors/electronics/pcb/2026-06-28-方正科技-buffett分析.md
+  themes:
+  - pcb
+  - AI算力
+  - 困境反转
