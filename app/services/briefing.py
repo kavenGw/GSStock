@@ -16,6 +16,84 @@ from app.config.sector_ratings import SECTOR_RATING_CONFIG
 logger = logging.getLogger(__name__)
 
 
+def get_categories() -> list:
+    """获取分类列表（含持仓股和用户分类，只统计A股）"""
+    from app.models.category import Category, StockCategory
+    from app.services.position import PositionService
+    from app.utils.market_identifier import MarketIdentifier
+
+    latest_date = PositionService.get_latest_date()
+    position_count = 0
+    if latest_date:
+        positions = PositionService.get_snapshot(latest_date)
+        position_count = sum(1 for p in positions if MarketIdentifier.is_a_share(p.stock_code))
+
+    categories = Category.query.filter_by(parent_id=None).all()
+
+    all_stock_cats = StockCategory.query.all()
+    cat_count = {}
+    for sc in all_stock_cats:
+        if sc.category_id and MarketIdentifier.is_a_share(sc.stock_code):
+            cat_count[sc.category_id] = cat_count.get(sc.category_id, 0) + 1
+
+    result = [
+        {'id': -1, 'name': '持仓股', 'count': position_count},
+    ]
+
+    for cat in categories:
+        count = cat_count.get(cat.id, 0)
+        for child in cat.children:
+            count += cat_count.get(child.id, 0)
+        result.append({
+            'id': cat.id,
+            'name': cat.name,
+            'count': count,
+        })
+
+    return result
+
+
+def get_stocks_by_category(category_id: int) -> list:
+    """按分类获取股票列表"""
+    from app.models.category import Category, StockCategory
+    from app.models.stock import Stock
+    from app.services.position import PositionService
+    from app.utils.market_identifier import MarketIdentifier
+
+    if category_id == -1:
+        latest_date = PositionService.get_latest_date()
+        if not latest_date:
+            return []
+        positions = PositionService.get_snapshot(latest_date)
+        return [{'stock_code': p.stock_code, 'stock_name': p.stock_name}
+                for p in positions if MarketIdentifier.is_a_share(p.stock_code)]
+
+    category = Category.query.get(category_id)
+    if not category:
+        return []
+
+    cat_ids = [category_id]
+    for child in category.children:
+        cat_ids.append(child.id)
+
+    stock_cats = StockCategory.query.filter(
+        StockCategory.category_id.in_(cat_ids)
+    ).all()
+
+    result = []
+    for sc in stock_cats:
+        if not MarketIdentifier.is_a_share(sc.stock_code):
+            continue
+        stock = Stock.query.filter_by(stock_code=sc.stock_code).first()
+        stock_name = stock.stock_name if stock else sc.stock_code
+        result.append({
+            'stock_code': sc.stock_code,
+            'stock_name': stock_name
+        })
+
+    return result
+
+
 # 配置常量
 STOCK_CATEGORIES = {
     'storage': {'name': '存储芯片', 'order': 1},
@@ -559,7 +637,6 @@ class BriefingService:
             }
         """
         from app.services.earnings import EarningsService
-        from app.routes.alert import get_categories, get_stocks_by_category
 
         try:
             # 获取所有分类的股票
