@@ -170,3 +170,20 @@ def test_add_existing_watch_keeps_source(client_ctx):
 
     row = CompanyKeyword.query.filter_by(name='盯盘公司').first()
     assert row.source == 'watch'  # 不被降级为 manual
+
+
+def test_get_news_items_company_tab_includes_watch(app_ctx):
+    from datetime import datetime
+    from app import db
+    from app.models.news import CompanyKeyword, NewsItem
+    from app.services.news_service import NewsService
+
+    db.session.add(CompanyKeyword(name='盯盘公司', source='watch', is_active=True))
+    db.session.add(NewsItem(
+        source_id='x1', source_name='test', content='盯盘公司发布利好',
+        display_time=datetime(2026, 6, 29, 10, 0), matched_keywords='盯盘公司',
+    ))
+    db.session.commit()
+
+    items = NewsService.get_news_items(tab='company')
+    assert any('盯盘公司' in (i['matched_keywords'] or '') for i in items)
