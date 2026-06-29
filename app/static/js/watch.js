@@ -84,6 +84,10 @@ const Watch = {
     chartMeta: {},
     tdSequential: {},
     tdSequentialIntraday: {},
+    ohlc: {},
+    signals: {},
+    SIGNAL_THRESHOLDS_KEY: 'watchSignalThresholds',
+    DEFAULT_THRESHOLDS: { rsiOverbought: 70, rsiOversold: 30, volumeRatio: 2.0, volumeShrinkRatio: 0.5, bollingerWidth: 2 },
     _marketViewMode: {},
     _weeklyChartData: {},
     lastRefreshTime: null,
@@ -211,6 +215,7 @@ const Watch = {
             this.updateStatus(`${this.stocks.length} 只股票`);
             this.recordRefreshTime();
             await this.loadAllCharts();
+            this.loadSignals();
 
             this._saveToStore();
         } catch (e) {
@@ -236,6 +241,71 @@ const Watch = {
                     <span class="${pctClass} small fw-bold" data-bench-pct="${b.code}">${pctDisplay}</span>
                 </div>
             </div>`;
+        }).join('');
+    },
+
+    // --- 技术信号 ---
+    _signalThresholds() {
+        try {
+            const raw = localStorage.getItem(this.SIGNAL_THRESHOLDS_KEY);
+            if (!raw) return { ...this.DEFAULT_THRESHOLDS };
+            return { ...this.DEFAULT_THRESHOLDS, ...JSON.parse(raw) };
+        } catch {
+            return { ...this.DEFAULT_THRESHOLDS };
+        }
+    },
+
+    _saveSignalThresholds(t) {
+        try {
+            localStorage.setItem(this.SIGNAL_THRESHOLDS_KEY, JSON.stringify(t));
+        } catch (e) {
+            console.warn('[Watch] 阈值保存失败:', e);
+        }
+    },
+
+    async loadSignals() {
+        try {
+            const resp = await fetch('/watch/signals');
+            const result = await resp.json();
+            if (!result.success) return;
+            this.ohlc = {};
+            (result.stocks || []).forEach(s => { this.ohlc[s.stock_code] = s.data || []; });
+            this.computeSignals();
+            this._updateAllSummaryTables();
+        } catch (e) {
+            console.error('[Watch] signals load failed:', e);
+        }
+    },
+
+    computeSignals() {
+        this.signals = {};
+        if (typeof SignalDetector === 'undefined') return;
+        const thresholds = this._signalThresholds();
+        for (const stock of this.stocks) {
+            const code = stock.stock_code;
+            const ohlc = this.ohlc[code];
+            if (!ohlc || ohlc.length < 20) continue;
+            try {
+                const result = SignalDetector.detectAll(ohlc, thresholds);
+                const recentIdx = ohlc.length - 3;
+                const patterns = [...result.buySignals, ...result.sellSignals]
+                    .filter(s => typeof s.index === 'number' && s.index >= recentIdx);
+                const merged = [...result.alerts, ...patterns];
+                if (merged.length > 0) this.signals[code] = merged;
+            } catch (e) {
+                console.warn(`[Watch] 信号计算失败 ${code}:`, e);
+            }
+        }
+    },
+
+    _renderSignalBadges(code) {
+        const signals = this.signals[code] || [];
+        if (signals.length === 0) return '<span class="text-muted">—</span>';
+        const cls = { buy: 'signal-buy', sell: 'signal-sell', neutral: 'signal-watch' };
+        return signals.map(s => {
+            const c = cls[s.type] || 'signal-watch';
+            const title = (s.description || '').replace(/"/g, '&quot;');
+            return `<span class="entry-signal ${c} me-1" title="${title}">${s.name}</span>`;
         }).join('');
     },
 
@@ -314,6 +384,7 @@ const Watch = {
         let html = `<table class="table table-sm table-hover stock-summary-table mb-0">
             <thead><tr>
                 <th>股票</th><th class="text-end">涨跌%</th>
+                <th>信号</th>
                 <th style="min-width:220px">支撑 / 现价 / 压力</th>
                 <th>AI摘要</th>
             </tr></thead><tbody>`;
@@ -387,6 +458,7 @@ const Watch = {
             html += `<tr>
                 <td class="stock-name">${name}${tdBadge}</td>
                 <td class="text-end ${pctClass} fw-bold">${pctDisplay}</td>
+                <td>${this._renderSignalBadges(code)}</td>
                 <td>${rangeBarHtml}</td>
                 <td>${aiHtml}</td>
             </tr>`;
