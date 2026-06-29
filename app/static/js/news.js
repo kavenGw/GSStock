@@ -305,7 +305,14 @@ const News = {
 
             if (compData.success) {
                 document.getElementById('companyKeywords').innerHTML = compData.companies.length
-                    ? compData.companies.map(c => `
+                    ? compData.companies.map(c => c.source === 'watch'
+                        ? `
+                        <span class="kw-manage-tag kw-company">
+                            ${c.name}
+                            <span class="kw-watch-badge">盯盘</span>
+                        </span>
+                    `
+                        : `
                         <span class="kw-manage-tag kw-company">
                             ${c.name}
                             <button class="kw-delete" onclick="News.deleteCompany('${c.id}')">-</button>
