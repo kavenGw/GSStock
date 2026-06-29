@@ -100,6 +100,26 @@ def migrate_wyckoff_table():
     logging.info("wyckoff_auto_result 迁移完成")
 
 
+def migrate_company_keyword_table():
+    """迁移 company_keyword 表：添加 source 列"""
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(db.engine)
+    try:
+        columns = [col['name'] for col in inspector.get_columns('company_keyword')]
+    except Exception:
+        return
+
+    if 'source' in columns:
+        return
+
+    logging.info("迁移 company_keyword 表: 添加 source 列")
+    with db.engine.connect() as conn:
+        conn.execute(text("ALTER TABLE company_keyword ADD COLUMN source VARCHAR(10) DEFAULT 'manual'"))
+        conn.commit()
+    logging.info("company_keyword 表迁移完成")
+
+
 class SafeRotatingFileHandler(_RotatingFileHandler):
     """Windows 安全的 RotatingFileHandler，轮转失败时跳过而非崩溃"""
 
@@ -292,6 +312,7 @@ def create_app(config_class=None):
         migrate_daily_snapshot_table()
         migrate_trades_table()
         migrate_wyckoff_table()
+        migrate_company_keyword_table()
 
         from app.seeds import (
             seed_cpu_category,
@@ -302,6 +323,7 @@ def create_app(config_class=None):
             seed_apple_category,
             seed_photoresist_category,
             seed_ccl_upstream_category,
+            seed_watch_companies,
         )
         seed_cpu_category()
         seed_worldcup_category()
@@ -311,6 +333,7 @@ def create_app(config_class=None):
         seed_apple_category()
         seed_photoresist_category()
         seed_ccl_upstream_category()
+        seed_watch_companies()
 
         # news 表重建：source_id 列类型从 INT 改为 VARCHAR
         from sqlalchemy import inspect as sa_inspect, text

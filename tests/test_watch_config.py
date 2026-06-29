@@ -5,7 +5,7 @@ from app.services.watch_service import WatchService
 def test_get_watch_codes_matches_config_order():
     codes = WatchService.get_watch_codes()
     assert codes == [e['code'] for e in WATCH_CODES]
-    assert len(codes) == 7
+    assert len(codes) == len(WATCH_CODES)
     assert '2631.HK' in codes and '2577.HK' in codes
 
 
@@ -30,7 +30,7 @@ def test_get_market_map():
     assert mm['000660.KS'] == 'KR'
     assert mm['2631.HK'] == 'HK'
     assert mm['300223'] == 'A'
-    assert len(mm) == 7
+    assert len(mm) == len(WATCH_CODES)
 
 
 def _watch_client():

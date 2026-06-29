@@ -42,6 +42,7 @@ class CompanyKeyword(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     last_fetched_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
+    source = db.Column(db.String(10), default='manual')
 
 
 class IdentifiedCompany(db.Model):
