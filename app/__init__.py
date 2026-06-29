@@ -270,7 +270,7 @@ def create_app(config_class=None):
             stock_db_path, _ = get_db_paths(app)
             cleanup_legacy_tables(stock_db_path)
 
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, alert_bp, briefing_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, supply_chain_bp, valuations_bp, minerals_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, briefing_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, supply_chain_bp, valuations_bp, minerals_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
@@ -281,7 +281,6 @@ def create_app(config_class=None):
     app.register_blueprint(profit_bp)
     app.register_blueprint(rebalance_bp)
     app.register_blueprint(heavy_metals_bp)
-    app.register_blueprint(alert_bp)
     app.register_blueprint(briefing_bp)
     app.register_blueprint(stock_detail_bp)
     app.register_blueprint(watch_bp)
