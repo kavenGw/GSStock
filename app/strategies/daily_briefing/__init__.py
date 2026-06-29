@@ -39,7 +39,6 @@ class DailyBriefingStrategy(Strategy):
         except Exception as e:
             logger.error(f'[每日简报] 推送失败: {e}')
 
-        self._push_value_dip_alert()
         self._push_pullback_alert()
 
     def _scan_weekend(self):
@@ -88,24 +87,6 @@ class DailyBriefingStrategy(Strategy):
             logger.error(f'[每日简报] 信号缓存更新失败: {e}')
 
     @staticmethod
-    def _push_value_dip_alert():
-        """检测价值洼地并推送 Slack 提醒"""
-        from app.services.value_dip import ValueDipService
-        from app.services.notification import NotificationService
-
-        try:
-            dips = ValueDipService.detect_value_dips()
-            if not dips:
-                logger.info('[每日简报] 无价值洼地')
-                return
-
-            message = DailyBriefingStrategy._format_value_dip_message(dips)
-            NotificationService.send_slack(message, 'news_daily')
-            logger.info(f'[每日简报] 价值洼地推送: {len(dips)} 条')
-        except Exception as e:
-            logger.error(f'[每日简报] 价值洼地推送失败: {e}')
-
-    @staticmethod
     def _push_pullback_alert():
         """推送高点回退排行"""
         from app.services.value_dip import ValueDipService
@@ -129,42 +110,9 @@ class DailyBriefingStrategy(Strategy):
         lines = ['📉 *高点回退提醒*（90日高点）\n']
         for s in stocks:
             lines.append(
-                f"  · {s['name']}（{s['sector']}）"
+                f"  · {s['name']}（{s['market']}）"
                 f" 现价{s['price']} / 高点{s['high']}"
                 f" → *{s['pullback_pct']}%*"
             )
         return '\n'.join(lines)
 
-    @staticmethod
-    def _format_value_dip_message(dips: list) -> str:
-        lines = ['⚠ *价值洼地提醒*\n']
-
-        # Group by sector for compact display
-        from collections import OrderedDict
-        sector_groups = OrderedDict()
-        for dip in dips:
-            name = dip['sector_name']
-            if name not in sector_groups:
-                sector_groups[name] = []
-            sector_groups[name].append(dip)
-
-        for sector_name, periods in sector_groups.items():
-            lines.append(f"*{sector_name}*")
-            for p in periods:
-                sc = p['sector_change']
-                ac = p['avg_change']
-                sc_s = f"{'+' if sc >= 0 else ''}{sc}%"
-                ac_s = f"{'+' if ac >= 0 else ''}{ac}%"
-                lines.append(f"  {p['period']} {sc_s} < 均值 {ac_s}")
-
-            stock_parts = []
-            for s in periods[0]['stocks']:
-                c = s['change']
-                if c is not None:
-                    stock_parts.append(f"{s['name']} {'+' if c >= 0 else ''}{c}%")
-                else:
-                    stock_parts.append(f"{s['name']} N/A")
-            lines.append('  · ' + ' · '.join(stock_parts))
-            lines.append('')
-
-        return '\n'.join(lines).strip()
