@@ -266,6 +266,7 @@ const Watch = {
     async loadSignals() {
         try {
             const resp = await fetch('/watch/signals');
+            if (!resp.ok) { console.error('[Watch] signals HTTP', resp.status); return; }
             const result = await resp.json();
             if (!result.success) return;
             this.ohlc = {};
@@ -302,10 +303,11 @@ const Watch = {
         const signals = this.signals[code] || [];
         if (signals.length === 0) return '<span class="text-muted">—</span>';
         const cls = { buy: 'signal-buy', sell: 'signal-sell', neutral: 'signal-watch' };
+        const esc = str => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         return signals.map(s => {
             const c = cls[s.type] || 'signal-watch';
-            const title = (s.description || '').replace(/"/g, '&quot;');
-            return `<span class="entry-signal ${c} me-1" title="${title}">${s.name}</span>`;
+            const title = esc(s.description).replace(/"/g, '&quot;');
+            return `<span class="entry-signal ${c} me-1" title="${title}">${esc(s.name)}</span>`;
         }).join('');
     },
 
