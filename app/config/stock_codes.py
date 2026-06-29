@@ -105,4 +105,7 @@ WATCH_CODES = [
     {'code': '1810.HK',   'name': '小米集团',  'market': 'HK'},
     {'code': '0700.HK',   'name': '腾讯控股',  'market': 'HK'},
     {'code': '0358.HK',   'name': '江西铜业',  'market': 'HK'},
+    {'code': '688313',    'name': '仕佳光子',  'market': 'A'},
+    {'code': '9992.HK',   'name': '泡泡玛特',  'market': 'HK'},
+    {'code': '600703',    'name': '三安光电',  'market': 'A'},
 ]
