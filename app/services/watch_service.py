@@ -17,7 +17,7 @@ class WatchService:
         """获取盯盘列表（来自 WATCH_CODES 配置）"""
         return [{'id': i, 'stock_code': e['code'], 'stock_name': e['name'],
                  'market': e['market'], 'added_at': None}
-                for i, e in enumerate(WATCH_CODES)]
+                for i, e in enumerate(WATCH_CODES, 1)]
 
     @staticmethod
     def get_watch_codes() -> list[str]:
