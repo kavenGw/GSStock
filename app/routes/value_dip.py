@@ -11,11 +11,11 @@ def index():
     return render_template('value_dip.html')
 
 
-@value_dip_bp.route('/api/sectors')
-def sectors():
+@value_dip_bp.route('/api/stocks')
+def stocks():
     try:
-        data = ValueDipService.get_sector_performance()
-        return jsonify(data)
+        data = ValueDipService.get_watch_performance()
+        return jsonify({'stocks': data})
     except Exception as e:
         logger.error(f'[价值洼地] API 错误: {e}')
         return jsonify({'error': str(e)}), 500
