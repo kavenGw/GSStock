@@ -18,23 +18,6 @@ def watch_list():
     return jsonify({'success': True, 'data': items})
 
 
-@watch_bp.route('/add', methods=['POST'])
-def add_stock():
-    data = request.get_json()
-    code = data.get('stock_code', '').strip()
-    name = data.get('stock_name', '').strip()
-    if not code:
-        return jsonify({'success': False, 'message': '股票代码不能为空'})
-    result = WatchService.add_stock(code, name)
-    return jsonify(result)
-
-
-@watch_bp.route('/remove/<stock_code>', methods=['DELETE'])
-def remove_stock(stock_code):
-    result = WatchService.remove_stock(stock_code)
-    return jsonify(result)
-
-
 @watch_bp.route('/prices')
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
@@ -99,22 +82,6 @@ def analyze():
 def get_analysis():
     analyses = WatchService.get_all_today_analyses()
     return jsonify({'success': True, 'data': analyses})
-
-
-@watch_bp.route('/stocks/search')
-def search_stocks():
-    """搜索可添加的股票"""
-    from app.models.stock import Stock
-    q = request.args.get('q', '').strip()
-    if not q:
-        stocks = Stock.query.limit(50).all()
-    else:
-        stocks = Stock.query.filter(
-            (Stock.stock_code.contains(q)) | (Stock.stock_name.contains(q))
-        ).limit(50).all()
-    return jsonify({'success': True, 'data': [
-        {'stock_code': s.stock_code, 'stock_name': s.stock_name} for s in stocks
-    ]})
 
 
 @watch_bp.route('/market-status')

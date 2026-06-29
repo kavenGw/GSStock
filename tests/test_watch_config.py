@@ -31,3 +31,18 @@ def test_get_market_map():
     assert mm['2631.HK'] == 'HK'
     assert mm['300223'] == 'A'
     assert len(mm) == 7
+
+
+def _watch_client():
+    from flask import Flask
+    from app.routes import watch_bp
+    app = Flask(__name__)
+    app.register_blueprint(watch_bp)
+    return app.test_client()
+
+
+def test_add_remove_search_routes_removed():
+    c = _watch_client()
+    assert c.post('/watch/add', json={'stock_code': 'X'}).status_code == 404
+    assert c.delete('/watch/remove/300223').status_code == 404
+    assert c.get('/watch/stocks/search?q=x').status_code == 404
