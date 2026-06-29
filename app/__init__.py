@@ -273,7 +273,7 @@ def create_app(config_class=None):
     app.register_blueprint(minerals_bp)
 
     with app.app_context():
-        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, WatchList, WatchAnalysis, NewsItem, InterestKeyword, EarningsSnapshot
+        from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, WatchAnalysis, NewsItem, InterestKeyword, EarningsSnapshot
 
         # 一次性迁移：移除交易策略模块遗留表（2026-04-22 起）
         from sqlalchemy import inspect as sa_inspect, text
