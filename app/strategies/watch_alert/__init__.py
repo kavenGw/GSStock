@@ -22,7 +22,6 @@ class WatchAlertStrategy(Strategy):
     _last_params_retry = None
 
     def scan(self) -> list[Signal]:
-        from app.models.watch_list import WatchList
         from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
         from app.services.watch_alert_service import WatchAlertService
@@ -33,8 +32,7 @@ class WatchAlertStrategy(Strategy):
         if not codes:
             return []
 
-        items = WatchList.query.filter(WatchList.stock_code.in_(codes)).all()
-        market_map = {w.stock_code: w.market or MarketIdentifier.identify(w.stock_code) for w in items}
+        market_map = WatchService.get_market_map()
 
         # 按股票所属市场过滤，只保留市场已开盘的股票
         open_markets = {m for m in set(market_map.values()) if m and TradingCalendarService.is_market_open(m)}
@@ -61,11 +59,11 @@ class WatchAlertStrategy(Strategy):
             prices.update(data_service.get_realtime_prices(other_codes))
 
         watch_prices = {c: prices[c] for c in active_codes if c in prices}
-        name_map = {w.stock_code: w.stock_name for w in items}
+        name_map = {e['stock_code']: e['stock_name'] for e in WatchService.get_watch_list()}
 
         alert_params_map = self._load_alert_params(active_codes)
         td_results = self._calc_td_if_due(active_codes, data_service)
-        trading_minutes = self._calc_trading_minutes(active_codes, items, TradingCalendarService)
+        trading_minutes = self._calc_trading_minutes(active_codes, market_map, TradingCalendarService)
 
         service = WatchAlertService()
         signals = service.check_alerts(
@@ -150,9 +148,7 @@ class WatchAlertStrategy(Strategy):
         return td_results
 
     @staticmethod
-    def _calc_trading_minutes(codes: list[str], items: list, calendar_service) -> dict:
-        market_map = {w.stock_code: w.market for w in items}
-
+    def _calc_trading_minutes(codes: list[str], market_map: dict, calendar_service) -> dict:
         TOTAL_MINUTES = {
             'A': 240, 'US': 390, 'HK': 390,
             'KR': 390, 'TW': 270, 'JP': 300,
