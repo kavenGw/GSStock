@@ -315,7 +315,7 @@ const Watch = {
             <thead><tr>
                 <th>股票</th><th class="text-end">涨跌%</th>
                 <th style="min-width:220px">支撑 / 现价 / 压力</th>
-                <th>AI摘要</th><th></th>
+                <th>AI摘要</th>
             </tr></thead><tbody>`;
 
         for (const stock of stocks) {
@@ -389,7 +389,6 @@ const Watch = {
                 <td class="text-end ${pctClass} fw-bold">${pctDisplay}</td>
                 <td>${rangeBarHtml}</td>
                 <td>${aiHtml}</td>
-                <td class="text-end"><button class="btn btn-sm btn-link text-muted p-0" onclick="Watch.removeStock('${code}')" title="移除"><i class="bi bi-x-lg"></i></button></td>
             </tr>`;
         }
 
@@ -982,77 +981,6 @@ const Watch = {
         } catch (e) {
             console.error('[Watch] loadAnalysis failed:', e);
         }
-    },
-
-    // --- 增删 ---
-    async addStock(code, name) {
-        try {
-            const resp = await fetch('/watch/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stock_code: code, stock_name: name }),
-            });
-            const data = await resp.json();
-            if (data.success) {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addStockModal'));
-                if (modal) modal.hide();
-                document.getElementById('stockSearchInput').value = '';
-                document.getElementById('searchResults').innerHTML = '';
-                await this.loadList();
-            } else {
-                alert(data.message || '添加失败');
-            }
-        } catch (e) {
-            console.error('[Watch] addStock failed:', e);
-        }
-    },
-
-    async removeStock(code) {
-        if (!confirm('确定移除该股票？')) return;
-        try {
-            const resp = await fetch(`/watch/remove/${code}`, { method: 'DELETE' });
-            const data = await resp.json();
-            if (data.success) {
-                Object.values(this.chartInstances).forEach(c => c.dispose());
-                this.chartInstances = {};
-                delete this.chartData[code];
-                delete this._weeklyChartData[code];
-                this.stocks = this.stocks.filter(s => s.stock_code !== code);
-                this.prices = this.prices.filter(p => p.code !== code);
-                if (this.stocks.length === 0) {
-                    this.showEmpty();
-                } else {
-                    this.renderCards();
-                    this._renderAllMarketCharts();
-                }
-                this.updateStatus(`${this.stocks.length} 只股票`);
-            }
-        } catch (e) {
-            console.error('[Watch] removeStock failed:', e);
-        }
-    },
-
-    searchStocks(query) {
-        clearTimeout(this.searchDebounce);
-        this.searchDebounce = setTimeout(async () => {
-            const container = document.getElementById('searchResults');
-            if (!query.trim()) { container.innerHTML = ''; return; }
-            try {
-                const resp = await fetch(`/watch/stocks/search?q=${encodeURIComponent(query)}`);
-                const data = await resp.json();
-                if (!data.success) return;
-                const existingCodes = new Set(this.stocks.map(s => s.stock_code));
-                container.innerHTML = (data.data || []).map(s => {
-                    const added = existingCodes.has(s.stock_code);
-                    return `<div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><span class="fw-bold">${s.stock_name}</span> <small class="text-muted ms-2">${s.stock_code}</small></div>
-                        ${added
-                            ? '<span class="badge bg-secondary">已添加</span>'
-                            : `<button class="btn btn-sm btn-outline-primary" onclick="Watch.addStock('${s.stock_code}','${s.stock_name}')">添加</button>`}
-                    </div>`;
-                }).join('') || '<div class="list-group-item text-muted text-center">无匹配结果</div>';
-            } catch (e) { console.error('[Watch] search failed:', e); }
-        }, 300);
     },
 
     // --- UI工具 ---
