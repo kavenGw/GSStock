@@ -70,30 +70,6 @@ BENCHMARK_CODES = [
     {'code': '^NDX', 'name': '纳指100', 'market': 'US'},
 ]
 
-# 价值洼地板块配置
-VALUE_DIP_SECTORS = {
-    'korea_storage': {
-        'name': '韩国存储',
-        'stocks': {'005930.KS': '三星电子', '000660.KS': 'SK海力士'}
-    },
-    'a_storage_controller': {
-        'name': 'A股存储主控',
-        'stocks': {'001309': '德明利', '301308': '江波龙', '688525': '佰维存储'}
-    },
-    'a_storage': {
-        'name': 'A股存储',
-        'stocks': {'300223': '北京君正', '603986': '兆易创新'}
-    },
-    'a_pcb': {
-        'name': 'A股PCB',
-        'stocks': {'002463': '沪电股份', '300476': '胜宏科技'}
-    },
-    'a_ccl': {
-        'name': 'A股CCL',
-        'stocks': {'600183': '生益科技', '688519': '南亚新材'}
-    },
-}
-
 # 盯盘股票池（唯一权威源，替代 watch_list 表）
 WATCH_CODES = [
     {'code': '300223',    'name': '北京君正',  'market': 'A'},
