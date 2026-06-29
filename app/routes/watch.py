@@ -306,3 +306,20 @@ def earnings():
 
     data = QuarterlyEarningsService.get_earnings(code)
     return jsonify({'success': True, 'data': data})
+
+
+@watch_bp.route('/signals')
+def signals():
+    """批量返回盯盘股 60 日 OHLC，供前端计算技术信号"""
+    from app.services.unified_stock_data import unified_stock_data_service
+
+    codes = WatchService.get_watch_codes()
+    if not codes:
+        return jsonify({'success': True, 'stocks': []})
+
+    trend = unified_stock_data_service.get_trend_data(codes, days=60)
+    stocks = trend.get('stocks', []) if trend else []
+    return jsonify({'success': True, 'stocks': [
+        {'stock_code': s.get('stock_code'), 'data': s.get('data', [])}
+        for s in stocks
+    ]})
