@@ -25,3 +25,7 @@
 ## 盯盘股票池（代码配置，非 DB）
 
 盯盘要盯哪些股票由 `app/config/stock_codes.py` 的 `WATCH_CODES` 常量决定（唯一权威源），不再有 `watch_list` 表/增删 UI/`/watch/add`/`/watch/remove`。改盯盘池=改 WATCH_CODES（每条 `{'code','name','market'}`，`market` 显式写死——`MarketIdentifier` 不认 `.KS` 等后缀会误判）。`WatchService` 的 `get_watch_codes/get_watch_list/get_watched_markets/get_market_map` 全部读该常量。`WatchAnalysis` 表（AI 分析结果）与盯盘池无关，仍在 DB。DB 里遗留的 `watch_list` 孤立表无害，未做 drop 迁移。
+
+## 盯盘 summary 表技术信号列（原 /alert 预警页已并入）
+
+每市场 summary 表有「信号」列：`watch.js` 拉 `GET /watch/signals`（批量 60 日 OHLC）后复用 `signal-detector.js`（与 heavy_metals 页共享，勿删）的 `SignalDetector.detectAll` 逐股算 RSI/MACD/布林/成交量/均线 + 买卖形态（取最近 3 根 K 线内）。阈值（RSI 超买超卖/放量倍数）存独立 localStorage key `watchSignalThresholds`——**不带 `watch_` 前缀**以避开 `WatchStore.clearAll` 每日清空。徽标 `name`/`description` 须 HTML 转义。独立 `/alert` 页（alert.py/alert.html/alert-page.js/alert.css）已删除，能力收缩进此处仅覆盖 `WATCH_CODES`。
