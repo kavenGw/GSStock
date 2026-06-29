@@ -57,6 +57,11 @@
                 <span id="lastRefreshTime" class="ms-2" style="display:none;"></span>
             </small>
         </div>
+        <div>
+            <button class="btn btn-outline-secondary btn-sm" onclick="Watch.showSignalSettings()">
+                <i class="bi bi-gear"></i> 信号设置
+            </button>
+        </div>
     </div>
 </div>
 
@@ -83,6 +88,39 @@
 
 <!-- 股票卡片列表 -->
 <div id="stockCards" class="d-none"></div>
+
+<!-- 信号阈值设置弹窗 -->
+<div class="modal fade" id="signalSettingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-gear"></i> 信号阈值设置</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">RSI 超买阈值：<span id="wsRsiOverboughtValue">70</span></label>
+                    <input type="range" class="form-range" min="60" max="90" value="70" id="wsRsiOverboughtRange"
+                           oninput="document.getElementById('wsRsiOverboughtValue').textContent = this.value">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">RSI 超卖阈值：<span id="wsRsiOversoldValue">30</span></label>
+                    <input type="range" class="form-range" min="10" max="40" value="30" id="wsRsiOversoldRange"
+                           oninput="document.getElementById('wsRsiOversoldValue').textContent = this.value">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">放量倍数：<span id="wsVolumeRatioValue">2.0</span></label>
+                    <input type="range" class="form-range" min="1.5" max="5" step="0.5" value="2" id="wsVolumeRatioRange"
+                           oninput="document.getElementById('wsVolumeRatioValue').textContent = parseFloat(this.value).toFixed(1)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="Watch.saveSignalSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 

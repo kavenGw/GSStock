@@ -311,6 +311,28 @@ const Watch = {
         }).join('');
     },
 
+    showSignalSettings() {
+        const t = this._signalThresholds();
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        const txt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        set('wsRsiOverboughtRange', t.rsiOverbought); txt('wsRsiOverboughtValue', t.rsiOverbought);
+        set('wsRsiOversoldRange', t.rsiOversold); txt('wsRsiOversoldValue', t.rsiOversold);
+        set('wsVolumeRatioRange', t.volumeRatio); txt('wsVolumeRatioValue', parseFloat(t.volumeRatio).toFixed(1));
+        const modal = new bootstrap.Modal(document.getElementById('signalSettingsModal'));
+        modal.show();
+    },
+
+    saveSignalSettings() {
+        const t = this._signalThresholds();
+        t.rsiOverbought = parseInt(document.getElementById('wsRsiOverboughtRange').value, 10);
+        t.rsiOversold = parseInt(document.getElementById('wsRsiOversoldRange').value, 10);
+        t.volumeRatio = parseFloat(document.getElementById('wsVolumeRatioRange').value);
+        this._saveSignalThresholds(t);
+        this.computeSignals();
+        this._updateAllSummaryTables();
+        bootstrap.Modal.getInstance(document.getElementById('signalSettingsModal')).hide();
+    },
+
     // --- 市场分组工具 ---
     _getMarketGroups() {
         const groups = {};
