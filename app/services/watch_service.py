@@ -3,8 +3,8 @@ import logging
 from datetime import date, datetime
 
 from app import db
-from app.models.watch_list import WatchList, WatchAnalysis
-from app.utils.market_identifier import MarketIdentifier
+from app.config.stock_codes import WATCH_CODES
+from app.models.watch_list import WatchAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -14,46 +14,26 @@ class WatchService:
 
     @staticmethod
     def get_watch_list() -> list[dict]:
-        """获取盯盘列表"""
-        items = WatchList.query.order_by(WatchList.added_at.desc()).all()
-        return [{'id': w.id, 'stock_code': w.stock_code, 'stock_name': w.stock_name,
-                 'market': w.market, 'added_at': w.added_at.isoformat() if w.added_at else None} for w in items]
-
-    @staticmethod
-    def add_stock(stock_code: str, stock_name: str = '') -> dict:
-        """添加股票到盯盘列表"""
-        existing = WatchList.query.filter_by(stock_code=stock_code).first()
-        if existing:
-            return {'success': False, 'message': '该股票已在盯盘列表中'}
-
-        market = MarketIdentifier.identify(stock_code) or 'A'
-        item = WatchList(stock_code=stock_code, stock_name=stock_name, market=market)
-        db.session.add(item)
-        db.session.commit()
-        return {'success': True, 'message': '添加成功'}
-
-    @staticmethod
-    def remove_stock(stock_code: str) -> dict:
-        """从盯盘列表移除股票"""
-        item = WatchList.query.filter_by(stock_code=stock_code).first()
-        if not item:
-            return {'success': False, 'message': '该股票不在盯盘列表中'}
-        db.session.delete(item)
-        db.session.commit()
-        return {'success': True, 'message': '已移除'}
+        """获取盯盘列表（来自 WATCH_CODES 配置）"""
+        return [{'id': i, 'stock_code': e['code'], 'stock_name': e['name'],
+                 'market': e['market'], 'added_at': None}
+                for i, e in enumerate(WATCH_CODES)]
 
     @staticmethod
     def get_watch_codes() -> list[str]:
         """获取盯盘列表的股票代码"""
-        items = WatchList.query.all()
-        return [w.stock_code for w in items]
+        return [e['code'] for e in WATCH_CODES]
+
+    @staticmethod
+    def get_market_map() -> dict:
+        """{股票代码: 市场}"""
+        return {e['code']: e['market'] for e in WATCH_CODES}
 
     @staticmethod
     def get_watched_markets() -> list[str]:
         """获取盯盘列表涉及的市场（按优先级排序）"""
         priority = ['A', 'US', 'HK', 'KR', 'TW', 'JP']
-        items = WatchList.query.with_entities(WatchList.market).distinct().all()
-        markets = {m[0] for m in items if m[0]}
+        markets = {e['market'] for e in WATCH_CODES if e['market']}
         return [m for m in priority if m in markets] + [m for m in markets if m not in priority]
 
     @staticmethod

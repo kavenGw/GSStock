@@ -93,3 +93,14 @@ VALUE_DIP_SECTORS = {
         'stocks': {'600183': '生益科技', '688519': '南亚新材'}
     },
 }
+
+# 盯盘股票池（唯一权威源，替代 watch_list 表）
+WATCH_CODES = [
+    {'code': '300223',    'name': '北京君正',  'market': 'A'},
+    {'code': '603986',    'name': '兆易创新',  'market': 'A'},
+    {'code': '600183',    'name': '生益科技',  'market': 'A'},
+    {'code': '000660.KS', 'name': 'SK海力士',  'market': 'KR'},
+    {'code': '2631.HK',   'name': '天岳先进',  'market': 'HK'},
+    {'code': '2577.HK',   'name': '英诺赛科',  'market': 'HK'},
+    {'code': '9981.HK',   'name': '沃尔核材',  'market': 'HK'},
+]
