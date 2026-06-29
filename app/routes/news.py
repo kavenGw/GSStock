@@ -96,7 +96,7 @@ def get_companies():
     companies = CompanyKeyword.query.filter_by(is_active=True).order_by(CompanyKeyword.created_at.desc()).all()
     return jsonify({
         'success': True,
-        'companies': [{'id': str(c.id), 'name': c.name} for c in companies]
+        'companies': [{'id': str(c.id), 'name': c.name, 'source': c.source or 'manual'} for c in companies]
     })
 
 
@@ -122,6 +122,8 @@ def delete_company(company_id):
     c = db.session.get(CompanyKeyword, company_id)
     if not c:
         return jsonify({'success': False, 'error': 'not found'})
+    if c.source == 'watch':
+        return jsonify({'success': False, 'error': 'watch company, not deletable'})
     db.session.delete(c)
     db.session.commit()
     return jsonify({'success': True})
