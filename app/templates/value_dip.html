@@ -4,62 +4,31 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">价值洼地</h4>
-    <div class="d-flex gap-3 align-items-center">
-        <button type="button" class="btn btn-outline-secondary btn-sm" id="compare-btn">
-            板块走势对比
-        </button>
-        <div class="btn-group btn-group-sm" id="period-toggle">
-            <button type="button" class="btn btn-outline-primary" data-period="7d">7天</button>
-            <button type="button" class="btn btn-primary" data-period="30d">30天</button>
-            <button type="button" class="btn btn-outline-primary" data-period="90d">90天</button>
-        </div>
+    <div class="btn-group btn-group-sm" id="period-toggle">
+        <button type="button" class="btn btn-outline-primary" data-period="7d">7天</button>
+        <button type="button" class="btn btn-primary" data-period="30d">30天</button>
+        <button type="button" class="btn btn-outline-primary" data-period="90d">90天</button>
     </div>
 </div>
 
-<div id="compare-container" class="mb-4 d-none">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span>板块走势对比（涨跌幅%）</span>
-            <button type="button" class="btn-close" id="compare-close"></button>
-        </div>
-        <div class="card-body">
-            <div id="compare-chart" style="height: 400px;"></div>
-        </div>
-    </div>
-</div>
-
-<div id="sector-cards" class="row g-3 mb-4">
-    <!-- JS 动态渲染板块卡片 -->
-</div>
-
-<div id="pullback-container" class="mb-4">
-    <div class="card">
-        <div class="card-header">
-            <span id="pullback-header">📉 高点回退排行（30日）</span>
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-hover table-sm mb-0">
-                <thead>
-                    <tr>
-                        <th>股票</th>
-                        <th>板块</th>
-                        <th class="text-end">现价</th>
-                        <th class="text-end">30日高点</th>
-                        <th class="text-end">回退幅度</th>
-                    </tr>
-                </thead>
-                <tbody id="pullback-body">
-                    <tr><td colspan="5" class="text-center text-muted py-3">加载中...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div id="trend-container" class="d-none">
-    <h5 id="trend-title" class="mb-3"></h5>
-    <div id="trend-charts" class="row g-3">
-        <!-- JS 动态渲染走势图 -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover table-sm mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>股票</th>
+                    <th>市场</th>
+                    <th class="text-end">现价</th>
+                    <th class="text-end">7d</th>
+                    <th class="text-end">30d</th>
+                    <th class="text-end">90d</th>
+                    <th class="text-end" id="pullback-th">30日高点回退</th>
+                </tr>
+            </thead>
+            <tbody id="stock-body">
+                <tr><td colspan="7" class="text-center text-muted py-3">加载中...</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
