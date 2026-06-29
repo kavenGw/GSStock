@@ -132,9 +132,12 @@ def migrate_company_keyword_table():
 
 ```python
 def test_migrate_company_keyword_idempotent(app_ctx):
-    from app import migrate_company_keyword_table
+    from sqlalchemy import inspect
+    from app import db, migrate_company_keyword_table
     migrate_company_keyword_table()
     migrate_company_keyword_table()  # 连跑两次不抛错
+    columns = [c['name'] for c in inspect(db.engine).get_columns('company_keyword')]
+    assert 'source' in columns
 ```
 
 - [ ] **Step 6: 接线迁移调用**
