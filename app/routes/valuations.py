@@ -77,6 +77,9 @@ SECTOR_LABELS = {
 }
 
 CARVE_OUT_CATEGORIES = {'啤酒'}
+PROMOTE_MATERIALS_SUBSECTORS = {'nonferrous': '有色金属', 'lithium': '锂', 'copper-foil': '铜箔'}
+MATERIALS_OTHER_KEY = 'materials-other'
+MATERIALS_OTHER_LABEL = '其余材料'
 
 SUBSECTOR_LABELS = {
     'storage': '存储', 'design': '设计', 'equipment': '设备', 'optical': '光学',
@@ -101,23 +104,40 @@ SUBSECTOR_LABELS = {
 }
 
 
+def _top_key(r: dict) -> str:
+    cat = r.get('category')
+    if cat in CARVE_OUT_CATEGORIES:
+        return cat
+    if r.get('sector') == 'materials':
+        sub = r.get('subsector')
+        if sub in PROMOTE_MATERIALS_SUBSECTORS:
+            return f'mat:{sub}'
+        return MATERIALS_OTHER_KEY
+    return r.get('sector') or '__none__'
+
+
+def _top_label(key: str) -> str:
+    if key in CARVE_OUT_CATEGORIES:
+        return key
+    if key.startswith('mat:'):
+        return PROMOTE_MATERIALS_SUBSECTORS[key[4:]]
+    if key == MATERIALS_OTHER_KEY:
+        return MATERIALS_OTHER_LABEL
+    if key == '__none__':
+        return '未分类'
+    return SECTOR_LABELS.get(key, key)
+
+
 def group_by_sector(rows: list[dict]) -> list[dict]:
-    """两级分组：一级 category 命中 CARVE_OUT_CATEGORIES 用分类名，否则按 sector；
-    一级内再按 subsector 分二级组（None→未分类）。一级/二级均按标的数降序（key 兜底），
-    行内按 Base 安全边际降序（None 末位）。每行写 sector_label。"""
+    """两级分组：一级 key 走 _top_key（啤酒 carve-out > materials 子类升顶级 > sector）；
+    升顶级的材料子类（mat:*）标 flat=True 供模板隐藏 lvl2 表头。一级内按 subsector 分二级组
+    （None→未分类）。一级/二级均按标的数降序（key 兜底），行内按 Base 安全边际降序（None 末位）。"""
     buckets: dict[str, list] = {}
     for r in rows:
-        cat = r.get('category')
-        key = cat if cat in CARVE_OUT_CATEGORIES else (r.get('sector') or '__none__')
-        buckets.setdefault(key, []).append(r)
+        buckets.setdefault(_top_key(r), []).append(r)
     groups = []
     for key, items in buckets.items():
-        if key in CARVE_OUT_CATEGORIES:
-            label = key
-        elif key == '__none__':
-            label = '未分类'
-        else:
-            label = SECTOR_LABELS.get(key, key)
+        label = _top_label(key)
         for r in items:
             r['sector_label'] = label
         sub_buckets: dict[str, list] = {}
@@ -135,7 +155,13 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
                 'rows': sub_items,
             })
         subgroups.sort(key=lambda sg: (-sg['count'], sg['key']))
-        groups.append({'sector': key, 'label': label, 'count': len(items), 'subgroups': subgroups})
+        groups.append({
+            'sector': key,
+            'label': label,
+            'count': len(items),
+            'flat': key.startswith('mat:'),
+            'subgroups': subgroups,
+        })
     groups.sort(key=lambda g: (-g['count'], g['sector']))
     return groups
 
