@@ -3054,3 +3054,21 @@
   - 涨价周期
   - 国产替代
   - 业绩拐点
+- stock_code: '688503'
+  stock_name: 聚和材料
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: 成本加成型大宗商品生意（无定价权、毛利率7%连降），当前PE48x/PB5.74x建立在含银价峰值库存收益的尾随峰值盈利上，期望内在价值约31.7元、安全边际约-74%（最乐观情景仍-50%），任何情景均无安全边际，叠加去银化结构性压制需求——须待银价反噬证实盈利回落、估值大幅回调且铜浆/电子级银粉规模兑现后再重估。
+  bear: 20
+  base: 32
+  bull: 62
+  dividend_yield: 0.35
+  conviction_date: '2026-06-30'
+  source_doc: sectors/materials/光伏银浆/2026-06-30-聚和材料-buffett分析.md
+  themes:
+  - 光伏银浆
+  - 去银化
+  - 周期顶利润
+  - 银价
