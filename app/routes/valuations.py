@@ -130,8 +130,8 @@ def _top_label(key: str) -> str:
 
 
 def group_by_sector(rows: list[dict]) -> list[dict]:
-    """两级分组：一级 key 走 _top_key（啤酒 carve-out > materials 子类升顶级 > sector）；
-    升顶级的材料子类（mat:*）标 flat=True 供模板隐藏 lvl2 表头。一级内按 subsector 分二级组
+    """两级分组：一级 key 走 _top_key（啤酒 carve-out > materials/半导体 子类升顶级 > sector）；
+    升顶级的子类（mat:*/semi:*）标 flat=True 供模板隐藏 lvl2 表头。一级内按 subsector 分二级组
     （None→未分类）。一级/二级均按标的数降序（key 兜底），行内按 Base 安全边际降序（None 末位）。"""
     buckets: dict[str, list] = {}
     for r in rows:
