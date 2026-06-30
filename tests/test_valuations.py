@@ -620,3 +620,9 @@ def test_index_renders_sector_chips(app_client):
     assert 'resetSectors' in html, '缺 resetSectors JS'
     # toggleSectorVisible( 出现在 JS 定义 + 每个 group 的 onclick；非空 yaml → 至少 2 次
     assert html.count('toggleSectorVisible(') >= 2, '板块 chip 未按 groups 渲染'
+
+
+def test_index_sector_pref_persistence_wired(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'hiddenSectors: [...hiddenSectors]' in html, 'savePref 未持久化 hiddenSectors'
+    assert 'p.hiddenSectors' in html, 'loadPref 未读取 hiddenSectors'

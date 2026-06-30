@@ -175,10 +175,17 @@ function loadPref() {
       const valid = new Set([...document.querySelectorAll('#theme-options input')].map(c => c.value));
       p.themes.forEach(t => { if (valid.has(t)) selectedThemes.add(t); });
     }
+    if (Array.isArray(p.hiddenSectors)) {
+      const validSec = new Set(
+        [...document.querySelectorAll('#sector-chips .chip-sector')]
+          .map(b => b.dataset.sector).filter(s => s !== '__all__')
+      );
+      p.hiddenSectors.forEach(s => { if (validSec.has(s)) hiddenSectors.add(s); });
+    }
   } catch (e) {}
 }
 function savePref() {
-  localStorage.setItem(PREF_KEY, JSON.stringify({ sortKey, dir: sortDir, mode, themes: [...selectedThemes] }));
+  localStorage.setItem(PREF_KEY, JSON.stringify({ sortKey, dir: sortDir, mode, themes: [...selectedThemes], hiddenSectors: [...hiddenSectors] }));
 }
 
 function marginOf(tr, key) {
