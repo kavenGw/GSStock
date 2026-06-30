@@ -75,6 +75,15 @@ table.mode-flat .group-header { display: none; }
     <button class="btn btn-outline-primary" data-mode="flat" onclick="setMode('flat')">▤ 平铺</button>
   </div>
 </div>
+<div id="sector-chips" class="mb-3 d-flex flex-wrap gap-1 align-items-center">
+  <span class="text-muted small me-1">板块</span>
+  <button class="btn btn-sm btn-outline-secondary chip-sector" data-sector="__all__"
+          onclick="resetSectors()">全部</button>
+  {% for g in groups %}
+  <button class="btn btn-sm btn-primary chip-sector" data-sector="{{ g.sector }}"
+          onclick="toggleSectorVisible('{{ g.sector }}')">{{ g.label }} <span class="badge bg-light text-dark">{{ g.count }}</span></button>
+  {% endfor %}
+</div>
 <div class="table-responsive">
 <table id="val-table" class="table table-sm table-hover val-table mode-grouped">
   <thead class="table-light">
@@ -151,6 +160,7 @@ let sortDir = 'desc';
 let mode = 'grouped';
 let currentMarket = 'all';
 let selectedThemes = new Set();
+let hiddenSectors = new Set();
 let defaultSectorOrder = [];
 let defaultSubOrder = {};
 const MARGIN_SORT_KEYS = ['bear', 'base', 'bull'];
@@ -198,6 +208,35 @@ function themeMatches(tr) {
   return arr.some(t => selectedThemes.has(t));
 }
 
+function sectorShown(tr) {
+  return !hiddenSectors.has(tr.dataset.sector);
+}
+
+function updateSectorChips() {
+  document.querySelectorAll('#sector-chips .chip-sector').forEach(b => {
+    const sec = b.dataset.sector;
+    if (sec === '__all__') return;
+    const shown = !hiddenSectors.has(sec);
+    b.classList.toggle('btn-primary', shown);
+    b.classList.toggle('btn-outline-secondary', !shown);
+  });
+}
+
+function toggleSectorVisible(sector) {
+  if (hiddenSectors.has(sector)) hiddenSectors.delete(sector);
+  else hiddenSectors.add(sector);
+  updateSectorChips();
+  savePref();
+  recompute();
+}
+
+function resetSectors() {
+  hiddenSectors.clear();
+  updateSectorChips();
+  savePref();
+  recompute();
+}
+
 function updateThemeButton() {
   const btn = document.getElementById('theme-filter-btn');
   if (btn) btn.textContent = selectedThemes.size ? '主题 (' + selectedThemes.size + ')' : '主题';
@@ -232,7 +271,7 @@ function filterThemeSearch(q) {
 
 function repRows(rows) {
   for (const tr of rows) {
-    if (rowMatchesMarket(tr) && themeMatches(tr)) return marginOf(tr, sortKey);
+    if (rowMatchesMarket(tr) && themeMatches(tr) && sectorShown(tr)) return marginOf(tr, sortKey);
   }
   return null;
 }
@@ -348,7 +387,7 @@ function recompute() {
   tbody.querySelectorAll('.group-header.lvl2.collapsed').forEach(h => collapsedSub.add(h.dataset.subgroup));
 
   tbody.querySelectorAll('tr[data-code]').forEach(tr => {
-    const fOk = rowMatchesMarket(tr) && themeMatches(tr);
+    const fOk = rowMatchesMarket(tr) && themeMatches(tr) && sectorShown(tr);
     tr.dataset.filterHidden = fOk ? '' : '1';
     let show;
     if (mode === 'flat') {
@@ -445,6 +484,7 @@ function initValuations() {
     if (cb) cb.checked = true;
   });
   updateThemeButton();
+  updateSectorChips();
   setMode(mode);
 }
 document.addEventListener('DOMContentLoaded', initValuations);
