@@ -611,3 +611,18 @@ def test_index_route_renders_quality_column(app_client):
     assert '质地' in html
     assert 'data-sort="quality"' in html
     assert '★' in html
+
+
+def test_index_renders_sector_chips(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'id="sector-chips"' in html, '缺板块 chips 容器'
+    assert 'data-sector="__all__"' in html, '缺全部复位 chip'
+    assert 'resetSectors' in html, '缺 resetSectors JS'
+    # toggleSectorVisible( 出现在 JS 定义 + 每个 group 的 onclick；非空 yaml → 至少 2 次
+    assert html.count('toggleSectorVisible(') >= 2, '板块 chip 未按 groups 渲染'
+
+
+def test_index_sector_pref_persistence_wired(app_client):
+    html = app_client.get('/valuations/').data.decode('utf-8')
+    assert 'hiddenSectors: [...hiddenSectors]' in html, 'savePref 未持久化 hiddenSectors'
+    assert 'p.hiddenSectors' in html, 'loadPref 未读取 hiddenSectors'
