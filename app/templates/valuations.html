@@ -38,7 +38,7 @@ table.mode-flat .group-header { display: none; }
   <h4 class="mb-0"><i class="bi bi-cash-stack"></i> Claude估值</h4>
   <div>
     <span id="refresh-status" class="text-muted small me-2"></span>
-    <button id="refresh-btn" class="btn btn-sm btn-primary" onclick="refreshPrices()">🔄 刷新实时价</button>
+    <button id="refresh-btn" class="btn btn-sm btn-primary" onclick="refreshPrices(true)">🔄 刷新实时价</button>
   </div>
 </div>
 {% if not groups %}
@@ -448,12 +448,12 @@ function toggleSub(subId) {
   recompute();
 }
 
-async function refreshPrices() {
+async function refreshPrices(force) {
   const btn = document.getElementById('refresh-btn');
   const status = document.getElementById('refresh-status');
-  btn.disabled = true; status.textContent = '刷新中…';
+  btn.disabled = true; status.textContent = force ? '刷新中…' : '更新中…';
   try {
-    const resp = await fetch('/valuations/api/prices?force=1');
+    const resp = await fetch('/valuations/api/prices' + (force ? '?force=1' : ''));
     if (!resp.ok) throw new Error('http ' + resp.status);
     const data = await resp.json();
     document.querySelectorAll('#val-table tr[data-code]').forEach(tr => {
@@ -471,7 +471,7 @@ async function refreshPrices() {
     });
     applySort();
     recompute();
-    status.textContent = '已更新 ' + new Date().toLocaleTimeString();
+    status.textContent = (force ? '已更新 ' : '自动更新 ') + new Date().toLocaleTimeString();
   } catch (e) {
     status.textContent = '刷新失败';
   } finally {
@@ -495,6 +495,7 @@ function initValuations() {
   updateThemeButton();
   updateSectorChips();
   setMode(mode);
+  refreshPrices(false);
 }
 document.addEventListener('DOMContentLoaded', initValuations);
 </script>
