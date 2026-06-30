@@ -165,14 +165,13 @@ def test_group_by_sector_orders_groups_by_count_desc():
     from app.routes.valuations import group_by_sector
     rows = [
         {'stock_code': 'a', 'sector': 'electronics', 'margin_base': 0.1},
-        {'stock_code': 'b', 'sector': 'semiconductor', 'margin_base': 0.2},
-        {'stock_code': 'c', 'sector': 'semiconductor', 'margin_base': 0.3},
-        {'stock_code': 'd', 'sector': 'semiconductor', 'margin_base': 0.1},
+        {'stock_code': 'b', 'sector': 'semiconductor', 'subsector': 'storage', 'margin_base': 0.2},
+        {'stock_code': 'c', 'sector': 'semiconductor', 'subsector': 'storage', 'margin_base': 0.3},
     ]
     groups = group_by_sector(rows)
-    assert [g['sector'] for g in groups] == ['semiconductor', 'electronics']
-    assert groups[0]['count'] == 3
-    assert groups[0]['label'] == '半导体'
+    assert [g['sector'] for g in groups] == ['semi:storage', 'electronics']
+    assert groups[0]['count'] == 2
+    assert groups[0]['label'] == '存储'
     assert groups[1]['label'] == '电子'
 
 
@@ -210,11 +209,11 @@ def test_group_by_sector_empty_returns_empty():
 def test_group_by_sector_tiebreak_by_sector_name():
     from app.routes.valuations import group_by_sector
     rows = [
-        {'stock_code': 'a', 'sector': 'semiconductor', 'margin_base': 0.1},
+        {'stock_code': 'a', 'sector': 'semiconductor', 'subsector': 'design', 'margin_base': 0.1},
         {'stock_code': 'b', 'sector': 'electronics', 'margin_base': 0.2},
     ]
     groups = group_by_sector(rows)
-    assert [g['sector'] for g in groups] == ['electronics', 'semiconductor']
+    assert [g['sector'] for g in groups] == ['electronics', 'semi-other']
 
 
 def test_index_renders_sector_group_headers(app_client):
@@ -231,7 +230,7 @@ def test_group_by_sector_assigns_sector_label_to_rows():
         {'stock_code': 'b', 'sector': None, 'subsector': None, 'margin_base': 0.2},
     ])
     by_sector = {g['sector']: g for g in groups}
-    assert by_sector['semiconductor']['subgroups'][0]['rows'][0]['sector_label'] == '半导体'
+    assert by_sector['semi:storage']['subgroups'][0]['rows'][0]['sector_label'] == '存储'
     assert by_sector['__none__']['subgroups'][0]['rows'][0]['sector_label'] == '未分类'
 
 
@@ -438,13 +437,16 @@ def test_group_by_sector_builds_subgroups_by_subsector():
         {'stock_code': 'b', 'sector': 'semiconductor', 'subsector': 'storage', 'margin_base': 0.2},
         {'stock_code': 'c', 'sector': 'semiconductor', 'subsector': 'design', 'margin_base': 0.3},
     ]
-    [grp] = group_by_sector(rows)
-    assert grp['count'] == 3
-    subs = {sg['key']: sg for sg in grp['subgroups']}
-    assert subs['storage']['count'] == 2
-    assert subs['storage']['label'] == '存储'
-    assert subs['design']['count'] == 1
-    assert [sg['key'] for sg in grp['subgroups']] == ['storage', 'design']
+    groups = group_by_sector(rows)
+    groups_dict = {g['sector']: g for g in groups}
+    grp_storage = groups_dict['semi:storage']
+    assert grp_storage['count'] == 2
+    [sg] = grp_storage['subgroups']
+    assert sg['key'] == 'storage'
+    assert sg['label'] == '存储'
+    grp_other = groups_dict['semi-other']
+    assert grp_other['count'] == 1
+    assert {sg['key'] for sg in grp_other['subgroups']} == {'design'}
 
 
 def test_group_by_sector_none_subsector_is_unclassified_subgroup():
@@ -462,9 +464,9 @@ def test_group_by_sector_subgroup_id_is_sector_scoped():
         {'stock_code': 'b', 'sector': 'electronics', 'subsector': 'pcb', 'margin_base': 0.2},
     ]
     groups = {g['sector']: g for g in group_by_sector(rows)}
-    sem_id = groups['semiconductor']['subgroups'][0]['subgroup_id']
+    sem_id = groups['semi-other']['subgroups'][0]['subgroup_id']
     ele_id = groups['electronics']['subgroups'][0]['subgroup_id']
-    assert sem_id == 'semiconductor__pcb'
+    assert sem_id == 'semi-other__pcb'
     assert ele_id == 'electronics__pcb'
     assert sem_id != ele_id
 

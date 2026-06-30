@@ -80,6 +80,10 @@ CARVE_OUT_CATEGORIES = {'啤酒'}
 PROMOTE_MATERIALS_SUBSECTORS = {'nonferrous': '有色金属', 'lithium': '锂', 'copper-foil': '铜箔'}
 MATERIALS_OTHER_KEY = 'materials-other'
 MATERIALS_OTHER_LABEL = '其余材料'
+PROMOTE_SEMI_SUBSECTORS = {'storage': '存储', 'materials': '半导体材料',
+                           'power': '功率', 'equipment': '设备'}
+SEMI_OTHER_KEY = 'semi-other'
+SEMI_OTHER_LABEL = '其余半导体'
 
 SUBSECTOR_LABELS = {
     'storage': '存储', 'design': '设计', 'equipment': '设备', 'optical': '光学',
@@ -114,6 +118,11 @@ def _top_key(r: dict) -> str:
         if sub in PROMOTE_MATERIALS_SUBSECTORS:
             return f'mat:{sub}'
         return MATERIALS_OTHER_KEY
+    if r.get('sector') == 'semiconductor':
+        sub = r.get('subsector')
+        if sub in PROMOTE_SEMI_SUBSECTORS:
+            return f'semi:{sub}'
+        return SEMI_OTHER_KEY
     return r.get('sector') or '__none__'
 
 
@@ -124,6 +133,10 @@ def _top_label(key: str) -> str:
         return PROMOTE_MATERIALS_SUBSECTORS[key[4:]]
     if key == MATERIALS_OTHER_KEY:
         return MATERIALS_OTHER_LABEL
+    if key.startswith('semi:'):
+        return PROMOTE_SEMI_SUBSECTORS[key[5:]]
+    if key == SEMI_OTHER_KEY:
+        return SEMI_OTHER_LABEL
     if key == '__none__':
         return '未分类'
     return SECTOR_LABELS.get(key, key)
@@ -160,7 +173,7 @@ def group_by_sector(rows: list[dict]) -> list[dict]:
             'sector': key,
             'label': label,
             'count': len(items),
-            'flat': key.startswith('mat:'),
+            'flat': key.startswith(('mat:', 'semi:')),
             'subgroups': subgroups,
         })
     groups.sort(key=lambda g: (-g['count'], g['sector']))
