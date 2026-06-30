@@ -18,6 +18,7 @@
 .group-header.lvl1 th { font-size: 13px; }
 .group-header.lvl2 { background: #f8f9fa; }
 .group-header.lvl2:hover { background: #eef1f4; }
+.group-header.lvl2.subgroup-flat { display: none; }
 .group-header.lvl2 th { font-size: 12px; font-weight: 500; padding-left: 2.4rem; }
 #market-chips .chip { margin-right: 6px; }
 .val-table th.sortable { cursor: pointer; user-select: none; }
@@ -104,7 +105,7 @@ table.mode-flat .group-header { display: none; }
       <th colspan="13"><span class="caret">▼</span> {{ g.label }} <span class="badge bg-secondary group-count">{{ g.count }}</span></th>
     </tr>
     {% for sg in g.subgroups %}
-    <tr class="group-header lvl2" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}" onclick="toggleSub('{{ sg.subgroup_id }}')">
+    <tr class="group-header lvl2{% if g.flat %} subgroup-flat{% endif %}" data-sector="{{ g.sector }}" data-subgroup="{{ sg.subgroup_id }}" onclick="toggleSub('{{ sg.subgroup_id }}')">
       <th colspan="13"><span class="caret">▼</span> {{ sg.label }} <span class="badge bg-light text-secondary subgroup-count">{{ sg.count }}</span></th>
     </tr>
       {% for r in sg.rows %}
@@ -417,6 +418,7 @@ function recompute() {
     secVisible[tr.dataset.sector] = (secVisible[tr.dataset.sector] || 0) + 1;
   });
   tbody.querySelectorAll('.group-header.lvl2').forEach(h => {
+    if (h.classList.contains('subgroup-flat')) { h.style.display = 'none'; return; }
     const v = subVisible[h.dataset.subgroup] || 0;
     h.style.display = (v > 0 && !collapsedSec.has(h.dataset.sector)) ? '' : 'none';
     const badge = h.querySelector('.subgroup-count');

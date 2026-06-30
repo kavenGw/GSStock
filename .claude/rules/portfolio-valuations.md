@@ -27,6 +27,8 @@
 
 **新增一个主题/二级板块分组**：① 在 `CARVE_OUT_CATEGORIES` 加分类名 ② 在分类管理（`StockCategory`，stock_code 唯一约束=一股一类）把目标股设为该分类。模板零改动（数据驱动）。
 
+**materials 子类升顶级板块（与 CARVE_OUT_CATEGORIES 并列的第二条 carve 机制）**：`group_by_sector` 对 `sector=='materials'` 的行特殊处理——`subsector ∈ PROMOTE_MATERIALS_SUBSECTORS`（有色 `nonferrous`/锂 `lithium`/铜箔 `copper-foil`）升为**扁平顶级板块**（组 `flat=True`），其余材料子类归入 `materials-other`（「其余材料」桶，保留 subsector 二级）。区别于 CARVE_OUT_CATEGORIES（按 DB 分类 carve），此机制**按 subsector（source_doc 路径派生）driven**、仅作用于 materials、零数据改动。扁平组在模板里给 lvl2 表头加 `subgroup-flat` 类隐藏，`recompute()` 跳过其重显。新增升顶级子类只改 `PROMOTE_MATERIALS_SUBSECTORS` dict。
+
 分类数据是用户数据非 seed（seed 铁律"不覆盖已存在归属"，而改挂分类恰需覆盖）；建/改分类走分类管理 UI 或一次性 DB 写入。
 
 **A+H 双重上市标的取较低估值口径（铁律）**：A+H 股做 buffett 档 / 写 valuations.yaml 时，**取 A 股与 H 股两地中估值更低（安全边际更大）一侧作跟踪主体，不强行用 A 股口径**——H 股通常较 A 股折价，AH 折价是安全边际放大器（实测天岳 A 股口径安全边际 -18.7%，切 H 股 02631 因折价 -38.7% 反转为 +32.7%）。frontmatter `stock_code` 与 valuations 条目（`market`/`currency`/每股内在价值）按选定口径写；同股切换口径时 valuations 按 `stock_code` 覆盖旧条目（688234→02631）。H 口径市值自洽校验见 `data-fetch-conventions.md` 港股节，币种折算（RMB→HKD ×1.08）+ 安全边际两口径对照见 stock-deep-redo playbook §3。
