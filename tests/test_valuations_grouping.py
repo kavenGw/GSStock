@@ -34,7 +34,9 @@ def test_copper_foil_promoted():
     rows = [_row('301217', 'materials', 'copper-foil')]
     groups = group_by_sector(rows)
     g = next(x for x in groups if x['label'] == '铜箔')
+    assert g['sector'] == 'mat:copper-foil'
     assert g['flat'] is True
+    assert g['count'] == 1
 
 
 def test_singleton_subsectors_go_to_materials_other():
@@ -53,6 +55,16 @@ def test_non_materials_sector_unaffected():
     g = next(x for x in groups if x['sector'] == 'electronics')
     assert g['flat'] is False
     assert g['label'] == '电子'
+
+
+def test_materials_subsector_under_other_sector_stays_put():
+    rows = [_row('300666', 'semiconductor', 'materials')]
+    groups = group_by_sector(rows)
+    g = next(x for x in groups if x['sector'] == 'semiconductor')
+    assert g['flat'] is False
+    assert g['label'] == '半导体'
+    assert {sg['label'] for sg in g['subgroups']} == {'材料'}
+    assert all(x['sector'] != 'materials-other' for x in groups)
 
 
 def test_carveout_category_beats_materials_promotion():

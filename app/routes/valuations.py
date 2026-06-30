@@ -91,6 +91,7 @@ SUBSECTOR_LABELS = {
     'functional-materials': '功能材料', 'display-glass': '显示玻璃', 'precision-manufacturing': '精密制造',
     'pcb-equipment': 'PCB设备', 'thermal-management': '热管理', 'nonferrous': '有色',
     'copper-foil': '铜箔', 'chemicals': '化工', 'magnetic-materials': '磁材', 'ceramics': '陶瓷',
+    'glass': '玻璃', 'specialty-gas': '特气', 'industrial-gas': '工业气体',
     'minor-metals': '小金属', 'superhard': '超硬材料', 'lithium': '锂', 'consumer-electronics': '消费电子',
     'sportswear': '运动服饰', 'beer': '啤酒', 'home-appliance': '家电', 'mobility': '出行',
     'local-services': '本地生活', 'restaurant': '餐饮', 'designer-toy': '潮玩', 'auto': '汽车',
