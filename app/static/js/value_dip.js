@@ -3,6 +3,22 @@
     let currentPeriod = '30d';
     let relChart = null;
 
+    // 相对走势图 legend 显示/隐藏选择持久化（不带 watch_ 前缀，避开 WatchStore.clearAll 每日清空）
+    const LEGEND_KEY = 'valueDipRelLegend';
+    let legendSelected = loadLegendSelected();
+
+    function loadLegendSelected() {
+        try {
+            const raw = localStorage.getItem(LEGEND_KEY);
+            const obj = raw ? JSON.parse(raw) : null;
+            return obj && typeof obj === 'object' ? obj : {};
+        } catch (e) { return {}; }
+    }
+
+    function saveLegendSelected() {
+        try { localStorage.setItem(LEGEND_KEY, JSON.stringify(legendSelected)); } catch (e) {}
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         loadStocks();
         loadRelative();
@@ -84,6 +100,10 @@
         if (!relChart) {
             relChart = echarts.init(document.getElementById('relative-chart'));
             window.addEventListener('resize', () => relChart && relChart.resize());
+            relChart.on('legendselectchanged', params => {
+                legendSelected = Object.assign({}, legendSelected, params.selected);
+                saveLegendSelected();
+            });
         }
         return relChart;
     }
@@ -120,7 +140,7 @@
         chart.setOption({
             tooltip: { trigger: 'axis', order: 'valueDesc',
                        valueFormatter: v => (v == null ? '-' : v + '%') },
-            legend: { type: 'scroll', top: 0 },
+            legend: { type: 'scroll', top: 0, selected: legendSelected },
             grid: { left: 48, right: 16, top: 40, bottom: 30 },
             xAxis: { type: 'category', data: xDates },
             yAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
