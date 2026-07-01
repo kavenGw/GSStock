@@ -1,9 +1,11 @@
 (function() {
     let stocks = [];
     let currentPeriod = '30d';
+    let relChart = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         loadStocks();
+        loadRelative();
         document.getElementById('period-toggle').addEventListener('click', e => {
             const btn = e.target.closest('[data-period]');
             if (!btn) return;
@@ -13,6 +15,7 @@
                 b.classList.toggle('btn-outline-primary', b.dataset.period !== currentPeriod);
             });
             render();
+            loadRelative();
         });
     });
 
@@ -75,5 +78,52 @@
                 <td class="text-end">${fmtPullback(s[pbKey])}</td>
             </tr>
         `).join('');
+    }
+
+    function ensureChart() {
+        if (!relChart) {
+            relChart = echarts.init(document.getElementById('relative-chart'));
+            window.addEventListener('resize', () => relChart && relChart.resize());
+        }
+        return relChart;
+    }
+
+    async function loadRelative() {
+        try {
+            const resp = await fetch('/value-dip/api/relative?period=' + currentPeriod);
+            const data = await resp.json();
+            renderRelative(data.series || []);
+        } catch (e) {
+            console.error('加载相对走势失败:', e);
+            const el = document.getElementById('relative-chart');
+            if (el) el.innerHTML = '<div class="text-center text-muted py-5">加载失败</div>';
+        }
+    }
+
+    function renderRelative(series) {
+        const chart = ensureChart();
+        const dateSet = new Set();
+        series.forEach(s => s.dates.forEach(d => dateSet.add(d)));
+        const xDates = [...dateSet].sort();
+        const seriesOpt = series.map(s => {
+            const m = {};
+            s.dates.forEach((d, i) => { m[d] = s.values[i]; });
+            return {
+                name: s.label,
+                type: 'line',
+                showSymbol: false,
+                connectNulls: true,
+                data: xDates.map(d => (d in m ? m[d] : null)),
+            };
+        });
+        chart.setOption({
+            tooltip: { trigger: 'axis', order: 'valueDesc',
+                       valueFormatter: v => (v == null ? '-' : v + '%') },
+            legend: { type: 'scroll', top: 0 },
+            grid: { left: 48, right: 16, top: 40, bottom: 30 },
+            xAxis: { type: 'category', data: xDates },
+            yAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+            series: seriesOpt,
+        }, true);
     }
 })();
