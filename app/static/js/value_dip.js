@@ -95,6 +95,7 @@
             renderRelative(data.series || []);
         } catch (e) {
             console.error('加载相对走势失败:', e);
+            if (relChart) { relChart.dispose(); relChart = null; }
             const el = document.getElementById('relative-chart');
             if (el) el.innerHTML = '<div class="text-center text-muted py-5">加载失败</div>';
         }
