@@ -150,12 +150,13 @@ class WatchAlertStrategy(Strategy):
     @staticmethod
     def _calc_trading_minutes(codes: list[str], market_map: dict, calendar_service) -> dict:
         TOTAL_MINUTES = {
-            'A': 240, 'US': 390, 'HK': 390,
+            'A': 240, 'US': 390, 'HK': 330,
             'KR': 390, 'TW': 270, 'JP': 300,
         }
 
         SESSIONS = {
             'A': [(time(9, 30), time(11, 30)), (time(13, 0), time(15, 0))],
+            'HK': [(time(9, 30), time(12, 0)), (time(13, 0), time(16, 0))],
             'JP': [(time(9, 0), time(11, 30)), (time(12, 30), time(15, 0))],
         }
 
