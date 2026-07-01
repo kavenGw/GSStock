@@ -1,12 +1,57 @@
 """价值洼地分析服务 — 盯盘股扁平涨幅 + 高点回退"""
 import logging
+from app.config.stock_codes import WATCH_CODES
 from app.services.watch_service import WatchService
 from app.services.unified_stock_data import unified_stock_data_service
 
 logger = logging.getLogger(__name__)
 
+PERIOD_DAYS = {'7d': 7, '30d': 30, '90d': 90}
+_AH_SUFFIX = {'A': 'A', 'HK': 'H'}
+
 
 class ValueDipService:
+
+    @staticmethod
+    def _build_series(entries: list, trend_map: dict, period: str) -> list:
+        days = PERIOD_DAYS.get(period, 30)
+        series = []
+        for e in entries:
+            legs = [(e['code'], e['name'], e['market'], bool(e.get('ah')))]
+            if e.get('ah'):
+                ah = e['ah']
+                legs.append((ah['code'], ah['name'], ah['market'], True))
+            for code, name, market, paired in legs:
+                data = trend_map.get(code) or []
+                window = data[-days:] if len(data) > days else data
+                pts = [(d.get('date'), d.get('close')) for d in window
+                       if d.get('close') is not None]
+                if len(pts) < 2:
+                    continue
+                base = float(pts[0][1])
+                if base <= 0:
+                    continue
+                label = f"{name}({_AH_SUFFIX.get(market, market)})" if paired else name
+                series.append({
+                    'code': code, 'name': name, 'market': market, 'label': label,
+                    'dates': [p[0] for p in pts],
+                    'values': [round((float(p[1]) / base - 1) * 100, 2) for p in pts],
+                })
+        return series
+
+    @staticmethod
+    def get_relative_series(period: str = '30d') -> list:
+        codes = []
+        for e in WATCH_CODES:
+            codes.append(e['code'])
+            if e.get('ah'):
+                codes.append(e['ah']['code'])
+        trend_result = unified_stock_data_service.get_trend_data(codes, days=90)
+        trend_map = {}
+        if trend_result and trend_result.get('stocks'):
+            for s in trend_result['stocks']:
+                trend_map[s['stock_code']] = s.get('data', [])
+        return ValueDipService._build_series(WATCH_CODES, trend_map, period)
 
     @staticmethod
     def get_watch_performance() -> list:
