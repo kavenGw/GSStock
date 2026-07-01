@@ -1,14 +1,9 @@
 import logging
-from flask import render_template, jsonify, request
+from flask import jsonify, request
 from app.routes import value_dip_bp
 from app.services.value_dip import ValueDipService
 
 logger = logging.getLogger(__name__)
-
-
-@value_dip_bp.route('/')
-def index():
-    return render_template('value_dip.html')
 
 
 @value_dip_bp.route('/api/stocks')
