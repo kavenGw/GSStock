@@ -3072,3 +3072,20 @@
   - 去银化
   - 周期顶利润
   - 银价
+- stock_code: WOLF
+  stock_name: Wolfspeed
+  market: US
+  currency: USD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 91 天预打包破产已削债 70%、修复资产负债表并保住 SiC 衬底龙头地位与 AI 数据中心高压 SiC 期权，但盈利尚未修复（Non-GAAP 毛利率 −20.6%、利用率 ~25%、营收 YoY −19%），中国衬底价格战结构性压制天花板；当前 $48.25 对期望内在价值 ~$26/股无安全边际（−46%），列观察待利用率回升与价格战企稳
+  bear: 12
+  base: 27
+  bull: 57
+  conviction_date: '2026-07-01'
+  source_doc: sectors/semiconductor/sic-power/2026-07-01-Wolfspeed-buffett分析.md
+  themes:
+  - silicon-carbide
+  - 功率半导体
+  - 破产重整
+  - 供给侧
