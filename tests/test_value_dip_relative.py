@@ -1,3 +1,7 @@
+import pytest
+from flask import Flask
+
+from app.routes import value_dip_bp
 from app.services.value_dip import ValueDipService, PERIOD_DAYS
 
 
@@ -49,3 +53,24 @@ def test_degrade_ah_leg_only():
                 'ah': {'code': '688234', 'name': '天岳先进', 'market': 'A'}}]
     series = ValueDipService._build_series(entries, {'2631.HK': _mk(30)}, '30d')
     assert [s['label'] for s in series] == ['天岳先进(H)']
+
+
+@pytest.fixture
+def client(monkeypatch):
+    app = Flask(__name__)
+    app.register_blueprint(value_dip_bp)
+    monkeypatch.setattr(
+        ValueDipService, 'get_relative_series',
+        staticmethod(lambda period='30d': [
+            {'code': 'X', 'name': '甲', 'market': 'A', 'label': '甲',
+             'dates': ['d1', 'd2'], 'values': [0.0, 5.0]}]))
+    return app.test_client()
+
+
+def test_relative_endpoint_ok(client):
+    resp = client.get('/value-dip/api/relative?period=7d')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert 'series' in data
+    row = data['series'][0]
+    assert len(row['dates']) == len(row['values'])

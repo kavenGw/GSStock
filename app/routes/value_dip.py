@@ -25,3 +25,16 @@ def pullback():
     except Exception as e:
         logger.error(f'[价值洼地] 高点回退API错误: {e}')
         return jsonify({'error': str(e)}), 500
+
+
+@value_dip_bp.route('/api/relative')
+def relative():
+    try:
+        period = request.args.get('period', '30d')
+        if period not in ('7d', '30d', '90d'):
+            period = '30d'
+        data = ValueDipService.get_relative_series(period)
+        return jsonify({'series': data})
+    except Exception as e:
+        logger.error(f'[价值洼地] 相对走势API错误: {e}')
+        return jsonify({'error': str(e)}), 500
