@@ -39,6 +39,12 @@ related_docs:
 # Coherent（COHR）— 巴菲特视角深度分析
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-06-04-光迅科技-buffett分析](2026-06-04-光迅科技-buffett分析.md) — 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）
+> - [2026-07-02-源杰科技-buffett分析](2026-07-02-源杰科技-buffett分析.md) — 国产 CW 光源要挑战的正是 Lumentum/Coherent 垄断（镜像对手）
+> - [2026-07-02-迈威尔-仕佳光子-buffett对比分析](../../../cross-sector/2026-07-02-迈威尔-仕佳光子-buffett对比分析.md) — AI 光互联赛道横评，Coherent 为西方 incumbent 参照
+> - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 磷化铟板块——Coherent 全球领先 InP 晶圆/6英寸量产供应商
+> - [2026-06-11-SemiAnalysis-CPO-800VDC延后影响](../../../themes/2026-06-11-SemiAnalysis-CPO-800VDC延后影响.md) — CPO 延后论点（触发 COHR 单日 -11%），但 CPO 仍需 CW 光源双刃
 <!-- END related_docs -->
 
 > 数据基准：2026-07-02 盘中｜现价 $368.65（源A stockanalysis / 源B stocktitan $368.23，当日 -7.02%）｜基本股本 195.6M、市值 $72.1B（完全稀释 ~209.6M 股 / ~$77B，Bain 系 Series B 优先股 2025Q4 已转普通股）｜PE(TTM) 153.9x｜Fwd PE 49.4x｜P/S 10.9x｜PB 6.75｜EV/EBITDA 55.7x｜52 周 +313~325%｜分析师目标价 $384.45（Buy）｜不派普通股息
@@ -163,7 +169,7 @@ related_docs:
 | **上游 InP/CW 光源卡位** | 产品层强 + 业绩层部分兑现 | 6"InP ×4 扩产【硬】；CW 光源全球领先 merchant 供应商，成品收发器 ~25%【软】 | **【真敏感·结构性】**——CPO 双刃里的受益侧锚点；但上游份额精确数【缺】 |
 | **NVIDIA $2B + 采购承诺** | 具名兑底 | 2026-03-02 双方 PR，multiyear、multibillion【硬】 | **【真敏感·具名】**——最硬的客户能见度层 |
 | **1.6T EML/硅光 ramp** | 产品层→业绩层过渡 | 1.6T 硅光/EML 方案现 ramp、200G VCSEL 方案明年 ramp【软】 | **【真敏感·兑现中】**——节奏可跟踪，但放量台数缺权威数【缺】 |
-| **$23B 增长机会 TAM** | 第三方单方口径 | Futurum 单源【软】 | **【蹭概念/未兑现预期】**——不进 owner earnings 基础，仅作 Bull 概率赋权参考 |
+| **$23B 增长机会 TAM** | 第三方单方口径 | Futurum 单源【软】 | **【蹭概念/未兑现预期】**——单源软数，既不进 owner earnings 基础，也不参与 §9 bull 权重赋权（门控只认扩产/客户 capex 两项硬证据） |
 | **SiC/EV 第二波** | 周期底 | SiC 保留扩张（75/12.5/12.5，$1B），150→200mm【硬】；EV 需求低谷 | **【蹭概念·周期底】**——第二波未起，不计入 AI 估值 |
 
 **AI 叙事是否已被充分定价**：**已充分至偏过度**。PE(TTM) 154x/Fwd PE 49.4x/EV-EBITDA 56x。**关键纪律（红线 5）**：Coherent 的 AI 敞口确实已在业绩层兑现（DC&Comms $1.4B/季、+37%、占比 77%），这必须如实肯定、区别于纯概念股；**但业绩已兑现不等于价格合理**——§9 owner earnings 基础只采穿越周期可持续中枢，$23B TAM/未量产台数不当业绩。任何把"AI 想象/护城河上修"折进估值稀释"贵"的做法，都会掉进红线 4/5 陷阱。

@@ -3142,3 +3142,20 @@
   - ai_compute
   - 光模块
   - 光芯片
+- stock_code: COHR
+  stock_name: Coherent
+  market: US
+  currency: USD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 估值透支——PE(TTM)154x/Fwd PE 49x/EV-EBITDA 56x/52周+320%，场景加权期望内在价值约 $212/股 vs 现价 $368.65、安全边际约 -42%，即便 bull 情景压力测试（$340/股）仍约 -8%；业务质量与 NVIDIA $2B 入股+采购承诺、世界首条 6"InP 量产线均属上乘硬证据，但价格无任何安全边际，等回调至约 $200-250 区间再评
+  bear: 90
+  base: 195
+  bull: 340
+  quality: 4
+  conviction_date: '2026-07-02'
+  source_doc: sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md
+  themes:
+  - ai_compute
+  - 光模块
+  - InP光芯片
