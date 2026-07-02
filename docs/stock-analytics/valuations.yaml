@@ -3089,3 +3089,19 @@
   - 功率半导体
   - 破产重整
   - 供给侧
+- stock_code: '688515'
+  stock_name: 裕太微
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 以太网PHY国产替代真卡位（2.5G网通份额30%+）但连续多年亏损未摘U、PS(TTM)约30x偏贵，期望内在价值远低于现市值（安全边际-48.7%）；等扭亏兑现+估值回调
+  bear: 69
+  base: 125
+  bull: 200
+  conviction_date: '2026-07-02'
+  source_doc: sectors/semiconductor/ethernet-phy/2026-07-02-裕太微-buffett分析.md
+  themes:
+  - 以太网PHY
+  - 国产替代
+  - 车载以太网
