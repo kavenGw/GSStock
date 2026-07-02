@@ -3125,3 +3125,20 @@
   themes:
   - ai_compute
   - 光模块
+- stock_code: LITE
+  stock_name: Lumentum
+  market: US
+  currency: USD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 好生意（AI datacom 光器件龙头、高端 EML 全球 50-60% 份额、Q3 营收+90%/毛利48% 业绩层真兑现）但估值极端透支——P/S 25 / EV-EBITDA 123 / 52周+742%，三情景加权期望内在价值约 150 美元/股、对现价 $801 安全边际约 -81%，即便 bull 压力测试仍 -58% 无任何安全边际
+  bear: 54
+  base: 113
+  bull: 333
+  quality: 5
+  conviction_date: '2026-07-02'
+  source_doc: sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md
+  themes:
+  - ai_compute
+  - 光模块
+  - 光芯片
