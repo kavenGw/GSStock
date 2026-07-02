@@ -19,6 +19,9 @@ valuation:
   currency: USD
   dividend_yield: null
 related_docs:
+- path: ../../../cross-sector/2026-07-02-迈威尔-仕佳光子-buffett对比分析.md
+  note: AI 光互联赛道六方横评，Lumentum 为高端 EML 全球定价者参照
+  symmetric: true
 - path: 2026-07-02-源杰科技-buffett分析.md
   note: 中国 CW 光源/EML 芯片追赶者，Lumentum 是其对标的全球垄断者
   symmetric: true
@@ -36,6 +39,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
+> - [2026-07-02-迈威尔-仕佳光子-buffett对比分析](../../../cross-sector/2026-07-02-迈威尔-仕佳光子-buffett对比分析.md) — AI 光互联赛道六方横评，Lumentum 为高端 EML 全球定价者参照
 > - [2026-07-02-源杰科技-buffett分析](2026-07-02-源杰科技-buffett分析.md) — 中国 CW 光源/EML 芯片追赶者，Lumentum 是其对标的全球垄断者
 > - [2026-06-28-仕佳光子-buffett分析](../optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 中国光芯片追赶者（无源强/有源 EML 早期），芯片层份额格局参照
 > - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 芯片全球玩家，Lumentum(LITE) 是 InP 激光器龙头
