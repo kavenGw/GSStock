@@ -684,6 +684,7 @@ const Watch = {
             legend: { data: legendData, top: 0, textStyle: { fontSize: 11 }, selectedMode: true },
             tooltip: {
                 trigger: 'axis',
+                order: 'valueDesc',
                 formatter: params => {
                     let html = params[0].axisValue;
                     params.forEach(p => {
@@ -777,6 +778,7 @@ const Watch = {
             legend: { data: legendData, top: 0, textStyle: { fontSize: 11 }, selectedMode: true },
             tooltip: {
                 trigger: 'axis',
+                order: 'valueDesc',
                 formatter: params => {
                     let html = params[0].axisValue;
                     params.forEach(p => {
