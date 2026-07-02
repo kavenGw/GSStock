@@ -46,6 +46,9 @@ related_docs:
   - path: ../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md
     note: 仕佳光子（光芯片）buffett——无源AWG/PLC强、有源EML早期，PE205x极贵定watch
     symmetric: true
+  - path: ../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
+    note: CPO/NPO 替代延后，缓释新易盛档 CPO 替代风险，延长可插拔光模块跑道（利好但估值不翻案）
+    symmetric: true
 ---
 # SemiAnalysis CPO/800VDC 落地延后 — 影响专题（2026-06-11）
 
@@ -59,6 +62,7 @@ related_docs:
 > - [2026-05-13-磷化铟-板块分析](./2026-05-13-磷化铟-板块分析.md) — InP 激光器是可插拔光模块上游，跑道延长的间接受益
 > - [2026-06-25-烽火通信-buffett分析](../sectors/semiconductor/optical/2026-06-25-烽火通信-buffett分析.md) — 烽火通信深度档：DSP仅产品层维持exclude
 > - [2026-06-28-仕佳光子-buffett分析](../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 仕佳光子（光芯片）buffett——无源AWG/PLC强、有源EML早期，PE205x极贵定watch
+> - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — CPO/NPO 替代延后，缓释新易盛档 CPO 替代风险，延长可插拔光模块跑道（利好但估值不翻案）
 <!-- END related_docs -->
 
 > 撰写日期：2026-06-11

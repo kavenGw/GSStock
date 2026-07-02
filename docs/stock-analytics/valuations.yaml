@@ -3108,3 +3108,20 @@
   - 以太网PHY
   - 国产替代
   - 车载以太网
+- stock_code: '300502'
+  stock_name: 新易盛
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 好生意（全球第二光模块龙头+毛利系统性高旭创6-7pct+AI业绩硬兑现），但价格透支——PB98.7%分位历史天花板、PE(TTM)66，场景加权期望内在价值约121元/股、安全边际约-76%，即便bull压力测试仍-60%，无任何安全边际
+  bear: 45
+  base: 125
+  bull: 204
+  dividend_yield: 0.2
+  quality: 4
+  conviction_date: '2026-07-02'
+  source_doc: sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
+  themes:
+  - ai_compute
+  - 光模块
