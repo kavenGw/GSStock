@@ -50,6 +50,5 @@ This project has a graphify knowledge graph at graphify-out/.
 
 Rules:
 - When answering architecture or codebase questions, consult graphify-out/GRAPH_REPORT.md for god nodes and community structure — but the graph may lag recent edits, so treat current source as authoritative on any conflict
-- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - The graph is a navigation aid, not a source of truth. Optionally refresh after substantial code changes (skip for small edits): `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"`
 - Top god nodes are minified vendor bundles (echarts.min.js / chart.umd.min.js — `E()`, `T()`, `js()` etc.); skip them. Real architectural cores are `Stock`, `MarketIdentifier`, `UnifiedStockCache`, `UnifiedStockDataService`.
