@@ -3159,3 +3159,21 @@
   - ai_compute
   - 光模块
   - InP光芯片
+- stock_code: '300394'
+  stock_name: 天孚通信
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 好生意（无源光器件国内龙头+高毛利54-57%+AI光引擎业绩真兑现，1.6T光引擎已量产58.5万只→2026预计190万只），但极贵价格+尖锐风险——PE(TTM)126x/PB50x/分位97-99%历史极高位、Fabrinet单客63%极端集中、康宁玻璃桥威胁FAU/主动耦合环节，场景加权期望内在价值约34.4元/股、安全边际约-86%，即便bull压测仍约-79%，无任何安全边际
+  bear: 16.1
+  base: 36.7
+  bull: 52.3
+  dividend_yield: 0.2
+  quality: 4
+  conviction_date: '2026-07-02'
+  source_doc: sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
+  themes:
+  - ai_compute
+  - 光器件
+  - CPO

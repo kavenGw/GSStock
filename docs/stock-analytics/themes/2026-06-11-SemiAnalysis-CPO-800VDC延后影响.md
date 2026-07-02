@@ -55,6 +55,9 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md
     note: CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
     symmetric: true
+  - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
+    note: CPO 对天孚是配套受益 vs 关键耦合环节被玻璃桥/被动对准替代的双刃，区别于模块厂纯逆风；CPO 延后缓释替代时点但不翻案估值
+    symmetric: true
 ---
 # SemiAnalysis CPO/800VDC 落地延后 — 影响专题（2026-06-11）
 
@@ -71,6 +74,7 @@ related_docs:
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — CPO/NPO 替代延后，缓释新易盛档 CPO 替代风险，延长可插拔光模块跑道（利好但估值不翻案）
 > - [2026-07-02-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md) — CPO 延后当日 Lumentum -8%；其 buffett 深度档
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
+> - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — CPO 对天孚是配套受益 vs 关键耦合环节被玻璃桥/被动对准替代的双刃，区别于模块厂纯逆风；CPO 延后缓释替代时点但不翻案估值
 <!-- END related_docs -->
 
 > 撰写日期：2026-06-11
