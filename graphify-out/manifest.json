@@ -16,8 +16,8 @@
     "hash": "64bd42da9ddea9d9a73c63729563080b"
   },
   "D:\\Git\\stock\\app\\__init__.py": {
-    "mtime": 1782306302.456403,
-    "hash": "29527c88c26769f0dcfbafb519ee863e"
+    "mtime": 1782729414.7238746,
+    "hash": "dffa12e6ad8e9e7fa9fdfed1a89ed300"
   },
   "D:\\Git\\stock\\app\\config\\blog_monitor.py": {
     "mtime": 1774681423.4768047,
@@ -56,12 +56,12 @@
     "hash": "e1926a8b50e4a944e9a88fc60e70a7a1"
   },
   "D:\\Git\\stock\\app\\config\\stock_codes.py": {
-    "mtime": 1776748234.4478817,
-    "hash": "aadd4616312e1bb0ce6e45f288b09f27"
+    "mtime": 1782962114.5793355,
+    "hash": "bed95c9c5fd30c3f3efba9b4de9db916"
   },
   "D:\\Git\\stock\\app\\config\\supply_chain.py": {
-    "mtime": 1780405174.0085635,
-    "hash": "c2f3e59eec2da21d0e696d5ec104772c"
+    "mtime": 1782345162.1639109,
+    "hash": "daad233099aded3917eaf0776b742dc0"
   },
   "D:\\Git\\stock\\app\\config\\worldcup_config.py": {
     "mtime": 1781880912.6165423,
@@ -224,8 +224,8 @@
     "hash": "527ba3a48265d5fa5c46120e9d038710"
   },
   "D:\\Git\\stock\\app\\models\\news.py": {
-    "mtime": 1774068098.0857453,
-    "hash": "d8749347b8123c1fdcc9d12a7220fdd4"
+    "mtime": 1782725445.9553237,
+    "hash": "106e0ccd003578912ca8dc7cc3a334aa"
   },
   "D:\\Git\\stock\\app\\models\\position.py": {
     "mtime": 1771206154.7862382,
@@ -268,24 +268,20 @@
     "hash": "0ac0ce5d5bb7df839d7899c1a5ff8fd3"
   },
   "D:\\Git\\stock\\app\\models\\watch_list.py": {
-    "mtime": 1773037267.3249884,
-    "hash": "13f0a6cf5018599a5fc32f2c6ff44de6"
+    "mtime": 1782708774.2531178,
+    "hash": "aee7931516ba5d46a1c2db314442d660"
   },
   "D:\\Git\\stock\\app\\models\\wyckoff.py": {
     "mtime": 1771206133.8666494,
     "hash": "5bab681f38fe780f2fadc2ea5eb024df"
   },
   "D:\\Git\\stock\\app\\models\\__init__.py": {
-    "mtime": 1776850995.5679834,
-    "hash": "848c37e0591009b1fcd2e9db9eec6d18"
+    "mtime": 1782708774.2526114,
+    "hash": "366a2085407b59ec28c28ed6b9370427"
   },
   "D:\\Git\\stock\\app\\routes\\advice.py": {
     "mtime": 1764838718.979434,
     "hash": "96ffa3dde1650f5ef518b4dcadb58a00"
-  },
-  "D:\\Git\\stock\\app\\routes\\alert.py": {
-    "mtime": 1775195551.136323,
-    "hash": "ed731e1faf0028cb026425a68f0c56e5"
   },
   "D:\\Git\\stock\\app\\routes\\briefing.py": {
     "mtime": 1775195557.575868,
@@ -316,8 +312,8 @@
     "hash": "f0ba8fcf4f4b192380cda235801b175e"
   },
   "D:\\Git\\stock\\app\\routes\\news.py": {
-    "mtime": 1774068071.1059241,
-    "hash": "0672f54b1d48cfcf2c511f0e3d17761a"
+    "mtime": 1782725445.9553237,
+    "hash": "6dc4fe98ea2a061e7ff2bac649dfb258"
   },
   "D:\\Git\\stock\\app\\routes\\position.py": {
     "mtime": 1771210704.9948273,
@@ -348,20 +344,20 @@
     "hash": "97ccaf4d9a87cd84a0c3985e35e07054"
   },
   "D:\\Git\\stock\\app\\routes\\valuations.py": {
-    "mtime": 1782306966.7818787,
-    "hash": "7abfe33d8ba62939db06a40bf24248f7"
+    "mtime": 1782804161.7676244,
+    "hash": "952a9c7561b934fb24eeba8438702bb5"
   },
   "D:\\Git\\stock\\app\\routes\\value_dip.py": {
-    "mtime": 1775002894.177855,
-    "hash": "c12539164dcf1887ccd241ea71f14bd3"
+    "mtime": 1782902161.6158953,
+    "hash": "11c448a3c9231f22e31a104c3eeaefa3"
   },
   "D:\\Git\\stock\\app\\routes\\watch.py": {
-    "mtime": 1775636176.0407848,
-    "hash": "617905f8d8dbac7cec6e6acd16966187"
+    "mtime": 1782898931.6426985,
+    "hash": "df3ebaaf956054f0b65d7afe8ecd57e2"
   },
   "D:\\Git\\stock\\app\\routes\\__init__.py": {
-    "mtime": 1782306294.0881798,
-    "hash": "1392107169235a75ae9546adf92399d5"
+    "mtime": 1782729414.7238746,
+    "hash": "96b7109153c6641cabd69623c302757a"
   },
   "D:\\Git\\stock\\app\\scheduler\\engine.py": {
     "mtime": 1775217253.375384,
@@ -403,13 +399,17 @@
     "mtime": 1777103997.55546,
     "hash": "7f01de762a7bc621cf9149636c2671c0"
   },
+  "D:\\Git\\stock\\app\\seeds\\watch_companies.py": {
+    "mtime": 1782725445.9563248,
+    "hash": "a54136fac523cba40147917ee96a9525"
+  },
   "D:\\Git\\stock\\app\\seeds\\worldcup_category.py": {
     "mtime": 1777011809.435121,
     "hash": "9871791a1fa2da4a53cedf89391be4e6"
   },
   "D:\\Git\\stock\\app\\seeds\\__init__.py": {
-    "mtime": 1778160987.8973799,
-    "hash": "164df8b635bd0f39c196e6899a970559"
+    "mtime": 1782725445.9563248,
+    "hash": "6fe68f7c9a7e0b6249c3ff980d327bf4"
   },
   "D:\\Git\\stock\\app\\services\\ai_analyzer.py": {
     "mtime": 1774229228.0964777,
@@ -432,8 +432,8 @@
     "hash": "24b046b59bb4be358343676236204fa7"
   },
   "D:\\Git\\stock\\app\\services\\briefing.py": {
-    "mtime": 1775195565.3716655,
-    "hash": "0a93da8ef30956922979882a4366afa7"
+    "mtime": 1782729414.7238746,
+    "hash": "4134b5a01c136674d1bf99b233430fab"
   },
   "D:\\Git\\stock\\app\\services\\buffett_analysis.py": {
     "mtime": 1779087812.0351186,
@@ -612,12 +612,12 @@
     "hash": "1cd882384df8f67d761d8a1d8dba5c5d"
   },
   "D:\\Git\\stock\\app\\services\\valuations_helpers.py": {
-    "mtime": 1782306946.2025259,
-    "hash": "7c854ff1637ad47c028d4eab68746db1"
+    "mtime": 1782465004.056929,
+    "hash": "3f4db7825c454c3ebf8b1d1f9958d126"
   },
   "D:\\Git\\stock\\app\\services\\value_dip.py": {
-    "mtime": 1775002884.1405768,
-    "hash": "b74779cbfac55821395851c28e6bde6b"
+    "mtime": 1782902161.6158953,
+    "hash": "d8c7a5c7abe5717337d2008845eb14c0"
   },
   "D:\\Git\\stock\\app\\services\\wallstreet_news_service.py": {
     "mtime": 1775439833.0166214,
@@ -632,8 +632,8 @@
     "hash": "5c3d57aa6ba2c705a7a27165065b03bd"
   },
   "D:\\Git\\stock\\app\\services\\watch_service.py": {
-    "mtime": 1773037297.2817752,
-    "hash": "2bda9329f367b96100688bbada3bceba"
+    "mtime": 1782708774.2536206,
+    "hash": "b213628f9f46def3797cf553ef333590"
   },
   "D:\\Git\\stock\\app\\services\\worldcup_service.py": {
     "mtime": 1781880912.6195893,
@@ -699,10 +699,6 @@
     "mtime": 1778420039.4519198,
     "hash": "2846176ac8028c81b281504f5a6e2223"
   },
-  "D:\\Git\\stock\\app\\static\\js\\alert-page.js": {
-    "mtime": 1780546191.5656514,
-    "hash": "8b50832efd1c9641411b82328397d4f5"
-  },
   "D:\\Git\\stock\\app\\static\\js\\briefing.js": {
     "mtime": 1775195699.9006896,
     "hash": "169171210e816b1075909351876f70a3"
@@ -728,8 +724,8 @@
     "hash": "0afd1305e0de08c8b2e7c00324cfcaec"
   },
   "D:\\Git\\stock\\app\\static\\js\\news.js": {
-    "mtime": 1774068063.712468,
-    "hash": "4a1cae6e69f44b5218d1f2a0f72c62a9"
+    "mtime": 1782725445.9563248,
+    "hash": "2c7b20b9cc548d6f93c7a5502a016c39"
   },
   "D:\\Git\\stock\\app\\static\\js\\profit_charts.js": {
     "mtime": 1764979863.5296614,
@@ -764,12 +760,12 @@
     "hash": "33f4dcf564c2152ef3126368d259d90d"
   },
   "D:\\Git\\stock\\app\\static\\js\\value_dip.js": {
-    "mtime": 1775002913.9472873,
-    "hash": "a75c9d4144a3ff3777c883f407a14376"
+    "mtime": 1782945858.1632688,
+    "hash": "f0f922ac914b9f82dcc84bf5f95d8daf"
   },
   "D:\\Git\\stock\\app\\static\\js\\watch.js": {
-    "mtime": 1775538938.3594713,
-    "hash": "4c0ad88f800d03279318c3535eb0d07e"
+    "mtime": 1782963337.7139788,
+    "hash": "3fbc3657949822001a18fcde33427ed0"
   },
   "D:\\Git\\stock\\app\\static\\vendor\\js\\bootstrap.bundle.min.js": {
     "mtime": 1773800355.7252593,
@@ -804,8 +800,8 @@
     "hash": "b9bf843f73dab46660b1735b9099fab8"
   },
   "D:\\Git\\stock\\app\\strategies\\daily_briefing\\__init__.py": {
-    "mtime": 1775694609.7868783,
-    "hash": "1f9a3e642c5d9a9508a46935c4e8413a"
+    "mtime": 1782751760.2493217,
+    "hash": "c71b390efc3a54b1e5dc71011fd631cb"
   },
   "D:\\Git\\stock\\app\\strategies\\earnings_snapshot\\__init__.py": {
     "mtime": 1775008608.6619372,
@@ -840,8 +836,8 @@
     "hash": "645981c3c011e94d5c90703a957369fd"
   },
   "D:\\Git\\stock\\app\\strategies\\watch_alert\\__init__.py": {
-    "mtime": 1775716751.6419666,
-    "hash": "da2d4bff44034c0e5371ee00d6af950b"
+    "mtime": 1782899053.7055097,
+    "hash": "8e73adf3459ca2fb653a48b3bf252b98"
   },
   "D:\\Git\\stock\\app\\strategies\\watch_preload\\__init__.py": {
     "mtime": 1775538910.5207877,
@@ -892,8 +888,8 @@
     "hash": "e13a0174c104d95803fbd9bde208673c"
   },
   "D:\\Git\\stock\\scripts\\sync_valuations.py": {
-    "mtime": 1781953883.173983,
-    "hash": "29288cd0c5311ea7d6b23aa54628849d"
+    "mtime": 1782901407.3113792,
+    "hash": "73c61ab0347291c374419bae1ea38922"
   },
   "D:\\Git\\stock\\scripts\\_docs_schema.py": {
     "mtime": 1782305955.88334,
@@ -902,6 +898,14 @@
   "D:\\Git\\stock\\tests\\conftest.py": {
     "mtime": 1782307524.4404626,
     "hash": "b20d7895cee732b4040ad71bda3ea1d6"
+  },
+  "D:\\Git\\stock\\tests\\test_alert_removed.py": {
+    "mtime": 1782729414.735866,
+    "hash": "76062697a3319fe5b75bb2cec731b85d"
+  },
+  "D:\\Git\\stock\\tests\\test_briefing_earnings_alert.py": {
+    "mtime": 1782729414.735866,
+    "hash": "0b8d96ed522c5d7b75360f36e88b30e6"
   },
   "D:\\Git\\stock\\tests\\test_buffett_analysis.py": {
     "mtime": 1779087812.0653603,
@@ -968,16 +972,48 @@
     "hash": "4c2b676ff351e7db62d1bbea27be68bc"
   },
   "D:\\Git\\stock\\tests\\test_sync_valuations.py": {
-    "mtime": 1781953883.173983,
-    "hash": "80f0ccb4a3eefda6e06ab73514d68a32"
+    "mtime": 1782901407.311889,
+    "hash": "9f84d281d7a8452543d1788b5c35e094"
   },
   "D:\\Git\\stock\\tests\\test_valuations.py": {
-    "mtime": 1782307534.7600758,
-    "hash": "0406a06748d8b32a8001ff58008e1358"
+    "mtime": 1782803082.3495622,
+    "hash": "b1a657ea3ffa6590c0e12919d07a20f0"
+  },
+  "D:\\Git\\stock\\tests\\test_valuations_grouping.py": {
+    "mtime": 1782802825.8580232,
+    "hash": "47074e7927674772a9f506cf23ddb05a"
+  },
+  "D:\\Git\\stock\\tests\\test_value_dip_briefing.py": {
+    "mtime": 1782751760.2493217,
+    "hash": "df9955f51d9c0dc4e41cef1bfc21b435"
+  },
+  "D:\\Git\\stock\\tests\\test_value_dip_flat.py": {
+    "mtime": 1782751760.2493217,
+    "hash": "8c15938a62f084d99caed76278a7e3bf"
+  },
+  "D:\\Git\\stock\\tests\\test_value_dip_relative.py": {
+    "mtime": 1782902161.6163974,
+    "hash": "34e527513f6ff290bef8c90863a57424"
+  },
+  "D:\\Git\\stock\\tests\\test_value_dip_routes.py": {
+    "mtime": 1782751760.2493217,
+    "hash": "b7cd8bc79d033ea67bb2bc079158bd1d"
   },
   "D:\\Git\\stock\\tests\\test_volume_alert_unit_consistency.py": {
     "mtime": 1776939374.4267924,
     "hash": "dc4ecb4de98e5b5212e5d6e26d045d1a"
+  },
+  "D:\\Git\\stock\\tests\\test_watch_companies_seed.py": {
+    "mtime": 1782725445.9573233,
+    "hash": "1d59e54abe73900dd599b3b2611fb679"
+  },
+  "D:\\Git\\stock\\tests\\test_watch_config.py": {
+    "mtime": 1782725445.958324,
+    "hash": "400f6b51b4d6c622f298c03d244fa51c"
+  },
+  "D:\\Git\\stock\\tests\\test_watch_signals.py": {
+    "mtime": 1782729414.736866,
+    "hash": "52a489565b41e0e24b63561122fd96f3"
   },
   "D:\\Git\\stock\\tests\\test_worldcup_config.py": {
     "mtime": 1781880912.6220994,
@@ -1000,8 +1036,8 @@
     "hash": "f06e76fe4cfc78e030746f976de96d1a"
   },
   "D:\\Git\\stock\\CLAUDE.md": {
-    "mtime": 1781905563.2304792,
-    "hash": "c365830645fb3a8a42e6f0678ebbf024"
+    "mtime": 1782963707.8287876,
+    "hash": "7eefc357ead1ad67a2cd5e61c9d7ba43"
   },
   "D:\\Git\\stock\\README.md": {
     "mtime": 1781881037.4314022,
@@ -1043,13 +1079,9 @@
     "mtime": 1771998734.0535445,
     "hash": "f173fb840cfd7800dbc4ddf1679a304b"
   },
-  "D:\\Git\\stock\\app\\templates\\alert.html": {
-    "mtime": 1780546155.1723804,
-    "hash": "37d578e2460607dc4673f8c476daf779"
-  },
   "D:\\Git\\stock\\app\\templates\\base.html": {
-    "mtime": 1782307963.9410212,
-    "hash": "0b02b0c65dd23286ef7649375182497f"
+    "mtime": 1782899361.4747474,
+    "hash": "ef510a8a18b63b3cc5f662cd82d18ebd"
   },
   "D:\\Git\\stock\\app\\templates\\briefing.html": {
     "mtime": 1773905352.052034,
@@ -1092,8 +1124,8 @@
     "hash": "293ca83a3cad2564c75fe4614fd251c8"
   },
   "D:\\Git\\stock\\app\\templates\\news.html": {
-    "mtime": 1774068072.9975822,
-    "hash": "156ddf08dd51d35dc6dc922b2a11e242"
+    "mtime": 1782725445.9573233,
+    "hash": "f341fe92aaa7b01a832fd72677cf8d03"
   },
   "D:\\Git\\stock\\app\\templates\\overall_profit.html": {
     "mtime": 1764980310.586791,
@@ -1124,16 +1156,12 @@
     "hash": "f96784fba304ea0fe9b293ddf29adf42"
   },
   "D:\\Git\\stock\\app\\templates\\valuations.html": {
-    "mtime": 1782030966.404487,
-    "hash": "01313d1e7b1e2a9e41fbe28f90262978"
-  },
-  "D:\\Git\\stock\\app\\templates\\value_dip.html": {
-    "mtime": 1775002921.7732494,
-    "hash": "9d23079b38e47e81d62dcbb4d402fe08"
+    "mtime": 1782804161.7676244,
+    "hash": "ac4b69eb96eb65a2fbec28a0855d451c"
   },
   "D:\\Git\\stock\\app\\templates\\watch.html": {
-    "mtime": 1775538722.439742,
-    "hash": "77cb2f4a7a10ce70201c170b376438ce"
+    "mtime": 1782902161.6163974,
+    "hash": "2c5d07b24a5ee600a3ed97654daa11d2"
   },
   "D:\\Git\\stock\\app\\templates\\partials\\stock_detail_drawer.html": {
     "mtime": 1771129728.9508834,
@@ -1176,16 +1204,16 @@
     "hash": "d75216af53d02736eb651de157410b53"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\valuations.yaml": {
-    "mtime": 1782308656.5589404,
-    "hash": "30321e69711c787f3d767a87ca7f3c43"
+    "mtime": 1782951917.3753405,
+    "hash": "0aefe7f17d218024223764c33b08a74f"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-05-15-\u5229\u57fa\u578b\u5b58\u50a8\u6da8\u4ef7-SLC-NAND-comps.md": {
     "mtime": 1782276408.9766212,
     "hash": "16c60d99e7aaf13e6438bfdc524d6a58"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-05-20-\u5b58\u50a8\u6269\u5382\u53cc\u96c4\u53d7\u76ca\u94fe-comps.md": {
-    "mtime": 1782308325.5796633,
-    "hash": "d9390672aa46e933860a0be67459bb06"
+    "mtime": 1782462358.360472,
+    "hash": "da365147036e2bc8d411868de7ae6278"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-05-22-\u80dc\u5b8f-\u6caa\u7535-comps-\u826f\u7387\u4e0eRubin\u4efd\u989d.md": {
     "mtime": 1781939615.6151085,
@@ -1196,8 +1224,8 @@
     "hash": "cec8b16fad9a1917827dda7d0d6d3ae6"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-05-29-\u6caa\u7535-\u80dc\u5b8f-\u751f\u76ca-\u5e02\u503c\u91cd\u4f30-comps.md": {
-    "mtime": 1781939615.6151085,
-    "hash": "55a02b3426efcac6ab2508833626c732"
+    "mtime": 1782653322.6879766,
+    "hash": "5e5aa56ae92243cb0dd5f2e26ba2fbb9"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-05-29-\u94dc\u677f\u5757-\u6709\u8272\u8d44\u6e90-comps.md": {
     "mtime": 1781855566.513608,
@@ -1219,6 +1247,14 @@
     "mtime": 1782011052.480604,
     "hash": "0dfff77ff39e871386dbda014d8d23ce"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-06-25-SiC\u886c\u5e95-GaN\u5668\u4ef6-\u6676\u5706\u5de5\u827a\u5bf9\u6bd4-comps.md": {
+    "mtime": 1782478745.9344988,
+    "hash": "563131f7ffbf3bcfd93772199f8559bf"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\comps\\2026-06-26-\u4e09\u5b89\u5149\u7535-\u5929\u5cb3\u5148\u8fdb-SiC\u4ef7\u503c\u94fe\u5bf9\u6bd4-comps.md": {
+    "mtime": 1782543936.7013862,
+    "hash": "07e1b8c1a2dccfb2f41fdd1381f27a8e"
+  },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\quarterly\\26q1\\2026-04-25-\u5146\u6613\u521b\u65b0-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
     "mtime": 1782051412.4474719,
     "hash": "a92b1fa46edc7437bbd99a01316347d1"
@@ -1228,16 +1264,16 @@
     "hash": "c4579acccdf14817a21622268d382976"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\quarterly\\26q1\\2026-04-26-\u96c5\u514b\u79d1\u6280-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
-    "mtime": 1780283461.9507525,
-    "hash": "52abc56bdcca7dad9f1f848bb9ab1ead"
+    "mtime": 1782636450.4485474,
+    "hash": "03adc08ae29d42d4e14532ddc36c06e2"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\quarterly\\26q1\\2026-04-27-\u5174\u68ee\u79d1\u6280-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
     "mtime": 1780474219.5624514,
     "hash": "26f095e0891f079f514ea432b7f24c0a"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\quarterly\\26q1\\2026-04-28-\u957f\u7535\u901a\u5bcc-comps-\u5c01\u6d4b\u8d5b\u9053\u6a2a\u5411\u5bf9\u6bd4.md": {
-    "mtime": 1782306798.2862148,
-    "hash": "48e65acda6ba7608bf482181d5c6a765"
+    "mtime": 1782618733.3429587,
+    "hash": "030ac45a510a154a224380a8ad0ef8a9"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\comps\\quarterly\\26q1\\2026-04-28-\u9633\u5149\u7535\u6e90-comps-\u6210\u957f\u6027\u4e0e\u6295\u8d44\u51b3\u7b56.md": {
     "mtime": 1780839093.205621,
@@ -1248,8 +1284,8 @@
     "hash": "e31b572dd499e7c2ce485251b4e9ef4c"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\cross-sector\\2026-05-06-\u901a\u5bcc\u5fae\u7535-AMD26Q1\u8d22\u62a5\u8054\u52a8\u4e13\u9898.md": {
-    "mtime": 1779087812.0386312,
-    "hash": "2e0b89f1936908e83e884c6ac572b385"
+    "mtime": 1782618733.3439765,
+    "hash": "f8568fbdfb9fc9d6ba1bec6d76140f97"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\cross-sector\\2026-05-08-AMD-Intel-buffett\u5bf9\u6bd4\u5206\u6790.md": {
     "mtime": 1782276408.9805877,
@@ -1258,6 +1294,10 @@
   "D:\\Git\\stock\\docs\\stock-analytics\\cross-sector\\2026-05-08-\u7acb\u8baf\u7cbe\u5bc6-\u6b4c\u5c14\u80a1\u4efd-buffett\u5bf9\u6bd4\u5206\u6790.md": {
     "mtime": 1782276408.9805877,
     "hash": "adec67b61b7e13b9ba0b1a0fc84c6b40"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\cross-sector\\2026-07-02-\u8fc8\u5a01\u5c14-\u4ed5\u4f73\u5149\u5b50-buffett\u5bf9\u6bd4\u5206\u6790.md": {
+    "mtime": 1782962242.0815713,
+    "hash": "7a885c31e2b35479e42d03ac29b5f2a3"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\quarterly\\26q1\\2026-04-28-\u5317\u4eac\u541b\u6b63-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
     "mtime": 1782276408.9815862,
@@ -1320,8 +1360,8 @@
     "hash": "7e9b7ea2e58fd47dda249851f612b657"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\quarterly\\26q1\\2026-05-01-\u76db\u5408\u6676\u5fae-26Q1\u5b63\u62a5\u70b9\u8bc4.md": {
-    "mtime": 1781939199.2792854,
-    "hash": "59441e0061914e48aa06801bd9ea3b64"
+    "mtime": 1782619455.2588294,
+    "hash": "269e7f32038b70a5e8cb6e05561fb158"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\quarterly\\26q1\\2026-05-02-\u6caa\u7535\u80a1\u4efd-\u6cf0\u56fd\u5de5\u5382\u4e13\u9898.md": {
     "mtime": 1779087812.044159,
@@ -1536,20 +1576,28 @@
     "hash": "aababb287a155941b3608e208381e37e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\pcb\\2026-06-04-\u4e16\u8fd0\u7535\u8def-buffett\u5206\u6790.md": {
-    "mtime": 1780621576.3956814,
-    "hash": "979d720cc9bf2ead7ac782349726d5d5"
+    "mtime": 1782653322.697649,
+    "hash": "68738554ccf6810ee42eaed2c8bc9e01"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\pcb\\2026-06-04-\u6caa\u7535\u80a1\u4efd-buffett\u5206\u6790.md": {
-    "mtime": 1782306658.4095905,
-    "hash": "af0e311a7446ecab7ecd4c31014f0460"
+    "mtime": 1782653322.697649,
+    "hash": "925f18c544ee3dc07c6713195635d809"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\pcb\\2026-06-28-\u4e2d\u5bcc\u7535\u8def-buffett\u5206\u6790.md": {
+    "mtime": 1782653322.697649,
+    "hash": "c0238f74d2417e9142e45e9517e468f1"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\pcb\\2026-06-28-\u65b9\u6b63\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1782653322.697649,
+    "hash": "e34573f918d6c56601e511e92c104248"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\pcb-equipment\\2026-06-20-\u5927\u65cf\u6570\u63a7-buffett\u5206\u6790.md": {
     "mtime": 1782306658.4095905,
     "hash": "6a84bad4386a698481bb844e63725c2b"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\power-electronics\\2026-06-02-\u9ea6\u683c\u7c73\u7279-buffett\u5206\u6790.md": {
-    "mtime": 1780391365.378225,
-    "hash": "4a18a0f3429c0cc92f09cccdbedb030a"
+    "mtime": 1782566134.9992564,
+    "hash": "fedffc3ddfc945d0997f8047fbfe9e29"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\electronics\\precision-manufacturing\\2026-06-19-\u84dd\u601d\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1781904161.903023,
@@ -1568,24 +1616,24 @@
     "hash": "d0bb610c6d952adf2fb3e7033bd57d7c"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\energy\\battery\\2026-06-16-\u4ebf\u7eac\u9502\u80fd-buffett\u5206\u6790.md": {
-    "mtime": 1782289149.4582756,
-    "hash": "4cc8e7de4d40a30325b7321bb136f3c9"
+    "mtime": 1782460664.5345063,
+    "hash": "1e2f5647ec6b94f93cf2fb8d578bda95"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\energy\\battery\\2026-06-20-\u745e\u6d66\u5170\u94a7-buffett\u5206\u6790.md": {
-    "mtime": 1782289149.459279,
-    "hash": "a90710a6afbccd1f8a3940e4d9ed04d9"
+    "mtime": 1782460664.535512,
+    "hash": "0eaabb940a3ed2b9f33045173152637e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\energy\\solar\\2026-05-22-\u6b63\u6cf0\u7535\u6e90-buffett\u5206\u6790.md": {
-    "mtime": 1780802650.0082498,
-    "hash": "1025146e3f68b0f7383c5bbf073f896c"
+    "mtime": 1782881134.7297819,
+    "hash": "fb9ee0e0fc871b208b39007cfdfa04b0"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\energy\\solar\\2026-05-28-TCL\u4e2d\u73af-buffett\u5206\u6790.md": {
     "mtime": 1780802650.0117576,
     "hash": "986500e553025c7417d797d22c8fcf1e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\energy\\solar\\2026-06-07-\u9633\u5149\u7535\u6e90-buffett\u5206\u6790.md": {
-    "mtime": 1780839093.212124,
-    "hash": "232461791ef9add2879a6bb57f7a2bce"
+    "mtime": 1782881134.7297819,
+    "hash": "5303d29438d7253488b752428bb58122"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\energy\\waste-to-energy\\2026-06-08-\u4f1f\u660e\u73af\u4fdd-buffett\u5206\u6790.md": {
     "mtime": 1780962487.9749062,
@@ -1623,6 +1671,10 @@
     "mtime": 1781360457.1593647,
     "hash": "d8cfdb284cb2cb820c5016f30fd4e30e"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\industrial\\diversified-industrial\\2026-06-25-\u9732\u7b11\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1782345138.0016396,
+    "hash": "4381ec9553016ba1cce0aabc376dda13"
+  },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\industrial\\ev\\2026-06-04-\u96f6\u8dd1\u6c7d\u8f66-buffett\u5206\u6790.md": {
     "mtime": 1780621572.5120275,
     "hash": "fdbf837a395eb2840d1171e783cc74db"
@@ -1632,16 +1684,16 @@
     "hash": "5e4391ecf667308a3d358d428566c8b6"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\industrial\\power-electronics\\2026-05-18-\u4e2d\u6052\u7535\u6c14-buffett\u5206\u6790.md": {
-    "mtime": 1780839093.212124,
-    "hash": "993d73a1493538d012b009fe9923472a"
+    "mtime": 1782566134.9992564,
+    "hash": "c6d7ce8d621a638ed2b5d8d22d13969a"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\industrial\\power-equipment\\2026-05-18-\u65ed\u5149\u7535\u5b50-buffett\u5206\u6790.md": {
     "mtime": 1779103481.8127825,
     "hash": "3c674d422dc0114f14ce65208fdb1e1e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\industrial\\power-equipment\\2026-05-28-\u91d1\u76d8\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1780838681.8921826,
-    "hash": "09f07f84a2290d8b4fe015e17f212f43"
+    "mtime": 1782565518.4711237,
+    "hash": "14a9b980591925a4a386ab54bf04d5d4"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\industrial\\precision-components\\2026-06-20-\u7eff\u7684\u8c10\u6ce2-buffett\u5206\u6790.md": {
     "mtime": 1781963123.1504033,
@@ -1652,20 +1704,28 @@
     "hash": "9876b1d4c711b191a33e0a01ce0abb62"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\chemicals\\2026-05-08-\u4e07\u534e\u5316\u5b66-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.0516975,
-    "hash": "a52fb7c1b8625f37285b540c2910a906"
+    "mtime": 1782619455.2658544,
+    "hash": "5a0ca7c5db078fbd6ac87932c0942e33"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\copper-foil\\2026-06-08-\u94dc\u51a0\u94dc\u7b94-buffett\u5206\u6790.md": {
     "mtime": 1782289149.4582756,
     "hash": "c5bbdb8700eb002787d8a2aeb5cb2eb4"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\copper-foil\\2026-06-19-\u5609\u5143\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1781874577.9891279,
-    "hash": "699d2f06b367046f92a3eae5d57550bc"
+    "mtime": 1782460664.535512,
+    "hash": "644b40fabe2b8f3854c9fdc80f55cae2"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\glass\\2026-06-26-\u65d7\u6ee8\u96c6\u56e2-buffett\u5206\u6790.md": {
+    "mtime": 1782479727.2837021,
+    "hash": "1808127b857f9f32cfdbb74f40feeea6"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\industrial-gas\\2026-06-28-\u91d1\u5b8f\u6c14\u4f53-buffett\u5206\u6790.md": {
+    "mtime": 1782655104.6980815,
+    "hash": "cf960449cd71b7c0a6896892fd8e2d6b"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\lithium\\2026-06-15-\u8d63\u950b\u9502\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1782289149.4582756,
-    "hash": "101ceb5bc3e32b865647b452515561aa"
+    "mtime": 1782460664.535512,
+    "hash": "9b151b691e06c7190ab9a6f22eca739d"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\magnetic-materials\\2026-06-07-\u6a2a\u5e97\u4e1c\u78c1-buffett\u5206\u6790.md": {
     "mtime": 1780838737.1382394,
@@ -1676,28 +1736,28 @@
     "hash": "ce5fe743763d39e6bb18b10ac61d0051"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-04-24-\u7d2b\u91d1\u77ff\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1782289149.4572778,
-    "hash": "e84a2e0bfa2dd0eaeb17ded218085ae7"
+    "mtime": 1782313465.6739001,
+    "hash": "a6ce6b19a61c40bdf70063ffaa5496d5"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-05-13-\u76db\u8fbe\u8d44\u6e90-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.0527112,
-    "hash": "914d5c54ec3d01eff18686d350872e71"
+    "mtime": 1782751971.6276865,
+    "hash": "5bab35d1fa79bc8f9da0b34c1a29ed87"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-05-14-\u4e2d\u56fd\u94dd\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1780925203.4726498,
-    "hash": "b16c2b220ea73f13286e2bfedbfc2c67"
+    "mtime": 1782539798.9769983,
+    "hash": "0d9c0f8e5f78af50938a332c876fefed"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-05-14-\u4e91\u94dd\u80a1\u4efd-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.0527112,
-    "hash": "9826cbe7b902452bbc8e9a3b9f19f9ce"
+    "mtime": 1782539739.2993283,
+    "hash": "7c7e72e478548463551d8f56e24abd9a"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-05-14-\u5357\u5c71\u94dd\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.0527112,
-    "hash": "bdfe25a8b15731fae32f32b6338a0476"
+    "mtime": 1782539798.9769983,
+    "hash": "d71caccf0df3ac023e2844dc4ab6f0b5"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-05-14-\u5929\u5c71\u94dd\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.0527112,
-    "hash": "e71986664aa776f717e29dd9688fff6e"
+    "mtime": 1782539798.9800558,
+    "hash": "2a4e38cc6dbb1bf92d60c01dad7fbe13"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-05-14-\u76db\u5c6f\u77ff\u4e1a-buffett\u5206\u6790.md": {
     "mtime": 1782289149.4572778,
@@ -1712,16 +1772,16 @@
     "hash": "bd0ad8453774fd55c6365be1d3050f1a"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-02-\u5317\u65b9\u94dc\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1782289149.4538949,
-    "hash": "f134d8d34896f476ae66590078bd775d"
+    "mtime": 1782313465.6739001,
+    "hash": "057c08d1a7e0a6534f755d4909341967"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-02-\u94dc\u9675\u6709\u8272-buffett\u5206\u6790.md": {
-    "mtime": 1782306001.9070518,
-    "hash": "cddd948c1b409e0f2e33015cac4a9abe"
+    "mtime": 1782313465.6739001,
+    "hash": "1c62024e5f402b0d2f09d2462f86dd4d"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-08-\u4e2d\u56fd\u5b8f\u6865-buffett\u5206\u6790.md": {
-    "mtime": 1780925203.4771576,
-    "hash": "84ddb60a92f4b32cf3f2f89a6ba6f997"
+    "mtime": 1782539798.9800558,
+    "hash": "a24c40df1652d0e710e28f143ba412b4"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-11-\u7ae0\u6e90\u94a8\u4e1a-buffett\u5206\u6790.md": {
     "mtime": 1781360457.1630335,
@@ -1732,36 +1792,48 @@
     "hash": "ab4204aeedb1264c66ce98029a502369"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-19-\u6c5f\u897f\u94dc\u4e1a-buffett\u5206\u6790.md": {
-    "mtime": 1782306008.5301561,
-    "hash": "353e1b516c198c63941115a76051a5a8"
+    "mtime": 1782313651.6291494,
+    "hash": "ada5ddaf6e35813f3b520da7af32e190"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-21-\u4e2d\u91d1\u9ec4\u91d1-buffett\u5206\u6790.md": {
-    "mtime": 1782030285.638268,
-    "hash": "903c8743bcd06a4643a0f970901fe42a"
+    "mtime": 1782313465.6739001,
+    "hash": "27d4a80a2fd8de6ae77df75b6e1494d6"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\nonferrous\\2026-06-21-\u6d1b\u9633\u94bc\u4e1a-buffett\u5206\u6790.md": {
     "mtime": 1782289149.459279,
     "hash": "57bb2002cce4a818560698d8768720ed"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\specialty-gas\\2026-06-28-\u51ef\u7f8e\u7279\u6c14-buffett\u5206\u6790.md": {
+    "mtime": 1782655104.7011046,
+    "hash": "13bdcde1964370148eb99af68e723b08"
+  },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\superhard\\2026-06-11-\u529b\u91cf\u94bb\u77f3-buffett\u5206\u6790.md": {
     "mtime": 1781360457.1681943,
     "hash": "66bd500f766da8cfa1c875c8b0229f8f"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\materials\\\u5149\u4f0f\u94f6\u6d46\\2026-06-30-\u805a\u548c\u6750\u6599-buffett\u5206\u6790.md": {
+    "mtime": 1782794018.2779577,
+    "hash": "60617cd69c4044c1dcdf40e2f3ac7ba5"
+  },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\media\\digital-marketing\\2026-05-18-\u4e07\u6da6\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1779103692.9366956,
     "hash": "810254399195b41c102baf0bd5da8551"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\media\\internet-platform\\2026-06-24-\u817e\u8baf\u63a7\u80a1-buffett\u5206\u6790.md": {
+    "mtime": 1782314199.9379697,
+    "hash": "9dbafa6de15515789aba378ef2167045"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\media\\music-streaming\\2026-06-04-\u7f51\u6613\u4e91\u97f3\u4e50-buffett\u5206\u6790.md": {
     "mtime": 1781904635.1793647,
     "hash": "b1b9ee90b8e6147b1683dbb03362e572"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\media\\music-streaming\\2026-06-20-\u817e\u8baf\u97f3\u4e50-buffett\u5206\u6790.md": {
-    "mtime": 1781904635.1793647,
-    "hash": "dd0c79f43f5b850f9cef3b3cabcce84f"
+    "mtime": 1782314199.9379697,
+    "hash": "fd4f5be689c201f844f083a5212fcc5e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\media\\online-literature\\2026-06-04-\u9605\u6587\u96c6\u56e2-buffett\u5206\u6790.md": {
-    "mtime": 1781904635.1841364,
-    "hash": "06ad133deef22c00617a89041258309d"
+    "mtime": 1782314199.9379697,
+    "hash": "3b8c9f39e967b2e44bc7aa92eafd514e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\media\\shopping-guide\\2026-06-20-\u503c\u5f97\u4e70-buffett\u5206\u6790.md": {
     "mtime": 1781963150.915102,
@@ -1775,37 +1847,53 @@
     "mtime": 1782049427.4387312,
     "hash": "5e9c7d856c17b5db14d86792fc9f717c"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\analog-power\\2026-06-28-\u5bcc\u6ee1\u5fae-buffett\u5206\u6790.md": {
+    "mtime": 1782657155.9738379,
+    "hash": "06a2e5de823b0a8c4dbcceec1858c067"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\compound-semiconductor\\2026-06-25-\u4e09\u5b89\u5149\u7535-buffett\u5206\u6790.md": {
+    "mtime": 1782566134.997209,
+    "hash": "bbe946413558f5d5a95edf3d7db2229e"
+  },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-04-25-\u56fd\u82af\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1779148753.9606543,
     "hash": "cfca2c1ae8277a1069511a722c2676cd"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-04-25-\u5e0c\u837b\u5fae-buffett\u5206\u6790.md": {
-    "mtime": 1782308025.3162308,
-    "hash": "ff1b7dd04b542920e44e0d6b85c52e7f"
+    "mtime": 1782619455.2683592,
+    "hash": "4a9d1d624a1f7e780613f91d56842c3f"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-05-14-\u8fc8\u5a01\u5c14\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1779087812.0552306,
     "hash": "8991e048f84fe9e02022e4fc476d5af6"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-05-15-\u5168\u5fd7\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.055818,
-    "hash": "55cd65a2a54b6c5bbcea61f2ed9ed930"
-  },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-05-15-\u82af\u539f\u80a1\u4efd-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.055818,
-    "hash": "7e8f95147a3f7c88a5a9b8c2128625ac"
+    "mtime": 1782636606.5043976,
+    "hash": "8723dc050c63e327dd86b603e552ba94"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-05-19-\u6d77\u5149\u4fe1\u606f-buffett\u5206\u6790.md": {
-    "mtime": 1782049413.1785982,
-    "hash": "0f56e6b1c8f2718084925aa1afa62449"
+    "mtime": 1782618733.3454845,
+    "hash": "505fb8ec51b4e651170adddc302f34c0"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-05-21-\u82f1\u4f1f\u8fbe-buffett\u5206\u6790.md": {
-    "mtime": 1779321599.0708559,
-    "hash": "d07e46618320650438d843fe6fe46890"
+    "mtime": 1782618733.3454845,
+    "hash": "d4a9869860a082bc2559b472ac3b0088"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-06-24-\u5e0c\u837b\u5fae-buffett\u5206\u6790.md": {
-    "mtime": 1782309555.0032704,
-    "hash": "d759e3d5f1936b5ee9df972262197fa3"
+    "mtime": 1782619455.2683592,
+    "hash": "641d5fc1879061c5cd1c4e83c7223e92"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-06-26-\u82af\u539f\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1782570915.7904491,
+    "hash": "621a761c08dc8a8d5585fad65d9755ad"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-06-27-\u707f\u82af\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1782570915.7904491,
+    "hash": "556c1c65091fcce63e0eb661560aae0a"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\design\\2026-06-28-\u745e\u82af\u5fae-buffett\u5206\u6790.md": {
+    "mtime": 1782636606.5043976,
+    "hash": "7e498f57eba53c087ae6fdc82e1e23d8"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\equipment\\2026-05-19-\u77fd\u7535\u80a1\u4efd-buffett\u5206\u6790.md": {
     "mtime": 1780317938.284508,
@@ -1816,36 +1904,40 @@
     "hash": "ff4a0ee4f4a892336139bfa6fcc6da36"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\equipment\\2026-06-19-\u6676\u76db\u673a\u7535-buffett\u5206\u6790.md": {
-    "mtime": 1781877911.2747908,
-    "hash": "07d2bf3371b1ebe99fd8ba3ea58c08f7"
+    "mtime": 1782566134.998246,
+    "hash": "401ee23c893bebf48a84992b02738c9a"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\equipment\\2026-06-20-ASMPT-buffett\u5206\u6790.md": {
-    "mtime": 1782308325.5934553,
-    "hash": "6e97b6252c414c1974e6056898f8ed07"
+    "mtime": 1782618733.3439765,
+    "hash": "8e00f83c5086491eb64dece214311f27"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\equipment\\2026-06-20-\u7f57\u535a\u7279\u79d1-buffett\u5206\u6790.md": {
     "mtime": 1781960148.2402182,
     "hash": "2142a32278bfb84aa6e42e9b7f775863"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\equipment\\2026-06-24-\u62d3\u8346\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1782308325.5934553,
-    "hash": "aab7c78d09d62d85b0909864bdf7d745"
+    "mtime": 1782654323.3164654,
+    "hash": "741edce59949b3e5ba3bd5f50575e19d"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\ethernet-phy\\2026-07-02-\u88d5\u592a\u5fae-buffett\u5206\u6790.md": {
+    "mtime": 1782951147.1900156,
+    "hash": "e45eb14ecbb422f5289007a30496fa6b"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\foundry\\2026-06-20-\u4e2d\u82af\u56fd\u9645-buffett\u5206\u6790.md": {
-    "mtime": 1781966683.3728366,
-    "hash": "eac9c35f804557eb587601f99b11a738"
+    "mtime": 1782618733.344981,
+    "hash": "7036b42cacdf8d05786c07f8498525d7"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\laser-chip\\2026-06-21-\u957f\u5149\u534e\u82af-buffett\u5206\u6790.md": {
-    "mtime": 1782276408.9953623,
-    "hash": "2fd80acd931e17cfed82dbbd1f6c01ac"
+    "mtime": 1782951831.4098995,
+    "hash": "e69daa15b4101f04432e6f772a07a17c"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\led\\2026-06-26-\u534e\u707f\u5149\u7535-buffett\u5206\u6790.md": {
+    "mtime": 1782479246.87838,
+    "hash": "1d7b0f529a81bbb6443b60adbec8e986"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-07-\u5b8f\u548c\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1782276408.9953623,
     "hash": "946e5f5697ff39cfeccf027586fa5e6e"
-  },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-08-\u5357\u5927\u5149\u7535-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.057328,
-    "hash": "4044f15f6f121f3f5fdfba6502530be1"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-08-\u5de8\u5316\u80a1\u4efd-buffett\u5206\u6790.md": {
     "mtime": 1780978598.6211617,
@@ -1863,17 +1955,9 @@
     "mtime": 1779087812.0583277,
     "hash": "8ab07f5c605c2963531d7865d091a5a8"
   },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-12-\u6c5f\u4e30\u7535\u5b50-buffett\u5206\u6790.md": {
-    "mtime": 1779237848.2777004,
-    "hash": "272432b42a9d64139d8828c245a4be37"
-  },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-15-\u4e2d\u5de8\u82af-buffett\u5206\u6790.md": {
-    "mtime": 1779087812.0583277,
-    "hash": "7c774f5011706a88f06acb6cdb1893fd"
-  },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-19-\u6c5f\u4e30\u7535\u5b50-buffett\u5206\u6790.md": {
-    "mtime": 1779237848.2787013,
-    "hash": "53b23c39ea1cdad3f62f24b1700626fd"
+    "mtime": 1782481844.320131,
+    "hash": "7ba0b8c70f44d8471fcc3baaac93fc2e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-05-26-\u9f0e\u9f99\u80a1\u4efd-buffett\u5206\u6790.md": {
     "mtime": 1782306798.299353,
@@ -1884,8 +1968,8 @@
     "hash": "fccab218f4bdda8cb6625337854b6184"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-06-01-\u96c5\u514b\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1780282622.646041,
-    "hash": "caea04982cc67d74c7742bd7a62d22bd"
+    "mtime": 1782636450.4485474,
+    "hash": "59910fdc7cc781dee0200f2427874071"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-06-08-\u5efa\u6ed4\u79ef\u5c42\u677f-buffett\u5206\u6790.md": {
     "mtime": 1782306658.414135,
@@ -1896,8 +1980,20 @@
     "hash": "029fdee93b37a67277c7fd25d3c285ad"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-06-11-\u77f3\u82f1\u80a1\u4efd-buffett\u5206\u6790.md": {
-    "mtime": 1781231700.531633,
-    "hash": "90469dfdf425c16c4d6f2a9507889858"
+    "mtime": 1782539764.6186814,
+    "hash": "41b008fed8188822740b805bddce8cca"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-06-26-\u591a\u6c1f\u591a-buffett\u5206\u6790.md": {
+    "mtime": 1782481844.314696,
+    "hash": "7521c6d216eda528dd613e9f6cdfd827"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-06-26-\u6c5f\u4e30\u7535\u5b50-buffett\u5206\u6790.md": {
+    "mtime": 1782462340.5096457,
+    "hash": "59c88495e5cb92638ce29d11c5761e60"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\materials\\2026-06-28-\u5357\u5927\u5149\u7535-buffett\u5206\u6790.md": {
+    "mtime": 1782654372.8451095,
+    "hash": "3aac925725e70f2850a544c13ee25e07"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\mcu\\2026-05-15-\u4e2d\u9896\u7535\u5b50-buffett\u5206\u6790.md": {
     "mtime": 1782276408.9963784,
@@ -1907,65 +2003,93 @@
     "mtime": 1782276408.9963784,
     "hash": "8ac0227a371f18365a2a91d19c554e42"
   },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\mems\\2026-06-20-\u8d5b\u5fae\u7535\u5b50-buffett\u5206\u6790.md": {
-    "mtime": 1781955402.326639,
-    "hash": "9efe5755339320763fbcff8df4e781dd"
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\mems\\2026-06-28-\u8d5b\u5fae\u7535\u5b50-buffett\u5206\u6790.md": {
+    "mtime": 1782653322.7079754,
+    "hash": "14095b3a64349b2ebbddd6b725da01d5"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\networking\\2026-06-21-\u76db\u79d1\u901a\u4fe1-buffett\u5206\u6790.md": {
     "mtime": 1782049394.5400224,
     "hash": "a81cdfa9b6313f0653c3dfa3b5769d7b"
-  },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical\\2026-05-09-\u6e90\u6770\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1782048623.8493972,
-    "hash": "2b34eb09466f5847d85b361a8f70f983"
-  },
-  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical\\2026-05-12-\u70fd\u706b\u901a\u4fe1-buffett\u5206\u6790.md": {
-    "mtime": 1780577497.3591266,
-    "hash": "d337491c0ba47b69529e3f756472d00e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical\\2026-06-04-\u5149\u5e93\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1780577497.3634791,
     "hash": "e25452374643d10d9f24bc89673fe177"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical\\2026-06-04-\u5149\u8fc5\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1781138476.689257,
-    "hash": "a84b5c7d74f97456293a16650d956231"
+    "mtime": 1782951831.412704,
+    "hash": "6a0e1dd9546c10d132822c9ee3396e92"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical\\2026-06-25-\u70fd\u706b\u901a\u4fe1-buffett\u5206\u6790.md": {
+    "mtime": 1782345181.4066877,
+    "hash": "5cea171352969e6a0b003c7a122e1e08"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical\\2026-07-02-\u6e90\u6770\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1782962206.0476532,
+    "hash": "a45e443ce2014690693768e3db7a1017"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical-chip\\2026-06-28-\u4ed5\u4f73\u5149\u5b50-buffett\u5206\u6790.md": {
+    "mtime": 1782951831.412704,
+    "hash": "2168d717a33f6149f44b88bf0bb6d188"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\optical-components\\2026-06-04-\u84dd\u7279\u5149\u5b66-buffett\u5206\u6790.md": {
     "mtime": 1780621568.512215,
     "hash": "358528ba45058224fd2150bb81bcc39e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\packaging\\2026-06-08-\u6df1\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1782306798.3003557,
-    "hash": "bff78d03068157329da3ee0893604a57"
+    "mtime": 1782618733.3439765,
+    "hash": "61cecb14c215614a1f1f5035e85d73e2"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\parts\\2026-06-26-\u73c2\u739b\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1782462340.5096457,
+    "hash": "9759e234b27437af72357a48a39bcb7d"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\pcb\\2026-06-20-\u80dc\u5b8f\u79d1\u6280-buffett\u5206\u6790.md": {
-    "mtime": 1782306658.414135,
-    "hash": "268be7dce68b580845bab050c1fa8fe3"
+    "mtime": 1782653322.7094774,
+    "hash": "ce458c381a3a9b21b99d38dd61627380"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\photonics\\2026-06-20-\u70ac\u5149\u79d1\u6280-buffett\u5206\u6790.md": {
     "mtime": 1781960148.2422185,
     "hash": "2e39113293bbb9c3ed1c2e6dca290a21"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\power\\2026-06-19-\u534e\u6da6\u5fae-buffett\u5206\u6790.md": {
-    "mtime": 1782308025.3187332,
-    "hash": "c57d918f71aef9561afd6c6da8fc2c60"
+    "mtime": 1782566134.9977126,
+    "hash": "fc7ccd7f1664584a99d8175f2e29dec5"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\power\\2026-06-19-\u58eb\u5170\u5fae-buffett\u5206\u6790.md": {
-    "mtime": 1782308025.3202417,
-    "hash": "2849795dcd0d79ffa51d78a450e947fd"
+    "mtime": 1782566134.997209,
+    "hash": "f0ca04646e2616d47a7410e94d7b8640"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\power\\2026-06-19-\u82f1\u8bfa\u8d5b\u79d1-buffett\u5206\u6790.md": {
-    "mtime": 1781960285.2114904,
-    "hash": "4b8d583e67e4e16c25d07647bfdf1aa3"
+    "mtime": 1782566054.6870134,
+    "hash": "a6b0803dbca21a1eb3e329dfd684ad6e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\power\\2026-06-24-\u6377\u6377\u5fae\u7535-buffett\u5206\u6790.md": {
-    "mtime": 1782308635.5048883,
-    "hash": "dcae9d71ffaadd1ad7720faeed07567a"
+    "mtime": 1782545653.189859,
+    "hash": "c1df54cdf165d8c0a0affcdca94edc52"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\power\\2026-06-25-\u626c\u6770\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1782566134.998246,
+    "hash": "46e1cd6f67a69bd2b92cfa98bde0becb"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\power\\2026-06-25-\u65af\u8fbe\u534a\u5bfc-buffett\u5206\u6790.md": {
+    "mtime": 1782566134.998246,
+    "hash": "6bada59412e9e9c8ade7ba7a9219025a"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\process-systems\\2026-06-28-\u81f3\u7eaf\u79d1\u6280-buffett\u5206\u6790.md": {
+    "mtime": 1782655104.706455,
+    "hash": "2d3126d3fe522573cb2f041ae472c7b1"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\sic-power\\2026-07-01-Wolfspeed-buffett\u5206\u6790.md": {
+    "mtime": 1782900653.6628244,
+    "hash": "c3971409213a14df925e0372d7e6c52a"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\sic-substrate\\2026-06-19-\u5929\u5cb3\u5148\u8fdb-buffett\u5206\u6790.md": {
-    "mtime": 1781877911.2773058,
-    "hash": "1b83c1617c70afe2a170324a06127b6a"
+    "mtime": 1782566134.994589,
+    "hash": "4f167a5255b6cb30e7f17030fe3517d6"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\silicon-material\\2026-06-26-\u795e\u5de5\u80a1\u4efd-buffett\u5206\u6790.md": {
+    "mtime": 1782539764.6186814,
+    "hash": "b2c56eaa7b25b69acf71694f1191c047"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\storage\\2026-04-25-\u590d\u65e6\u5fae\u7535-buffett\u5206\u6790.md": {
     "mtime": 1779087812.0608356,
@@ -1996,8 +2120,8 @@
     "hash": "f62addeb0689ef7238627b93aa2ccfeb"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\storage\\2026-05-31-\u5146\u6613\u521b\u65b0-buffett\u5206\u6790.md": {
-    "mtime": 1781877519.0170693,
-    "hash": "b17094a52542eb4b329946ca86c979d4"
+    "mtime": 1782655104.706455,
+    "hash": "5179c44902d5f2bfc3cb3e683ae3b0e9"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\storage\\2026-05-31-\u6c5f\u6ce2\u9f99-buffett\u5206\u6790.md": {
     "mtime": 1781877519.018573,
@@ -2016,8 +2140,16 @@
     "hash": "92097523465f574f58bfc08e30d2d4c6"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\wafer\\2026-06-08-\u7acb\u6602\u5fae-buffett\u5206\u6790.md": {
-    "mtime": 1782276409.000104,
-    "hash": "7e0e943e943ebf9f474296f5146fe122"
+    "mtime": 1782542015.7993767,
+    "hash": "a00274f3cba3a288cecbb75a2d2b38c6"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\wafer\\2026-06-26-\u6caa\u7845\u4ea7\u4e1a-buffett\u5206\u6790.md": {
+    "mtime": 1782542015.7993767,
+    "hash": "8fbb0fd02f61064e791d771ebcd6e81f"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\sectors\\semiconductor\\wafer\\2026-06-27-\u897f\u5b89\u5955\u6750-buffett\u5206\u6790.md": {
+    "mtime": 1782542015.798374,
+    "hash": "92e6cc6bb4e60574ed20176590487e08"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-05-08-\u4e16\u754c\u676f2026-\u7092\u4f5c\u65f6\u95f4\u951a\u4e13\u9898.md": {
     "mtime": 1781963862.4534254,
@@ -2040,8 +2172,8 @@
     "hash": "9c525f945371adc2a974984119d3824b"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-05-25-\u534e\u4e3a\u97ec\u5b9a\u5f8b-\u534a\u5bfc\u4f53\u65b0\u8303\u5f0f\u4e13\u9898.md": {
-    "mtime": 1781966683.380698,
-    "hash": "81bb79914bd1e3de05b971d3c33f7080"
+    "mtime": 1782479465.8442128,
+    "hash": "52d08227560353769884bef0dc3c0f5e"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-05-26-\u7f8e\u5149DDR4\u6269\u4ea7-\u5f71\u54cd\u5206\u6790\u4e13\u9898.md": {
     "mtime": 1782276409.0011084,
@@ -2052,8 +2184,8 @@
     "hash": "581de7f5115697dadc43076299a5c9d1"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-05-28-\u5317\u7f8e\u7b97\u529b\u7f3a\u7535-\u7535\u529b\u8bbe\u5907\u94fe\u4e13\u9898.md": {
-    "mtime": 1780839093.2186978,
-    "hash": "fa92195c95e6113d2e6c5cd8ba955009"
+    "mtime": 1782565518.4711237,
+    "hash": "7fde8a35b15e691e348e190b3cad318d"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-05-29-Rubin-VR200-BOM\u62c6\u89e3-\u4ef7\u503c\u5206\u914d.md": {
     "mtime": 1782276409.0011084,
@@ -2080,8 +2212,8 @@
     "hash": "988a0b8d2a8889686d7a2c2d6dce2a4f"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-07-AIDC\u50a8\u80fd\u914d\u5957\u7387-\u50a8\u80fd\u94fe\u5f71\u54cd.md": {
-    "mtime": 1780925203.5264697,
-    "hash": "35e1a3deb8ebc96b26ac38ca4d2682c0"
+    "mtime": 1782460664.535512,
+    "hash": "5ae3a2917ab6b9c5c0591fd1e5c6c740"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-07-\u8f66\u89c4\u5b58\u50a8\u6da8\u4ef7180%-\u8f66\u4f01\u6210\u672c\u4f20\u5bfc\u4e13\u9898.md": {
     "mtime": 1782276409.0021086,
@@ -2092,12 +2224,12 @@
     "hash": "92c06442930b8ae3070eb7dd015ca4a9"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-11-SemiAnalysis-CPO-800VDC\u5ef6\u540e\u5f71\u54cd.md": {
-    "mtime": 1781960148.2453878,
-    "hash": "8f23e8675664a74795bb6f98dd668369"
+    "mtime": 1782951831.4182792,
+    "hash": "43c69b84206f8aad89213fa8af6165aa"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-11-\u5146\u6613\u5149\u6a21\u5757MCU-\u5149\u4e92\u8054\u5207\u5165\u5f71\u54cd.md": {
-    "mtime": 1781960148.2453878,
-    "hash": "ad0356d7e0dc52aa2b612f74a241ad7a"
+    "mtime": 1782951831.4182792,
+    "hash": "0125b5e17d642e4b123f7ca122d26b96"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-14-\u786b\u9178\u6da8\u4ef7-\u94dc\u51b6\u70bc\u526f\u4ea7\u5229\u597d\u4e13\u9898.md": {
     "mtime": 1781855566.5316699,
@@ -2108,32 +2240,40 @@
     "hash": "8e564785bbdaa761d8c2b31b84751283"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-19-GaN\u4e13\u5229\u6218\u5168\u7403\u786e\u6743.md": {
-    "mtime": 1781960298.1466508,
-    "hash": "f37f40186da9b248f0df4916af1c9be7"
+    "mtime": 1782558460.0782835,
+    "hash": "5295a3433dbeb1f668197a9569a19607"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-19-\u5b58\u50a8\u8d85\u7ea7\u5468\u671f\u5ef6\u957f-\u82f9\u679c\u786e\u8ba4\u6da8\u4ef7\u8f6c\u5ac1.md": {
     "mtime": 1781877519.0200894,
     "hash": "0e79999798b96ecc6574a8ae085f2aa4"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-19-\u78b3\u5316\u7845-\u6c2e\u5316\u9553-\u7b2c\u4e09\u4ee3\u534a\u5bfc\u4f53\u677f\u5757\u4e13\u9898.md": {
-    "mtime": 1781877911.2803042,
-    "hash": "f4f9a460a2bfbbc5141a322e9c6dec8e"
+    "mtime": 1782478745.9344988,
+    "hash": "691b59e55a5d85857c19ddd793be934d"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-19-\u7acb\u6602\u5fae\u6da8\u4ef7-\u7845\u57fa\u529f\u7387\u94fe\u5f71\u54cd.md": {
-    "mtime": 1782276409.0031085,
-    "hash": "e5f556b394199143f583522ac8e23d88"
+    "mtime": 1782462732.3594048,
+    "hash": "fc484bc085cd0a6482b0407878a4f4a2"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-20-\u9762\u677f\u6298\u65e7capex\u62d0\u70b9.md": {
     "mtime": 1781943041.0802953,
     "hash": "5da0be9a3ad015d0bf56e25a2e0cd34c"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-24-\u4e07\u534e\u5316\u5b66\u8de8\u754c\u9502\u7535\u6750\u6599-\u78b3\u9178\u9502\u6269\u4ea7.md": {
+    "mtime": 1782460664.535512,
+    "hash": "a944471df4794a80cc4fc81a31eb7e4f"
+  },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-24-\u6a21\u62df\u529f\u7387\u82af\u72477\u6708\u6da8\u4ef7\u6f6e-\u56fd\u9645\u9f99\u5934\u5b9a\u4ef7\u4f1e.md": {
-    "mtime": 1782308025.3232508,
-    "hash": "23bcae647e63992231cd9f68409316ff"
+    "mtime": 1782619455.2771893,
+    "hash": "196a85ed3687444e05f95cdaa0a37f02"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-24-\u82f1\u4f1f\u8fbePCB\u964d\u4ef7\u4f20\u95fb-\u7b97\u529bPCB\u94fe\u60c5\u7eea\u6740\u8dcc.md": {
-    "mtime": 1782306658.4203596,
-    "hash": "fcd217a99458d0da573490b2845e4dbc"
+    "mtime": 1782653322.7143743,
+    "hash": "4c49315f2038a05618d753bb5facbf55"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-24-\u91d1\u4ef7\u8dcc\u78344000\u7f8e\u5143.md": {
+    "mtime": 1782751971.6276865,
+    "hash": "d1032fb21b3010ae5ec259574105a2ce"
   },
   "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-24-\u957f\u7535\u79d1\u628078\u4ebf\u4e34\u6e2f\u5148\u8fdb\u5c01\u6d4b\u6269\u4ea7-\u5c01\u6d4b\u677f\u5757\u5f71\u54cd.md": {
     "mtime": 1782306798.3044755,
@@ -2143,21 +2283,161 @@
     "mtime": 1782309555.00747,
     "hash": "ba10d51759051268dbe190dca154e313"
   },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-26-\u50a8\u80fd\u7535\u82af\u4e00\u82af\u96be\u6c42-\u4f9b\u9700\u6da8\u4ef7\u94fe\u5f71\u54cd.md": {
+    "mtime": 1782460664.5345063,
+    "hash": "9ddf79db052420f2e207017ebb2f8712"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-27-12\u82f1\u5bf8\u5927\u7845\u7247\u7f3a\u53e3\u6da8\u4ef7-AI\u9a71\u52a8\u4e24\u6781\u5206\u5316.md": {
+    "mtime": 1782542015.7993767,
+    "hash": "b29c206cd2f8cd6c34e03111cc434939"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-27-SiC\u886c\u5e95\u6da8\u4ef7\u5468\u671f-CoWoS-SiC\u5316-Rubin-HVDC\u5171\u632f.md": {
+    "mtime": 1782545653.1873517,
+    "hash": "be2e431be6c3d79f41b85aa5aed52505"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-27-\u4e2d\u56fd\u53d8\u538b\u5668\u51fa\u53e3\u5151\u73b0-\u9ad8\u76db\u6570\u636e\u9a8c\u8bc1.md": {
+    "mtime": 1782565518.4706185,
+    "hash": "ae543b8c79471cdc513c96a5dd0b66ba"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-27-\u6469\u6839\u5927\u901aAI\u529f\u7387\u534a\u5bfc\u4f53TAM\u6846\u67b6-SiC-GaN\u5355\u74e6\u4ef7\u503c\u91cf\u5316.md": {
+    "mtime": 1782566134.994589,
+    "hash": "7648621b6dbd4095bbd2dc99185dda01"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-27-\u6b27\u76df\u5e9f\u94dd\u51fa\u53e3\u7ba1\u5236-\u94dd\u677f\u5757.md": {
+    "mtime": 1782539798.9800558,
+    "hash": "f1a8d6c3f621e8487f92eead0989c04b"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-28-\u534a\u5bfc\u4f53\u9ad8\u7eaf\u4e8c\u6c27\u5316\u78b3\u77ed\u7f3a-\u5f71\u54cd\u5206\u6790\u4e13\u9898.md": {
+    "mtime": 1782655104.7109985,
+    "hash": "4ccf52e4113d9210d9a9ef8a7b7016b0"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-06-28-\u6676\u5706\u4ee3\u5de52.0\u5e02\u573aQ1\u589e23%-\u5148\u8fdb\u5c01\u88c5\u53d7\u76ca.md": {
+    "mtime": 1782654323.3164654,
+    "hash": "3b0247ec896d5858e2e9f4e55f897e0e"
+  },
+  "D:\\Git\\stock\\docs\\stock-analytics\\themes\\2026-07-01-\u7f8e\u56fd\u62df\u7981\u8fdb\u53e3\u4e2d\u56fd\u80fd\u6e90\u9006\u53d8\u5668.md": {
+    "mtime": 1782881134.743948,
+    "hash": "ad13c1cde6a1f67b6445bad79b8ab478"
+  },
   "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-21-\u4f30\u503c\u9875\u677f\u5757\u6392\u5e8f\u8054\u52a8.md": {
     "mtime": 1782030194.6306207,
     "hash": "ca2efd8faa302ab7e4849c55a53d68c9"
   },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-24-claude-md-rules-\u91cd\u6784.md": {
+    "mtime": 1782311455.05887,
+    "hash": "69e62388bb820b411872bcf41fcdbefe"
+  },
   "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-24-minerals-page.md": {
-    "mtime": 1782287906.7874691,
-    "hash": "7a9d8fb5252e5ecd9816939c31db396a"
+    "mtime": 1782313952.8110836,
+    "hash": "f1538507970b953627db469678c6cc26"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-25-SiC\u886c\u5e95-GaN\u5668\u4ef6-\u6676\u5706\u5de5\u827a\u5bf9\u6bd4.md": {
+    "mtime": 1782347592.456059,
+    "hash": "32758e5af935eab1b8dbcdc597986bf6"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-25-valuations-subsector-grouping.md": {
+    "mtime": 1782344930.597012,
+    "hash": "34fa617e143d14ec6c026e056783ec3c"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-25-valuations-theme-filter.md": {
+    "mtime": 1782394770.8321931,
+    "hash": "f138f221db19fa6b2ef8e1f1ebee9322"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-26-valuations-quality-column.md": {
+    "mtime": 1782462993.612752,
+    "hash": "6a76a4c31651600ef62bd44ee2ec22e2"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-29-watch-companies-into-news-keywords.md": {
+    "mtime": 1782715118.2684524,
+    "hash": "e9d85c833828eb809650da26beca48cb"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-29-watch-list-code-config.md": {
+    "mtime": 1782705945.0635657,
+    "hash": "506515835cc504b53b4e7850f96562eb"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-29-\u9884\u8b66\u5408\u5e76\u8fdb\u76ef\u76d8\u9875.md": {
+    "mtime": 1782727003.3972926,
+    "hash": "2d8b156b84628e2a6491b7b46e2a40db"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-30-valuations-materials-split.md": {
+    "mtime": 1782798904.9027338,
+    "hash": "8d5ac1c2a9577e966d55a8c2f17828fc"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-30-valuations-page-optimization.md": {
+    "mtime": 1782804161.7676244,
+    "hash": "ff7f46577da1402dbc301efa1b189386"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-30-valuations-sector-toggle.md": {
+    "mtime": 1782793611.7267315,
+    "hash": "56b3c4f5c55e514c3e5584c31cfa9b67"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-06-30-value-dip-watch-stocks.md": {
+    "mtime": 1782750000.8323927,
+    "hash": "7ed53b885e2bbbadcdca29dee0188136"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\plans\\2026-07-01-\u76ef\u76d8\u76f8\u5bf9\u8d70\u52bf\u56fe.md": {
+    "mtime": 1782900876.9186585,
+    "hash": "05c718f0ae57f122bcbed320b2f27b12"
   },
   "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-21-\u4f30\u503c\u9875\u677f\u5757\u6392\u5e8f\u8054\u52a8-design.md": {
-    "mtime": 1782029965.914932,
-    "hash": "bd70060b05d165bdec969a172ba97118"
+    "mtime": 1782313957.1202722,
+    "hash": "14697be9c161dcde125a5b877891ebcb"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-24-claude-md-rules-\u91cd\u6784-design.md": {
+    "mtime": 1782311149.847006,
+    "hash": "df8307fcf6ef1640d0f86b2317b637c0"
   },
   "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-24-minerals-page-design.md": {
-    "mtime": 1782287399.1033583,
-    "hash": "32c18294d40f2ff36fe8e872af8cea43"
+    "mtime": 1782313961.5395744,
+    "hash": "07c8674ee27af3c7b738b5002cffb191"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-25-SiC\u886c\u5e95-GaN\u5668\u4ef6-\u6676\u5706\u5de5\u827a\u5bf9\u6bd4-design.md": {
+    "mtime": 1782344583.7370627,
+    "hash": "c3214c0e0998a90b56c0a67fc608ea9f"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-25-valuations-subsector-grouping-design.md": {
+    "mtime": 1782344299.8918438,
+    "hash": "807d717fc3451e098a6a41629ede8c5b"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-25-valuations-theme-filter-design.md": {
+    "mtime": 1782344654.5266795,
+    "hash": "a153f8e960730fb23e7fa3f9b1d05b16"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-26-valuations-quality-column-design.md": {
+    "mtime": 1782462801.3493857,
+    "hash": "4d0fceb51a6db57cca127dd7e2800c97"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-29-watch-companies-into-news-keywords-design.md": {
+    "mtime": 1782714309.5824993,
+    "hash": "95ed17e764682ee8d286461740674f9a"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-29-watch-list-code-config-design.md": {
+    "mtime": 1782705780.764309,
+    "hash": "ba9e288b78c4c8b85e821b3cbd9287d3"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-29-\u9884\u8b66\u5408\u5e76\u8fdb\u76ef\u76d8\u9875-design.md": {
+    "mtime": 1782726650.3280425,
+    "hash": "e857b8d6ad31ca9b824310430388af0e"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-30-valuations-materials-split-design.md": {
+    "mtime": 1782798466.1856313,
+    "hash": "9338a3ea4dda8c0075107878eeaa808c"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-30-valuations-page-optimization-design.md": {
+    "mtime": 1782802016.2287579,
+    "hash": "986136c103d686075a28eccc683b6682"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-30-valuations-sector-toggle-design.md": {
+    "mtime": 1782793372.8005424,
+    "hash": "e5fd563f82630baae47eda1f2cec9a26"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-06-30-value-dip-watch-stocks-design.md": {
+    "mtime": 1782749803.1673102,
+    "hash": "91439304454015f0f17f163770534de1"
+  },
+  "D:\\Git\\stock\\docs\\superpowers\\specs\\2026-07-01-\u76ef\u76d8\u76f8\u5bf9\u8d70\u52bf\u56fe-design.md": {
+    "mtime": 1782900484.565941,
+    "hash": "4e9109a965018386daf5add278e0d655"
   },
   "D:\\Git\\stock\\scripts\\_solar_comps_data.txt": {
     "mtime": 1777336208.9924977,

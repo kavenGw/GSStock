@@ -1,0 +1,1 @@
+{"nodes": [{"id": "watchlist_WatchAnalysis", "label": "WatchAnalysis model (AI analysis result)", "file_type": "code", "source_file": "app/models/watch_list.py", "source_location": "WatchAnalysis", "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

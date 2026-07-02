@@ -1,0 +1,1 @@
+{"nodes": [{"id": "supplychain_graphs", "label": "SUPPLY_CHAIN_GRAPHS (industry chain map)", "file_type": "code", "source_file": "app/config/supply_chain.py", "source_location": "SUPPLY_CHAIN_GRAPHS", "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}
