@@ -1403,19 +1403,19 @@
   note: exclude；利润波动极大，无三档可靠拆分
   themes:
   - AIoT-SoC
-- stock_code: '300476'
+- stock_code: '02476'
   stock_name: 胜宏科技
-  market: A
-  currency: CNY
+  market: HK
+  currency: HKD
   sector: semiconductor
   rating: watch
-  bear: 33.0
-  base: 106.8
-  bull: 183.1
+  bear: 35.6
+  base: 115.3
+  bull: 197.7
   dividend_yield: null
   conviction_date: '2026-06-20'
   source_doc: sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md
-  note: 每股内在价值=情景市值/9.829亿股反推；A股口径(H股2476.HK反溢价+3.3%故不切)
+  note: 每股内在价值=情景市值/9.829亿股反推×1.08(RMB→HKD)；2026-07-02 H(02476)对A由06-20反溢价+3.3%转折价-11.5%,按A+H取较低口径铁律切H跟踪(覆盖旧300476条);H口径安全边际-59%仍深度负,维持watch
   themes:
   - AI-PCB
   - Rubin
