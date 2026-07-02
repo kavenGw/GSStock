@@ -1754,14 +1754,17 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 267.0
-  base: 1221.0
-  bull: 1744.0
-  conviction_date: '2026-05-09'
-  source_doc: sectors/semiconductor/optical/2026-05-09-源杰科技-buffett分析.md
-  note: 源杰科技；悲观230/中性1050/乐观1500亿÷0.86亿股；估值不可靠PE380x题材定价
+  watch_reason: 估值透支——即便卖方 2026E 8 亿净利兑现仍是远期 PE 274x，PB 处近 5 年 99.4 分位历史极值，三情景加权期望安全边际约 -92.5%，好生意但价格无任何安全边际
+  bear: 12
+  base: 127
+  bull: 353
+  dividend_yield: 0.04
+  conviction_date: '2026-07-02'
+  source_doc: sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md
+  note: 源杰科技buffett重做；除权后1.245亿股口径，悲观12/中性127/乐观353元每股；PB99.4分位、远期PE274x，好生意无安全边际
   themes:
   - ai_compute
+  - 光芯片
 - stock_code: '688521'
   stock_name: 芯原股份
   market: A
