@@ -3180,3 +3180,22 @@
   themes:
   - ai_compute
   - 光模块
+- stock_code: '03661'
+  stock_name: 圣邦股份
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 国产模拟设计真龙头（营收第一/毛利51%/长期高CAGR），质地硬；但PE_TTM 154.6（5年81分位）/PB 17.67，取较低的H口径折价后等效PE仍~124x，绝对无安全边际；盈利已停滞4年（2025扣非-5.23%）、AI敞口业绩层未坐实、公司自身激励目标保守（2026营收仅+10%）。三情景期望内在价值~25.7 HKD/股（H口径市值~174亿HKD），较H口径市值811亿HKD折让-78.6%，即便bull压力测试仍-60%。好公司坏价格，等回调或多季兑现验证。
+  bear: 11.2
+  base: 26.3
+  bull: 47.9
+  dividend_yield: 0.001
+  quality: 4
+  conviction_date: '2026-07-03'
+  source_doc: sectors/semiconductor/design/2026-07-03-圣邦股份-buffett分析.md
+  themes:
+  - 模拟芯片涨价
+  - 国产替代
+  - AI电源
+  - A+H
