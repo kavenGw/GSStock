@@ -3199,3 +3199,21 @@
   - 国产替代
   - AI电源
   - A+H
+- stock_code: '002335'
+  stock_name: 科华数据
+  market: A
+  currency: CNY
+  sector: energy
+  rating: watch
+  watch_reason: 价格无安全边际——PE_TTM 66x（5年分位84%）/PB 4.55，且建立在被储能价格战压制的低盈利基数上；数能双主线质地尚可、AI液冷2026兑现存在但仍在业绩层起步，任一情景的正常化估值均低于283.62亿市值。需等液冷营收兑证 + 显著更低入场价。
+  bear: 9.32
+  base: 18.02
+  bull: 30.58
+  dividend_yield: 0.26
+  conviction_date: '2026-07-03'
+  source_doc: sectors/energy/energy-storage/2026-07-03-科华数据-buffett分析.md
+  themes:
+  - 储能
+  - AIDC电源
+  - 液冷
+  - 供给侧反转
