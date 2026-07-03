@@ -2724,21 +2724,6 @@
   - 微信生态
   - SOTP折价
   - 中概股
-- stock_code: '002617'
-  stock_name: 露笑科技
-  market: A
-  currency: CNY
-  sector: industrial
-  rating: exclude
-  bear: 2.88
-  base: 3.67
-  bull: 5.76
-  conviction_date: '2026-06-25'
-  source_doc: sectors/industrial/diversified-industrial/2026-06-25-露笑科技-buffett分析.md
-  themes:
-  - 碳化硅
-  - AI算力电源
-  - 多元化工业
 - stock_code: '300373'
   stock_name: 扬杰科技
   market: A
