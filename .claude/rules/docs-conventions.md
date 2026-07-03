@@ -21,6 +21,12 @@
 
 **锂电/储能成品制造归 `energy`/`battery`，不归 `materials`**：电芯/电池系统/动力/储能/消费电池制造（如亿纬锂能）属 energy；`materials` 仅放上游锂盐/正负极/隔膜/电解液（如赣锋锂业=materials/lithium）。中游电池厂 vs 上游锂资源成本传导方向相反（电池厂是锂买方，锂价涨=成本压力）。采证 subagent 易误判电池厂为 materials/industrial，控制者需纠。
 
+## 建档 gating：低质地非科技标的不建档
+
+跑 buffett / stock-deep-redo / analyze-category 时，若标的**质地很差（ROE 长期偏低、曾巨亏、无护城河的低质量多元化制造）且不属于科技类**，直接判掉——不建 buffett/分析档、不写 valuations.yaml，采证阶段先粗筛命中即口头说明「不建档」后停手，不进入写档/estimate/valuations 流程。这类"蹭题材热度"的 exclude 档只是给炒作背书、占用 doc 池，价值为负（案例：露笑 002617 多元化工业蹭 SiC 概念，建 exclude 档后被要求删除并撤 valuations 条目，2026-07-03）。
+
+例外：**科技类**标的即便评 exclude/watch 仍可建档（记录反面对照有价值）；**非科技的高质地**标的（消费/金融龙头等）不受此限。删已建档时同步删 valuations 条目 + 清理兄弟档 related_docs 反向链，跑 `lint_docs_refs.py` 收尾（exit 0 为真闸）。
+
 ## Frontmatter 约定（5 类 doc_type）
 
 所有文档必须有 YAML frontmatter，按 `scripts/_docs_schema.py:REQUIRED_FIELDS_BY_TYPE` 字段集补齐。
