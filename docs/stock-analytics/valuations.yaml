@@ -3235,3 +3235,21 @@
   - 数字隔离器
   - 国产替代
   - A+H
+- stock_code: '688536'
+  stock_name: 思瑞浦
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 国产模拟设计二线高增长追赶者，扭亏兑现真实（2026Q1 扣非 0.93 亿高质量转正、连 7 季营收环比增、光模块/汽车业绩层已起量），质地为科技成长股正面样本；但估值极端（PS_TTM ~18.9x / PB 7.23 近5年中位 / PE_TTM 174 无意义），穿越周期正常化 owner earnings 基数低（毛利率 46.6% 未修复到历史 55-60%、净利率仅 15%），三情景期望每股内在价值 ~60.5 CNY，较现价 332.12 折让 -81.8%，即便 bull 压力测试仍 -65.6%——绝对无安全边际。叠加创芯微并购 7.38 亿商誉悬顶（对赌仅到 2026、2027 起无保护）。好成长坏价格，watch 等回调或多季兑现；为何 watch 而非 exclude——科技类、扭亏成长真实、有护城河雏形，非衰退陷阱。
+  bear: 19.1
+  base: 54.3
+  bull: 114.1
+  dividend_yield: 0.0005
+  conviction_date: '2026-07-03'
+  source_doc: sectors/semiconductor/design/2026-07-03-思瑞浦-buffett分析.md
+  themes:
+  - 模拟芯片涨价
+  - 国产替代
+  - AI光模块
+  - 扭亏成长
