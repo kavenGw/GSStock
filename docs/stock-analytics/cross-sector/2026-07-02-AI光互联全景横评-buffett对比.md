@@ -23,6 +23,15 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
     note: 天孚个股 buffett 深度（上游无源器件+光引擎封装平台/军火商，独有玻璃桥替代风险，本对比的天孚口径来源）
     symmetric: true
+  - path: ../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md
+    note: 光迅个股 buffett 深度档（2026-06-04 较早口径 PE~100x/内在价值 250 亿/目标 24-30 元）；本横评为 2026-07-03 新口径（PE179x/−54%），市值口径已翻倍，以横评为准
+    symmetric: true
+  - path: ../sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md
+    note: 光库个股 buffett 深度档（2026-06-04 较早口径 PE362x/内在价值 82 亿/−78%）；本横评为 2026-07-03 新口径（PE384x/−62%），市值口径已翻倍，以横评为准
+    symmetric: true
+  - path: ../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md
+    note: 仕佳个股 buffett 深度档（2026-06-28 PE205x/内在价值~38元/−79%，含 bear12/base37/bull88 场景）；本横评为定性口径
+    symmetric: true
 ---
 # AI 光互联全景横评 — 迈威尔 · Coherent · Lumentum · 中际旭创 · 新易盛 · 仕佳光子 · 源杰科技 · 天孚通信 · 光迅科技 · 光库科技（Buffett 框架十方对比）
 
@@ -34,6 +43,9 @@ related_docs:
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — Coherent 个股 buffett 深度分析（AI 光互联西方 incumbent，本对比的 Coherent 口径来源）
 > - [2026-07-02-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md) — Lumentum 个股 buffett 深度分析（高端 EML 全球定价者，本对比的 Lumentum 口径来源）
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 天孚个股 buffett 深度（上游无源器件+光引擎封装平台/军火商，独有玻璃桥替代风险，本对比的天孚口径来源）
+> - [2026-06-04-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md) — 光迅个股 buffett 深度档（2026-06-04 较早口径 PE~100x/内在价值 250 亿/目标 24-30 元）；本横评为 2026-07-03 新口径（PE179x/−54%），市值口径已翻倍，以横评为准
+> - [2026-06-04-光库科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md) — 光库个股 buffett 深度档（2026-06-04 较早口径 PE362x/内在价值 82 亿/−78%）；本横评为 2026-07-03 新口径（PE384x/−62%），市值口径已翻倍，以横评为准
+> - [2026-06-28-仕佳光子-buffett分析](../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 仕佳个股 buffett 深度档（2026-06-28 PE205x/内在价值~38元/−79%，含 bear12/base37/bull88 场景）；本横评为定性口径
 <!-- END related_docs -->
 
 > 撰写日期：2026-07-02（十方扩展 2026-07-03）
