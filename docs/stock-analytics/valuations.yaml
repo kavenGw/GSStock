@@ -368,9 +368,10 @@
   rating: exclude
   bear: 9.83
   base: 24.56
-  bull: 57.31
-  conviction_date: '2026-06-02'
-  source_doc: sectors/electronics/pcb/2026-06-02-东山精密-buffett分析.md
+  bull: 57.32
+  dividend_yield: 0
+  conviction_date: '2026-07-03'
+  source_doc: sectors/electronics/pcb/2026-07-03-东山精密-buffett分析.md
   note: 东山精密；三情景市值180/450/1050亿÷18.32亿股；exclude，安全边际-86.6%
   themes:
   - PCB
