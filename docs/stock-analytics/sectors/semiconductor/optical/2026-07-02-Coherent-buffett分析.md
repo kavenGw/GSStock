@@ -25,7 +25,7 @@ related_docs:
 - path: 2026-07-02-源杰科技-buffett分析.md
   note: 国产 CW 光源要挑战的正是 Lumentum/Coherent 垄断（镜像对手）
   symmetric: true
-- path: ../../../cross-sector/2026-07-02-迈威尔-仕佳光子-buffett对比分析.md
+- path: ../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md
   note: AI 光互联赛道横评，Coherent 为西方 incumbent 参照
   symmetric: true
 - path: ../../../themes/2026-05-13-磷化铟-板块分析.md
@@ -42,7 +42,7 @@ related_docs:
 > **关联文档**
 > - [2026-06-04-光迅科技-buffett分析](2026-06-04-光迅科技-buffett分析.md) — 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）
 > - [2026-07-02-源杰科技-buffett分析](2026-07-02-源杰科技-buffett分析.md) — 国产 CW 光源要挑战的正是 Lumentum/Coherent 垄断（镜像对手）
-> - [2026-07-02-迈威尔-仕佳光子-buffett对比分析](../../../cross-sector/2026-07-02-迈威尔-仕佳光子-buffett对比分析.md) — AI 光互联赛道横评，Coherent 为西方 incumbent 参照
+> - [2026-07-02-AI光互联全景横评-buffett对比](../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md) — AI 光互联赛道横评，Coherent 为西方 incumbent 参照
 > - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 磷化铟板块——Coherent 全球领先 InP 晶圆/6英寸量产供应商
 > - [2026-06-11-SemiAnalysis-CPO-800VDC延后影响](../../../themes/2026-06-11-SemiAnalysis-CPO-800VDC延后影响.md) — CPO 延后论点（触发 COHR 单日 -11%），但 CPO 仍需 CW 光源双刃
 <!-- END related_docs -->
