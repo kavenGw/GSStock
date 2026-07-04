@@ -59,6 +59,8 @@ description: >-
 4. **选 sector-lens**：按 subsector 从 `references/sector-lenses.md` 挑命中的 lens 节（**可叠加**：主 lens
    如 PCB/存储 + **两个横切 lens（AI、成长）默认对每只股跑识别**）。把命中节的【必查清单】【撰写落点】摘出，分别注入 Phase A / Phase B 提示。
 
+**建档前避坑门（强制，先于 Phase A）**：采证第一步先查 `docs/stock-analytics/avoidance-list.yaml`——命中目标 `stock_code` 则按 `.claude/rules/docs-conventions.md`「建档前避坑列表验证」做原因验证：用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，逐条对照 `avoid_reason` 判仍成立/被推翻。**理由仍成立即中断建档**（口头说明后停手，不派 Phase A/B/C）；**被推翻**（基本面真实反转）才放行，且建档完成后从 avoidance-list.yaml 移除该条并 commit。
+
 ### Phase A — 联网采证（派 1 个 subagent，opus）
 产出 `.omc/artifacts/<股票名>-<日期>-evidence.md`（gitignore，不入库）。要点：
 - WebSearch/WebFetch 逐条验证核心多空论点（供给侧/需求/涨价/政策/财报），英文+中文交叉验证。

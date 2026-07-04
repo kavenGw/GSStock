@@ -27,6 +27,19 @@
 
 例外：**科技类**标的即便评 exclude/watch 仍可建档（记录反面对照有价值）；**非科技的高质地**标的（消费/金融龙头等）不受此限。删已建档时同步删 valuations 条目 + 清理兄弟档 related_docs 反向链，跑 `lint_docs_refs.py` 收尾（exit 0 为真闸）。
 
+**「题材敞口≈0」是本 gating 的判别核心**：低质地非科技 exclude 的靶子是「主业与所蹭题材几乎无关、硬蹭概念」（露笑=多元化工业蹭 SiC，SiC 收入≈0）。**若被 watch/exclude 的"题材"本身就是其主营业务**（如锂矿商锂价 watch、电解铝厂周期顶 watch、啤酒龙头复兴 thesis 待验证），即便 ROE 一般或曾周期性亏损，也属「生意看得懂但当前不便宜/不确定」的合理归类，**不删、正常建档**——勿把周期股/质地一般股误判为"蹭题材占坑"。（2026-07-04 全量核对 68 条非科技 watch/exclude 档，0 条命中，doc 池已洁净。）
+
+## 建档前避坑列表验证（硬门）
+
+建档 skill（buffett / stock-deep-redo / analyze-category）采证阶段**第一步**先 load `docs/stock-analytics/avoidance-list.yaml`，按 `stock_code` 查命中：
+
+- **未命中** → 正常建档流程。
+- **命中** → 强制「避坑原因验证」:用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，对照 `avoid_reason` **逐条**判「仍成立 / 被推翻」，**必须列出每条原因 + 当前实测值对照**，不接受空口「改善了」。
+  - **理由仍成立** → **中断建档**，口头说明「命中避坑列表且理由仍成立，不建档」，停手，不进入写档/estimate/valuations 流程。
+  - **理由被推翻**（基本面真实反转）→ 放行建档；建档完成后从 `avoidance-list.yaml` **移除该条**并 commit。
+
+`avoidance-list.yaml` 与 `valuations.yaml` 并列，不受 docs frontmatter/refs linter 约束；字段见文件头注释。新判掉一只低质地非科技标的（或删档）时同步补一条（`stock_code` 带引号）。
+
 ## Frontmatter 约定（5 类 doc_type）
 
 所有文档必须有 YAML frontmatter，按 `scripts/_docs_schema.py:REQUIRED_FIELDS_BY_TYPE` 字段集补齐。

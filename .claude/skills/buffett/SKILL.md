@@ -16,6 +16,12 @@ Not applying formulas — thinking the way he actually thinks.
 
 ---
 
+## 建档前避坑门（强制，先于一切分析）
+
+若本次分析将产出/更新 `docs/stock-analytics/` 的建档，采证第一步先查 `docs/stock-analytics/avoidance-list.yaml`——命中目标 `stock_code` 则按 `.claude/rules/docs-conventions.md`「建档前避坑列表验证」做原因验证：用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，逐条对照 `avoid_reason` 判仍成立/被推翻。**理由仍成立即中断建档**（口头说明后停手，不写档/estimate/valuations）；**被推翻**（基本面真实反转）才放行，且建档完成后从 avoidance-list.yaml 移除该条并 commit。纯问答式投资分析（不建档）不受此门约束。
+
+---
+
 ## Quick Filter (2 minutes, 8 questions)
 
 Run these 8 questions first. Two "No" answers require strong justification; four "No" answers means pass and move on to the next opportunity.
