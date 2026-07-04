@@ -88,4 +88,5 @@ WATCH_CODES = [
     {'code': '9992.HK',   'name': '泡泡玛特',  'market': 'HK'},
     {'code': '600703',    'name': '三安光电',  'market': 'A'},
     {'code': '300274',    'name': '阳光电源',  'market': 'A'},
+    {'code': '002156',    'name': '通富微电',  'market': 'A'},
 ]
