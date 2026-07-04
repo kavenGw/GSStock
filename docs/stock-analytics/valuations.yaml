@@ -3253,3 +3253,22 @@
   - 国产替代
   - AI光模块
   - 扭亏成长
+- stock_code: GLW
+  stock_name: 康宁
+  market: US
+  currency: USD
+  sector: electronics
+  rating: watch
+  watch_reason: 顶级护城河 + AI光通信硬业绩敞口的优质公司，但当前 PE~95x/PB~15x/PS~10x 已 priced-for-perfection，期望内在价值 ~$66 对现价 $196.79 安全边际深度为负（-66%），叠加内部人抛售 + 营收连续 miss，等大幅回调（≤$85 进观察区、≤$50 才有安全边际）再议。
+  bear: 30
+  base: 64
+  bull: 108
+  dividend_yield: 0.57
+  quality: 5
+  conviction_date: '2026-07-04'
+  source_doc: sectors/electronics/optical-communications/2026-07-04-康宁-buffett分析.md
+  themes:
+  - AI光通信
+  - 数据中心
+  - 显示玻璃
+  - 供给侧
