@@ -1,0 +1,23 @@
+# 避坑列表 — 低质地/已判掉标的登记表
+# 不受 docs linter 约束（类 valuations.yaml，独立聚合文件）
+#
+# 用途：建档 skill（buffett / stock-deep-redo / analyze-category）采证第一步按 stock_code 查此表，
+#       命中即做「避坑原因验证」——逐条对照 avoid_reason 判仍成立/被推翻：
+#         · 理由仍成立  → 中断建档（不进入写档/estimate/valuations 流程）
+#         · 理由被推翻  → 放行建档，建档完成后从本表移除该条
+# 协议全文见 .claude/rules/docs-conventions.md「建档前避坑列表验证」。
+#
+# 字段：stock_code(字符串引号防前导0丢失) / stock_name / sector / avoid_reason /
+#       avoid_date / key_metrics_snapshot(当时硬数据,供未来验证逐条对照) / source
+# 去重：按 stock_code 唯一。
+
+- stock_code: '002617'
+  stock_name: 露笑科技
+  sector: industrial
+  avoid_reason: 多元化工业（漆包线+高空作业机械+光伏电站），ROE 长期<5%、2022 巨亏，SiC 衬底纯蹭概念、相关收入≈0，主业与所蹭题材几乎无关
+  avoid_date: '2026-07-03'
+  key_metrics_snapshot:
+    roe_recent: 4.2          # 近年 ROE 约 <5%
+    worst_loss_year: '2022'  # 该年归母巨亏
+    theme_revenue_pct: 0     # SiC 题材收入占营收 ≈0
+  source: 已删 exclude 档（原 sectors/industrial/.../露笑科技-buffett分析.md，删于 2026-07-03）
