@@ -3292,3 +3292,23 @@
   - lithium
   - 供给侧
   - 重组整合
+- stock_code: '300037'
+  stock_name: 新宙邦
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: 双引擎结构真实（电解液走量、有机氟+电子化学品赚利润，有机氟毛利率 61.7% 贡献 37.6% 利润），26Q1 扣非翻倍且质量高（+111.7%、扣非≈归母）——生意看得懂、质地属周期成长股不差。但价格错了：PE_TTM 49.76（5 年分位 73.9%）、PB 6.31（分位 89.6% 高位区），市场用 26Q1 年化的周期上行峰值利润 × 成长股倍数定价；穿越周期正常化场景加权期望内在价值约 34.6 元/股、对应现价 88.96 元安全边际约 -61%，即便最乐观 bull 情景每股 56.4 元相对现价仍 -37%。好周期成长股、错价格，等周期回落 + 六氟自供爬坡兑现 + 承接叙事落地为公司披露金额再重估。
+  bear: 16.7
+  base: 34.5
+  bull: 56.4
+  dividend_yield: 1.22
+  conviction_date: '2026-07-05'
+  source_doc: sectors/materials/electrolyte/2026-07-05-新宙邦-buffett分析.md
+  commodity: lithium
+  commodity_impact: negative
+  themes:
+  - 电解液周期
+  - 有机氟/PFAS承接
+  - 氟化冷却液液冷
+  - 半导体化学品国产替代
