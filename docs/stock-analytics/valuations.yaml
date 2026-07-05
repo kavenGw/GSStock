@@ -3272,3 +3272,23 @@
   - 数据中心
   - 显示玻璃
   - 供给侧
+- stock_code: 000792
+  stock_name: 盐湖股份
+  market: A
+  currency: CNY
+  sector: materials
+  commodity: lithium
+  commodity_impact: positive
+  quality: 4
+  rating: watch
+  watch_reason: 钾锂双料全球最左成本曲线、五矿重组已落地，生意质地一流；但 PE_TTM 15x / PB 3.48 已把周期上行与重组红利充分定价，三情景期望内在价值 16.24 元对现价 29.41 元安全边际 -44.8%，连 bull 情景亦 -9.8%——好公司当前太贵，等回调不追高。
+  bear: 7.26
+  base: 15.59
+  bull: 26.53
+  conviction_date: '2026-07-05'
+  source_doc: sectors/materials/potash/2026-07-05-盐湖股份-buffett分析.md
+  themes:
+  - potash
+  - lithium
+  - 供给侧
+  - 重组整合
