@@ -108,7 +108,11 @@ def market_status():
     from datetime import time as dtime
 
     # 午休窗口：(开始, 下午开盘)
-    LUNCH_WINDOWS = {'A': (dtime(11, 30), dtime(13, 0)), 'JP': (dtime(11, 30), dtime(12, 30))}
+    LUNCH_WINDOWS = {
+        'A': (dtime(11, 30), dtime(13, 0)),
+        'HK': (dtime(12, 0), dtime(13, 0)),
+        'JP': (dtime(11, 30), dtime(12, 30)),
+    }
 
     result = {}
     for m in markets:
