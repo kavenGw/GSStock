@@ -32,6 +32,9 @@ related_docs:
   - path: ../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md
     note: 仕佳个股 buffett 深度档（2026-06-28 PE205x/内在价值~38元/−79%，含 bear12/base37/bull88 场景）；本横评为定性口径
     symmetric: true
+  - path: ../themes/2026-07-07-光库科技H1业绩预告-AI光互联景气再验证.md
+    note: 光库 H1 2026 业绩预告点评——为本横评 7 家（含光库/光迅/旭创/新易盛/天孚/源杰/仕佳）AI 光互联景气再添上游数据点，但全链估值透支、评级全线 watch 不变
+    symmetric: true
 ---
 # AI 光互联全景横评 — 迈威尔 · Coherent · Lumentum · 中际旭创 · 新易盛 · 仕佳光子 · 源杰科技 · 天孚通信 · 光迅科技 · 光库科技（Buffett 框架十方对比）
 
@@ -46,6 +49,7 @@ related_docs:
 > - [2026-06-04-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md) — 光迅个股 buffett 深度档（2026-06-04 较早口径 PE~100x/内在价值 250 亿/目标 24-30 元）；本横评为 2026-07-03 新口径（PE179x/−54%），市值口径已翻倍，以横评为准
 > - [2026-06-04-光库科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md) — 光库个股 buffett 深度档（2026-06-04 较早口径 PE362x/内在价值 82 亿/−78%）；本横评为 2026-07-03 新口径（PE384x/−62%），市值口径已翻倍，以横评为准
 > - [2026-06-28-仕佳光子-buffett分析](../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 仕佳个股 buffett 深度档（2026-06-28 PE205x/内在价值~38元/−79%，含 bear12/base37/bull88 场景）；本横评为定性口径
+> - [2026-07-07-光库科技H1业绩预告-AI光互联景气再验证](../themes/2026-07-07-光库科技H1业绩预告-AI光互联景气再验证.md) — 光库 H1 2026 业绩预告点评——为本横评 7 家（含光库/光迅/旭创/新易盛/天孚/源杰/仕佳）AI 光互联景气再添上游数据点，但全链估值透支、评级全线 watch 不变
 <!-- END related_docs -->
 
 > 撰写日期：2026-07-02（十方扩展 2026-07-03）
