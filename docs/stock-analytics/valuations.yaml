@@ -3328,3 +3328,23 @@
   - 功率半导体
   - 涨价周期
   - AI电源
+- stock_code: '688432'
+  stock_name: 有研硅
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 真盈利的硅材料公司（本体8寸硅抛光片61%+刻蚀设备用硅材料30%，2025净利2.09亿、负债率8.87%）但三重背离——①利润连续三年下滑（扣非2022峰3.13亿→2025腰斩1.30亿、ROE降至4.63%）②估值处5年绝对顶（PE276/PB12.98均近5年max、≈100分位）③今日涨停被当12英寸受益股炒作，但12寸仅28.11%参股有研艾斯（权益法、持续亏损、非并表）系题材错配；期望内在价值约55.6亿/4.45元，安全边际约−90%，即便bull仍−81%，等大幅回撤且利润拐头再评
+  bear: 1.12
+  base: 4.64
+  bull: 8.96
+  dividend_yield: 0.12
+  conviction_date: '2026-07-07'
+  source_doc: sectors/semiconductor/wafer/2026-07-07-有研硅-buffett分析.md
+  themes:
+  - 硅片
+  - 刻蚀耗材
+  - 大硅片
+  - 国产替代
+  - AI
+  - 周期
