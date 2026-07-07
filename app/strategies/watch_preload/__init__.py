@@ -4,6 +4,8 @@ from app.strategies.base import Strategy, Signal
 
 logger = logging.getLogger(__name__)
 
+BACKOFF_CAP = 8
+
 
 class WatchPreloadStrategy(Strategy):
     name = "watch_preload"
@@ -12,6 +14,31 @@ class WatchPreloadStrategy(Strategy):
     needs_llm = False
 
     _tick_count = 0
+    _backoff = {}
+
+    def _should_skip(self, market: str) -> bool:
+        state = self._backoff.get(market)
+        if state and state['remaining'] > 0:
+            state['remaining'] -= 1
+            return True
+        return False
+
+    def _record_result(self, market: str, ok: bool):
+        if ok:
+            if self._backoff.pop(market, None):
+                logger.info(f'[盯盘预取] {market} 取价恢复，退避清零')
+            return
+        prev = self._backoff.get(market)
+        skip = min(prev['skip'] * 2, BACKOFF_CAP) if prev else 1
+        self._backoff[market] = {'skip': skip, 'remaining': skip}
+        logger.warning(f'[盯盘预取] {market} 取价失败，退避 {skip} tick')
+
+    @staticmethod
+    def _prices_ok(prices: dict, codes: list[str]) -> bool:
+        if not codes:
+            return True
+        valid = sum(1 for c in codes if (prices.get(c) or {}).get('current_price'))
+        return valid >= len(codes) * 0.5
 
     def scan(self) -> list[Signal]:
         from app.services.watch_service import WatchService
@@ -38,12 +65,19 @@ class WatchPreloadStrategy(Strategy):
         if not active_codes:
             return []
 
-        # 每次预取价格
-        try:
-            unified_stock_data_service.get_realtime_prices(active_codes, force_refresh=True)
-            logger.debug(f'[盯盘预取] 价格预取完成: {len(active_codes)}只')
-        except Exception as e:
-            logger.error(f'[盯盘预取] 价格预取失败: {e}')
+        # 每次按市场预取价格，失败市场指数退避（yfinance 限流不连累腾讯源）
+        for market, m_codes in market_codes.items():
+            if self._should_skip(market):
+                continue
+            try:
+                prices = unified_stock_data_service.get_realtime_prices(m_codes, force_refresh=True)
+                ok = self._prices_ok(prices, m_codes)
+                if ok:
+                    logger.debug(f'[盯盘预取] {market} 价格预取完成: {len(m_codes)}只')
+            except Exception as e:
+                logger.error(f'[盯盘预取] {market} 价格预取失败: {e}')
+                ok = False
+            self._record_result(market, ok)
 
         # 每次预取A股分时数据（缓存TTL=1分钟，保证客户端随时可获取完整分时）
         a_codes = market_codes.get('A', [])
