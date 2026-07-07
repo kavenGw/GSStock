@@ -45,6 +45,13 @@ class TradingCalendarService:
         'COMEX': 'America/Chicago',
     }
 
+    # 分时段交易市场（含午休）；不在此表的市场用 MARKET_HOURS 单一时段
+    MARKET_SESSIONS = {
+        'A': [(time(9, 30), time(11, 30)), (time(13, 0), time(15, 0))],
+        'HK': [(time(9, 30), time(12, 0)), (time(13, 0), time(16, 0))],
+        'JP': [(time(9, 0), time(11, 30)), (time(12, 30), time(15, 0))],
+    }
+
     # 缓存日历实例
     _calendars = {}
 
@@ -227,17 +234,9 @@ class TradingCalendarService:
 
         current_time = dt.time()
 
-        # A股有午休
-        if market == 'A':
-            morning_session = (time(9, 30) <= current_time <= time(11, 30))
-            afternoon_session = (time(13, 0) <= current_time <= time(15, 0))
-            return morning_session or afternoon_session
-
-        # 日股有午休 (11:30-12:30)
-        if market == 'JP':
-            morning_session = (time(9, 0) <= current_time <= time(11, 30))
-            afternoon_session = (time(12, 30) <= current_time <= time(15, 0))
-            return morning_session or afternoon_session
+        sessions = cls.MARKET_SESSIONS.get(market)
+        if sessions:
+            return any(s_open <= current_time <= s_close for s_open, s_close in sessions)
 
         return open_time <= current_time <= close_time
 
