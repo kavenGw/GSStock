@@ -1,6 +1,6 @@
 """盯盘告警策略 — 价格获取 + AI参数加载 + TD节流 + 7种检测"""
 import logging
-from datetime import datetime, time
+from datetime import datetime
 
 from app.strategies.base import Strategy, Signal
 
@@ -154,12 +154,6 @@ class WatchAlertStrategy(Strategy):
             'KR': 390, 'TW': 270, 'JP': 300,
         }
 
-        SESSIONS = {
-            'A': [(time(9, 30), time(11, 30)), (time(13, 0), time(15, 0))],
-            'HK': [(time(9, 30), time(12, 0)), (time(13, 0), time(16, 0))],
-            'JP': [(time(9, 0), time(11, 30)), (time(12, 30), time(15, 0))],
-        }
-
         result = {}
         for code in codes:
             market = market_map.get(code, 'A')
@@ -167,7 +161,7 @@ class WatchAlertStrategy(Strategy):
             now_dt = calendar_service.get_market_now(market)
             now_t = now_dt.time()
 
-            sessions = SESSIONS.get(market)
+            sessions = calendar_service.MARKET_SESSIONS.get(market)
             if sessions:
                 elapsed = 0
                 for s_open, s_close in sessions:
