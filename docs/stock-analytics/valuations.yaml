@@ -3312,3 +3312,19 @@
   - 有机氟/PFAS承接
   - 氟化冷却液液冷
   - 半导体化学品国产替代
+- stock_code: '688261'
+  stock_name: 东微半导
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 技术卡位真实（900V+超结国内第一+自研TGBT）、行业涨价周期向上，但扣非连续两季为负、2026Q1营收-1.1%涨价未兑现到报表、PB4.12已price-in复苏，场景加权内在价值约49.6元 vs 现价99.08，安全边际约-50%
+  bear: 20.6
+  base: 49.6
+  bull: 84.4
+  conviction_date: '2026-07-07'
+  source_doc: sectors/semiconductor/power-device/2026-07-07-东微半导-buffett分析.md
+  themes:
+  - 功率半导体
+  - 涨价周期
+  - AI电源
