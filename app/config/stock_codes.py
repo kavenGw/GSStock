@@ -84,9 +84,7 @@ WATCH_CODES = [
      'ah': {'code': '600362', 'market': 'A', 'name': '江西铜业'}},
     {'code': '2476.HK',   'name': '胜宏科技',  'market': 'HK',
      'ah': {'code': '300476', 'market': 'A', 'name': '胜宏科技'}},
-    {'code': '688313',    'name': '仕佳光子',  'market': 'A'},
     {'code': '9992.HK',   'name': '泡泡玛特',  'market': 'HK'},
-    {'code': '600703',    'name': '三安光电',  'market': 'A'},
     {'code': '300274',    'name': '阳光电源',  'market': 'A'},
     {'code': '002156',    'name': '通富微电',  'market': 'A'},
 ]
