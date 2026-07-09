@@ -3348,3 +3348,20 @@
   - 国产替代
   - AI
   - 周期
+- stock_code: '600988'
+  stock_name: 赤峰黄金
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 6.0
+  base: 14.3
+  bull: 24.0
+  dividend_yield: 1.06
+  quality: 4
+  conviction_date: '2026-07-09'
+  source_doc: sectors/materials/nonferrous/2026-07-09-赤峰黄金-buffett分析.md
+  themes:
+  - gold_defense
+  - 央行购金
+  - 并购整合
