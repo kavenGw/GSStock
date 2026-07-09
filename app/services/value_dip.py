@@ -3,6 +3,7 @@ import logging
 from app.config.stock_codes import WATCH_CODES
 from app.services.watch_service import WatchService
 from app.services.unified_stock_data import unified_stock_data_service
+from app.utils.support_resistance import calculate_support_resistance
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,8 @@ class ValueDipService:
                     'price': s['price'],
                     'high': high,
                     'pullback_pct': pullback,
+                    'support': s.get('support'),
+                    'resistance': s.get('resistance'),
                 })
         stocks.sort(key=lambda x: x['pullback_pct'])
         return stocks
@@ -142,5 +145,25 @@ class ValueDipService:
                 info[f'high_{period_key}'] = round(high_val, 2)
                 info[f'pullback_{period_key}'] = round(
                     (info['price'] - high_val) / high_val * 100, 2) if high_val > 0 else 0
+
+        info['support'] = None
+        info['resistance'] = None
+        if info['price']:
+            triples = [(float(d['high']), float(d['low']), float(d['close']))
+                       for d in data
+                       if d.get('high') is not None
+                       and d.get('low') is not None
+                       and d.get('close') is not None]
+            if len(triples) >= 20:
+                sr = calculate_support_resistance(
+                    [t[0] for t in triples],
+                    [t[1] for t in triples],
+                    [t[2] for t in triples])
+                below = [s for s in sr['support'] if s < info['price']]
+                above = [r for r in sr['resistance'] if r > info['price']]
+                if below:
+                    info['support'] = max(below)
+                if above:
+                    info['resistance'] = min(above)
 
         return info
