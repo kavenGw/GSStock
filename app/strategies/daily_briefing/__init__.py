@@ -109,10 +109,20 @@ class DailyBriefingStrategy(Strategy):
     def _format_pullback_message(stocks: list) -> str:
         lines = ['📉 *高点回退提醒*（90日高点）\n']
         for s in stocks:
-            lines.append(
+            line = (
                 f"  · {s['name']}（{s['market']}）"
                 f" 现价{s['price']} / 高点{s['high']}"
                 f" → *{s['pullback_pct']}%*"
             )
+            price = s.get('price')
+            if price and s.get('support') is not None:
+                sp = s['support']
+                pct = (sp - price) / price * 100
+                line += f" | 下方支撑{sp:.2f}({pct:+.2f}%)"
+            if price and s.get('resistance') is not None:
+                rp = s['resistance']
+                pct = (rp - price) / price * 100
+                line += f" | 上方压力{rp:.2f}({pct:+.2f}%)"
+            lines.append(line)
         return '\n'.join(lines)
 
