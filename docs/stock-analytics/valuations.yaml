@@ -3365,3 +3365,21 @@
   - gold_defense
   - 央行购金
   - 并购整合
+- stock_code: 02865
+  stock_name: 钧达股份
+  market: HK
+  currency: HKD
+  sector: energy
+  rating: watch
+  watch_reason: cell_cycle_bottom_unconfirmed_space_concept_priced_in
+  bear: 9.6
+  base: 16.1
+  bull: 32.2
+  conviction_date: '2026-07-10'
+  source_doc: sectors/energy/solar/2026-07-10-钧达股份-buffett分析.md
+  themes:
+  - photovoltaic_cell
+  - topcon
+  - capacity_clearing
+  - 反内卷
+  - overseas_expansion

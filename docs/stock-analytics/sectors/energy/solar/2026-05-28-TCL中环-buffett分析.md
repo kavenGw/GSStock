@@ -22,6 +22,9 @@ related_docs:
 - path: ../../electronics/display/2026-06-02-TCL科技-buffett分析.md
   note: TCL中环控股母公司，光伏业务是TCL科技最大拖累项
   symmetric: true
+- path: 2026-07-10-钧达股份-buffett分析.md
+  note: 同光伏过剩周期不同环节：TCL中环硅片 vs 钧达电池片；钧达纯专业化电池厂无一体化对冲
+  symmetric: true
 ---
 # TCL中环（002129.SZ）Buffett 投资分析
 
@@ -30,6 +33,7 @@ related_docs:
 > - [2026-06-07-阳光电源-buffett分析](2026-06-07-阳光电源-buffett分析.md) — 同光伏链不同环节对比；阳光电源逆变器+储能护城河更强
 > - [2026-05-22-正泰电源-buffett分析](2026-05-22-正泰电源-buffett分析.md) — 同光伏链不同环节对比；正泰偏逆变器/电气箱柜
 > - [2026-06-02-TCL科技-buffett分析](../../electronics/display/2026-06-02-TCL科技-buffett分析.md) — TCL中环控股母公司，光伏业务是TCL科技最大拖累项
+> - [2026-07-10-钧达股份-buffett分析](2026-07-10-钧达股份-buffett分析.md) — 同光伏过剩周期不同环节：TCL中环硅片 vs 钧达电池片；钧达纯专业化电池厂无一体化对冲
 <!-- END related_docs -->
 
 **分析日期**：2026-05-28
