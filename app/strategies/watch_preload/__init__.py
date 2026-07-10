@@ -10,7 +10,7 @@ BACKOFF_CAP = 8
 class WatchPreloadStrategy(Strategy):
     name = "watch_preload"
     description = "盯盘数据预取（每分钟价格+分时，每15分钟走势）"
-    schedule = "interval_minutes:1"
+    schedule = "interval_minutes:3"
     needs_llm = False
 
     _tick_count = 0
