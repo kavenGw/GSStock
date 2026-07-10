@@ -25,7 +25,6 @@ class WatchAlertStrategy(Strategy):
         from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
         from app.services.watch_alert_service import WatchAlertService
-        from app.config.stock_codes import BENCHMARK_CODES
         from app.utils.market_identifier import MarketIdentifier
 
         codes = WatchService.get_watch_codes()
@@ -45,20 +44,21 @@ class WatchAlertStrategy(Strategy):
         from app.services.unified_stock_data import UnifiedStockDataService
         data_service = UnifiedStockDataService()
 
-        bench_codes = [b['code'] for b in BENCHMARK_CODES]
-        all_codes = list(set(active_codes + bench_codes))
+        a_codes = [c for c in active_codes if MarketIdentifier.is_a_share(c)]
+        other_codes = [c for c in active_codes if c not in a_codes]
 
-        a_codes = [c for c in all_codes if MarketIdentifier.is_a_share(c)]
-        other_codes = [c for c in all_codes if c not in a_codes]
-
-        # 价格由 watch_preload 每分钟 force_refresh 预取，这里直接读缓存
+        # 价格由 watch_preload 每3分钟 force_refresh 预取，这里只读缓存(cache_only，绝不触发API)
         prices = {}
         if a_codes:
-            prices.update(data_service.get_realtime_prices(a_codes))
+            prices.update(data_service.get_realtime_prices(a_codes, cache_only=True))
         if other_codes:
-            prices.update(data_service.get_realtime_prices(other_codes))
+            prices.update(data_service.get_realtime_prices(other_codes, cache_only=True))
 
-        watch_prices = {c: prices[c] for c in active_codes if c in prices}
+        # 取价失败降级返回的过期旧价(_is_degraded)会污染极值并误报，直接跳过该股
+        watch_prices = self._filter_fresh(prices, active_codes)
+        skipped = [c for c in active_codes if c in prices and c not in watch_prices]
+        if skipped:
+            logger.info(f'[盯盘告警] 跳过{len(skipped)}只降级旧价: {skipped}')
         name_map = {e['stock_code']: e['stock_name'] for e in WatchService.get_watch_list()}
 
         alert_params_map = self._load_alert_params(active_codes)
