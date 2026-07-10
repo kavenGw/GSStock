@@ -19,9 +19,17 @@ valuation:
   bull: 57
   currency: USD
   dividend_yield: null
-related_docs: []
+related_docs:
+  - path: ../../../themes/2026-07-10-英飞凌二轮涨价功率缺货-国产替代.md
+    note: 英飞凌 SiC 竞对，涨价利好但困境未修，反面对照
+    symmetric: true
 ---
 # Wolfspeed（WOLF）buffett 深度分析——91 天预打包破产重整后再承做：资产负债表已修复，盈利尚未修复
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-07-10-英飞凌二轮涨价功率缺货-国产替代](../../../themes/2026-07-10-英飞凌二轮涨价功率缺货-国产替代.md) — 英飞凌 SiC 竞对，涨价利好但困境未修，反面对照
+<!-- END related_docs -->
 
 
 ## §0 结论摘要（倒金字塔）
