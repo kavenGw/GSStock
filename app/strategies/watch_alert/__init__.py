@@ -77,6 +77,12 @@ class WatchAlertStrategy(Strategy):
             logger.info(f'[盯盘告警] 产出 {len(signals)} 个信号')
         return signals
 
+    @staticmethod
+    def _filter_fresh(prices: dict, active_codes: list[str]) -> dict:
+        """只保留活跃股中命中缓存且非降级(_is_degraded)的实时价"""
+        return {c: prices[c] for c in active_codes
+                if c in prices and not prices[c].get('_is_degraded')}
+
     def _load_alert_params(self, codes: list[str]) -> dict:
         today = datetime.now().strftime('%Y-%m-%d')
         cache_entry = self._alert_params_cache.get(today)
