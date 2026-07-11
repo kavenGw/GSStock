@@ -1,3 +1,10 @@
+---
+paths:
+  - "app/routes/valuations.py"
+  - "docs/stock-analytics/**"
+  - ".claude/skills/portfolio-init/**"
+  - ".claude/skills/portfolio-rebalance/**"
+---
 # Portfolio / Valuations skill 行为与 A+H 口径
 
 > **何时读**：跑 /portfolio-init 或 /portfolio-rebalance、改 RebalanceConfig/StockWeight/PositionPlan、改 /valuations 页或 valuations.yaml、裁定 A+H 双重上市口径

@@ -1,3 +1,8 @@
+---
+paths:
+  - "docs/stock-analytics/**"
+  - "scripts/**"
+---
 # 文档写作与 lint 规范
 
 > **何时读**：写 docs/stock-analytics/ 新文档、改 frontmatter、跑 lint_docs_*、维护 related_docs、判 sector 归属

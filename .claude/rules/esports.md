@@ -1,3 +1,8 @@
+---
+paths:
+  - "app/services/esports*"
+  - "app/services/worldcup*"
+---
 # 赛事推送（NBA / LoL / 世界杯）
 
 > **何时读**：改 app/services/esports_service.py、调整 NBA/LoL/世界杯推送时机、调试失败重试队列、修改赛程预告 / 赛前提醒 / 比分变化推送

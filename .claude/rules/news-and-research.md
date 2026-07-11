@@ -1,3 +1,9 @@
+---
+paths:
+  - "app/services/**"
+  - "app/config/github_releases.py"
+  - "app/config/blog_monitor.py"
+---
 # 新闻 / 研报 / 监控源
 
 > **何时读**：调整新闻轮询参数、新增新闻源、修改博客/Trending/Release 监控、修改 plugin discovery、新增第三方仓库到 GITHUB_RELEASE_REPOS

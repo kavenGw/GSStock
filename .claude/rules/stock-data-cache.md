@@ -1,3 +1,8 @@
+---
+paths:
+  - "app/services/**"
+  - "app/utils/**"
+---
 # 数据架构与缓存
 
 > **何时读**：改 app/services/ 下任何 fetcher、写涉及 Stock/UnifiedStockCache 的 SQL、调试缓存命中率、新增市场支持、修改 Volume / 缓存 TTL

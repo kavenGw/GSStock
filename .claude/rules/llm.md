@@ -1,3 +1,7 @@
+---
+paths:
+  - "app/llm/**"
+---
 # LLM 配置
 
 > **何时读**：改 app/llm/、调 LLM 模型路由、改限流/超时、配 llama-server、调日预算

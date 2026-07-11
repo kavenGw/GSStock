@@ -1,3 +1,8 @@
+---
+paths:
+  - "app/config/supply_chain.py"
+  - "app/templates/supply_chain.html"
+---
 # 产业链图谱与 tag 同步
 
 > **何时读**：改 app/config/supply_chain.py、新增/修改 `SUPPLY_CHAIN_GRAPHS` 图谱、调 `/supply-chain` 渲染、回写标的 tag 反映分析结论

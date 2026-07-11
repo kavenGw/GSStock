@@ -1,3 +1,9 @@
+---
+paths:
+  - "app/models/**"
+  - "app/seeds/**"
+  - "app/config/stock_codes.py"
+---
 # 数据模型与入库
 
 > **何时读**：改 schema、Stock/StockCategory 表、写 seeds、多账户合并、OCR 入库流程、双 DB（stock.db/private.db）选型、股票/期货/指数代码配置

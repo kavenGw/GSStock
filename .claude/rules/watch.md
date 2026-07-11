@@ -1,3 +1,11 @@
+---
+paths:
+  - "app/templates/watch.html"
+  - "app/static/**"
+  - "app/services/watch*"
+  - "app/strategies/**"
+  - "app/config/stock_codes.py"
+---
 # 盯盘助手
 
 > **何时读**：改 app/templates/watch.html、修改盯盘前端 JS、调整 watch_realtime / watch_alert 策略、改 WatchAnalysisService、调整 AI 分析调度（realtime/7d/30d）

@@ -1,3 +1,10 @@
+---
+paths:
+  - "app/services/notification.py"
+  - "app/services/watch_alert_service.py"
+  - "app/services/esports*"
+  - "app/strategies/**"
+---
 # Slack 推送、告警格式与推送语义
 
 > **何时读**：改 app/services/notification.py、新增推送策略、改盯盘告警格式/排版、调 Slack 频道路由、改 _fetch_* 失败语义或新闻推送去重

@@ -1,3 +1,8 @@
+---
+paths:
+  - "app/services/**"
+  - "scripts/**"
+---
 # 数据获取坑点约定
 
 > **何时读**：写新数据获取脚本、首次调用 akshare 某接口、抓 PDF 调研纪要、按 stock_name 反查代码、新浪/cninfo/巨潮源切换、腾讯 HTTP 行情字段 / 港股 q=hk 取数 / A+H 市值自洽校验
