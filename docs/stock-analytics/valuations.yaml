@@ -3383,3 +3383,24 @@
   - capacity_clearing
   - 反内卷
   - overseas_expansion
+- stock_code: '600673'
+  stock_name: 东阳光
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: 资产是真的（秦淮数据 782MW 在运 + 310 亿算力长单 + 12x PE 收来的 IDC），但价格离谱——PB 11.26 处近十年 98.4% 分位、扣非 PE 157–183x；SOTP 场景加权期望内在价值 8.03 元/股 vs 现价 37.15 元，安全边际 −78%，即便最乐观 bull 情景（13.03 元）安全边际仍为 −65%。叠加控股股东质押 81–87%、连续两年零分红、关联交易重组未过审且业绩承诺未签、摊薄 22%+——不买，只跟踪；需重组落地并表兑现 + 客户身份披露 + 股价回落 60%+ 才重新承做
+  bear: 3.16
+  base: 8.96
+  bull: 13.03
+  dividend_yield: 0.0
+  quality: 2
+  conviction_date: '2026-07-12'
+  source_doc: sectors/materials/aluminum-foil/2026-07-12-东阳光-buffett分析.md
+  themes:
+  - AIDC
+  - 算力
+  - 制冷剂配额
+  - AI电源
+  - 供给侧
+  - 重组并购
