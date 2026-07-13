@@ -19,12 +19,16 @@ related_docs:
 - path: ../../electronics/display/2026-06-02-TCL科技-buffett分析.md
   note: 同属 TCL 集团；TCL电子 TV 业务向华星(TCL科技子公司)采购面板，面板涨价为其成本压力(方向相反)
   symmetric: true
+- path: ../../../themes/2026-07-13-TCL科技H1预增-面板双寡头盈利兑现.md
+  note: 同日自身预告经调整归母+40-56%证实中高端化+毛利改善的成长为真；但watch否决点在估值price-in而非成长真伪，评级不动
+  symmetric: true
 ---
 # TCL电子（01070.HK）Buffett 投资分析
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-06-02-TCL科技-buffett分析](../../electronics/display/2026-06-02-TCL科技-buffett分析.md) — 同属 TCL 集团；TCL电子 TV 业务向华星(TCL科技子公司)采购面板，面板涨价为其成本压力(方向相反)
+> - [2026-07-13-TCL科技H1预增-面板双寡头盈利兑现](../../../themes/2026-07-13-TCL科技H1预增-面板双寡头盈利兑现.md) — 同日自身预告经调整归母+40-56%证实中高端化+毛利改善的成长为真；但watch否决点在估值price-in而非成长真伪，评级不动
 <!-- END related_docs -->
 
 **分析日期**：2026-06-20
