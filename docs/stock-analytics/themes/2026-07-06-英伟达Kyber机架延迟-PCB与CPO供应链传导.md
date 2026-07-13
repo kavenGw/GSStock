@@ -44,6 +44,9 @@ related_docs:
   - path: ../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md
     note: 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
     symmetric: true
+  - path: 2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md
+    note: 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
+    symmetric: true
 ---
 # 英伟达 Kyber 机架延迟——高端 PCB 与 CPO 供应链传导专题（2026-07-06）
 
@@ -57,6 +60,7 @@ related_docs:
 > - [2026-05-31-立讯精密-buffett分析](../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md) — 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久
 > - [2026-06-19-沃尔核材-buffett分析](../sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
 > - [2026-05-06-通富微电-AMD26Q1财报联动专题](../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md) — 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
+> - [2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪](2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md) — 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
 <!-- END related_docs -->
 
 > 撰写日期：2026-07-06
