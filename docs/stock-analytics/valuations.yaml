@@ -1314,13 +1314,13 @@
   currency: HKD
   sector: semiconductor
   rating: exclude
-  bear: 3.1
-  base: 5.3
-  bull: 9.2
-  dividend_yield: 0.74
-  conviction_date: '2026-06-21'
-  source_doc: sectors/semiconductor/materials/2026-06-08-建滔积层板-buffett分析.md
-  note: 旧档 PE 6.3x 系净利 10 倍单位错误（HKD 2.44B 误记 24.4B）；实际 PE-TTM 117.8x@91.85，commodity 合理 8-12x，期望内在价值仅 HKD 5.4，现价高估约 94%，exclude
+  bear: 6.4
+  base: 11.7
+  bull: 21.8
+  dividend_yield: 1.27
+  conviction_date: '2026-07-13'
+  source_doc: sectors/semiconductor/materials/2026-07-13-建滔积层板-buffett分析.md
+  note: 现价从 91.85 跌至 53.35（-42%），PE-TTM 68.8x，期望内在价值 HKD 11.9，安全边际 -77.7%，commodity 合理 8-12x，维持 exclude
   themes:
   - CCL
   - 涨价周期
