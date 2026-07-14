@@ -5,6 +5,9 @@ stock_names: [迈威尔, Coherent, Lumentum, 中际旭创, 新易盛, 仕佳光�
 themes: [AI光互联, 光DSP, 光芯片, CW光源, EML, 光模块, InP, LPO, 光引擎, 无源器件, 薄膜铌酸锂, 星间激光, buffett对比]
 date: 2026-07-02
 related_docs:
+  - path: ../themes/2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效.md
+    note: 索尔思（东山子公司）H1 光模块兑现为 800G/1.6T 需求再添一个模块厂本体数据点，但七家自身 Q1/H1 业绩已是更硬更早的证据、本次不构成增量信息，全链"业绩真兑现+估值全额透支"格局不变
+    symmetric: true
   - path: ../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md
     note: 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
     symmetric: true
@@ -40,6 +43,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
+> - [2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效](../themes/2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效.md) — 索尔思（东山子公司）H1 光模块兑现为 800G/1.6T 需求再添一个模块厂本体数据点，但七家自身 Q1/H1 业绩已是更硬更早的证据、本次不构成增量信息，全链"业绩真兑现+估值全额透支"格局不变
 > - [2026-07-02-中际旭创-buffett分析](../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md) — 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
 > - [2026-07-02-源杰科技-buffett分析](../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md) — 源杰科技个股 buffett 深度分析（本对比的源杰口径来源）
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 新易盛个股 buffett 深度分析（全球第二光模块龙头，本对比的新易盛口径来源）

@@ -366,13 +366,13 @@
   currency: CNY
   sector: electronics
   rating: exclude
-  bear: 9.83
-  base: 24.56
-  bull: 57.32
+  bear: 21.83
+  base: 47.76
+  bull: 114.63
   dividend_yield: 0
   conviction_date: '2026-07-03'
   source_doc: sectors/electronics/pcb/2026-07-03-东山精密-buffett分析.md
-  note: 东山精密；三情景市值180/450/1050亿÷18.32亿股；exclude，安全边际-86.6%
+  note: 东山精密；三档已按2026-07-14 H1预告(扣非24-25亿)粗口径重锚——扣非口径bear20/base35/bull60亿×20/25/35x÷18.32亿股=400/875/2100亿市值；旧值9.83/24.56/57.32(基于已证伪的9/18/30亿中枢)作废。exclude维持，安全边际-78.2%(现价260.37/市值4769亿)；非完整重估，待stock-deep-redo。见themes/2026-07-14-东山精密H1预增283-296%
   themes:
   - PCB
   - FPC
