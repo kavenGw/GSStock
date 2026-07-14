@@ -4,9 +4,17 @@ stock_codes: ['AMD', 'INTC']
 stock_names: [AMD, Intel]
 themes: [CPU竞争, x86服务器, buffett对比]
 date: 2026-05-08
-related_docs: []
+related_docs:
+- path: ../themes/2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认.md
+  note: 通富（AMD 后段封测占其营收 60%+）H1 营收推算 +22%~30%，是 AMD 数据中心出货未失速的供应链侧第三方读数，弱正向确认；但通富利润端为持股重估、对 AMD 无信息量。不改本档 AMD 侧结论
+  symmetric: true
 ---
 # AMD vs Intel — Buffett 框架对比分析
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认](../themes/2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认.md) — 通富（AMD 后段封测占其营收 60%+）H1 营收推算 +22%~30%，是 AMD 数据中心出货未失速的供应链侧第三方读数，弱正向确认；但通富利润端为持股重估、对 AMD 无信息量。不改本档 AMD 侧结论
+<!-- END related_docs -->
 
 
 > 撰写日期：2026-05-08（AMD 26Q1 财报后第 3 个交易日）
