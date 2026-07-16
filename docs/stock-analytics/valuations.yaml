@@ -3422,3 +3422,22 @@
   - CRO
   - 生物资产
   - 安评
+- stock_code: '688353'
+  stock_name: 华盛锂电
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 8.8
+  base: 15.0
+  bull: 28.1
+  dividend_yield: 0
+  conviction_date: '2026-07-16'
+  source_doc: sectors/materials/electrolyte/2026-07-16-华盛锂电-buffett分析.md
+  themes:
+  - VC涨价
+  - 电解液添加剂
+  - 锂电材料周期
+  - 供给侧扩产
+  - 治理红旗
+  - 储能β
