@@ -3404,3 +3404,21 @@
   - AI电源
   - 供给侧
   - 重组并购
+- stock_code: '06127'
+  stock_name: 昭衍新药
+  market: HK
+  currency: HKD
+  sector: healthcare
+  rating: watch
+  quality: 4
+  watch_reason: 国内临床前安评龙头、GLP 资质+自供实验猴壁垒真实，但 2025-2026 报表净利几乎全部来自实验猴（食蟹猴）生物资产公允价值变动这一非现金 mark-to-market 收益，实验室主业连续亏损（2025 实验室服务及其他 -1.64 亿）；剔猴价后经营利润为负，H 现价 27.90 HKD 对应 PB 2.39、近 52 周高位，期望内在价值 ≈14.4 HKD、安全边际 −48.6%，连最乐观 bull（21 HKD）都在现价下方 25% —— 好资产、被猴价利润幻觉与订单复苏叙事推到远高于任何诚实内在价值，等主业真实扭亏 + 价格腰斩再看
+  bear: 11
+  base: 14
+  bull: 21
+  dividend_yield: 0.05
+  conviction_date: '2026-07-16'
+  source_doc: sectors/healthcare/cro/2026-07-16-昭衍新药-buffett分析.md
+  themes:
+  - CRO
+  - 生物资产
+  - 安评
