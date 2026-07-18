@@ -221,23 +221,6 @@
   - 纯电转型
   - 智能驾驶
   - 充电桩
-- stock_code: '000063'
-  stock_name: 中兴通讯
-  market: A
-  currency: CNY
-  sector: electronics
-  rating: watch
-  bear: 12.55
-  base: 14.11
-  bull: 15.68
-  conviction_date: '2026-05-29'
-  source_doc: sectors/electronics/networking/2026-05-29-中兴通讯-buffett分析.md
-  note: 中兴；内在价值600-750亿÷47.83亿股
-  themes:
-  - 通信设备
-  - 5G主设备
-  - AI算力服务器
-  - 政企算力转型
 - stock_code: '000100'
   stock_name: TCL科技
   market: A
@@ -3441,3 +3424,21 @@
   - 供给侧扩产
   - 治理红旗
   - 储能β
+- stock_code: '00763'
+  stock_name: 中兴通讯
+  market: HK
+  currency: HKD
+  sector: electronics
+  rating: watch
+  watch_reason: 全球5G主设备寡头之一（Dell'Oro 2025H1 份额~10%，全球第4/国内第2），电信端有真实但正在被算力低毛利业务结构性稀释的护城河（专利/运营商认证/切换成本）。本次重审的两个触发变量都不足以翻转旧结论——豆包AI手机产品层真实（努比亚硬件+中兴通信/产能+字节豆包大模型）但业绩层≈0（备货20万台仅计划、测算≈0.5%营收、纯流量概念已多轮price-in）；26Q1基本面反而比旧档更差（归母-46.58%、扣非-52.16%、毛利率28.28%环比继续下滑、经营现金流转负-19.79亿），旧档"等毛利率止跌"触发器未兑现、反向恶化。A+H取低估值侧=H股00763，现价23.16HKD（PE~18/PB~1.18/折价A股40%）仍高于期望内在价值14.8HKD，安全边际-36%，最乐观bull压力测试仍仅+2.4%。等毛利率真止跌回30%+、算力停止透传稀释、电信基本盘企稳再议。
+  bear: 9.03
+  base: 16.14
+  bull: 23.71
+  dividend_yield: 1.92
+  conviction_date: '2026-07-18'
+  source_doc: sectors/electronics/networking/2026-07-18-中兴通讯-buffett分析.md
+  themes:
+  - 通信设备
+  - 5G主设备
+  - AI算力服务器
+  - 豆包AI手机
