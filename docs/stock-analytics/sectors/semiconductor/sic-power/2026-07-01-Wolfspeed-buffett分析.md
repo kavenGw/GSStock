@@ -23,12 +23,16 @@ related_docs:
   - path: ../../../themes/2026-07-10-英飞凌二轮涨价功率缺货-国产替代.md
     note: 英飞凌 SiC 竞对，涨价利好但困境未修，反面对照
     symmetric: true
+  - path: ../../../themes/2026-07-19-博世美国SiC晶圆厂-CHIPS补贴-供给侧影响.md
+    note: 博世 200mm 北美车规 SiC 量产直接侵蚀本档"8寸领先"残存卖点+从潜在客户变竞争者，强化"无安全边际前不买"，池内唯一中量级利空
+    symmetric: true
 ---
 # Wolfspeed（WOLF）buffett 深度分析——91 天预打包破产重整后再承做：资产负债表已修复，盈利尚未修复
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-07-10-英飞凌二轮涨价功率缺货-国产替代](../../../themes/2026-07-10-英飞凌二轮涨价功率缺货-国产替代.md) — 英飞凌 SiC 竞对，涨价利好但困境未修，反面对照
+> - [2026-07-19-博世美国SiC晶圆厂-CHIPS补贴-供给侧影响](../../../themes/2026-07-19-博世美国SiC晶圆厂-CHIPS补贴-供给侧影响.md) — 博世 200mm 北美车规 SiC 量产直接侵蚀本档"8寸领先"残存卖点+从潜在客户变竞争者，强化"无安全边际前不买"，池内唯一中量级利空
 <!-- END related_docs -->
 
 
