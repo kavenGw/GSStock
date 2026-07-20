@@ -80,3 +80,28 @@ def test_context_skips_volume_ratio_on_unit_glitch():
     tm = {'603626': {'elapsed': 240, 'total': 240}}  # 比率>50 → 跳过量比
     ctx = WatchSignalPipeline._build_context('603626', prices, params, tm)
     assert '量比' not in ctx
+
+
+def test_push_skips_low_and_formats_high():
+    from unittest.mock import patch
+    from app.services.notification import NotificationService
+
+    high = ConsolidatedAlert(
+        code='603626', name='科森科技', priority='HIGH', direction='resistance_break',
+        primary_line='突破阻力 30.00 | 当前 30.05',
+        secondary_lines=['下穿 MA5 20.50', '放量 1.8x'],
+        context_line='涨幅 +2.30% | 量比 1.8x | 距上方阻力 32.00(+6.5%)',
+    )
+    low = ConsolidatedAlert(code='600519', name='茅台', priority='LOW', direction='high',
+                            primary_line='刷新前高')
+    sent = []
+    with patch.object(NotificationService, 'send_slack', side_effect=lambda t, c: sent.append((t, c)) or True):
+        ok = NotificationService.push_watch_alerts([high, low])
+    assert ok is True
+    assert len(sent) == 1  # LOW 被跳过
+    text, _ = sent[0]
+    assert '🔴 *科森科技(603626)*' in text
+    assert '[HIGH]' in text
+    assert '突破阻力 30.00 | 当前 30.05' in text
+    assert '  · 下穿 MA5 20.50' in text
+    assert '涨幅 +2.30%' in text

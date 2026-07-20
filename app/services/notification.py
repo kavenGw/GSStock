@@ -93,6 +93,29 @@ class NotificationService:
         NotificationService.send_slack(text, channel)
 
     @staticmethod
+    def push_watch_alerts(alerts) -> bool:
+        """合并盯盘告警推送：一股一条，跳过 LOW（LOW 只 debug log）"""
+        pushed = 0
+        for a in alerts:
+            if a.priority == 'LOW':
+                logger.debug(f'[盯盘告警] {a.name}({a.code}) LOW 静默: {a.primary_line}')
+                continue
+            if a.direction in ('high', 'above', 'up', 'buy', 'resistance_break'):
+                emoji = '🔴'
+            elif a.direction in ('low', 'below', 'down', 'sell', 'support_break'):
+                emoji = '🟢'
+            else:
+                emoji = '⚠️'
+            lines = [f'{emoji} *{a.name}({a.code})*  [{a.priority}]', a.primary_line]
+            for s in a.secondary_lines:
+                lines.append(f'  · {s}')
+            if a.context_line:
+                lines.append(a.context_line)
+            if NotificationService.send_slack('\n'.join(lines), CHANNEL_WATCH):
+                pushed += 1
+        return pushed > 0
+
+    @staticmethod
     def send_slack(message: str, channel: str = CHANNEL_NEWS, blocks: list = None) -> bool:
         if not SLACK_ENABLED:
             logger.warning('[通知.Slack] Slack 未配置')
