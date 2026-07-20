@@ -1,10 +1,21 @@
 import logging
+from datetime import datetime
 from flask import render_template, request, jsonify
 
 from app.routes import watch_bp
 from app.services.watch_service import WatchService
 
 logger = logging.getLogger(__name__)
+
+
+def _price_age_seconds(data: dict):
+    ts = data.get('last_fetch_time')
+    if not ts:
+        return None
+    try:
+        return int((datetime.now() - datetime.fromisoformat(ts)).total_seconds())
+    except (ValueError, TypeError):
+        return None
 
 
 @watch_bp.route('/')
@@ -45,6 +56,7 @@ def prices():
                 'volume': data.get('volume'),
                 'market': data.get('market', ''),
                 'stale': code not in raw_prices or data.get('_is_degraded', False),
+                'age_seconds': _price_age_seconds(data),
             })
 
     bench_codes = [b['code'] for b in BENCHMARK_CODES]
