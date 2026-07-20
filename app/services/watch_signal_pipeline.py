@@ -36,6 +36,8 @@ class ConsolidatedAlert:
 
 class WatchSignalPipeline:
 
+    VOLUME_RATIO_CAP = 50.0
+
     @staticmethod
     def _direction_sign(direction: str) -> int:
         if direction in _BULLISH:
@@ -108,4 +110,34 @@ class WatchSignalPipeline:
 
     @staticmethod
     def _build_context(code, prices, params_map, trading_minutes):
-        return ''  # Task 2 实现
+        p = prices.get(code, {})
+        params = params_map.get(code, {})
+        parts = []
+
+        chg = p.get('change_percent')
+        if chg is not None:
+            parts.append(f'涨幅 {chg:+.2f}%')
+
+        baseline = params.get('volume_baseline', 0)
+        volume = p.get('volume')
+        if baseline and volume:
+            tm = trading_minutes.get(code) or {}
+            elapsed = tm.get('elapsed', 0)
+            total = tm.get('total', 0)
+            normalized = volume / (elapsed / total) if elapsed > 0 and total > 0 else volume
+            ratio = normalized / baseline
+            if ratio < WatchSignalPipeline.VOLUME_RATIO_CAP:
+                parts.append(f'量比 {ratio:.1f}x')
+
+        curr = p.get('current_price')
+        if curr:
+            resistances = sorted(l for l in params.get('resistance_levels', []) if l and l > curr)
+            supports = sorted((l for l in params.get('support_levels', []) if l and l < curr), reverse=True)
+            if resistances:
+                r = resistances[0]
+                parts.append(f'距上方阻力 {r}({(r - curr) / curr * 100:+.1f}%)')
+            elif supports:
+                s = supports[0]
+                parts.append(f'距下方支撑 {s}({(s - curr) / curr * 100:+.1f}%)')
+
+        return ' | '.join(parts)

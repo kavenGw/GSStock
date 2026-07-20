@@ -55,3 +55,28 @@ def test_opposite_direction_not_stacked():
 def test_ignores_signal_without_stock_code():
     raw = [Signal(strategy='watch_alert', priority='HIGH', title='x', detail='', data={})]
     assert WatchSignalPipeline.process(raw, {}, {}, {}) == []
+
+
+def test_context_change_volume_range():
+    prices = {'603626': {'current_price': 30.05, 'change_percent': 2.30, 'volume': 1200}}
+    params = {'603626': {'volume_baseline': 1000, 'resistance_levels': [32.0, 35.0], 'support_levels': [28.0]}}
+    tm = {'603626': {'elapsed': 120, 'total': 240}}  # 半天 → 归一化 ×2 → 量比 2.4x
+    ctx = WatchSignalPipeline._build_context('603626', prices, params, tm)
+    assert '涨幅 +2.30%' in ctx
+    assert '量比 2.4x' in ctx
+    assert '距上方阻力 32.0(+6.5%)' in ctx
+
+
+def test_context_uses_support_when_no_resistance_above():
+    prices = {'600519': {'current_price': 100.0, 'change_percent': -1.0, 'volume': 0}}
+    params = {'600519': {'resistance_levels': [90.0], 'support_levels': [95.0, 80.0]}}
+    ctx = WatchSignalPipeline._build_context('600519', prices, params, {})
+    assert '距下方支撑 95.0(-5.0%)' in ctx
+
+
+def test_context_skips_volume_ratio_on_unit_glitch():
+    prices = {'603626': {'current_price': 30.0, 'change_percent': 0, 'volume': 999999}}
+    params = {'603626': {'volume_baseline': 100}}
+    tm = {'603626': {'elapsed': 240, 'total': 240}}  # 比率>50 → 跳过量比
+    ctx = WatchSignalPipeline._build_context('603626', prices, params, tm)
+    assert '量比' not in ctx
