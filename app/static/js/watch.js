@@ -66,6 +66,14 @@ const WatchStore = {
     },
 };
 
+// 新鲜度：age_seconds 超过 120s 时显示"Nmin前"灰字（美股/港股 3min 刷新会命中）
+function freshnessTag(p) {
+    if (p.age_seconds == null) return '';
+    if (p.age_seconds <= 120) return '';
+    const mins = Math.round(p.age_seconds / 60);
+    return `<span class="price-age" title="缓存新鲜度">${mins}min前</span>`;
+}
+
 const Watch = {
     REFRESH_INTERVAL: 60,
     CHART_FULL_REFRESH_EVERY: 5,  // 每5次刷新重新拉取完整分时数据
@@ -483,7 +491,7 @@ const Watch = {
                 <td class="stock-name">${name}${tdBadge}</td>
                 <td class="text-end ${pctClass} fw-bold">${pctDisplay}</td>
                 <td>${this._renderSignalBadges(code)}</td>
-                <td>${rangeBarHtml}</td>
+                <td>${rangeBarHtml}${freshnessTag(p)}</td>
                 <td>${aiHtml}</td>
             </tr>`;
         }
