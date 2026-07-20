@@ -1,4 +1,4 @@
-"""盯盘数据预取策略 — 每分钟预取价格，每15分钟预取走势"""
+"""盯盘数据预取策略 — A股每分钟，美股/港股每3分钟（差异化提频）"""
 import logging
 from app.strategies.base import Strategy, Signal
 
@@ -10,7 +10,7 @@ NON_A_REFRESH_EVERY = 3   # 美股/港股每 3 tick(≈3min)刷新
 
 class WatchPreloadStrategy(Strategy):
     name = "watch_preload"
-    description = "盯盘数据预取（每分钟价格+分时，每15分钟走势）"
+    description = "盯盘数据预取（A股1min/美港股3min，趋势分档）"
     schedule = "interval_minutes:1"
     needs_llm = False
 
