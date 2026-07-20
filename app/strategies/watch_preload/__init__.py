@@ -5,12 +5,13 @@ from app.strategies.base import Strategy, Signal
 logger = logging.getLogger(__name__)
 
 BACKOFF_CAP = 8
+NON_A_REFRESH_EVERY = 3   # 美股/港股每 3 tick(≈3min)刷新
 
 
 class WatchPreloadStrategy(Strategy):
     name = "watch_preload"
     description = "盯盘数据预取（每分钟价格+分时，每15分钟走势）"
-    schedule = "interval_minutes:3"
+    schedule = "interval_minutes:1"
     needs_llm = False
 
     _tick_count = 0
@@ -40,6 +41,12 @@ class WatchPreloadStrategy(Strategy):
         valid = sum(1 for c in codes if (prices.get(c) or {}).get('current_price'))
         return valid >= len(codes) * 0.5
 
+    @staticmethod
+    def _should_refresh_market(market: str, tick: int, non_a_every: int = NON_A_REFRESH_EVERY) -> bool:
+        if market == 'A':
+            return True
+        return tick % non_a_every == 0
+
     def scan(self) -> list[Signal]:
         from app.services.watch_service import WatchService
         from app.services.trading_calendar import TradingCalendarService
@@ -67,6 +74,8 @@ class WatchPreloadStrategy(Strategy):
 
         # 每次按市场预取价格，失败市场指数退避（yfinance 限流不连累腾讯源）
         for market, m_codes in market_codes.items():
+            if not self._should_refresh_market(market, self._tick_count):
+                continue
             if self._should_skip(market):
                 continue
             try:
@@ -88,15 +97,24 @@ class WatchPreloadStrategy(Strategy):
             except Exception as e:
                 logger.error(f'[盯盘预取] A股分时预取失败: {e}')
 
-        # 每 trend_interval 次预取走势
+        # 走势预取按市场分档：A股每 trend_interval tick，非A每 trend_interval*3 tick
         trend_interval = self._config.get('trend_interval', 15)
-        if self._tick_count % trend_interval == 0:
+        a_codes_trend = market_codes.get('A', [])
+        non_a_trend = [c for m, l in market_codes.items() if m != 'A' for c in l]
+        if a_codes_trend and self._tick_count % trend_interval == 0:
             try:
-                unified_stock_data_service.get_trend_data(active_codes, days=7)
-                unified_stock_data_service.get_trend_data(active_codes, days=30)
-                logger.info(f'[盯盘预取] 走势预取完成: {len(active_codes)}只 (tick={self._tick_count})')
+                unified_stock_data_service.get_trend_data(a_codes_trend, days=7)
+                unified_stock_data_service.get_trend_data(a_codes_trend, days=30)
+                logger.info(f'[盯盘预取] A股走势预取完成: {len(a_codes_trend)}只 (tick={self._tick_count})')
             except Exception as e:
-                logger.error(f'[盯盘预取] 走势预取失败: {e}')
+                logger.error(f'[盯盘预取] A股走势预取失败: {e}')
+        if non_a_trend and self._tick_count % (trend_interval * 3) == 0:
+            try:
+                unified_stock_data_service.get_trend_data(non_a_trend, days=7)
+                unified_stock_data_service.get_trend_data(non_a_trend, days=30)
+                logger.info(f'[盯盘预取] 非A走势预取完成: {len(non_a_trend)}只 (tick={self._tick_count})')
+            except Exception as e:
+                logger.error(f'[盯盘预取] 非A走势预取失败: {e}')
 
         self._tick_count += 1
         return []

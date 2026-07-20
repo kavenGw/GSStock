@@ -17,7 +17,7 @@ paths:
 - 图表：ECharts 分时线图，全宽，支撑/阻力标线，九转信号浮动标注
 - 下方双栏：左=AI分析（realtime/7d/30d标签页），右=季度财报表格
 - 缓存：localStorage（WatchStore），按市场分key持久化，每日自动清理
-- 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）
+- 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）；后端 A股每分钟 force_refresh，美股/港股每3分钟（差异化提频，见 watch_preload）
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
