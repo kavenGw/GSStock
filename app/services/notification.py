@@ -109,7 +109,8 @@ class NotificationService:
                 emoji = '🟢'
             else:
                 emoji = '⚪'
-            lines = [f'{emoji} *{a.name}({a.code})*  [{a.priority}]', a.primary_line]
+            head = f'{emoji} {chg:+.2f}% ' if chg is not None else f'{emoji} '
+            lines = [f'{head}*{a.name}({a.code})*  [{a.priority}]', a.primary_line]
             for s in a.secondary_lines:
                 lines.append(f'  · {s}')
             if a.context_line:
