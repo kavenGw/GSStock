@@ -6,8 +6,9 @@
 
 在 `daily_briefing` 每日推送里新增两条跨市场溢价：
 
-- **TSMC 美台**：TSM（NYSE ADR）vs 2330.TW（台湾）
-- **SK海力士 美韩**：HXSCL（OTC 粉单）vs 000660.KS（首尔）
+- **TSMC 美台**：TSM（NYSE ADR）vs 2330.TW（台湾），1 ADR = 5 股，ratio=5
+- **SK海力士 美韩**：SKHY（2026-07-09 挂牌的 Nasdaq 保荐 ADR）vs 000660.KS（首尔），1 ADS = 1/10 普通股，ratio=0.1
+  - 原设想的 OTC 粉单 HXSCL/HXSCF 无 yfinance 报价，已弃用；改用挂牌保荐 ADR SKHY（流动性好，实测溢价 ~+22%）
 
 粒度：**当前溢价% + 较昨日变化**。展示 + 喂 GLM 双路，完全照搬现有 ETF溢价（`format_etf_premium_summary`）的分层与接线。
 
@@ -99,8 +100,8 @@ ADR_PREMIUM_PAIRS = [
 ## 已知限制
 
 - 收盘 vs 收盘的天然时间差（8am 推送时亚洲未开盘）。
-- HXSCL OTC 报价稀薄，可能常年 `—`。
-- ratio 靠实测反推；公司调整 ADR 比例时需手更配置。
+- 公司调整 ADR 比例时需手更 `ADR_PREMIUM_PAIRS.ratio`（SKHY 新挂牌，若后续做拆并需复核 1 ADS=1/10 口径）。
+- SKHY 2026-07-09 才挂牌，`prev.json` 昨日基准需累积一日后 delta 才有值（首日无箭头，符合设计）。
 
 ## 改动清单
 

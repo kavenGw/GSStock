@@ -548,13 +548,15 @@ rtk git add app/services/notification.py app/llm/prompts/daily_briefing.py tests
 
 ---
 
-## 收尾说明：HXSCL ratio 待确认（实施后手动）
+## 收尾说明：SK 腿已点亮（HXSCL → SKHY，2026-07-21 完成）
 
-`skhynix` 的 `ratio` 出厂置 `None` → SK 腿推送恒显「SK海力士 —」。要点亮它需确认 HXSCL（SK海力士未挂牌 OTC ADR）的存托比例：
+原计划的 OTC 粉单 `HXSCL`/`HXSCF` 实测 yfinance 无任何报价（`history(period='7d')` 空）。改用 SK海力士 **2026-07-09 挂牌的 Nasdaq 保荐 ADR `SKHY`**（成交活跃，日成交约 3700 万股）：
 
-1. 先确认 HXSCL 在 yfinance 有活跃 `close`（`yf.Ticker('HXSCL').history(period='5d')` 非空）。若长期空，SK 腿保持「—」即符合设计（已知限制，不算 bug）。
-2. 若有价：查存托行公告的 ADR:普通股 比例（结构性事实，**不能**用价格反推——TSM 因外资溢价，价格反推会得错值）。锁定后把 `ratio` 写进 `app/config/adr_premium.py` 并补一条 `_compute_premium` 该比例的断言测试。
-3. 公司调整 ADR 比例时需手更此配置。
+1. 存托比例：1 ADS = 1/10 普通股（保荐存托协议公告）→ `ratio=0.1`（结构性事实，非价格反推）。
+2. 配置已改：`{'key':'skhynix','name':'SK海力士','us':'SKHY','home':'000660.KS','ratio':0.1,'fx':'KRW=X'}`。
+3. 实测溢价 ~+22%（SKHY $151 vs 000660.KS 折 USD × 0.1），量级合理（挂牌初 ~+50% 回落中）。
+4. 测试 `test_skhynix_leg_priced_with_ratio` 覆盖 ratio=0.1 计算；SK 腿正常出数不再显「—」。
+5. 公司调整 ADR 比例时需手更此配置。
 
 ## Self-Review
 

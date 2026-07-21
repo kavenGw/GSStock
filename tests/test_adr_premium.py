@@ -29,7 +29,7 @@ def test_get_adr_premium_data_degrades_per_leg(monkeypatch):
     fake_quotes = {
         'TSM': {'close': 190.0}, '2330.TW': {'close': 1000.0}, 'TWD=X': {'close': 32.0},
         '000660.KS': {'close': 200000.0}, 'KRW=X': {'close': 1380.0},
-        # HXSCL 缺失
+        # SKHY 缺失 → SK 腿降级
     }
     monkeypatch.setattr(
         'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
@@ -68,13 +68,13 @@ def test_delta_computed_from_prev(tmp_path, monkeypatch):
         'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
         lambda symbols, cache_type: {
             'TSM': {'close': 190.0}, '2330.TW': {'close': 1000.0}, 'TWD=X': {'close': 32.0},
-            'HXSCL': {'close': 10.0}, '000660.KS': {'close': 200000.0}, 'KRW=X': {'close': 1380.0},
+            '000660.KS': {'close': 200000.0}, 'KRW=X': {'close': 1380.0},
         },
     )
     pairs = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
     # 今日 tsmc=21.6, 昨日 20.0 → delta=1.6
     assert pairs['tsmc']['delta'] == 1.6
-    # skhynix ratio=None → premium None → delta None，且不覆盖（此处本无旧值）
+    # skhynix 缺 SKHY 报价 → premium None → delta None，且不覆盖（此处本无旧值）
     assert pairs['skhynix']['delta'] is None
 
 
@@ -87,8 +87,22 @@ def test_none_premium_does_not_overwrite_prev(tmp_path, monkeypatch):
         lambda symbols, cache_type: {'TSM': {'close': 190.0}, '2330.TW': {'close': 1000.0}, 'TWD=X': {'close': 32.0}},
     )
     BriefingService.save_adr_premium_snapshot()
-    # skhynix 今日无价（ratio 也 None）→ 旧值仍在
+    # skhynix 今日缺 SKHY 报价 → 旧值仍在
     assert BriefingService._load_adr_prev()['skhynix']['premium'] == -0.5
+
+
+def test_skhynix_leg_priced_with_ratio(monkeypatch):
+    # SKHY 有价：ratio=0.1 → fair = 1500000*0.1/1500 = 100 ; premium = 150/100-1 = +50.00%
+    monkeypatch.setattr(
+        'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
+        lambda symbols, cache_type: {
+            'SKHY': {'close': 150.0}, '000660.KS': {'close': 1500000.0}, 'KRW=X': {'close': 1500.0},
+        },
+    )
+    monkeypatch.setattr(BriefingService, '_load_adr_prev', staticmethod(lambda: {}))
+    by_key = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
+    assert by_key['skhynix']['premium_rate'] == 50.0
+    assert by_key['skhynix']['error'] is None
 
 
 def test_getter_is_pure_no_write(tmp_path, monkeypatch):
