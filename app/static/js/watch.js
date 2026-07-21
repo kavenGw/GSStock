@@ -85,6 +85,7 @@ const Watch = {
     stocks: [],
     prices: [],
     benchmarks: [],
+    indices: {},
     marketStatus: {},
     analyses: {},
     chartInstances: {},
@@ -152,6 +153,9 @@ const Watch = {
         const benchData = WatchStore.get('benchmarks');
         if (benchData && benchData.data) this.benchmarks = benchData.data;
 
+        const idxData = WatchStore.get('indices');
+        if (idxData && idxData.data) this.indices = idxData.data;
+
         const marketStatus = WatchStore.get('marketStatus');
         if (marketStatus && marketStatus.data) this.marketStatus = marketStatus.data;
 
@@ -190,6 +194,7 @@ const Watch = {
             }
         }
         WatchStore.set('benchmarks', null, this.benchmarks);
+        WatchStore.set('indices', null, this.indices);
         WatchStore.set('marketStatus', null, this.marketStatus);
         WatchStore.set('viewMode', null, this._marketViewMode);
         WatchStore.set('refreshTime', null, this.lastRefreshTime);
@@ -210,6 +215,7 @@ const Watch = {
             this.stocks = listData.data || [];
             this.prices = priceData.prices || [];
             this.benchmarks = priceData.benchmarks || [];
+            this.indices = priceData.indices || {};
             this.marketStatus = marketData.data || {};
 
             this.renderBenchmarks();
@@ -250,6 +256,88 @@ const Watch = {
                 </div>
             </div>`;
         }).join('');
+    },
+
+    _escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+    },
+
+    renderIndexStrips() {
+        for (const [market, items] of Object.entries(this.indices || {})) {
+            const el = document.getElementById(`index-strip-${market}`);
+            if (!el || !items || !items.length) continue;
+            el.innerHTML = items.map(idx => {
+                const price = idx.price != null ? idx.price.toFixed(2) : '--';
+                const pctClass = idx.change_pct > 0 ? 'price-up' : idx.change_pct < 0 ? 'price-down' : 'price-flat';
+                const sign = idx.change_pct > 0 ? '+' : '';
+                const pct = idx.change_pct != null ? `${sign}${idx.change_pct.toFixed(2)}%` : '--';
+                const code = this._escapeHtml(idx.code);
+                const name = this._escapeHtml(idx.name);
+                return `<div class="card px-2 py-1" style="min-width:120px;cursor:pointer;"
+                            onclick="Watch.toggleIndexChart('${market}','${code}','${name}')">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold small">${name}</span>
+                        <span class="small">${price}</span>
+                        <span class="${pctClass} small fw-bold">${pct}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    },
+
+    async toggleIndexChart(market, code, name) {
+        const el = document.getElementById(`index-chart-${market}`);
+        if (!el) return;
+        const key = `index-${market}`;
+        // 已展开且是同一指数 → 收起
+        if (el.style.display !== 'none' && el.dataset.code === code) {
+            el.style.display = 'none';
+            if (this.chartInstances[key]) { this.chartInstances[key].dispose(); delete this.chartInstances[key]; }
+            return;
+        }
+        el.style.display = 'block';
+        el.dataset.code = code;
+        try {
+            const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(code)}&period=intraday`);
+            const d = await resp.json();
+            if (!d.success || !d.data || !d.data.length) {
+                if (this.chartInstances[key]) { this.chartInstances[key].dispose(); delete this.chartInstances[key]; }
+                el.innerHTML = `<div class="text-muted small p-2">${this._escapeHtml(name)} 暂无分时数据</div>`;
+                return;
+            }
+            el.innerHTML = '';
+            if (this.chartInstances[key]) this.chartInstances[key].dispose();
+            const chart = echarts.init(el);
+            this.chartInstances[key] = chart;
+            const times = d.data.map(p => p.time);
+            const closes = d.data.map(p => p.close);
+            const prev = d.prev_close;
+            const up = closes.length && closes[closes.length - 1] >= (prev ?? closes[0]);
+            chart.setOption({
+                grid: { left: 48, right: 12, top: 24, bottom: 24 },
+                tooltip: { trigger: 'axis' },
+                title: { text: `${name} 分时`, textStyle: { fontSize: 12 }, left: 8, top: 4 },
+                xAxis: { type: 'category', data: times, boundaryGap: false,
+                         axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', scale: true, axisLabel: { fontSize: 10 },
+                         splitLine: { show: true } },
+                series: [{
+                    type: 'line', data: closes, showSymbol: false, smooth: false,
+                    lineStyle: { width: 1.5, color: up ? '#e34d59' : '#00a870' },
+                    markLine: prev != null ? {
+                        symbol: 'none', silent: true,
+                        data: [{ yAxis: prev }],
+                        lineStyle: { type: 'dashed', color: '#999', width: 1 },
+                        label: { formatter: `昨收 ${prev}`, fontSize: 10 }
+                    } : undefined,
+                }],
+            });
+        } catch (e) {
+            if (this.chartInstances[key]) { this.chartInstances[key].dispose(); delete this.chartInstances[key]; }
+            el.innerHTML = `<div class="text-muted small p-2">分时加载失败</div>`;
+        }
     },
 
     // --- 技术信号 ---
@@ -388,6 +476,8 @@ const Watch = {
                             <button class="btn btn-outline-secondary${viewMode === '7d' ? ' active' : ''}" onclick="Watch.switchMarketView('${market}','7d',this)">7日</button>
                         </div>
                     </div>
+                    <div class="watch-index-strip d-flex gap-2 flex-wrap mb-2" id="index-strip-${market}"></div>
+                    <div class="watch-index-chart mb-2" id="index-chart-${market}" style="display:none;height:180px;"></div>
                     <div class="market-chart" id="chart-market-${market}">
                         <div class="skeleton skeleton-card" style="height:100%;"></div>
                     </div>
@@ -401,6 +491,7 @@ const Watch = {
         document.getElementById('emptyState').classList.add('d-none');
         container.classList.remove('d-none');
 
+        this.renderIndexStrips();
         this._updateAllSummaryTables();
     },
 
@@ -945,8 +1036,10 @@ const Watch = {
             if (priceData.success) {
                 this.prices = priceData.prices || [];
                 this.benchmarks = priceData.benchmarks || [];
+                this.indices = priceData.indices || {};
                 this.updateAllPrices();
                 this.renderBenchmarks();
+                this.renderIndexStrips();
 
                 this._refreshCount = (this._refreshCount || 0) + 1;
                 if (this._refreshCount % this.CHART_FULL_REFRESH_EVERY === 0) {

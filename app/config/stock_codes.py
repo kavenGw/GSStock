@@ -70,6 +70,18 @@ BENCHMARK_CODES = [
     {'code': '^NDX', 'name': '纳指100', 'market': 'US'},
 ]
 
+# 盯盘各市场分区的指数条（仅行情参照，不进 WATCH_CODES/告警/信号）
+MARKET_INDICES = {
+    'A': [
+        {'code': '000001.SS', 'name': '上证'},
+        {'code': '399006.SZ', 'name': '创业板'},
+        {'code': '000688.SS', 'name': '科创50'},
+    ],
+    'KR': [
+        {'code': '^KS11', 'name': 'KOSPI'},
+    ],
+}
+
 # 盯盘股票池（唯一权威源，替代 watch_list 表）
 WATCH_CODES = [
     {'code': '300223',    'name': '北京君正',  'market': 'A'},

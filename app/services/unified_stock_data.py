@@ -34,6 +34,18 @@ logger = logging.getLogger(__name__)
 VOLUME_UNIT_SCHEMA_VERSION = 2
 
 
+def _tencent_code(code: str) -> str:
+    """腾讯行情代码前缀：优先 .SS/.SH→sh、.SZ→sz（指数权威口径），
+    裸代码回退 6/5 开头→sh、其余→sz。"""
+    c = code.strip()
+    up = c.upper()
+    if up.endswith('.SS') or up.endswith('.SH'):
+        return f"sh{c[:-3]}"
+    if up.endswith('.SZ'):
+        return f"sz{c[:-3]}"
+    return f"sh{c}" if c.startswith(('6', '5')) else f"sz{c}"
+
+
 # 数据类型定义
 @dataclass
 class PriceData:
@@ -916,10 +928,7 @@ class UnifiedStockDataService:
         tencent_codes = []
         code_map = {}
         for code in stock_codes:
-            if code.startswith(('6', '5')):
-                tc = f'sh{code}'
-            else:
-                tc = f'sz{code}'
+            tc = _tencent_code(code)
             tencent_codes.append(tc)
             code_map[tc] = code
 
@@ -1343,7 +1352,7 @@ class UnifiedStockDataService:
         interval_map = {'1m': 'm1', '5m': 'm5', '15m': 'm15'}
         tc_interval = interval_map.get(interval, 'm1')
         try:
-            tc = f'sh{code}' if code.startswith(('6', '5')) else f'sz{code}'
+            tc = _tencent_code(code)
             url = f"http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param={tc},{tc_interval},,240"
             resp = requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
             data = resp.json()
@@ -2045,10 +2054,7 @@ class UnifiedStockDataService:
         for stock_code in stock_codes:
             try:
                 # 腾讯格式: sh600519, sz000001, sh510300
-                if stock_code.startswith(('6', '5')):
-                    tc = f'sh{stock_code}'
-                else:
-                    tc = f'sz{stock_code}'
+                tc = _tencent_code(stock_code)
 
                 # 腾讯日K线接口
                 url = f"http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={tc},day,{start_date.strftime('%Y-%m-%d')},{today.strftime('%Y-%m-%d')},{days},qfq"
@@ -2663,12 +2669,14 @@ class UnifiedStockDataService:
         return result
 
     def get_a_share_index_quotes(self, index_codes: list,
-                                  force_refresh: bool = False) -> dict:
+                                  force_refresh: bool = False,
+                                  cache_only: bool = False) -> dict:
         """A股指数数据获取（负载均衡：东方财富/新浪，yfinance兜底）
 
         Args:
             index_codes: 指数代码列表（如 '000001.SS', '399001.SZ'）
             force_refresh: 是否强制刷新
+            cache_only: 仅读缓存、跳过API抓取，未命中则不在返回中
 
         Returns:
             {code: {'close': float, 'change_percent': float, 'name': str}}
@@ -2702,6 +2710,9 @@ class UnifiedStockDataService:
             need_fetch = list(index_codes)
 
         if not need_fetch:
+            return result
+
+        if cache_only:
             return result
 
         self._miss_count += len(need_fetch)

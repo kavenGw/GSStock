@@ -38,6 +38,12 @@ paths:
 
 盯盘要盯哪些股票由 `app/config/stock_codes.py` 的 `WATCH_CODES` 常量决定（唯一权威源），不再有 `watch_list` 表/增删 UI/`/watch/add`/`/watch/remove`。改盯盘池=改 WATCH_CODES（每条 `{'code','name','market'}`，`market` 显式写死——`MarketIdentifier` 不认 `.KS` 等后缀会误判）。`WatchService` 的 `get_watch_codes/get_watch_list/get_watched_markets/get_market_map` 全部读该常量。`WatchAnalysis` 表（AI 分析结果）与盯盘池无关，仍在 DB。DB 里遗留的 `watch_list` 孤立表无害，未做 drop 迁移。
 
+## 盯盘各市场分区指数条
+
+各市场分区大图上方的指数 chip 由 `app/config/stock_codes.py` 的 `MARKET_INDICES`（按市场键）决定，仅做行情参照——**不进** `WATCH_CODES`/告警/信号/AI 分析。当前：A 股=上证`000001.SS`/创业板`399006.SZ`/科创50`000688.SS`，韩股=KOSPI`^KS11`。数据经 `/watch/prices` 的 `indices` 字段下发：A 指数走 `get_a_share_index_quotes(cache_only=True)`（东财/新浪，正确处理 `.SS/.SZ`），KR 走 `get_realtime_prices` 缓存；`watch_preload` 每分钟按开盘市场预热价格+分时。点击 chip 复用 `/watch/chart-data?period=intraday` 展开分时 mini 面板（单开切换）。
+
+**关键坑**：腾讯行情代码由 `_tencent_code()`（`unified_stock_data.py`）按 `.SS→sh`/`.SZ→sz` 定交易所——上证/科创50 是 `0` 开头但在沪，不能用「6/5→sh 其余→sz」裸启发式。KOSPI `^KS11` 由 `MarketIdentifier.identify` 特判为 `KR`（否则 `^` 通配落 US，交易时段/取数源错）。
+
 ## 盯盘 summary 表技术信号列（原 /alert 预警页已并入）
 
 每市场 summary 表有「信号」列：`watch.js` 拉 `GET /watch/signals`（批量 60 日 OHLC）后复用 `signal-detector.js`（与 heavy_metals 页共享，勿删）的 `SignalDetector.detectAll` 逐股算 RSI/MACD/布林/成交量/均线 + 买卖形态（取最近 3 根 K 线内）。阈值（RSI 超买超卖/放量倍数）存独立 localStorage key `watchSignalThresholds`——**不带 `watch_` 前缀**以避开 `WatchStore.clearAll` 每日清空。徽标 `name`/`description` 须 HTML 转义。独立 `/alert` 页（alert.py/alert.html/alert-page.js/alert.css）已删除，能力收缩进此处仅覆盖 `WATCH_CODES`。
