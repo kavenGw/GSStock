@@ -3461,3 +3461,23 @@
   - 类债券资产
   - 利率下行受益
   - 水电龙头
+- stock_code: '600183'
+  stock_name: 生益科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 生意质地顶级——全球第二大 CCL + 大陆唯一英伟达 M9 认证的高速 CCL 厂商，毛利率逆原材料大涨（玻纤布+100%/FR-4+55%）逆势扩张（FY25 26.47%→26Q1 28.1%）坐实高端结构性 α 真实存在（非纯 pass-through），FY25 净现比 1.58x 现金流红灯解除、客户最分散、表最稳。但现价 135.67（PE-TTM 83.89 / PB 20.62，均处 5 年约 97% 极值分位、总市值 3295.43 亿）对任何穿越周期正常化利润仍深度高估：期望内在价值约 37 元/股，安全边际 -72.7%（现价是期望值的 3.67 倍；即便最乐观 bull 58 元，现价仍是其 2.34 倍）。关键缺口=官方未披露 AI 高速 CCL 营收占比，业绩层可持续性证据未闭环，故 bull 概率封顶 25%。评级 watch 而非 exclude：与建滔（commodity/M9 未认证/内部人套现，判 exclude）不同，生益是一门真正值得拥有的生意，只是价格太贵——顶级生意，等一个便宜的价格。买点 ≤22 元（理想）/≤28 元（可接受）。
+  bear: 18
+  base: 38
+  bull: 58
+  dividend_yield: 0.88
+  quality: 4
+  conviction_date: '2026-07-21'
+  source_doc: sectors/semiconductor/materials/2026-07-21-生益科技-buffett分析.md
+  themes:
+  - CCL
+  - AI高速CCL
+  - 涨价周期
+  - 供给侧
+  - 估值泡沫
