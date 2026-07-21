@@ -5,7 +5,8 @@ REM   1. Copy this file to tunnel.local.bat (gitignored, NEVER commit it)
 REM   2. Fill in the three values below
 REM   3. One-time in WSL Ubuntu: sudo apt install sshpass
 REM   4. Double-click tunnel.local.bat; keep the window open, then browse http://localhost:5000
-REM Note: avoid passwords containing " or % (breaks batch/wsl quoting); change password if needed
+REM Note: avoid passwords containing " % & | < > ^ $ or backtick (breaks batch/wsl/bash quoting); change password if needed
+REM Note: if "wsl -d Ubuntu" fails, run "wsl -l" to confirm the distro name
 
 set SERVER_USER=your_user
 set SERVER_HOST=your.server.ip
