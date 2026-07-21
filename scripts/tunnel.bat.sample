@@ -1,0 +1,15 @@
+@echo off
+REM SSH tunnel to cloud server (see docs/superpowers/specs/2026-07-21-private-access-ssh-tunnel-design.md)
+REM Usage:
+REM   1. Copy this file to tunnel.local.bat (gitignored, NEVER commit it)
+REM   2. Fill in the three values below
+REM   3. One-time in WSL Ubuntu: sudo apt install sshpass
+REM   4. Double-click tunnel.local.bat; keep the window open, then browse http://localhost:5000
+REM Note: avoid passwords containing " or % (breaks batch/wsl quoting); change password if needed
+
+set SERVER_USER=your_user
+set SERVER_HOST=your.server.ip
+set SERVER_PASS=your_password
+
+wsl -d Ubuntu sshpass -p "%SERVER_PASS%" ssh -N -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -L 5000:127.0.0.1:5000 %SERVER_USER%@%SERVER_HOST%
+pause

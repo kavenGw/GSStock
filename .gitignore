@@ -26,6 +26,7 @@ data
 .claude/scheduled_tasks.lock
 .claude/skills/portfolio-init/local-config.yaml
 scripts/_*.txt
+scripts/tunnel.local.bat
 .graphify_incremental.json
 
 # portfolio-shortlist 缓存（按股票 md5 命中跳过 docs 重读）
