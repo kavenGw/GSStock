@@ -20,6 +20,8 @@ class WatchAlertService:
             cls._instance._prev_prices = {}
             cls._instance._prev_ma_side = {}
             cls._instance._extreme_cooldown = {}
+            cls._instance._price_ring = {}
+            cls._instance._momentum_cooldown = {}
             cls._instance._last_trading_date = None
         return cls._instance
 
@@ -31,6 +33,8 @@ class WatchAlertService:
             self._prev_prices = {}
             self._prev_ma_side = {}
             self._extreme_cooldown = {}
+            self._price_ring = {}
+            self._momentum_cooldown = {}
             self._last_trading_date = today
 
     def _has_fired(self, key: str) -> bool:
@@ -76,6 +80,7 @@ class WatchAlertService:
             params = alert_params_map.get(code, {})
 
             signals.extend(self._check_intraday_extreme(code, name, data))
+            signals.extend(self._check_intraday_momentum(code, name, data))
 
             td = td_results.get(code)
             if td:
@@ -186,7 +191,7 @@ class WatchAlertService:
                 signals.append(self._make_signal(name, code,
                     f'{label} {level} | 当前 {curr:.2f}',
                     detail,
-                    {'alert_type': 'support_resistance', 'direction': direction, 'level': level}))
+                    {'alert_type': direction, 'direction': direction, 'level': level}))
                 self._mark_fired(key)
 
         for level in resistance_levels:
@@ -204,7 +209,7 @@ class WatchAlertService:
                 signals.append(self._make_signal(name, code,
                     f'{label} {level} | 当前 {curr:.2f}',
                     detail,
-                    {'alert_type': 'support_resistance', 'direction': direction, 'level': level}))
+                    {'alert_type': direction, 'direction': direction, 'level': level}))
                 self._mark_fired(key)
 
         return signals
@@ -276,6 +281,9 @@ class WatchAlertService:
     # 成交量异动比率上限，超过此值视为数据异常而非真实异动
     VOLUME_RATIO_CAP = 50.0
 
+    INTRADAY_MOMENTUM_WINDOW_MIN = 3
+    INTRADAY_MOMENTUM_PCT = 1.5
+
     def _check_volume_anomaly(self, code: str, name: str, data: dict, params: dict,
                                minutes_info: dict = None) -> list[Signal]:
         signals = []
@@ -318,6 +326,46 @@ class WatchAlertService:
                     '',
                     {'alert_type': 'volume_anomaly', 'normalized_volume': normalized, 'baseline': baseline}))
                 self._mark_fired(key)
+        return signals
+
+    def _check_intraday_momentum(self, code: str, name: str, data: dict) -> list[Signal]:
+        from collections import deque
+        signals = []
+        curr = data.get('current_price')
+        if curr is None:
+            return signals
+
+        now = datetime.now()
+        ring = self._price_ring.setdefault(code, deque(maxlen=5))
+
+        ref_px = None
+        window_sec = self.INTRADAY_MOMENTUM_WINDOW_MIN * 60 + 5
+        for ts, px in ring:
+            if (now - ts).total_seconds() <= window_sec:
+                ref_px = px
+                break
+        ring.append((now, curr))
+
+        if not ref_px or ref_px == curr:
+            return signals
+
+        change_pct = (curr - ref_px) / ref_px * 100
+        if abs(change_pct) < self.INTRADAY_MOMENTUM_PCT:
+            return signals
+
+        direction = 'up' if change_pct > 0 else 'down'
+        cooldown_key = f'momentum:{code}:{direction}'
+        last = self._momentum_cooldown.get(cooldown_key)
+        cooldown_min = int(os.environ.get('WATCH_ALERT_COOLDOWN_MINUTES', '5'))
+        if last and now - last < timedelta(minutes=cooldown_min):
+            return signals
+
+        label = '急拉' if direction == 'up' else '急跌'
+        signals.append(self._make_signal(name, code,
+            f'{label} {change_pct:+.1f}% | 当前 {curr:.2f}',
+            '',
+            {'alert_type': 'intraday_momentum', 'direction': direction, 'change_pct': change_pct}))
+        self._momentum_cooldown[cooldown_key] = now
         return signals
 
     def _check_td_sequential(self, code: str, name: str, curr: float, td: dict) -> list[Signal]:

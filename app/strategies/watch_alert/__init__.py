@@ -72,10 +72,18 @@ class WatchAlertStrategy(Strategy):
             td_results=td_results,
             trading_minutes=trading_minutes,
         )
+        if not signals:
+            return []
 
-        if signals:
-            logger.info(f'[盯盘告警] 产出 {len(signals)} 个信号')
-        return signals
+        from app.services.watch_signal_pipeline import WatchSignalPipeline
+        from app.services.notification import NotificationService
+        alerts = WatchSignalPipeline.process(
+            signals, watch_prices, alert_params_map, name_map, trading_minutes)
+        pushable = [a for a in alerts if a.priority != 'LOW']
+        if pushable:
+            NotificationService.push_watch_alerts(alerts)
+            logger.info(f'[盯盘告警] 合并推送 {len(pushable)} 股（原始 {len(signals)} 信号）')
+        return []
 
     @staticmethod
     def _filter_fresh(prices: dict, active_codes: list[str]) -> dict:

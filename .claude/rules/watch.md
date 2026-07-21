@@ -17,7 +17,7 @@ paths:
 - 图表：ECharts 分时线图，全宽，支撑/阻力标线，九转信号浮动标注
 - 下方双栏：左=AI分析（realtime/7d/30d标签页），右=季度财报表格
 - 缓存：localStorage（WatchStore），按市场分key持久化，每日自动清理
-- 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）
+- 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）；后端 A股每分钟 force_refresh，美股/港股每3分钟（差异化提频，见 watch_preload）
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
@@ -29,6 +29,10 @@ paths:
 - realtime 增量推送：`_realtime_push_state` 追踪每股当日已推状态，首次完整推送，后续仅推变化（信号/支撑阻力/摘要），无变化跳过
 - 7d/30d：每日简报推送时自动计算（8:00am），结果包含在 Slack 消息中
 - 分析入口：`WatchAnalysisService.analyze_stocks(period, force)`
+
+## 盯盘告警信号管线（合并/分级/上下文）
+
+`watch_alert.scan` 不再逐条 `event_bus.publish`，而是 `check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`app/services/watch_signal_pipeline.py`，纯函数）按股合并、加权共振分级（HIGH/MID/LOW）、上下文增强（涨幅/量比/区间位置）→ `NotificationService.push_watch_alerts` 一股一条直推、`scan` 返回 `[]`（复用 watch_realtime 直推先例）。跨 tick 去重仍归 `WatchAlertService._fired`；管线只做同 tick 合并。新增第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5% 急拉急跌，`_price_ring` 环形缓冲）。**已知限制**：盯盘内存态（`WatchAlertService._fired`/`_price_ring`/极值/`_momentum_cooldown`）均为进程内变量，盘中重启会重置，可能导致极值重报或跨 tick 去重失效（漏报/重报），健壮性与持久化留后续 spec。
 
 ## 盯盘股票池（代码配置，非 DB）
 
