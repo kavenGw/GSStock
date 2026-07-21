@@ -42,6 +42,15 @@ class WatchPreloadStrategy(Strategy):
         return valid >= len(codes) * 0.5
 
     @staticmethod
+    def _index_codes_for_markets(open_markets: set) -> dict:
+        from app.config.stock_codes import MARKET_INDICES
+        out = {}
+        for mkt, defs in MARKET_INDICES.items():
+            if mkt in open_markets:
+                out[mkt] = [i['code'] for i in defs]
+        return out
+
+    @staticmethod
     def _should_refresh_market(market: str, tick: int, non_a_every: int = NON_A_REFRESH_EVERY) -> bool:
         if market == 'A':
             return True
@@ -96,6 +105,23 @@ class WatchPreloadStrategy(Strategy):
                 logger.debug(f'[盯盘预取] A股分时预取完成: {len(a_codes)}只')
             except Exception as e:
                 logger.error(f'[盯盘预取] A股分时预取失败: {e}')
+
+        # 指数条预热（价格 + 分时），独立于个股 backoff
+        index_codes_by_market = self._index_codes_for_markets(open_markets)
+        for mkt, idx_codes in index_codes_by_market.items():
+            if not idx_codes:
+                continue
+            try:
+                if mkt == 'A':
+                    unified_stock_data_service.get_a_share_index_quotes(
+                        idx_codes, force_refresh=True)
+                else:
+                    unified_stock_data_service.get_realtime_prices(
+                        idx_codes, force_refresh=True)
+                unified_stock_data_service.get_intraday_data(idx_codes)
+                logger.debug(f'[盯盘预取] {mkt} 指数预热完成: {len(idx_codes)}只')
+            except Exception as e:
+                logger.error(f'[盯盘预取] {mkt} 指数预热失败: {e}')
 
         # 走势预取按市场分档：A股每 trend_interval tick，非A每 trend_interval*3 tick
         trend_interval = self._config.get('trend_interval', 15)
