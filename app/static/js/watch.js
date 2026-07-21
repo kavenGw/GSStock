@@ -1036,8 +1036,10 @@ const Watch = {
             if (priceData.success) {
                 this.prices = priceData.prices || [];
                 this.benchmarks = priceData.benchmarks || [];
+                this.indices = priceData.indices || {};
                 this.updateAllPrices();
                 this.renderBenchmarks();
+                this.renderIndexStrips();
 
                 this._refreshCount = (this._refreshCount || 0) + 1;
                 if (this._refreshCount % this.CHART_FULL_REFRESH_EVERY === 0) {

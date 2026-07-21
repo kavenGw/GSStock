@@ -2054,10 +2054,7 @@ class UnifiedStockDataService:
         for stock_code in stock_codes:
             try:
                 # 腾讯格式: sh600519, sz000001, sh510300
-                if stock_code.startswith(('6', '5')):
-                    tc = f'sh{stock_code}'
-                else:
-                    tc = f'sz{stock_code}'
+                tc = _tencent_code(stock_code)
 
                 # 腾讯日K线接口
                 url = f"http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={tc},day,{start_date.strftime('%Y-%m-%d')},{today.strftime('%Y-%m-%d')},{days},qfq"
@@ -2679,6 +2676,7 @@ class UnifiedStockDataService:
         Args:
             index_codes: 指数代码列表（如 '000001.SS', '399001.SZ'）
             force_refresh: 是否强制刷新
+            cache_only: 仅读缓存、跳过API抓取，未命中则不在返回中
 
         Returns:
             {code: {'close': float, 'change_percent': float, 'name': str}}
