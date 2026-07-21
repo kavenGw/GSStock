@@ -287,7 +287,56 @@ const Watch = {
         }
     },
 
-    toggleIndexChart(market, code, name) { /* Task 8 实现 */ },
+    async toggleIndexChart(market, code, name) {
+        const el = document.getElementById(`index-chart-${market}`);
+        if (!el) return;
+        const key = `index-${market}`;
+        // 已展开且是同一指数 → 收起
+        if (el.style.display !== 'none' && el.dataset.code === code) {
+            el.style.display = 'none';
+            if (this.chartInstances[key]) { this.chartInstances[key].dispose(); delete this.chartInstances[key]; }
+            return;
+        }
+        el.style.display = 'block';
+        el.dataset.code = code;
+        try {
+            const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(code)}&period=intraday`);
+            const d = await resp.json();
+            if (!d.success || !d.data || !d.data.length) {
+                el.innerHTML = `<div class="text-muted small p-2">${this._escapeHtml(name)} 暂无分时数据</div>`;
+                return;
+            }
+            el.innerHTML = '';
+            if (this.chartInstances[key]) this.chartInstances[key].dispose();
+            const chart = echarts.init(el);
+            this.chartInstances[key] = chart;
+            const times = d.data.map(p => p.time);
+            const closes = d.data.map(p => p.close);
+            const prev = d.prev_close;
+            const up = closes.length && closes[closes.length - 1] >= (prev ?? closes[0]);
+            chart.setOption({
+                grid: { left: 48, right: 12, top: 24, bottom: 24 },
+                tooltip: { trigger: 'axis' },
+                title: { text: `${name} 分时`, textStyle: { fontSize: 12 }, left: 8, top: 4 },
+                xAxis: { type: 'category', data: times, boundaryGap: false,
+                         axisLabel: { fontSize: 10 } },
+                yAxis: { type: 'value', scale: true, axisLabel: { fontSize: 10 },
+                         splitLine: { show: true } },
+                series: [{
+                    type: 'line', data: closes, showSymbol: false, smooth: false,
+                    lineStyle: { width: 1.5, color: up ? '#e34d59' : '#00a870' },
+                    markLine: prev != null ? {
+                        symbol: 'none', silent: true,
+                        data: [{ yAxis: prev }],
+                        lineStyle: { type: 'dashed', color: '#999', width: 1 },
+                        label: { formatter: `昨收 ${prev}`, fontSize: 10 }
+                    } : undefined,
+                }],
+            });
+        } catch (e) {
+            el.innerHTML = `<div class="text-muted small p-2">分时加载失败</div>`;
+        }
+    },
 
     // --- 技术信号 ---
     _signalThresholds() {
