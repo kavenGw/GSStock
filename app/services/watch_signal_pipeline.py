@@ -117,10 +117,6 @@ class WatchSignalPipeline:
         params = params_map.get(code, {})
         parts = []
 
-        chg = p.get('change_percent')
-        if chg is not None:
-            parts.append(f'涨幅 {chg:+.2f}%')
-
         baseline = params.get('volume_baseline', 0)
         volume = p.get('volume')
         if baseline and volume:

@@ -62,7 +62,7 @@ def test_context_change_volume_range():
     params = {'603626': {'volume_baseline': 1000, 'resistance_levels': [32.0, 35.0], 'support_levels': [28.0]}}
     tm = {'603626': {'elapsed': 120, 'total': 240}}  # 半天 → 归一化 ×2 → 量比 2.4x
     ctx = WatchSignalPipeline._build_context('603626', prices, params, tm)
-    assert '涨幅 +2.30%' in ctx
+    assert '涨幅' not in ctx
     assert '量比 2.4x' in ctx
     assert '距上方阻力 32.0(+6.5%)' in ctx
 
