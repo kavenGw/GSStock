@@ -1179,7 +1179,7 @@ class NotificationService:
         blocks = []
 
         # 市场行情 - 从 BriefingService 获取结构化数据
-        has_market = indices_text or futures_text or etf_text
+        has_market = indices_text or futures_text or etf_text or adr_text
         if has_market:
             blocks.append(B._block_header('📈 市场行情'))
 
@@ -1551,6 +1551,13 @@ class NotificationService:
         total = len(news_messages) + (1 if watch_msg else 0)
         results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': total}
         results['content_preview'] = news_messages[0][:500] if news_messages else ''
+
+        try:
+            from app.services.briefing import BriefingService
+            BriefingService.save_adr_premium_snapshot()
+        except Exception as e:
+            logger.warning(f'[通知.ADR溢价] 昨日基准更新失败: {e}')
+
         return results
 
     @staticmethod

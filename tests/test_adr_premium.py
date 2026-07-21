@@ -1,3 +1,5 @@
+from datetime import date
+
 from app.services.briefing import BriefingService
 
 
@@ -84,9 +86,46 @@ def test_none_premium_does_not_overwrite_prev(tmp_path, monkeypatch):
         'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
         lambda symbols, cache_type: {'TSM': {'close': 190.0}, '2330.TW': {'close': 1000.0}, 'TWD=X': {'close': 32.0}},
     )
-    BriefingService.get_adr_premium_data()
+    BriefingService.save_adr_premium_snapshot()
     # skhynix 今日无价（ratio 也 None）→ 旧值仍在
     assert BriefingService._load_adr_prev()['skhynix']['premium'] == -0.5
+
+
+def test_getter_is_pure_no_write(tmp_path, monkeypatch):
+    f = tmp_path / 'prev.json'
+    f.write_text('{"tsmc": {"date": "2026-07-20", "premium": 20.0}}', encoding='utf-8')
+    monkeypatch.setattr('app.services.briefing.ADR_PREV_FILE', str(f))
+    monkeypatch.setattr(
+        'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
+        lambda symbols, cache_type: {
+            'TSM': {'close': 190.0}, '2330.TW': {'close': 1000.0}, 'TWD=X': {'close': 32.0},
+        },
+    )
+    pairs1 = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
+    pairs2 = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
+    assert pairs1['tsmc']['delta'] == 1.6
+    assert pairs2['tsmc']['delta'] == 1.6
+    assert BriefingService._load_adr_prev()['tsmc']['premium'] == 20.0
+
+
+def test_save_snapshot_updates_valid_and_preserves_missing(tmp_path, monkeypatch):
+    f = tmp_path / 'prev.json'
+    f.write_text(
+        '{"tsmc": {"date": "2026-07-20", "premium": 20.0}, "skhynix": {"date": "2026-07-20", "premium": -0.5}}',
+        encoding='utf-8',
+    )
+    monkeypatch.setattr('app.services.briefing.ADR_PREV_FILE', str(f))
+    monkeypatch.setattr(
+        'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
+        lambda symbols, cache_type: {
+            'TSM': {'close': 190.0}, '2330.TW': {'close': 1000.0}, 'TWD=X': {'close': 32.0},
+        },
+    )
+    BriefingService.save_adr_premium_snapshot()
+    stored = BriefingService._load_adr_prev()
+    assert stored['tsmc']['premium'] == 21.6
+    assert stored['tsmc']['date'] == date.today().isoformat()
+    assert stored['skhynix']['premium'] == -0.5
 
 
 from app.services.notification import NotificationService

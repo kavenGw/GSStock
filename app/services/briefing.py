@@ -612,7 +612,7 @@ class BriefingService:
 
     @staticmethod
     def get_adr_premium_data() -> dict:
-        """获取 ADR 跨市场溢价（当前溢价% + 较昨日变化）"""
+        """获取 ADR 跨市场溢价（当前溢价% + 较昨日变化）。纯读：不落盘，可重复调用。"""
         from app.services.unified_stock_data import unified_stock_data_service
         from app.config.adr_premium import ADR_PREMIUM_PAIRS
 
@@ -623,10 +623,8 @@ class BriefingService:
 
         quotes = unified_stock_data_service.get_yfinance_batch_quotes(symbols, 'adr_premium_yf')
         prev = BriefingService._load_adr_prev()
-        today_str = date.today().isoformat()
 
         pairs = []
-        new_store = dict(prev)
         for p in ADR_PREMIUM_PAIRS:
             us_close = (quotes.get(p['us']) or {}).get('close')
             home_close = (quotes.get(p['home']) or {}).get('close')
@@ -639,8 +637,6 @@ class BriefingService:
             error = None
             if premium is None:
                 error = 'ratio待确认' if not p.get('ratio') else '行情缺失'
-            else:
-                new_store[p['key']] = {'date': today_str, 'premium': premium}
 
             pairs.append({
                 'key': p['key'], 'name': p['name'],
@@ -650,8 +646,19 @@ class BriefingService:
                 'delta': delta, 'error': error,
             })
 
-        BriefingService._save_adr_prev(new_store)
         return {'pairs': pairs}
+
+    @staticmethod
+    def save_adr_premium_snapshot() -> None:
+        """把当日有效溢价写回 prev.json 作为明日基准；无价的腿保留旧值。
+        与 get_adr_premium_data 的读取解耦——push 尾部调用一次，避免同 push 内多次读取被写入污染 delta。"""
+        data = BriefingService.get_adr_premium_data()
+        store = dict(BriefingService._load_adr_prev())
+        today_str = date.today().isoformat()
+        for p in data['pairs']:
+            if p.get('premium_rate') is not None:
+                store[p['key']] = {'date': today_str, 'premium': p['premium_rate']}
+        BriefingService._save_adr_prev(store)
 
     @staticmethod
     def _load_adr_prev() -> dict:
