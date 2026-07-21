@@ -7,6 +7,8 @@
 - 板块评级（根据美股表现评级A股板块风险）
 """
 import logging
+import os
+import json
 from datetime import datetime, date, timedelta
 from typing import Optional
 
@@ -14,6 +16,9 @@ from app import db
 from app.config.sector_ratings import SECTOR_RATING_CONFIG
 
 logger = logging.getLogger(__name__)
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+ADR_PREV_FILE = os.path.join(DATA_DIR, 'adr_premium_prev.json')
 
 
 def get_categories() -> list:
@@ -595,6 +600,75 @@ class BriefingService:
             })
 
         return {'etfs': result, 'partial': partial}
+
+    @staticmethod
+    def _compute_premium(us_close, home_close, fx_rate, ratio):
+        if not us_close or not home_close or not fx_rate or not ratio:
+            return None
+        fair = home_close * ratio / fx_rate
+        if fair <= 0:
+            return None
+        return round((us_close / fair - 1) * 100, 2)
+
+    @staticmethod
+    def get_adr_premium_data() -> dict:
+        """获取 ADR 跨市场溢价（当前溢价% + 较昨日变化）"""
+        from app.services.unified_stock_data import unified_stock_data_service
+        from app.config.adr_premium import ADR_PREMIUM_PAIRS
+
+        symbols = []
+        for p in ADR_PREMIUM_PAIRS:
+            symbols += [p['us'], p['home'], p['fx']]
+        symbols = list(dict.fromkeys(symbols))
+
+        quotes = unified_stock_data_service.get_yfinance_batch_quotes(symbols, 'adr_premium_yf')
+        prev = BriefingService._load_adr_prev()
+        today_str = date.today().isoformat()
+
+        pairs = []
+        new_store = dict(prev)
+        for p in ADR_PREMIUM_PAIRS:
+            us_close = (quotes.get(p['us']) or {}).get('close')
+            home_close = (quotes.get(p['home']) or {}).get('close')
+            fx_rate = (quotes.get(p['fx']) or {}).get('close')
+            premium = BriefingService._compute_premium(us_close, home_close, fx_rate, p.get('ratio'))
+
+            prev_premium = (prev.get(p['key']) or {}).get('premium')
+            delta = round(premium - prev_premium, 2) if (premium is not None and prev_premium is not None) else None
+
+            error = None
+            if premium is None:
+                error = 'ratio待确认' if not p.get('ratio') else '行情缺失'
+            else:
+                new_store[p['key']] = {'date': today_str, 'premium': premium}
+
+            pairs.append({
+                'key': p['key'], 'name': p['name'],
+                'us_price': us_close, 'home_price': home_close,
+                'fx': fx_rate, 'ratio': p.get('ratio'),
+                'premium_rate': premium, 'prev_premium': prev_premium,
+                'delta': delta, 'error': error,
+            })
+
+        BriefingService._save_adr_prev(new_store)
+        return {'pairs': pairs}
+
+    @staticmethod
+    def _load_adr_prev() -> dict:
+        try:
+            with open(ADR_PREV_FILE, encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            return {}
+
+    @staticmethod
+    def _save_adr_prev(store: dict) -> None:
+        try:
+            os.makedirs(DATA_DIR, exist_ok=True)
+            with open(ADR_PREV_FILE, 'w', encoding='utf-8') as f:
+                json.dump(store, f, ensure_ascii=False)
+        except OSError as e:
+            logger.warning(f'[简报.ADR溢价] 昨日值写入失败: {e}')
 
     @staticmethod
     def get_cache_update_time() -> Optional[datetime]:
