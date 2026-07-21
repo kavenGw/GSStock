@@ -35,15 +35,15 @@ VOLUME_UNIT_SCHEMA_VERSION = 2
 
 
 def _tencent_code(code: str) -> str:
-	"""腾讯行情代码前缀：优先 .SS/.SH→sh、.SZ→sz（指数权威口径），
-	裸代码回退 6/5 开头→sh、其余→sz。"""
-	c = code.strip()
-	up = c.upper()
-	if up.endswith('.SS') or up.endswith('.SH'):
-		return f"sh{c[:-3]}"
-	if up.endswith('.SZ'):
-		return f"sz{c[:-3]}"
-	return f"sh{c}" if c.startswith(('6', '5')) else f"sz{c}"
+    """腾讯行情代码前缀：优先 .SS/.SH→sh、.SZ→sz（指数权威口径），
+    裸代码回退 6/5 开头→sh、其余→sz。"""
+    c = code.strip()
+    up = c.upper()
+    if up.endswith('.SS') or up.endswith('.SH'):
+        return f"sh{c[:-3]}"
+    if up.endswith('.SZ'):
+        return f"sz{c[:-3]}"
+    return f"sh{c}" if c.startswith(('6', '5')) else f"sz{c}"
 
 
 # 数据类型定义
