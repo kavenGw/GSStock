@@ -2672,7 +2672,8 @@ class UnifiedStockDataService:
         return result
 
     def get_a_share_index_quotes(self, index_codes: list,
-                                  force_refresh: bool = False) -> dict:
+                                  force_refresh: bool = False,
+                                  cache_only: bool = False) -> dict:
         """A股指数数据获取（负载均衡：东方财富/新浪，yfinance兜底）
 
         Args:
@@ -2711,6 +2712,9 @@ class UnifiedStockDataService:
             need_fetch = list(index_codes)
 
         if not need_fetch:
+            return result
+
+        if cache_only:
             return result
 
         self._miss_count += len(need_fetch)

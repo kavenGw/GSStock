@@ -73,7 +73,33 @@ def prices():
             'change_pct': data.get('change_percent'),
         })
 
-    return jsonify({'success': True, 'prices': price_list, 'benchmarks': benchmark_list})
+    from app.config.stock_codes import MARKET_INDICES
+
+    indices_out = {}
+    a_index_defs = MARKET_INDICES.get('A', [])
+    a_index_codes = [i['code'] for i in a_index_defs]
+    a_quotes = (unified_stock_data_service.get_a_share_index_quotes(
+        a_index_codes, cache_only=True) if a_index_codes else {})
+    if a_index_defs:
+        indices_out['A'] = [{
+            'code': i['code'], 'name': i['name'],
+            'price': (a_quotes.get(i['code']) or {}).get('close'),
+            'change_pct': (a_quotes.get(i['code']) or {}).get('change_percent'),
+        } for i in a_index_defs]
+
+    for mkt, defs in MARKET_INDICES.items():
+        if mkt == 'A':
+            continue
+        mcodes = [i['code'] for i in defs]
+        mraw = _read_cached_prices(mcodes)
+        indices_out[mkt] = [{
+            'code': i['code'], 'name': i['name'],
+            'price': (mraw.get(i['code']) or {}).get('current_price'),
+            'change_pct': (mraw.get(i['code']) or {}).get('change_percent'),
+        } for i in defs]
+
+    return jsonify({'success': True, 'prices': price_list,
+                    'benchmarks': benchmark_list, 'indices': indices_out})
 
 
 @watch_bp.route('/analyze')
