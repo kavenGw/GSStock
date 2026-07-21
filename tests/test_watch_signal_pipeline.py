@@ -62,7 +62,7 @@ def test_context_change_volume_range():
     params = {'603626': {'volume_baseline': 1000, 'resistance_levels': [32.0, 35.0], 'support_levels': [28.0]}}
     tm = {'603626': {'elapsed': 120, 'total': 240}}  # 半天 → 归一化 ×2 → 量比 2.4x
     ctx = WatchSignalPipeline._build_context('603626', prices, params, tm)
-    assert '涨幅 +2.30%' in ctx
+    assert '涨幅' not in ctx
     assert '量比 2.4x' in ctx
     assert '距上方阻力 32.0(+6.5%)' in ctx
 
@@ -90,7 +90,7 @@ def test_push_skips_low_and_formats_high():
         code='603626', name='科森科技', priority='HIGH', direction='resistance_break',
         primary_line='突破阻力 30.00 | 当前 30.05',
         secondary_lines=['下穿 MA5 20.50', '放量 1.8x'],
-        context_line='涨幅 +2.30% | 量比 1.8x | 距上方阻力 32.00(+6.5%)',
+        context_line='量比 1.8x | 距上方阻力 32.00(+6.5%)',
         change_percent=2.30,
     )
     low = ConsolidatedAlert(code='600519', name='茅台', priority='LOW', direction='high',
@@ -101,11 +101,10 @@ def test_push_skips_low_and_formats_high():
     assert ok is True
     assert len(sent) == 1  # LOW 被跳过
     text, _ = sent[0]
-    assert '🔴 *科森科技(603626)*' in text
+    assert '🔴 +2.30% *科森科技(603626)*' in text
     assert '[HIGH]' in text
     assert '突破阻力 30.00 | 当前 30.05' in text
     assert '  · 下穿 MA5 20.50' in text
-    assert '涨幅 +2.30%' in text
 
 
 def test_process_populates_change_percent():
@@ -136,21 +135,21 @@ def test_color_up_is_red():
     a = ConsolidatedAlert(code='603626', name='科森科技', priority='HIGH',
                           direction='resistance_break', primary_line='突破阻力 30.00 | 当前 30.05',
                           change_percent=2.35)
-    assert '🔴 *科森科技(603626)*' in _push_one(a)
+    assert '🔴 +2.35% *科森科技(603626)*' in _push_one(a)
 
 
 def test_color_down_is_green():
     a = ConsolidatedAlert(code='600519', name='茅台', priority='HIGH',
                           direction='resistance_break', primary_line='突破阻力 100 | 当前 100.5',
                           change_percent=-1.20)
-    assert '🟢 *茅台(600519)*' in _push_one(a)
+    assert '🟢 -1.20% *茅台(600519)*' in _push_one(a)
 
 
 def test_color_flat_is_white():
     a = ConsolidatedAlert(code='600519', name='茅台', priority='HIGH',
                           direction='up', primary_line='测试',
                           change_percent=0)
-    assert '⚪ *茅台(600519)*' in _push_one(a)
+    assert '⚪ +0.00% *茅台(600519)*' in _push_one(a)
 
 
 def test_color_missing_is_warning():
@@ -165,4 +164,4 @@ def test_color_bug_regression_up_but_below_target_is_red():
     a = ConsolidatedAlert(code='000660.KS', name='SK海力士', priority='HIGH',
                           direction='below', primary_line='当前 1805500.00 < 目标 1892000.0',
                           change_percent=2.35)
-    assert '🔴 *SK海力士(000660.KS)*' in _push_one(a)
+    assert '🔴 +2.35% *SK海力士(000660.KS)*' in _push_one(a)
