@@ -87,3 +87,41 @@ def test_none_premium_does_not_overwrite_prev(tmp_path, monkeypatch):
     BriefingService.get_adr_premium_data()
     # skhynix 今日无价（ratio 也 None）→ 旧值仍在
     assert BriefingService._load_adr_prev()['skhynix']['premium'] == -0.5
+
+
+from app.services.notification import NotificationService
+
+
+def _patch_pairs(monkeypatch, pairs):
+    monkeypatch.setattr(BriefingService, 'get_adr_premium_data',
+                        staticmethod(lambda: {'pairs': pairs}))
+
+
+def test_format_premium_and_discount_with_arrows(monkeypatch):
+    _patch_pairs(monkeypatch, [
+        {'name': 'TSM', 'premium_rate': 1.82, 'delta': 0.5, 'error': None},
+        {'name': 'SK海力士', 'premium_rate': -0.31, 'delta': -0.2, 'error': None},
+    ])
+    out = NotificationService.format_adr_premium_summary()
+    assert out == '🌏 ADR溢价: TSM +1.82%(溢价)↑0.5pct | SK海力士 -0.31%(折价)↓0.2pct'
+
+
+def test_format_no_arrow_when_delta_none(monkeypatch):
+    _patch_pairs(monkeypatch, [{'name': 'TSM', 'premium_rate': 1.82, 'delta': None, 'error': None}])
+    assert NotificationService.format_adr_premium_summary() == '🌏 ADR溢价: TSM +1.82%(溢价)'
+
+
+def test_format_dash_for_missing_leg(monkeypatch):
+    _patch_pairs(monkeypatch, [
+        {'name': 'TSM', 'premium_rate': 1.82, 'delta': None, 'error': None},
+        {'name': 'SK海力士', 'premium_rate': None, 'delta': None, 'error': '行情缺失'},
+    ])
+    assert NotificationService.format_adr_premium_summary() == '🌏 ADR溢价: TSM +1.82%(溢价) | SK海力士 —'
+
+
+def test_format_empty_when_all_missing(monkeypatch):
+    _patch_pairs(monkeypatch, [
+        {'name': 'TSM', 'premium_rate': None, 'delta': None, 'error': 'x'},
+        {'name': 'SK海力士', 'premium_rate': None, 'delta': None, 'error': 'x'},
+    ])
+    assert NotificationService.format_adr_premium_summary() == ''

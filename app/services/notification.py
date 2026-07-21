@@ -658,6 +658,37 @@ class NotificationService:
             return ''
 
     @staticmethod
+    def format_adr_premium_summary() -> str:
+        """格式化 ADR 跨市场溢价用于推送"""
+        try:
+            from app.services.briefing import BriefingService
+            data = BriefingService.get_adr_premium_data()
+            pairs = data.get('pairs', [])
+            if not pairs:
+                return ''
+
+            parts = []
+            any_valid = False
+            for p in pairs:
+                pr = p.get('premium_rate')
+                if pr is None:
+                    parts.append(f"{p['name']} —")
+                    continue
+                any_valid = True
+                tag = '溢价' if pr >= 0 else '折价'
+                seg = f"{p['name']} {pr:+.2f}%({tag})"
+                delta = p.get('delta')
+                if delta is not None and delta != 0:
+                    arrow = '↑' if delta > 0 else '↓'
+                    seg += f"{arrow}{abs(delta):.1f}pct"
+                parts.append(seg)
+
+            return f"🌏 ADR溢价: {' | '.join(parts)}" if any_valid else ''
+        except Exception as e:
+            logger.warning(f'[通知.ADR溢价] 格式化失败: {e}')
+            return ''
+
+    @staticmethod
     def format_sectors_summary() -> str:
         """格式化板块涨跌用于推送"""
         try:
