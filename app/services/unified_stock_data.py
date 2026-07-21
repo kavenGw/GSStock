@@ -34,6 +34,18 @@ logger = logging.getLogger(__name__)
 VOLUME_UNIT_SCHEMA_VERSION = 2
 
 
+def _tencent_code(code: str) -> str:
+	"""腾讯行情代码前缀：优先 .SS/.SH→sh、.SZ→sz（指数权威口径），
+	裸代码回退 6/5 开头→sh、其余→sz。"""
+	c = code.strip()
+	up = c.upper()
+	if up.endswith('.SS') or up.endswith('.SH'):
+		return f"sh{c[:-3]}"
+	if up.endswith('.SZ'):
+		return f"sz{c[:-3]}"
+	return f"sh{c}" if c.startswith(('6', '5')) else f"sz{c}"
+
+
 # 数据类型定义
 @dataclass
 class PriceData:
@@ -916,10 +928,7 @@ class UnifiedStockDataService:
         tencent_codes = []
         code_map = {}
         for code in stock_codes:
-            if code.startswith(('6', '5')):
-                tc = f'sh{code}'
-            else:
-                tc = f'sz{code}'
+            tc = _tencent_code(code)
             tencent_codes.append(tc)
             code_map[tc] = code
 
@@ -1343,7 +1352,7 @@ class UnifiedStockDataService:
         interval_map = {'1m': 'm1', '5m': 'm5', '15m': 'm15'}
         tc_interval = interval_map.get(interval, 'm1')
         try:
-            tc = f'sh{code}' if code.startswith(('6', '5')) else f'sz{code}'
+            tc = _tencent_code(code)
             url = f"http://web.ifzq.gtimg.cn/appstock/app/kline/mkline?param={tc},{tc_interval},,240"
             resp = requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
             data = resp.json()
