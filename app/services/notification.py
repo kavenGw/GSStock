@@ -100,12 +100,15 @@ class NotificationService:
             if a.priority == 'LOW':
                 logger.debug(f'[盯盘告警] {a.name}({a.code}) LOW 静默: {a.primary_line}')
                 continue
-            if a.direction in ('high', 'above', 'up', 'buy', 'resistance_break'):
+            chg = a.change_percent
+            if chg is None:
+                emoji = '⚠️'
+            elif chg > 0:
                 emoji = '🔴'
-            elif a.direction in ('low', 'below', 'down', 'sell', 'support_break'):
+            elif chg < 0:
                 emoji = '🟢'
             else:
-                emoji = '⚠️'
+                emoji = '⚪'
             lines = [f'{emoji} *{a.name}({a.code})*  [{a.priority}]', a.primary_line]
             for s in a.secondary_lines:
                 lines.append(f'  · {s}')
