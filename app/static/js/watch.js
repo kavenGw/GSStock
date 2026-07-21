@@ -303,6 +303,7 @@ const Watch = {
             const resp = await fetch(`/watch/chart-data?code=${encodeURIComponent(code)}&period=intraday`);
             const d = await resp.json();
             if (!d.success || !d.data || !d.data.length) {
+                if (this.chartInstances[key]) { this.chartInstances[key].dispose(); delete this.chartInstances[key]; }
                 el.innerHTML = `<div class="text-muted small p-2">${this._escapeHtml(name)} 暂无分时数据</div>`;
                 return;
             }
@@ -334,6 +335,7 @@ const Watch = {
                 }],
             });
         } catch (e) {
+            if (this.chartInstances[key]) { this.chartInstances[key].dispose(); delete this.chartInstances[key]; }
             el.innerHTML = `<div class="text-muted small p-2">分时加载失败</div>`;
         }
     },
