@@ -58,6 +58,10 @@ class MarketIdentifier:
         if code.upper().endswith('.T'):
             return 'JP'
 
+        # 韩股指数：^KS11 (KOSPI), ^KQ11 (KOSDAQ) —— 早于通用 ^ 判美股
+        if code.upper() in ('^KS11', '^KQ11'):
+            return 'KR'
+
         # 美股指数：以^开头（如 ^GSPC, ^DJI, ^IXIC, ^VIX）
         if code.startswith('^'):
             return 'US'
