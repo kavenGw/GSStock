@@ -3442,3 +3442,22 @@
   - 5G主设备
   - AI算力服务器
   - 豆包AI手机
+- stock_code: '600900'
+  stock_name: 长江电力
+  market: A
+  currency: CNY
+  sector: energy
+  rating: watch
+  watch_reason: 护城河顶级（长江干流梯级水电=不可再造的自然垄断）但当前价格不便宜——PB 约 3.2 处近 5 年偏高区间、股息率被股价上涨压缩至约 3.45%（低于历史 3–4% 中枢下沿）。场景加权期望内在价值约 25.2 元/股，低于现价 28.98 元，安全边际约 -13%；即便利率下行重估的 bull 情景压力测试也仅 +7%。好公司、当前价格安全边际不足，等回撤。
+  quality: 5
+  bear: 17.7
+  base: 26.0
+  bull: 31.0
+  dividend_yield: 3.45
+  conviction_date: '2026-07-21'
+  source_doc: sectors/energy/hydropower/2026-07-21-长江电力-buffett分析.md
+  themes:
+  - 高股息
+  - 类债券资产
+  - 利率下行受益
+  - 水电龙头
