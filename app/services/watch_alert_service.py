@@ -191,7 +191,7 @@ class WatchAlertService:
                 signals.append(self._make_signal(name, code,
                     f'{label} {level} | 当前 {curr:.2f}',
                     detail,
-                    {'alert_type': 'support_resistance', 'direction': direction, 'level': level}))
+                    {'alert_type': direction, 'direction': direction, 'level': level}))
                 self._mark_fired(key)
 
         for level in resistance_levels:
@@ -209,7 +209,7 @@ class WatchAlertService:
                 signals.append(self._make_signal(name, code,
                     f'{label} {level} | 当前 {curr:.2f}',
                     detail,
-                    {'alert_type': 'support_resistance', 'direction': direction, 'level': level}))
+                    {'alert_type': direction, 'direction': direction, 'level': level}))
                 self._mark_fired(key)
 
         return signals
