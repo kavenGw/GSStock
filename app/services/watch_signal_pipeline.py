@@ -2,6 +2,7 @@
 import logging
 import re
 from dataclasses import dataclass, field
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class ConsolidatedAlert:
     primary_line: str
     secondary_lines: list = field(default_factory=list)
     context_line: str = ''
-    change_percent: float = None
+    change_percent: Optional[float] = None
     fired_signals: list = field(default_factory=list)
 
 
