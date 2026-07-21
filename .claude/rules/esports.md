@@ -12,7 +12,8 @@ paths:
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
-| `ESPORTS_ENABLED` | 是否启用赛事推送 | `true` |
+| `ESPORTS_ENABLED` | 是否启用赛事推送（NBA + LoL 总开关） | `true` |
+| `NBA_ENABLED` | 单独关闭 NBA（不影响 LoL） | `true` |
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |
 | `ESPORTS_LOL_MONITOR_INTERVAL` | LoL 比分轮询间隔（分钟） | `30` |

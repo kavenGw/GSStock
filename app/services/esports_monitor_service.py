@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from threading import Lock
 
 from app.config.esports_config import (
-    ESPORTS_ENABLED, ESPORTS_NBA_MONITOR_INTERVAL, ESPORTS_LOL_MONITOR_INTERVAL,
+    ESPORTS_ENABLED, NBA_ENABLED, ESPORTS_NBA_MONITOR_INTERVAL, ESPORTS_LOL_MONITOR_INTERVAL,
     ESPORTS_PRE_MATCH_MINUTES, NBA_TEAM_MONITOR, NBA_TEAM_NAMES,
 )
 from app.config.worldcup_config import (
@@ -126,7 +126,7 @@ class EsportsMonitorService:
 
         matches = []
 
-        if not match_type or match_type == 'nba':
+        if (not match_type or match_type == 'nba') and NBA_ENABLED:
             # NBA
             try:
                 if is_today:

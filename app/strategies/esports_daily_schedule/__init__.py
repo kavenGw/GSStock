@@ -31,6 +31,9 @@ class EsportsDailyScheduleStrategy(Strategy):
 
     @staticmethod
     def _push_nba_today():
+        from app.config.esports_config import NBA_ENABLED
+        if not NBA_ENABLED:
+            return
         from app.services.esports_service import EsportsService
         from app.services.notification import NotificationService
         from app.config.notification_config import CHANNEL_NBA

@@ -2,6 +2,7 @@
 import os
 
 ESPORTS_ENABLED = os.getenv('ESPORTS_ENABLED', 'true').lower() == 'true'
+NBA_ENABLED = os.getenv('NBA_ENABLED', 'true').lower() == 'true'  # 独立开关，false 只关 NBA 不影响 LoL
 ESPORTS_FETCH_TIMEOUT = int(os.getenv('ESPORTS_FETCH_TIMEOUT', '15'))
 
 # 赛事实时监控
