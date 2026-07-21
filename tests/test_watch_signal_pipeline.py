@@ -105,3 +105,17 @@ def test_push_skips_low_and_formats_high():
     assert '突破阻力 30.00 | 当前 30.05' in text
     assert '  · 下穿 MA5 20.50' in text
     assert '涨幅 +2.30%' in text
+
+
+def test_process_populates_change_percent():
+    raw = [_sig('603626', 'resistance_break', 'resistance_break', '突破阻力 30.0 | 当前 30.05')]
+    prices = {'603626': {'current_price': 30.05, 'change_percent': 2.35, 'volume': 1200}}
+    alerts = WatchSignalPipeline.process(raw, prices, {}, {'603626': '科森科技'})
+    assert len(alerts) == 1
+    assert alerts[0].change_percent == 2.35
+
+
+def test_process_change_percent_defaults_none_when_missing():
+    raw = [_sig('600519', 'td_sequential', 'buy', 'TD九转买入')]
+    alerts = WatchSignalPipeline.process(raw, {}, {}, {'600519': '茅台'})
+    assert alerts[0].change_percent is None

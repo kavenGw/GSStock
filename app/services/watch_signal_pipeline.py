@@ -31,6 +31,7 @@ class ConsolidatedAlert:
     primary_line: str
     secondary_lines: list = field(default_factory=list)
     context_line: str = ''
+    change_percent: float = None
     fired_signals: list = field(default_factory=list)
 
 
@@ -104,6 +105,7 @@ class WatchSignalPipeline:
                 code=code, name=name, priority=priority, direction=primary_dir,
                 primary_line=primary_line, secondary_lines=secondary_lines,
                 context_line=context_line,
+                change_percent=prices.get(code, {}).get('change_percent'),
                 fired_signals=[s.data for s in sigs],
             ))
         return alerts
