@@ -125,3 +125,25 @@ def test_format_empty_when_all_missing(monkeypatch):
         {'name': 'SK海力士', 'premium_rate': None, 'delta': None, 'error': 'x'},
     ])
     assert NotificationService.format_adr_premium_summary() == ''
+
+
+from app.llm.prompts.daily_briefing import build_daily_briefing_prompt
+
+
+def test_prompt_renders_adr_premium():
+    prompt = build_daily_briefing_prompt({'adr_premium': '🌏 ADR溢价: TSM +1.82%(溢价)'})
+    assert 'ADR溢价' in prompt
+    assert 'TSM +1.82%(溢价)' in prompt
+
+
+def test_market_blocks_include_adr(monkeypatch):
+    _patch_pairs(monkeypatch, [
+        {'name': 'TSM', 'premium_rate': 1.82, 'delta': 0.5, 'error': None},
+    ])
+    # 其余 BriefingService 取数在 build_market_blocks 里被 try/except 兜底，无价时走 except 分支
+    blocks = NotificationService.build_market_blocks(
+        indices_text='', futures_text='', etf_text='',
+        sectors_text='', technical_text='', adr_text='🌏 ADR溢价: TSM +1.82%(溢价)↑0.5pct',
+    )
+    dumped = str(blocks)
+    assert 'ADR溢价' in dumped and 'TSM' in dumped

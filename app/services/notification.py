@@ -1172,7 +1172,8 @@ class NotificationService:
     def build_market_blocks(indices_text: str, futures_text: str, etf_text: str,
                             sectors_text: str, technical_text: str,
                             dram_text: str = '', earnings_text: str = '',
-                            pe_text: str = '', ai_text: str = '') -> list:
+                            pe_text: str = '', ai_text: str = '',
+                            adr_text: str = '') -> list:
         """构建 Message 3 的 Block Kit blocks（市场行情 + 板块 + 技术 + 数据）"""
         B = NotificationService
         blocks = []
@@ -1232,6 +1233,28 @@ class NotificationService:
         except Exception:
             if etf_text:
                 blocks.append(B._block_section(etf_text))
+
+        try:
+            from app.services.briefing import BriefingService
+            adr_data = BriefingService.get_adr_premium_data()
+            items = []
+            for p in adr_data.get('pairs', []):
+                pr = p.get('premium_rate')
+                if pr is None:
+                    items.append(f"{p['name']}  `—`")
+                    continue
+                tag = '溢价' if pr >= 0 else '折价'
+                seg = f"{p['name']}  `{pr:+.2f}%`  {tag}"
+                delta = p.get('delta')
+                if delta is not None and delta != 0:
+                    seg += f" {'↑' if delta > 0 else '↓'}{abs(delta):.1f}pct"
+                items.append(seg)
+            if items:
+                blocks.append(B._block_section('*ADR溢价*'))
+                blocks.append(B._block_fields(items))
+        except Exception:
+            if adr_text:
+                blocks.append(B._block_section(adr_text))
 
         # 板块热点
         if sectors_text:
@@ -1334,6 +1357,7 @@ class NotificationService:
         indices_text = NotificationService.format_indices_summary()
         futures_text = NotificationService.format_futures_summary()
         etf_text = NotificationService.format_etf_premium_summary()
+        adr_text = NotificationService.format_adr_premium_summary()
         sectors_text = NotificationService.format_sectors_summary()
         dram_text = NotificationService.format_dram_summary()
         technical_text = NotificationService.format_technical_summary()
@@ -1390,6 +1414,7 @@ class NotificationService:
                     'indices': indices_text,
                     'futures': futures_text,
                     'etf_premium': etf_text,
+                    'adr_premium': adr_text,
                     'sectors': sectors_text,
                     'dram': dram_text,
                     'technical': technical_text,
@@ -1447,6 +1472,8 @@ class NotificationService:
             market_lines.append(futures_text)
         if etf_text:
             market_lines.append(etf_text)
+        if adr_text:
+            market_lines.append(adr_text)
         if market_lines:
             msg3_parts.append('\n'.join(market_lines))
         if sectors_text:
@@ -1468,7 +1495,7 @@ class NotificationService:
         msg3_blocks = NotificationService.build_market_blocks(
             indices_text, futures_text, etf_text, sectors_text, technical_text,
             dram_text, earnings.get('text', ''), pe.get('text', ''),
-            ai_text)
+            ai_text, adr_text)
 
         news_messages = []
         news_blocks_list = []

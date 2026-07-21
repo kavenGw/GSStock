@@ -18,6 +18,7 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
             - indices: 指数行情
             - futures: 期货数据
             - etf_premium: ETF溢价
+            - adr_premium: ADR跨市场溢价
             - sectors: 板块涨跌
             - dram: DRAM价格
             - technical: 技术评分
@@ -28,6 +29,7 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
         'indices': '指数行情',
         'futures': '期货数据',
         'etf_premium': 'ETF溢价',
+        'adr_premium': 'ADR溢价',
         'sectors': '板块涨跌',
         'dram': 'DRAM价格',
         'technical': '技术评分',
