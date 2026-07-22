@@ -109,8 +109,12 @@ class NotificationService:
                 emoji = '🟢'
             else:
                 emoji = '⚪'
-            head = f'{emoji} {chg:+.2f}% ' if chg is not None else f'{emoji} '
-            lines = [f'{head}*{a.name}({a.code})*  [{a.priority}]', a.primary_line]
+            parts = [emoji, f'*{a.name}({a.code})*']
+            if a.current_price is not None:
+                parts.append(f'{a.current_price:,.2f}'.rstrip('0').rstrip('.'))
+            if chg is not None:
+                parts.append(f'{chg:+.2f}%')
+            lines = [f"{' '.join(parts)}  [{a.priority}]", a.primary_line]
             for s in a.secondary_lines:
                 lines.append(f'  · {s}')
             if a.context_line:

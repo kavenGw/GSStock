@@ -91,6 +91,7 @@ def test_push_skips_low_and_formats_high():
         primary_line='突破阻力 30.00 | 当前 30.05',
         secondary_lines=['下穿 MA5 20.50', '放量 1.8x'],
         context_line='量比 1.8x | 距上方阻力 32.00(+6.5%)',
+        current_price=30.05,
         change_percent=2.30,
     )
     low = ConsolidatedAlert(code='600519', name='茅台', priority='LOW', direction='high',
@@ -101,7 +102,7 @@ def test_push_skips_low_and_formats_high():
     assert ok is True
     assert len(sent) == 1  # LOW 被跳过
     text, _ = sent[0]
-    assert '🔴 +2.30% *科森科技(603626)*' in text
+    assert '🔴 *科森科技(603626)* 30.05 +2.30%' in text
     assert '[HIGH]' in text
     assert '突破阻力 30.00 | 当前 30.05' in text
     assert '  · 下穿 MA5 20.50' in text
@@ -135,21 +136,21 @@ def test_color_up_is_red():
     a = ConsolidatedAlert(code='603626', name='科森科技', priority='HIGH',
                           direction='resistance_break', primary_line='突破阻力 30.00 | 当前 30.05',
                           change_percent=2.35)
-    assert '🔴 +2.35% *科森科技(603626)*' in _push_one(a)
+    assert '🔴 *科森科技(603626)* +2.35%' in _push_one(a)
 
 
 def test_color_down_is_green():
     a = ConsolidatedAlert(code='600519', name='茅台', priority='HIGH',
                           direction='resistance_break', primary_line='突破阻力 100 | 当前 100.5',
                           change_percent=-1.20)
-    assert '🟢 -1.20% *茅台(600519)*' in _push_one(a)
+    assert '🟢 *茅台(600519)* -1.20%' in _push_one(a)
 
 
 def test_color_flat_is_white():
     a = ConsolidatedAlert(code='600519', name='茅台', priority='HIGH',
                           direction='up', primary_line='测试',
                           change_percent=0)
-    assert '⚪ +0.00% *茅台(600519)*' in _push_one(a)
+    assert '⚪ *茅台(600519)* +0.00%' in _push_one(a)
 
 
 def test_color_missing_is_warning():
@@ -164,7 +165,7 @@ def test_color_bug_regression_up_but_below_target_is_red():
     a = ConsolidatedAlert(code='000660.KS', name='SK海力士', priority='HIGH',
                           direction='below', primary_line='当前 1805500.00 < 目标 1892000.0',
                           change_percent=2.35)
-    assert '🔴 +2.35% *SK海力士(000660.KS)*' in _push_one(a)
+    assert '🔴 *SK海力士(000660.KS)* +2.35%' in _push_one(a)
 
 
 def test_process_populates_current_price():
@@ -197,3 +198,41 @@ def test_preserves_current_as_comparison_subject():
     raw = [_sig('000660.KS', 'target_price', 'below', '当前 1805500.00 < 目标 1892000.0')]
     alerts = WatchSignalPipeline.process(raw, {}, {}, {'000660.KS': 'SK海力士'})
     assert alerts[0].primary_line == '当前 1805500.00 < 目标 1892000.0'
+
+
+def test_title_order_name_price_change():
+    a = ConsolidatedAlert(code='603626', name='科森科技', priority='HIGH',
+                          direction='resistance_break', primary_line='突破阻力 30.0',
+                          current_price=30.05, change_percent=2.30)
+    text = _push_one(a)
+    assert '🔴 *科森科技(603626)* 30.05 +2.30%  [HIGH]' in text
+
+
+def test_title_price_thousands_and_trim_zeros():
+    a = ConsolidatedAlert(code='000660.KS', name='SK海力士', priority='MID',
+                          direction='resistance_break', primary_line='突破阻力 1936000.0',
+                          current_price=1938000.00, change_percent=5.56)
+    assert '*SK海力士(000660.KS)* 1,938,000 +5.56%' in _push_one(a)
+
+
+def test_title_price_trims_to_integer_when_whole():
+    a = ConsolidatedAlert(code='600519', name='茅台', priority='MID',
+                          direction='up', primary_line='测试',
+                          current_price=26.00, change_percent=1.0)
+    assert '*茅台(600519)* 26 +1.00%' in _push_one(a)
+
+
+def test_title_price_keeps_cents():
+    a = ConsolidatedAlert(code='600519', name='茅台', priority='MID',
+                          direction='up', primary_line='测试',
+                          current_price=150.25, change_percent=1.0)
+    assert '*茅台(600519)* 150.25 +1.00%' in _push_one(a)
+
+
+def test_title_no_price_when_current_price_none():
+    a = ConsolidatedAlert(code='603626', name='科森科技', priority='HIGH',
+                          direction='resistance_break', primary_line='突破阻力 30.0',
+                          current_price=None, change_percent=2.30)
+    text = _push_one(a)
+    assert '🔴 *科森科技(603626)* +2.30%' in text
+    assert 'None' not in text
