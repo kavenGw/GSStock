@@ -50,7 +50,7 @@ paths:
 - `app/services/notification.py` — `dispatch_signal()` direction→emoji 路由（🔴=up/buy/resistance_break, 🟢=down/sell/support_break），`push_realtime_analysis()` 实时分析推送格式
 - `app/strategies/volume_alert/__init__.py` — 收盘成交量异动策略
 
-**合并推送（信号管线）**：`watch_alert` 不再逐条 dispatch，而是经 `WatchSignalPipeline` 按股合并 → `NotificationService.push_watch_alerts()` 一股一条。格式：`emoji *名称(代码)* [优先级]` 首行 + 主信号行 + 次信号 `  · ` bullet + 上下文行（涨幅/量比/区间位置）。优先级 HIGH/MID 推送，LOW 静默（只 debug log）。分级 = 主信号权重 + 同向次信号×0.5 + 量价配合+1。
+**合并推送（信号管线）**：`watch_alert` 不再逐条 dispatch，而是经 `WatchSignalPipeline` 按股合并 → `NotificationService.push_watch_alerts()` 一股一条。格式：`emoji *名称(代码)* 股价 涨幅 [优先级]` 首行（股价千分位去尾零、change_percent 非空才拼涨幅）+ 主信号行 + 次信号 `  · ` bullet + 上下文行（量比/区间位置）。股价提到标题后，A 类告警（支撑阻力/TD九转/动量）主/次信号行尾部 ` | 当前 X` 由 `_strip_current` 去重剥离；B 类（盘中极值/目标价/均线穿越）`当前 X` 作比较主语保留。优先级 HIGH/MID 推送，LOW 静默（只 debug log）。分级 = 主信号权重 + 同向次信号×0.5 + 量价配合+1。
 
 ## Slack 推送排版规范
 
