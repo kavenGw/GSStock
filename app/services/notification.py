@@ -1177,7 +1177,7 @@ class NotificationService:
     def build_market_blocks(indices_text: str, futures_text: str, etf_text: str,
                             sectors_text: str, technical_text: str,
                             dram_text: str = '', earnings_text: str = '',
-                            pe_text: str = '', ai_text: str = '',
+                            ai_text: str = '',
                             adr_text: str = '') -> list:
         """构建 Message 3 的 Block Kit blocks（市场行情 + 板块 + 技术 + 数据）"""
         B = NotificationService
@@ -1315,8 +1315,8 @@ class NotificationService:
                 else:
                     blocks.append(B._block_section(line))
 
-        # DRAM / 财报 / PE
-        extra_texts = [t for t in [dram_text, earnings_text, pe_text] if t]
+        # DRAM / 财报
+        extra_texts = [t for t in [dram_text, earnings_text] if t]
         if extra_texts:
             blocks.append(B._block_divider())
             for t in extra_texts:
@@ -1490,8 +1490,6 @@ class NotificationService:
             data_lines.append(dram_text)
         if earnings.get('text'):
             data_lines.append(earnings['text'])
-        if pe.get('text'):
-            data_lines.append(pe['text'])
         if data_lines:
             msg3_parts.append('\n'.join(data_lines))
         if ai_text:
@@ -1499,7 +1497,7 @@ class NotificationService:
 
         msg3_blocks = NotificationService.build_market_blocks(
             indices_text, futures_text, etf_text, sectors_text, technical_text,
-            dram_text, earnings.get('text', ''), pe.get('text', ''),
+            dram_text, earnings.get('text', ''),
             ai_text, adr_text)
 
         news_messages = []
