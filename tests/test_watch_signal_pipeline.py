@@ -19,7 +19,7 @@ def test_group_one_alert_per_stock():
     alerts = WatchSignalPipeline.process(raw, {}, {}, {'603626': '科森科技', '600519': '茅台'})
     assert len(alerts) == 2
     by_code = {a.code: a for a in alerts}
-    assert by_code['603626'].primary_line == '突破阻力 30.0 | 当前 30.05'
+    assert by_code['603626'].primary_line == '突破阻力 30.0'
     assert '上穿 MA5' in by_code['603626'].secondary_lines
     assert by_code['603626'].name == '科森科技'
 
@@ -165,3 +165,35 @@ def test_color_bug_regression_up_but_below_target_is_red():
                           direction='below', primary_line='当前 1805500.00 < 目标 1892000.0',
                           change_percent=2.35)
     assert '🔴 +2.35% *SK海力士(000660.KS)*' in _push_one(a)
+
+
+def test_process_populates_current_price():
+    raw = [_sig('603626', 'resistance_break', 'resistance_break', '突破阻力 30.0 | 当前 30.05')]
+    prices = {'603626': {'current_price': 30.05, 'change_percent': 2.35, 'volume': 1200}}
+    alerts = WatchSignalPipeline.process(raw, prices, {}, {'603626': '科森科技'})
+    assert alerts[0].current_price == 30.05
+
+
+def test_process_current_price_defaults_none_when_missing():
+    raw = [_sig('600519', 'td_sequential', 'buy', 'TD九转买入 | 当前 100.00')]
+    alerts = WatchSignalPipeline.process(raw, {}, {}, {'600519': '茅台'})
+    assert alerts[0].current_price is None
+
+
+def test_strips_trailing_current_from_primary_and_secondary():
+    # A 类：支撑阻力 / TD九转 尾部 | 当前 X 被剥离
+    raw = [
+        _sig('603626', 'resistance_break', 'resistance_break', '突破阻力 30.0 | 当前 30.05'),
+        _sig('603626', 'td_sequential', 'buy', 'TD九转买入信号 | 当前 30.05'),
+    ]
+    alerts = WatchSignalPipeline.process(raw, {}, {}, {'603626': '科森科技'})
+    a = alerts[0]
+    assert a.primary_line == 'TD九转买入信号'
+    assert a.secondary_lines == ['突破阻力 30.0']
+
+
+def test_preserves_current_as_comparison_subject():
+    # B 类：当前 X 是比较主语，保留（无尾部 | 当前 段）
+    raw = [_sig('000660.KS', 'target_price', 'below', '当前 1805500.00 < 目标 1892000.0')]
+    alerts = WatchSignalPipeline.process(raw, {}, {}, {'000660.KS': 'SK海力士'})
+    assert alerts[0].primary_line == '当前 1805500.00 < 目标 1892000.0'

@@ -33,6 +33,7 @@ class ConsolidatedAlert:
     secondary_lines: list = field(default_factory=list)
     context_line: str = ''
     change_percent: Optional[float] = None
+    current_price: Optional[float] = None
     fired_signals: list = field(default_factory=list)
 
 
@@ -59,6 +60,10 @@ class WatchSignalPipeline:
         if match:
             return title[match.end():]
         return title
+
+    @staticmethod
+    def _strip_current(line: str) -> str:
+        return re.sub(r' \| 当前 [\d.]+$', '', line)
 
     @staticmethod
     def process(raw_signals, prices, params_map, name_map, trading_minutes=None):
@@ -95,9 +100,11 @@ class WatchSignalPipeline:
 
             priority = 'HIGH' if agg >= 5 else ('MID' if agg >= 3 else 'LOW')
 
-            primary_line = WatchSignalPipeline._strip_prefix(primary.title, name, code)
+            primary_line = WatchSignalPipeline._strip_current(
+                WatchSignalPipeline._strip_prefix(primary.title, name, code))
             secondary_lines = [
-                WatchSignalPipeline._strip_prefix(s.title, name, code)
+                WatchSignalPipeline._strip_current(
+                    WatchSignalPipeline._strip_prefix(s.title, name, code))
                 for s in sigs if s is not primary
             ]
             context_line = WatchSignalPipeline._build_context(code, prices, params_map, trading_minutes)
@@ -107,6 +114,7 @@ class WatchSignalPipeline:
                 primary_line=primary_line, secondary_lines=secondary_lines,
                 context_line=context_line,
                 change_percent=prices.get(code, {}).get('change_percent'),
+                current_price=prices.get(code, {}).get('current_price'),
                 fired_signals=[s.data for s in sigs],
             ))
         return alerts
