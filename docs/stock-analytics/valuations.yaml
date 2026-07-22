@@ -3482,3 +3482,21 @@
   - 涨价周期
   - 供给侧
   - 估值泡沫
+- stock_code: '02610'
+  stock_name: 南山铝业国际
+  market: HK
+  currency: HKD
+  sector: materials
+  rating: watch
+  watch_reason: 期望内在价值 ~33.7 HKD 较现价 27.26 仅 +24% 上行，对"单一国别/单一产品氧化铝 + 供给过剩硬风险 + 周期高位低 PE 陷阱"这类低确定性 commodity 标的所需的 40-50% 安全边际明显不足；等 PB ≤ 1.0（约 ≤ 22-24 HKD，接近 bear/账面）或氧化铝跌至成本线市场恐慌期，给足周期股该有的安全边际再认真加仓。
+  bear: 21.9
+  base: 34.7
+  bull: 52.0
+  dividend_yield: 2.9
+  conviction_date: '2026-07-22'
+  source_doc: sectors/materials/nonferrous/2026-07-22-南山铝业国际-buffett分析.md
+  themes:
+  - 有色金属
+  - 氧化铝
+  - 印尼出海
+  - 供给过剩
