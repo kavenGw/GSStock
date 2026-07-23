@@ -3500,3 +3500,22 @@
   - 氧化铝
   - 印尼出海
   - 供给过剩
+- stock_code: TSLA
+  stock_name: 特斯拉
+  market: US
+  currency: USD
+  sector: consumer
+  rating: watch
+  watch_reason: 高质地科技制造 + 真实品牌/成本护城河，但现价 PE(TTM)~360/Forward165/PB16.7 是纯叙事定价——按穿越周期正常化业主盈余（剔除碳积分结构性坍塌与一次性税项、未兑现 Robotaxi/Optimus 不进 owner earnings）场景加权，期望内在价值约 66 USD/股 vs 现价 374.01，安全边际 −82%；即便 bull 单档（给周期顶利润 + 42x）仍 −61%，另加 Robotaxi/Optimus 期权价值压测仍深度为负。生意看得懂、质地不差，但价格离谱贵，跟踪不持有。
+  bear: 23.94
+  base: 59.84
+  bull: 145.21
+  quality: 4
+  conviction_date: '2026-07-23'
+  source_doc: sectors/consumer/auto-ev/2026-07-23-特斯拉-buffett分析.md
+  themes:
+  - ev
+  - robotaxi
+  - ai
+  - fsd
+  - energy-storage
