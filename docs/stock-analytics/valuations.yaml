@@ -3519,3 +3519,23 @@
   - ai
   - fsd
   - energy-storage
+- stock_code: GOOGL
+  stock_name: 谷歌
+  market: US
+  currency: USD
+  sector: media
+  rating: watch
+  watch_reason: 业务质地近乎顶级——Q2'26 营收 $119.8B/+24%、营业利润率 34%、Cloud +82% 且 margin 20.7%→35.6% 的业绩层 AI 兑现、Search +17% 抗侵蚀、RPO backlog $514B——但 52 周 +80%、forward PE 25.4x 已把成长充分定价：期望内在价值 ~$279/股（$3.40T）低于现价 $342.09（$4.17T），安全边际约 −18.4%；即便 bull 情景 $370 相对现价也仅 +8.2% 上行，而 bear $175 下行 −49%，风险回报明显偏下行。同时 FCF 史上首负（Q2 −$5.9B）、十年首停回购 + 发股发债 $70B 级、折旧 +42% 上台阶、ad tech 案 AdX 剥离风险未消——等一次像样回撤（价 ≤ ~$251 进入正安全边际、≤ ~$223 得 20% 折价）再评估。
+  bear: 175
+  base: 286
+  bull: 370
+  dividend_yield: 0.26
+  quality: 5
+  conviction_date: '2026-07-23'
+  source_doc: sectors/media/internet-platform/2026-07-23-谷歌-buffett分析.md
+  themes:
+  - AI
+  - cloud
+  - 搜索广告
+  - TPU
+  - capex超级周期
