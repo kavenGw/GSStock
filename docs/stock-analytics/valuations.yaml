@@ -3556,3 +3556,20 @@
   - 果链
   - AI液冷
   - 人形机器人
+- stock_code: 002379
+  stock_name: 宏桥控股
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 4.83
+  base: 7.24
+  bull: 10.64
+  dividend_yield: 0.9
+  quality: 4
+  conviction_date: '2026-07-23'
+  source_doc: sectors/materials/nonferrous/2026-07-23-宏桥控股-buffett分析.md
+  themes:
+  - 有色金属
+  - 电解铝
+  - AH溢价
