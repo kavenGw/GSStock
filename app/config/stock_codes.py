@@ -103,4 +103,5 @@ WATCH_CODES = [
     {'code': '600988',    'name': '赤峰黄金',  'market': 'A'},
     {'code': '000725',    'name': '京东方A',   'market': 'A'},
     {'code': '600584',    'name': '长电科技',  'market': 'A'},
+    {'code': '688825',    'name': '长鑫存储',  'market': 'A'},
 ]
