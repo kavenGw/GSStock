@@ -3573,3 +3573,21 @@
   - 有色金属
   - 电解铝
   - AH溢价
+- stock_code: 00568
+  stock_name: 山东墨龙
+  market: HK
+  currency: HKD
+  sector: energy
+  rating: exclude
+  bear: 0.44
+  base: 0.8
+  bull: 1.03
+  conviction_date: '2026-07-27'
+  source_doc: sectors/energy/oil-equipment/2026-07-27-山东墨龙-buffett分析.md
+  quality: 1
+  themes:
+  - 油气装备
+  - OCTG油套管
+  - 困境反转
+  - 海外油气订单
+  - A+H折价
