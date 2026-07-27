@@ -1817,22 +1817,6 @@
   - 供给侧
   - 利基存储
   - SHM收购
-- stock_code: CXMT
-  stock_name: 长鑫科技
-  market: US
-  currency: USD
-  sector: semiconductor
-  rating: exclude
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-05-18'
-  source_doc: sectors/semiconductor/storage/2026-05-18-长鑫科技-buffett分析.md
-  note: 长鑫科技；科创板IPO申报中，无三档每股估值；价值买点市值1500-2500亿
-  themes:
-  - 存储芯片
-  - 国产替代
-  - 半导体制造
 - stock_code: MRVL
   stock_name: 迈威尔科技
   market: US
@@ -3633,3 +3617,23 @@
   - 净额法
   - 少数股东摊薄
   - 关联方作价落差
+- stock_code: '688825'
+  stock_name: 长鑫科技
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 生意本身已从"能不能扭亏"变成全球第四大 DRAM 原厂（2025Q4 销售额份额 7.67%、Q1 单季 OCF 425.66 亿），但首日收盘 49.00 元对应 3.28 万亿市值 = pro-forma PB 约 19.5x（三大原厂 2017-2024 年末 PB 从未破 2.3x），期望内在价值 5.79 元/股，安全边际 -88.2%；即便最乐观 bull 情景（10.29 元）安全边际仍为 -79.0%。不买的理由是价格与周期位置，不是生意看不懂——市值回落到 2,150~2,800 亿（3.2~4.2 元，1.0~1.3x 2026E 归母净资产）区间才值得转入建仓评估。
+  bear: 3.21
+  base: 5.79
+  bull: 10.29
+  conviction_date: '2026-07-27'
+  source_doc: sectors/semiconductor/storage/2026-07-27-长鑫科技-buffett分析.md
+  themes:
+  - 存储芯片
+  - 国产替代
+  - 半导体制造
+  - DRAM
+  - 周期股
+  - 新股定价
+  - AI存储
