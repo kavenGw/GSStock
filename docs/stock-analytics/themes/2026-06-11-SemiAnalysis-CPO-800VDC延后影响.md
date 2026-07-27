@@ -61,6 +61,9 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md
     note: CPO延后点名受益的下游光模块全球第一龙头
     symmetric: true
+  - path: 2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md
+    note: 反向证据——ficonTEC 已收到 FAU 量产（非研发）自动化整线订单，设备端在为 CPO/OIO 落地下量产单，对本档"推迟至 2028-2029"构成局部反证；但设备下单领先量产 12-18 个月，不推翻良率 19% 与可维护性主论据
+    symmetric: true
 ---
 # SemiAnalysis CPO/800VDC 落地延后 — 影响专题（2026-06-11）
 
@@ -79,6 +82,7 @@ related_docs:
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — CPO 对天孚是配套受益 vs 关键耦合环节被玻璃桥/被动对准替代的双刃，区别于模块厂纯逆风；CPO 延后缓释替代时点但不翻案估值
 > - [2026-07-02-中际旭创-buffett分析](../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md) — CPO延后点名受益的下游光模块全球第一龙头
+> - [2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点](2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md) — 反向证据——ficonTEC 已收到 FAU 量产（非研发）自动化整线订单，设备端在为 CPO/OIO 落地下量产单，对本档"推迟至 2028-2029"构成局部反证；但设备下单领先量产 12-18 个月，不推翻良率 19% 与可维护性主论据
 <!-- END related_docs -->
 
 > 撰写日期：2026-06-11
