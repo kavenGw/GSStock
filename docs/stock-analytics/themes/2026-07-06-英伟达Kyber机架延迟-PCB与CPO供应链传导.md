@@ -47,6 +47,9 @@ related_docs:
   - path: 2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md
     note: 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
     symmetric: true
+  - path: ../sectors/semiconductor/equipment/2026-07-27-芯碁微装-buffett分析.md
+    note: Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早
+    symmetric: true
 ---
 # 英伟达 Kyber 机架延迟——高端 PCB 与 CPO 供应链传导专题（2026-07-06）
 
@@ -61,6 +64,7 @@ related_docs:
 > - [2026-06-19-沃尔核材-buffett分析](../sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
 > - [2026-05-06-通富微电-AMD26Q1财报联动专题](../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md) — 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
 > - [2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪](2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md) — 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
+> - [2026-07-27-芯碁微装-buffett分析](../sectors/semiconductor/equipment/2026-07-27-芯碁微装-buffett分析.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早
 <!-- END related_docs -->
 
 > 撰写日期：2026-07-06
