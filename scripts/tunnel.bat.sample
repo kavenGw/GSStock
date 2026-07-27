@@ -4,7 +4,8 @@ REM Usage:
 REM   1. Copy this file to tunnel.local.bat (gitignored, NEVER commit it)
 REM   2. Fill in the three values below
 REM   3. One-time in WSL Ubuntu: sudo apt install sshpass
-REM   4. Double-click tunnel.local.bat; keep the window open, then browse http://localhost:5000
+REM   4. Double-click tunnel.local.bat; the browser opens http://127.0.0.1:5000/ by itself
+REM      once the tunnel is up. Keep the window open -- closing it drops the tunnel.
 REM Note: the password is handed to WSL via the SSHPASS env var, NOT the command line --
 REM       wsl.exe expands $VAR in the command line it forwards, which silently truncates
 REM       passwords containing $ . Still avoid " % and ^ (consumed by batch itself).
@@ -13,6 +14,19 @@ REM Note: if "wsl -d Ubuntu" fails, run "wsl -l" to confirm the distro name
 set SERVER_USER=your_user
 set SERVER_HOST=your.server.ip
 set "SSHPASS=your_password"
+
+REM Port 5000 must be free -- otherwise ssh -L fails to bind while the browser
+REM still opens and points at whatever else is listening there.
+netstat -ano -p TCP | findstr /R /C:":5000 .*LISTENING" >nul
+if %errorlevel% equ 0 (
+    echo [ERROR] Local port 5000 is already in use -- maybe a local "python run.py"
+    echo         or an earlier tunnel window is still running.
+    echo         Run "netstat -ano ^| findstr :5000" to find the owning PID.
+    pause
+    exit /b 1
+)
+
+start "" /min powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0wait_and_open.ps1"
 
 set WSLENV=SSHPASS
 wsl -d Ubuntu sshpass -e ssh -N -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -L 5000:127.0.0.1:5000 %SERVER_USER%@%SERVER_HOST%

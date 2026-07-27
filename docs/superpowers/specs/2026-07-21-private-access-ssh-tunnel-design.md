@@ -70,3 +70,7 @@ wsl -d Ubuntu sshpass -p "密码" ssh -N -o StrictHostKeyChecking=accept-new -o 
 1. 服务器重启 gunicorn 后，公网 `http://服务器IP:5000` 不可达（连接拒绝/超时）
 2. 本机运行 `tunnel.local.bat` 后，浏览器 `http://localhost:5000` 正常打开应用
 3. `git status` 确认 `tunnel.local.bat` 不被 git 跟踪
+
+## 后续演进
+
+- 2026-07-27：隧道建立成功后自动打开浏览器（端口预检 + HTTP 探活），见 `2026-07-27-tunnel-auto-open-browser-design.md`
