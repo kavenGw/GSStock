@@ -3611,3 +3611,25 @@
   - AI算力
   - PCB
   - 国产替代
+- stock_code: '300548'
+  stock_name: 长芯博创
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 业绩兑现为真（2025 归母 +364.6%、2026H1 预告 +66.45%~+105.09% 且扣非≈归母），但价格已把兑现与想象一并定完——PB 24.4x 处上市以来 95.8 分位、期望内在价值 27.22 元/股（80.2 亿）vs 现价 167.70 元（494.39 亿）、安全边际 −83.7%；成长持续性证据包三项全【缺】/【软】（无在披露扩产计划且在建工程 −73%、客户 100% 匿名无具名 guidance、AI 敞口无法从混合口径里切出），bull 概率封顶 20%。回调至 base 档 28.49 元附近才进入讨论区间
+  bear: 10.45
+  base: 28.49
+  bull: 49.19
+  dividend_yield: 0.17
+  conviction_date: '2026-07-27'
+  source_doc: sectors/semiconductor/optical/2026-07-27-长芯博创-buffett分析.md
+  themes:
+  - AI光互联
+  - AOC
+  - AEC
+  - 高速铜缆
+  - 匿名客户长单
+  - 净额法
+  - 少数股东摊薄
+  - 关联方作价落差
