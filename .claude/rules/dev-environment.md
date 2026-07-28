@@ -1,6 +1,6 @@
 # 开发环境与工作流
 
-> **何时读**：跑脚本/查 DB、提 commit、踩 Windows 编码/heredoc/管道吞 stdout/create_app 副作用、git 协议（amend 重验、并行 session 抢 index）、分支策略（投研写档 vs 功能开 worktree）、测试布局
+> **何时读**：跑脚本/查 DB、提 commit、改或跑 `.bat`/`.ps1`、踩 Windows 编码/heredoc/管道吞 stdout/create_app 副作用、git 协议（amend 重验、并行 session 抢 index）、分支策略（投研写档 vs 功能开 worktree）、测试布局
 > **不必读**：纯业务逻辑实现（除非需 commit）
 
 ## 常用命令的 Windows 坑点
@@ -18,6 +18,25 @@ PYTHONIOENCODING=utf-8 python -c "..."
 ```
 
 **PYTHONIOENCODING 作用域限制**：`PYTHONIOENCODING` 只管 stdout/stderr。`Path.write_text()` / `open()` 写含中文的文件默认仍用 cp950，必须显式 `encoding='utf-8'` 否则 `UnicodeEncodeError`。
+
+**`.bat` / `.ps1` 一律纯 ASCII，中文说明沉淀到 `docs/`**（铁律）。本机系统 ANSI 代码页是 950（Big5），而这类脚本通常是 UTF-8 无 BOM —— cmd.exe 与 Windows PowerShell 5.1 都按 ACP 解码它们，UTF-8 中文三字节序列在 Big5 下重新配对后会把行尾 `\n` 当成某个 lead byte 的 trail byte 吃掉，**行边界错乱**。两种宿主的表现天差地别：
+
+- `.bat`：满屏 `'xxx' is not recognized as an internal or external command`，连它**之前**的英文 REM 行也被搅乱，甚至解析出错到真的把 `wsl` 拉起来。吵但显眼。
+- `.ps1`：**静默删掉注释的下一行代码，且 `ParseErrors = 0`**。实测 `wait_and_open.ps1` 第 11 行中文注释吞并第 12 行，`[System.Net.WebRequest]::DefaultWebProxy = $null` 从未执行，无任何报错。**远比 `.bat` 危险**——「脚本跑通了」对这类 bug 完全没有判别力（被吞的往往是防御性代码，缺了在正常环境下毫无差异）。
+
+判 `.ps1` 语句是否真的存在，用引擎 AST 而非「能跑」：
+
+```powershell
+$e=$null;$t=$null
+$ast=[System.Management.Automation.Language.Parser]::ParseFile('<abs path>',[ref]$t,[ref]$e)
+$ast.FindAll({param($n) $n -is [System.Management.Automation.Language.AssignmentStatementAst] -and $n.Extent.Text -match '<关键字>'},$true).Count
+```
+
+改完用字节级校验兜底：`python -c "d=open(p,'rb').read(); print(sum(1 for b in d if b>127))"`，必须为 0。修法选纯 ASCII 而非加 BOM —— BOM 在后续编辑中易丢失，纯 ASCII 不会退化。
+
+**别直接执行非 `.bat`/`.cmd` 后缀的批处理文件**：`cmd /c scripts\tunnel.bat.sample` 不会执行脚本 —— `.sample` 在本机无文件关联，cmd 退化走 ShellExecute 把它当文档打开，**拉起一整个 VS Code 进程树并阻塞 120 秒以上**，还得靠 `Get-CimInstance Win32_Process` 追出子进程树 `taskkill /T /F` 清理。要实跑先临时复制成 `.bat` 后缀，跑完删。另外 Git Bash/MSYS 会污染 `cmd /c "..."` 里的 `/c`、`findstr /R /C:` 等 token（路径改写），从 Bash 工具调 cmd 不可靠，改用 PowerShell 的 `& cmd /c "$path"`。
+
+**同一行内读 `%errorlevel%` 拿到的是执行前的旧值**：`cmd /c "cmd1 & echo %errorlevel%"` 会在**解析阶段整行预展开** `%errorlevel%`，读到 cmd1 执行**之前**的值 —— 实测据此测出的 `EXITCODE=0` 是假阳性。要拿退出码就分离命令，或用 PowerShell 的 `$LASTEXITCODE`。（批处理文件里 `cmd1` 与 `if %errorlevel% equ 0` 分两行写则安全，`if` 行是在前一行执行完之后才被解析的。）
 
 **Windows bash 管道吞 stdout**：`| grep` 或 PowerShell `Select-String` 可能静默吞掉 python 脚本 stdout；验证脚本时改用 `open(path, 'w').write(...)` 直接写文件再用 Read 工具读取，稳过管道。
 
