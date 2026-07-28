@@ -82,7 +82,7 @@ netstat -ano -p TCP | findstr /R /C:":5000 .*LISTENING"
 
 ## 风险与取舍
 
-- helper 与 bat 分离后本地隧道脚本不再纯自包含，依赖同目录的 `wait_and_open.ps1`。两者同在 `scripts/`，`%~dp0` 定位可靠；helper 缺失时 `start` 静默失败，隧道仍正常工作，仅退化为不自动开浏览器
+- helper 与 bat 分离后本地隧道脚本不再纯自包含，依赖同目录的 `wait_and_open.ps1`。两者同在 `scripts/`，`%~dp0` 定位可靠；helper 缺失时 `start` 本身成功拉起 `powershell.exe`，是 powershell 因 `-File` 路径不存在而报错退出，`-WindowStyle Hidden` 使该报错不可见——净行为仍是隧道正常工作，仅退化为不自动开浏览器
 - 60 秒超时为固定值，跨网认证极慢时可能错过。可通过 `-TimeoutSeconds` 参数调整，不改代码
 
 ## 验收标准

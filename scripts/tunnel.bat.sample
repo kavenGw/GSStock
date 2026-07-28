@@ -1,7 +1,9 @@
 @echo off
 REM SSH tunnel to cloud server (see docs/superpowers/specs/2026-07-21-private-access-ssh-tunnel-design.md)
 REM Usage:
-REM   1. Copy this file to tunnel.local.bat (gitignored, NEVER commit it)
+REM   1. Copy this file to tunnel.local.bat (gitignored, NEVER commit it), keeping the
+REM      copy in this same scripts/ folder next to wait_and_open.ps1 (it is located via
+REM      %~dp0, so a copy elsewhere silently loses the auto-open-browser behavior)
 REM   2. Fill in the three values below
 REM   3. One-time in WSL Ubuntu: sudo apt install sshpass
 REM   4. Double-click tunnel.local.bat; the browser opens http://127.0.0.1:5000/ by itself
@@ -17,11 +19,11 @@ set "SSHPASS=your_password"
 
 REM Port 5000 must be free -- otherwise ssh -L fails to bind while the browser
 REM still opens and points at whatever else is listening there.
-netstat -ano -p TCP | findstr /R /C:":5000 .*LISTENING" >nul
+netstat -ano | findstr /R /C:":5000 .*LISTENING" >nul
 if %errorlevel% equ 0 (
     echo [ERROR] Local port 5000 is already in use -- maybe a local "python run.py"
     echo         or an earlier tunnel window is still running.
-    echo         Run "netstat -ano ^| findstr :5000" to find the owning PID.
+    echo         Run "netstat -ano | findstr :5000" to find the owning PID.
     pause
     exit /b 1
 )

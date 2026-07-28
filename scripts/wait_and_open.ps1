@@ -1,6 +1,7 @@
 <#
-轮询 URL 直到可访问，成功后用默认浏览器打开。由 tunnel.bat 后台调用。
-退出码：0 = 已打开；1 = 超时未探到。
+Poll a URL until it responds, then open it in the default browser.
+Called in the background by tunnel.bat.
+Exit code: 0 = opened; 1 = timed out without a response.
 #>
 param(
     [string]$Url = 'http://127.0.0.1:5000/',
@@ -8,7 +9,7 @@ param(
     [int]$IntervalMs = 500
 )
 
-# 全局代理（Clash/v2ray 等）可能截走 127.0.0.1 请求，显式禁用
+# A global proxy (Clash/v2ray etc.) can hijack requests to 127.0.0.1; disable it explicitly.
 [System.Net.WebRequest]::DefaultWebProxy = $null
 
 $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -19,7 +20,8 @@ while ((Get-Date) -lt $deadline) {
         Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 3 | Out-Null
         $reachable = $true
     } catch {
-        # 拿到 HTTP 响应（含 4xx/5xx）即说明转发链路已建立；连接被拒时 Response 为 null
+        # Getting any HTTP response (including 4xx/5xx) proves the forwarding chain is up;
+        # Response is null when the connection itself was refused.
         if ($_.Exception.Response) { $reachable = $true }
     }
 
