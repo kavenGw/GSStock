@@ -56,7 +56,7 @@ start "" /min powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden 
 ### 3. 端口预检
 
 ```bat
-netstat -ano -p TCP | findstr /R /C:":5000 .*LISTENING"
+netstat -ano | findstr /R /C:":5000 .*LISTENING"
 ```
 
 匹配到即说明本机已有进程占用 5000。模式中 `:5000` 后的空格保证 `:50000` 不误命中。
