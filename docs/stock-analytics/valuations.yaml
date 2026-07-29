@@ -289,21 +289,6 @@
   - 算力硬件
   - 服务器组装
   - 实体清单风险
-- stock_code: '002050'
-  stock_name: 三花智控
-  market: A
-  currency: CNY
-  sector: electronics
-  rating: watch
-  bear: 14.7
-  base: 20.4
-  bull: 30.4
-  conviction_date: '2026-05-13'
-  source_doc: sectors/electronics/components/2026-05-13-三花智控-buffett分析.md
-  note: 三花智控；文档直接给每股保守14.7/中性20.4/乐观30.4元
-  themes:
-  - 机器人
-  - 新能源车热管理
 - stock_code: 09981
   stock_name: 沃尔核材
   market: HK
@@ -3637,3 +3622,21 @@
   - 周期股
   - 新股定价
   - AI存储
+- stock_code: '02050'
+  stock_name: 三花智控
+  market: HK
+  currency: HKD
+  sector: industrial
+  rating: watch
+  watch_reason: 生意质地优秀（制冷控制元器件全球份额 45.5% 第一、10 年 ROE 均值 17.2%、现金转化率持续 >100%），但期望内在价值 15.16 HKD vs H 股现价 25.56 HKD，安全边际 −40.7%；即便 bull 情景（24.31 HKD）仍为负。机器人业绩层收入为硬性的零（公司三次拒答 + 公开辟谣 + Tesla Optimus 累计产量 0），两大主业终端 2026 年全线负增长，董监高在历史最高点后第 3 个交易日集体减持使治理项由中性转减分。等 H 股跌破 15.2 HKD 才进入公平价，或等液冷/汽零份额兑现抬高内在价值再评估
+  bear: 9.55
+  base: 15.23
+  bull: 24.31
+  dividend_yield: 1.69
+  conviction_date: '2026-07-29'
+  source_doc: sectors/industrial/thermal-management/2026-07-29-三花智控-buffett分析.md
+  quality: 4
+  themes:
+  - 机器人
+  - 新能源车热管理
+  - 数据中心液冷
