@@ -25,7 +25,10 @@ related_docs:
 ---
 # SK海力士（KRX 000660 / NasdaqGS SKHY）— 26Q2 财报当日 Buffett 深度分析：史上最好的一个季度，与腰斩的股价
 
-<!-- BEGIN related_docs -->
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-07-27-长鑫科技-buffett分析](2026-07-27-长鑫科技-buffett分析.md) — 同板块同周期的对照档——长鑫是 DUV-only 追赶者、本档是 EUV+HBM 领先者，两档共用同一套"PB 阶梯为主锚 + 周期顶利润不可定价"的方法论；本档同时纠正底稿两处引用（through-cycle/peak 39% 已过时、"三大原厂 PB 上沿 2.3x"只能确认 SK海力士 一家为 1.87x）并用 26Q2 实际值替换了底稿引用的一致预期 ₩64.1 兆
+> - [2026-05-20-存储扩厂双雄受益链-comps](../../../comps/2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂受益链 comps；本档把 SK海力士 2026 capex ₩47~49 兆（同比 +60%）同时读作受益链利好与 2027 供给集中释放的压力源
 <!-- END related_docs -->
 
 > 数据基准：SK hynix 2Q26 官方 press release（2026-07-29）、业绩说明会实录（韩媒转述）、stockanalysis.com / companiesmarketcap 行情与历史 PB 序列（2026-07-29 盘中）、TrendForce 2026-06/07 系列 press release，以及采证档 `.omc/artifacts/SK海力士-2026-07-29-evidence.md`（733 行，Phase A 联网采证 + 控制者独立抽验）。
