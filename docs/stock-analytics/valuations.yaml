@@ -1283,18 +1283,20 @@
   currency: HKD
   sector: semiconductor
   rating: exclude
-  bear: 6.4
-  base: 11.7
-  bull: 21.8
-  dividend_yield: 1.27
-  conviction_date: '2026-07-13'
-  source_doc: sectors/semiconductor/materials/2026-07-13-建滔积层板-buffett分析.md
-  note: 现价从 91.85 跌至 53.35（-42%），PE-TTM 68.8x，期望内在价值 HKD 11.9，安全边际 -77.7%，commodity 合理 8-12x，维持 exclude
+  bear: 5.7
+  base: 10.6
+  bull: 19.9
+  dividend_yield: 2.33
+  conviction_date: '2026-07-30'
+  source_doc: sectors/semiconductor/materials/2026-07-30-建滔积层板-buffett分析.md
+  note: 26H1 盈喜纯利>28 亿（+>200%）裁决花旗口径（被证伪 27-30%，但外推全年高于一致预期 15-54%）；现价 29.14（07-30 -7.61%）较旧档再跌 42.9%，PE-TTM 37.6x，期望内在价值 HKD 11.5，安全边际 -60.7%，净现比仅 0.88x，维持 exclude
   themes:
   - CCL
   - 涨价周期
   - AI高速CCL
+  - 供给侧
   - 港股周期股
+  - 估值泡沫
 - stock_code: '300054'
   stock_name: 鼎龙股份
   market: A

@@ -25,8 +25,8 @@ related_docs:
 - path: ../sectors/semiconductor/materials/2026-07-21-生益科技-buffett分析.md
   note: 生益科技权威档——本事件对其旧 thesis「结构性 α 真实但价格太贵（安全边际 -72.7%）」为强化：供给紧张延长=涨价周期延长，正常化中枢上移逻辑更稳，但估值矛盾未变，维持 watch
   symmetric: true
-- path: ../sectors/semiconductor/materials/2026-07-13-建滔积层板-buffett分析.md
-  note: 建滔积层板=花旗研报直接标的（1888.HK Buy/TP HK$130）；本档承接其 exclude 旧 thesis，点明花旗「8-9x PE 便宜」与本池「增长 100% 来自价格、高端份额 2.3%」的分歧=周期顶利润 PE 陷阱，维持 exclude
+- path: ../sectors/semiconductor/materials/2026-07-30-建滔积层板-buffett分析.md
+  note: 建滔积层板=花旗研报直接标的（1888.HK Buy/TP HK$130）；07-30 盈喜（纯利>28 亿 +>200%）裁决花旗口径：H1 40 亿被证伪 27-30%（盈喜下限 28.0 亿校准后≈29.2 亿），但外推全年 58-78 亿又高于市场一致 50.7 亿 15-54%——真相在两套口径之间；花旗「PE 仅 8-9x」经拆解系建立在 FY27E EPS 4.53【推断】上。17 天再跌 42.9% 系纯倍数杀（PE-TTM 68.8x→37.6x），期望内在价值下修至 HKD 11.5，安全边际 -60.7%，维持 exclude
   symmetric: true
 - path: ../sectors/semiconductor/materials/2026-05-07-宏和科技-buffett分析.md
   note: 宏和科技=纯电子玻纤布最纯正敞口，正是本轮最紧缺瓶颈环节；旧 thesis「等季报兑现」被本事件（7628+80%/T-Glass 交期>30 周/织机 18-24 月刚性）强化，景气延续至 2027 底
@@ -55,7 +55,7 @@ related_docs:
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-07-21-生益科技-buffett分析](../sectors/semiconductor/materials/2026-07-21-生益科技-buffett分析.md) — 生益科技权威档——本事件对其旧 thesis「结构性 α 真实但价格太贵（安全边际 -72.7%）」为强化：供给紧张延长=涨价周期延长，正常化中枢上移逻辑更稳，但估值矛盾未变，维持 watch
-> - [2026-07-13-建滔积层板-buffett分析](../sectors/semiconductor/materials/2026-07-13-建滔积层板-buffett分析.md) — 建滔积层板=花旗研报直接标的（1888.HK Buy/TP HK$130）；本档承接其 exclude 旧 thesis，点明花旗「8-9x PE 便宜」与本池「增长 100% 来自价格、高端份额 2.3%」的分歧=周期顶利润 PE 陷阱，维持 exclude
+> - [2026-07-30-建滔积层板-buffett分析](../sectors/semiconductor/materials/2026-07-30-建滔积层板-buffett分析.md) — 建滔积层板=花旗研报直接标的（1888.HK Buy/TP HK$130）；07-30 盈喜（纯利>28 亿 +>200%）裁决花旗口径：H1 40 亿被证伪 27-30%（盈喜下限 28.0 亿校准后≈29.2 亿），但外推全年 58-78 亿又高于市场一致 50.7 亿 15-54%——真相在两套口径之间；花旗「PE 仅 8-9x」经拆解系建立在 FY27E EPS 4.53【推断】上。17 天再跌 42.9% 系纯倍数杀（PE-TTM 68.8x→37.6x），期望内在价值下修至 HKD 11.5，安全边际 -60.7%，维持 exclude
 > - [2026-05-07-宏和科技-buffett分析](../sectors/semiconductor/materials/2026-05-07-宏和科技-buffett分析.md) — 宏和科技=纯电子玻纤布最纯正敞口，正是本轮最紧缺瓶颈环节；旧 thesis「等季报兑现」被本事件（7628+80%/T-Glass 交期>30 周/织机 18-24 月刚性）强化，景气延续至 2027 底
 > - [2026-05-12-圣泉集团-buffett分析](../sectors/semiconductor/materials/2026-05-12-圣泉集团-buffett分析.md) — 圣泉集团=PPE 电子树脂涨价环节，中量级利好；旧 thesis「电子树脂护城河未形成、等正常化盈利兑现」不因本景气改变
 > - [2026-06-08-铜冠铜箔-buffett分析](../sectors/materials/copper-foil/2026-06-08-铜冠铜箔-buffett分析.md) — 铜冠铜箔=PCB 铜箔涨价+HVLP 环节，中量级利好；旧 thesis「估值透支周期顶部、安全边际为负」被强化景气但未改估值判断
