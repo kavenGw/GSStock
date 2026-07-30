@@ -3640,3 +3640,23 @@
   - 机器人
   - 新能源车热管理
   - 数据中心液冷
+- stock_code: MSFT
+  stock_name: 微软
+  market: US
+  currency: USD
+  sector: ai-application
+  rating: watch
+  watch_reason: 生意仍是顶级（Commercial RPO $678B/+84%、Azure 在 $100B 基数上反加速至 +43%、FY27Q1 指引 ~+45% cc、企业切换成本护城河未损），但资本回报已实质性变质——FCF 四年 CAGR +0.7%（FY22 $65.1B→FY26 $67.0B）、FCF margin 32.9%→20.2%、ROIC 71.6%→30.7%，FY26 GAAP EPS $17.95 中约 $1.00 是 OpenAI/Anthropic 非现金重估收益。剔除后正常化 EPS ~$16.95，主锚 $426.40 对应 PE 25.2×、P/FCF 47.3×，隐含市场已在为「FY29 FCF 约 $132B（≈FY26 两倍）」付钱。三情景加权期望内在价值 $342/股（≈$2.54T），对主锚安全边际约 −19.7%；即便 bull $442 相对主锚也仅 +3.7% 上行，而 bear $212 下行 −50%，风险回报偏下行。PE 创十年新低是事实，但 PE 自 FY24 峰值下杀 42.6% 与 ROIC 下杀 57% 量级相当——这更像合理重定价而非错杀。价格 ≤ ~$342 才进入正安全边际，≤ ~$274（20% 折价）才是合格建仓点，≤ ~$240（30%）为强安全边际点。
+  bear: 212
+  base: 358
+  bull: 442
+  dividend_yield: 0.85
+  quality: 5
+  conviction_date: '2026-07-30'
+  source_doc: sectors/ai-application/cloud/2026-07-30-微软-buffett分析.md
+  themes:
+  - AI
+  - cloud
+  - capex超级周期
+  - OpenAI
+  - FCF拐点
