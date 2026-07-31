@@ -203,7 +203,7 @@ from app.services.price_freshness import price_age_seconds
 - [ ] **Step 6: 跑全量测试确认无回归**
 
 Run: `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/ -v > pytest_out.txt 2>&1; rtk grep -E "passed|failed|error" pytest_out.txt; rm pytest_out.txt`
-Expected: 除 `tests/test_watch_prices_age.py` 因旧 import 失败外全部 passed（下一步删除该文件）
+Expected: 除 `tests/test_watch_prices_age.py` 因旧 import 失败外无新增失败（baseline 39 failed 既有，与本改动无关；下一步删除该文件）
 
 - [ ] **Step 7: 删除冗余测试并提交**
 
@@ -618,7 +618,7 @@ Expected: 3 passed
 - [ ] **Step 5: 跑全量测试确认无回归**
 
 Run: `PYTHONIOENCODING=utf-8 SCHEDULER_ENABLED=0 rtk python -m pytest tests/ -v > pytest_out.txt 2>&1; rtk grep -E "passed|failed|error" pytest_out.txt; rm pytest_out.txt`
-Expected: 全部 passed，无新增 failed/error
+Expected: 无新增 failed/error（baseline 39 failed 既有，与本改动无关）
 
 - [ ] **Step 6: 提交**
 

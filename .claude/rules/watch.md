@@ -34,6 +34,8 @@ paths:
 
 `watch_alert.scan` 不再逐条 `event_bus.publish`，而是 `check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`app/services/watch_signal_pipeline.py`，纯函数）按股合并、加权共振分级（HIGH/MID/LOW）、上下文增强（涨幅/量比/区间位置）→ `NotificationService.push_watch_alerts` 一股一条直推、`scan` 返回 `[]`（复用 watch_realtime 直推先例）。跨 tick 去重仍归 `WatchAlertService._fired`；管线只做同 tick 合并。新增第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5% 急拉急跌，`_price_ring` 环形缓冲）。**已知限制**：盯盘内存态（`WatchAlertService._fired`/`_price_ring`/极值/`_momentum_cooldown`）均为进程内变量，盘中重启会重置，可能导致极值重报或跨 tick 去重失效（漏报/重报），健壮性与持久化留后续 spec。
 
+**价格新鲜度闸门**：`app/services/price_freshness.py`（纯函数）在三处接入点拦截非实时数据，宁可不推也不推旧价——阈值 = 2×preload 刷新周期（A 股 120s / 非 A 360s）：`watch_alert.scan`（告警）、`WatchAnalysisService.analyze_stocks('realtime')`（AI 实时分析，7d/30d 不加门）、`NotificationService.push_realtime_analysis`（推送层再查一遍，防 LLM 循环期间价已过期）。**告警/分析/推送盘中突然静默是期望行为而非故障**（preload 退避期间、午休复盘首 tick 等均会触发），排障看日志关键词「跳过N只降级/超龄旧价」。
+
 ## 盯盘股票池（代码配置，非 DB）
 
 盯盘要盯哪些股票由 `app/config/stock_codes.py` 的 `WATCH_CODES` 常量决定（唯一权威源），不再有 `watch_list` 表/增删 UI/`/watch/add`/`/watch/remove`。改盯盘池=改 WATCH_CODES（每条 `{'code','name','market'}`，`market` 显式写死——`MarketIdentifier` 不认 `.KS` 等后缀会误判）。`WatchService` 的 `get_watch_codes/get_watch_list/get_watched_markets/get_market_map` 全部读该常量。`WatchAnalysis` 表（AI 分析结果）与盯盘池无关，仍在 DB。DB 里遗留的 `watch_list` 孤立表无害，未做 drop 迁移。

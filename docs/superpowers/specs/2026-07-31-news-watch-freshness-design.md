@@ -89,6 +89,7 @@ raw_prices = filter_fresh_prices(raw_prices, market_map)
 - **preload 指数退避（最长 8 tick）**：退避期间价格超龄 → 告警/分析静默，恢复后自动复活。这正是期望行为。
 - **`last_fetch_time` 缺失/格式异常**：fail-closed 视为不新鲜，解析用 `try/except ValueError` 包住不抛异常。
 - **market_map 缺 code**：按非 A 默认 6 分钟阈值兜底（宽松侧，避免市场识别缺失误杀）。
+- **已知打折项——闸门保证"抓取新鲜"而非"报价新鲜"**：A 股备用源（东财/新浪）走 `_get_source_snapshot`，`_SNAPSHOT_TTL = 120`（`app/services/unified_stock_data.py`）——全市场快照缓存 2 分钟，但写进 price dict 的 `last_fetch_time` 是当前抓取时刻。腾讯主源故障、走备用源时，一条 `age=10s` 的 A 股价格其行情本身最旧可能是 2 分钟前，叠加 120s 闸门阈值，真实报价年龄最坏约 240s。这是既有架构限制（改 snapshot 语义爆炸半径过大），不在本次范围内修，仅留档。
 
 ## 错误处理与日志
 

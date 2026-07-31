@@ -66,3 +66,28 @@ def test_all_stale_pushes_nothing(monkeypatch):
     result = NotificationService.push_realtime_analysis(ANALYSES)
     assert sent == []
     assert result is False
+
+
+def test_stale_gate_precedes_state_write(monkeypatch):
+    """闸门必须在 _realtime_push_state 写入之前拦截 —— 否则停更期间被静默的股，
+    恢复新鲜后会被误判成"已推送过"而走增量路径，丢失首推的完整支撑/压力信息"""
+    single = {'600519': ANALYSES['600519']}
+    stale = (datetime.now() - timedelta(minutes=10)).isoformat()
+    calls, sent = _setup(monkeypatch, {
+        '600519': {'current_price': 1800.0, 'change_percent': 1.2, 'last_fetch_time': stale},
+    })
+    NotificationService.push_realtime_analysis(single)
+    assert sent == []
+    assert '600519' not in NotificationService._realtime_push_state['stocks']
+
+    fresh = datetime.now().isoformat()
+    monkeypatch.setattr(unified_stock_data_service, 'get_realtime_prices',
+                         lambda codes, **kwargs: {
+                             '600519': {'current_price': 1800.0, 'change_percent': 1.2,
+                                        'last_fetch_time': fresh},
+                         })
+    NotificationService.push_realtime_analysis(single)
+    joined = '\n'.join(sent)
+    assert '📊 盯盘实时分析' in joined
+    assert '支撑' in joined and '压力' in joined
+    assert '🔄 盯盘更新' not in joined

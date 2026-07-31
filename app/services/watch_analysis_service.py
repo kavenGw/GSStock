@@ -76,13 +76,15 @@ class WatchAnalysisService:
 
         raw_prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=is_realtime)
 
+        stale_prices = {}
         if is_realtime:
-            from app.services.price_freshness import filter_fresh_prices, price_age_seconds
+            from app.services.price_freshness import filter_fresh_prices, age_str
             fresh_prices = filter_fresh_prices(raw_prices, WatchService.get_market_map())
             stale = [c for c in raw_prices if c not in fresh_prices]
             if stale:
-                detail = [f"{c}(age={price_age_seconds(raw_prices[c])}s)" for c in stale]
-                logger.warning(f'[盯盘AI] realtime 跳过{len(stale)}只降级/超龄旧价: {detail}')
+                stale_prices = {c: raw_prices[c] for c in stale}
+                detail = [f"{c}(age={age_str(raw_prices[c])}s)" for c in stale]
+                logger.info(f'[盯盘AI] realtime 跳过{len(stale)}只降级/超龄旧价: {detail}')
             raw_prices = fresh_prices
 
         provider = llm_router.route('watch_analysis')
@@ -98,7 +100,11 @@ class WatchAnalysisService:
             current_price = price_data.get('current_price', 0)
             stock_name = price_data.get('name', code)
             if not current_price:
-                logger.warning(f'[盯盘AI] {code} 跳过{period}分析: 无实时价格数据')
+                if code in stale_prices:
+                    from app.services.price_freshness import age_str
+                    logger.info(f'[盯盘AI] {code} 跳过{period}分析: 价格超龄({age_str(stale_prices[code])}s)')
+                else:
+                    logger.warning(f'[盯盘AI] {code} 跳过{period}分析: 无实时价格数据')
                 failed_codes.append(code)
                 continue
 

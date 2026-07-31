@@ -47,7 +47,7 @@ class WatchAlertStrategy(Strategy):
         a_codes = [c for c in active_codes if MarketIdentifier.is_a_share(c)]
         other_codes = [c for c in active_codes if c not in a_codes]
 
-        # 价格由 watch_preload 每3分钟 force_refresh 预取，这里只读缓存(cache_only，绝不触发API)
+        # 价格由 watch_preload 预取（A股每分钟/非A每3分钟 force_refresh），这里只读缓存(cache_only，绝不触发API)
         prices = {}
         if a_codes:
             prices.update(data_service.get_realtime_prices(a_codes, cache_only=True))
@@ -58,8 +58,8 @@ class WatchAlertStrategy(Strategy):
         watch_prices = self._filter_fresh(prices, active_codes, market_map)
         skipped = [c for c in active_codes if c in prices and c not in watch_prices]
         if skipped:
-            from app.services.price_freshness import price_age_seconds
-            detail = [f"{c}(age={price_age_seconds(prices[c])}s)" for c in skipped]
+            from app.services.price_freshness import age_str
+            detail = [f"{c}(age={age_str(prices[c])}s)" for c in skipped]
             logger.info(f'[盯盘告警] 跳过{len(skipped)}只降级/超龄旧价: {detail}')
         name_map = {e['stock_code']: e['stock_name'] for e in WatchService.get_watch_list()}
 

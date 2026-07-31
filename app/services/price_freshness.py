@@ -11,7 +11,7 @@ def max_age_seconds(market: str) -> int:
     return interval * FRESHNESS_MULTIPLIER * 60
 
 
-def price_age_seconds(data: dict, now: datetime = None):
+def price_age_seconds(data: dict, now: datetime = None) -> int | None:
     ts = data.get('last_fetch_time')
     if not ts:
         return None
@@ -20,6 +20,12 @@ def price_age_seconds(data: dict, now: datetime = None):
     except (ValueError, TypeError):
         return None
     return int(((now or datetime.now()) - fetched).total_seconds())
+
+
+def age_str(data: dict, now: datetime = None) -> str:
+    """日志用：age 未知(last_fetch_time 缺失/损坏)显示 '?' 而非 'None'"""
+    age = price_age_seconds(data, now)
+    return str(age) if age is not None else '?'
 
 
 def is_fresh(price_data: dict, market: str, now: datetime = None) -> bool:
