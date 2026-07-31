@@ -458,8 +458,12 @@ class NotificationService:
         now_str = datetime.now().strftime('%H:%M')
 
         from app.services.unified_stock_data import unified_stock_data_service
+        from app.services.price_freshness import filter_fresh_prices
         all_codes = [c for c, p in analyses.items() if p.get('realtime')]
-        raw_prices = unified_stock_data_service.get_realtime_prices(all_codes) if all_codes else {}
+        raw_prices = unified_stock_data_service.get_realtime_prices(
+            all_codes, cache_only=True) if all_codes else {}
+        market_map = {w['stock_code']: w['market'] for w in watch_list}
+        raw_prices = filter_fresh_prices(raw_prices, market_map)
 
         def _fmt_levels(levels, current):
             if not levels or current is None:
@@ -475,10 +479,15 @@ class NotificationService:
 
         full_blocks = []
         update_blocks = []
+        stale_skipped = []
 
         for code, periods in analyses.items():
             data = periods.get('realtime')
             if not data:
+                continue
+
+            if code not in raw_prices:
+                stale_skipped.append(code)
                 continue
 
             is_first, changes = NotificationService._detect_realtime_changes(code, data)
@@ -490,7 +499,7 @@ class NotificationService:
             signal_key = data.get('signal', '')
             signal = signal_icons.get(signal_key, '⚪观望')
             summary = data.get('summary', '')
-            price_data = raw_prices.get(code, {})
+            price_data = raw_prices[code]
             current_price = price_data.get('current_price')
             change_pct = price_data.get('change_percent')
             support = data.get('support_levels', [])
@@ -508,12 +517,9 @@ class NotificationService:
 
             if is_first:
                 lines = [f"{signal} {name}({code})"]
-                if current_price is not None:
-                    arrow = '▲' if (change_pct or 0) >= 0 else '▼'
-                    pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
-                    lines.append(f"  现价 {current_price} {arrow}{pct_str} | 支撑 {sup_str} | 压力 {res_str}")
-                else:
-                    lines.append(f"  支撑 {sup_str} | 压力 {res_str}")
+                arrow = '▲' if (change_pct or 0) >= 0 else '▼'
+                pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
+                lines.append(f"  现价 {current_price} {arrow}{pct_str} | 支撑 {sup_str} | 压力 {res_str}")
                 lines.append(f"  💡 {summary}")
                 full_blocks.append("\n".join(lines))
             else:
@@ -523,10 +529,9 @@ class NotificationService:
                     old_label = signal_icons.get(old_signal, old_signal)
                     header += f"  <- {old_label}"
                 lines = [header]
-                if current_price is not None:
-                    arrow = '▲' if (change_pct or 0) >= 0 else '▼'
-                    pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
-                    lines.append(f"  现价 {current_price} {arrow}{pct_str}")
+                arrow = '▲' if (change_pct or 0) >= 0 else '▼'
+                pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
+                lines.append(f"  现价 {current_price} {arrow}{pct_str}")
                 if changes.get('support'):
                     lines.append(f"  支撑 {sup_str} -> 调整")
                 if changes.get('resistance'):
@@ -534,6 +539,9 @@ class NotificationService:
                 if changes.get('summary'):
                     lines.append(f"  💡 {summary}")
                 update_blocks.append("\n".join(lines))
+
+        if stale_skipped:
+            logger.info(f'[盯盘实时] 推送跳过{len(stale_skipped)}只降级/超龄旧价: {stale_skipped}')
 
         sent = False
         separator = "\n——————————————————\n"
