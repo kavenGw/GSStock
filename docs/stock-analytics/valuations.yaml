@@ -3682,3 +3682,22 @@
   - 电商
   - Trainium
   - FCF转负
+- stock_code: '688111'
+  stock_name: 金山办公
+  market: A
+  currency: CNY
+  sector: ai-application
+  rating: watch
+  watch_reason: 生意质地优秀（86.6% 毛利、149.6 亿净现金零有息负债、经营性投入资本为负）但价格无安全边际——剔除基金浮盈后真实 PE 约 57.7x、EV/owner earnings 约 62x，期望内在价值 115.4 元较现价 269.58 元低 57%；且 AI 至今零业绩层披露、2027 面临「基金归零 + 信创高基数」双重基数陷阱
+  bear: 78.0
+  base: 118.4
+  bull: 163.9
+  dividend_yield: 0.46
+  quality: 4
+  conviction_date: '2026-07-31'
+  source_doc: sectors/ai-application/software/2026-07-31-金山办公-buffett分析.md
+  themes:
+  - AI办公
+  - 信创
+  - 雷军系
+  - 订阅制SaaS
