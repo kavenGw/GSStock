@@ -54,11 +54,13 @@ class WatchAlertStrategy(Strategy):
         if other_codes:
             prices.update(data_service.get_realtime_prices(other_codes, cache_only=True))
 
-        # 取价失败降级返回的过期旧价(_is_degraded)会污染极值并误报，直接跳过该股
-        watch_prices = self._filter_fresh(prices, active_codes)
+        # 取价失败降级(_is_degraded)或超龄(2倍preload周期)的旧价会污染极值并误报，直接跳过该股
+        watch_prices = self._filter_fresh(prices, active_codes, market_map)
         skipped = [c for c in active_codes if c in prices and c not in watch_prices]
         if skipped:
-            logger.info(f'[盯盘告警] 跳过{len(skipped)}只降级旧价: {skipped}')
+            from app.services.price_freshness import price_age_seconds
+            detail = [f"{c}(age={price_age_seconds(prices[c])}s)" for c in skipped]
+            logger.info(f'[盯盘告警] 跳过{len(skipped)}只降级/超龄旧价: {detail}')
         name_map = {e['stock_code']: e['stock_name'] for e in WatchService.get_watch_list()}
 
         alert_params_map = self._load_alert_params(active_codes)
@@ -86,10 +88,11 @@ class WatchAlertStrategy(Strategy):
         return []
 
     @staticmethod
-    def _filter_fresh(prices: dict, active_codes: list[str]) -> dict:
-        """只保留活跃股中命中缓存且非降级(_is_degraded)的实时价"""
-        return {c: prices[c] for c in active_codes
-                if c in prices and not prices[c].get('_is_degraded')}
+    def _filter_fresh(prices: dict, active_codes: list[str], market_map: dict) -> dict:
+        """只保留活跃股中命中缓存、非降级且未超龄(2倍preload周期)的实时价"""
+        from app.services.price_freshness import filter_fresh_prices
+        return filter_fresh_prices(
+            {c: prices[c] for c in active_codes if c in prices}, market_map)
 
     def _load_alert_params(self, codes: list[str]) -> dict:
         today = datetime.now().strftime('%Y-%m-%d')

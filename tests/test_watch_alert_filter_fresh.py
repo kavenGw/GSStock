@@ -1,28 +1,39 @@
-"""_filter_fresh 剔除降级旧价(_is_degraded)与未命中条目"""
+"""_filter_fresh 剔除降级/超龄旧价与未命中条目"""
+from datetime import datetime, timedelta
+
 from app.strategies.watch_alert import WatchAlertStrategy
+
+MM = {'a': 'A', 'b': 'A', 'h': 'HK'}
+
+
+def _p(age_seconds=0, **overrides):
+    data = {'current_price': 10.0,
+            'last_fetch_time': (datetime.now() - timedelta(seconds=age_seconds)).isoformat()}
+    data.update(overrides)
+    return data
 
 
 def test_drops_degraded_entry():
-    prices = {
-        'a': {'current_price': 10.0},
-        'b': {'current_price': 81.5, '_is_degraded': True},
-    }
-    result = WatchAlertStrategy._filter_fresh(prices, ['a', 'b'])
-    assert result == {'a': {'current_price': 10.0}}
+    prices = {'a': _p(), 'b': _p(_is_degraded=True)}
+    assert set(WatchAlertStrategy._filter_fresh(prices, ['a', 'b'], MM)) == {'a'}
 
 
-def test_drops_missing_code():
-    result = WatchAlertStrategy._filter_fresh({'a': {'current_price': 10.0}}, ['a', 'b'])
+def test_drops_stale_a_share_beyond_2min():
+    prices = {'a': _p(), 'b': _p(age_seconds=180)}
+    assert set(WatchAlertStrategy._filter_fresh(prices, ['a', 'b'], MM)) == {'a'}
+
+
+def test_keeps_hk_within_6min():
+    prices = {'h': _p(age_seconds=180)}
+    assert set(WatchAlertStrategy._filter_fresh(prices, ['h'], MM)) == {'h'}
+
+
+def test_drops_entry_without_fetch_time():
+    prices = {'a': {'current_price': 10.0}}
+    assert WatchAlertStrategy._filter_fresh(prices, ['a'], MM) == {}
+
+
+def test_drops_missing_code_and_ignores_inactive():
+    prices = {'a': _p(), 'x': _p()}
+    result = WatchAlertStrategy._filter_fresh(prices, ['a', 'b'], MM)
     assert set(result) == {'a'}
-
-
-def test_ignores_inactive_codes():
-    prices = {'a': {'current_price': 10.0}, 'x': {'current_price': 5.0}}
-    result = WatchAlertStrategy._filter_fresh(prices, ['a'])
-    assert set(result) == {'a'}
-
-
-def test_keeps_all_fresh():
-    prices = {'a': {'current_price': 10.0}, 'b': {'current_price': 20.0}}
-    result = WatchAlertStrategy._filter_fresh(prices, ['a', 'b'])
-    assert result == prices

@@ -28,14 +28,17 @@ def test_module_no_benchmark_import():
 
 def test_degraded_price_excluded_end_to_end():
     """降级旧价(_is_degraded)经 _filter_fresh 后既不产生信号也不污染盘中极值"""
+    from datetime import datetime
     from app.strategies.watch_alert import WatchAlertStrategy
     from app.services.watch_alert_service import WatchAlertService
 
     prices = {
-        'FRESH': {'current_price': 10.0},
-        '2631.HK': {'current_price': 81.5, '_is_degraded': True},
+        'FRESH': {'current_price': 10.0, 'last_fetch_time': datetime.now().isoformat()},
+        '2631.HK': {'current_price': 81.5, '_is_degraded': True,
+                    'last_fetch_time': datetime.now().isoformat()},
     }
-    watch_prices = WatchAlertStrategy._filter_fresh(prices, ['FRESH', '2631.HK'])
+    watch_prices = WatchAlertStrategy._filter_fresh(
+        prices, ['FRESH', '2631.HK'], {'FRESH': 'A', '2631.HK': 'HK'})
 
     service = WatchAlertService()
     service._intraday_extremes = {}
