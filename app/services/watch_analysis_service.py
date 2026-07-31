@@ -76,6 +76,15 @@ class WatchAnalysisService:
 
         raw_prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=is_realtime)
 
+        if is_realtime:
+            from app.services.price_freshness import filter_fresh_prices, price_age_seconds
+            fresh_prices = filter_fresh_prices(raw_prices, WatchService.get_market_map())
+            stale = [c for c in raw_prices if c not in fresh_prices]
+            if stale:
+                detail = [f"{c}(age={price_age_seconds(raw_prices[c])}s)" for c in stale]
+                logger.warning(f'[盯盘AI] realtime 跳过{len(stale)}只降级/超龄旧价: {detail}')
+            raw_prices = fresh_prices
+
         provider = llm_router.route('watch_analysis')
         if not provider:
             logger.warning('[盯盘AI] LLM 不可用，跳过分析')
