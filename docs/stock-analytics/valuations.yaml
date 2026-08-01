@@ -3699,3 +3699,19 @@
   - 信创
   - 雷军系
   - 订阅制SaaS
+- stock_code: '02513'
+  stock_name: 智谱
+  market: HK
+  currency: HKD
+  sector: ai-application
+  rating: watch
+  watch_reason: 技术领先是硬证据（AA 智能指数开源榜第一 51 分、三年营收 CAGR 132.5%、逆势提价 83% 而调用量 +400%），但价格与结构均无安全边际——PS(TTM) 549x / forward PS 59x（后者依赖公司未确认的软证据），期望内在价值 374.6 HKD 较现价 987.50 HKD 低 62.1%，即便 bull 情景完全兑现安全边际也仅 +2.8%；且万亿市值曾建立在 2.67% 自由流通盘上、2027-01-08 还有约 40% 待解禁，价格发现机制本身失效
+  bear: 59.0
+  base: 307.8
+  bull: 1014.9
+  conviction_date: '2026-08-01'
+  source_doc: sectors/ai-application/llm/2026-08-01-智谱-buffett分析.md
+  themes:
+  - 大模型
+  - AI应用
+  - 港股
