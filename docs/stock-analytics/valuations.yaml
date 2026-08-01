@@ -1793,11 +1793,12 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 47.1
-  base: 87.4
-  bull: 161.4
-  conviction_date: '2026-06-21'
-  source_doc: sectors/semiconductor/storage/2026-06-21-普冉股份-buffett分析.md
+  bear: 15.5
+  base: 46.4
+  bull: 86.1
+  dividend_yield: 0.03
+  conviction_date: '2026-08-01'
+  source_doc: sectors/semiconductor/storage/2026-08-01-普冉股份-buffett分析.md
   note: 普冉股份；bear45/base90/bull240亿÷1.48亿股
   themes:
   - memory
@@ -1805,6 +1806,7 @@
   - 供给侧
   - 利基存储
   - SHM收购
+  - 2D NAND
 - stock_code: MRVL
   stock_name: 迈威尔科技
   market: US
@@ -3429,11 +3431,6 @@
   dividend_yield: 3.45
   conviction_date: '2026-07-21'
   source_doc: sectors/energy/hydropower/2026-07-21-长江电力-buffett分析.md
-  themes:
-  - 高股息
-  - 类债券资产
-  - 利率下行受益
-  - 水电龙头
 - stock_code: '600183'
   stock_name: 生益科技
   market: A
