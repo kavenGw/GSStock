@@ -1799,7 +1799,7 @@
   dividend_yield: 0.03
   conviction_date: '2026-08-01'
   source_doc: sectors/semiconductor/storage/2026-08-01-普冉股份-buffett分析.md
-  note: 普冉股份；bear45/base90/bull240亿÷1.48亿股
+  note: 普冉股份；bear23/base69/bull128亿÷1.487亿股（SHM 按供应协议 2032 到期作有限年期 SOTP 拆分，不给永续倍数）
   themes:
   - memory
   - NOR涨价
