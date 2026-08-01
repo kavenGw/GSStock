@@ -51,16 +51,17 @@
   currency: CNY
   sector: ai-application
   rating: watch
-  bear: 16.0
-  base: 24.11
-  bull: 48.44
-  conviction_date: '2026-06-04'
-  source_doc: sectors/ai-application/cloud/2026-06-04-优刻得-buffett分析.md
+  watch_reason: 价格两个月跌 20.5%（38.70→30.77），但证据同期恶化更快——新增前期会计差错更正+上交所年报问询函（2025 三期报表重发）、应收 6.29 亿中单项计提 2.49 亿（计提比例 70.81%）、速动比率降至 1.01、三年资金缺口 26.28 亿；旧档三大多头论据（涨价兑现毛利率、扣非转正、智算订单）一条未获新兑证，2026H1 至今未披露。PS(TTM) 8.05x 仍是最贵可比（GDS 3.86x）的 2.1 倍、金山云的 3.5 倍，PB 5 年分位 78%。期望内在价值 96.4 亿 < 市值 141.76 亿，安全边际 −32%（较旧档 −27% 进一步恶化）。生意侧毛利率与上架率的改善是真的，故不排除、继续跟踪。
+  bear: 13.35
+  base: 21.03
+  bull: 38.25
+  conviction_date: '2026-08-01'
+  source_doc: sectors/ai-application/cloud/2026-08-01-优刻得-buffett分析.md
+  quality: 2
   themes:
   - 智算
   - AI算力
   - 云计算
-  - 供给侧涨价
 - stock_code: ORCL
   stock_name: 甲骨文
   market: US
