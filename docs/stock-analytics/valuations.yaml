@@ -3733,3 +3733,20 @@
   - AI算力
   - 扩产爬坡
   - PCB设计服务
+- stock_code: '002366'
+  stock_name: 融发核电
+  market: A
+  currency: CNY
+  sector: energy
+  rating: exclude
+  bear: 2.01
+  base: 2.79
+  bull: 3.9
+  conviction_date: '2026-08-02'
+  source_doc: sectors/energy/nuclear-equipment/2026-08-02-融发核电-buffett分析.md
+  themes:
+  - 核电装备
+  - 可控核聚变概念
+  - 重整重生
+  - 核准常态化
+  - 重资产扩产
