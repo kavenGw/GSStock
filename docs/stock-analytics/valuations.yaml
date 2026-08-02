@@ -3715,3 +3715,21 @@
   - 大模型
   - AI应用
   - 港股
+- stock_code: '301366'
+  stock_name: 一博科技
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  watch_reason: PB 3.86 处上市以来 85.8% 分位、H1 年化 PE 66.6x、年化 ROE 仅 5.9%、净利率 9.01%；期望内在价值 15.23 元 vs 现价 40.58 元，安全边际 -62.5%，即便 bull（24.54 元，已按公司 2028 激励目标 1.8 亿扣非兑现假设）压力测试仍 -39.5%，且 bull 隐含 PB 2.33 仍低于当前 3.86 —— 三档中最乐观的一档都撑不起今天的价。无券商覆盖（东财研报 hits=0）、量价拆分/稼动率/二期投产时间表全缺；仅跟踪 2026 全年扣非（剔股份支付）能否 ≥1.5 亿、二期时间表是否披露、AI 分行业占比是否重披，当前价绝对不可买。
+  bear: 8.32
+  base: 15.66
+  bull: 24.54
+  dividend_yield: 0.25
+  conviction_date: '2026-08-02'
+  source_doc: sectors/electronics/pcb/2026-08-02-一博科技-buffett分析.md
+  themes:
+  - PCB
+  - AI算力
+  - 扩产爬坡
+  - PCB设计服务
