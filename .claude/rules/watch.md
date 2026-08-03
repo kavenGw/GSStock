@@ -38,7 +38,7 @@ paths:
 
 ## 盯盘股票池（代码配置，非 DB）
 
-盯盘要盯哪些股票由 `app/config/stock_codes.py` 的 `WATCH_CODES` 常量决定（唯一权威源），不再有 `watch_list` 表/增删 UI/`/watch/add`/`/watch/remove`。改盯盘池=改 WATCH_CODES（每条 `{'code','name','market'}`，`market` 显式写死——`MarketIdentifier` 不认 `.KS` 等后缀会误判）。`WatchService` 的 `get_watch_codes/get_watch_list/get_watched_markets/get_market_map` 全部读该常量。`WatchAnalysis` 表（AI 分析结果）与盯盘池无关，仍在 DB。DB 里遗留的 `watch_list` 孤立表无害，未做 drop 迁移。
+盯盘要盯哪些股票由 `app/config/stock_codes.py` 的 `WATCH_CODES` 常量决定（唯一权威源），不再有 `watch_list` 表/增删 UI/`/watch/add`/`/watch/remove`。改盯盘池=改 WATCH_CODES（每条 `{'code','name','market'}`，`market` 显式写死——`MarketIdentifier` 不认 `.KS` 等后缀会误判）。`WatchService` 的 `get_watch_codes/get_watch_list/get_watched_markets/get_market_map` 全部读该常量。`WatchAnalysis` 表（AI 分析结果）与盯盘池无关，仍在 DB。DB 里遗留的 `watch_list` 孤立表已于 2026-08-03 drop（旧 7 条数据与 WATCH_CODES 不一致，直连查 DB 会读到过时盯盘池而误判）。
 
 ## 盯盘各市场分区指数条
 
