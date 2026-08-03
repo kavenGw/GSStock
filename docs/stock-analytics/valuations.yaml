@@ -3750,3 +3750,20 @@
   - 重整重生
   - 核准常态化
   - 重资产扩产
+- stock_code: '03317'
+  stock_name: 迅策科技
+  market: HK
+  currency: HKD
+  sector: ai-application
+  rating: watch
+  watch_reason: 生意本质是「重研发的项目制数据工程公司」而非 SaaS——交易制收入占比 2022 年 47% 升至 2024 年 81%、DSO 从 63 天恶化到 286 天、净收入留存率从 143%(2022) 崩到 36%(2025H1)、毛利率 76.68%→61.66%；营收翻倍是拿 15 个百分点毛利率换的。Token 化转型是真的但只走了 10%，且客户 capex 能见度为【缺】，bull 概率按增长证据包门控封顶 20%。期望内在价值 44.4 HKD 较现价 119.50 低 62.8%，即便 bull 完全兑现安全边际仍为 -26.3%——不是贵一点，是最乐观情景也买不下手。留在观察位因为证伪点近且硬：正式中报（8 月内）与 2026 年报的 Token 占比、毛利率、DSO 三项可直接判死或翻案
+  bear: 20.7
+  base: 43.4
+  bull: 88.1
+  conviction_date: '2026-08-03'
+  quality: 2
+  source_doc: sectors/ai-application/software/2026-08-03-迅策科技-buffett分析.md
+  themes:
+  - AI应用
+  - Token经济
+  - 金融IT
