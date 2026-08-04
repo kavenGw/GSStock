@@ -20,7 +20,7 @@ paths:
 | `ESPORTS_PRE_MATCH_MINUTES` | 赛前提醒（开赛前N分钟） | `30` |
 
 **推送逻辑**：
-- 每日赛程预告：`esports_daily_schedule` 策略 07:00 推送当日 NBA/LoL 赛程到 `news_nba` / `news_lol`（NBA 按 `NBA_TEAM_MONITOR` 过滤关注球队；LoL 覆盖 LPL/LCK/先锋赛/Worlds/MSI）
+- 每日赛程预告：`esports_daily_schedule` 策略 07:00 推送**昨日结果 + 今日赛程**到 `news_nba` / `news_lol` / `news_worldcup`（NBA 按 `NBA_TEAM_MONITOR` 过滤关注球队，昨日今日同一套过滤；LoL 覆盖 LPL/LCK/先锋赛/Worlds/MSI）。**赛事推送的唯一入口**——每日简报（`push_daily_report` / `push_daily_extras`）曾并行推一份「昨日/今日」汇总造成每天双推（07:00 + 08:00），已于 2026-08-04 摘除，新增赛事推送不要再挂到简报里
 - 赛前提醒：比赛开始前30分钟推送
 - 比分变化：仅在比分发生变化时推送（避免重复通知）
 - 比赛结束：自动检测并推送最终比分
@@ -39,6 +39,6 @@ paths:
 | `ESPORTS_WORLDCUP_MONITOR_INTERVAL` | 世界杯比分轮询间隔（分钟） | `5` |
 
 - 数据源：ESPN soccer `fifa.world` scoreboard（与 NBA 同源同结构）。数据层独立 `app/services/worldcup_service.py`，足球语义（平局/点球/上下半场状态）自洽，不污染 NBA/LoL。
-- 推送：每日赛程预告（07:00，并入 `esports_daily_schedule`）→ `news_worldcup`；赛前 30min 提醒（共享 `ESPORTS_PRE_MATCH_MINUTES`）；进球/比分变化；终场比分（胜方加 🏆，平局无 🏆，点球括号标注）。全部比赛无球队过滤。
+- 推送：每日昨日结果 + 今日赛程（07:00，并入 `esports_daily_schedule`；昨日已完赛复用 `WorldCupService.format_score(g, final=True)`）→ `news_worldcup`；赛前 30min 提醒（共享 `ESPORTS_PRE_MATCH_MINUTES`）；进球/比分变化；终场比分（胜方加 🏆，平局无 🏆，点球括号标注）。全部比赛无球队过滤。
 - 监控调度：`EsportsMonitorService` 以加法式分支纳入 `match_type='worldcup'`，复用赛前提醒/比分轮询/重试队列框架。WC2026 在美加墨，北京时间多落 00:00–11:00，靠 22:00 次日 setup 覆盖凌晨场次、5:00 早间 setup 覆盖白天场次。
 - 退场：赛事结束后删 `worldcup_service.py` + `worldcup_config.py` + 各文件 worldcup 分支与 `CHANNEL_WORLDCUP`。

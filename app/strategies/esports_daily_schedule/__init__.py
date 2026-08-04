@@ -1,4 +1,4 @@
-"""每日赛事安排推送 — 每天 07:00 推送今日 NBA 和 LoL 赛程
+"""每日赛事安排推送 — 每天 07:00 推送昨日结果 + 今日 NBA 和 LoL 赛程
 
 失败联赛不直接推 "数据获取失败"，而是挂起 5min × 3 轮重试。
 详见 docs/plans/2026-05-07-esports-retry-queue-design.md
@@ -11,6 +11,15 @@ from app.strategies.base import Strategy, Signal
 logger = logging.getLogger(__name__)
 
 _CST = timezone(timedelta(hours=8))
+
+
+def _sorted_by_time(matches):
+    return sorted(matches, key=lambda x: x.get('start_time') or '99:99')
+
+
+def _is_played(m, score_key):
+    """已开赛（进行中/已结束且有比分）→ 昨日段按比分展示"""
+    return m['status'] in ('completed', 'in_progress') and m.get(score_key) is not None
 
 
 class EsportsDailyScheduleStrategy(Strategy):
@@ -47,21 +56,39 @@ class EsportsDailyScheduleStrategy(Strategy):
                 enqueue(today, 'nba', 'NBA')
                 return
 
-            games = nba.get('today') or []
             monitored_cn = {NBA_TEAM_NAMES.get(k, k) for k, v in NBA_TEAM_MONITOR.items() if v}
-            if monitored_cn:
-                games = [g for g in games if g['home'] in monitored_cn or g['away'] in monitored_cn]
 
-            if not games:
-                NotificationService.send_slack('🏀 *今日 NBA 赛程*\n无关注球队比赛', CHANNEL_NBA)
-                return
+            def _filtered(key):
+                games = nba.get(key) or []
+                if monitored_cn:
+                    games = [g for g in games
+                             if g['home'] in monitored_cn or g['away'] in monitored_cn]
+                return games
 
-            lines = [f'🏀 *今日 NBA 赛程* ({len(games)}场)', '']
-            for g in sorted(games, key=lambda x: x.get('start_time') or '99:99'):
-                t = g.get('start_time') or '--:--'
-                lines.append(f'  · {t}  {g["away"]} vs {g["home"]}')
+            yesterday, today = _filtered('yesterday'), _filtered('today')
+
+            lines = ['🏀 *NBA*', '']
+            if not yesterday:
+                lines.append('昨日: 无关注球队比赛')
+            else:
+                lines.append(f'昨日 ({len(yesterday)}场)')
+                for g in _sorted_by_time(yesterday):
+                    if _is_played(g, 'away_score'):
+                        lines.append(
+                            f'  · {g["away"]} {g["away_score"]}-{g["home_score"]} {g["home"]}')
+                    else:
+                        lines.append(f'  · {g["away"]} vs {g["home"]} 未开赛')
+            lines.append('')
+            if not today:
+                lines.append('今日: 无关注球队比赛')
+            else:
+                lines.append(f'今日 ({len(today)}场)')
+                for g in _sorted_by_time(today):
+                    t = g.get('start_time') or '--:--'
+                    lines.append(f'  · {t}  {g["away"]} vs {g["home"]}')
+
             NotificationService.send_slack('\n'.join(lines), CHANNEL_NBA)
-            logger.info(f'[赛事安排] NBA 推送 {len(games)} 场')
+            logger.info(f'[赛事安排] NBA 推送 昨日{len(yesterday)}场 / 今日{len(today)}场')
         except Exception as e:
             logger.error(f'[赛事安排] NBA 推送失败: {type(e).__name__}: {e}', exc_info=True)
 
@@ -90,24 +117,37 @@ class EsportsDailyScheduleStrategy(Strategy):
                 if data is None:
                     enqueue(today, 'lol', league)
                     continue
+                prev = data.get('yesterday') or []
                 matches = data.get('today') or []
-                if not matches and league not in LOL_ALWAYS_SHOW:
-                    continue
-                if not matches:
-                    sections.append(f'*{league}*\n今日无赛事')
+                if not prev and not matches and league not in LOL_ALWAYS_SHOW:
                     continue
                 total += len(matches)
-                lines = [f'*{league}* ({len(matches)}场)']
-                for m in sorted(matches, key=lambda x: x.get('start_time') or '99:99'):
-                    t = m.get('start_time') or '--:--'
-                    lines.append(f'  · {t}  {m["team1"]} vs {m["team2"]}')
+
+                lines = [f'*{league}*']
+                if not prev:
+                    lines.append('昨日: 无赛事')
+                else:
+                    lines.append(f'昨日 ({len(prev)}场)')
+                    for m in _sorted_by_time(prev):
+                        if _is_played(m, 'score1'):
+                            lines.append(
+                                f'  · {m["team1"]} {m["score1"]}-{m["score2"]} {m["team2"]}')
+                        else:
+                            lines.append(f'  · {m["team1"]} vs {m["team2"]} 未开赛')
+                if not matches:
+                    lines.append('今日: 无赛事')
+                else:
+                    lines.append(f'今日 ({len(matches)}场)')
+                    for m in _sorted_by_time(matches):
+                        t = m.get('start_time') or '--:--'
+                        lines.append(f'  · {t}  {m["team1"]} vs {m["team2"]}')
                 sections.append('\n'.join(lines))
 
             if not sections:
                 return
-            header = f'🎮 *今日 LoL 赛程* ({total}场)' if total else '🎮 *今日 LoL 赛程*'
+            header = f'🎮 *LoL 赛程* (今日{total}场)' if total else '🎮 *LoL 赛程*'
             NotificationService.send_slack(header + '\n\n' + '\n\n'.join(sections), CHANNEL_LOL)
-            logger.info(f'[赛事安排] LoL 推送 {total} 场')
+            logger.info(f'[赛事安排] LoL 推送 今日 {total} 场')
         except Exception as e:
             logger.error(f'[赛事安排] LoL 推送失败: {type(e).__name__}: {e}', exc_info=True)
 
@@ -128,18 +168,32 @@ class EsportsDailyScheduleStrategy(Strategy):
                 enqueue(today, 'worldcup', 'WorldCup')
                 return
 
+            yesterday = sched.get('yesterday') or []
             games = sched.get('today') or []
-            if not games:
-                NotificationService.send_slack(
-                    '⚽ *今日世界杯赛程*\n今日无比赛', CHANNEL_WORLDCUP)
-                return
 
-            lines = [f'⚽ *今日世界杯赛程* ({len(games)}场)', '']
-            for g in sorted(games, key=lambda x: x.get('start_time') or '99:99'):
-                t = g.get('start_time') or '--:--'
-                lines.append(f'  · {t}  {g["home"]} vs {g["away"]}')
+            lines = ['⚽ *世界杯赛程*', '']
+            if not yesterday:
+                lines.append('昨日: 无比赛')
+            else:
+                lines.append(f'昨日 ({len(yesterday)}场)')
+                for g in _sorted_by_time(yesterday):
+                    if g['status'] == 'completed':
+                        score = WorldCupService.format_score(g, final=True)
+                        lines.append(f'  · {score.removeprefix("⚽ ")}')
+                    else:
+                        lines.append(f'  · {g["home"]} vs {g["away"]} 未开赛')
+            lines.append('')
+            if not games:
+                lines.append('今日: 无比赛')
+            else:
+                lines.append(f'今日 ({len(games)}场)')
+                for g in _sorted_by_time(games):
+                    t = g.get('start_time') or '--:--'
+                    lines.append(f'  · {t}  {g["home"]} vs {g["away"]}')
+
             NotificationService.send_slack('\n'.join(lines), CHANNEL_WORLDCUP)
-            logger.info(f'[赛事安排] 世界杯 推送 {len(games)} 场')
+            logger.info(
+                f'[赛事安排] 世界杯 推送 昨日{len(yesterday)}场 / 今日{len(games)}场')
         except Exception as e:
             logger.error(f'[赛事安排] 世界杯 推送失败: {type(e).__name__}: {e}',
                          exc_info=True)

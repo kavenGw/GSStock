@@ -41,6 +41,17 @@ def _patch_slack(monkeypatch):
     return cap
 
 
+@pytest.fixture
+def enable_nba(monkeypatch):
+    """本机 .env 可能关掉 NBA/世界杯，测试不依赖该开关"""
+    monkeypatch.setattr('app.config.esports_config.NBA_ENABLED', True)
+
+
+@pytest.fixture
+def enable_worldcup(monkeypatch):
+    monkeypatch.setattr('app.config.worldcup_config.WORLDCUP_ENABLED', True)
+
+
 def test_lol_partial_success_pushes_first_and_enqueues_failures(monkeypatch):
     cap = _patch_slack(monkeypatch)
     fake_lol = {
@@ -100,11 +111,11 @@ def test_lol_all_success_pushes_first_no_enqueue(monkeypatch):
 
     assert len(cap.calls) == 1
     text = cap.calls[0][0]
-    assert 'LPL' in text and 'LCK' in text and '先锋赛' in text and '今日无赛事' in text
+    assert 'LPL' in text and 'LCK' in text and '先锋赛' in text and '今日: 无赛事' in text
     assert rq._pending == {}
 
 
-def test_nba_failure_enqueues(monkeypatch):
+def test_nba_failure_enqueues(monkeypatch, enable_nba):
     cap = _patch_slack(monkeypatch)
     monkeypatch.setattr(
         'app.services.esports_service.EsportsService.get_nba_schedule',
@@ -118,7 +129,7 @@ def test_nba_failure_enqueues(monkeypatch):
     assert rq._key(today, 'nba', 'NBA') in rq._pending
 
 
-def test_worldcup_failure_enqueues(monkeypatch):
+def test_worldcup_failure_enqueues(monkeypatch, enable_worldcup):
     cap = _patch_slack(monkeypatch)
     monkeypatch.setattr(
         'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
@@ -130,7 +141,7 @@ def test_worldcup_failure_enqueues(monkeypatch):
     assert rq._key(today, 'worldcup', 'WorldCup') in rq._pending
 
 
-def test_worldcup_success_pushes(monkeypatch):
+def test_worldcup_success_pushes(monkeypatch, enable_worldcup):
     cap = _patch_slack(monkeypatch)
     fake = {'today': [{'home': '巴西', 'away': '中国', 'start_time': '08:00'}],
             'yesterday': []}
@@ -146,7 +157,7 @@ def test_worldcup_success_pushes(monkeypatch):
     assert rq._pending == {}
 
 
-def test_worldcup_empty_pushes_no_match(monkeypatch):
+def test_worldcup_empty_pushes_no_match(monkeypatch, enable_worldcup):
     cap = _patch_slack(monkeypatch)
     monkeypatch.setattr(
         'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
@@ -154,7 +165,69 @@ def test_worldcup_empty_pushes_no_match(monkeypatch):
     )
     EsportsDailyScheduleStrategy._push_worldcup_today()
     assert len(cap.calls) == 1
-    assert '今日无比赛' in cap.calls[0][0]
+    assert '今日: 无比赛' in cap.calls[0][0]
+
+
+def test_lol_includes_yesterday_results(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    fake_lol = {
+        'LPL': {
+            'today': [{'team1': 'A', 'team2': 'B', 'start_time': '17:00'}],
+            'yesterday': [{'team1': 'WBG', 'team2': 'WE', 'start_time': '17:00',
+                           'status': 'completed', 'score1': 2, 'score2': 1}],
+        },
+        'LCK': {'today': [], 'yesterday': []},
+        '先锋赛': {'today': [], 'yesterday': []},
+    }
+    monkeypatch.setattr(
+        'app.services.esports_service.EsportsService.get_lol_schedule',
+        staticmethod(lambda today=None: fake_lol),
+    )
+
+    EsportsDailyScheduleStrategy._push_lol_today()
+
+    text = cap.calls[0][0]
+    assert '昨日 (1场)' in text and 'WBG 2-1 WE' in text
+    assert '今日 (1场)' in text and 'A vs B' in text
+
+
+def test_nba_includes_yesterday_results(monkeypatch, enable_nba):
+    cap = _patch_slack(monkeypatch)
+    fake = {
+        'today': [],
+        'yesterday': [{'home': '湖人', 'away': '勇士', 'start_time': '09:00',
+                       'status': 'completed', 'home_score': 100, 'away_score': 110}],
+    }
+    monkeypatch.setattr(
+        'app.services.esports_service.EsportsService.get_nba_schedule',
+        staticmethod(lambda today=None: fake),
+    )
+    monkeypatch.setattr('app.config.esports_config.NBA_TEAM_MONITOR', {})
+
+    EsportsDailyScheduleStrategy._push_nba_today()
+
+    text = cap.calls[0][0]
+    assert '勇士 110-100 湖人' in text
+    assert '今日: 无关注球队比赛' in text
+
+
+def test_worldcup_includes_yesterday_results(monkeypatch, enable_worldcup):
+    cap = _patch_slack(monkeypatch)
+    fake = {
+        'today': [],
+        'yesterday': [{'home': '巴西', 'away': '中国', 'start_time': '08:00',
+                       'status': 'completed', 'home_score': 2, 'away_score': 1}],
+    }
+    monkeypatch.setattr(
+        'app.services.worldcup_service.WorldCupService.get_worldcup_schedule',
+        staticmethod(lambda today=None: fake),
+    )
+
+    EsportsDailyScheduleStrategy._push_worldcup_today()
+
+    text = cap.calls[0][0]
+    assert '巴西 2*' in text and '1 中国' in text and '终场' in text
+    assert '今日: 无比赛' in text
 
 
 def test_worldcup_disabled_skips(monkeypatch):

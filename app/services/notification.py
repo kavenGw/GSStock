@@ -12,7 +12,7 @@ import certifi
 
 from app.config.notification_config import (
     SLACK_BOT_TOKEN, SLACK_ENABLED,
-    CHANNEL_NEWS, CHANNEL_WATCH, CHANNEL_AI_TOOL, CHANNEL_LOL, CHANNEL_NBA, CHANNEL_DAILY,
+    CHANNEL_NEWS, CHANNEL_WATCH, CHANNEL_AI_TOOL, CHANNEL_DAILY,
     CHANNEL_OPERATION,
 )
 
@@ -980,108 +980,6 @@ class NotificationService:
             logger.warning(f'[通知.GitHub Trending] 获取失败: {e}')
             return []
 
-    @staticmethod
-    def format_esports_summary_split() -> tuple[str, str]:
-        """格式化赛事资讯，分别返回 NBA 和 LoL 文本
-
-        Returns:
-            (nba_text, lol_text)，获取失败的部分返回空字符串
-        """
-        from app.config.esports_config import ESPORTS_ENABLED
-        if not ESPORTS_ENABLED:
-            return '', ''
-
-        nba_text = ''
-        lol_text = ''
-
-        try:
-            from app.services.esports_service import EsportsService
-
-            # NBA
-            nba = EsportsService.get_nba_schedule()
-            if nba is not None:
-                nba_text = NotificationService._format_nba_section(nba)
-
-            # LoL
-            from app.config.esports_config import LOL_ALWAYS_SHOW
-            lol = EsportsService.get_lol_schedule()
-            if lol is not None:
-                lol_sections = []
-                for league_name in ['LPL', 'LCK', '先锋赛', 'Worlds', 'MSI']:
-                    if league_name not in lol:
-                        continue
-                    league_data = lol[league_name]
-                    if league_data is None:
-                        lol_sections.append(f'🎮 {league_name}\n数据获取失败')
-                    else:
-                        has_matches = any(
-                            league_data.get(k) for k in ('yesterday', 'today')
-                        )
-                        if has_matches or league_name in LOL_ALWAYS_SHOW:
-                            section = NotificationService._format_lol_section(
-                                league_name, league_data,
-                            )
-                            lol_sections.append(section)
-                if lol_sections:
-                    lol_text = '\n\n'.join(lol_sections)
-        except Exception as e:
-            logger.warning(f'[通知.赛事] 格式化失败: {e}')
-
-        return nba_text, lol_text
-
-    @staticmethod
-    def _format_nba_section(nba_data) -> str:
-        from app.config.esports_config import NBA_TEAM_MONITOR, NBA_TEAM_NAMES
-
-        # 构建关注球队的中文名集合
-        monitored_cn = set()
-        for eng_name, enabled in NBA_TEAM_MONITOR.items():
-            if enabled:
-                cn_name = NBA_TEAM_NAMES.get(eng_name, eng_name)
-                monitored_cn.add(cn_name)
-
-        lines = ['🏀 NBA']
-        for label, key in [('昨日', 'yesterday'), ('今日', 'today')]:
-            games = nba_data.get(key)
-            if games is None:
-                lines.append(f'{label}: 数据获取失败')
-                continue
-
-            # 过滤关注球队
-            if monitored_cn:
-                games = [g for g in games if g['home'] in monitored_cn or g['away'] in monitored_cn]
-
-            if not games:
-                lines.append(f'{label}: 无关注球队比赛')
-            else:
-                completed = [g for g in games if g['status'] in ('completed', 'in_progress')]
-                scheduled = [g for g in games if g['status'] not in ('completed', 'in_progress')]
-                lines.append(f'{label} ({len(games)}场):')
-                for g in completed:
-                    lines.append(f"  {g['away']} {g['away_score']}-{g['home_score']} {g['home']}")
-                for g in scheduled:
-                    lines.append(f"  {g['away']} vs {g['home']} {g['start_time']}")
-        return '\n'.join(lines)
-
-    @staticmethod
-    def _format_lol_section(league_name, league_data) -> str:
-        lines = [f'🎮 {league_name}']
-        for label, key in [('昨日', 'yesterday'), ('今日', 'today')]:
-            matches = league_data.get(key)
-            if matches is None:
-                lines.append(f'{label}: 数据获取失败')
-            elif not matches:
-                lines.append(f'{label}: 无赛事')
-            else:
-                completed = [m for m in matches if m['status'] in ('completed', 'in_progress') and m['score1'] is not None]
-                scheduled = [m for m in matches if m['status'] not in ('completed', 'in_progress') or m['score1'] is None]
-                lines.append(f'{label} ({len(matches)}场):')
-                for m in completed:
-                    lines.append(f"  {m['team1']} {m['score1']}-{m['score2']} {m['team2']}")
-                for m in scheduled:
-                    lines.append(f"  {m['team1']} vs {m['team2']} {m['start_time']}")
-        return '\n'.join(lines)
-
     # ── Slack Block Kit helpers ──
 
     @staticmethod
@@ -1408,9 +1306,6 @@ class NotificationService:
         # GitHub Release 版本更新
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
 
-        # 赛事资讯
-        nba_text, lol_text = NotificationService.format_esports_summary_split()
-
         # GLM 综合分析
         core_insights = ''
         action_suggestions = ''
@@ -1551,14 +1446,6 @@ class NotificationService:
                     for key, version in release_pushed_versions:
                         GitHubReleaseService.mark_pushed_version(key, version)
 
-        # 赛事 → 各自频道
-        if nba_text:
-            if NotificationService.send_slack(nba_text, CHANNEL_NBA):
-                sent += 1
-        if lol_text:
-            if NotificationService.send_slack(lol_text, CHANNEL_LOL):
-                sent += 1
-
         total = len(news_messages) + (1 if watch_msg else 0)
         results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': total}
         results['content_preview'] = news_messages[0][:500] if news_messages else ''
@@ -1573,7 +1460,7 @@ class NotificationService:
 
     @staticmethod
     def push_daily_extras() -> dict:
-        """周末推送: GitHub Release + 赛事资讯（不含市场简报）"""
+        """周末推送: GitHub Release（不含市场简报；赛事归 esports_daily_schedule 07:00）"""
         with NotificationService._daily_push_lock:
             today = date.today()
 
@@ -1596,15 +1483,6 @@ class NotificationService:
                     from app.services.github_release import GitHubReleaseService
                     for key, version in release_pushed_versions:
                         GitHubReleaseService.mark_pushed_version(key, version)
-
-        # 赛事 → 各自频道
-        nba_text, lol_text = NotificationService.format_esports_summary_split()
-        if nba_text:
-            if NotificationService.send_slack(nba_text, CHANNEL_NBA):
-                sent += 1
-        if lol_text:
-            if NotificationService.send_slack(lol_text, CHANNEL_LOL):
-                sent += 1
 
         return {'slack': sent > 0, 'messages_sent': sent}
 
