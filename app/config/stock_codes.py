@@ -99,6 +99,7 @@ WATCH_CODES = [
      'ah': {'code': '300476', 'market': 'A', 'name': '胜宏科技'}},
     {'code': '9992.HK',   'name': '泡泡玛特',  'market': 'HK'},
     {'code': '1888.HK',   'name': '建滔积层板', 'market': 'HK'},
+    {'code': '9868.HK',   'name': '小鹏集团-W', 'market': 'HK'},
     {'code': '300274',    'name': '阳光电源',  'market': 'A'},
     {'code': '002156',    'name': '通富微电',  'market': 'A'},
     {'code': '600988',    'name': '赤峰黄金',  'market': 'A'},
