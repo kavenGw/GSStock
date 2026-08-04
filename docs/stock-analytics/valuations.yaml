@@ -3784,3 +3784,22 @@
   - 功率半导体
   - AI数据中心
   - 汽车电子
+- stock_code: '688205'
+  stock_name: 德科立
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  quality: 2
+  watch_reason: 生意看得懂、资产负债表干净（零有息负债、净现金 11.2 亿），DCI 敞口也是真业绩（2025 接入和数据类 +180.55%）；但 2025 年在 AI 光通信最猛景气中是同业唯一营收仅 +10.99%、归母 −28.77% 的公司，ROE 3.14%（扣非 1.70%）远低于股权成本，毛利率 34.39%(2020)→25.73%(2026Q1) 单边下行；现价 126.15 元对应 PE_TTM 262x（扣非 467x）、PB 8.52 仍处 5 年 82% 分位，三情景加权期望内在价值约 14.84 元/股、安全边际约 −88%。观察点是「盈利能力能否修复」而非「AI 会不会来」——扣非年化回到 2.5 亿以上且单季毛利率站上 32% 之前，价格与基本面之间不存在任何可执行的买入区间。
+  bear: 9.29
+  base: 13.25
+  bull: 28.13
+  dividend_yield: 0.08
+  conviction_date: '2026-08-04'
+  source_doc: sectors/semiconductor/optical/2026-08-04-德科立-buffett分析.md
+  themes:
+  - ai_compute
+  - DCI
+  - 光模块
+  - 光放大器
