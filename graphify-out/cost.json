@@ -174,8 +174,14 @@
       "output_tokens": 0,
       "files": 81,
       "note": "incremental --update; input_tokens is combined subagent input+output (split unavailable)"
+    },
+    {
+      "date": "2026-08-04T02:14:55.023705+00:00",
+      "input_tokens": 263818,
+      "output_tokens": 0,
+      "files": 744
     }
   ],
-  "total_input_tokens": 2199882,
+  "total_input_tokens": 2463700,
   "total_output_tokens": 41700
 }
