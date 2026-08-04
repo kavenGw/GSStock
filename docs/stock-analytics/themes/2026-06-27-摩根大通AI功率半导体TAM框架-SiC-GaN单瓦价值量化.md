@@ -65,6 +65,9 @@ related_docs:
 - path: 2026-06-15-AI服务器GaN涨价兑现.md
   note: GaN涨价兑现专题，本框架给出GaN单瓦价值的长期上限锚
   symmetric: false
+- path: ../sectors/semiconductor/power/2026-08-04-安森美-buffett分析.md
+  note: onsemi 自述 AIDC 电源 TAM 2030 约 $50B（较此前 $12B 一次 4 倍上修）与本框架互校，且标注为公司自述非第三方，是本框架的美股实证补丁
+  symmetric: true
 ---
 # 摩根大通 AI 功率半导体 TAM 框架专题（2026-06-27）
 
@@ -83,6 +86,7 @@ related_docs:
 > - [2026-06-19-碳化硅-氮化镓-第三代半导体板块专题](2026-06-19-碳化硅-氮化镓-第三代半导体板块专题.md) — SiC+GaN板块格局专题，本档为其提供自上而下TAM定量骨架
 > - [2026-06-27-SiC衬底涨价周期-CoWoS-SiC化-Rubin-HVDC共振](2026-06-27-SiC衬底涨价周期-CoWoS-SiC化-Rubin-HVDC共振.md) — 供给侧涨价周期专题，本档是其需求侧定量验证（同日互补：供给紧×需求大）
 > - [2026-06-15-AI服务器GaN涨价兑现](2026-06-15-AI服务器GaN涨价兑现.md) — GaN涨价兑现专题，本框架给出GaN单瓦价值的长期上限锚
+> - [2026-08-04-安森美-buffett分析](../sectors/semiconductor/power/2026-08-04-安森美-buffett分析.md) — onsemi 自述 AIDC 电源 TAM 2030 约 $50B（较此前 $12B 一次 4 倍上修）与本框架互校，且标注为公司自述非第三方，是本框架的美股实证补丁
 <!-- END related_docs -->
 
 > 撰写日期：2026-06-27

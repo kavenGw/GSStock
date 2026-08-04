@@ -51,6 +51,9 @@ related_docs:
 - path: ../comps/2026-06-26-三安光电-天岳先进-SiC价值链对比-comps.md
   note: 三安(IDM) vs 天岳(纯衬底) SiC 价值链对比 comps，本档涨价传导的价值链背景
   symmetric: false
+- path: ../sectors/semiconductor/power/2026-08-04-安森美-buffett分析.md
+  note: onsemi 官方口径核销本主题在美股 IDM 端的兑现节奏——800V HVDC 要 late 2027/early 2028 才 ramp，涨价/共振叙事尚未反映到其财报
+  symmetric: true
 ---
 # SiC 衬底涨价周期 + CoWoS SiC 化 + Rubin HVDC 三重共振：一条吹票贴背后的真假分层
 
@@ -66,6 +69,7 @@ related_docs:
 > - [2026-06-24-捷捷微电-buffett分析](../sectors/semiconductor/power/2026-06-24-捷捷微电-buffett分析.md) — 捷捷微电（MOS国产替代）——储能低压MOS缺货涨价受益但估值已透支
 > - [2026-06-19-碳化硅-氮化镓-第三代半导体板块专题](2026-06-19-碳化硅-氮化镓-第三代半导体板块专题.md) — SiC+GaN 板块格局专题，本档为其涨价周期事件驱动切片
 > - [2026-06-26-三安光电-天岳先进-SiC价值链对比-comps](../comps/2026-06-26-三安光电-天岳先进-SiC价值链对比-comps.md) — 三安(IDM) vs 天岳(纯衬底) SiC 价值链对比 comps，本档涨价传导的价值链背景
+> - [2026-08-04-安森美-buffett分析](../sectors/semiconductor/power/2026-08-04-安森美-buffett分析.md) — onsemi 官方口径核销本主题在美股 IDM 端的兑现节奏——800V HVDC 要 late 2027/early 2028 才 ramp，涨价/共振叙事尚未反映到其财报
 <!-- END related_docs -->
 
 ## §0 一句话结论

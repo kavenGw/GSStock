@@ -3767,3 +3767,20 @@
   - AI应用
   - Token经济
   - 金融IT
+- stock_code: 'ON'
+  stock_name: 安森美
+  market: US
+  currency: USD
+  sector: semiconductor
+  rating: watch
+  watch_reason: Q2 2026 确认周期复苏中段（毛利率连改 4 季至 39.3%、利用率 77%→83%、FCF $425M YoY 翻两番），经营杠杆修复是比 AI 更扎实的多头逻辑；但期望内在价值 $68.00/股对 8/4 盘中 $86.25 安全边际 -21.2%，PE(TTM) 51.5x / 2026E 27.6x / PB 4.35x 已把复苏提前定价，且增长为 PSG 单腿（AMG 同比 -2%）、800V HVDC 要 2027 末才 ramp、SiC 价格战结构性未消化，Beta 2.02。列观察待价格回落至 $48-54 或毛利率站稳 42%+ 后重估
+  bear: 40
+  base: 70
+  bull: 105
+  conviction_date: '2026-08-04'
+  source_doc: sectors/semiconductor/power/2026-08-04-安森美-buffett分析.md
+  themes:
+  - silicon-carbide
+  - 功率半导体
+  - AI数据中心
+  - 汽车电子
