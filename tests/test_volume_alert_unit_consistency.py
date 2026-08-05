@@ -5,6 +5,7 @@
 2. volume_alert 比值异常 / 今日bar残缺 sanity gate
 3. VOLUME_UNIT_SCHEMA_VERSION 缓存失效检测机制
 """
+import ast
 import os
 import re
 import sys
@@ -316,3 +317,68 @@ def test_sina_batch_trend_normalizes_shares_to_lots(monkeypatch):
 
     vols = [p['volume'] for p in results[0]['data']]
     assert vols == [17534730, 25060238], f"新浪批量走势未归一到手: {vols}"
+
+
+# ============ 5. AST 静态断言：禁止绕过归一 helper ============
+
+def _unwrap_volume_expr(node):
+    """剥掉 `X or 0` / 三元表达式外壳，取出真正的取值表达式列表"""
+    if isinstance(node, ast.BoolOp):
+        out = []
+        for v in node.values:
+            out.extend(_unwrap_volume_expr(v))
+        return out
+    if isinstance(node, ast.IfExp):
+        return _unwrap_volume_expr(node.body) + _unwrap_volume_expr(node.orelse)
+    return [node]
+
+
+def _volume_dict_values(tree):
+    """收集 unified_stock_data.py 中所有 {'volume': <expr>} 的 <expr>"""
+    found = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Dict):
+            continue
+        for key, value in zip(node.keys, node.values):
+            if isinstance(key, ast.Constant) and key.value == 'volume':
+                found.append((key.lineno, value))
+    return found
+
+
+def test_all_volume_assignments_go_through_normalize_helper():
+    """任何 'volume' 赋值都必须来自 _normalize_volume()，不得内联换算"""
+    tree = ast.parse(SERVICE_FILE.read_text(encoding='utf-8'))
+    offenders = []
+    for lineno, value in _volume_dict_values(tree):
+        for expr in _unwrap_volume_expr(value):
+            if isinstance(expr, ast.Constant):  # `'volume': 0` / None 占位允许
+                continue
+            is_helper_call = (
+                isinstance(expr, ast.Call)
+                and isinstance(expr.func, ast.Name)
+                and expr.func.id == '_normalize_volume'
+            )
+            if not is_helper_call:
+                offenders.append(lineno)
+    assert not offenders, (
+        f"unified_stock_data.py 第 {sorted(set(offenders))} 行的 volume 绕过了 _normalize_volume()，"
+        f"新增数据源必须在 VOLUME_SOURCE_UNITS 登记单位后走 helper"
+    )
+
+
+def test_all_used_source_keys_are_registered():
+    """所有 _normalize_volume 调用点用到的 source 字面量都已登记"""
+    tree = ast.parse(SERVICE_FILE.read_text(encoding='utf-8'))
+    used = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == '_normalize_volume' and len(node.args) >= 2):
+            src = node.args[1]
+            assert isinstance(src, ast.Constant), (
+                f"第 {node.lineno} 行 _normalize_volume 的 source 必须是字面量，不能是变量"
+            )
+            used.add(src.value)
+
+    unknown = used - set(VOLUME_SOURCE_UNITS)
+    assert not unknown, f"未登记的数据源: {unknown}"
+    assert len(used) >= 10, f"调用点覆盖的源过少（{len(used)}），疑有落点未接入"
