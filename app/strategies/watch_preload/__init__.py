@@ -1,16 +1,16 @@
-"""盯盘数据预取策略 — A股每分钟，美股/港股每3分钟（差异化提频）"""
+"""盯盘数据预取策略 — A股/港股每分钟（腾讯源），美股每3分钟"""
 import logging
 from app.strategies.base import Strategy, Signal
 
 logger = logging.getLogger(__name__)
 
 BACKOFF_CAP = 8
-NON_A_REFRESH_EVERY = 3   # 美股/港股每 3 tick(≈3min)刷新
+NON_A_REFRESH_EVERY = 3   # 美股等 yfinance 市场每 3 tick(≈3min)刷新
 
 
 class WatchPreloadStrategy(Strategy):
     name = "watch_preload"
-    description = "盯盘数据预取（A股1min/美港股3min，趋势分档）"
+    description = "盯盘数据预取（A股/港股1min，美股3min，趋势分档）"
     schedule = "interval_minutes:1"
     needs_llm = False
 
@@ -52,7 +52,7 @@ class WatchPreloadStrategy(Strategy):
 
     @staticmethod
     def _should_refresh_market(market: str, tick: int, non_a_every: int = NON_A_REFRESH_EVERY) -> bool:
-        if market == 'A':
+        if market in ('A', 'HK'):
             return True
         return tick % non_a_every == 0
 
