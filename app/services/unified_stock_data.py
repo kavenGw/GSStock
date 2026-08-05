@@ -10,6 +10,7 @@
 各源原生单位登记在 VOLUME_SOURCE_UNITS，转换一律走 _normalize_volume()，禁止在落点内联换算。
 """
 import logging
+import math
 import threading
 import pandas as pd
 from dataclasses import dataclass, asdict
@@ -29,9 +30,6 @@ from app.utils.market_identifier import MarketIdentifier
 from app.utils.readonly_mode import is_readonly_mode
 
 logger = logging.getLogger(__name__)
-
-
-import math
 
 
 # 缓存 volume 单位契约版本；变更契约时 bump 触发启动时全量清理

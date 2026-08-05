@@ -20,8 +20,6 @@ SERVICE_FILE = ROOT / 'app' / 'services' / 'unified_stock_data.py'
 
 # ============ 1. 单位归一化源码契约锁定 ============
 
-import math
-
 from app.services.unified_stock_data import VOLUME_SOURCE_UNITS, _normalize_volume
 
 
