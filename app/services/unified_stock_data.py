@@ -734,7 +734,7 @@ class UnifiedStockDataService:
                         'current_price': round(price_val, 2),
                         'change': round(change_val, 2),
                         'change_percent': round(change_pct, 2),
-                        'volume': int(latest['Volume']) if not pd.isna(latest['Volume']) else None,
+                        'volume': _normalize_volume(latest['Volume'], 'yfinance', market),
                         'high': round(float(latest['High']), 2) if not pd.isna(latest['High']) else None,
                         'low': round(float(latest['Low']), 2) if not pd.isna(latest['Low']) else None,
                         'open': round(float(latest['Open']), 2) if not pd.isna(latest['Open']) else None,
@@ -835,7 +835,7 @@ class UnifiedStockDataService:
                             'current_price': float(row['最新价']) if row['最新价'] else None,
                             'change': float(row.get('涨跌额', 0)) if row.get('涨跌额') else None,
                             'change_percent': float(row['涨跌幅']) if row['涨跌幅'] else None,
-                            'volume': int(row['成交量']) if row.get('成交量') else None,
+                            'volume': _normalize_volume(row.get('成交量'), 'eastmoney_spot', 'A'),
                             'high': float(row['最高']) if row.get('最高') else None,
                             'low': float(row['最低']) if row.get('最低') else None,
                             'open': float(row['今开']) if row.get('今开') else None,
@@ -882,8 +882,7 @@ class UnifiedStockDataService:
                             'current_price': float(row['最新价']) if row['最新价'] else None,
                             'change': float(row.get('涨跌额', 0)) if row.get('涨跌额') else None,
                             'change_percent': float(row['涨跌幅']) if row['涨跌幅'] else None,
-                            # 新浪 stock_zh_a_spot 返回"股"，/100 归一到"手"（与腾讯/东财对齐）
-                            'volume': int(row['成交量']) // 100 if row.get('成交量') else None,
+                            'volume': _normalize_volume(row.get('成交量'), 'sina_spot', 'A'),
                             'high': float(row['最高']) if row.get('最高') else None,
                             'low': float(row['最低']) if row.get('最低') else None,
                             'open': float(row['今开']) if row.get('今开') else None,
@@ -938,7 +937,7 @@ class UnifiedStockDataService:
                         'current_price': round(price_val, 2),
                         'change': round(change_val, 2),
                         'change_percent': round(change_pct, 2),
-                        'volume': int(latest['Volume']) if not pd.isna(latest['Volume']) else None,
+                        'volume': _normalize_volume(latest['Volume'], 'yfinance', 'A'),
                         'high': round(float(latest['High']), 2) if not pd.isna(latest['High']) else None,
                         'low': round(float(latest['Low']), 2) if not pd.isna(latest['Low']) else None,
                         'open': round(float(latest['Open']), 2) if not pd.isna(latest['Open']) else None,
@@ -1028,16 +1027,13 @@ class UnifiedStockDataService:
 
                 try:
                     market = self._identify_market(original_code) or 'A'
-                    raw_vol = float(fields[6]) if fields[6] else None
-                    # 腾讯 [6] A股原生"手"、港股原生"股"（成交额[37]交叉验证），均原样保留
-                    vol = int(raw_vol) if raw_vol is not None else None
                     result[original_code] = {
                         'code': original_code,
                         'name': fields[1],
                         'current_price': float(fields[3]) if fields[3] else None,
                         'prev_close': float(fields[4]) if fields[4] else None,
                         'open': float(fields[5]) if fields[5] else None,
-                        'volume': vol,
+                        'volume': _normalize_volume(fields[6], 'tencent_qt', market),
                         'high': float(fields[33]) if fields[33] else None,
                         'low': float(fields[34]) if fields[34] else None,
                         'change': float(fields[31]) if fields[31] else None,

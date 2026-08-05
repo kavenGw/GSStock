@@ -256,3 +256,27 @@ def test_sanity_gate_accepts_normal_anomaly(strategy_deps, caplog):
     assert signals[0].data['stock_code'] == '600519'
     # change_pct = (8000-3000)/3000 ≈ 1.667 → 放量 167%
     assert signals[0].data['volume_change_pct'] > 0
+
+
+# ============ 4. 落点接入回归 ============
+
+def test_tencent_qt_parse_returns_lots(monkeypatch):
+    """腾讯 q= 接口解析后 A 股 volume 为「手」（原值即手，不得再除）"""
+    from app.services import unified_stock_data as usd
+
+    raw_line = 'v_sz000725="51~京东方A~000725~5.97~5.63~5.59~25060238~0~0~5.97~' + '~'.join(['0'] * 60) + '";'
+
+    class FakeResp:
+        text = raw_line
+        encoding = 'gbk'
+        status_code = 200
+
+    # requests 在 unified_stock_data 中是函数内 import（无模块级属性），
+    # 必须 patch requests 模块本身，不能 patch usd.requests
+    monkeypatch.setattr('requests.get', lambda *a, **k: FakeResp())
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+    result = service._fetch_from_tencent(['000725'], '2026-08-05 16:30:00')
+
+    assert result['000725']['volume'] == 25060238
