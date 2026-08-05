@@ -6,7 +6,8 @@
 - 收盘后: 次日开盘前有效
 - 非交易日: 下个交易日开盘前有效
 
-单位契约：所有 A 股 OHLC/realtime volume 字段统一为"手"（腾讯/新浪源解析时 /100 归一）。
+单位契约：A 股 OHLC/realtime volume 统一为"手"，港股/美股为"股"。
+各源原生单位登记在 VOLUME_SOURCE_UNITS，转换一律走 _normalize_volume()，禁止在落点内联换算。
 """
 import logging
 import threading
@@ -30,8 +31,50 @@ from app.utils.readonly_mode import is_readonly_mode
 logger = logging.getLogger(__name__)
 
 
+import math
+
+
 # 缓存 volume 单位契约版本；变更契约时 bump 触发启动时全量清理
-VOLUME_UNIT_SCHEMA_VERSION = 3
+VOLUME_UNIT_SCHEMA_VERSION = 4
+
+
+# 各数据源 volume 原生单位（'lots'=手 / 'shares'=股）。
+# 单位标注以 A 股口径为准——港股/美股契约本就是「股」，_normalize_volume 对非 A 市场一律原样返回，
+# 故 tencent_qt 之类「A 股为手、港股为股」的源在此登记为 'lots' 不会影响港股。
+VOLUME_SOURCE_UNITS = {
+    'tencent_qt': 'lots',           # qt.gtimg.cn q= 接口 [6]
+    'tencent_fqkline': 'lots',      # appstock fqkline 日K row[5]
+    'tencent_mkline': 'lots',       # appstock mkline 分钟K row[5]
+    'sina_spot': 'shares',          # ak.stock_zh_a_spot
+    'sina_daily': 'shares',         # ak.stock_zh_a_daily
+    'eastmoney_ak_hist': 'lots',    # ak.stock_zh_a_hist
+    'eastmoney_push2his': 'lots',   # push2his.eastmoney.com kline
+    'eastmoney_spot': 'lots',       # ak.stock_zh_a_spot_em
+    'eastmoney_hist_min': 'lots',   # ak.stock_zh_a_hist_min_em
+    'eastmoney_intraday': 'lots',   # ak.stock_intraday_em 的「手数」列
+    'etf_fund_hist': 'lots',        # ak.fund_etf_hist_em
+    'yfinance': 'shares',           # yfinance Volume
+}
+
+
+def _normalize_volume(raw, source: str, market: str):
+    """把各源的 volume 归一到契约单位：A 股=手，港股/美股=股。
+
+    source 未登记时抛 KeyError —— 宁可启动即失败，也不静默按错误单位入库。
+    raw 为空/非数值时返回 None，由调用点决定填 0 还是 None。
+    """
+    unit = VOLUME_SOURCE_UNITS[source]
+    if raw is None:
+        return None
+    try:
+        val = float(raw)
+    except (TypeError, ValueError):
+        return None
+    if math.isnan(val):
+        return None
+    if market == 'A' and unit == 'shares':
+        return int(val) // 100
+    return int(val)
 
 
 def _tencent_code(code: str) -> str:
