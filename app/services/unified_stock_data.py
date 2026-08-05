@@ -6,9 +6,11 @@
 - 收盘后: 次日开盘前有效
 - 非交易日: 下个交易日开盘前有效
 
-单位契约：所有 A 股 OHLC/realtime volume 字段统一为"手"（腾讯/新浪源解析时 /100 归一）。
+单位契约：A 股 OHLC/realtime volume 统一为"手"，港股/美股为"股"。
+各源原生单位登记在 VOLUME_SOURCE_UNITS，转换一律走 _normalize_volume()，禁止在落点内联换算。
 """
 import logging
+import math
 import threading
 import pandas as pd
 from dataclasses import dataclass, asdict
@@ -31,7 +33,46 @@ logger = logging.getLogger(__name__)
 
 
 # 缓存 volume 单位契约版本；变更契约时 bump 触发启动时全量清理
-VOLUME_UNIT_SCHEMA_VERSION = 3
+VOLUME_UNIT_SCHEMA_VERSION = 4
+
+
+# 各数据源 volume 原生单位（'lots'=手 / 'shares'=股）。
+# 单位标注以 A 股口径为准——港股/美股契约本就是「股」，_normalize_volume 对非 A 市场一律原样返回，
+# 故 tencent_qt 之类「A 股为手、港股为股」的源在此登记为 'lots' 不会影响港股。
+VOLUME_SOURCE_UNITS = {
+    'tencent_qt': 'lots',           # qt.gtimg.cn q= 接口 [6]
+    'tencent_fqkline': 'lots',      # appstock fqkline 日K row[5]
+    'tencent_mkline': 'lots',       # appstock mkline 分钟K row[5]
+    'sina_spot': 'shares',          # ak.stock_zh_a_spot
+    'sina_daily': 'shares',         # ak.stock_zh_a_daily
+    'eastmoney_ak_hist': 'lots',    # ak.stock_zh_a_hist
+    'eastmoney_push2his': 'lots',   # push2his.eastmoney.com kline
+    'eastmoney_spot': 'lots',       # ak.stock_zh_a_spot_em
+    'eastmoney_hist_min': 'lots',   # ak.stock_zh_a_hist_min_em
+    'eastmoney_intraday': 'lots',   # ak.stock_intraday_em 的「手数」列
+    'etf_fund_hist': 'lots',        # ak.fund_etf_hist_em
+    'yfinance': 'shares',           # yfinance Volume
+}
+
+
+def _normalize_volume(raw, source: str, market: str):
+    """把各源的 volume 归一到契约单位：A 股=手，港股/美股=股。
+
+    source 未登记时抛 KeyError —— 宁可启动即失败，也不静默按错误单位入库。
+    raw 为空/非数值时返回 None，由调用点决定填 0 还是 None。
+    """
+    unit = VOLUME_SOURCE_UNITS[source]
+    if raw is None:
+        return None
+    try:
+        val = float(raw)
+    except (TypeError, ValueError):
+        return None
+    if math.isnan(val):
+        return None
+    if market == 'A' and unit == 'shares':
+        return int(val) // 100
+    return int(val)
 
 
 def _tencent_code(code: str) -> str:
@@ -278,7 +319,7 @@ class UnifiedStockDataService:
                 if not stock_dir.is_dir():
                     continue
                 for pkl in stock_dir.glob('*.pkl'):
-                    if pkl.stem.startswith(('ohlc_', 'price', 'index')):
+                    if pkl.stem.startswith(('ohlc_', 'price', 'index', 'intraday_')):
                         try:
                             pkl.unlink()
                             removed_pkl += 1
@@ -296,7 +337,8 @@ class UnifiedStockDataService:
                 return
             deleted = UnifiedStockCache.query.filter(
                 UnifiedStockCache.cache_type.in_(['price', 'index']) |
-                UnifiedStockCache.cache_type.like('ohlc_%')
+                UnifiedStockCache.cache_type.like('ohlc_%') |
+                UnifiedStockCache.cache_type.like('intraday_%')
             ).delete(synchronize_session=False)
             db.session.commit()
         except Exception as e:
@@ -693,7 +735,7 @@ class UnifiedStockDataService:
                         'current_price': round(price_val, 2),
                         'change': round(change_val, 2),
                         'change_percent': round(change_pct, 2),
-                        'volume': int(latest['Volume']) if not pd.isna(latest['Volume']) else None,
+                        'volume': _normalize_volume(latest['Volume'], 'yfinance', market),
                         'high': round(float(latest['High']), 2) if not pd.isna(latest['High']) else None,
                         'low': round(float(latest['Low']), 2) if not pd.isna(latest['Low']) else None,
                         'open': round(float(latest['Open']), 2) if not pd.isna(latest['Open']) else None,
@@ -794,7 +836,7 @@ class UnifiedStockDataService:
                             'current_price': float(row['最新价']) if row['最新价'] else None,
                             'change': float(row.get('涨跌额', 0)) if row.get('涨跌额') else None,
                             'change_percent': float(row['涨跌幅']) if row['涨跌幅'] else None,
-                            'volume': int(row['成交量']) if row.get('成交量') else None,
+                            'volume': _normalize_volume(row.get('成交量'), 'eastmoney_spot', 'A'),
                             'high': float(row['最高']) if row.get('最高') else None,
                             'low': float(row['最低']) if row.get('最低') else None,
                             'open': float(row['今开']) if row.get('今开') else None,
@@ -841,8 +883,7 @@ class UnifiedStockDataService:
                             'current_price': float(row['最新价']) if row['最新价'] else None,
                             'change': float(row.get('涨跌额', 0)) if row.get('涨跌额') else None,
                             'change_percent': float(row['涨跌幅']) if row['涨跌幅'] else None,
-                            # 新浪 stock_zh_a_spot 返回"股"，/100 归一到"手"（与腾讯/东财对齐）
-                            'volume': int(row['成交量']) // 100 if row.get('成交量') else None,
+                            'volume': _normalize_volume(row.get('成交量'), 'sina_spot', 'A'),
                             'high': float(row['最高']) if row.get('最高') else None,
                             'low': float(row['最低']) if row.get('最低') else None,
                             'open': float(row['今开']) if row.get('今开') else None,
@@ -897,7 +938,7 @@ class UnifiedStockDataService:
                         'current_price': round(price_val, 2),
                         'change': round(change_val, 2),
                         'change_percent': round(change_pct, 2),
-                        'volume': int(latest['Volume']) if not pd.isna(latest['Volume']) else None,
+                        'volume': _normalize_volume(latest['Volume'], 'yfinance', 'A'),
                         'high': round(float(latest['High']), 2) if not pd.isna(latest['High']) else None,
                         'low': round(float(latest['Low']), 2) if not pd.isna(latest['Low']) else None,
                         'open': round(float(latest['Open']), 2) if not pd.isna(latest['Open']) else None,
@@ -986,17 +1027,14 @@ class UnifiedStockDataService:
                     continue
 
                 try:
-                    market = self._identify_market(original_code) or 'A'
-                    raw_vol = float(fields[6]) if fields[6] else None
-                    # 腾讯 [6] A股原生"手"、港股原生"股"（成交额[37]交叉验证），均原样保留
-                    vol = int(raw_vol) if raw_vol is not None else None
+                    market = self._identify_market(original_code)
                     result[original_code] = {
                         'code': original_code,
                         'name': fields[1],
                         'current_price': float(fields[3]) if fields[3] else None,
                         'prev_close': float(fields[4]) if fields[4] else None,
                         'open': float(fields[5]) if fields[5] else None,
-                        'volume': vol,
+                        'volume': _normalize_volume(fields[6], 'tencent_qt', market),
                         'high': float(fields[33]) if fields[33] else None,
                         'low': float(fields[34]) if fields[34] else None,
                         'change': float(fields[31]) if fields[31] else None,
@@ -1408,7 +1446,7 @@ class UnifiedStockDataService:
                     'high': round(float(row[3]), 2),
                     'low': round(float(row[4]), 2),
                     'close': round(float(row[2]), 2),
-                    'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0,
+                    'volume': (_normalize_volume(row[5] if len(row) > 5 else None, 'tencent_mkline', 'A') or 0),
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': result_data, 'trading_date': trading_date}
@@ -1438,7 +1476,7 @@ class UnifiedStockDataService:
                     'high': float(row['最高']),
                     'low': float(row['最低']),
                     'close': float(row['收盘']),
-                    'volume': int(row['成交量'])
+                    'volume': (_normalize_volume(row['成交量'], 'eastmoney_hist_min', 'A') or 0)
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': target_str}
@@ -1478,7 +1516,7 @@ class UnifiedStockDataService:
                     'high': float(row['high']),
                     'low': float(row['low']),
                     'close': float(row['close']),
-                    'volume': int(row['volume'])
+                    'volume': (_normalize_volume(row.get('volume'), 'eastmoney_intraday', 'A') or 0)
                 })
 
             logger.info(f"[数据服务.分时] {code} fallback成功: {len(data)}条")
@@ -1507,7 +1545,7 @@ class UnifiedStockDataService:
                     'high': float(row['High']),
                     'low': float(row['Low']),
                     'close': float(row['Close']),
-                    'volume': int(row['Volume'])
+                    'volume': (_normalize_volume(row.get('Volume'), 'yfinance', self._identify_market(code)) or 0)
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': trading_date}
@@ -1718,7 +1756,7 @@ class UnifiedStockDataService:
                             'low': round(float(row['最低']), 2),
                             'close': round(float(row['收盘']), 2),
                             'change_pct': 0,
-                            'volume': int(row['成交量']) if row.get('成交量') else 0
+                            'volume': (_normalize_volume(row.get('成交量'), 'etf_fund_hist', market) or 0)
                         })
                     logger.debug(f"[数据服务.增量] {stock_code} (ETF): {len(data_points)}天")
                     return {
@@ -1756,7 +1794,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['最低']), 2),
                         'close': round(float(row['收盘']), 2),
                         'change_pct': 0,
-                        'volume': int(row['成交量']) if row.get('成交量') else 0
+                        'volume': (_normalize_volume(row.get('成交量'), 'eastmoney_ak_hist', market) or 0)
                     })
                 return data_points
 
@@ -1782,8 +1820,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['low']), 2),
                         'close': round(float(row['close']), 2),
                         'change_pct': 0,
-                        # 新浪 stock_zh_a_daily 返回"股"，/100 归一到"手"
-                        'volume': int(row['volume']) // 100 if row.get('volume') else 0
+                        'volume': (_normalize_volume(row.get('volume'), 'sina_daily', market) or 0)
                     })
                 return data_points if data_points else None
 
@@ -1810,8 +1847,7 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(float(row[2]), 2),
                         'change_pct': 0,
-                        # 腾讯 fqkline 日K row[5] 原生"手"（与东财逐日相等），原样保留
-                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
+                        'volume': (_normalize_volume(row[5] if len(row) > 5 else None, 'tencent_fqkline', market) or 0)
                     })
                 return data_points if data_points else None
 
@@ -1866,7 +1902,7 @@ class UnifiedStockDataService:
                     'low': round(float(low_price), 2),
                     'close': round(float(close_price), 2),
                     'change_pct': 0,  # 后续合并时重新计算
-                    'volume': int(volume) if not pd.isna(volume) else 0
+                    'volume': (_normalize_volume(volume, 'yfinance', market) or 0)
                 })
 
             if data_points:
@@ -1918,7 +1954,7 @@ class UnifiedStockDataService:
                             'low': round(float(row['最低']), 2),
                             'close': round(float(row['收盘']), 2),
                             'change_pct': round(change_pct, 2),
-                            'volume': int(row['成交量']) if row.get('成交量') else 0
+                            'volume': (_normalize_volume(row.get('成交量'), 'etf_fund_hist', 'A') or 0)
                         })
 
                     if len(data_points) >= 2:
@@ -1985,7 +2021,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['最低']), 2),
                         'close': round(float(row['收盘']), 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(row['成交量']) if row.get('成交量') else 0
+                        'volume': (_normalize_volume(row.get('成交量'), 'eastmoney_ak_hist', 'A') or 0)
                     })
 
                 if len(data_points) >= 2:
@@ -2045,7 +2081,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['low']), 2),
                         'close': round(float(row['close']), 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(row['volume']) if row.get('volume') else 0
+                        'volume': (_normalize_volume(row.get('volume'), 'sina_daily', 'A') or 0)
                     })
 
                 if len(data_points) >= 2:
@@ -2116,8 +2152,9 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(close_price, 2),
                         'change_pct': round(change_pct, 2),
-                        # 腾讯 fqkline 日K row[5] 原生"手"（与东财逐日相等），原样保留
-                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
+                        'volume': (_normalize_volume(row[5] if len(row) > 5 else None,
+                                                     'tencent_fqkline',
+                                                     self._identify_market(stock_code)) or 0)
                     })
 
                 if len(data_points) >= 2:
@@ -2183,7 +2220,7 @@ class UnifiedStockDataService:
                         'close': round(close_price, 2),
                         'high': round(float(parts[3]), 2),
                         'low': round(float(parts[4]), 2),
-                        'volume': int(float(parts[5])) if parts[5] else 0,
+                        'volume': (_normalize_volume(parts[5], 'eastmoney_push2his', 'A') or 0),
                         'change_pct': round((close_price - base_price) / base_price * 100, 2),
                     })
 
@@ -2248,7 +2285,8 @@ class UnifiedStockDataService:
                         'low': round(float(low_price), 2),
                         'close': round(float(close_price), 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(volume) if not pd.isna(volume) else 0
+                        'volume': (_normalize_volume(volume, 'yfinance',
+                                                     self._identify_market(stock_code)) or 0)
                     })
 
                 if len(data_points) < 2:
@@ -2380,7 +2418,8 @@ class UnifiedStockDataService:
                 'low': round(float(low_p), 2) if not pd.isna(low_p) else 0,
                 'close': round(float(close_p), 2),
                 'change_pct': round(change_pct, 2),
-                'volume': int(volume) if not pd.isna(volume) else 0
+                'volume': (_normalize_volume(volume, 'yfinance',
+                                             self._identify_market(stock_code)) or 0)
             })
 
         if len(data_points) < 2:
@@ -2560,7 +2599,7 @@ class UnifiedStockDataService:
                                         index_code=local_code,
                                         date=trade_date,
                                         price=float(row['Close']),
-                                        volume=int(row['Volume']) if row['Volume'] else None,
+                                        volume=_normalize_volume(row['Volume'], 'yfinance', self._identify_market(local_code)),
                                     )
                                     db.session.add(cache)
                             db.session.commit()

@@ -5,12 +5,10 @@
 2. volume_alert 比值异常 / 今日bar残缺 sanity gate
 3. VOLUME_UNIT_SCHEMA_VERSION 缓存失效检测机制
 """
+import ast
 import os
-import re
-import sys
 import logging
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -20,64 +18,62 @@ SERVICE_FILE = ROOT / 'app' / 'services' / 'unified_stock_data.py'
 
 # ============ 1. 单位归一化源码契约锁定 ============
 
-def test_sina_daily_hist_volume_divides_100():
-    """新浪 stock_zh_a_daily 解析必须 // 100"""
-    content = SERVICE_FILE.read_text(encoding='utf-8')
-    # fetch_from_sina 日K：int(row['volume']) // 100
-    assert re.search(
-        r"int\(row\['volume'\]\)\s*//\s*100",
-        content,
-    ), "sina 日K volume 未做 // 100 归一化"
+from app.services.unified_stock_data import VOLUME_SOURCE_UNITS, _normalize_volume
 
 
-def test_tencent_fqkline_volume_not_divided():
-    """腾讯 fqkline 日K row[5] 原生"手"，禁止 / 100（2026-08-05 实测与东财逐日相等）"""
-    content = SERVICE_FILE.read_text(encoding='utf-8')
-    divided = re.findall(r"int\(float\(row\[5\]\)\s*/\s*100\)", content)
-    assert not divided, f"腾讯 fqkline 日K volume 出现 /100 双重除法 {len(divided)} 处"
-    raw = re.findall(r"int\(float\(row\[5\]\)\)", content)
-    assert len(raw) >= 2, f"腾讯 fqkline 日K volume 原样解析出现次数不足，预期>=2，实际={len(raw)}"
+def test_lots_source_passthrough_for_a_share():
+    """原生「手」的源，A 股不做转换"""
+    assert _normalize_volume(25060238, 'tencent_qt', 'A') == 25060238
+    assert _normalize_volume('17534731', 'tencent_fqkline', 'A') == 17534731
+    assert _normalize_volume(12345, 'eastmoney_ak_hist', 'A') == 12345
 
 
-def test_sina_spot_volume_divides_100():
-    """新浪 stock_zh_a_spot 解析必须 // 100"""
-    content = SERVICE_FILE.read_text(encoding='utf-8')
-    # fetch_from_sina spot: int(row['成交量']) // 100
-    assert re.search(
-        r"int\(row\['成交量'\]\)\s*//\s*100",
-        content,
-    ), "sina spot 成交量未做 // 100 归一化"
+def test_shares_source_divides_100_for_a_share():
+    """原生「股」的源，A 股必须 // 100 归一到「手」"""
+    assert _normalize_volume(2506023803, 'sina_daily', 'A') == 25060238
+    assert _normalize_volume(1753473070, 'sina_daily', 'A') == 17534730
+    assert _normalize_volume(2506023803, 'yfinance', 'A') == 25060238
+    assert _normalize_volume(1234567, 'sina_spot', 'A') == 12345
 
 
-def test_tencent_realtime_volume_not_divided():
-    """腾讯 qt.gtimg.cn realtime [6] 原生"手"，禁止 / 100（2026-08-05 用成交额 [37] 交叉验证）"""
-    content = SERVICE_FILE.read_text(encoding='utf-8')
-    assert not re.search(
-        r"int\(raw_vol\s*/\s*100\)",
-        content,
-    ), "腾讯 realtime fields[6] 出现 /100 双重除法"
-    assert re.search(
-        r"vol\s*=\s*int\(raw_vol\)",
-        content,
-    ), "腾讯 realtime fields[6] 原样解析缺失"
+def test_non_a_market_always_passthrough():
+    """港股/美股契约就是「股」，任何源都原样返回"""
+    assert _normalize_volume(2506023803, 'yfinance', 'US') == 2506023803
+    assert _normalize_volume(2506023803, 'yfinance', 'HK') == 2506023803
+    assert _normalize_volume(9876543, 'tencent_qt', 'HK') == 9876543
 
 
-def test_eastmoney_hist_volume_not_divided():
-    """东财 akshare hist 返回手，不应 // 100（只有注释/无显式除法）"""
-    content = SERVICE_FILE.read_text(encoding='utf-8')
-    # 东财 fetch_from_eastmoney 日K的 `int(row['成交量'])` 不带 //100
-    assert re.search(
-        r"'volume':\s*int\(row\['成交量'\]\)\s+if\s+row\.get\('成交量'\)",
-        content,
-    ), "东财 akshare hist 的 volume 解析模式变更了"
+def test_empty_values_return_none():
+    """空值语义：调用点自行决定填 0 还是 None"""
+    assert _normalize_volume(None, 'sina_daily', 'A') is None
+    assert _normalize_volume('', 'sina_daily', 'A') is None
+    assert _normalize_volume(float('nan'), 'yfinance', 'A') is None
+    assert _normalize_volume('abc', 'yfinance', 'A') is None
+
+
+def test_zero_is_preserved_not_none():
+    """0 是合法成交量（停牌/一字板），不能被当成空值"""
+    assert _normalize_volume(0, 'sina_daily', 'A') == 0
+    assert _normalize_volume(0.0, 'tencent_qt', 'A') == 0
+
+
+def test_unregistered_source_raises_keyerror():
+    """未登记的源必须炸，不允许静默走默认单位"""
+    with pytest.raises(KeyError):
+        _normalize_volume(100, 'some_new_source', 'A')
+
+
+def test_all_registered_units_are_valid():
+    """映射表只允许 lots / shares 两种取值"""
+    assert set(VOLUME_SOURCE_UNITS.values()) <= {'lots', 'shares'}
 
 
 # ============ 2. VOLUME_UNIT_SCHEMA_VERSION 机制 ============
 
 def test_schema_version_constant_defined():
-    """VOLUME_UNIT_SCHEMA_VERSION 常量存在且为 3"""
+    """VOLUME_UNIT_SCHEMA_VERSION 常量存在且为 4"""
     from app.services.unified_stock_data import VOLUME_UNIT_SCHEMA_VERSION
-    assert VOLUME_UNIT_SCHEMA_VERSION == 3
+    assert VOLUME_UNIT_SCHEMA_VERSION == 4
 
 
 def test_clear_volume_related_cache_removes_pkl(tmp_path, monkeypatch):
@@ -257,3 +253,201 @@ def test_sanity_gate_accepts_normal_anomaly(strategy_deps, caplog):
     assert signals[0].data['stock_code'] == '600519'
     # change_pct = (8000-3000)/3000 ≈ 1.667 → 放量 167%
     assert signals[0].data['volume_change_pct'] > 0
+
+
+# ============ 4. 落点接入回归 ============
+
+def test_tencent_qt_parse_returns_lots(monkeypatch):
+    """腾讯 q= 接口解析后 A 股 volume 为「手」（原值即手，不得再除）"""
+    from app.services import unified_stock_data as usd
+
+    raw_line = 'v_sz000725="51~京东方A~000725~5.97~5.63~5.59~25060238~0~0~5.97~' + '~'.join(['0'] * 60) + '";'
+
+    class FakeResp:
+        text = raw_line
+        encoding = 'gbk'
+        status_code = 200
+
+    # requests 在 unified_stock_data 中是函数内 import（无模块级属性），
+    # 必须 patch requests 模块本身，不能 patch usd.requests
+    monkeypatch.setattr('requests.get', lambda *a, **k: FakeResp())
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+    result = service._fetch_from_tencent(['000725'], '2026-08-05 16:30:00')
+
+    assert result['000725']['volume'] == 25060238
+
+
+def test_sina_batch_trend_normalizes_shares_to_lots(monkeypatch):
+    """回归 2026-08-05 事故：_fetch_trend_from_sina 曾漏 //100，
+    京东方A 被推成 2,506,023,803（股）而非 25,060,238（手）"""
+    import pandas as pd
+    from datetime import date
+    from app.services import unified_stock_data as usd
+
+    df = pd.DataFrame(
+        {
+            'open': [5.46, 5.59],
+            'high': [5.66, 6.03],
+            'low': [5.43, 5.58],
+            'close': [5.63, 5.97],
+            'volume': [1753473070.0, 2506023803.0],
+        },
+        index=pd.to_datetime(['2026-08-04', '2026-08-05']),
+    )
+
+    class FakeAk:
+        @staticmethod
+        def stock_zh_a_daily(**kwargs):
+            return df
+
+    monkeypatch.setattr('app.services.akshare_client.ak', FakeAk, raising=False)
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+    results = service._fetch_trend_from_sina(
+        ['000725'], 5, date(2026, 7, 30), date(2026, 8, 5),
+        {'000725': '京东方A'}, {},
+    )
+
+    vols = [p['volume'] for p in results[0]['data']]
+    assert vols == [17534730, 25060238], f"新浪批量走势未归一到手: {vols}"
+
+
+# ============ 5. AST 静态断言：禁止绕过归一 helper ============
+
+def _unwrap_volume_expr(node):
+    """剥掉 `X or 0` / 三元表达式外壳，取出真正的取值表达式列表"""
+    if isinstance(node, ast.BoolOp):
+        out = []
+        for v in node.values:
+            out.extend(_unwrap_volume_expr(v))
+        return out
+    if isinstance(node, ast.IfExp):
+        return _unwrap_volume_expr(node.body) + _unwrap_volume_expr(node.orelse)
+    return [node]
+
+
+def _is_constant_expr(node):
+    """字面常量表达式不承载数据流，允许豁免不走 _normalize_volume。
+
+    例：`'volume': 0` / `None` 占位；pandas 具名聚合 `.agg(volume=('手数', 'sum'))`
+    里的 `('手数', 'sum')`——这是给结果列取名 'volume' 的元组字面量，
+    不是从数据源取到的成交量数值。判据是「是否承载数据流」，不是「像不像元组/字面量」：
+    只要元素全是字面常量就没有数据流经此处，可以放行；一旦出现变量/函数调用/属性访问，
+    就说明有真实数值在流动，必须走 helper。
+    """
+    if isinstance(node, ast.Constant):
+        return True
+    if isinstance(node, (ast.Tuple, ast.List)):
+        return all(isinstance(e, ast.Constant) for e in node.elts)
+    return False
+
+
+def _volume_dict_values(tree):
+    """收集 unified_stock_data.py 中所有形态的 volume 赋值表达式：
+    {'volume': <expr>} 字典字面量 / Model(volume=<expr>) 关键字参数 /
+    d['volume'] = <expr> 下标赋值
+    """
+    found = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict):
+            for key, value in zip(node.keys, node.values):
+                if isinstance(key, ast.Constant) and key.value == 'volume':
+                    found.append((key.lineno, value))
+        elif isinstance(node, ast.keyword):
+            if node.arg == 'volume':
+                found.append((node.value.lineno, node.value))
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if (isinstance(target, ast.Subscript)
+                        and isinstance(target.slice, ast.Constant)
+                        and target.slice.value == 'volume'):
+                    found.append((node.lineno, node.value))
+    return found
+
+
+def test_all_volume_assignments_go_through_normalize_helper():
+    """任何 'volume' 赋值都必须来自 _normalize_volume()，不得内联换算"""
+    tree = ast.parse(SERVICE_FILE.read_text(encoding='utf-8'))
+    offenders = []
+    for lineno, value in _volume_dict_values(tree):
+        for expr in _unwrap_volume_expr(value):
+            if _is_constant_expr(expr):
+                continue
+            is_helper_call = (
+                isinstance(expr, ast.Call)
+                and isinstance(expr.func, ast.Name)
+                and expr.func.id == '_normalize_volume'
+            )
+            if not is_helper_call:
+                offenders.append(lineno)
+    assert not offenders, (
+        f"unified_stock_data.py 第 {sorted(set(offenders))} 行的 volume 绕过了 _normalize_volume()，"
+        f"新增数据源必须在 VOLUME_SOURCE_UNITS 登记单位后走 helper"
+    )
+
+
+def test_all_used_source_keys_are_registered():
+    """所有 _normalize_volume 调用点用到的 source 字面量都已登记"""
+    tree = ast.parse(SERVICE_FILE.read_text(encoding='utf-8'))
+    used = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == '_normalize_volume' and len(node.args) >= 2):
+            src = node.args[1]
+            assert isinstance(src, ast.Constant), (
+                f"第 {node.lineno} 行 _normalize_volume 的 source 必须是字面量，不能是变量"
+            )
+            used.add(src.value)
+
+    unknown = used - set(VOLUME_SOURCE_UNITS)
+    assert not unknown, f"未登记的数据源: {unknown}"
+    unused = set(VOLUME_SOURCE_UNITS) - used
+    assert not unused, f"已登记但无调用点的数据源: {unused}"
+    assert used == set(VOLUME_SOURCE_UNITS)
+
+
+# ============ 6. 跨源真值一致性（联网，默认跳过）============
+
+@pytest.mark.network
+@pytest.mark.skipif(not os.environ.get('RUN_NETWORK_TESTS'), reason='需 RUN_NETWORK_TESTS=1 且联网')
+def test_cross_source_volume_agreement():
+    """同一 A 股同一交易日，各源归一后互差 < 1%。排查量纲问题的现场工具。"""
+    from datetime import date, timedelta
+    from app.services import unified_stock_data as usd
+
+    code = '000725'
+    today = date.today()
+    start = today - timedelta(days=15)
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+
+    per_source = {}
+    for name, fn in [
+        ('tencent', service._fetch_trend_from_tencent),
+        ('sina', service._fetch_trend_from_sina),
+        ('eastmoney', service._fetch_trend_from_eastmoney),
+        ('em_direct', service._fetch_trend_from_eastmoney_direct),
+    ]:
+        try:
+            res = fn([code], 10, start, today, {code: code}, {})
+        except Exception:
+            continue
+        if res:
+            per_source[name] = {p['date']: p['volume'] for p in res[0]['data']}
+
+    assert len(per_source) >= 2, f'可用源不足，无法交叉验证: {list(per_source)}'
+
+    common = set.intersection(*(set(v) for v in per_source.values()))
+    assert common, '各源无共同交易日'
+
+    for d in sorted(common):
+        vals = [per_source[s][d] for s in per_source if per_source[s][d]]
+        if len(vals) < 2:
+            continue
+        assert max(vals) / min(vals) < 1.01, f'{d} 各源 volume 不一致: ' + str(
+            {s: per_source[s][d] for s in per_source}
+        )

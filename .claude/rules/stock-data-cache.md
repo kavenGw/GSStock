@@ -62,12 +62,13 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 ### Volume 单位契约
 
-所有 A 股 OHLC/realtime 的 `volume` 字段统一为**"手"** 单位（1手=100股）。港股（腾讯 r_hk realtime / yfinance）volume 一律为股数，不做 /100。
+所有 A 股 OHLC/realtime 的 `volume` 字段统一为**"手"**（1手=100股）。港股（腾讯 r_hk realtime / yfinance）、美股 volume 一律为股数，不做 /100。
 
-- 腾讯 `qt.gtimg.cn` realtime `[6]` / `fqkline` 日K / `mkline` 分钟K原生就是**"手"**，原样保留不除（2026-08-05 用成交额 `[37]` 交叉验证 + 与东财日K逐日对照确认；此前误判为"股"再 /100 导致 A 股量低估 100 倍，已修复并 bump VOLUME_UNIT_SCHEMA_VERSION=3）
-- 新浪 `stock_zh_a_spot` / `stock_zh_a_daily` 原生返回"股"，解析时 `//100` 归一
-- 东财 akshare `stock_zh_a_hist` / `stock_zh_a_spot_em` 原生是"手"，保持不变
-- 东财直连 push2his、ETF `fund_etf_hist_em` 原生是"手"，保持不变
+**转换收敛在单点**：各源原生单位登记在 `app/services/unified_stock_data.py` 的 `VOLUME_SOURCE_UNITS`，所有 fetch 落点一律调 `_normalize_volume(raw, source, market)`，**禁止在落点内联 `//100`**。`market != 'A'` 时 helper 原样返回；source 未登记直接抛 `KeyError`。`tests/test_volume_alert_unit_consistency.py` 用 AST 断言守住这条（新增数据源不登记单位 = 测试红）。
+
+已登记单位：腾讯 `qt`/`fqkline`/`mkline` = 手；新浪 `stock_zh_a_spot`/`stock_zh_a_daily` = 股；东财 `stock_zh_a_hist`/`push2his`/`stock_zh_a_spot_em`/`hist_min`/`intraday_em`/`fund_etf_hist_em` = 手；yfinance = 股。
+
+（2026-08-05 事故：`_fetch_trend_from_sina` 与 yfinance A 股兜底漏 `//100`，volume_alert 推出 100 倍量纲，已修并 bump `VOLUME_UNIT_SCHEMA_VERSION=4`。）
 
 **VOLUME_UNIT_SCHEMA_VERSION 机制**：`app/services/unified_stock_data.py` 顶部定义版本常量，启动时校验 `data/memory_cache/.schema_version`。版本不匹配则自动清理内存缓存（`ohlc_*/price/index` pkl）和数据库缓存（`UnifiedStockCache` 对应 `cache_type` 行）。单位契约变更时 bump 该常量触发全量清理。
 
