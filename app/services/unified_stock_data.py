@@ -1445,7 +1445,7 @@ class UnifiedStockDataService:
                     'high': round(float(row[3]), 2),
                     'low': round(float(row[4]), 2),
                     'close': round(float(row[2]), 2),
-                    'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0,
+                    'volume': (_normalize_volume(row[5] if len(row) > 5 else None, 'tencent_mkline', 'A') or 0),
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': result_data, 'trading_date': trading_date}
@@ -1475,7 +1475,7 @@ class UnifiedStockDataService:
                     'high': float(row['最高']),
                     'low': float(row['最低']),
                     'close': float(row['收盘']),
-                    'volume': int(row['成交量'])
+                    'volume': (_normalize_volume(row.get('成交量'), 'eastmoney_hist_min', 'A') or 0)
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': target_str}
@@ -1515,7 +1515,7 @@ class UnifiedStockDataService:
                     'high': float(row['high']),
                     'low': float(row['low']),
                     'close': float(row['close']),
-                    'volume': int(row['volume'])
+                    'volume': (_normalize_volume(row.get('volume'), 'eastmoney_intraday', 'A') or 0)
                 })
 
             logger.info(f"[数据服务.分时] {code} fallback成功: {len(data)}条")
@@ -1544,7 +1544,7 @@ class UnifiedStockDataService:
                     'high': float(row['High']),
                     'low': float(row['Low']),
                     'close': float(row['Close']),
-                    'volume': int(row['Volume'])
+                    'volume': (_normalize_volume(row.get('Volume'), 'yfinance', self._identify_market(code)) or 0)
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': trading_date}
