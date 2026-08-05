@@ -8,12 +8,16 @@ related_docs:
 - path: ../themes/2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认.md
   note: 通富（AMD 后段封测占其营收 60%+）H1 营收推算 +22%~30%，是 AMD 数据中心出货未失速的供应链侧第三方读数，弱正向确认；但通富利润端为持股重估、对 AMD 无信息量。不改本档 AMD 侧结论
   symmetric: true
+- path: ../sectors/semiconductor/design/2026-08-05-AMD-buffett分析.md
+  note: AMD Q2 FY2026 财报后独立 buffett 首建档，评级 watch（与本档 Keep Watching 连续未翻转）。期望内在价值约 $204/股 vs 盘后价 $472.85，安全边际 -57%；本档合理估值上限 $200 与新档 base 档 $210 基本吻合，三个月强财报没有改变估值框架结论。AMD 侧结论以新档为准，本档保留作基线底稿
+  symmetric: true
 ---
 # AMD vs Intel — Buffett 框架对比分析
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认](../themes/2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认.md) — 通富（AMD 后段封测占其营收 60%+）H1 营收推算 +22%~30%，是 AMD 数据中心出货未失速的供应链侧第三方读数，弱正向确认；但通富利润端为持股重估、对 AMD 无信息量。不改本档 AMD 侧结论
+> - [2026-08-05-AMD-buffett分析](../sectors/semiconductor/design/2026-08-05-AMD-buffett分析.md) — AMD Q2 FY2026 财报后独立 buffett 首建档，评级 watch（与本档 Keep Watching 连续未翻转）。期望内在价值约 $204/股 vs 盘后价 $472.85，安全边际 -57%；本档合理估值上限 $200 与新档 base 档 $210 基本吻合，三个月强财报没有改变估值框架结论。AMD 侧结论以新档为准，本档保留作基线底稿
 <!-- END related_docs -->
 
 

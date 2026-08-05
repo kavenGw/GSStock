@@ -1175,18 +1175,21 @@
   stock_name: AMD
   market: US
   currency: USD
-  sector: other
-  rating: null
-  bear: 100.0
-  base: 175.0
-  bull: 225.0
-  conviction_date: '2026-05-08'
-  source_doc: cross-sector/2026-05-08-AMD-Intel-buffett对比分析.md
+  sector: semiconductor
+  rating: watch
+  watch_reason: Q2 FY2026 营收/EPS/毛利率/指引全面超预期且管理层给出「2027 年 Data Center 营收 well over 100% 增长」的新前瞻，基本面动能真实且在加速；但股价 YTD +142%、PE(TTM) 约 150~170x、EV/EBITDA 88x、PS 22.6x，全面超预期的财报换来 -8.8% 的盘后下跌，是「叙事已 priced-in」最硬的市场自证。场景加权期望内在价值约 $204/股，对盘后价 $472.85 安全边际 −57%，即便最乐观 bull 档 $310 仍较现价低 34%。公司好、价格不可接受，故观察不买；买点见 §10。
+  bear: 105
+  base: 210
+  bull: 310
+  conviction_date: '2026-08-05'
+  source_doc: sectors/semiconductor/design/2026-08-05-AMD-buffett分析.md
   note: 合理估值上限$200($8EPS×25x)；C情景/A情景推算bear/bull；文档结论无安全边际
+  quality: 4
   themes:
-  - CPU竞争
+  - AI算力
+  - 数据中心GPU
   - x86服务器
-  - buffett对比
+  - hyperscaler-capex
 - stock_code: INTC
   stock_name: Intel
   market: US
