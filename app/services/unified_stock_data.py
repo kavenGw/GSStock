@@ -1953,7 +1953,7 @@ class UnifiedStockDataService:
                             'low': round(float(row['最低']), 2),
                             'close': round(float(row['收盘']), 2),
                             'change_pct': round(change_pct, 2),
-                            'volume': int(row['成交量']) if row.get('成交量') else 0
+                            'volume': (_normalize_volume(row.get('成交量'), 'etf_fund_hist', 'A') or 0)
                         })
 
                     if len(data_points) >= 2:
@@ -2020,7 +2020,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['最低']), 2),
                         'close': round(float(row['收盘']), 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(row['成交量']) if row.get('成交量') else 0
+                        'volume': (_normalize_volume(row.get('成交量'), 'eastmoney_ak_hist', 'A') or 0)
                     })
 
                 if len(data_points) >= 2:
@@ -2080,7 +2080,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['low']), 2),
                         'close': round(float(row['close']), 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(row['volume']) if row.get('volume') else 0
+                        'volume': (_normalize_volume(row.get('volume'), 'sina_daily', 'A') or 0)
                     })
 
                 if len(data_points) >= 2:
@@ -2151,8 +2151,9 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(close_price, 2),
                         'change_pct': round(change_pct, 2),
-                        # 腾讯 fqkline 日K row[5] 原生"手"（与东财逐日相等），原样保留
-                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
+                        'volume': (_normalize_volume(row[5] if len(row) > 5 else None,
+                                                     'tencent_fqkline',
+                                                     self._identify_market(stock_code)) or 0)
                     })
 
                 if len(data_points) >= 2:
@@ -2218,7 +2219,7 @@ class UnifiedStockDataService:
                         'close': round(close_price, 2),
                         'high': round(float(parts[3]), 2),
                         'low': round(float(parts[4]), 2),
-                        'volume': int(float(parts[5])) if parts[5] else 0,
+                        'volume': (_normalize_volume(parts[5], 'eastmoney_push2his', 'A') or 0),
                         'change_pct': round((close_price - base_price) / base_price * 100, 2),
                     })
 
@@ -2283,7 +2284,8 @@ class UnifiedStockDataService:
                         'low': round(float(low_price), 2),
                         'close': round(float(close_price), 2),
                         'change_pct': round(change_pct, 2),
-                        'volume': int(volume) if not pd.isna(volume) else 0
+                        'volume': (_normalize_volume(volume, 'yfinance',
+                                                     self._identify_market(stock_code)) or 0)
                     })
 
                 if len(data_points) < 2:
@@ -2415,7 +2417,8 @@ class UnifiedStockDataService:
                 'low': round(float(low_p), 2) if not pd.isna(low_p) else 0,
                 'close': round(float(close_p), 2),
                 'change_pct': round(change_pct, 2),
-                'volume': int(volume) if not pd.isna(volume) else 0
+                'volume': (_normalize_volume(volume, 'yfinance',
+                                             self._identify_market(stock_code)) or 0)
             })
 
         if len(data_points) < 2:

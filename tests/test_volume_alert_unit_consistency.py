@@ -280,3 +280,39 @@ def test_tencent_qt_parse_returns_lots(monkeypatch):
     result = service._fetch_from_tencent(['000725'], '2026-08-05 16:30:00')
 
     assert result['000725']['volume'] == 25060238
+
+
+def test_sina_batch_trend_normalizes_shares_to_lots(monkeypatch):
+    """回归 2026-08-05 事故：_fetch_trend_from_sina 曾漏 //100，
+    京东方A 被推成 2,506,023,803（股）而非 25,060,238（手）"""
+    import pandas as pd
+    from datetime import date
+    from app.services import unified_stock_data as usd
+
+    df = pd.DataFrame(
+        {
+            'open': [5.46, 5.59],
+            'high': [5.66, 6.03],
+            'low': [5.43, 5.58],
+            'close': [5.63, 5.97],
+            'volume': [1753473070.0, 2506023803.0],
+        },
+        index=pd.to_datetime(['2026-08-04', '2026-08-05']),
+    )
+
+    class FakeAk:
+        @staticmethod
+        def stock_zh_a_daily(**kwargs):
+            return df
+
+    monkeypatch.setattr('app.services.akshare_client.ak', FakeAk, raising=False)
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+    results = service._fetch_trend_from_sina(
+        ['000725'], 5, date(2026, 7, 30), date(2026, 8, 5),
+        {'000725': '京东方A'}, {},
+    )
+
+    vols = [p['volume'] for p in results[0]['data']]
+    assert vols == [17534730, 25060238], f"新浪批量走势未归一到手: {vols}"
