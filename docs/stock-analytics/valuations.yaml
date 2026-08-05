@@ -3808,3 +3808,19 @@
   - DCI
   - 光模块
   - 光放大器
+- stock_code: '00100'
+  stock_name: MiniMax
+  market: HK
+  currency: HKD
+  sector: ai-application
+  rating: watch
+  watch_reason: 三重改善（收入 +158.9%、毛利率 12.2%→25.4%、销售费用 −40.3%）是硬证据且极罕见，但 25.4% 的毛利率绝对水平意味着单位经济尚未跑通——毛利 US$20.08M 覆盖不了研发 US$252.8M 的 8%；143.8x TTM PS（完全稀释 151.8x）在任何口径下都无安全边际，期望内在价值 117.4 HKD 较现价 253.80 HKD 低 53.7%，即便 bull 完全兑现安全边际也只有 +4.1%；且 ARR 口径分裂 12.6 倍、具名客户为零、2027-01-09 还有 25%+ 战略股东解禁，2026 中报（≤8/31）将在 4 周内刷新全部 TTM 口径
+  bear: 31.9
+  base: 109.9
+  bull: 264.3
+  conviction_date: '2026-08-05'
+  source_doc: sectors/ai-application/llm/2026-08-05-MiniMax-buffett分析.md
+  themes:
+  - AI大模型
+  - AI应用出海
+  - 港股
