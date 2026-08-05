@@ -30,15 +30,13 @@ def test_sina_daily_hist_volume_divides_100():
     ), "sina 日K volume 未做 // 100 归一化"
 
 
-def test_tencent_fqkline_volume_divides_100():
-    """腾讯 fqkline 日K 解析必须 / 100"""
+def test_tencent_fqkline_volume_not_divided():
+    """腾讯 fqkline 日K row[5] 原生"手"，禁止 / 100（2026-08-05 实测与东财逐日相等）"""
     content = SERVICE_FILE.read_text(encoding='utf-8')
-    # 腾讯 row[5] 处理需要有 / 100
-    matches = re.findall(
-        r"int\(float\(row\[5\]\)\s*/\s*100\)",
-        content,
-    )
-    assert len(matches) >= 2, f"腾讯 fqkline 日K volume /100 出现次数不足，预期>=2，实际={len(matches)}"
+    divided = re.findall(r"int\(float\(row\[5\]\)\s*/\s*100\)", content)
+    assert not divided, f"腾讯 fqkline 日K volume 出现 /100 双重除法 {len(divided)} 处"
+    raw = re.findall(r"int\(float\(row\[5\]\)\)", content)
+    assert len(raw) >= 2, f"腾讯 fqkline 日K volume 原样解析出现次数不足，预期>=2，实际={len(raw)}"
 
 
 def test_sina_spot_volume_divides_100():
@@ -51,13 +49,17 @@ def test_sina_spot_volume_divides_100():
     ), "sina spot 成交量未做 // 100 归一化"
 
 
-def test_tencent_realtime_still_divides_100():
-    """腾讯 qt.gtimg.cn realtime 必须保留 / 100（A股处理）"""
+def test_tencent_realtime_volume_not_divided():
+    """腾讯 qt.gtimg.cn realtime [6] 原生"手"，禁止 / 100（2026-08-05 用成交额 [37] 交叉验证）"""
     content = SERVICE_FILE.read_text(encoding='utf-8')
-    assert re.search(
+    assert not re.search(
         r"int\(raw_vol\s*/\s*100\)",
         content,
-    ), "腾讯 realtime A股 volume 丢失 / 100 归一化"
+    ), "腾讯 realtime fields[6] 出现 /100 双重除法"
+    assert re.search(
+        r"vol\s*=\s*int\(raw_vol\)",
+        content,
+    ), "腾讯 realtime fields[6] 原样解析缺失"
 
 
 def test_eastmoney_hist_volume_not_divided():
@@ -73,9 +75,9 @@ def test_eastmoney_hist_volume_not_divided():
 # ============ 2. VOLUME_UNIT_SCHEMA_VERSION 机制 ============
 
 def test_schema_version_constant_defined():
-    """VOLUME_UNIT_SCHEMA_VERSION 常量存在且为 2"""
+    """VOLUME_UNIT_SCHEMA_VERSION 常量存在且为 3"""
     from app.services.unified_stock_data import VOLUME_UNIT_SCHEMA_VERSION
-    assert VOLUME_UNIT_SCHEMA_VERSION == 2
+    assert VOLUME_UNIT_SCHEMA_VERSION == 3
 
 
 def test_clear_volume_related_cache_removes_pkl(tmp_path, monkeypatch):

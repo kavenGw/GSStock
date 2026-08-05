@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 # 缓存 volume 单位契约版本；变更契约时 bump 触发启动时全量清理
-VOLUME_UNIT_SCHEMA_VERSION = 2
+VOLUME_UNIT_SCHEMA_VERSION = 3
 
 
 def _tencent_code(code: str) -> str:
@@ -988,12 +988,8 @@ class UnifiedStockDataService:
                 try:
                     market = self._identify_market(original_code) or 'A'
                     raw_vol = float(fields[6]) if fields[6] else None
-                    if raw_vol is None:
-                        vol = None
-                    elif market == 'A':
-                        vol = int(raw_vol / 100)
-                    else:
-                        vol = int(raw_vol)
+                    # 腾讯 [6] A股原生"手"、港股原生"股"（成交额[37]交叉验证），均原样保留
+                    vol = int(raw_vol) if raw_vol is not None else None
                     result[original_code] = {
                         'code': original_code,
                         'name': fields[1],
@@ -1814,8 +1810,8 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(float(row[2]), 2),
                         'change_pct': 0,
-                        # 腾讯 fqkline 日K row[5] 是"股"，/100 归一到"手"
-                        'volume': int(float(row[5]) / 100) if len(row) > 5 and row[5] else 0
+                        # 腾讯 fqkline 日K row[5] 原生"手"（与东财逐日相等），原样保留
+                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
                     })
                 return data_points if data_points else None
 
@@ -2120,8 +2116,8 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(close_price, 2),
                         'change_pct': round(change_pct, 2),
-                        # 腾讯 fqkline 日K row[5] 是"股"，/100 归一到"手"
-                        'volume': int(float(row[5]) / 100) if len(row) > 5 and row[5] else 0
+                        # 腾讯 fqkline 日K row[5] 原生"手"（与东财逐日相等），原样保留
+                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
                     })
 
                 if len(data_points) >= 2:

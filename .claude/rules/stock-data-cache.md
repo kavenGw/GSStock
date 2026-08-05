@@ -64,7 +64,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 所有 A 股 OHLC/realtime 的 `volume` 字段统一为**"手"** 单位（1手=100股）。港股（腾讯 r_hk realtime / yfinance）volume 一律为股数，不做 /100。
 
-- 腾讯 `qt.gtimg.cn` / `fqkline` 日K原生返回"股"，解析时 `/100` 归一
+- 腾讯 `qt.gtimg.cn` realtime `[6]` / `fqkline` 日K / `mkline` 分钟K原生就是**"手"**，原样保留不除（2026-08-05 用成交额 `[37]` 交叉验证 + 与东财日K逐日对照确认；此前误判为"股"再 /100 导致 A 股量低估 100 倍，已修复并 bump VOLUME_UNIT_SCHEMA_VERSION=3）
 - 新浪 `stock_zh_a_spot` / `stock_zh_a_daily` 原生返回"股"，解析时 `//100` 归一
 - 东财 akshare `stock_zh_a_hist` / `stock_zh_a_spot_em` 原生是"手"，保持不变
 - 东财直连 push2his、ETF `fund_etf_hist_em` 原生是"手"，保持不变

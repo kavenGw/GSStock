@@ -47,11 +47,11 @@ def test_hk_volume_stays_in_shares():
     assert result['1888.HK']['volume'] == 118191487
 
 
-def test_a_share_volume_still_converted_to_lots():
+def test_a_share_volume_kept_in_lots():
     text = _build_line('sh600519', A_FIELDS)
     with patch('requests.get', return_value=_tencent_resp(text)):
         result = unified_stock_data_service._fetch_from_tencent(['600519'], '2026-08-05T13:20:00')
-    assert result['600519']['volume'] == 12345
+    assert result['600519']['volume'] == 1234500
     assert result['600519']['market'] == 'A'
 
 
