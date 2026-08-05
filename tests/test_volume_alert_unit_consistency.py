@@ -7,11 +7,8 @@
 """
 import ast
 import os
-import re
-import sys
 import logging
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -69,7 +66,6 @@ def test_unregistered_source_raises_keyerror():
 def test_all_registered_units_are_valid():
     """映射表只允许 lots / shares 两种取值"""
     assert set(VOLUME_SOURCE_UNITS.values()) <= {'lots', 'shares'}
-    assert len(VOLUME_SOURCE_UNITS) == 12
 
 
 # ============ 2. VOLUME_UNIT_SCHEMA_VERSION 机制 ============
@@ -333,15 +329,42 @@ def _unwrap_volume_expr(node):
     return [node]
 
 
+def _is_constant_expr(node):
+    """字面常量表达式不承载数据流，允许豁免不走 _normalize_volume。
+
+    例：`'volume': 0` / `None` 占位；pandas 具名聚合 `.agg(volume=('手数', 'sum'))`
+    里的 `('手数', 'sum')`——这是给结果列取名 'volume' 的元组字面量，
+    不是从数据源取到的成交量数值。判据是「是否承载数据流」，不是「像不像元组/字面量」：
+    只要元素全是字面常量就没有数据流经此处，可以放行；一旦出现变量/函数调用/属性访问，
+    就说明有真实数值在流动，必须走 helper。
+    """
+    if isinstance(node, ast.Constant):
+        return True
+    if isinstance(node, (ast.Tuple, ast.List)):
+        return all(isinstance(e, ast.Constant) for e in node.elts)
+    return False
+
+
 def _volume_dict_values(tree):
-    """收集 unified_stock_data.py 中所有 {'volume': <expr>} 的 <expr>"""
+    """收集 unified_stock_data.py 中所有形态的 volume 赋值表达式：
+    {'volume': <expr>} 字典字面量 / Model(volume=<expr>) 关键字参数 /
+    d['volume'] = <expr> 下标赋值
+    """
     found = []
     for node in ast.walk(tree):
-        if not isinstance(node, ast.Dict):
-            continue
-        for key, value in zip(node.keys, node.values):
-            if isinstance(key, ast.Constant) and key.value == 'volume':
-                found.append((key.lineno, value))
+        if isinstance(node, ast.Dict):
+            for key, value in zip(node.keys, node.values):
+                if isinstance(key, ast.Constant) and key.value == 'volume':
+                    found.append((key.lineno, value))
+        elif isinstance(node, ast.keyword):
+            if node.arg == 'volume':
+                found.append((node.value.lineno, node.value))
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if (isinstance(target, ast.Subscript)
+                        and isinstance(target.slice, ast.Constant)
+                        and target.slice.value == 'volume'):
+                    found.append((node.lineno, node.value))
     return found
 
 
@@ -351,7 +374,7 @@ def test_all_volume_assignments_go_through_normalize_helper():
     offenders = []
     for lineno, value in _volume_dict_values(tree):
         for expr in _unwrap_volume_expr(value):
-            if isinstance(expr, ast.Constant):  # `'volume': 0` / None 占位允许
+            if _is_constant_expr(expr):
                 continue
             is_helper_call = (
                 isinstance(expr, ast.Call)

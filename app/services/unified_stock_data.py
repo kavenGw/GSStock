@@ -319,7 +319,7 @@ class UnifiedStockDataService:
                 if not stock_dir.is_dir():
                     continue
                 for pkl in stock_dir.glob('*.pkl'):
-                    if pkl.stem.startswith(('ohlc_', 'price', 'index')):
+                    if pkl.stem.startswith(('ohlc_', 'price', 'index', 'intraday_')):
                         try:
                             pkl.unlink()
                             removed_pkl += 1
@@ -337,7 +337,8 @@ class UnifiedStockDataService:
                 return
             deleted = UnifiedStockCache.query.filter(
                 UnifiedStockCache.cache_type.in_(['price', 'index']) |
-                UnifiedStockCache.cache_type.like('ohlc_%')
+                UnifiedStockCache.cache_type.like('ohlc_%') |
+                UnifiedStockCache.cache_type.like('intraday_%')
             ).delete(synchronize_session=False)
             db.session.commit()
         except Exception as e:
@@ -1026,7 +1027,7 @@ class UnifiedStockDataService:
                     continue
 
                 try:
-                    market = self._identify_market(original_code) or 'A'
+                    market = self._identify_market(original_code)
                     result[original_code] = {
                         'code': original_code,
                         'name': fields[1],
@@ -1475,7 +1476,7 @@ class UnifiedStockDataService:
                     'high': float(row['最高']),
                     'low': float(row['最低']),
                     'close': float(row['收盘']),
-                    'volume': (_normalize_volume(row.get('成交量'), 'eastmoney_hist_min', 'A') or 0)
+                    'volume': (_normalize_volume(row['成交量'], 'eastmoney_hist_min', 'A') or 0)
                 })
 
             return {'stock_code': code, 'stock_name': '', 'data': data, 'trading_date': target_str}
@@ -2598,7 +2599,7 @@ class UnifiedStockDataService:
                                         index_code=local_code,
                                         date=trade_date,
                                         price=float(row['Close']),
-                                        volume=int(row['Volume']) if row['Volume'] else None,
+                                        volume=_normalize_volume(row['Volume'], 'yfinance', self._identify_market(local_code)),
                                     )
                                     db.session.add(cache)
                             db.session.commit()

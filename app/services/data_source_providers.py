@@ -7,6 +7,10 @@
 - 美股: yfinance, Twelve Data, Polygon.io
 - 港股: yfinance, Twelve Data
 - 韩股/台股: yfinance
+
+volume 单位：仅 YFinanceProvider 会命中 A 股（yfinance 是 A 股的 fallback 源），
+故只有它接入 _normalize_volume；TwelveDataProvider / PolygonProvider 仅注册给
+US/HK，两地契约本就是原样透传（股），无需归一。
 """
 import os
 import logging
