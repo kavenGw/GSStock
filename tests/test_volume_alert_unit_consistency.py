@@ -52,12 +52,12 @@ def test_sina_spot_volume_divides_100():
 
 
 def test_tencent_realtime_still_divides_100():
-    """腾讯 qt.gtimg.cn realtime 必须保留 / 100（fields[6]）"""
+    """腾讯 qt.gtimg.cn realtime 必须保留 / 100（A股处理）"""
     content = SERVICE_FILE.read_text(encoding='utf-8')
     assert re.search(
-        r"int\(float\(fields\[6\]\)\s*/\s*100\)",
+        r"int\(raw_vol\s*/\s*100\)",
         content,
-    ), "腾讯 realtime fields[6] 丢失 / 100 归一化"
+    ), "腾讯 realtime A股 volume 丢失 / 100 归一化"
 
 
 def test_eastmoney_hist_volume_not_divided():
