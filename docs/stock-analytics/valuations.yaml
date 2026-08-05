@@ -1183,7 +1183,7 @@
   bull: 310
   conviction_date: '2026-08-05'
   source_doc: sectors/semiconductor/design/2026-08-05-AMD-buffett分析.md
-  note: 合理估值上限$200($8EPS×25x)；C情景/A情景推算bear/bull；文档结论无安全边际
+  note: 2026-08-05 首建档三情景 30/45/25 加权期望 $204；bull $310 仍低于现价 34%（压力测试）；权证潜在稀释 19.6% 已入各档
   quality: 4
   themes:
   - AI算力
