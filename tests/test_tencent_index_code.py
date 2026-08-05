@@ -11,3 +11,10 @@ def test_index_codes_respect_suffix():
     assert _tencent_code('000001.SS') == 'sh000001'   # 上证：0开头但在沪
     assert _tencent_code('000688.SS') == 'sh000688'   # 科创50：0开头但在沪
     assert _tencent_code('399006.SZ') == 'sz399006'   # 创业板指
+
+
+def test_hk_codes_zero_padded():
+    assert _tencent_code('1888.HK') == 'hk01888'
+    assert _tencent_code('700.HK') == 'hk00700'
+    assert _tencent_code('03690.HK') == 'hk03690'
+    assert _tencent_code('9992.hk') == 'hk09992'
