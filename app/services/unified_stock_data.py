@@ -965,19 +965,21 @@ class UnifiedStockDataService:
                     continue
 
                 try:
+                    market = self._identify_market(original_code) or 'A'
+                    raw_vol = float(fields[6]) if fields[6] else None
                     result[original_code] = {
                         'code': original_code,
                         'name': fields[1],
                         'current_price': float(fields[3]) if fields[3] else None,
                         'prev_close': float(fields[4]) if fields[4] else None,
                         'open': float(fields[5]) if fields[5] else None,
-                        'volume': int(float(fields[6]) / 100) if fields[6] else None,  # 股→手，与OHLC数据统一
+                        'volume': int(raw_vol / 100) if raw_vol and market == 'A' else (int(raw_vol) if raw_vol else None),
                         'high': float(fields[33]) if fields[33] else None,
                         'low': float(fields[34]) if fields[34] else None,
                         'change': float(fields[31]) if fields[31] else None,
                         'change_percent': float(fields[32]) if fields[32] else None,
                         'last_fetch_time': now_str,
-                        'market': 'A',
+                        'market': market,
                     }
                 except (ValueError, IndexError) as e:
                     logger.debug(f"[数据服务.获取] 腾讯数据解析失败 {original_code}: {e}")
