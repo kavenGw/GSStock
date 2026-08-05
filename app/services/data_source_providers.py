@@ -69,7 +69,15 @@ class YFinanceProvider(DataSourceProvider):
         return self._yf
 
     def get_realtime_price(self, symbol: str) -> Optional[dict]:
+        """获取实时价格。
+
+        volume 经 _normalize_volume 归一：A 股（DATA_SOURCE_REGISTRY 登记 yfinance 为其兜底源）
+        除以 100 转为「手」，港股/美股原样返回「股」——与 unified_stock_data.py 契约一致。
+        """
         try:
+            from app.services.unified_stock_data import _normalize_volume
+            from app.utils.market_identifier import MarketIdentifier
+
             ticker = self.yf.Ticker(symbol)
             hist = ticker.history(period="5d")
             if hist.empty or len(hist) < 2:
@@ -79,6 +87,7 @@ class YFinanceProvider(DataSourceProvider):
             prev = hist.iloc[-2]
             change = last['Close'] - prev['Close']
             change_pct = (change / prev['Close'] * 100) if prev['Close'] else 0
+            market = MarketIdentifier.identify(symbol) or 'US'
 
             return {
                 'code': symbol,
@@ -86,7 +95,7 @@ class YFinanceProvider(DataSourceProvider):
                 'price': float(last['Close']),
                 'change': float(change),
                 'change_pct': float(change_pct),
-                'volume': int(last['Volume']) if 'Volume' in last else 0,
+                'volume': (_normalize_volume(last['Volume'], 'yfinance', market) or 0) if 'Volume' in last else 0,
                 'high': float(last['High']),
                 'low': float(last['Low']),
                 'open': float(last['Open']),
@@ -98,7 +107,15 @@ class YFinanceProvider(DataSourceProvider):
             return None
 
     def get_historical_data(self, symbol: str, days: int) -> Optional[dict]:
+        """获取历史K线数据。
+
+        volume 经 _normalize_volume 归一：A 股（DATA_SOURCE_REGISTRY 登记 yfinance 为其兜底源）
+        除以 100 转为「手」，港股/美股原样返回「股」——与 unified_stock_data.py 契约一致。
+        """
         try:
+            from app.services.unified_stock_data import _normalize_volume
+            from app.utils.market_identifier import MarketIdentifier
+
             ticker = self.yf.Ticker(symbol)
             start_date = (date.today() - timedelta(days=days * 2)).isoformat()
             end_date = (date.today() + timedelta(days=1)).isoformat()
@@ -107,6 +124,7 @@ class YFinanceProvider(DataSourceProvider):
             if hist.empty:
                 return None
 
+            market = MarketIdentifier.identify(symbol) or 'US'
             data_points = []
             prev_close = None
             for idx, row in hist.iterrows():
@@ -120,7 +138,7 @@ class YFinanceProvider(DataSourceProvider):
                     'high': float(row['High']),
                     'low': float(row['Low']),
                     'close': close,
-                    'volume': int(row['Volume']) if 'Volume' in row else 0,
+                    'volume': (_normalize_volume(row['Volume'], 'yfinance', market) or 0) if 'Volume' in row else 0,
                     'change_pct': round(change_pct, 2)
                 })
                 prev_close = close

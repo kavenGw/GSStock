@@ -384,3 +384,47 @@ def test_all_used_source_keys_are_registered():
     unused = set(VOLUME_SOURCE_UNITS) - used
     assert not unused, f"已登记但无调用点的数据源: {unused}"
     assert used == set(VOLUME_SOURCE_UNITS)
+
+
+# ============ 6. 跨源真值一致性（联网，默认跳过）============
+
+@pytest.mark.network
+@pytest.mark.skipif(not os.environ.get('RUN_NETWORK_TESTS'), reason='需 RUN_NETWORK_TESTS=1 且联网')
+def test_cross_source_volume_agreement():
+    """同一 A 股同一交易日，各源归一后互差 < 1%。排查量纲问题的现场工具。"""
+    from datetime import date, timedelta
+    from app.services import unified_stock_data as usd
+
+    code = '000725'
+    today = date.today()
+    start = today - timedelta(days=15)
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+
+    per_source = {}
+    for name, fn in [
+        ('tencent', service._fetch_trend_from_tencent),
+        ('sina', service._fetch_trend_from_sina),
+        ('eastmoney', service._fetch_trend_from_eastmoney),
+        ('em_direct', service._fetch_trend_from_eastmoney_direct),
+    ]:
+        try:
+            res = fn([code], 10, start, today, {code: code}, {})
+        except Exception:
+            continue
+        if res:
+            per_source[name] = {p['date']: p['volume'] for p in res[0]['data']}
+
+    assert len(per_source) >= 2, f'可用源不足，无法交叉验证: {list(per_source)}'
+
+    common = set.intersection(*(set(v) for v in per_source.values()))
+    assert common, '各源无共同交易日'
+
+    for d in sorted(common):
+        vals = [per_source[s][d] for s in per_source if per_source[s][d]]
+        if len(vals) < 2:
+            continue
+        assert max(vals) / min(vals) < 1.01, f'{d} 各源 volume 不一致: ' + str(
+            {s: per_source[s][d] for s in per_source}
+        )
