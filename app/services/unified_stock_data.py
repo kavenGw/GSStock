@@ -1755,7 +1755,7 @@ class UnifiedStockDataService:
                             'low': round(float(row['最低']), 2),
                             'close': round(float(row['收盘']), 2),
                             'change_pct': 0,
-                            'volume': int(row['成交量']) if row.get('成交量') else 0
+                            'volume': (_normalize_volume(row.get('成交量'), 'etf_fund_hist', market) or 0)
                         })
                     logger.debug(f"[数据服务.增量] {stock_code} (ETF): {len(data_points)}天")
                     return {
@@ -1793,7 +1793,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['最低']), 2),
                         'close': round(float(row['收盘']), 2),
                         'change_pct': 0,
-                        'volume': int(row['成交量']) if row.get('成交量') else 0
+                        'volume': (_normalize_volume(row.get('成交量'), 'eastmoney_ak_hist', market) or 0)
                     })
                 return data_points
 
@@ -1819,8 +1819,7 @@ class UnifiedStockDataService:
                         'low': round(float(row['low']), 2),
                         'close': round(float(row['close']), 2),
                         'change_pct': 0,
-                        # 新浪 stock_zh_a_daily 返回"股"，/100 归一到"手"
-                        'volume': int(row['volume']) // 100 if row.get('volume') else 0
+                        'volume': (_normalize_volume(row.get('volume'), 'sina_daily', market) or 0)
                     })
                 return data_points if data_points else None
 
@@ -1847,8 +1846,7 @@ class UnifiedStockDataService:
                         'low': round(float(row[4]), 2),
                         'close': round(float(row[2]), 2),
                         'change_pct': 0,
-                        # 腾讯 fqkline 日K row[5] 原生"手"（与东财逐日相等），原样保留
-                        'volume': int(float(row[5])) if len(row) > 5 and row[5] else 0
+                        'volume': (_normalize_volume(row[5] if len(row) > 5 else None, 'tencent_fqkline', market) or 0)
                     })
                 return data_points if data_points else None
 
@@ -1903,7 +1901,7 @@ class UnifiedStockDataService:
                     'low': round(float(low_price), 2),
                     'close': round(float(close_price), 2),
                     'change_pct': 0,  # 后续合并时重新计算
-                    'volume': int(volume) if not pd.isna(volume) else 0
+                    'volume': (_normalize_volume(volume, 'yfinance', market) or 0)
                 })
 
             if data_points:
