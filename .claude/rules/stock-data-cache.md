@@ -78,7 +78,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 ### 数据源
 
-A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速），美股/港股走 yfinance；选源与负载均衡见下方「核心组件」。腾讯字段索引 / XD除息失真 / `[41][42]`年高低失真 / 港股 `q=hk` 字段 / A+H 市值自洽校验等取数坑见 `data-fetch-conventions.md`。
+A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速），**港股实时价腾讯 `q=hk<code>` 优先、yfinance 兜底**，美股走 yfinance；选源与负载均衡见下方「核心组件」。腾讯字段索引 / XD除息失真 / `[41][42]`年高低失真 / 港股 `q=hk` 字段 / A+H 市值自洽校验等取数坑见 `data-fetch-conventions.md`。
 
 ### 策略数据协作
 
@@ -87,7 +87,7 @@ A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速
 ### 核心组件
 
 - **UnifiedStockDataService** - 统一数据获取入口（单例模式）
-  - `get_realtime_prices(stock_codes, force_refresh)` - A股用腾讯HTTP批量+akshare负载均衡，美股/港股用yfinance
+  - `get_realtime_prices(stock_codes, force_refresh)` - A股用腾讯HTTP批量+akshare负载均衡，**港股腾讯批量优先（yfinance兜底）**，美股用yfinance
     - `cache_only=True`：只读内存+DB 缓存、跳过第三层 API，未命中 code 不在返回里（前端显「—」）。首屏秒开/只读渲染用它避免 yfinance 逐只串行阻塞（港股/美股冷缓存可卡数十秒）；要最新价才走 force_refresh
   - `get_trend_data(stock_codes, days)` - OHLC走势数据
   - `get_indices_data(target_date)` - 指数数据
