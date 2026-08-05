@@ -381,4 +381,6 @@ def test_all_used_source_keys_are_registered():
 
     unknown = used - set(VOLUME_SOURCE_UNITS)
     assert not unknown, f"未登记的数据源: {unknown}"
-    assert len(used) >= 10, f"调用点覆盖的源过少（{len(used)}），疑有落点未接入"
+    unused = set(VOLUME_SOURCE_UNITS) - used
+    assert not unused, f"已登记但无调用点的数据源: {unused}"
+    assert used == set(VOLUME_SOURCE_UNITS)
