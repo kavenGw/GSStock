@@ -688,15 +688,17 @@
   currency: CNY
   sector: materials
   rating: exclude
-  bear: 5.8
-  base: 6.5
-  bull: 7.2
-  conviction_date: '2026-05-13'
-  source_doc: sectors/materials/nonferrous/2026-05-13-盛达资源-buffett分析.md
-  note: 正常化净利3.3亿×12-15x=40-50亿
+  bear: 3.5
+  base: 8.8
+  bull: 13.6
+  dividend_yield: 0.41
+  conviction_date: '2026-08-05'
+  source_doc: sectors/materials/nonferrous/2026-08-05-盛达资源-buffett分析.md
+  note: 治理立案+7.92亿资金占用是硬否决项，叠加周期顶PE；场景加权内在价值7.64元/股（约52.7亿市值）
   themes:
   - 白银
   - 有色金属
+  - 贵金属
 - stock_code: '000630'
   stock_name: 铜陵有色
   market: A
