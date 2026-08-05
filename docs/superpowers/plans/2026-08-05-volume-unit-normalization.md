@@ -221,9 +221,9 @@ cd D:/Git/stock-volume-unit && rtk git add app/services/unified_stock_data.py te
 **Interfaces:**
 - Consumes: `_normalize_volume(raw, source, market)`（Task 1）
 
-- [ ] **Step 1: 写失败的回归测试**
+- [ ] **Step 1: 写防退化基线测试**
 
-在 `tests/test_volume_alert_unit_consistency.py` 末尾新增分节：
+腾讯这条落点当前行为本来就正确，此测试是接入 helper 后的防退化基线（非 TDD red），所以下一步预期 PASS。在 `tests/test_volume_alert_unit_consistency.py` 末尾新增分节：
 
 ```python
 # ============ 4. 落点接入回归 ============
