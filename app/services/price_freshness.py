@@ -2,7 +2,7 @@
 from datetime import datetime
 
 FRESHNESS_MULTIPLIER = 2
-PRELOAD_INTERVAL_MINUTES = {'A': 1}   # 其余市场默认 3，对应 watch_preload NON_A_REFRESH_EVERY
+PRELOAD_INTERVAL_MINUTES = {'A': 1, 'HK': 1}   # 其余市场默认 3，对应 watch_preload NON_A_REFRESH_EVERY
 DEFAULT_INTERVAL_MINUTES = 3
 
 

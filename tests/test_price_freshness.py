@@ -17,8 +17,8 @@ def _p(age_seconds=0, **overrides):
 
 def test_max_age_by_market():
     assert max_age_seconds('A') == 120
+    assert max_age_seconds('HK') == 120
     assert max_age_seconds('US') == 360
-    assert max_age_seconds('HK') == 360
     assert max_age_seconds('') == 360
 
 
@@ -34,8 +34,16 @@ def test_non_a_fresh_within_6min():
     assert is_fresh(_p(age_seconds=350), 'US')
 
 
+def test_hk_fresh_within_2min():
+    assert is_fresh(_p(age_seconds=119), 'HK')
+
+
+def test_hk_stale_beyond_2min():
+    assert not is_fresh(_p(age_seconds=121), 'HK')
+
+
 def test_non_a_stale_beyond_6min():
-    assert not is_fresh(_p(age_seconds=370), 'HK')
+    assert not is_fresh(_p(age_seconds=370), 'US')
 
 
 def test_degraded_rejected_even_if_recent():

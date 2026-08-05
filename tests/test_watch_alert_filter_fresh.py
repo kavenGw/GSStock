@@ -23,8 +23,8 @@ def test_drops_stale_a_share_beyond_2min():
     assert set(WatchAlertStrategy._filter_fresh(prices, ['a', 'b'], MM)) == {'a'}
 
 
-def test_keeps_hk_within_6min():
-    prices = {'h': _p(age_seconds=180)}
+def test_keeps_hk_within_2min():
+    prices = {'h': _p(age_seconds=100)}
     assert set(WatchAlertStrategy._filter_fresh(prices, ['h'], MM)) == {'h'}
 
 
