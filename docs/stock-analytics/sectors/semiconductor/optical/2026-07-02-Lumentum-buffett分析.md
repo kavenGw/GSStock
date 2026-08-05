@@ -34,6 +34,9 @@ related_docs:
 - path: ../../../themes/2026-06-11-SemiAnalysis-CPO-800VDC延后影响.md
   note: CPO 延后事件中 Lumentum 当日 -8%，可插拔跑道延长
   symmetric: true
+- path: ../../../themes/2026-08-05-FCC拟禁中国新型号光模块-北美准入风险.md
+  note: FCC 拟禁中国新型号光模块——美系替代供给方受益，但双面：中国模块厂同时是 EML 大客户，需求为转移而非净增、中间有摩擦损耗；thesis 边际强化，评级不动
+  symmetric: true
 ---
 # Lumentum Holdings（LITE）buffett 深度分析——AI datacom 光器件业绩真兑现的全球龙头，但 P/S 25 / EV-EBITDA 123 / 52周+742%，好公司极贵价格
 
@@ -44,6 +47,7 @@ related_docs:
 > - [2026-06-28-仕佳光子-buffett分析](../optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 中国光芯片追赶者（无源强/有源 EML 早期），芯片层份额格局参照
 > - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 芯片全球玩家，Lumentum(LITE) 是 InP 激光器龙头
 > - [2026-06-11-SemiAnalysis-CPO-800VDC延后影响](../../../themes/2026-06-11-SemiAnalysis-CPO-800VDC延后影响.md) — CPO 延后事件中 Lumentum 当日 -8%，可插拔跑道延长
+> - [2026-08-05-FCC拟禁中国新型号光模块-北美准入风险](../../../themes/2026-08-05-FCC拟禁中国新型号光模块-北美准入风险.md) — FCC 拟禁中国新型号光模块——美系替代供给方受益，但双面：中国模块厂同时是 EML 大客户，需求为转移而非净增、中间有摩擦损耗；thesis 边际强化，评级不动
 <!-- END related_docs -->
 
 > 数据基准：2026-07-02（美东；行情锚基于 2026-07-01 收盘）｜现价 **$801.16**（收盘 -6.63%）｜总股本 77.8M 股｜总市值 **$62.33B**｜52 周区间 **$88.37–$1,085.68**（较 5 月 ATH 回撤约 -26%，自 52 周低涨约 9.1x，52 周 +742%）｜PE(TTM) 152（GAAP 刚转正、基数虚高，无意义）｜Forward PE 50.6x（FY27 口径）~100x（CY26 非 GAAP EPS≈$8 口径）｜P/S 25.0｜EV/EBITDA 122.8｜PB 19.3
