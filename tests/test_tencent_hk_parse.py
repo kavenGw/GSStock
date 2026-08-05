@@ -53,3 +53,22 @@ def test_a_share_volume_still_converted_to_lots():
         result = unified_stock_data_service._fetch_from_tencent(['600519'], '2026-08-05T13:20:00')
     assert result['600519']['volume'] == 12345
     assert result['600519']['market'] == 'A'
+
+
+def test_zero_volume_not_none():
+    hk_zero = {0: '100', 1: '建滔积层板', 2: '01888', 3: '34.600', 4: '31.120',
+               5: '31.120', 6: '0', 30: '2026/08/05 13:16:48',
+               31: '3.480', 32: '11.18', 33: '34.760', 34: '30.500'}
+    a_zero = {0: '1', 1: '贵州茅台', 2: '600519', 3: '1800.00', 4: '1790.00',
+              5: '1795.00', 6: '0', 31: '10.00', 32: '0.56',
+              33: '1810.00', 34: '1785.00'}
+
+    text_hk = _build_line('hk01888', hk_zero)
+    with patch('requests.get', return_value=_tencent_resp(text_hk)):
+        result = unified_stock_data_service._fetch_from_tencent(['1888.HK'], '2026-08-05T13:20:00')
+    assert result['1888.HK']['volume'] == 0
+
+    text_a = _build_line('sh600519', a_zero)
+    with patch('requests.get', return_value=_tencent_resp(text_a)):
+        result = unified_stock_data_service._fetch_from_tencent(['600519'], '2026-08-05T13:20:00')
+    assert result['600519']['volume'] == 0
