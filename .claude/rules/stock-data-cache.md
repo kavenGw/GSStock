@@ -78,7 +78,7 @@ MarketIdentifier.is_index(code)      # 判断是否指数
 
 ### 数据源
 
-A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速），**港股实时价腾讯 `q=hk<code>` 优先、yfinance 兜底**，美股走 yfinance；选源与负载均衡见下方「核心组件」。腾讯字段索引 / XD除息失真 / `[41][42]`年高低失真 / 港股 `q=hk` 字段 / A+H 市值自洽校验等取数坑见 `data-fetch-conventions.md`。
+A股实时价/分时K线优先腾讯 `qt.gtimg.cn`（并发安全、无需限速），**港股实时价腾讯 `q=r_hk<code>`（实时口径）优先、yfinance 兜底；裸 `hk` 前缀为15分钟延迟口径，实时价勿用**，美股走 yfinance；选源与负载均衡见下方「核心组件」。腾讯字段索引 / XD除息失真 / `[41][42]`年高低失真 / 港股 `q=hk` 字段 / A+H 市值自洽校验等取数坑见 `data-fetch-conventions.md`。
 
 ### 策略数据协作
 

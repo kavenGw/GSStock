@@ -14,7 +14,7 @@ def test_index_codes_respect_suffix():
 
 
 def test_hk_codes_zero_padded():
-    assert _tencent_code('1888.HK') == 'hk01888'
-    assert _tencent_code('700.HK') == 'hk00700'
-    assert _tencent_code('03690.HK') == 'hk03690'
-    assert _tencent_code('9992.hk') == 'hk09992'
+    assert _tencent_code('1888.HK') == 'r_hk01888'
+    assert _tencent_code('700.HK') == 'r_hk00700'
+    assert _tencent_code('03690.HK') == 'r_hk03690'
+    assert _tencent_code('9992.hk') == 'r_hk09992'

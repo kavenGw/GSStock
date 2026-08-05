@@ -36,7 +36,8 @@ VOLUME_UNIT_SCHEMA_VERSION = 2
 
 def _tencent_code(code: str) -> str:
     """腾讯行情代码前缀：优先 .SS/.SH→sh、.SZ→sz（指数权威口径），
-    .HK→hk+5位补零，裸代码回退 6/5 开头→sh、其余→sz。"""
+    .HK→r_hk+5位补零（实时口径；裸 hk 前缀是15分钟延迟口径，不可用于实时价），
+    裸代码回退 6/5 开头→sh、其余→sz。"""
     c = code.strip()
     up = c.upper()
     if up.endswith('.SS') or up.endswith('.SH'):
@@ -44,7 +45,7 @@ def _tencent_code(code: str) -> str:
     if up.endswith('.SZ'):
         return f"sz{c[:-3]}"
     if up.endswith('.HK'):
-        return f"hk{int(c[:-3]):05d}"
+        return f"r_hk{int(c[:-3]):05d}"
     return f"sh{c}" if c.startswith(('6', '5')) else f"sz{c}"
 
 
