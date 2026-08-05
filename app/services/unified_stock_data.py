@@ -620,17 +620,20 @@ class UnifiedStockDataService:
         a_share_success = 0
         yf_success = 0
 
-        # 分离A股和非A股
+        # 分离A股、港股和其他（港股腾讯优先，其余 yfinance）
         a_share_codes = []
+        hk_codes = []
         other_codes = []
         for code in stock_codes:
             market = self._identify_market(code)
             if market == 'A':
                 a_share_codes.append(code)
+            elif market == 'HK':
+                hk_codes.append(code)
             else:
                 other_codes.append(code)
 
-        logger.debug(f"[数据服务.实时价格] 分离股票: A股 {len(a_share_codes)}只, 其他 {len(other_codes)}只")
+        logger.debug(f"[数据服务.实时价格] 分离股票: A股 {len(a_share_codes)}只, 港股 {len(hk_codes)}只, 其他 {len(other_codes)}只")
 
         # A股获取（东方财富优先，yfinance备用）
         if a_share_codes:
@@ -645,6 +648,24 @@ class UnifiedStockDataService:
                     is_complete=a_market_closed,
                     data_end_date=a_effective_date if a_market_closed else None
                 )
+
+        fetched_other = []
+
+        # 港股：腾讯批量优先（实时、免限流），失败/缺失并入 yfinance 兜底
+        if hk_codes:
+            try:
+                hk_fetched = self._fetch_from_tencent(hk_codes, now_str)
+            except Exception as e:
+                logger.warning(f"[数据服务.实时价格] 腾讯港股获取失败: {e}")
+                hk_fetched = {}
+            hk_ok = {c: d for c, d in hk_fetched.items() if d.get('current_price')}
+            for code, data in hk_ok.items():
+                result[code] = data
+                fetched_other.append((code, data))
+            if hk_ok:
+                names = ', '.join(d['name'] for d in hk_ok.values())
+                logger.info(f"[数据服务.实时价格] 腾讯(港股) → {names} ({len(hk_ok)}只)")
+            other_codes.extend(c for c in hk_codes if c not in hk_ok)
 
         # 非A股使用yfinance
         if other_codes:
@@ -687,7 +708,6 @@ class UnifiedStockDataService:
                     logger.debug(f"[数据服务.获取] {code} 失败 (yfinance): {e}")
                     return code, None
 
-            fetched_other = []
             rate_limited_codes = []
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = {executor.submit(fetch_single, code): code for code in other_codes}
@@ -713,15 +733,15 @@ class UnifiedStockDataService:
                 if expired_data:
                     result[code] = expired_data
 
-            # 主线程中批量保存到缓存，用市场有效日期和完整性判断
-            for code, data in fetched_other:
-                effective_date = SmartCacheStrategy.get_effective_cache_date(code)
-                is_complete = SmartCacheStrategy.is_data_complete(code, effective_date)
-                UnifiedStockCache.set_cached_data(
-                    code, 'price', data, effective_date,
-                    is_complete=is_complete,
-                    data_end_date=effective_date if is_complete else None
-                )
+        # 主线程中批量保存到缓存，用市场有效日期和完整性判断
+        for code, data in fetched_other:
+            effective_date = SmartCacheStrategy.get_effective_cache_date(code)
+            is_complete = SmartCacheStrategy.is_data_complete(code, effective_date)
+            UnifiedStockCache.set_cached_data(
+                code, 'price', data, effective_date,
+                is_complete=is_complete,
+                data_end_date=effective_date if is_complete else None
+            )
         return result
 
     def _fetch_a_share_prices(self, stock_codes: list, today: date, now_str: str) -> dict:
