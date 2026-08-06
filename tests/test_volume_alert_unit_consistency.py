@@ -174,41 +174,75 @@ def test_check_cache_schema_version_skips_when_matched(tmp_path, monkeypatch):
 
 @pytest.fixture
 def strategy_deps(monkeypatch):
-    """通用 mock 工厂：返回可配置的 trend/realtime，并屏蔽交易日校验"""
-    from app.strategies.volume_alert import __init__ as va_mod
+    """通用 mock 工厂：可配置 trend/realtime/市场归属/各市场交易日开关"""
 
     class _Stub:
         trend = {'stocks': []}
         realtime = {}
+        markets = None          # {code: 'A'|'HK'}，None 时全部按 'A'
+        names = None            # {code: name}，None 时从 trend 的 stock_name 推
+        trading_days = None     # {'A': True, 'HK': True}，None 时全部 True
+        requested_codes = []    # 记录实际传给取数层的代码，供断言
 
     stub = _Stub()
 
-    def fake_get_watch_codes():
+    def _codes():
         return [s['stock_code'] for s in stub.trend.get('stocks', [])]
+
+    def _market_map():
+        if stub.markets is not None:
+            return dict(stub.markets)
+        return {c: 'A' for c in _codes()}
+
+    def fake_get_watch_codes():
+        return _codes()
+
+    def fake_get_watch_list():
+        names = stub.names or {}
+        mm = _market_map()
+        out = []
+        for i, s in enumerate(stub.trend.get('stocks', []), 1):
+            code = s['stock_code']
+            out.append({
+                'id': i,
+                'stock_code': code,
+                'stock_name': names.get(code, s.get('stock_name', code)),
+                'market': mm.get(code, 'A'),
+                'added_at': None,
+            })
+        return out
 
     class FakeUSD:
         def __init__(self):
             pass
+
         def get_trend_data(self, codes, days=5, force_refresh=False):
-            return stub.trend
+            stub.requested_codes = list(codes)
+            wanted = set(codes)
+            return {'stocks': [s for s in stub.trend.get('stocks', [])
+                               if s['stock_code'] in wanted]}
+
         def get_realtime_prices(self, codes, force_refresh=False):
-            return stub.realtime
+            wanted = set(codes)
+            return {k: v for k, v in stub.realtime.items() if k in wanted}
 
     class FakeCal:
         @staticmethod
         def is_trading_day(market, today):
-            return True
+            if stub.trading_days is None:
+                return True
+            return stub.trading_days.get(market, False)
 
-    class FakeMI:
-        @staticmethod
-        def is_a_share(code):
-            return True
-
-    # 策略内 local import，patch 目标模块
-    monkeypatch.setattr('app.services.watch_service.WatchService.get_watch_codes', fake_get_watch_codes, raising=False)
-    monkeypatch.setattr('app.services.trading_calendar.TradingCalendarService', FakeCal, raising=False)
-    monkeypatch.setattr('app.services.unified_stock_data.UnifiedStockDataService', FakeUSD, raising=False)
-    monkeypatch.setattr('app.utils.market_identifier.MarketIdentifier', FakeMI, raising=False)
+    monkeypatch.setattr('app.services.watch_service.WatchService.get_watch_codes',
+                        fake_get_watch_codes, raising=False)
+    monkeypatch.setattr('app.services.watch_service.WatchService.get_watch_list',
+                        fake_get_watch_list, raising=False)
+    monkeypatch.setattr('app.services.watch_service.WatchService.get_market_map',
+                        _market_map, raising=False)
+    monkeypatch.setattr('app.services.trading_calendar.TradingCalendarService',
+                        FakeCal, raising=False)
+    monkeypatch.setattr('app.services.unified_stock_data.UnifiedStockDataService',
+                        FakeUSD, raising=False)
 
     return stub
 
@@ -278,6 +312,151 @@ def test_sanity_gate_accepts_normal_anomaly(strategy_deps, caplog):
     assert signals[0].data['stock_code'] == '600519'
     # change_pct = (8000-3000)/3000 ≈ 1.667 → 放量 167%
     assert signals[0].data['volume_change_pct'] > 0
+
+
+# ============ 7. 多市场覆盖 ============
+
+def test_hk_stock_produces_signal(strategy_deps):
+    """回归本次缺陷：港股此前被 is_a_share 过滤，从未产出过信号。
+    数值取自 2026-08-06 泡泡玛特真实行情。
+    """
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('9992.HK', '9992.HK',
+                              [7000000, 6500000, 8381789, 6638049, 19505349], today_str)]
+    }
+    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_pct': -2.54}}
+    strategy_deps.markets = {'9992.HK': 'HK'}
+    strategy_deps.names = {'9992.HK': '泡泡玛特'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert len(signals) == 1
+    assert signals[0].data['stock_code'] == '9992.HK'
+    assert signals[0].data['volume_change_pct'] > 1.9      # (19505349-6638049)/6638049 ≈ 1.94
+
+
+def test_both_markets_scanned_together(strategy_deps):
+    """A 股与港股在同一次扫描中各自产出信号"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [
+            _make_ohlc('600584', '长电科技', [1400000, 1500000, 1435993, 1761053, 2359071], today_str),
+            _make_ohlc('9992.HK', '9992.HK', [7000000, 6500000, 8381789, 6638049, 19505349], today_str),
+        ]
+    }
+    strategy_deps.realtime = {
+        '600584': {'volume': 2359071, 'change_pct': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_pct': -2.54},
+    }
+    strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
+    strategy_deps.names = {'600584': '长电科技', '9992.HK': '泡泡玛特'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert {s.data['stock_code'] for s in signals} == {'600584', '9992.HK'}
+
+
+def test_hk_survives_a_share_holiday(strategy_deps):
+    """A 股休市但港股开市时，港股仍被扫描——修复原先 is_trading_day('A') 提前 return 的连坐"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [
+            _make_ohlc('600584', '长电科技', [1400000, 1500000, 1435993, 1761053, 2359071], today_str),
+            _make_ohlc('9992.HK', '9992.HK', [7000000, 6500000, 8381789, 6638049, 19505349], today_str),
+        ]
+    }
+    strategy_deps.realtime = {
+        '600584': {'volume': 2359071, 'change_pct': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_pct': -2.54},
+    }
+    strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
+    strategy_deps.names = {'600584': '长电科技', '9992.HK': '泡泡玛特'}
+    strategy_deps.trading_days = {'A': False, 'HK': True}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert [s.data['stock_code'] for s in signals] == ['9992.HK']
+    assert strategy_deps.requested_codes == ['9992.HK'], \
+        'A 股休市时不应把 A 股代码送进取数层'
+
+
+def test_a_survives_hk_holiday(strategy_deps):
+    """反向：港股休市（如佛诞）时 A 股照常扫描"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [
+            _make_ohlc('600584', '长电科技', [1400000, 1500000, 1435993, 1761053, 2359071], today_str),
+            _make_ohlc('9992.HK', '9992.HK', [7000000, 6500000, 8381789, 6638049, 19505349], today_str),
+        ]
+    }
+    strategy_deps.realtime = {
+        '600584': {'volume': 2359071, 'change_pct': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_pct': -2.54},
+    }
+    strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
+    strategy_deps.trading_days = {'A': True, 'HK': False}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert [s.data['stock_code'] for s in signals] == ['600584']
+
+
+def test_all_markets_closed_returns_empty_without_fetching(strategy_deps):
+    """两市场均休市：返回空且不发起任何取数"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('600584', '长电科技',
+                              [1400000, 1500000, 1435993, 1761053, 2359071], today_str)]
+    }
+    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_pct': 10.0}}
+    strategy_deps.markets = {'600584': 'A'}
+    strategy_deps.trading_days = {'A': False, 'HK': False}
+    strategy_deps.requested_codes = ['sentinel']
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert signals == []
+    assert strategy_deps.requested_codes == ['sentinel'], '休市日不应调用取数层'
+
+
+def test_unsupported_market_excluded(strategy_deps):
+    """美股/韩股在盯盘池里但不在覆盖范围内，不得进入扫描"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [
+            _make_ohlc('600584', '长电科技', [1400000, 1500000, 1435993, 1761053, 2359071], today_str),
+            _make_ohlc('005930.KS', '三星电子', [1000, 1000, 1000, 1000, 5000], today_str),
+        ]
+    }
+    strategy_deps.realtime = {
+        '600584': {'volume': 2359071, 'change_pct': 10.0},
+        '005930.KS': {'volume': 5000, 'change_pct': 3.0},
+    }
+    strategy_deps.markets = {'600584': 'A', '005930.KS': 'KR'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert [s.data['stock_code'] for s in signals] == ['600584']
+    assert '005930.KS' not in strategy_deps.requested_codes
 
 
 # ============ 4. 落点接入回归 ============

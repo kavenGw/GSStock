@@ -1,4 +1,4 @@
-"""A股收盘成交量异动策略 — 盯盘股票量比超30%时推送"""
+"""A股/港股收盘成交量异动策略 — 盯盘股票量比超30%时推送"""
 import logging
 from datetime import date, datetime, timedelta
 from app.strategies.base import Strategy, Signal
@@ -7,11 +7,12 @@ logger = logging.getLogger(__name__)
 
 VOLUME_CHANGE_THRESHOLD = 0.3
 RETRY_DELAY_MINUTES = 10
+SUPPORTED_MARKETS = {'A', 'HK'}
 
 
 class VolumeAlertStrategy(Strategy):
     name = "volume_alert"
-    description = "A股收盘成交量异动推送"
+    description = "A股/港股收盘成交量异动推送"
     schedule = "30 16 * * 1-5"  # 工作日16:30，等待数据源完成收盘结算
     needs_llm = False
 
@@ -27,24 +28,30 @@ class VolumeAlertStrategy(Strategy):
         from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
         from app.services.unified_stock_data import UnifiedStockDataService
-        from app.utils.market_identifier import MarketIdentifier
 
-        if not TradingCalendarService.is_trading_day('A', date.today()):
-            logger.info(f'[成交量异动] {date.today()} 非A股交易日，跳过扫描')
-            return []
+        market_map = WatchService.get_market_map()
 
         if retry_codes:
-            a_codes = retry_codes
-            logger.info(f'[成交量异动] 重试 {len(a_codes)} 只: {a_codes}')
+            codes = retry_codes
+            logger.info(f'[成交量异动] 重试 {len(codes)} 只: {codes}')
         else:
-            codes = WatchService.get_watch_codes()
-            a_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
-        if not a_codes:
+            today = date.today()
+            open_markets = {
+                m for m in SUPPORTED_MARKETS
+                if m in set(market_map.values())
+                and TradingCalendarService.is_trading_day(m, today)
+            }
+            if not open_markets:
+                logger.info(f'[成交量异动] {today} A股/港股均非交易日，跳过扫描')
+                return []
+            codes = [c for c, m in market_map.items() if m in open_markets]
+
+        if not codes:
             return []
 
         data_service = UnifiedStockDataService()
-        trend = data_service.get_trend_data(a_codes, days=5, force_refresh=True)
-        realtime = data_service.get_realtime_prices(a_codes, force_refresh=True)
+        trend = data_service.get_trend_data(codes, days=5, force_refresh=True)
+        realtime = data_service.get_realtime_prices(codes, force_refresh=True)
 
         today_str = date.today().strftime('%Y-%m-%d')
         signals = []
@@ -126,7 +133,7 @@ class VolumeAlertStrategy(Strategy):
             self._push_error(f'重试仍缺失今日数据: {", ".join(names or missing_codes)}')
 
         if signals:
-            logger.info(f'[成交量异动] 扫描 {len(a_codes)} 只, 产出 {len(signals)} 个信号')
+            logger.info(f'[成交量异动] 扫描 {len(codes)} 只, 产出 {len(signals)} 个信号')
         return signals
 
     def _schedule_retry(self, codes: list):
