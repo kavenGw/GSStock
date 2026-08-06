@@ -3841,3 +3841,18 @@
   - 创新药
   - 出海
   - 盈利拐点
+- stock_code: '002716'
+  stock_name: 湖南白银
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 0.65
+  base: 1.26
+  bull: 2.12
+  conviction_date: '2026-08-06'
+  source_doc: sectors/materials/nonferrous/2026-08-06-湖南白银-buffett分析.md
+  themes:
+  - 白银
+  - 有色金属
+  - 贵金属
