@@ -3873,3 +3873,21 @@
   - 白银
   - 冶炼加工
   quality: 1
+- stock_code: '688548'
+  stock_name: 广钢气体
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  quality: 3
+  bear: 1.09
+  base: 2.66
+  bull: 5.46
+  dividend_yield: 0.3
+  conviction_date: '2026-08-06'
+  source_doc: sectors/materials/industrial-gas/2026-08-06-广钢气体-buffett分析.md
+  themes:
+  - 工业气体
+  - 电子大宗气体
+  - 氦气
+  - 国产替代
