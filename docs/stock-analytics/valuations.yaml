@@ -3824,3 +3824,20 @@
   - AI大模型
   - AI应用出海
   - 港股
+- stock_code: '06160'
+  stock_name: 百济神州
+  market: HK
+  currency: HKD
+  sector: healthcare
+  rating: watch
+  watch_reason: 生意真实、拐点真实——2026Q2 GAAP 营业利润 3.25 亿美元（+270%）、毛利率 87%→90%、TTM FCF +13.3 亿美元，全年 GAAP 营业利润指引上调至 10–11 亿美元，是中国创新药里唯一跑通"规模化+GAAP 盈利"的标的；但泽布替尼单品占收入 70.4%、2027 一致预期增速断崖降到 +14.4%、PE(fwd) 38.19x 是国际可比表最高，H 现价 198.70 HKD 对应期望内在价值 146.1 HKD、安全边际 −26.5%，连 bull 情景（243 HKD）也只比现价高 22.3%——好公司买在了把 2029 年利润提前定价的位置，等价格回到 130 HKD 下方再谈
+  bear: 90
+  base: 141
+  bull: 243
+  conviction_date: '2026-08-06'
+  source_doc: sectors/healthcare/innovative-drug/2026-08-06-百济神州-buffett分析.md
+  quality: 4
+  themes:
+  - 创新药
+  - 出海
+  - 盈利拐点
