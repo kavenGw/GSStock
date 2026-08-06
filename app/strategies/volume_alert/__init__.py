@@ -27,9 +27,10 @@ class VolumeAlertStrategy(Strategy):
     def _do_scan(self, retry_codes: list = None) -> list[Signal]:
         from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
-        from app.services.unified_stock_data import UnifiedStockDataService
+        from app.services.unified_stock_data import UnifiedStockDataService, CONTRACT_VOLUME_UNIT
 
         market_map = WatchService.get_market_map()
+        name_map = {e['stock_code']: e['stock_name'] for e in WatchService.get_watch_list()}
 
         if retry_codes:
             codes = retry_codes
@@ -59,7 +60,7 @@ class VolumeAlertStrategy(Strategy):
 
         for stock in trend.get('stocks', []):
             code = stock.get('stock_code')
-            name = stock.get('stock_name', code)
+            name = name_map.get(code) or stock.get('stock_name') or code
             ohlc = stock.get('data', [])
             if not ohlc or len(ohlc) < 2:
                 continue
@@ -116,20 +117,20 @@ class VolumeAlertStrategy(Strategy):
             price_str = f"+{price_change:.2f}%" if price_change >= 0 else f"{price_change:.2f}%"
 
             vol_cmp = '>' if change_pct > 0 else '<'
+            unit = CONTRACT_VOLUME_UNIT.get(market_map.get(code))
+            u = f' {unit}' if unit else ''
             signals.append(Signal(
                 strategy=self.name,
                 priority='HIGH' if abs(change_pct) >= 0.5 else 'MEDIUM',
                 title=f'{name}({code}) {direction}{pct_str}',
-                detail=f"今日 {today_vol:,.0f} {vol_cmp} 昨日 {prev_vol:,.0f} | 涨跌 {price_str}",
+                detail=f"今日 {today_vol:,.0f}{u} {vol_cmp} 昨日 {prev_vol:,.0f}{u} | 涨跌 {price_str}",
                 data={'stock_code': code, 'volume_change_pct': round(change_pct, 4)},
             ))
 
         if missing_codes and not retry_codes:
             self._schedule_retry(missing_codes)
         elif missing_codes and retry_codes:
-            names = [s.get('stock_name', s.get('stock_code'))
-                     for s in trend.get('stocks', [])
-                     if s.get('stock_code') in missing_codes]
+            names = [name_map.get(c) or c for c in missing_codes]
             self._push_error(f'重试仍缺失今日数据: {", ".join(names or missing_codes)}')
 
         if signals:

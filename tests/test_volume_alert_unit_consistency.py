@@ -459,6 +459,106 @@ def test_unsupported_market_excluded(strategy_deps):
     assert '005930.KS' not in strategy_deps.requested_codes
 
 
+def test_a_share_detail_uses_lots_unit(strategy_deps):
+    """A 股 detail 的成交量带「手」后缀"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('600584', '长电科技',
+                              [1400000, 1500000, 1435993, 1761053, 2359071], today_str)]
+    }
+    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_pct': 10.0}}
+    strategy_deps.markets = {'600584': 'A'}
+    strategy_deps.names = {'600584': '长电科技'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert len(signals) == 1
+    assert signals[0].detail == '今日 2,359,071 手 > 昨日 1,761,053 手 | 涨跌 +10.00%'
+
+
+def test_hk_detail_uses_shares_unit(strategy_deps):
+    """港股 detail 的成交量带「股」后缀"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('9992.HK', '9992.HK',
+                              [7000000, 6500000, 8381789, 6638049, 19505349], today_str)]
+    }
+    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_pct': -2.54}}
+    strategy_deps.markets = {'9992.HK': 'HK'}
+    strategy_deps.names = {'9992.HK': '泡泡玛特'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert len(signals) == 1
+    assert signals[0].detail == '今日 19,505,349 股 > 昨日 6,638,049 股 | 涨跌 -2.54%'
+
+
+def test_hk_title_uses_chinese_name_from_watch_codes(strategy_deps):
+    """港股 trend 返回的 stock_name 是代码本身，标题必须走 WATCH_CODES 中文名"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('9992.HK', '9992.HK',
+                              [7000000, 6500000, 8381789, 6638049, 19505349], today_str)]
+    }
+    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_pct': -2.54}}
+    strategy_deps.markets = {'9992.HK': 'HK'}
+    strategy_deps.names = {'9992.HK': '泡泡玛特'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert signals[0].title.startswith('泡泡玛特(9992.HK) 放量')
+    assert '9992.HK(9992.HK)' not in signals[0].title
+
+
+def test_name_falls_back_to_trend_then_code(strategy_deps):
+    """WATCH_CODES 无该名时退回 trend 的 stock_name"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('600584', '长电科技',
+                              [1400000, 1500000, 1435993, 1761053, 2359071], today_str)]
+    }
+    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_pct': 10.0}}
+    strategy_deps.markets = {'600584': 'A'}
+    strategy_deps.names = {'600584': ''}      # 模拟 WATCH_CODES 名为空
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert signals[0].title.startswith('长电科技(600584) 放量')
+
+
+def test_shrink_direction_keeps_unit_suffix(strategy_deps):
+    """缩量方向（vol_cmp 为 <）同样带单位后缀"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('9992.HK', '9992.HK',
+                              [8000000, 8000000, 8000000, 10000000, 5000000], today_str)]
+    }
+    strategy_deps.realtime = {'9992.HK': {'volume': 5000000, 'change_pct': -3.5}}
+    strategy_deps.markets = {'9992.HK': 'HK'}
+    strategy_deps.names = {'9992.HK': '泡泡玛特'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert len(signals) == 1
+    assert signals[0].title.startswith('泡泡玛特(9992.HK) 缩量50%')
+    assert signals[0].detail == '今日 5,000,000 股 < 昨日 10,000,000 股 | 涨跌 -3.50%'
+
+
 # ============ 4. 落点接入回归 ============
 
 def test_tencent_qt_parse_returns_lots(monkeypatch):
