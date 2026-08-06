@@ -1,4 +1,4 @@
-"""A股收盘成交量异动策略 — 盯盘股票量比超30%时推送"""
+"""A股/港股收盘成交量异动策略 — 盯盘股票量比超30%时推送"""
 import logging
 from datetime import date, datetime, timedelta
 from app.strategies.base import Strategy, Signal
@@ -7,11 +7,12 @@ logger = logging.getLogger(__name__)
 
 VOLUME_CHANGE_THRESHOLD = 0.3
 RETRY_DELAY_MINUTES = 10
+SUPPORTED_MARKETS = {'A', 'HK'}
 
 
 class VolumeAlertStrategy(Strategy):
     name = "volume_alert"
-    description = "A股收盘成交量异动推送"
+    description = "A股/港股收盘成交量异动推送"
     schedule = "30 16 * * 1-5"  # 工作日16:30，等待数据源完成收盘结算
     needs_llm = False
 
@@ -26,25 +27,32 @@ class VolumeAlertStrategy(Strategy):
     def _do_scan(self, retry_codes: list = None) -> list[Signal]:
         from app.services.trading_calendar import TradingCalendarService
         from app.services.watch_service import WatchService
-        from app.services.unified_stock_data import UnifiedStockDataService
-        from app.utils.market_identifier import MarketIdentifier
+        from app.services.unified_stock_data import UnifiedStockDataService, CONTRACT_VOLUME_UNIT
 
-        if not TradingCalendarService.is_trading_day('A', date.today()):
-            logger.info(f'[成交量异动] {date.today()} 非A股交易日，跳过扫描')
-            return []
+        market_map = WatchService.get_market_map()
+        name_map = {e['stock_code']: e['stock_name'] for e in WatchService.get_watch_list()}
 
         if retry_codes:
-            a_codes = retry_codes
-            logger.info(f'[成交量异动] 重试 {len(a_codes)} 只: {a_codes}')
+            codes = retry_codes
+            logger.info(f'[成交量异动] 重试 {len(codes)} 只: {codes}')
         else:
-            codes = WatchService.get_watch_codes()
-            a_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
-        if not a_codes:
+            today = date.today()
+            open_markets = {
+                m for m in SUPPORTED_MARKETS
+                if m in set(market_map.values())
+                and TradingCalendarService.is_trading_day(m, today)
+            }
+            if not open_markets:
+                logger.info(f'[成交量异动] {today} A股/港股均非交易日，跳过扫描')
+                return []
+            codes = [c for c, m in market_map.items() if m in open_markets]
+
+        if not codes:
             return []
 
         data_service = UnifiedStockDataService()
-        trend = data_service.get_trend_data(a_codes, days=5, force_refresh=True)
-        realtime = data_service.get_realtime_prices(a_codes, force_refresh=True)
+        trend = data_service.get_trend_data(codes, days=5, force_refresh=True)
+        realtime = data_service.get_realtime_prices(codes, force_refresh=True)
 
         today_str = date.today().strftime('%Y-%m-%d')
         signals = []
@@ -52,7 +60,7 @@ class VolumeAlertStrategy(Strategy):
 
         for stock in trend.get('stocks', []):
             code = stock.get('stock_code')
-            name = stock.get('stock_name', code)
+            name = name_map.get(code) or stock.get('stock_name') or code
             ohlc = stock.get('data', [])
             if not ohlc or len(ohlc) < 2:
                 continue
@@ -66,8 +74,12 @@ class VolumeAlertStrategy(Strategy):
                 if rt_vol:
                     today_vol = rt_vol
                     prev_vol = ohlc[-1].get('volume', 0)  # 此时 ohlc[-1] 即昨日
-                    price_change = rt.get('change_percent', rt.get('change_pct', 0)) or 0
+                    price_change = rt.get('change_percent') or 0
                     logger.info(f"[成交量异动] {code} {name} 使用realtime合成今日bar: vol={today_vol:,}")
+                elif rt.get('current_price') is not None:
+                    # 取数成功但无成交量 → 停牌（港股常态，可持续数周），不告警
+                    logger.info(f"[成交量异动] {code} {name} 疑似停牌: 有报价无成交量，跳过")
+                    continue
                 else:
                     missing_codes.append(code)
                     logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}, realtime 无 volume")
@@ -75,7 +87,10 @@ class VolumeAlertStrategy(Strategy):
             else:
                 today_vol = ohlc[-1].get('volume', 0)
                 prev_vol = ohlc[-2].get('volume', 0)
-                price_change = rt.get('change_pct', ohlc[-1].get('change_pct', 0))
+                price_change = rt.get('change_percent')
+                if price_change is None:
+                    prev_close = ohlc[-2].get('close') or 0
+                    price_change = ((ohlc[-1].get('close', 0) - prev_close) / prev_close * 100) if prev_close else 0
 
             if not prev_vol or not today_vol:
                 continue
@@ -109,24 +124,25 @@ class VolumeAlertStrategy(Strategy):
             price_str = f"+{price_change:.2f}%" if price_change >= 0 else f"{price_change:.2f}%"
 
             vol_cmp = '>' if change_pct > 0 else '<'
+            # 此处 market 来自 WATCH_CODES 配置，仅用于展示标签；volume 归一化口径以 _identify_market 的形态推断为准
+            unit = CONTRACT_VOLUME_UNIT.get(market_map.get(code))
+            u = f' {unit}' if unit else ''
             signals.append(Signal(
                 strategy=self.name,
                 priority='HIGH' if abs(change_pct) >= 0.5 else 'MEDIUM',
                 title=f'{name}({code}) {direction}{pct_str}',
-                detail=f"今日 {today_vol:,.0f} {vol_cmp} 昨日 {prev_vol:,.0f} | 涨跌 {price_str}",
+                detail=f"今日 {today_vol:,.0f}{u} {vol_cmp} 昨日 {prev_vol:,.0f}{u} | 涨跌 {price_str}",
                 data={'stock_code': code, 'volume_change_pct': round(change_pct, 4)},
             ))
 
         if missing_codes and not retry_codes:
             self._schedule_retry(missing_codes)
         elif missing_codes and retry_codes:
-            names = [s.get('stock_name', s.get('stock_code'))
-                     for s in trend.get('stocks', [])
-                     if s.get('stock_code') in missing_codes]
-            self._push_error(f'重试仍缺失今日数据: {", ".join(names or missing_codes)}')
+            names = [name_map.get(c) or c for c in missing_codes]
+            self._push_error(f'重试仍缺失今日数据: {", ".join(names)}')
 
         if signals:
-            logger.info(f'[成交量异动] 扫描 {len(a_codes)} 只, 产出 {len(signals)} 个信号')
+            logger.info(f'[成交量异动] 扫描 {len(codes)} 只, 产出 {len(signals)} 个信号')
         return signals
 
     def _schedule_retry(self, codes: list):
