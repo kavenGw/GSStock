@@ -3891,3 +3891,19 @@
   - 电子大宗气体
   - 氦气
   - 国产替代
+- stock_code: '688362'
+  stock_name: 甬矽电子
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 6.2
+  base: 9.6
+  bull: 15.0
+  conviction_date: '2026-08-06'
+  source_doc: sectors/semiconductor/packaging/2026-08-06-甬矽电子-buffett分析.md
+  themes:
+  - 封测
+  - 先进封装
+  - AI
+  - 扩产
