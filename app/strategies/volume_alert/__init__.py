@@ -74,8 +74,12 @@ class VolumeAlertStrategy(Strategy):
                 if rt_vol:
                     today_vol = rt_vol
                     prev_vol = ohlc[-1].get('volume', 0)  # 此时 ohlc[-1] 即昨日
-                    price_change = rt.get('change_percent', rt.get('change_pct', 0)) or 0
+                    price_change = rt.get('change_percent') or 0
                     logger.info(f"[成交量异动] {code} {name} 使用realtime合成今日bar: vol={today_vol:,}")
+                elif rt.get('current_price') is not None:
+                    # 取数成功但无成交量 → 停牌（港股常态，可持续数周），不告警
+                    logger.info(f"[成交量异动] {code} {name} 疑似停牌: 有报价无成交量，跳过")
+                    continue
                 else:
                     missing_codes.append(code)
                     logger.warning(f"[成交量异动] {code} {name} OHLC最新日期 {last_date} != 今天 {today_str}, realtime 无 volume")
@@ -83,7 +87,10 @@ class VolumeAlertStrategy(Strategy):
             else:
                 today_vol = ohlc[-1].get('volume', 0)
                 prev_vol = ohlc[-2].get('volume', 0)
-                price_change = rt.get('change_pct', ohlc[-1].get('change_pct', 0))
+                price_change = rt.get('change_percent')
+                if price_change is None:
+                    prev_close = ohlc[-2].get('close') or 0
+                    price_change = ((ohlc[-1].get('close', 0) - prev_close) / prev_close * 100) if prev_close else 0
 
             if not prev_vol or not today_vol:
                 continue
@@ -117,6 +124,7 @@ class VolumeAlertStrategy(Strategy):
             price_str = f"+{price_change:.2f}%" if price_change >= 0 else f"{price_change:.2f}%"
 
             vol_cmp = '>' if change_pct > 0 else '<'
+            # 此处 market 来自 WATCH_CODES 配置，仅用于展示标签；volume 归一化口径以 _identify_market 的形态推断为准
             unit = CONTRACT_VOLUME_UNIT.get(market_map.get(code))
             u = f' {unit}' if unit else ''
             signals.append(Signal(
@@ -131,7 +139,7 @@ class VolumeAlertStrategy(Strategy):
             self._schedule_retry(missing_codes)
         elif missing_codes and retry_codes:
             names = [name_map.get(c) or c for c in missing_codes]
-            self._push_error(f'重试仍缺失今日数据: {", ".join(names or missing_codes)}')
+            self._push_error(f'重试仍缺失今日数据: {", ".join(names)}')
 
         if signals:
             logger.info(f'[成交量异动] 扫描 {len(codes)} 只, 产出 {len(signals)} 个信号')

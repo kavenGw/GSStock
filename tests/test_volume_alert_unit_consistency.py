@@ -194,9 +194,6 @@ def strategy_deps(monkeypatch):
             return dict(stub.markets)
         return {c: 'A' for c in _codes()}
 
-    def fake_get_watch_codes():
-        return _codes()
-
     def fake_get_watch_list():
         names = stub.names or {}
         mm = _market_map()
@@ -233,8 +230,6 @@ def strategy_deps(monkeypatch):
                 return True
             return stub.trading_days.get(market, False)
 
-    monkeypatch.setattr('app.services.watch_service.WatchService.get_watch_codes',
-                        fake_get_watch_codes, raising=False)
     monkeypatch.setattr('app.services.watch_service.WatchService.get_watch_list',
                         fake_get_watch_list, raising=False)
     monkeypatch.setattr('app.services.watch_service.WatchService.get_market_map',
@@ -247,11 +242,20 @@ def strategy_deps(monkeypatch):
     return stub
 
 
-def _make_ohlc(code, name, vols, today_str='2099-04-23'):
-    """辅助：构造含 today bar 的 OHLC，vols 列表含今天，末尾即今天"""
+def _make_ohlc(code, name, vols, today_str='2099-04-23', closes=None):
+    """辅助：构造含 today bar 的 OHLC，vols 列表含今天，末尾即今天
+
+    closes 可选，与 vols 等长；不传时所有 close 为 10。
+    change_pct 模拟服务层 _merge_trend_data 的语义：相对区间首日收盘的累计涨幅。
+    """
     dates = [f'2099-04-{21 + i:02d}' for i in range(len(vols) - 1)] + [today_str]
-    data = [{'date': d, 'open': 10, 'high': 11, 'low': 9, 'close': 10, 'volume': v, 'change_pct': 0}
-            for d, v in zip(dates, vols)]
+    closes = list(closes) if closes else [10] * len(vols)
+    base = closes[0] or 0
+    data = [
+        {'date': d, 'open': c, 'high': c + 1, 'low': c - 1, 'close': c, 'volume': v,
+         'change_pct': round((c - base) / base * 100, 2) if base else 0}
+        for d, v, c in zip(dates, vols, closes)
+    ]
     return {'stock_code': code, 'stock_name': name, 'data': data}
 
 
@@ -265,7 +269,7 @@ def test_sanity_gate_rejects_extreme_ratio(strategy_deps, caplog, monkeypatch):
     strategy_deps.trend = {
         'stocks': [_make_ohlc('600519', '贵州茅台', [1, 1, 1, 1, 1000], today_str)]
     }
-    strategy_deps.realtime = {'600519': {'volume': 1000, 'change_pct': 1.0}}
+    strategy_deps.realtime = {'600519': {'volume': 1000, 'change_percent': 1.0}}
 
     caplog.set_level(logging.WARNING)
     signals = VolumeAlertStrategy()._do_scan()
@@ -285,7 +289,7 @@ def test_sanity_gate_rejects_partial_today_bar(strategy_deps, caplog, monkeypatc
     strategy_deps.trend = {
         'stocks': [_make_ohlc('600519', '贵州茅台', [2000, 2000, 2000, 100, 10], today_str)]
     }
-    strategy_deps.realtime = {'600519': {'volume': 10, 'change_pct': -1.0}}
+    strategy_deps.realtime = {'600519': {'volume': 10, 'change_percent': -1.0}}
 
     caplog.set_level(logging.WARNING)
     signals = VolumeAlertStrategy()._do_scan()
@@ -304,7 +308,7 @@ def test_sanity_gate_accepts_normal_anomaly(strategy_deps, caplog):
     strategy_deps.trend = {
         'stocks': [_make_ohlc('600519', '贵州茅台', [3000, 3000, 4000, 3000, 8000], today_str)]
     }
-    strategy_deps.realtime = {'600519': {'volume': 8000, 'change_pct': 3.0}}
+    strategy_deps.realtime = {'600519': {'volume': 8000, 'change_percent': 3.0}}
 
     signals = VolumeAlertStrategy()._do_scan()
 
@@ -328,7 +332,7 @@ def test_hk_stock_produces_signal(strategy_deps):
         'stocks': [_make_ohlc('9992.HK', '9992.HK',
                               [7000000, 6500000, 8381789, 6638049, 19505349], today_str)]
     }
-    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_pct': -2.54}}
+    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_percent': -2.54}}
     strategy_deps.markets = {'9992.HK': 'HK'}
     strategy_deps.names = {'9992.HK': '泡泡玛特'}
 
@@ -352,8 +356,8 @@ def test_both_markets_scanned_together(strategy_deps):
         ]
     }
     strategy_deps.realtime = {
-        '600584': {'volume': 2359071, 'change_pct': 10.0},
-        '9992.HK': {'volume': 19505149, 'change_pct': -2.54},
+        '600584': {'volume': 2359071, 'change_percent': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_percent': -2.54},
     }
     strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
     strategy_deps.names = {'600584': '长电科技', '9992.HK': '泡泡玛特'}
@@ -376,8 +380,8 @@ def test_hk_survives_a_share_holiday(strategy_deps):
         ]
     }
     strategy_deps.realtime = {
-        '600584': {'volume': 2359071, 'change_pct': 10.0},
-        '9992.HK': {'volume': 19505149, 'change_pct': -2.54},
+        '600584': {'volume': 2359071, 'change_percent': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_percent': -2.54},
     }
     strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
     strategy_deps.names = {'600584': '长电科技', '9992.HK': '泡泡玛特'}
@@ -403,8 +407,8 @@ def test_a_survives_hk_holiday(strategy_deps):
         ]
     }
     strategy_deps.realtime = {
-        '600584': {'volume': 2359071, 'change_pct': 10.0},
-        '9992.HK': {'volume': 19505149, 'change_pct': -2.54},
+        '600584': {'volume': 2359071, 'change_percent': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_percent': -2.54},
     }
     strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
     strategy_deps.trading_days = {'A': True, 'HK': False}
@@ -424,7 +428,7 @@ def test_all_markets_closed_returns_empty_without_fetching(strategy_deps):
         'stocks': [_make_ohlc('600584', '长电科技',
                               [1400000, 1500000, 1435993, 1761053, 2359071], today_str)]
     }
-    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_pct': 10.0}}
+    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_percent': 10.0}}
     strategy_deps.markets = {'600584': 'A'}
     strategy_deps.trading_days = {'A': False, 'HK': False}
     strategy_deps.requested_codes = ['sentinel']
@@ -448,8 +452,8 @@ def test_unsupported_market_excluded(strategy_deps):
         ]
     }
     strategy_deps.realtime = {
-        '600584': {'volume': 2359071, 'change_pct': 10.0},
-        '005930.KS': {'volume': 5000, 'change_pct': 3.0},
+        '600584': {'volume': 2359071, 'change_percent': 10.0},
+        '005930.KS': {'volume': 5000, 'change_percent': 3.0},
     }
     strategy_deps.markets = {'600584': 'A', '005930.KS': 'KR'}
 
@@ -469,7 +473,7 @@ def test_a_share_detail_uses_lots_unit(strategy_deps):
         'stocks': [_make_ohlc('600584', '长电科技',
                               [1400000, 1500000, 1435993, 1761053, 2359071], today_str)]
     }
-    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_pct': 10.0}}
+    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_percent': 10.0}}
     strategy_deps.markets = {'600584': 'A'}
     strategy_deps.names = {'600584': '长电科技'}
 
@@ -489,7 +493,7 @@ def test_hk_detail_uses_shares_unit(strategy_deps):
         'stocks': [_make_ohlc('9992.HK', '9992.HK',
                               [7000000, 6500000, 8381789, 6638049, 19505349], today_str)]
     }
-    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_pct': -2.54}}
+    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_percent': -2.54}}
     strategy_deps.markets = {'9992.HK': 'HK'}
     strategy_deps.names = {'9992.HK': '泡泡玛特'}
 
@@ -509,7 +513,7 @@ def test_hk_title_uses_chinese_name_from_watch_codes(strategy_deps):
         'stocks': [_make_ohlc('9992.HK', '9992.HK',
                               [7000000, 6500000, 8381789, 6638049, 19505349], today_str)]
     }
-    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_pct': -2.54}}
+    strategy_deps.realtime = {'9992.HK': {'volume': 19505149, 'change_percent': -2.54}}
     strategy_deps.markets = {'9992.HK': 'HK'}
     strategy_deps.names = {'9992.HK': '泡泡玛特'}
 
@@ -529,7 +533,7 @@ def test_name_falls_back_to_trend_then_code(strategy_deps):
         'stocks': [_make_ohlc('600584', '长电科技',
                               [1400000, 1500000, 1435993, 1761053, 2359071], today_str)]
     }
-    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_pct': 10.0}}
+    strategy_deps.realtime = {'600584': {'volume': 2359071, 'change_percent': 10.0}}
     strategy_deps.markets = {'600584': 'A'}
     strategy_deps.names = {'600584': ''}      # 模拟 WATCH_CODES 名为空
 
@@ -548,7 +552,7 @@ def test_shrink_direction_keeps_unit_suffix(strategy_deps):
         'stocks': [_make_ohlc('9992.HK', '9992.HK',
                               [8000000, 8000000, 8000000, 10000000, 5000000], today_str)]
     }
-    strategy_deps.realtime = {'9992.HK': {'volume': 5000000, 'change_pct': -3.5}}
+    strategy_deps.realtime = {'9992.HK': {'volume': 5000000, 'change_percent': -3.5}}
     strategy_deps.markets = {'9992.HK': 'HK'}
     strategy_deps.names = {'9992.HK': '泡泡玛特'}
 
@@ -557,6 +561,136 @@ def test_shrink_direction_keeps_unit_suffix(strategy_deps):
     assert len(signals) == 1
     assert signals[0].title.startswith('泡泡玛特(9992.HK) 缩量50%')
     assert signals[0].detail == '今日 5,000,000 股 < 昨日 10,000,000 股 | 涨跌 -3.50%'
+
+
+# ============ 3b. 涨跌字段取数契约 ============
+
+def test_realtime_dict_exposes_change_percent_not_change_pct(monkeypatch):
+    """契约锁定：realtime 产出的键是 change_percent，不存在 change_pct。
+    任何消费方写 rt.get('change_pct') 都是死路，本测试负责炸掉。
+    """
+    from app.services import unified_stock_data as usd
+
+    raw_line = ('v_sz000725="51~京东方A~000725~5.97~5.63~5.59~25060238~0~0~5.97~'
+                + '~'.join(['0'] * 60) + '";')
+
+    class FakeResp:
+        text = raw_line
+        encoding = 'gbk'
+        status_code = 200
+
+    monkeypatch.setattr('requests.get', lambda *a, **k: FakeResp())
+
+    usd.UnifiedStockDataService._instance = None
+    service = usd.UnifiedStockDataService.__new__(usd.UnifiedStockDataService)
+    result = service._fetch_from_tencent(['000725'], '2026-08-05 16:30:00')
+
+    keys = set(result['000725'])
+    assert 'change_percent' in keys
+    assert 'change_pct' not in keys, 'realtime 无 change_pct 键，消费方不得读它'
+
+
+def test_price_change_uses_daily_not_cumulative(strategy_deps):
+    """回归终审缺陷：OHLC 的 change_pct 是相对区间首日的累计涨幅，不能当日涨跌。
+    真实数值取自 2026-08-06 腾讯控股：区间首日收 475.2、昨收 492.2、今收 479.2。
+    累计 = +0.84%，真实日涨跌 = -2.64%，方向相反。
+    """
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('0700.HK', '0700.HK',
+                              [7000000, 6500000, 8381789, 6638049, 19505349], today_str,
+                              closes=[475.2, 480.0, 485.0, 492.2, 479.2])]
+    }
+    # realtime 不提供 change_percent → 必须退到 close-over-close
+    strategy_deps.realtime = {'0700.HK': {'volume': 19505149}}
+    strategy_deps.markets = {'0700.HK': 'HK'}
+    strategy_deps.names = {'0700.HK': '腾讯控股'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert len(signals) == 1
+    assert '涨跌 -2.64%' in signals[0].detail
+    assert '+0.84%' not in signals[0].detail
+
+
+def test_change_percent_none_falls_back_without_typeerror(strategy_deps):
+    """腾讯 q= 在停牌/字段缺失时 change_percent 为 None，不得抛 TypeError"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('0700.HK', '0700.HK',
+                              [7000000, 6500000, 8381789, 6638049, 19505349], today_str,
+                              closes=[475.2, 480.0, 485.0, 492.2, 479.2])]
+    }
+    strategy_deps.realtime = {'0700.HK': {'volume': 19505149, 'change_percent': None}}
+    strategy_deps.markets = {'0700.HK': 'HK'}
+    strategy_deps.names = {'0700.HK': '腾讯控股'}
+
+    signals = VolumeAlertStrategy()._do_scan()
+
+    assert len(signals) == 1
+    assert '涨跌 -2.64%' in signals[0].detail
+
+
+def test_hk_suspended_stock_not_reported_as_missing(strategy_deps, monkeypatch):
+    """港股停牌（有报价、成交量为 0、OHLC 无今日 bar）不得进 missing_codes、不得告警"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    # OHLC 最新 bar 停在昨天（停牌日无新 bar）
+    strategy_deps.trend = {
+        'stocks': [_make_ohlc('0100.HK', '0100.HK',
+                              [7000000, 6500000, 8381789, 6638049, 5000000],
+                              '2099-04-25')]
+    }
+    strategy_deps.realtime = {'0100.HK': {'current_price': 179.5, 'volume': 0}}
+    strategy_deps.markets = {'0100.HK': 'HK'}
+    strategy_deps.names = {'0100.HK': 'MiniMax'}
+
+    errors, retries = [], []
+    monkeypatch.setattr(VolumeAlertStrategy, '_push_error',
+                        staticmethod(lambda msg: errors.append(msg)))
+    monkeypatch.setattr(VolumeAlertStrategy, '_schedule_retry',
+                        lambda self, codes: retries.append(list(codes)))
+
+    assert VolumeAlertStrategy()._do_scan() == []
+    assert errors == [], '停牌不应推送告警'
+    assert retries == [], '停牌不应排重试'
+
+    # 对照：realtime 完全取不到才算真缺失
+    strategy_deps.realtime = {}
+    assert VolumeAlertStrategy()._do_scan() == []
+    assert retries == [['0100.HK']]
+
+
+def test_units_resolved_per_code_within_one_scan(strategy_deps):
+    """同一次扫描内 A 股与港股各自取自己的单位标签，不是全局取一个"""
+    from datetime import date
+    from app.strategies.volume_alert import VolumeAlertStrategy
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    strategy_deps.trend = {
+        'stocks': [
+            _make_ohlc('600584', '长电科技', [1400000, 1500000, 1435993, 1761053, 2359071], today_str),
+            _make_ohlc('9992.HK', '9992.HK', [7000000, 6500000, 8381789, 6638049, 19505349], today_str),
+        ]
+    }
+    strategy_deps.realtime = {
+        '600584': {'volume': 2359071, 'change_percent': 10.0},
+        '9992.HK': {'volume': 19505149, 'change_percent': -2.54},
+    }
+    strategy_deps.markets = {'600584': 'A', '9992.HK': 'HK'}
+    strategy_deps.names = {'600584': '长电科技', '9992.HK': '泡泡玛特'}
+
+    details = {s.data['stock_code']: s.detail for s in VolumeAlertStrategy()._do_scan()}
+
+    assert details['600584'] == '今日 2,359,071 手 > 昨日 1,761,053 手 | 涨跌 +10.00%'
+    assert details['9992.HK'] == '今日 19,505,349 股 > 昨日 6,638,049 股 | 涨跌 -2.54%'
 
 
 # ============ 4. 落点接入回归 ============
