@@ -18,7 +18,11 @@ SERVICE_FILE = ROOT / 'app' / 'services' / 'unified_stock_data.py'
 
 # ============ 1. 单位归一化源码契约锁定 ============
 
-from app.services.unified_stock_data import VOLUME_SOURCE_UNITS, _normalize_volume
+from app.services.unified_stock_data import (
+    VOLUME_SOURCE_UNITS,
+    CONTRACT_VOLUME_UNIT,
+    _normalize_volume,
+)
 
 
 def test_lots_source_passthrough_for_a_share():
@@ -66,6 +70,27 @@ def test_unregistered_source_raises_keyerror():
 def test_all_registered_units_are_valid():
     """映射表只允许 lots / shares 两种取值"""
     assert set(VOLUME_SOURCE_UNITS.values()) <= {'lots', 'shares'}
+
+
+def test_contract_volume_unit_labels():
+    """契约单位标签：A 股为「手」，港美股为「股」"""
+    assert CONTRACT_VOLUME_UNIT['A'] == '手'
+    assert CONTRACT_VOLUME_UNIT['HK'] == '股'
+    assert CONTRACT_VOLUME_UNIT['US'] == '股'
+
+
+def test_contract_unit_matches_normalize_semantics():
+    """契约标签与 _normalize_volume 的行为必须自洽：
+    标「手」的市场，shares 源要被 //100；标「股」的市场，任何源都原样。
+    这条防止日后有人只改标签不改归一逻辑（或反之）。
+    """
+    for market, label in CONTRACT_VOLUME_UNIT.items():
+        raw = 1234567
+        normalized = _normalize_volume(raw, 'sina_daily', market)
+        if label == '手':
+            assert normalized == raw // 100, f'{market} 标「手」但 shares 源未 //100'
+        else:
+            assert normalized == raw, f'{market} 标「股」但 shares 源被转换了'
 
 
 # ============ 2. VOLUME_UNIT_SCHEMA_VERSION 机制 ============

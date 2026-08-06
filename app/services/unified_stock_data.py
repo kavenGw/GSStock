@@ -55,6 +55,16 @@ VOLUME_SOURCE_UNITS = {
 }
 
 
+# 各市场 volume 契约单位的展示标签。
+# 与 _normalize_volume 的转换规则同源：标「手」的市场，shares 源会被 //100。
+# 展示层（如 volume_alert 推送）必须 import 此表，禁止自行硬编码单位字符串。
+CONTRACT_VOLUME_UNIT = {
+    'A': '手',
+    'HK': '股',
+    'US': '股',
+}
+
+
 def _normalize_volume(raw, source: str, market: str):
     """把各源的 volume 归一到契约单位：A 股=手，港股/美股=股。
 
