@@ -3856,3 +3856,20 @@
   - 白银
   - 有色金属
   - 贵金属
+- stock_code: '601212'
+  stock_name: 白银有色
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 0.86
+  base: 1.4
+  bull: 2.15
+  conviction_date: '2026-08-06'
+  source_doc: sectors/materials/nonferrous/2026-08-06-白银有色-buffett分析.md
+  themes:
+  - 有色金属
+  - 铜
+  - 白银
+  - 冶炼加工
+  quality: 1
