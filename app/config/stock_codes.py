@@ -110,5 +110,6 @@ WATCH_CODES = [
      'ah': {'code': '688981', 'market': 'A', 'name': '中芯国际'}},
     {'code': '0100.HK',   'name': 'MiniMax',   'market': 'HK'},
     {'code': '688158',    'name': '优刻得-W',  'market': 'A'},
-    {'code': '000063',    'name': '中兴通讯',  'market': 'A'},
+    {'code': '0763.HK',   'name': '中兴通讯',  'market': 'HK',
+     'ah': {'code': '000063', 'market': 'A', 'name': '中兴通讯'}},
 ]
