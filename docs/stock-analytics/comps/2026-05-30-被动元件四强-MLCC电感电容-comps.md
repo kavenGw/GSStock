@@ -41,6 +41,9 @@ related_docs:
   - path: ../sectors/materials/aluminum-foil/2026-07-12-东阳光-buffett分析.md
     note: 江海股份（PB 11.88 / PE 107.7）同为铝电解+超级电容的 AI 电源主题标的，与东阳光 PB 11.26 构成同板块估值泡沫的横向读数
     symmetric: true
+  - path: ../sectors/electronics/components/2026-08-07-昀冢科技-buffett分析.md
+    note: 四强之外最极端的 MLCC 反面样本（连亏四年、PB 77.84 为同业中位 9.5 倍），时点对照——comps 为 2026-05-29 快照，昀冢档 §9.4 已改用 2026-08-07 实时快照
+    symmetric: true
 ---
 # 被动元件四强横评：三环集团 / 顺络电子 / 江海股份 / 风华高科（25A）
 
@@ -52,6 +55,7 @@ related_docs:
 > - [2026-05-30-被动元件四强-全球竞争力与AI弹性深度](../themes/2026-05-30-被动元件四强-全球竞争力与AI弹性深度.md) — 四强全球竞争力×AI/Rubin弹性深度（市场规模/全球市占/AI BOM 弹性）
 > - [2026-07-05-天山铝业中报预增-电解铝盈利验证](../themes/2026-07-05-天山铝业中报预增-电解铝盈利验证.md) — 高纯铝因电解电容器需求量价齐升——对江海股份是需求侧确认+原料成本逆风的双面读数
 > - [2026-07-12-东阳光-buffett分析](../sectors/materials/aluminum-foil/2026-07-12-东阳光-buffett分析.md) — 江海股份（PB 11.88 / PE 107.7）同为铝电解+超级电容的 AI 电源主题标的，与东阳光 PB 11.26 构成同板块估值泡沫的横向读数
+> - [2026-08-07-昀冢科技-buffett分析](../sectors/electronics/components/2026-08-07-昀冢科技-buffett分析.md) — 四强之外最极端的 MLCC 反面样本（连亏四年、PB 77.84 为同业中位 9.5 倍），时点对照——comps 为 2026-05-29 快照，昀冢档 §9.4 已改用 2026-08-07 实时快照
 <!-- END related_docs -->
 
 > 撰写日期：2026-05-30 ｜ 数据口径：财务时序来自 `stock_financial_abstract_ths`（截至 2025 年报），主营构成来自 `stock_zygc_em`（2025-12-31），估值锚 2026-05-29 收盘 / 盘中快照

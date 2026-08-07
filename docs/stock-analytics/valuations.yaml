@@ -3907,3 +3907,20 @@
   - 先进封装
   - AI
   - 扩产
+- stock_code: '688260'
+  stock_name: 昀冢科技
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: exclude
+  bear: 2.0
+  base: 8.5
+  bull: 19.0
+  conviction_date: '2026-08-07'
+  source_doc: sectors/electronics/components/2026-08-07-昀冢科技-buffett分析.md
+  themes:
+  - MLCC
+  - 被动元件
+  - 电子陶瓷
+  - 供给侧
+  - AI概念
