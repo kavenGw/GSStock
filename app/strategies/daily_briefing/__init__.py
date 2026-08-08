@@ -39,8 +39,6 @@ class DailyBriefingStrategy(Strategy):
         except Exception as e:
             logger.error(f'[每日简报] 推送失败: {e}')
 
-        self._push_pullback_alert()
-
     def _scan_weekend(self):
         from app.services.notification import NotificationService
 
@@ -85,44 +83,4 @@ class DailyBriefingStrategy(Strategy):
                 logger.info(f'[每日简报] 信号缓存更新完成: {len(a_codes)}只A股')
         except Exception as e:
             logger.error(f'[每日简报] 信号缓存更新失败: {e}')
-
-    @staticmethod
-    def _push_pullback_alert():
-        """推送高点回退排行"""
-        from app.services.value_dip import ValueDipService
-        from app.services.notification import NotificationService
-
-        try:
-            stocks = ValueDipService.get_pullback_ranking()
-            significant = [s for s in stocks if s['pullback_pct'] <= -5]
-            if not significant:
-                logger.info('[每日简报] 无显著高点回退')
-                return
-
-            message = DailyBriefingStrategy._format_pullback_message(significant)
-            NotificationService.send_slack(message, 'news_daily')
-            logger.info(f'[每日简报] 高点回退推送: {len(significant)} 只')
-        except Exception as e:
-            logger.error(f'[每日简报] 高点回退推送失败: {e}')
-
-    @staticmethod
-    def _format_pullback_message(stocks: list) -> str:
-        lines = ['📉 *高点回退提醒*（90日高点）\n']
-        for s in stocks:
-            line = (
-                f"  · {s['name']}（{s['market']}）"
-                f" 现价{s['price']} / 高点{s['high']}"
-                f" → *{s['pullback_pct']}%*"
-            )
-            price = s.get('price')
-            if price and s.get('support') is not None:
-                sp = s['support']
-                pct = (sp - price) / price * 100
-                line += f" | 下方支撑{sp:.2f}({pct:+.2f}%)"
-            if price and s.get('resistance') is not None:
-                rp = s['resistance']
-                pct = (rp - price) / price * 100
-                line += f" | 上方压力{rp:.2f}({pct:+.2f}%)"
-            lines.append(line)
-        return '\n'.join(lines)
 
