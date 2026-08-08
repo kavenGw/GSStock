@@ -1662,7 +1662,7 @@
   dividend_yield: 0.54
   conviction_date: '2026-08-08'
   source_doc: sectors/semiconductor/storage/2026-08-08-聚辰股份-buffett分析.md
-  note: 聚辰股份；保守30/基准54/乐观68亿÷1.59亿股
+  note: 聚辰股份；隐含 ROE 回查后倍数全部框架内（等效 PE 9.6/10.4/11.8x）；bear21.68/base27.43/bull46.00亿÷1.5827亿股；期望内在价值 29.42 亿=18.59 元，安全边际 -85.6%
   themes:
   - memory
   - VPD
@@ -3909,7 +3909,7 @@
   - 电子陶瓷
   - 供给侧
   - AI概念
-- stock_code: 06951
+- stock_code: '06951'
   stock_name: 三环集团
   market: HK
   currency: HKD
