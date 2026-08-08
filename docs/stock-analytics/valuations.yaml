@@ -583,18 +583,21 @@
   market: HK
   currency: HKD
   sector: industrial
-  rating: exclude
-  bear: null
-  base: null
-  bull: null
-  conviction_date: '2026-06-04'
-  source_doc: sectors/industrial/ev/2026-06-04-零跑汽车-buffett分析.md
-  note: 内在价值无法可靠估算；期望内在价值 221 亿港元仅供参考（bear 65 / base 163 / bull 815 亿港元市值口径）
+  rating: watch
+  watch_reason: 旧档 exclude 的两大支柱已被证据松动——毛利率有 Q2 12-13% 指引 + 交付环比 +124% 的稼动率支撑、行业产能利用率已从 49.5%(2024) 升至 70.3% 且零跑在出清受益侧（四家可比中唯一 TTM 盈利），"淘汰概率 40%"不再成立；但新增两条重负面：证监会 2026-06 公开质疑 2025 年 5.4 亿盈利是否靠压货/提前确认收入调节、67.44 亿定增 ≈14.1% 摊薄已触发旧档自设的放弃跟踪线。重算后期望内在价值 30.25 HKD/股，安全边际 −22.6% 仍为负；且 2026 中报未披露，Q2 毛利率/现金流/海外分部全部空白，此时定不出买入
+  bear: 13.69
+  base: 31.13
+  bull: 52.9
+  conviction_date: '2026-08-08'
+  source_doc: sectors/industrial/ev/2026-08-08-零跑汽车-buffett分析.md
+  note: 期望内在价值 490.98 亿港元（摊薄后每股 30.25 港元），安全边际 −22.6%；三档为摊薄后每股口径，摊薄后股本 16.23 亿股（含 67.44 亿定增 ≈14.1% 摊薄）
   themes:
   - ev
   - stellantis_partnership
   - overseas_expansion
-- stock_code: '09868'
+  - 智能驾驶
+  - 定增摊薄
+- stock_code: 09868
   stock_name: 小鹏汽车
   market: HK
   currency: HKD
@@ -3915,7 +3918,7 @@
   - 电子陶瓷
   - 供给侧
   - AI概念
-- stock_code: '06951'
+- stock_code: 06951
   stock_name: 三环集团
   market: HK
   currency: HKD
