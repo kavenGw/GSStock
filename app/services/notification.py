@@ -234,132 +234,6 @@ class NotificationService:
         return {'text': text.rstrip('\n')}
 
     @staticmethod
-    def format_alert_signals(codes: list[str] = None, name_map: dict[str, str] = None,
-                             position_codes: set[str] = None) -> dict:
-        """生成预警信号摘要（所有关注股票）"""
-        from app.services.signal_cache import SignalCacheService
-        from app.utils.market_identifier import MarketIdentifier
-
-        if codes is None or name_map is None:
-            codes, name_map = NotificationService._get_all_watched_codes()
-        a_share_codes = [c for c in codes if MarketIdentifier.is_a_share(c)]
-
-        if not a_share_codes:
-            return {'text': ''}
-
-        signals = SignalCacheService.get_cached_signals_with_names(a_share_codes, name_map)
-
-        buy_signals = signals.get('buy_signals', [])
-        sell_signals = signals.get('sell_signals', [])
-
-        if not buy_signals and not sell_signals:
-            return {'text': ''}
-
-        # 按 (stock_code, signal_name) 去重，保留最近一条
-        def dedup(sigs):
-            seen = {}
-            for sig in sigs:
-                key = (sig.get('stock_code', ''), sig.get('name', ''))
-                if key not in seen or (sig.get('date', '') > seen[key].get('date', '')):
-                    seen[key] = sig
-            return list(seen.values())
-
-        sell_signals = dedup(sell_signals)
-        buy_signals = dedup(buy_signals)
-
-        # 对立信号冲突消解：同一只股票的对立信号只保留日期最新的
-        conflict_pairs = [('突破5日均线', '跌破5日均线')]
-        for name_a, name_b in conflict_pairs:
-            pair = {name_a, name_b}
-            latest = {}  # stock_code -> (date, 'buy'|'sell')
-            for sig in buy_signals:
-                if sig.get('name') in pair:
-                    code = sig.get('stock_code', '')
-                    d = sig.get('date', '')
-                    if code not in latest or d > latest[code][0]:
-                        latest[code] = (d, 'buy')
-            for sig in sell_signals:
-                if sig.get('name') in pair:
-                    code = sig.get('stock_code', '')
-                    d = sig.get('date', '')
-                    if code not in latest or d > latest[code][0]:
-                        latest[code] = (d, 'sell')
-            buy_signals = [
-                s for s in buy_signals
-                if s.get('name') not in pair
-                or latest.get(s.get('stock_code', ''), (None, 'buy'))[1] == 'buy'
-            ]
-            sell_signals = [
-                s for s in sell_signals
-                if s.get('name') not in pair
-                or latest.get(s.get('stock_code', ''), (None, 'sell'))[1] == 'sell'
-            ]
-
-        grouped = {}
-        for sig in buy_signals:
-            code = sig.get('stock_code', '')
-            if code not in grouped:
-                grouped[code] = {'name': sig.get('stock_name', code), 'buy': [], 'sell': []}
-            grouped[code]['buy'].append(sig.get('name', ''))
-        for sig in sell_signals:
-            code = sig.get('stock_code', '')
-            if code not in grouped:
-                grouped[code] = {'name': sig.get('stock_name', code), 'buy': [], 'sell': []}
-            grouped[code]['sell'].append(sig.get('name', ''))
-
-        text = "⚡ 关键信号\n"
-
-        if position_codes:
-            pos_codes = [c for c in grouped if c in position_codes]
-            watch_codes = [c for c in grouped if c not in position_codes]
-        else:
-            pos_codes = []
-            watch_codes = list(grouped.keys())
-
-        if pos_codes:
-            text += "\n持仓:\n"
-            for code in pos_codes:
-                g = grouped[code]
-                parts = []
-                for s in g['sell']:
-                    parts.append(f"🟢{s}")
-                for s in g['buy']:
-                    parts.append(f"🔴{s}")
-                text += f"  {g['name']} {' '.join(parts)}\n"
-
-        if watch_codes:
-            # 同时有买卖信号的关注股票：保留最新方向
-            for code in watch_codes:
-                g = grouped[code]
-                if g['buy'] and g['sell']:
-                    buy_latest = max(
-                        (s.get('date', '') for s in buy_signals
-                         if s.get('stock_code') == code), default='')
-                    sell_latest = max(
-                        (s.get('date', '') for s in sell_signals
-                         if s.get('stock_code') == code), default='')
-                    if buy_latest >= sell_latest:
-                        g['sell'] = []
-                    else:
-                        g['buy'] = []
-
-            text += "\n关注:\n"
-            sell_parts = []
-            buy_parts = []
-            for code in watch_codes:
-                g = grouped[code]
-                for s in g['sell']:
-                    sell_parts.append(f"{g['name']}·{s}")
-                for s in g['buy']:
-                    buy_parts.append(f"{g['name']}·{s}")
-            if sell_parts:
-                text += f"  🟢卖出: {' | '.join(sell_parts[:8])}\n"
-            if buy_parts:
-                text += f"  🔴买入: {' | '.join(buy_parts[:8])}\n"
-
-        return {'text': text.rstrip('\n')}
-
-    @staticmethod
     def format_earnings_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
         """生成财报日期提醒（未来7天）"""
         from app.services.earnings import EarningsService
@@ -1011,9 +885,9 @@ class NotificationService:
         return s
 
     @staticmethod
-    def build_briefing_blocks(briefing_text: str, alerts_text: str,
-                              core_insights: str = '', action_suggestions: str = '') -> list:
-        """构建 Message 1 的 Block Kit blocks（核心观点 + 持仓 + 信号）"""
+    def build_briefing_blocks(briefing_text: str, core_insights: str = '',
+                              action_suggestions: str = '') -> list:
+        """构建 Message 1 的 Block Kit blocks（核心观点 + 持仓）"""
         B = NotificationService
         blocks = []
 
@@ -1036,28 +910,6 @@ class NotificationService:
                     items = [x.strip() for x in line.split(' | ') if x.strip()]
                     if len(items) > 1:
                         blocks.append(B._block_fields(items))
-                    else:
-                        blocks.append(B._block_section(line))
-                else:
-                    blocks.append(B._block_section(line))
-
-        if alerts_text:
-            blocks.append(B._block_divider())
-            for line in alerts_text.split('\n'):
-                line = line.strip()
-                if not line:
-                    continue
-                if line.startswith('⚡'):
-                    blocks.append(B._block_header(line))
-                elif line.startswith('持仓:') or line.startswith('关注:'):
-                    blocks.append(B._block_section(f"*{line}*"))
-                elif line.startswith('🟢卖出:') or line.startswith('🔴买入:'):
-                    items = line.split(': ', 1)
-                    if len(items) == 2:
-                        label = items[0]
-                        sigs = [s.strip() for s in items[1].split(' | ') if s.strip()]
-                        sig_text = '\n'.join(f"• {s}" for s in sigs)
-                        blocks.append(B._block_section(f"*{label}*\n{sig_text}"))
                     else:
                         blocks.append(B._block_section(line))
                 else:
@@ -1239,7 +1091,7 @@ class NotificationService:
 
     @staticmethod
     def push_daily_report(include_ai: bool = False) -> dict:
-        """一键推送每日报告（持仓+简报数据+GLM总结+预警+盯盘分析）"""
+        """一键推送每日报告（持仓+简报数据+GLM总结+盯盘分析）"""
         with NotificationService._daily_push_lock:
             today = date.today()
 
@@ -1253,16 +1105,8 @@ class NotificationService:
 
         codes, name_map = NotificationService._get_all_watched_codes()
 
-        from app.services.position import PositionService
-        position_codes = set()
-        latest_date = PositionService.get_latest_date()
-        if latest_date:
-            pos_list = PositionService.get_snapshot(latest_date)
-            position_codes = {p.stock_code for p in pos_list}
-
         # 收集所有结构化数据
         briefing = NotificationService.format_briefing_summary()
-        alerts = NotificationService.format_alert_signals(codes, name_map, position_codes)
         earnings = NotificationService.format_earnings_alerts(codes, name_map)
 
         indices_text = NotificationService.format_indices_summary()
@@ -1326,7 +1170,6 @@ class NotificationService:
                     'sectors': sectors_text,
                     'dram': dram_text,
                     'technical': technical_text,
-                    'alert_signals': alerts.get('text', ''),
                     'earnings_alerts': earnings.get('text', ''),
                     'watch_analysis': watch_text,
                 }
@@ -1360,11 +1203,9 @@ class NotificationService:
         elif action_suggestions:
             msg1_parts.append(f"💡 {action_suggestions}")
         msg1_parts.append(briefing['text'])
-        if alerts.get('text'):
-            msg1_parts.append(alerts['text'])
 
         msg1_blocks = NotificationService.build_briefing_blocks(
-            briefing['text'], alerts.get('text', ''), core_insights, action_suggestions)
+            briefing['text'], core_insights, action_suggestions)
 
         # Message 2: AI分析（盯盘）
         msg2_parts = []

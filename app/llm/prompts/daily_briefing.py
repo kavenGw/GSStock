@@ -12,7 +12,6 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
     Args:
         all_data: 包含以下 key 的字典，每个 value 为格式化后的文本字符串：
             - position_summary: 持仓概览
-            - alert_signals: 预警信号
             - earnings_alerts: 财报提醒
             - watch_analysis: 盯盘分析(7d+30d)
             - indices: 指数行情
@@ -33,7 +32,6 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
         'sectors': '板块涨跌',
         'dram': 'DRAM价格',
         'technical': '技术评分',
-        'alert_signals': '预警信号',
         'earnings_alerts': '财报提醒',
         'watch_analysis': '盯盘分析',
     }
