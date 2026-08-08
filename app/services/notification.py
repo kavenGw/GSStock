@@ -1193,7 +1193,7 @@ class NotificationService:
 
         # 组装纯文本（fallback）+ Block Kit blocks
 
-        # Message 1: 要点（核心观点 + 持仓 + 信号）
+        # Message 1: 要点（核心观点 + 持仓）
         msg1_parts = []
         if core_insights:
             header = f"🎯 今日核心观点\n{core_insights}"

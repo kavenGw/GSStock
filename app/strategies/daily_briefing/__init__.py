@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class DailyBriefingStrategy(Strategy):
     name = "daily_briefing"
-    description = "每日简报（市场概况+持仓+预警）"
+    description = "每日简报（市场概况+持仓+盯盘）"
     schedule = "0 8 * * *"
     needs_llm = False
 

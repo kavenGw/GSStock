@@ -49,10 +49,10 @@
 
 `DailyBriefingStrategy._refresh_signal_cache()` 虽然最初是为「关键信号」而建，但必须保留：
 
-- `price_alert` 策略（`*/5 9-15 * * 1-5`）读取同一份 signal_cache 推送持仓股当日信号；
-- 该方法覆盖 `_get_all_watched_codes()`（持仓 + 关注全集），范围宽于 `watch_realtime._refresh_watch_signals()`（仅 `WATCH_CODES` 盯盘池）。删除会导致不在盯盘池的持仓股当日信号缺失，`price_alert` 盘中漏推。
+- **真实受益方是走势看板，不是 `price_alert`**：`price_alert` 读缓存时硬过滤 `start_date=today, end_date=today`（`app/strategies/price_alert/__init__.py:51-54`），而 `_refresh_signal_cache` 走 `get_trend_data(..., days=365)` 拿到的日 K 最新只到昨日，`update_signals_from_trend_data` 写入的 `signal_date` 即 bar 日期（`app/services/signal_cache.py:140`、`:154-186`）——8 点这次刷新产出的信号全是昨日及更早，`price_alert` 当天一条都读不到，**不能再拿它当保留理由**。真正读到收益的是 `app/routes/heavy_metals.py:252-256`（按 `[today-days, today]` 窗口读缓存）与 `:297`（`has_recent_cache()` 决定是否重算 365 天）——8 点刷新让该页开盘即有信号，并省掉页面上的 365 天重算；
+- 该方法覆盖 `_get_all_watched_codes()`（持仓 + `StockCategory` 全表），范围宽于 `watch_realtime._refresh_watch_signals()`（仅 `WATCH_CODES` 盯盘池），两者无包含关系，删除会导致走势看板对非盯盘池标的当日信号缺失。
 
-改动后它的下游消费者从两个（每日简报 + price_alert）收敛为一个（price_alert）。
+改动后不要按 `price_alert` 去核对这个方法的必要性——它对不上，下一个维护者据此误删。
 
 ### 4. 文档同步
 
