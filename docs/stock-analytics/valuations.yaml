@@ -1655,14 +1655,18 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 18.9
-  base: 34.0
-  bull: 42.8
-  conviction_date: '2026-04-25'
-  source_doc: sectors/semiconductor/storage/2026-04-25-聚辰股份-buffett分析.md
+  watch_reason: 主业扣非连续两季大幅负增长、毛利率两季塌 10pct，H1 表观净利 +156% 全部来自盛合晶微打新浮盈；VPD 仅样品阶段、三星未获公司确认；PE 表观 69x（扣非口径粗算约 83x）、PB 7.93x 处 5 年 81.5% 分位，期望内在价值 29.4 亿 vs 市值 204.5 亿，安全边际 -85.6%
+  bear: 13.7
+  base: 17.33
+  bull: 29.06
+  dividend_yield: 0.54
+  conviction_date: '2026-08-08'
+  source_doc: sectors/semiconductor/storage/2026-08-08-聚辰股份-buffett分析.md
   note: 聚辰股份；保守30/基准54/乐观68亿÷1.59亿股
   themes:
   - memory
+  - VPD
+  - 存储周期
 - stock_code: '688173'
   stock_name: 希荻微
   market: A
@@ -3905,7 +3909,7 @@
   - 电子陶瓷
   - 供给侧
   - AI概念
-- stock_code: '06951'
+- stock_code: 06951
   stock_name: 三环集团
   market: HK
   currency: HKD
