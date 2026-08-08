@@ -40,6 +40,11 @@
 
 `ValueDipService.get_pullback_ranking()` 与 `/value_dip` 页面保持不变，仍可按需查看。
 
+**连带测试**（编写计划时发现，spec 初稿遗漏）：`_format_pullback_message` 有 4 个现存测试直接调用，需同步处理——
+
+- `tests/test_value_dip_briefing.py::test_pullback_message_uses_market` → 删除，该文件改为纯移除守卫测试；
+- `tests/test_pullback_support_resistance.py` 的 `test_format_renders_support_and_resistance` / `test_format_omits_missing_sr` / `test_format_renders_single_side` → 删除；同文件的 `test_calc_changes_attaches_support_resistance` / `test_calc_changes_sr_none_when_insufficient_data` 测的是 `ValueDipService`（保留组件），**必须保留**。
+
 ### 3. 保留 `_refresh_signal_cache()`
 
 `DailyBriefingStrategy._refresh_signal_cache()` 虽然最初是为「关键信号」而建，但必须保留：
