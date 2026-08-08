@@ -1606,15 +1606,19 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 45.0
-  base: 53.2
-  bull: 61.4
-  conviction_date: '2026-05-30'
-  source_doc: sectors/semiconductor/storage/2026-05-30-澜起科技-buffett分析.md
-  note: 澜起科技；公允市值550-750亿÷12.22亿股(建议买入33-43元为7折价)
+  watch_reason: 扣非口径 PE-TTM 123.9x / EV-扣非 116.0x、PB 13.05x 处 5 年 88.7 分位；2026H1 归母 +64~81% 中约 6.5 亿来自 H 股募资的一次性投资收益，扣非仅 +14.5~32.9%；前瞻 PE 85.4x 高于增速 3 倍于己的 Astera Labs（59.6x）；期望内在价值 474 亿 vs 市值 2630.5 亿，安全边际 -82.0%，bull 情景压力测试仍 -72.4%
+  bear: 25.07
+  base: 38.84
+  bull: 59.48
+  dividend_yield: 0.27
+  conviction_date: '2026-08-08'
+  source_doc: sectors/semiconductor/storage/2026-08-08-澜起科技-buffett分析.md
+  note: 澜起科技；期望内在价值474亿÷12.2054亿股≈38.84元，买点285-330亿(23-27元，期望值6-7折)，安全边际-82%
+  quality: 5
   themes:
   - memory
   - ai-server
+  - 存储周期
 - stock_code: '688041'
   stock_name: 海光信息
   market: A
@@ -3909,7 +3913,7 @@
   - 电子陶瓷
   - 供给侧
   - AI概念
-- stock_code: '06951'
+- stock_code: 06951
   stock_name: 三环集团
   market: HK
   currency: HKD
