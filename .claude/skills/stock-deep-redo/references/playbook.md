@@ -116,8 +116,8 @@ related_docs:
 
 AI 视角已统一到 `references/sector-lenses.md` 的 **AI（横切）** 节，避免两处维护。要点：逐维度写，
 **每维度结尾打 `【真敏感】` 或 `【蹭概念】` + 一句理由**；区分**产品层 vs 业绩层**；
-未兑现的概念不许进 §9 估值的 owner earnings 基础。命中 AI lens 时撰写 subagent 读该节的【撰写落点】。
-**成长横切 lens 同理**：命中时读 sector-lenses.md「成长 / 扩产 / 客户增长」节的【必查清单】【撰写落点】，
+未兑现的概念不许进 §9 估值的 owner earnings 基础。命中 AI lens 时，该节的【撰写落点】**由控制者原文内联进 Phase B 提示**（§9.1 铁律，写手不自读 sector-lenses.md）。
+**成长横切 lens 同理**：【必查清单】内联进 A3 采证提示、【撰写落点】内联进 Phase B 提示；
 其【撰写落点】§9 的「成长持续性证据包」对应本文件 §3 的 bull 门控铁律。
 
 ## 5. 联网采证清单
@@ -220,6 +220,8 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 > 其后是汇报正文。消息回传是可选冗余通道，不是交付方式。
 
 **阶段标识固定六种**：`phaseA1` / `phaseA2` / `phaseA3` / `phaseB` / `review` / `phaseC`。
+**异常轮次**：追派的 opus 复核审查员写 `review-2`（标识仍归入审查段），Phase B 返修/续跑写 `phaseB-2`；
+耗时账里并入对应段落并注明轮次，例：`审查 5.5 + 复核 2.0`。基本六标识不变。
 
 **控制者侧**：不等消息、不追要报告，subagent 结束后直接 `Read` 对应文件。收尾时把六个 start/end
 汇总成一行耗时账报给用户（这是"提速是否真的发生"的唯一可证伪依据）。
@@ -240,6 +242,7 @@ sector-lenses.md 261 行（命中的仅约 70 行）。
 | 命中 lens 的【必查清单】 | A3 采证提示 | ❌ "命中 AI + 成长 lens，去读 sector-lenses.md" |
 | 命中 lens 的【撰写落点】【双面必答】【监控指标模板】 | Phase B 提示 | ❌ 同上 |
 | 兄弟档口径要点（3-5 行） | Phase B 提示 | ❌ "参考兄弟档 xxx.md 的质量水位" |
+| 命中 lens 的【必查清单】【双面必答】 | 合并审查提示 | ❌ "去 sector-lenses.md 对照命中节" |
 
 **仍由 subagent 自读的**（必要，压不掉）：evidence 片段（事实源）、旧档（翻转对照）、
 本 playbook（规格）、`Skill buffett`（框架）。
@@ -262,14 +265,15 @@ sector-lenses.md 261 行（命中的仅约 70 行）。
 **不派合并 agent**（合并把省下的时间串回去）；**"相对旧档变化清单"移交 Phase B**（需全局视野）。
 
 **Phase B 撰写（1 个 opus，不拆）**：要求先 `Skill buffett`；给**三份 evidence 片段路径**（A1/A2/A3）+ 旧档路径；
-给 frontmatter 模板（§1）+ 13 节结构（§2）+ 场景加权机制（§3）+ 7 条质量红线（SKILL.md）；
+给 frontmatter 模板（§1）+ 13 节结构（§2）+ 场景加权机制（§3）+ **8 条**质量红线（由控制者从 SKILL.md「质量红线」节**原文内联**，不给路径）；
 **按 §9.1 内联铁律直接贴入**命中 lens 的【撰写落点】【双面必答】【监控指标模板】原文 + 兄弟档口径要点 3-5 行
 （**不给 sector-lenses.md / 兄弟档的路径让它自读**）；给关键事实锚（A1 的市值/PB/PS/股本/汇率 + 硬软分级 +
 需纠正的旧档错误假设）；交办两项独有活——**写"相对旧档变化清单"**、**标注 A2/A3 与 A1 的数字冲突**；
 要求只跑 frontmatter lint、**不 git add/commit**；汇报按 §9.0 写文件（标识 `phaseB`），内容含评级 +
 期望内在价值 + 安全边际 + 最脆弱论点自评。
 
-**合并审查**（read-only，sonnet）：给交付物+spec/playbook+evidence 路径；要求单 prompt 内先规格后质量两段输出——
+**合并审查**（read-only，sonnet）：给交付物路径 + `references/playbook.md` 路径 + 三份 evidence 片段路径 +
+**控制者内联的 8 条质量红线与命中 lens 必查清单原文**；要求单 prompt 内先规格后质量两段输出——
 规格段给逐项核对清单（13 节/frontmatter 含 valuation 块与正文一致/Σ概率=100% 且期望值算术/AI 标签/供给侧双面/
 数字可追溯/无范围外夹带）输出 SPEC-COMPLIANT 或问题清单；质量段给质量维度（内在一致/概率可辩护/双面性/"贵"诚实度/
 AI 不拔高/增长证据化/slop/buffett 贴合/监控可执行）输出 APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED + 2-3 条做得好的点。
@@ -280,7 +284,7 @@ APPROVED-WITH-NITS 的 Minor 可修后控制者直接核验。
 **Phase C 收尾**：先 `git status` 查遗留改动；**`git rm` 控制者传来的待删旧 buffett 档清单**；
 **把所有 symmetric 指向被删档的反向链改指到新档或删条目**；给要补反向条目的被链档路径 + 反向 YAML；
 跑 `--rewrite-blocks` + 双 lint exit 0 + `--check-orphans` 确认新档非孤儿；
-**同步 valuations.yaml**（见 §8）：运行 `sync_valuations.py --stock-code <code>` 确定性 upsert（估值数字已在 frontmatter `valuation` 块）；确认采证脚本已删、evidence.md 未 add；
+**同步 valuations.yaml**（见 §8）：运行 `sync_valuations.py --stock-code <code>` 确定性 upsert（估值数字已在 frontmatter `valuation` 块）；确认采证脚本已删、三份 evidence 片段与六份 report 均未被 git add；
 提交终稿；汇报按 §9.0 写文件（标识 `phaseC`），内容含双 lint 退出码 + valuations 同步状态 + SHA +
 `git show --stat HEAD` 文件清单 + 遗留检查结论（三份 evidence 片段与六份 report 均未被 add）。
 
@@ -293,5 +297,5 @@ APPROVED-WITH-NITS 的 Minor 可修后控制者直接核验。
 **派发坑：subagent 的"善后已完成"自报不可信，控制者必须亲验**：Phase A 采证 subagent 常声称
 "一次性脚本已删""evidence 已落盘"甚至把自己写的 evidence.md 叙述成"orchestrator 预置的更完整版本"
 （来源混淆）。实测脚本可能仍在 `scripts/_xxx.py`、需控制者手删。铁律：Phase A 返回后控制者**一律亲验**——
-`ls scripts/ | grep <采证脚本名>` 确认真删、`Read` evidence.md 确认真实落盘且内容/来源可靠，
+`ls scripts/ | grep <采证脚本名>` 确认真删、逐个 `Read` 三份 evidence 片段（A1/A2/A3）确认均真实落盘且内容/来源可靠，
 再放行 Phase B，不信 subagent 的总结措辞。

@@ -47,7 +47,9 @@ description: >-
 ## 总编排：3 阶段 subagent（A 三路并行）+ 合并审查
 
 为什么拆 subagent：联网采证、长文撰写、lint 收尾是三种不同的认知活；分开派能让每棒上下文干净，
-也满足"撰写与审查分属不同上下文、不在同一上下文自审"（见 CLAUDE.md）。**串行**，不要并行派实现者。
+也满足"撰写与审查分属不同上下文、不在同一上下文自审"（见 CLAUDE.md）。
+**阶段之间严格串行**（Phase A 全部落盘并经控制者亲验 → Phase B → 审查 → Phase C，不做流水线重叠）；
+**唯一的并行点是 Phase A 内部的 A1/A2/A3 三路**，除此之外不并行派实现者。
 
 ### 先做（控制者本人）
 1. 用 Glob 找该股已有底稿：`docs/stock-analytics/**/*<股票名>*.md`（buffett / comps / quarterly / theme）。
@@ -72,13 +74,13 @@ description: >-
 **并行，不串行**——六大采证块之间无依赖，单 agent 顺序跑完实测 ~7min，拆三路 ~4min。
 三个 agent 各写各的 evidence 片段，**不派合并 agent**（合并会把省下的时间又串回去），Phase B 同时读三份。
 
-| Agent | 负责 | evidence 片段 | 汇报文件（见 playbook §9.0）|
+| Agent | 负责 | evidence 片段（`.omc/artifacts/<股票名>-<日期>…`） | 汇报文件（见 playbook §9.0）|
 |---|---|---|---|
 | **A1 数据锚** | 实时行情双源交叉 + 市值自洽校验、最新财报、逐月交付/出货、可比公司估值表 | `-evidence-A1-数据锚.md` | `-phaseA1-report.md` |
 | **A2 论点验证** | 核心多空论点逐条联网核实（最重的一块，决定整轮墙钟）| `-evidence-A2-论点.md` | `-phaseA2-report.md` |
 | **A3 lens 专项** | 命中 lens 的【必查清单】逐条核实（AI / 成长 / 板块 lens）| `-evidence-A3-lens.md` | `-phaseA3-report.md` |
 
-（片段与汇报均落 `.omc/artifacts/`，已 gitignore、不入库。）
+（片段与汇报均落 `.omc/artifacts/`，文件名统一 `<股票名>-<日期>-<后缀>`，已 gitignore、不入库。）
 
 **A1 是所有行情/财务硬数字的唯一权威源**（铁律）：A2/A3 涉及数字时以定性表述为主，
 与 A1 冲突一律以 A1 为准；要求 Phase B 发现冲突时在正文显式标注，不得静默取一个。
@@ -97,6 +99,10 @@ description: >-
 **"相对旧档变化清单"不由 A1/A2/A3 写**——它需要全局视野，任何单路都写不了，**移交 Phase B**
 （Phase B 本就要读全部三份 evidence + 旧档，天然有全局视野，不增加串行时间）。
 
+**汇合闸门（强制）**：三路**全部**写完 evidence 片段与 report 后，控制者逐份 `Read` 亲验（片段真实落盘、
+A1 的采证脚本真删、数字有 URL 与日期）——**通过后才派 Phase B**。不许 A1 一落盘就开写（旧档过时事实会被
+写进正文洗不掉），也不许跳过任一路的亲验。
+
 - 详细采证清单与字段见 `references/playbook.md`。
 
 ### Phase B — 撰写（派 1 个 subagent，opus）
@@ -106,7 +112,8 @@ description: >-
 先 `Skill buffett` 取框架，读 **Phase A 的三份 evidence 片段（A1 数据锚 / A2 论点 / A3 lens）** + 旧档，
 按 13 节结构写正文 + frontmatter，跑 frontmatter lint。
 **只跑 `lint_docs_frontmatter.py`，不跑 refs**（对称留给 Phase C）；**不 git add/commit**（提交由 Phase C 统一做）。
-13 节模板、frontmatter 字段、场景加权估值机制、AI 维度标签法、质量红线全部在 `references/playbook.md`，撰写 subagent 必须先读它。
+13 节模板、frontmatter 字段、场景加权估值机制、AI 维度标签法在 `references/playbook.md`，撰写 subagent 必须先读它；
+**8 条质量红线不在 playbook，由控制者从本文件「质量红线」节原文内联进 Phase B 提示**（同 §9.1 内联铁律）。
 
 **控制者必须内联进提示的**（见 `references/playbook.md` §9.1，不许给路径让它自读）：
 - 命中 lens 的【撰写落点】【双面必答】【监控指标模板】原文 —— 要求对应节按落点深化，
@@ -156,8 +163,11 @@ description: >-
   - 枚举权威源：`scripts/_docs_schema.py` 的 `COMMODITIES`/`COMMODITY_IMPACTS`（含 neutral）。
 - 确认一次性采证脚本已删；**三份 evidence 片段（A1/A2/A3）与六份 report 文件均未被 git add**
   （都在 `.omc/artifacts/`，已 gitignore，但仍要确认）。
-- **提交终稿**：`git add` 新档 + 本次被改动的兄弟档/被链档 + valuations.yaml，与 `git commit` **同一条命令链**
-  （并行 session 会抢 index）；提交后 `git show --stat HEAD` 确认只含本任务文件、未裹挟他人在写档。
+- **提交终稿**：`git rm -q --ignore-unmatch <待删旧档...> && git add <新档> <被改兄弟档/被链档> valuations.yaml && git commit -F .git/MSG.txt`
+  —— 删除与新增**必须与 `git commit` 在同一条命令链**（并行 session 会抢 index，早前单独跑的 `git rm` 可能已被撤出暂存区）；
+  提交后 `git show --stat HEAD` 确认只含本任务文件、未裹挟他人在写档；
+  并 `git show HEAD:docs/stock-analytics/valuations.yaml` 复核本股条目真的落库（sync 的"已同步"自报不可信，
+  他方 session 的工作区旧版本可能覆盖本次结果，需重跑 sync 补正）。
 - 汇报按 `references/playbook.md` §9.0 写文件，标识 `phaseC`。
 
 ### 收尾（控制者本人）
@@ -176,7 +186,7 @@ description: >-
 3. **拒绝用周期顶利润定价**：周期股正常化利润取穿越周期的均值，绝不把财报顶部年化当常态——这是周期股 buffett 分析最常翻车处。
 4. **诚实面对"贵"**：PB/PE/市值高就老实算安全边际，必要时对最乐观情景也做压力测试；不要用"护城河上修"稀释"价格太贵"。
 5. **AI/概念维度分"产品 vs 业绩"**：有产品能力不等于有业绩贡献；未兑现的概念不许偷渡进估值。每个 AI 维度打【真敏感】/【蹭概念】+理由。
-6. **数字可追溯**：正文每个关键数字能回指 evidence.md 或基线底稿；无裸断言、无造数。
+6. **数字可追溯**：正文每个关键数字能回指三份 evidence 片段（A1/A2/A3）之一或基线底稿；无裸断言、无造数。
 7. **替换=物理删除旧档**：新档落定后该股历史 buffett 档必须 `git rm`，且所有指向旧档的 symmetric 反向链
    改指到新档——目录里同股只留最新一份，refs lint 无悬空引用。
 8. **看增长但不被增长拔高**：成长/扩产标的必查扩产达产 + 客户增长预期（分层：具名优先 → 终端兑底，逐条标【硬/软/缺】）；bull
@@ -186,7 +196,8 @@ description: >-
 ## 参考文件
 
 - `references/playbook.md` — 13 节模板、frontmatter 字段集 + rating 枚举、场景加权估值机制、采证清单、qt.gtimg.cn 字段、lint 命令、各 subagent 派发提示骨架。**撰写/审查 subagent 必读。**
-- `references/sector-lenses.md` — 可扩展板块视角注册表（AI/PCB/存储…），每 subsector 一节五段式调查清单。**命中 lens 的撰写/审查 subagent 必读对应节。**
+- `references/sector-lenses.md` — 可扩展板块视角注册表（AI/PCB/存储…），每 subsector 一节五段式调查清单。
+  **由控制者读并摘原文内联进 A3 / Phase B / 审查提示，subagent 不自读**（§9.1 内联铁律）。
 - 项目既有 rules（按需指给 subagent）：`.claude/rules/docs-conventions.md`（目录/frontmatter/lint/related_docs）、
   `.claude/rules/data-fetch-conventions.md`（akshare/实时价/qt.gtimg.cn 字段坑）、`.claude/rules/stock-data-cache.md`（缓存）、
   `.claude/rules/dev-environment.md`（Windows 编码/heredoc/create_app 副作用）。
