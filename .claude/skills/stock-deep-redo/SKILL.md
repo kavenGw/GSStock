@@ -61,14 +61,36 @@ description: >-
 
 **建档前避坑门（强制，先于 Phase A）**：采证第一步先查 `docs/stock-analytics/avoidance-list.yaml`——命中目标 `stock_code` 则按 `.claude/rules/docs-conventions.md`「建档前避坑列表验证」做原因验证：用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，逐条对照 `avoid_reason` 判仍成立/被推翻。**理由仍成立即中断建档**（口头说明后停手，不派 Phase A/B/C）；**被推翻**（基本面真实反转）才放行，且建档完成后从 avoidance-list.yaml 移除该条并 commit。
 
-### Phase A — 联网采证（派 1 个 subagent，opus）
-产出 `.omc/artifacts/<股票名>-<日期>-evidence.md`（gitignore，不入库）。要点：
-- WebSearch/WebFetch 逐条验证核心多空论点（供给侧/需求/涨价/政策/财报），英文+中文交叉验证。
-- 实时行情直连腾讯 HTTP（比走 service 快且无副作用）：`qt.gtimg.cn/q=sh<code>`（A股 sh/sz 前缀），
-  GBK 解码、`~` 分隔，字段 `[1]=name [3]=price [39]=PE_TTM [45]=市值(亿) [46]=PB`。脚本跑完即删。
+### Phase A — 联网采证（派 **3 个并行** subagent，均 opus）
+
+**并行，不串行**——六大采证块之间无依赖，单 agent 顺序跑完实测 ~7min，拆三路 ~4min。
+三个 agent 各写各的 evidence 片段，**不派合并 agent**（合并会把省下的时间又串回去），Phase B 同时读三份。
+
+| Agent | 负责 | evidence 片段 | 汇报文件（见 playbook §9.0）|
+|---|---|---|---|
+| **A1 数据锚** | 实时行情双源交叉 + 市值自洽校验、最新财报、逐月交付/出货、可比公司估值表 | `-evidence-A1-数据锚.md` | `-phaseA1-report.md` |
+| **A2 论点验证** | 核心多空论点逐条联网核实（最重的一块，决定整轮墙钟）| `-evidence-A2-论点.md` | `-phaseA2-report.md` |
+| **A3 lens 专项** | 命中 lens 的【必查清单】逐条核实（AI / 成长 / 板块 lens）| `-evidence-A3-lens.md` | `-phaseA3-report.md` |
+
+（片段与汇报均落 `.omc/artifacts/`，已 gitignore、不入库。）
+
+**A1 是所有行情/财务硬数字的唯一权威源**（铁律）：A2/A3 涉及数字时以定性表述为主，
+与 A1 冲突一律以 A1 为准；要求 Phase B 发现冲突时在正文显式标注，不得静默取一个。
+
+**三路共同纪律**：
+- WebSearch/WebFetch 英文+中文交叉验证；区分公司官方 vs 媒体 vs 分析师。
 - **证据分级**：【硬】=公司公告/财报/官方 EOL；【软】=媒体/分析师推测；【缺】=未找到。找不到就写"未找到公开证据"，**绝不编造数字或来源**，每个关键数字挂一个真实 URL + 日期。
-- **注入命中 lens 的【必查清单】**（来自 `references/sector-lenses.md` 命中节）：要求逐条联网核实，
-  查不到就明写"未找到公开证据"，不许跳过。
+
+**A1 专属**：实时行情直连腾讯 HTTP（比走 service 快且无副作用）。**A 股与港股字段索引不同，不可照搬**：
+- A 股 `qt.gtimg.cn/q=sh<code>`（6 开头 sh、0/3 开头 sz），GBK 解码、`~` 分隔，`[1]=name [3]=price [39]=PE_TTM [45]=市值(亿) [46]=PB`
+- **港股 `q=hk<code>` 索引异于 A 股**，勿套用上面的 39/45/46——先把整串字段 dump 出来自行辨认，
+  并用 **市值 = 现价 × 总股本** 自洽校验兜底（详见 `.claude/rules/data-fetch-conventions.md` 腾讯HTTP节）
+- 港股/美股市值、PE、PB、52 周区间**必须交叉验证 2 源**（stockanalysis.com / Yahoo / 富途），市值口径常分歧
+- 脚本跑完即删，控制者会亲验
+
+**"相对旧档变化清单"不由 A1/A2/A3 写**——它需要全局视野，任何单路都写不了，**移交 Phase B**
+（Phase B 本就要读全部三份 evidence + 旧档，天然有全局视野，不增加串行时间）。
+
 - 详细采证清单与字段见 `references/playbook.md`。
 
 ### Phase B — 撰写（派 1 个 subagent，opus）
