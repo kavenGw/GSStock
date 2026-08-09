@@ -44,7 +44,7 @@ description: >-
 - 用户明确要的是 comps 横评或 theme 专题，而非个股 buffett 档
 - 旧档结论与近期已有底稿（comps/theme/quarterly）出现冗列冲突，不确定以谁为准
 
-## 总编排：3 阶段 subagent + 合并审查
+## 总编排：3 阶段 subagent（A 三路并行）+ 合并审查
 
 为什么拆 subagent：联网采证、长文撰写、lint 收尾是三种不同的认知活；分开派能让每棒上下文干净，
 也满足"撰写与审查分属不同上下文、不在同一上下文自审"（见 CLAUDE.md）。**串行**，不要并行派实现者。
@@ -130,6 +130,10 @@ description: >-
    增长是否被诚实证据化、bull 赋权是否与增长证据强度匹配、slop 检查、buffett 框架贴合度、监控指标是否带阈值可执行。
    → APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED。
 
+**汇报**：按 `references/playbook.md` §9.0 写文件，标识 `review`——**两段正文都要写进文件**。
+审查 subagent 是"只回 idle 不给正文"的重灾区（实测 prompt 明写"最终回复必须包含完整两段"仍先回 idle），
+控制者一律读文件，不追要。
+
 **纪律保持**：审查员是独立 subagent（非撰写者自审），撰写≠审查上下文铁律不变。
 **异常升级**：sonnet 给出 `CHANGES-REQUESTED`，或规格段发现 Critical 问题 → 控制者**追派 1 个 opus 只读审查员
 复核该结论**，再据复核让撰写 subagent 修；同一审查上下文复审直到过。Minor nits 可修后控制者直接核验。
@@ -150,10 +154,18 @@ description: >-
   - `commodity_impact`: `positive`（上游资源/矿/锂盐——商品涨价利好，卖方如紫金/赣锋）| `negative`（下游加工/电池/消费——商品涨价是成本，买方如铜冠铜箔/亿纬锂能）| `neutral`（中游冶炼厂——低自给率，铜价 pass-through、利润由 TC/RC 加工费驱动，如云南铜业/铜陵有色/江西铜业）
   - 判据来自产业链位置（与 `.claude/rules/docs-conventions.md`「电池厂是锂买方，锂价涨=成本压力」一致）；本字段驱动 `/minerals` 矿产看板的板块归属与影响徽章。
   - 枚举权威源：`scripts/_docs_schema.py` 的 `COMMODITIES`/`COMMODITY_IMPACTS`（含 neutral）。
-- 确认一次性采证脚本已删、evidence.md 未被 add。
-- 提交终稿。
+- 确认一次性采证脚本已删；**三份 evidence 片段（A1/A2/A3）与六份 report 文件均未被 git add**
+  （都在 `.omc/artifacts/`，已 gitignore，但仍要确认）。
+- **提交终稿**：`git add` 新档 + 本次被改动的兄弟档/被链档 + valuations.yaml，与 `git commit` **同一条命令链**
+  （并行 session 会抢 index）；提交后 `git show --stat HEAD` 确认只含本任务文件、未裹挟他人在写档。
+- 汇报按 `references/playbook.md` §9.0 写文件，标识 `phaseC`。
 
 ### 收尾（控制者本人）
+
+**先算耗时账**：读六份 report 文件的 `start`/`end` 头（`phaseA1`/`phaseA2`/`phaseA3`/`phaseB`/`review`/`phaseC`），
+汇总成一行报给用户，例：`A1 3.2min / A2 4.1min / A3 3.5min（并行取 4.1）+ B 15.5 + 审查 5.5 + C 4.0 ≈ 29min`。
+**这是"提速是否真的发生"的唯一可证伪依据**，不许省。基线：2026-08-08 零跑实跑 ~40min。
+
 `git log --oneline` + `git status` 确认 commit 链干净、双 lint 全绿，向用户汇报核心结论（评级是否翻转、
 期望内在价值、安全边际）。工作流默认在 `main` 直接提交（本仓库 docs 一贯如此）；**不主动 push**，等用户要。
 

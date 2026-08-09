@@ -122,10 +122,12 @@ AI 视角已统一到 `references/sector-lenses.md` 的 **AI（横切）** 节�
 
 ## 5. 联网采证清单
 
-evidence.md 建议结构：核心论点逐家拆解（退出/扩产/政策的范围+时间表+动机+来源日期+硬软分级）、
-报价/需求数据（带来源口径，注明机构间分歧）、标的最新动向（季报/路线图）、概念维度线索（标【实证/概念】）、
-实时行情锚。纪律：英文+中文交叉验证；区分公司官方 vs 媒体 vs 分析师；找不到写"未找到公开证据"；
-每个关键数字挂真实 URL + 日期；绝不编造。研究取数坑（新浪 IR PDF 无法解析等）见 `.claude/rules/data-fetch-conventions.md`。
+三份 evidence 片段的建议结构（Phase A 三路各写各的，见 §9）：**A1 数据锚**=实时行情锚 + 最新财报 + 逐月交付 +
+可比公司估值表；**A2 论点**=核心论点逐家拆解（退出/扩产/政策的范围+时间表+动机+来源日期+硬软分级）+
+报价/需求数据（带来源口径，注明机构间分歧）+ 标的最新动向（季报/路线图）；**A3 lens**=命中 lens 必查清单逐条 +
+概念维度线索（标【实证/概念】）。纪律（三路通用）：英文+中文交叉验证；区分公司官方 vs 媒体 vs 分析师；
+找不到写"未找到公开证据"；每个关键数字挂真实 URL + 日期；绝不编造。研究取数坑（新浪 IR PDF 无法解析等）
+见 `.claude/rules/data-fetch-conventions.md`。
 
 ## 6. 数据获取
 
@@ -273,12 +275,14 @@ sector-lenses.md 261 行（命中的仅约 70 行）。
 AI 不拔高/增长证据化/slop/buffett 贴合/监控可执行）输出 APPROVED / APPROVED-WITH-NITS / CHANGES-REQUESTED + 2-3 条做得好的点。
 控制者收到 CHANGES-REQUESTED 或 Critical 规格问题时追派 1 个 opus 只读审查员复核该结论再放行修复。
 APPROVED-WITH-NITS 的 Minor 可修后控制者直接核验。
+**汇报按 §9.0 写文件（标识 `review`），两段正文全文写进文件**——审查是"只回 idle"的重灾区。
 
 **Phase C 收尾**：先 `git status` 查遗留改动；**`git rm` 控制者传来的待删旧 buffett 档清单**；
 **把所有 symmetric 指向被删档的反向链改指到新档或删条目**；给要补反向条目的被链档路径 + 反向 YAML；
 跑 `--rewrite-blocks` + 双 lint exit 0 + `--check-orphans` 确认新档非孤儿；
 **同步 valuations.yaml**（见 §8）：运行 `sync_valuations.py --stock-code <code>` 确定性 upsert（估值数字已在 frontmatter `valuation` 块）；确认采证脚本已删、evidence.md 未 add；
-提交终稿；汇报双 lint 退出码 + valuations 同步状态 + SHA + 状态。
+提交终稿；汇报按 §9.0 写文件（标识 `phaseC`），内容含双 lint 退出码 + valuations 同步状态 + SHA +
+`git show --stat HEAD` 文件清单 + 遗留检查结论（三份 evidence 片段与六份 report 均未被 add）。
 
 **派发坑：长文撰写 subagent 的 stream idle timeout**：Phase B（opus 写 300+ 行）可能中途报
 `Stream idle timeout - partial response received`、文件 0 落盘（多发生在它还在读基线/取框架阶段）。
