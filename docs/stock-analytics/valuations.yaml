@@ -914,22 +914,6 @@
   - 有色金属
   - 电解铝
   - 高股息
-- stock_code: '601899'
-  stock_name: 紫金矿业
-  market: A
-  currency: CNY
-  sector: materials
-  commodity: copper
-  commodity_impact: positive
-  rating: core
-  bear: 7.7
-  base: 9.7
-  bull: 19.4
-  conviction_date: '2026-04-24'
-  source_doc: sectors/materials/nonferrous/2026-04-24-紫金矿业-buffett分析.md
-  note: 内在价值1200-1800亿/bull 3000亿；股本约155亿股(公开数据近似)
-  themes:
-  - gold_defense
 - stock_code: '002654'
   stock_name: 万润科技
   market: A
@@ -3942,3 +3926,23 @@
   - AI服务器需求
   - 港股上市
   - A+H
+- stock_code: '02899'
+  stock_name: 紫金矿业
+  market: HK
+  currency: HKD
+  sector: materials
+  commodity: copper
+  commodity_impact: positive
+  quality: 5
+  rating: watch
+  watch_reason: 生意质地优秀（2025 加权 ROE 33.04%、全球矿产铜前四、低成本分位），但 H 股 PB 4.16x 对应公允 PB 约 2.0x，期望内在价值 17.49 HKD 较现价 36.40 HKD 安全边际 −51.9%，连最乐观 bull 情景（27.28 HKD）都仍是 −25.1%；且 2026H1 矿产铜同比 −6%、全年 120 万吨指引 H1 仅完成 44.5%，指引下修风险未被定价。买点 PB<1.4x（约 12 HKD）。
+  bear: 7.34
+  base: 18.82
+  bull: 27.28
+  dividend_yield: 2.55
+  conviction_date: '2026-08-09'
+  source_doc: sectors/materials/nonferrous/2026-08-09-紫金矿业-buffett分析.md
+  themes:
+  - copper_cycle
+  - gold_cycle
+  - lithium_growth
