@@ -201,6 +201,30 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 
 每个 subagent 都要给**完整自包含上下文**（别让它读本计划/SKILL，直接喂它需要的）。骨架：
 
+### 9.0 汇报文件协议（所有 subagent 通用，硬约定）
+
+**问题**：实测多数 subagent 完成后只发 idle 通知、不回传汇报正文，控制者须逐个 `SendMessage` 追要，
+每次一个完整往返（实测一轮吃掉约 5 分钟）。在 prompt 里写"最终回复必须包含完整正文"**已被证明无效**
+（审查 subagent 收到该指令后仍先回 idle）——靠措辞加压治不了，必须改机制。
+
+**约定**：每个 subagent 的派发 prompt 末尾**必须**包含以下要求，一字不可省：
+
+> 汇报**必须**用 Write 写到 `.omc/artifacts/<股票名>-<日期>-<阶段标识>-report.md`，写完才结束。
+> 文件头两行固定为耗时戳（开工时与收工时各跑一次 `date "+%Y-%m-%d %H:%M:%S"` 取值）：
+> ```
+> start: YYYY-MM-DD HH:MM:SS
+> end: YYYY-MM-DD HH:MM:SS
+> ```
+> 其后是汇报正文。消息回传是可选冗余通道，不是交付方式。
+
+**阶段标识固定六种**：`phaseA1` / `phaseA2` / `phaseA3` / `phaseB` / `review` / `phaseC`。
+
+**控制者侧**：不等消息、不追要报告，subagent 结束后直接 `Read` 对应文件。收尾时把六个 start/end
+汇总成一行耗时账报给用户（这是"提速是否真的发生"的唯一可证伪依据）。
+
+**为什么顺带加固了可信度**：subagent 的口头汇报本就不可信（已有教训：Phase A 曾自报"一次性脚本已删"
+而实际未删）。落成文件后，控制者的亲验对象从"它说了什么"变成"它写了什么 + 我自己查到什么"。
+
 **Phase A 采证**：交代标的+代码+市场+今天日期+知识截止须联网；给 evidence.md 结构（见 §5）；
 给 qt.gtimg.cn 取数脚本（见 §6）；强调证据分级+不造数；要求汇报证据强度 + 实时行情 + 状态。
 
