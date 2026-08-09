@@ -3946,3 +3946,19 @@
   - copper_cycle
   - gold_cycle
   - lithium_growth
+- stock_code: '688256'
+  stock_name: 寒武纪-U
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 盈利转正是真的（2026H1 扣非 +137% 快于归母 +122%、补助仅占 4%），但护城河（NeuWare vs CUDA）薄、出货份额仅 3%（昇腾 20.3%）、fabless 产能受制于中芯 N+2 约 20% 良率与韩系 HBM、需求由可逆的行政禁令供养（中方 2026-07 已松口拟放行 <20 万颗 H200）。PE(TTM) 226x / PB 55.6x / PS 78x 三项均为可比表最高，期望内在价值 1205 亿元 vs 市值 7539 亿元，安全边际 −84.0%，连最乐观 bull 情景（2860 亿）都仍有 −62%。价格是唯一否决项，业务本身值得持续跟踪。
+  bear: 22.9
+  base: 158
+  bull: 455
+  conviction_date: '2026-08-09'
+  source_doc: sectors/semiconductor/design/2026-08-09-寒武纪-buffett分析.md
+  themes:
+  - ai-chip
+  - 国产替代
+  - 算力
