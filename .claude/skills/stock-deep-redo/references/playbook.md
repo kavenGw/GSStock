@@ -225,6 +225,26 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 **为什么顺带加固了可信度**：subagent 的口头汇报本就不可信（已有教训：Phase A 曾自报"一次性脚本已删"
 而实际未删）。落成文件后，控制者的亲验对象从"它说了什么"变成"它写了什么 + 我自己查到什么"。
 
+### 9.1 内联铁律：控制者摘原文，不给路径让 subagent 自读
+
+**问题**：让 subagent 自己去读整份参考文件，既费它的墙钟（读+导航往返），又有挑错节的风险。
+实测一轮里写手自读了 6 份材料，其中两份是纯浪费：兄弟档 791 行（真正有用的仅 3-5 条口径）、
+sector-lenses.md 261 行（命中的仅约 70 行）。
+
+**铁律**：以下内容**由控制者摘成原文内联进 prompt**，**不许给文件路径让 subagent 自读**——
+
+| 内容 | 内联到 | 不许的做法 |
+|---|---|---|
+| 命中 lens 的【必查清单】 | A3 采证提示 | ❌ "命中 AI + 成长 lens，去读 sector-lenses.md" |
+| 命中 lens 的【撰写落点】【双面必答】【监控指标模板】 | Phase B 提示 | ❌ 同上 |
+| 兄弟档口径要点（3-5 行） | Phase B 提示 | ❌ "参考兄弟档 xxx.md 的质量水位" |
+
+**仍由 subagent 自读的**（必要，压不掉）：evidence 片段（事实源）、旧档（翻转对照）、
+本 playbook（规格）、`Skill buffett`（框架）。
+
+**这条不是新约定，是把既有约定的漏洞堵上**：SKILL.md「先做」本就写着"把命中节摘出注入"，
+但措辞允许控制者只报 lens 名字了事——实测控制者确实这么偷懒过。现措辞不留"指路"这个选项。
+
 **Phase A 采证（3 个并行，均 opus）**：三份 prompt 都要交代标的+代码+市场+今天日期+知识截止须联网、
 证据分级+不造数、§9.0 汇报文件协议（标识分别 `phaseA1`/`phaseA2`/`phaseA3`）。各自差异：
 
@@ -239,9 +259,13 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 
 **不派合并 agent**（合并把省下的时间串回去）；**"相对旧档变化清单"移交 Phase B**（需全局视野）。
 
-**Phase B 撰写**：要求先 `Skill buffett`；给 evidence.md 路径 + 基线底稿路径；给 frontmatter 模板（§1）+
-13 节结构（§2）+ 场景加权机制（§3）+ 命中 lens 的【撰写落点】（sector-lenses.md）+ 7 条质量红线（SKILL.md）；
-给关键事实锚（实时市值/PE/PB + 证据硬软分级 + 任何需纠正的错误假设）；要求只跑 frontmatter lint 后提交；汇报评级+期望内在价值+安全边际+SHA+状态。
+**Phase B 撰写（1 个 opus，不拆）**：要求先 `Skill buffett`；给**三份 evidence 片段路径**（A1/A2/A3）+ 旧档路径；
+给 frontmatter 模板（§1）+ 13 节结构（§2）+ 场景加权机制（§3）+ 7 条质量红线（SKILL.md）；
+**按 §9.1 内联铁律直接贴入**命中 lens 的【撰写落点】【双面必答】【监控指标模板】原文 + 兄弟档口径要点 3-5 行
+（**不给 sector-lenses.md / 兄弟档的路径让它自读**）；给关键事实锚（A1 的市值/PB/PS/股本/汇率 + 硬软分级 +
+需纠正的旧档错误假设）；交办两项独有活——**写"相对旧档变化清单"**、**标注 A2/A3 与 A1 的数字冲突**；
+要求只跑 frontmatter lint、**不 git add/commit**；汇报按 §9.0 写文件（标识 `phaseB`），内容含评级 +
+期望内在价值 + 安全边际 + 最脆弱论点自评。
 
 **合并审查**（read-only，sonnet）：给交付物+spec/playbook+evidence 路径；要求单 prompt 内先规格后质量两段输出——
 规格段给逐项核对清单（13 节/frontmatter 含 valuation 块与正文一致/Σ概率=100% 且期望值算术/AI 标签/供给侧双面/

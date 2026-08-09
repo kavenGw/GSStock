@@ -56,8 +56,14 @@ description: >-
 3. **列待删旧档清单**：从上面 Glob 结果筛出该股所有历史 buffett 档（`*buffett*.md`）。删前**先 Read 一眼
    确认确属同股旧 buffett 档**（判据：档名含目标股票名 **且** frontmatter `stock_code` 与目标一致；CLAUDE.md
    铁律：删除前看目标。不满足判据、或内容与预期严重不符，停下 surface 给用户，不照删）。把确认后的待删清单传给 Phase C。
-4. **选 sector-lens**：按 subsector 从 `references/sector-lenses.md` 挑命中的 lens 节（**可叠加**：主 lens
-   如 PCB/存储 + **两个横切 lens（AI、成长）默认对每只股跑识别**）。把命中节的【必查清单】【撰写落点】摘出，分别注入 Phase A / Phase B 提示。
+4. **选 sector-lens 并把命中节原文摘出**：按 subsector 从 `references/sector-lenses.md` 挑命中的 lens 节
+   （**可叠加**：主 lens 如 PCB/存储 + **两个横切 lens（AI、成长）默认对每只股跑识别**）。
+   **控制者必须把命中节的【必查清单】原文内联进 A3 提示、【撰写落点】【双面必答】【监控指标模板】原文内联进
+   Phase B 提示——不许只报 lens 名字让 subagent 自己去读整份 sector-lenses.md**（261 行里命中的通常只有
+   约 70 行，让它自读是纯浪费，且它可能挑错节）。铁律与理由见 `references/playbook.md` §9.1。
+5. **备兄弟档口径摘要**：若同板块有近期兄弟档可参照，控制者**读一遍并提炼成 3-5 行口径要点**
+   （如"兄弟档用 TTM 营收作分母 / bull 封顶 20% / 买点取 30% 折价"）备用于 Phase B 提示。
+   **不把兄弟档全文塞给写手、也不让它自己去读全文**（实测兄弟档 791 行，真正有用的就那几条）。
 
 **建档前避坑门（强制，先于 Phase A）**：采证第一步先查 `docs/stock-analytics/avoidance-list.yaml`——命中目标 `stock_code` 则按 `.claude/rules/docs-conventions.md`「建档前避坑列表验证」做原因验证：用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，逐条对照 `avoid_reason` 判仍成立/被推翻。**理由仍成立即中断建档**（口头说明后停手，不派 Phase A/B/C）；**被推翻**（基本面真实反转）才放行，且建档完成后从 avoidance-list.yaml 移除该条并 commit。
 
@@ -94,11 +100,25 @@ description: >-
 - 详细采证清单与字段见 `references/playbook.md`。
 
 ### Phase B — 撰写（派 1 个 subagent，opus）
-先 `Skill buffett` 取框架，读 evidence.md + 基线底稿，按 13 节结构写正文 + frontmatter，跑 frontmatter lint，提交。
-**只跑 `lint_docs_frontmatter.py`，不跑 refs**（对称留给 Phase C）。13 节模板、frontmatter 字段、场景加权
-估值机制、AI 维度标签法、质量红线全部在 `references/playbook.md`，撰写 subagent 必须先读它。
-**注入命中 lens 的【撰写落点】**（来自 `references/sector-lenses.md` 命中节）：要求对应节按落点深化，
-命中 lens 的每个必查项都要在正文有回应（查无证据也要写明）。
+
+**不拆**——13 节长文的价值很大程度在「§6 论点 → §9 估值 → §10 评级」的链式推导，拆多写手最容易断链。
+
+先 `Skill buffett` 取框架，读 **Phase A 的三份 evidence 片段（A1 数据锚 / A2 论点 / A3 lens）** + 旧档，
+按 13 节结构写正文 + frontmatter，跑 frontmatter lint。
+**只跑 `lint_docs_frontmatter.py`，不跑 refs**（对称留给 Phase C）；**不 git add/commit**（提交由 Phase C 统一做）。
+13 节模板、frontmatter 字段、场景加权估值机制、AI 维度标签法、质量红线全部在 `references/playbook.md`，撰写 subagent 必须先读它。
+
+**控制者必须内联进提示的**（见 `references/playbook.md` §9.1，不许给路径让它自读）：
+- 命中 lens 的【撰写落点】【双面必答】【监控指标模板】原文 —— 要求对应节按落点深化，
+  命中 lens 的每个必查项都要在正文有回应（查无证据也要写明）
+- 兄弟档口径要点 3-5 行 —— 不给兄弟档全文
+- A1 片段里的关键事实锚（实时市值/PB/PS/股本/汇率）+ 任何需纠正的旧档错误假设
+
+**Phase B 独有的两项交办**：
+- **写"相对旧档变化清单"**（Phase A 三路都写不了，需全局视野）：逐条列旧档口径 vs 最新事实 + 变化方向。
+- **标注三路 evidence 的数字冲突**：A1 是唯一权威源，若 A2/A3 与之打架，取 A1 并在正文显式标注，不得静默取一个。
+
+汇报按 `references/playbook.md` §9.0 写文件，标识 `phaseB`。
 
 ### 合并审查（派 1 个 read-only subagent，sonnet；异常升 opus）
 一个 sonnet 只读 subagent，单 prompt 内**先规格、后质量**两段顺序输出（顺序不可反）：
