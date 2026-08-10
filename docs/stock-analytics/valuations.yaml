@@ -1416,12 +1416,13 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 11.4
-  base: 54.7
-  bull: 132.4
-  conviction_date: '2026-05-31'
-  source_doc: sectors/semiconductor/storage/2026-05-31-江波龙-buffett分析.md
-  note: 江波龙；base/bull每股文档直接给；bear48亿÷4.23亿股
+  bear: 11.17
+  base: 56.32
+  bull: 111.71
+  dividend_yield: 0.24
+  conviction_date: '2026-08-10'
+  source_doc: sectors/semiconductor/storage/2026-08-10-江波龙-buffett分析.md
+  note: 期望内在价值 226 亿、市值 1745 亿、安全边际 −87.1%，第一否决项已从估值位移到品类（NAND 2027H2 转宽松）
   themes:
   - memory
   - 供给侧
@@ -3926,7 +3927,7 @@
   - AI服务器需求
   - 港股上市
   - A+H
-- stock_code: '02899'
+- stock_code: 02899
   stock_name: 紫金矿业
   market: HK
   currency: HKD
