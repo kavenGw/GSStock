@@ -24,6 +24,14 @@ def test_compute_premium_none_when_leg_missing():
     assert BriefingService._compute_premium(190.0, 1000.0, None, 5) is None
 
 
+def test_compute_premium_none_when_leg_nan():
+    # yfinance 偶发返回 NaN close（实测 XPEV 2026-08-11），not nan 为 False 拦不住
+    nan = float('nan')
+    assert BriefingService._compute_premium(nan, 1000.0, 32.0, 5) is None
+    assert BriefingService._compute_premium(190.0, nan, 32.0, 5) is None
+    assert BriefingService._compute_premium(190.0, 1000.0, nan, 5) is None
+
+
 def test_get_adr_premium_data_degrades_per_leg(monkeypatch):
     # TSM 全腿有价 → 有 premium；SK 缺 US 价 → premium None + error
     fake_quotes = {
@@ -103,6 +111,20 @@ def test_skhynix_leg_priced_with_ratio(monkeypatch):
     by_key = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
     assert by_key['skhynix']['premium_rate'] == 50.0
     assert by_key['skhynix']['error'] is None
+
+
+def test_xpeng_leg_priced_with_ratio(monkeypatch):
+    # XPEV 有价：ratio=2 → fair = 45.6*2/7.8 ≈ 11.69 ; premium = 12/11.69-1 ≈ +2.63%
+    monkeypatch.setattr(
+        'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
+        lambda symbols, cache_type: {
+            'XPEV': {'close': 12.0}, '9868.HK': {'close': 45.6}, 'HKD=X': {'close': 7.8},
+        },
+    )
+    monkeypatch.setattr(BriefingService, '_load_adr_prev', staticmethod(lambda: {}))
+    by_key = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
+    assert by_key['xpeng']['premium_rate'] == 2.63
+    assert by_key['xpeng']['error'] is None
 
 
 def test_getter_is_pure_no_write(tmp_path, monkeypatch):

@@ -7,6 +7,7 @@
 - 板块评级（根据美股表现评级A股板块风险）
 """
 import logging
+import math
 import os
 import json
 from datetime import datetime, date, timedelta
@@ -603,7 +604,8 @@ class BriefingService:
 
     @staticmethod
     def _compute_premium(us_close, home_close, fx_rate, ratio):
-        if not us_close or not home_close or not fx_rate or not ratio:
+        legs = (us_close, home_close, fx_rate, ratio)
+        if any(not v or math.isnan(v) for v in legs):
             return None
         fair = home_close * ratio / fx_rate
         if fair <= 0:

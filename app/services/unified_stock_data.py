@@ -2702,6 +2702,8 @@ class UnifiedStockDataService:
             try:
                 ticker = yf.Ticker(sym)
                 hist = ticker.history(period='5d')
+                if 'Close' in hist:
+                    hist = hist.dropna(subset=['Close'])
                 if hist.empty or len(hist) < 2:
                     return sym, None
 
