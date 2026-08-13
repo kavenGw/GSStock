@@ -4001,3 +4001,22 @@
   - copper_cycle
   - 治理修复
   - 高分红
+- stock_code: '00322'
+  stock_name: 康师傅控股
+  market: HK
+  currency: HKD
+  sector: consumer
+  rating: watch
+  watch_reason: valuation_rich
+  bear: 5.08
+  base: 7.84
+  bull: 10.64
+  dividend_yield: 6.97
+  conviction_date: '2026-08-13'
+  source_doc: sectors/consumer/food-beverage/2026-08-13-康师傅-buffett分析.md
+  themes:
+  - 高股息
+  - 零成长
+  - 方便面
+  - 即饮茶
+  - 现金牛
