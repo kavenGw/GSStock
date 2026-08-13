@@ -3980,3 +3980,24 @@
   - OLED材料
   - 半导体材料
   - 国产替代
+- stock_code: 000408
+  stock_name: 藏格矿业
+  market: A
+  currency: CNY
+  sector: materials
+  commodity: copper
+  commodity_impact: positive
+  rating: watch
+  watch_reason: 生意实体是「察尔汗钾锂主业（利润 22%）+ 巨龙铜业 30.78% 无控制权参股（利润 78%）」的组合，现金分红回流真实（2026 年内已实收 30.78 亿元、覆盖账面权益法收益 86.7%）；但铜/锂/钾三种商品同时处于景气高位形成三重周期共振顶，SOTP 场景加权期望内在价值 30.81 元对现价 80.05 元安全边际 -61.5%，连 bull 情景 45.50 元仍 -43.2%，把「参股不折价 + 主业 13x」的极端多头假设全部叠满也只有 54.43 元（-32.0%）——公司资产真实、价格无法接受，列 watch 不买。历史系统性财务造假主体已于 2025-05 完全出局，判定不构成自动否决，但折价已显性计入倍数与 bear 赋权。
+  bear: 16.99
+  base: 31.87
+  bull: 45.5
+  dividend_yield: 3.12
+  conviction_date: '2026-08-13'
+  source_doc: sectors/materials/potash/2026-08-13-藏格矿业-buffett分析.md
+  themes:
+  - potash
+  - lithium
+  - copper_cycle
+  - 治理修复
+  - 高分红
