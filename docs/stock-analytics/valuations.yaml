@@ -4039,3 +4039,23 @@
   - 有色金属
   - 贵金属
   - 控股公司折价
+- stock_code: JD
+  stock_name: 京东集团
+  market: US
+  currency: USD
+  sector: consumer
+  rating: config
+  bear: 27.96
+  base: 44.23
+  bull: 64.01
+  dividend_yield: 3.35
+  conviction_date: '2026-08-13'
+  source_doc: sectors/consumer/e-commerce/2026-08-13-京东-buffett分析.md
+  quality: 3
+  themes:
+  - 电商
+  - AI
+  - 即时零售
+  - 国补退坡
+  - 净现金
+  - SOTP
