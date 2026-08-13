@@ -1290,7 +1290,7 @@
   - 半导体显示PI/TFE-INK
   - 先进封装临时键合胶
 - stock_code: '300223'
-  stock_name: 北京君正
+  stock_name: 君正股份
   market: A
   currency: CNY
   sector: semiconductor
@@ -1300,7 +1300,7 @@
   bull: 52.1
   conviction_date: '2026-06-21'
   source_doc: sectors/semiconductor/storage/2026-06-21-北京君正-buffett分析.md
-  note: 北京君正；bear60.5/base135/bull252亿÷4.836亿股
+  note: 君正股份（原北京君正，2026 年更名）；bear60.5/base135/bull252亿÷4.836亿股
   themes:
   - memory
   - 供给侧

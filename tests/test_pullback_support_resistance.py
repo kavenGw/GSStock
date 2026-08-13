@@ -16,13 +16,13 @@ _CLOSES_25 = [95, 96, 98, 100, 103, 106, 110, 113, 116, 118, 120, 119, 117,
 
 
 def test_calc_changes_attaches_support_resistance():
-    info = ValueDipService._calc_stock_changes('300223', '北京君正', _mk_ohlc(_CLOSES_25))
+    info = ValueDipService._calc_stock_changes('300223', '君正股份', _mk_ohlc(_CLOSES_25))
     assert info['support'] is not None
     assert info['resistance'] is not None
     assert info['support'] < info['price'] < info['resistance']
 
 
 def test_calc_changes_sr_none_when_insufficient_data():
-    info = ValueDipService._calc_stock_changes('300223', '北京君正', _mk_ohlc(_CLOSES_25[:10]))
+    info = ValueDipService._calc_stock_changes('300223', '君正股份', _mk_ohlc(_CLOSES_25[:10]))
     assert info['support'] is None
     assert info['resistance'] is None

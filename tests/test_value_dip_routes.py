@@ -5,13 +5,13 @@ from app.services.value_dip import ValueDipService
 
 def _client(monkeypatch):
     monkeypatch.setattr(ValueDipService, 'get_watch_performance',
-                        staticmethod(lambda: [{'code': '300223', 'name': '北京君正',
+                        staticmethod(lambda: [{'code': '300223', 'name': '君正股份',
                                                'market': 'A', 'price': 30.0,
                                                'change_7d': 1.0, 'change_30d': 2.0,
                                                'change_90d': 3.0, 'high_90d': 40.0,
                                                'pullback_90d': -25.0}]))
     monkeypatch.setattr(ValueDipService, 'get_pullback_ranking',
-                        staticmethod(lambda days=90: [{'code': '300223', 'name': '北京君正',
+                        staticmethod(lambda days=90: [{'code': '300223', 'name': '君正股份',
                                                        'market': 'A', 'price': 30.0,
                                                        'high': 40.0, 'pullback_pct': -25.0}]))
     app = Flask(__name__)

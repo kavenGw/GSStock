@@ -401,7 +401,7 @@ SUPPLY_CHAIN_GRAPHS = {
                     '688008': {'name': '澜起科技', 'role': 'DDR5 RCD/DB 内存接口全球三强'},
                     '688123': {'name': '聚辰股份', 'role': 'DDR5 SPD EEPROM（澜起独家配套，SPD 全球三强）'},
                     '603986': {'name': '兆易创新', 'role': 'DRAM 自研 17nm DDR4 已量产（跨 DDR/NAND 双线）'},
-                    '300223': {'name': '北京君正', 'role': '车规 DRAM/SRAM（ISSI）'},
+                    '300223': {'name': '君正股份', 'role': '车规 DRAM/SRAM（ISSI）'},
                 },
             },
             'HBM 先进封装': {
