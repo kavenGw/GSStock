@@ -40,6 +40,9 @@ related_docs:
 - path: ../../../themes/2026-08-05-FCC拟禁中国新型号光模块-北美准入风险.md
   note: FCC 拟禁中国新型号光模块——政策为美系 incumbent 圈出受保护本土市场，强化「西方卡位」thesis 支柱（COHR 为承接替代第一顺位）；但产能承接是硬约束、受益以年计，估值否决项不变
   symmetric: true
+- path: 2026-08-13-Lumentum-buffett分析.md
+  note: 最直接西方对手；同日（2026-03-02）双方各获 NVIDIA 完全对称的 $20 亿入股（均为 non-exclusive），Coherent 6 英寸 InP 已量产 EML/CW/PD 且良率超其 3 英寸线，是 Lumentum EML 护城河被挤压的主要向量
+  symmetric: true
 ---
 
 # Coherent（COHR）— 巴菲特视角深度分析
@@ -53,6 +56,7 @@ related_docs:
 > - [2026-06-11-SemiAnalysis-CPO-800VDC延后影响](../../../themes/2026-06-11-SemiAnalysis-CPO-800VDC延后影响.md) — CPO 延后论点（触发 COHR 单日 -11%），但 CPO 仍需 CW 光源双刃
 > - [2026-08-04-德科立-buffett分析](2026-08-04-德科立-buffett分析.md) — 全球光放大器/光器件国际龙头 vs 国内追赶者对标——德科立在光放大器 TAM ~10 亿美元、CAGR 7.2% 的慢跑道上排全球第五，与 Coherent 等国际前三在光芯片与相干 DSP 上的差距是德科立护城河判定偏窄的主要依据
 > - [2026-08-05-FCC拟禁中国新型号光模块-北美准入风险](../../../themes/2026-08-05-FCC拟禁中国新型号光模块-北美准入风险.md) — FCC 拟禁中国新型号光模块——政策为美系 incumbent 圈出受保护本土市场，强化「西方卡位」thesis 支柱（COHR 为承接替代第一顺位）；但产能承接是硬约束、受益以年计，估值否决项不变
+> - [2026-08-13-Lumentum-buffett分析](2026-08-13-Lumentum-buffett分析.md) — 最直接西方对手；同日（2026-03-02）双方各获 NVIDIA 完全对称的 $20 亿入股（均为 non-exclusive），Coherent 6 英寸 InP 已量产 EML/CW/PD 且良率超其 3 英寸线，是 Lumentum EML 护城河被挤压的主要向量
 <!-- END related_docs -->
 
 > 数据基准：2026-07-02 盘中｜现价 $368.65（源A stockanalysis / 源B stocktitan $368.23，当日 -7.02%）｜基本股本 195.6M、市值 $72.1B（完全稀释 ~209.6M 股 / ~$77B，Bain 系 Series B 优先股 2025Q4 已转普通股）｜PE(TTM) 153.9x｜Fwd PE 49.4x｜P/S 10.9x｜PB 6.75｜EV/EBITDA 55.7x｜52 周 +313~325%｜分析师目标价 $384.45（Buy）｜不派普通股息

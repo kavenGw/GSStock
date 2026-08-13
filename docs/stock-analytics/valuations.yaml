@@ -3059,13 +3059,13 @@
   currency: USD
   sector: semiconductor
   rating: watch
-  watch_reason: 好生意（AI datacom 光器件龙头、高端 EML 全球 50-60% 份额、Q3 营收+90%/毛利48% 业绩层真兑现）但估值极端透支——P/S 25 / EV-EBITDA 123 / 52周+742%，三情景加权期望内在价值约 150 美元/股、对现价 $801 安全边际约 -81%，即便 bull 压力测试仍 -58% 无任何安全边际
-  bear: 54
-  base: 113
-  bull: 333
+  watch_reason: 事实侧全面变硬（Q4 FY26 营收 $1,006M/+109%、non-GAAP OM 36.6% 超指引、NVIDIA $20 亿具名入股 + 数十亿采购承诺把客户能见度从"终端兑底"升级为"具名硬证据"），但估值侧缺口仍未消失——完全稀释市值 $94.27B（101.1M 股口径，非站点的 $82.62B），三情景加权期望内在价值约 $255/股，对现价 $932.47 安全边际约 −73%，即便 bull 单独压力测试仍 −59%。核心不确定是当前 36.6%→指引 40% 的营业利润率含多少「缺口租金」——Coherent 6"InP 已量产、源杰 200G EML CY26 末量产、自家 Greensboro 要等 2028，三条产能曲线全指向 CY2027–2028 供给集中释放。等回调至约 $345–420 区间且缺口租金被证明为结构性后再评。
+  bear: 95
+  base: 258
+  bull: 383
+  conviction_date: '2026-08-13'
+  source_doc: sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md
   quality: 5
-  conviction_date: '2026-07-02'
-  source_doc: sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md
   themes:
   - ai_compute
   - 光模块

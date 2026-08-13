@@ -20,8 +20,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md
     note: Coherent 个股 buffett 深度分析（AI 光互联西方 incumbent，本对比的 Coherent 口径来源）
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md
-    note: Lumentum 个股 buffett 深度分析（高端 EML 全球定价者，本对比的 Lumentum 口径来源）
+  - path: ../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md
+    note: Lumentum 个股 buffett 深度分析（高端 EML 全球第一，本对比的 Lumentum 口径来源）；2026-08-13 重做档口径：完全稀释市值 $94.27B / P-S 31.3 为全景最贵一档，但 P-B 17.79 为整组最低
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
     note: 天孚个股 buffett 深度（上游无源器件+光引擎封装平台/军火商，独有玻璃桥替代风险，本对比的天孚口径来源）
@@ -63,7 +63,7 @@ related_docs:
 > - [2026-07-02-源杰科技-buffett分析](../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md) — 源杰科技个股 buffett 深度分析（本对比的源杰口径来源）
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 新易盛个股 buffett 深度分析（全球第二光模块龙头，本对比的新易盛口径来源）
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — Coherent 个股 buffett 深度分析（AI 光互联西方 incumbent，本对比的 Coherent 口径来源）
-> - [2026-07-02-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md) — Lumentum 个股 buffett 深度分析（高端 EML 全球定价者，本对比的 Lumentum 口径来源）
+> - [2026-08-13-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md) — Lumentum 个股 buffett 深度分析（高端 EML 全球第一，本对比的 Lumentum 口径来源）；2026-08-13 重做档口径：完全稀释市值 $94.27B / P-S 31.3 为全景最贵一档，但 P-B 17.79 为整组最低
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 天孚个股 buffett 深度（上游无源器件+光引擎封装平台/军火商，独有玻璃桥替代风险，本对比的天孚口径来源）
 > - [2026-06-04-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md) — 光迅个股 buffett 深度档（2026-06-04 较早口径 PE~100x/内在价值 250 亿/目标 24-30 元）；本横评为 2026-07-03 新口径（PE179x/−54%），市值口径已翻倍，以横评为准
 > - [2026-06-04-光库科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md) — 光库个股 buffett 深度档（2026-06-04 较早口径 PE362x/内在价值 82 亿/−78%）；本横评为 2026-07-03 新口径（PE384x/−62%），市值口径已翻倍，以横评为准

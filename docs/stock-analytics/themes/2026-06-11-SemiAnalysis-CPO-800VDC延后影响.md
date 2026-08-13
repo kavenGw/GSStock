@@ -49,8 +49,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
     note: CPO/NPO 替代延后，缓释新易盛档 CPO 替代风险，延长可插拔光模块跑道（利好但估值不翻案）
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md
-    note: CPO 延后当日 Lumentum -8%；其 buffett 深度档
+  - path: ../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md
+    note: CPO 延后当日 Lumentum −8%、并被放大成 6 周内 −35.6% 峰谷杀跌；其 buffett 深度档。8 月 Q4 财报证伪该报告的短期版本（lead CPO 客户计划 on track 且需求信号上修）
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md
     note: CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
@@ -78,7 +78,7 @@ related_docs:
 > - [2026-06-25-烽火通信-buffett分析](../sectors/semiconductor/optical/2026-06-25-烽火通信-buffett分析.md) — 烽火通信深度档：DSP仅产品层维持exclude
 > - [2026-06-28-仕佳光子-buffett分析](../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 仕佳光子（光芯片）buffett——无源AWG/PLC强、有源EML早期，PE205x极贵定watch
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — CPO/NPO 替代延后，缓释新易盛档 CPO 替代风险，延长可插拔光模块跑道（利好但估值不翻案）
-> - [2026-07-02-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md) — CPO 延后当日 Lumentum -8%；其 buffett 深度档
+> - [2026-08-13-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md) — CPO 延后当日 Lumentum −8%、并被放大成 6 周内 −35.6% 峰谷杀跌；其 buffett 深度档。8 月 Q4 财报证伪该报告的短期版本（lead CPO 客户计划 on track 且需求信号上修）
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — CPO 对天孚是配套受益 vs 关键耦合环节被玻璃桥/被动对准替代的双刃，区别于模块厂纯逆风；CPO 延后缓释替代时点但不翻案估值
 > - [2026-07-02-中际旭创-buffett分析](../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md) — CPO延后点名受益的下游光模块全球第一龙头
