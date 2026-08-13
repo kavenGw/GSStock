@@ -3963,3 +3963,20 @@
   - ai-chip
   - 国产替代
   - 算力
+- stock_code: '688550'
+  stock_name: 瑞联新材
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  watch_reason: 生意质地可跟踪（净现金零杠杆、认证壁垒真实、50.6% 派息、扣非质量优于同业），但现价 40.46 元隐含的可持续 ROE 需达 14.7%，而历史峰值仅 9.85%、正常化仅 6.95%；期望内在价值 25.0 亿元（每股 14.20）对应安全边际 −64.9%，即便最乐观情景仍为 −51.2%。等 2026 中报分离「结构性毛利损耗」与「医药季节性错配」，并等价格进入 9.5 元一线再谈买入。
+  bear: 9.37
+  base: 15.9
+  bull: 19.76
+  dividend_yield: 2.22
+  conviction_date: '2026-08-13'
+  source_doc: sectors/electronics/display-materials/2026-08-13-瑞联新材-buffett分析.md
+  themes:
+  - OLED材料
+  - 半导体材料
+  - 国产替代
