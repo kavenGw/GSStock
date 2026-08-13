@@ -232,7 +232,7 @@ related_docs:
 
 ## 四、Lumentum（LITE）
 
-> 完整口径见个股档 `../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md`。
+> 完整口径见个股档 `../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md`（该档已于 2026-08-13 重做，旧的 2026-07-02 档已删除；**本节数字仍为 2026-07-02 横评当时口径**，与重做档不一致处以重做档为准——重做档现价 $932.47、完全稀释市值 $94.27B/101.1M 股、期望内在价值 $255/股、安全边际 −72.7%）。
 
 ### 4.1 商业质量
 
@@ -801,7 +801,7 @@ AI 兑现: 1.6T 光引擎已量产 58.5万→2026预计190万只(+225%)·海外�
 
 - 迈威尔行情/财务：Yahoo Finance / CNBC / Seeking Alpha 汇总（2026-06-30）
 - Coherent 行情/财务/估值：stockanalysis.com + stocktitan（2026-07-02，行情锚 07-01）；FY26Q3 8-K + NVIDIA/Coherent 官方 PR；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md`
-- Lumentum 行情/财务/估值：stockanalysis.com + Google Finance 二源交叉（2026-07-02，行情锚 07-01）；Q3 FY26 8-K + investing.com slides；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-Lumentum-buffett分析.md`
+- Lumentum 行情/财务/估值：stockanalysis.com + Google Finance 二源交叉（2026-07-02，行情锚 07-01）；Q3 FY26 8-K + investing.com slides；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md`（本条来源记录为本横评撰写当时；该个股档已于 2026-08-13 重做并替换）
 - 中际旭创行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300308` + akshare `stock_zh_valuation_baidu('300308', 市净率, 近5年)`（2026-07-02）；财务：akshare `stock_financial_abstract_ths('300308')` 年度/单季 + 2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md`
 - 新易盛行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300502` + akshare `stock_zh_valuation_baidu('300502')`（2026-07-02）；财务：2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md`
 - 仕佳光子行情：腾讯 `qt.gtimg.cn` 实时接口（2026-07-02）；财务：招商证券 26Q1 点评 / 2025 年报点评
