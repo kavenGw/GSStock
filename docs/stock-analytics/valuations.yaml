@@ -4020,3 +4020,20 @@
   - 方便面
   - 即饮茶
   - 现金牛
+- stock_code: 0815
+  stock_name: 中国白银集团
+  market: HK
+  currency: HKD
+  sector: materials
+  rating: exclude
+  bear: 0.139
+  base: 0.234
+  bull: 0.361
+  dividend_yield: 0
+  conviction_date: '2026-08-13'
+  source_doc: sectors/materials/nonferrous/2026-08-13-中国白银集团-buffett分析.md
+  themes:
+  - 白银
+  - 有色金属
+  - 贵金属
+  - 控股公司折价
