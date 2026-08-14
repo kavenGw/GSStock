@@ -4059,3 +4059,21 @@
   - 国补退坡
   - 净现金
   - SOTP
+- stock_code: '01347'
+  stock_name: 华虹宏力
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 26Q2 营收创历史新高、毛利率升至 16.5%，但归母 ROE 年化仅 2.4%、H 股 PB 4.18x 高于全部同业而毛利率垫底；RIM 期望内在价值 32.1 HKD vs 现价 134.80 HKD，安全边际 -76.2%。生意本身不坏（8 寸满载现金牛 + Fab9 在爬坡 + 国家战略资产），但价格没有任何口径能支撑——等价格，不等基本面。
+  bear: 22.56
+  base: 32.23
+  bull: 48.35
+  conviction_date: '2026-08-14'
+  source_doc: sectors/semiconductor/foundry/2026-08-14-华虹宏力-buffett分析.md
+  themes:
+  - foundry
+  - 成熟制程
+  - AI外溢
+  - A+H折价
+  - 资产注入
