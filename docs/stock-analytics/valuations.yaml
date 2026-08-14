@@ -4078,3 +4078,22 @@
   - AI外溢
   - A+H折价
   - 资产注入
+- stock_code: '688183'
+  stock_name: 生益电子
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: watch
+  watch_reason: 26H1 正式财报（营收 57.84 亿 +53.46%、归母 11.11 亿 +109.36%、扣非/归母 99.99%）质地极硬，但现价 115.99 元 / 市值 971.52 亿对应 PE-TTM 47.31、PB 14.92，期望内在价值仅约 308 亿、安全边际 -68%，连最乐观 bull（560 亿）都比现价低 42%；同时 Q2 单季毛利率环比 -1.54pct 而上游母公司生益科技 Q2 毛利率环比 +4.53pct（利润向 CCL 端上移）、流动比率首次跌破 1（0.94）、货币资金 4.07 亿对短债 23.24 亿仅 0.18 倍、自由现金流 -3.51 亿；目标买点约 25 元（市值约 208 亿，base 30% 折价）
+  bear: 9.31
+  base: 35.46
+  bull: 66.86
+  dividend_yield: 0.52
+  conviction_date: '2026-08-14'
+  source_doc: sectors/electronics/pcb/2026-08-14-生益电子-buffett分析.md
+  themes:
+  - AI-PCB
+  - 高多层板
+  - HDI
+  - 供给侧扩产潮
+  - 量价拆分

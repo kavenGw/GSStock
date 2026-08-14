@@ -37,8 +37,8 @@ related_docs:
 - path: ../sectors/materials/copper-foil/2026-06-08-铜冠铜箔-buffett分析.md
   note: 铜冠铜箔=PCB 铜箔涨价+HVLP 环节，中量级利好；旧 thesis「估值透支周期顶部、安全边际为负」被强化景气但未改估值判断
   symmetric: true
-- path: ../sectors/electronics/pcb/2026-07-21-生益电子-buffett分析.md
-  note: 生益电子=下游 PCB，旧 thesis 明确「上游 CCL 涨价构成成本剪刀差」；本事件使剪刀差加剧（双面），但背靠生益科技 CCL 部分自供对冲
+- path: ../sectors/electronics/pcb/2026-08-14-生益电子-buffett分析.md
+  note: 生益电子=下游 PCB，26H1 正式财报裁定：全期毛利率同比 +3.92pct 说明成本已被转嫁，旧档「净成本压力」判断需修正为单面成立；但 Q2 单季毛利率环比 -1.54pct 而母公司 CCL 环比 +4.53pct，剪刀差已从「成本压力」转为「议价权反转风险」
   symmetric: true
 - path: ../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md
   note: 世运电路=下游 PCB，旧 thesis 明确「CCL 成本传导压力大」；本事件对其偏利空（AI 占比不透明、议价力弱、成本上行直接压毛利）
@@ -59,7 +59,7 @@ related_docs:
 > - [2026-05-07-宏和科技-buffett分析](../sectors/semiconductor/materials/2026-05-07-宏和科技-buffett分析.md) — 宏和科技=纯电子玻纤布最纯正敞口，正是本轮最紧缺瓶颈环节；旧 thesis「等季报兑现」被本事件（7628+80%/T-Glass 交期>30 周/织机 18-24 月刚性）强化，景气延续至 2027 底
 > - [2026-05-12-圣泉集团-buffett分析](../sectors/semiconductor/materials/2026-05-12-圣泉集团-buffett分析.md) — 圣泉集团=PPE 电子树脂涨价环节，中量级利好；旧 thesis「电子树脂护城河未形成、等正常化盈利兑现」不因本景气改变
 > - [2026-06-08-铜冠铜箔-buffett分析](../sectors/materials/copper-foil/2026-06-08-铜冠铜箔-buffett分析.md) — 铜冠铜箔=PCB 铜箔涨价+HVLP 环节，中量级利好；旧 thesis「估值透支周期顶部、安全边际为负」被强化景气但未改估值判断
-> - [2026-07-21-生益电子-buffett分析](../sectors/electronics/pcb/2026-07-21-生益电子-buffett分析.md) — 生益电子=下游 PCB，旧 thesis 明确「上游 CCL 涨价构成成本剪刀差」；本事件使剪刀差加剧（双面），但背靠生益科技 CCL 部分自供对冲
+> - [2026-08-14-生益电子-buffett分析](../sectors/electronics/pcb/2026-08-14-生益电子-buffett分析.md) — 生益电子=下游 PCB，26H1 正式财报裁定：全期毛利率同比 +3.92pct 说明成本已被转嫁，旧档「净成本压力」判断需修正为单面成立；但 Q2 单季毛利率环比 -1.54pct 而母公司 CCL 环比 +4.53pct，剪刀差已从「成本压力」转为「议价权反转风险」
 > - [2026-06-04-世运电路-buffett分析](../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md) — 世运电路=下游 PCB，旧 thesis 明确「CCL 成本传导压力大」；本事件对其偏利空（AI 占比不透明、议价力弱、成本上行直接压毛利）
 > - [2026-07-21-生益科技H1预增117-131%-CCL龙头兑现与目标价溯源](../themes/2026-07-21-生益科技H1预增117-131%-CCL龙头兑现与目标价溯源.md) — 同链前序事件档（生益 H1 预增），本档为其后 6 天花旗以南亚 read-across 的行业级延续，供给瓶颈时间窗（至 2027 底）为增量
 > - [2026-06-21-生益-建滔-CCL双雄-comps](../comps/2026-06-21-生益-建滔-CCL双雄-comps.md) — CCL 双雄估值对照锚——本事件强化「生益质地优于建滔」的相对判断，但两者「现价对穿越周期正常化利润深度高估」结论均未变
