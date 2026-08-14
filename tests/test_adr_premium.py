@@ -127,6 +127,20 @@ def test_xpeng_leg_priced_with_ratio(monkeypatch):
     assert by_key['xpeng']['error'] is None
 
 
+def test_jd_leg_priced_with_ratio(monkeypatch):
+    # JD 有价：ratio=2 → fair = 123*2/7.8464 ≈ 31.352 ; premium = 31.61/31.352-1 ≈ +0.82%
+    monkeypatch.setattr(
+        'app.services.unified_stock_data.unified_stock_data_service.get_yfinance_batch_quotes',
+        lambda symbols, cache_type: {
+            'JD': {'close': 31.61}, '9618.HK': {'close': 123.0}, 'HKD=X': {'close': 7.8464},
+        },
+    )
+    monkeypatch.setattr(BriefingService, '_load_adr_prev', staticmethod(lambda: {}))
+    by_key = {p['key']: p for p in BriefingService.get_adr_premium_data()['pairs']}
+    assert by_key['jd']['premium_rate'] == 0.82
+    assert by_key['jd']['error'] is None
+
+
 def test_getter_is_pure_no_write(tmp_path, monkeypatch):
     f = tmp_path / 'prev.json'
     f.write_text('{"tsmc": {"date": "2026-07-20", "premium": 20.0}}', encoding='utf-8')
