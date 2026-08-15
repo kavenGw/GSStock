@@ -86,6 +86,7 @@ MARKET_INDICES = {
 WATCH_CODES = [
     {'code': '300223',    'name': '君正股份',  'market': 'A'},
     {'code': '603986',    'name': '兆易创新',  'market': 'A'},
+    {'code': '688766',    'name': '普冉股份',  'market': 'A'},
     {'code': '000660.KS', 'name': 'SK海力士',  'market': 'KR'},
     {'code': '2631.HK',   'name': '天岳先进',  'market': 'HK',
      'ah': {'code': '688234', 'market': 'A', 'name': '天岳先进'}},
