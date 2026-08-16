@@ -21,6 +21,9 @@ related_docs:
   - path: ../sectors/semiconductor/storage/2026-06-03-佰维存储-buffett分析.md
     note: 佰维 6-03 buffett 分析（Watch/AI端侧最纯敞口、周期顶部估值）
     symmetric: true
+  - path: ../themes/2026-08-16-SkyHighMemory-普冉收购标的-深度承做.md
+    note: 本档原判"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"已失效——SHM 并表后普冉成为三家中 SLC NAND/eMMC 敞口最直接一家；该档给出 SHM 的定量卡位（2025 收入 13.49 亿、eMMC 占 64.13%、晶圆配额约 6.3 万片/年）与"只传导价、不传导量"的传导判定，是本档的 SLC NAND 敞口补丁
+    symmetric: true
 ---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
 
@@ -31,6 +34,7 @@ related_docs:
 > - [2026-08-01-普冉股份-buffett分析](../sectors/semiconductor/storage/2026-08-01-普冉股份-buffett分析.md) — 普冉 8-01 深度重做（仍 Exclude）：SHM 并表后本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断已失效，现为三家中 SLC NAND/eMMC 敞口最直接一家（约 65% 当期利润来自该资产）；但按 2032 有限收益期 SOTP 重估后安全边际仍 -88.3%
 > - [2026-05-31-东芯股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md) — 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
 > - [2026-06-03-佰维存储-buffett分析](../sectors/semiconductor/storage/2026-06-03-佰维存储-buffett分析.md) — 佰维 6-03 buffett 分析（Watch/AI端侧最纯敞口、周期顶部估值）
+> - [2026-08-16-SkyHighMemory-普冉收购标的-深度承做](../themes/2026-08-16-SkyHighMemory-普冉收购标的-深度承做.md) — 本档原判"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"已失效——SHM 并表后普冉成为三家中 SLC NAND/eMMC 敞口最直接一家；该档给出 SHM 的定量卡位（2025 收入 13.49 亿、eMMC 占 64.13%、晶圆配额约 6.3 万片/年）与"只传导价、不传导量"的传导判定，是本档的 SLC NAND 敞口补丁
 <!-- END related_docs -->
 
 > 分析日期：2026-05-15
