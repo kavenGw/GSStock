@@ -80,11 +80,12 @@
   currency: HKD
   sector: consumer
   rating: watch
-  bear: 9.52
-  base: 21.83
-  bull: 33.12
-  conviction_date: '2026-06-02'
-  source_doc: sectors/consumer/consumer-electronics/2026-06-02-小米集团-buffett分析.md
+  watch_reason: 二季报确认「量价利三杀」——手机出货 -26.5%/毛利率 8.5%、汽车分部毛利率连续 4 季新低至 19.2% 且仍亏 26 亿、经调整净利 -42.6%；正常化利润中枢与合理倍数双下修，期望内在价值约 20.03 HKD/股（5,159 亿港元），对 26.18 HKD 收盘价安全边际 -23.5%，即便 bull 情景上行也仅 +16.2%。质地仍属跟踪池（生态黏性真实、现金储备 2193 亿、回购加码），但盈利中枢是否结构性下台阶尚未证伪；需看到手机分部毛利率回到 10%+ 且汽车分部单季经营转正后再重估买点。注：26.18 为二季报盘后发布前的收盘价，尚未 price-in Q2。
+  bear: 12.65
+  base: 20.29
+  bull: 30.42
+  conviction_date: '2026-08-18'
+  source_doc: sectors/consumer/consumer-electronics/2026-08-18-小米集团-buffett分析.md
   themes:
   - 智能电动汽车
   - 人车家全生态
