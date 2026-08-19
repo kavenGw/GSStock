@@ -1784,13 +1784,13 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 15.5
-  base: 46.4
-  bull: 86.1
+  bear: 12.6
+  base: 31.8
+  bull: 78.0
   dividend_yield: 0.03
-  conviction_date: '2026-08-01'
-  source_doc: sectors/semiconductor/storage/2026-08-01-普冉股份-buffett分析.md
-  note: 普冉股份；bear23/base69/bull128亿÷1.487亿股（SHM 按供应协议 2032 到期作有限年期 SOTP 拆分，不给永续倍数）
+  conviction_date: '2026-08-19'
+  source_doc: sectors/semiconductor/storage/2026-08-19-普冉股份-buffett分析.md
+  note: 普冉股份；SOTP=本体(正常化owner earnings×8-12×框架内倍数)+SHM(有限年期折现至2032、无终值)；期望50.51亿÷1.48704亿股=33.97元，安全边际-92.7%（2026-08-18收盘694.16亿）；bull含49%收购完成的股本摊薄
   themes:
   - memory
   - NOR涨价
@@ -1798,6 +1798,7 @@
   - 利基存储
   - SHM收购
   - 2D NAND
+  - AI
 - stock_code: MRVL
   stock_name: 迈威尔科技
   market: US

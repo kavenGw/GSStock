@@ -12,8 +12,8 @@ related_docs:
   - path: 2026-05-25-兆易-君正-业务客户晶圆深度对比.md
     note: 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
     symmetric: true
-  - path: ../sectors/semiconductor/storage/2026-08-01-普冉股份-buffett分析.md
-    note: 普冉 8-01 深度重做（仍 Exclude）：SHM 并表后本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断已失效，现为三家中 SLC NAND/eMMC 敞口最直接一家（约 65% 当期利润来自该资产）；但按 2032 有限收益期 SOTP 重估后安全边际仍 -88.3%
+  - path: ../sectors/semiconductor/storage/2026-08-19-普冉股份-buffett分析.md
+    note: 普冉 8-19 半年报深度重做（仍 Exclude）：本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断进一步彻底失效——半年报坐实 SHM 单半年 SLC NAND/eMMC/MCP 系营收 23.4597 亿、占集团 59.3%，普冉现为三家中 2D NAND 敞口最直接一家，且该量被 2032 到期供应协议封顶；SOTP 重估后安全边际由 -88.3% 恶化至 -92.7%
     symmetric: true
   - path: ../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md
     note: 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
@@ -31,7 +31,7 @@ related_docs:
 > **关联文档**
 > - [2026-05-20-存储扩厂双雄受益链-comps](2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂双雄受益链 comps（产业链上游视角的对照）
 > - [2026-05-25-兆易-君正-业务客户晶圆深度对比](2026-05-25-兆易-君正-业务客户晶圆深度对比.md) — 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
-> - [2026-08-01-普冉股份-buffett分析](../sectors/semiconductor/storage/2026-08-01-普冉股份-buffett分析.md) — 普冉 8-01 深度重做（仍 Exclude）：SHM 并表后本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断已失效，现为三家中 SLC NAND/eMMC 敞口最直接一家（约 65% 当期利润来自该资产）；但按 2032 有限收益期 SOTP 重估后安全边际仍 -88.3%
+> - [2026-08-19-普冉股份-buffett分析](../sectors/semiconductor/storage/2026-08-19-普冉股份-buffett分析.md) — 普冉 8-19 半年报深度重做（仍 Exclude）：本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断进一步彻底失效——半年报坐实 SHM 单半年 SLC NAND/eMMC/MCP 系营收 23.4597 亿、占集团 59.3%，普冉现为三家中 2D NAND 敞口最直接一家，且该量被 2032 到期供应协议封顶；SOTP 重估后安全边际由 -88.3% 恶化至 -92.7%
 > - [2026-05-31-东芯股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md) — 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
 > - [2026-06-03-佰维存储-buffett分析](../sectors/semiconductor/storage/2026-06-03-佰维存储-buffett分析.md) — 佰维 6-03 buffett 分析（Watch/AI端侧最纯敞口、周期顶部估值）
 > - [2026-08-16-SkyHighMemory-普冉收购标的-深度承做](../themes/2026-08-16-SkyHighMemory-普冉收购标的-深度承做.md) — 本档原判"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"已失效——SHM 并表后普冉成为三家中 SLC NAND/eMMC 敞口最直接一家；该档给出 SHM 的定量卡位（2025 收入 13.49 亿、eMMC 占 64.13%、晶圆配额约 6.3 万片/年）与"只传导价、不传导量"的传导判定，是本档的 SLC NAND 敞口补丁
