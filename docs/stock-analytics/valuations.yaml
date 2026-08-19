@@ -1562,12 +1562,15 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 39.9
-  base: 92.7
-  bull: 185.5
-  conviction_date: '2026-05-31'
-  source_doc: sectors/semiconductor/storage/2026-05-31-兆易创新-buffett分析.md
-  note: 兆易创新；bear280/base650/bull1300亿÷~7.01亿股
+  watch_reason: 26H1 半年报（8-18 晚披露）确认利基 DRAM/SLC NAND 驱动的暴利真实且现金含量硬（经营现金流/扣非 123.9%、无银行借款、存货周转反而加快到 153.9 天），但三条独立证据同时把多头论据降级——①三巨头 legacy 产能已出现实际回流（三星 DDR4 延产至 2026 底、SK 无锡增产、美光 Fab 6 复产且 2027 供给 4×，目标客户正是车规/工业）；②公司董事会自己在 2026-06-30 风险提示公告写下全部空头论点（"利基存储主要间接受益""下游需求已受抑制""价格将出现相当幅度的回落"）；③朱一明 5-6～6-12 减持 1,111 万股套现 44.00 亿（均价 396.02 元）后股价见顶腰斩。按 buffett 框架重排倍数阶梯（bull 12×/base 11×/bear 8×，相对旧档 26/20/14× 全面下修）+ 长鑫持股按税后折价 SOTP 单列，期望内在价值降至 530 亿（每股 75.59 元），对 3,067 亿 A+H 市值安全边际 -82.7%（旧档 -78%）。买点需市值跌破 320 亿，可预见期内极难触及——实际操作含义是不买、只跟踪
+  bear: 35.91
+  base: 82.65
+  bull: 144.64
+  dividend_yield: 0.17
+  conviction_date: '2026-08-19'
+  source_doc: sectors/semiconductor/storage/2026-08-19-兆易创新-buffett分析.md
+  note: 兆易创新（A+H，H股03986）；bear252/base580/bull1015亿÷7.01745亿股全口径；含长鑫SOTP
+  quality: 4
   themes:
   - memory
   - 利基存储
@@ -1575,6 +1578,7 @@
   - AI
   - 国产替代
   - 超级周期
+  - A+H
 - stock_code: '605589'
   stock_name: 圣泉集团
   market: A
