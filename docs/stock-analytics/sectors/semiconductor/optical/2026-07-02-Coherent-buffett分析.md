@@ -19,8 +19,8 @@ valuation:
   currency: USD
   dividend_yield: null
 related_docs:
-- path: 2026-06-04-光迅科技-buffett分析.md
-  note: 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）
+- path: 2026-08-20-光迅科技-buffett分析.md
+  note: 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）；光迅 2026-08-20 二季报重做维持 watch，PE_TTM 127.4x/PB 10.19x，反推 TTM ROE 约 8.0%，安全边际 −88.4%
   symmetric: true
 - path: 2026-07-02-源杰科技-buffett分析.md
   note: 国产 CW 光源要挑战的正是 Lumentum/Coherent 垄断（镜像对手）
@@ -49,7 +49,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-06-04-光迅科技-buffett分析](2026-06-04-光迅科技-buffett分析.md) — 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）
+> - [2026-08-20-光迅科技-buffett分析](2026-08-20-光迅科技-buffett分析.md) — 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）；光迅 2026-08-20 二季报重做维持 watch，PE_TTM 127.4x/PB 10.19x，反推 TTM ROE 约 8.0%，安全边际 −88.4%
 > - [2026-07-02-源杰科技-buffett分析](2026-07-02-源杰科技-buffett分析.md) — 国产 CW 光源要挑战的正是 Lumentum/Coherent 垄断（镜像对手）
 > - [2026-07-02-AI光互联全景横评-buffett对比](../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md) — AI 光互联赛道横评，Coherent 为西方 incumbent 参照
 > - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 磷化铟板块——Coherent 全球领先 InP 晶圆/6英寸量产供应商

@@ -25,8 +25,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md
     note: buffett重做已修正——CPO/硅光均需外部CW光源，对源杰净偏利好非风险；估值结论仍不翻案（PB99分位）
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md
-    note: CPO/NPO 替代是其 Risk #5，延后延长可插拔光模块跑道（利好但估值不翻案）
+  - path: ../sectors/semiconductor/optical/2026-08-20-光迅科技-buffett分析.md
+    note: CPO/NPO 替代是其 Risk #5，延后延长可插拔光模块跑道（利好但估值不翻案）；光迅 2026-08-20 重做重申此结论——CPO 延后基本维持，但英伟达 2026-08-14 Spectrum-X 硅光交换机全面量产已开始压缩远期终值倍数
     symmetric: true
   - path: ../sectors/semiconductor/equipment/2026-06-20-罗博特科-buffett分析.md
     note: CPO 光子耦合封装设备叙事兑现时点后移（利空，但 exclude 结论不变）
@@ -70,7 +70,7 @@ related_docs:
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-07-02-源杰科技-buffett分析](../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md) — buffett重做已修正——CPO/硅光均需外部CW光源，对源杰净偏利好非风险；估值结论仍不翻案（PB99分位）
-> - [2026-06-04-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md) — CPO/NPO 替代是其 Risk
+> - [2026-08-20-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-08-20-光迅科技-buffett分析.md) — CPO/NPO 替代是其 Risk
 > - [2026-06-20-罗博特科-buffett分析](../sectors/semiconductor/equipment/2026-06-20-罗博特科-buffett分析.md) — CPO 光子耦合封装设备叙事兑现时点后移（利空，但 exclude 结论不变）
 > - [2026-06-19-沃尔核材-buffett分析](../sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md) — CPO 延后 = scale-up 铜连接窗口延长（边际利好，估值仍贵）
 > - [2026-05-30-AI机柜铜连接-DAC-AEC产业链专题](./2026-05-30-AI机柜铜连接-DAC-AEC产业链专题.md) — 铜 vs 光的边界——CPO 延后利好铜连接的逻辑底料

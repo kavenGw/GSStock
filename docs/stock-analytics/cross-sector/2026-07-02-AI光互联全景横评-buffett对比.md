@@ -26,8 +26,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
     note: 天孚个股 buffett 深度（上游无源器件+光引擎封装平台/军火商，独有玻璃桥替代风险，本对比的天孚口径来源）
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md
-    note: 光迅个股 buffett 深度档（2026-06-04 较早口径 PE~100x/内在价值 250 亿/目标 24-30 元）；本横评为 2026-07-03 新口径（PE179x/−54%），市值口径已翻倍，以横评为准
+  - path: ../sectors/semiconductor/optical/2026-08-20-光迅科技-buffett分析.md
+    note: 光迅个股 buffett 深度档——2026-08-20 二季报重做后口径已晚于本横评：评级维持 watch，期望内在价值 171.0 亿/每股 20.66 元，安全边际 −88.4%（8-19 收盘 177.88 元、市值 1472.58 亿、PE_TTM 127.4x、PB 10.19x），护城河自「中等」下修为「窄」，2026H1 营收 66.097 亿 +26.07%、归母 5.822 亿 +56.34%、经营现金流 −12.36 亿；本档口径已过时，以光迅档为准
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md
     note: 光库个股 buffett 深度档（2026-06-04 较早口径 PE362x/内在价值 82 亿/−78%）；本横评为 2026-07-03 新口径（PE384x/−62%），市值口径已翻倍，以横评为准
@@ -68,7 +68,7 @@ related_docs:
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — Coherent 个股 buffett 深度分析（AI 光互联西方 incumbent，本对比的 Coherent 口径来源）
 > - [2026-08-13-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md) — Lumentum 个股 buffett 深度分析（高端 EML 全球第一，本对比的 Lumentum 口径来源）；2026-08-13 重做档口径：完全稀释市值 $94.27B / P-S 31.3 为全景最贵一档，但 P-B 17.79 为整组最低
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 天孚个股 buffett 深度（上游无源器件+光引擎封装平台/军火商，独有玻璃桥替代风险，本对比的天孚口径来源）
-> - [2026-06-04-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光迅科技-buffett分析.md) — 光迅个股 buffett 深度档（2026-06-04 较早口径 PE~100x/内在价值 250 亿/目标 24-30 元）；本横评为 2026-07-03 新口径（PE179x/−54%），市值口径已翻倍，以横评为准
+> - [2026-08-20-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-08-20-光迅科技-buffett分析.md) — 光迅个股 buffett 深度档——2026-08-20 二季报重做后口径已晚于本横评：评级维持 watch，期望内在价值 171.0 亿/每股 20.66 元，安全边际 −88.4%（8-19 收盘 177.88 元、市值 1472.58 亿、PE_TTM 127.4x、PB 10.19x），护城河自「中等」下修为「窄」，2026H1 营收 66.097 亿 +26.07%、归母 5.822 亿 +56.34%、经营现金流 −12.36 亿；本档口径已过时，以光迅档为准
 > - [2026-06-04-光库科技-buffett分析](../sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md) — 光库个股 buffett 深度档（2026-06-04 较早口径 PE362x/内在价值 82 亿/−78%）；本横评为 2026-07-03 新口径（PE384x/−62%），市值口径已翻倍，以横评为准
 > - [2026-06-28-仕佳光子-buffett分析](../sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 仕佳个股 buffett 深度档（2026-06-28 PE205x/内在价值~38元/−79%，含 bear12/base37/bull88 场景）；本横评为定性口径
 > - [2026-07-07-光库科技H1业绩预告-AI光互联景气再验证](../themes/2026-07-07-光库科技H1业绩预告-AI光互联景气再验证.md) — 光库 H1 2026 业绩预告点评——为本横评 7 家（含光库/光迅/旭创/新易盛/天孚/源杰/仕佳）AI 光互联景气再添上游数据点，但全链估值透支、评级全线 watch 不变
