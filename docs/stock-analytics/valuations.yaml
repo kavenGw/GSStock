@@ -4125,3 +4125,22 @@
   - 光模块
   - EMS-ODM
   - A+H
+- stock_code: '300489'
+  stock_name: 光智科技
+  quality: 1
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 2.1
+  base: 4.2
+  bull: 10.5
+  dividend_yield: 0
+  conviction_date: '2026-08-17'
+  source_doc: sectors/semiconductor/materials/2026-08-17-光智科技-buffett分析.md
+  themes:
+  - 磷化铟
+  - 红外光学
+  - 国产替代
+  - 关联并购
+  - 题材炒作
