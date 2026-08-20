@@ -21,8 +21,8 @@ related_codes:
 - '02577'
 - '002617'
 related_docs:
-- path: ../sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md
-  note: 天岳先进（8英寸SiC衬底龙头）——本新闻直接主角，涨价直接动摇其"价格战磨底"旧硬伤
+- path: ../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md
+  note: 天岳为本新闻直接主角；2026 半年报重做后该涨价叙事被大幅证伪——公司官方口径仅到"企稳"、从未称涨价缺货，"回升15%+/跳涨170%"经核查无一手来源且与 Yole（天岳自己援引）2027 年 8 英寸再跌 22.4% 的预测冲突，合同负债 213 万 + 存货 +54.9% + 仍计提跌价三重证伪"供不应求"；本档由"动摇旧硬伤"降级为"局部紧缺非全面反转"
   symmetric: true
 - path: ../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md
   note: 三安光电（含SiC衬底的全产业链IDM）——SiC涨价+缺货利好其SiC分部减亏
@@ -59,7 +59,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-06-19-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md) — 天岳先进（8英寸SiC衬底龙头）——本新闻直接主角，涨价直接动摇其"价格战磨底"旧硬伤
+> - [2026-08-20-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md) — 天岳为本新闻直接主角；2026 半年报重做后该涨价叙事被大幅证伪——公司官方口径仅到"企稳"、从未称涨价缺货，"回升15%+/跳涨170%"经核查无一手来源且与 Yole（天岳自己援引）2027 年 8 英寸再跌 22.4% 的预测冲突，合同负债 213 万 + 存货 +54.9% + 仍计提跌价三重证伪"供不应求"；本档由"动摇旧硬伤"降级为"局部紧缺非全面反转"
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安光电（含SiC衬底的全产业链IDM）——SiC涨价+缺货利好其SiC分部减亏
 > - [2026-06-19-晶盛机电-buffett分析](../sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md) — 晶盛机电（SiC长晶设备+12英寸SiC中介层晶体设备）——卖铲人，不直接受价格战伤害
 > - [2026-06-19-华润微-buffett分析](../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md) — 华润微（功率IDM）——SiC器件涨价受益但估值已透支

@@ -32,7 +32,7 @@ related_docs:
 - path: ../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md
   note: 三安光电（SiC+GaN全产业链IDM）——双轨同时受益SiC翻倍与GaN爆发，但盈利未兑现
   symmetric: true
-- path: ../sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md
+- path: ../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md
   note: 天岳先进（8英寸SiC衬底）——SiC单瓦$30→$60翻倍放大衬底需求底盘，验证而非翻案
   symmetric: true
 - path: ../sectors/semiconductor/power/2026-06-19-士兰微-buffett分析.md
@@ -75,7 +75,7 @@ related_docs:
 > **关联文档**
 > - [2026-06-19-英诺赛科-buffett分析](../sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md) — 英诺赛科（8英寸GaN纯玩龙头）——GaN单瓦价值$3→$46(15x)是本框架最锐利数字，弹性最大映射
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安光电（SiC+GaN全产业链IDM）——双轨同时受益SiC翻倍与GaN爆发，但盈利未兑现
-> - [2026-06-19-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md) — 天岳先进（8英寸SiC衬底）——SiC单瓦$30→$60翻倍放大衬底需求底盘，验证而非翻案
+> - [2026-08-20-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md) — 天岳先进（8英寸SiC衬底）——SiC单瓦$30→$60翻倍放大衬底需求底盘，验证而非翻案
 > - [2026-06-19-士兰微-buffett分析](../sectors/semiconductor/power/2026-06-19-士兰微-buffett分析.md) — 士兰微（功率IDM+SiC主驱）——AI电源+SiC双引擎获TAM背书但估值已透支
 > - [2026-06-19-华润微-buffett分析](../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md) — 华润微（功率全平台IDM）——AI电源卡位获需求验证但用周期顶定价
 > - [2026-06-25-斯达半导-buffett分析](../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md) — 斯达半导（车规IGBT+SiC模块）——SiC增长引擎获TAM背书，衬底涨价双面性

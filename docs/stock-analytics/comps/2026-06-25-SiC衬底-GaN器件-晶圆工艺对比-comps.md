@@ -6,7 +6,7 @@ themes: [第三代半导体, SiC衬底, GaN器件, 晶圆工艺, 8英寸]
 period: '2026-06'
 date: 2026-06-25
 related_docs:
-  - path: ../sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md
+  - path: ../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md
     note: 天岳 SiC 衬底 buffett 档，本 comps 工艺对比的 SiC 侧标的（估值见该档）
     symmetric: true
   - path: ../sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md
@@ -26,7 +26,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-06-19-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-06-19-天岳先进-buffett分析.md) — 天岳 SiC 衬底 buffett 档，本 comps 工艺对比的 SiC 侧标的（估值见该档）
+> - [2026-08-20-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md) — 天岳 SiC 衬底 buffett 档，本 comps 工艺对比的 SiC 侧标的（估值见该档）
 > - [2026-06-19-英诺赛科-buffett分析](../sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md) — 英诺 GaN 器件 buffett 档，本 comps 工艺对比的 GaN 侧标的（估值见该档）
 > - [2026-06-19-碳化硅-氮化镓-第三代半导体板块专题](../themes/2026-06-19-碳化硅-氮化镓-第三代半导体板块专题.md) — SiC+GaN 板块格局专题（投资格局/价值链），本 comps 为其工艺层细化切片
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安横跨 SiC+GaN 两条材料，本工艺对比 comps 的全产业链 IDM 背景标的
