@@ -4162,3 +4162,20 @@
   - 国产替代
   - 工业自动化
   - 成长股
+- stock_code: '300720'
+  stock_name: 海川智能
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: exclude
+  bear: 1.74
+  base: 3.39
+  bull: 5.29
+  dividend_yield: 0.07
+  conviction_date: '2026-08-20'
+  source_doc: sectors/industrial/weighing-equipment/2026-08-20-海川智能-buffett分析.md
+  themes:
+  - 化合物半导体
+  - 壳资源
+  - 控制权变更
+  - 题材溢价
