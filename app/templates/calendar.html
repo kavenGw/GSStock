@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}事件日历{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-1"><i class="bi bi-calendar-event"></i> 事件日历</h4>
+            <small class="text-muted" id="calStaleInfo">加载中...</small>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline-primary btn-sm" id="calRefreshBtn">
+                <i class="bi bi-arrow-clockwise"></i> 刷新数据
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="cal-filters mb-3" id="calTypeFilter">
+    <button class="cal-chip is-on" data-type="earnings">财报</button>
+    <button class="cal-chip is-on" data-type="ex_dividend">除权除息</button>
+    <button class="cal-chip is-on" data-type="macro">宏观</button>
+    <button class="cal-chip is-on" data-type="manual">手工</button>
+</div>
+
+<div id="calLoading" class="cal-grid">
+    {% for m in initial_months %}
+    <div class="cal-month">
+        <div class="cal-month-title">{{ m.label }}</div>
+        <div class="cal-days">
+            {% for _ in range(42) %}
+            <div class="cal-cell"><div class="skeleton skeleton-text"></div></div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="calContainer" class="cal-grid d-none"></div>
+
+<div class="cal-drawer" id="calDrawer">
+    <div class="cal-drawer-head">
+        <span id="calDrawerTitle"></span>
+        <button class="btn-close" id="calDrawerClose" aria-label="关闭"></button>
+    </div>
+    <div class="cal-drawer-body" id="calDrawerBody"></div>
+</div>
+
+<script>
+    const INITIAL_MONTHS = {{ initial_months | tojson }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}
