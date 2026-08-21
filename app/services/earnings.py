@@ -269,7 +269,12 @@ class EarningsService:
     def fetch_disclosure_map(period: str) -> dict:
         """巨潮预约披露 -> {股票代码: {'date', 'status', 'detail'}}
 
-        期次未发布时 akshare 对空 DataFrame 硬赋列名会抛 ValueError，此处吞掉返回 {}。
+        期次未发布时 akshare 对空 DataFrame 硬赋列名会抛
+        `ValueError: Length mismatch: ...`，此处吞掉返回 {}。
+        其他异常（网络故障、非"Length mismatch"的 ValueError 等）一律
+        原样抛出、不写缓存 —— 调用方（Task 5 orchestration）需要能区分
+        "期次未发布"与"本次取数失败"，否则会把失败误判为空结果，
+        进而在按 source 裁剪日历事件时把当天已有的数据整体清空。
         """
         cache_key = (period, _today())
         if cache_key in _disclosure_cache:
@@ -277,10 +282,16 @@ class EarningsService:
 
         try:
             df = ak.stock_report_disclosure(market='沪深京', period=period)
-        except Exception as e:
+        except ValueError as e:
+            if 'Length mismatch' not in str(e):
+                logger.warning(f'[财报.预约披露] 期次 {period} 取数异常: {e}')
+                raise
             logger.info(f'[财报.预约披露] 期次 {period} 暂无数据: {e}')
             _disclosure_cache[cache_key] = {}
             return {}
+        except Exception as e:
+            logger.warning(f'[财报.预约披露] 期次 {period} 取数异常: {e}')
+            raise
 
         result = {}
         for _, row in df.iterrows():

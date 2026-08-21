@@ -93,6 +93,40 @@ def test_fetch_disclosure_map_caches_per_period(monkeypatch):
     assert calls == ['2026半年报'], '同一期次同一天只应取一次'
 
 
+def test_fetch_disclosure_map_propagates_network_failure(monkeypatch):
+    """网络故障等非"未发布"异常必须原样抛出，不能被吞成 {}，
+    否则下游会把失败误判为"当期无数据"进而清空日历事件。"""
+    from app.services import earnings as mod
+
+    def _boom(market, period):
+        raise ConnectionError('boom')
+
+    monkeypatch.setattr(mod, '_disclosure_cache', {})
+    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', _boom)
+
+    with pytest.raises(ConnectionError):
+        mod.EarningsService.fetch_disclosure_map('2026半年报')
+
+    assert mod._disclosure_cache == {}, '失败不应写入缓存，需允许当天重试'
+
+
+def test_fetch_disclosure_map_propagates_other_valueerror(monkeypatch):
+    """非"Length mismatch"的 ValueError（如格式错误的响应体）也必须抛出，
+    不能被误判为期次未发布。"""
+    from app.services import earnings as mod
+
+    def _boom(market, period):
+        raise ValueError('unexpected token')
+
+    monkeypatch.setattr(mod, '_disclosure_cache', {})
+    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', _boom)
+
+    with pytest.raises(ValueError):
+        mod.EarningsService.fetch_disclosure_map('2026半年报')
+
+    assert mod._disclosure_cache == {}
+
+
 def test_fetch_earnings_akshare_now_returns_real_dates(monkeypatch):
     """回归：该函数曾是空壳，A股财报预警长期失效。"""
     from app.services import earnings as mod
