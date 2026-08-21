@@ -291,7 +291,10 @@ class NotificationService:
         if codes is None or name_map is None:
             codes, name_map = NotificationService._get_all_watched_codes()
 
-        watch_codes = set(WatchService.get_watch_codes())
+        # 排除集需并上 A+H 对应代码：日历段按 WATCH_CODES 顶层代码报（不展开 ah，
+        # 否则同公司会在日历段内部重复），但推送层要防的是"同公司被两个段落各报一次"，
+        # 所以这里反过来要展开——两边故意不对称，勿"统一"。见 calendar_event._watch_entries。
+        watch_codes = set(WatchService.get_watch_codes_with_ah())
         target_codes = [c for c in codes if c not in watch_codes]
 
         if not target_codes:

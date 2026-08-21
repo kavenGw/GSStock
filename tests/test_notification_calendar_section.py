@@ -71,13 +71,24 @@ def test_format_calendar_events_flags_stale_data(monkeypatch):
     assert '⚠️ 事件数据 30 小时未更新' in text
 
 
+def test_watch_codes_with_ah_is_superset_and_expands_counterparts():
+    from app.services.watch_service import WatchService
+
+    top = set(WatchService.get_watch_codes())
+    with_ah = set(WatchService.get_watch_codes_with_ah())
+
+    assert with_ah >= top
+    assert with_ah > top  # 至少有 ah 条目被展开进来
+    assert '2899.HK' in with_ah and '601899' in with_ah  # 紫金矿业 H/A 均在并集内
+
+
 def test_earnings_alerts_excludes_watch_codes(monkeypatch):
     """盯盘股已由日历段覆盖，财报段只报补集，避免同一条消息里重复。"""
     from app.services import notification as mod
     from app.services.earnings import EarningsService
     from app.services.watch_service import WatchService
 
-    monkeypatch.setattr(WatchService, 'get_watch_codes',
+    monkeypatch.setattr(WatchService, 'get_watch_codes_with_ah',
                         staticmethod(lambda: ['603986', '0700.HK']))
 
     seen = {}
@@ -94,6 +105,28 @@ def test_earnings_alerts_excludes_watch_codes(monkeypatch):
                   '600519': '贵州茅台', '000725': '京东方A'})
 
     assert seen['codes'] == ['000725', '600519']
+
+
+def test_earnings_alerts_excludes_ah_counterpart_codes(monkeypatch):
+    """回归：盯盘池以 HK 代码登记的公司，其 A 股对应代码也不该在财报段重复出现。"""
+    from app.services import notification as mod
+    from app.services.earnings import EarningsService
+
+    seen = {}
+
+    def _fake(codes, days=7):
+        seen['codes'] = sorted(codes)
+        return []
+
+    monkeypatch.setattr(EarningsService, 'get_upcoming_earnings', staticmethod(_fake))
+
+    # 601899(紫金矿业) 是盯盘池 2899.HK 的 ah 对应代码，本身不在 WATCH_CODES 顶层里，
+    # 若排除集不展开 ah 就会漏判、被当成"补集"报出来。
+    mod.NotificationService.format_earnings_alerts(
+        codes=['601899', '600519'],
+        name_map={'601899': '紫金矿业', '600519': '贵州茅台'})
+
+    assert seen['codes'] == ['600519']
 
 
 def test_earnings_alerts_no_longer_filters_a_shares(monkeypatch):

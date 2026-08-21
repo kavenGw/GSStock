@@ -166,7 +166,13 @@ class CalendarEventService:
 
 
 def _watch_entries(markets: set[str] = None) -> list[dict]:
-    """WATCH_CODES 顶层条目；不展开 ah 子代码（否则 A+H 同公司会重复）"""
+    """WATCH_CODES 顶层条目；不展开 ah 子代码（否则 A+H 同公司会在日历段内部重复）
+
+    故意与 NotificationService.format_earnings_alerts 用的
+    WatchService.get_watch_codes_with_ah() 相反：那边要展开 ah，
+    防的是"同公司被日历段和财报段各报一次"。两边目标一致（一公司一提），
+    机制刻意相反，勿"统一"。
+    """
     return [e for e in WATCH_CODES if markets is None or e.get('market') in markets]
 
 
