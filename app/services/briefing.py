@@ -114,6 +114,7 @@ BRIEFING_STOCKS = [
     {'code': 'GOOG', 'name': '谷歌', 'market': 'US', 'category': 'tech_giant'},
     {'code': 'NVDA', 'name': '英伟达', 'market': 'US', 'category': 'tech_giant'},
     {'code': 'AAPL', 'name': '苹果', 'market': 'US', 'category': 'tech_giant'},
+    {'code': 'BABA', 'name': '阿里巴巴', 'market': 'US', 'category': 'tech_giant'},
     {'code': 'WDC', 'name': '西部数据', 'market': 'US', 'category': 'storage'},
     {'code': 'MU', 'name': '美光', 'market': 'US', 'category': 'storage'},
     {'code': 'SNDK', 'name': '闪迪', 'market': 'US', 'category': 'storage'},
