@@ -164,7 +164,7 @@ const CalendarPage = {
                 : e.title;
             const hi = e.priority === 'HIGH' ? ' is-high' : '';
             const tip = this.escape(`${e.title}${e.detail ? ' · ' + e.detail : ''}`);
-            return `<span class="cal-ev type-${e.event_type}${hi}" title="${tip}">${this.escape(label)}</span>`;
+            return `<span class="cal-ev type-${this.escape(e.event_type)}${hi}" title="${tip}">${this.escape(label)}</span>`;
         }).join('');
         const more = evts.length > 3
             ? `<span class="cal-ev is-more">+${evts.length - 3}</span>` : '';
@@ -176,7 +176,7 @@ const CalendarPage = {
         document.getElementById('calDrawerTitle').textContent = iso;
         document.getElementById('calDrawerBody').innerHTML = evts.length
             ? evts.map(e => `
-                <div class="cal-drawer-item type-${e.event_type}">
+                <div class="cal-drawer-item type-${this.escape(e.event_type)}">
                     <div class="cal-drawer-item-head">
                         ${e.stock_code
                             ? `<button type="button" class="cal-stock-link" data-code="${this.escape(e.stock_code)}" data-name="${this.escape(e.stock_name || e.stock_code)}">${this.escape(e.stock_name || e.stock_code)} (${this.escape(e.stock_code)})</button>`
