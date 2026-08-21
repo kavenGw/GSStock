@@ -8,6 +8,7 @@ import akshare as ak
 import pandas as pd
 
 from app import db
+from app.config.macro_calendar import MACRO_EVENTS
 from app.config.stock_codes import WATCH_CODES
 from app.models.stock_event import StockEvent
 from app.services.circuit_breaker import circuit_breaker
@@ -25,6 +26,9 @@ YF_RETRY_DELAY = 1.0
 
 # period_key 后缀 -> 财报中文标题
 _REPORT_TITLE = {'A': '年报披露', 'Q1': '一季报披露', 'H1': '中报披露', 'Q3': '三季报披露'}
+
+_MACRO_SOURCE = {'fomc': 'fomc', 'cpi': 'bls', 'nfp': 'bls'}
+_MACRO_MARKET = {'fomc': 'US', 'cpi': 'US', 'nfp': 'US'}
 
 _WRITABLE_FIELDS = ('event_date', 'stock_name', 'market', 'title',
                     'detail', 'priority', 'status')
@@ -280,4 +284,28 @@ def collect_dividend_a(today: date = None) -> list[dict]:
                 'period_key': f'FH{report_date}',
                 'extra': None,
             })
+    return out
+
+
+def collect_macro_range(start: date, end: date) -> list[dict]:
+    """宏观事件 — 纯本地表，不联网"""
+    out = []
+    for e in MACRO_EVENTS:
+        d = e['date']
+        if d < start or d > end:
+            continue
+        out.append({
+            'event_date': d,
+            'event_type': 'macro',
+            'stock_code': '',
+            'stock_name': None,
+            'market': _MACRO_MARKET.get(e['type'], 'US'),
+            'title': e['title'],
+            'detail': None,
+            'priority': 'HIGH',
+            'source': _MACRO_SOURCE.get(e['type'], 'fomc'),
+            'status': 'scheduled',
+            'period_key': d.isoformat(),
+            'extra': None,
+        })
     return out
