@@ -1,0 +1,139 @@
+from datetime import date
+
+import pytest
+
+
+def test_format_calendar_events_empty_returns_blank(monkeypatch):
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    monkeypatch.setattr(CalendarEventService, 'get_events',
+                        staticmethod(lambda start, end: []))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    assert mod.NotificationService.format_calendar_events() == ''
+
+
+def test_format_calendar_events_db_error_returns_blank(monkeypatch):
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    def _boom(start, end):
+        raise RuntimeError('no such table')
+
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(_boom))
+    assert mod.NotificationService.format_calendar_events() == ''
+
+
+def test_format_calendar_events_groups_by_date(monkeypatch):
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    today = date.today()
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(lambda s, e: [
+        {'event_date': today.isoformat(), 'event_type': 'earnings',
+         'stock_code': '603986', 'stock_name': '兆易创新', 'title': '中报披露',
+         'detail': None, 'priority': 'HIGH', 'status': 'confirmed'},
+        {'event_date': today.isoformat(), 'event_type': 'ex_dividend',
+         'stock_code': '0700.HK', 'stock_name': '腾讯控股', 'title': '除权除息',
+         'detail': None, 'priority': 'LOW', 'status': 'scheduled'},
+        {'event_date': '2026-09-16', 'event_type': 'macro', 'stock_code': '',
+         'stock_name': None, 'title': 'FOMC 议息', 'detail': None,
+         'priority': 'HIGH', 'status': 'scheduled'},
+    ]))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 2.0))
+
+    text = mod.NotificationService.format_calendar_events()
+
+    assert '📅 未来7天事件' in text
+    assert '今天' in text
+    assert '兆易创新(603986)' in text
+    assert '腾讯控股(0700.HK)' in text
+    assert 'FOMC 议息' in text
+    assert '未更新' not in text
+
+
+def test_format_calendar_events_flags_stale_data(monkeypatch):
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(lambda s, e: [
+        {'event_date': date.today().isoformat(), 'event_type': 'macro',
+         'stock_code': '', 'stock_name': None, 'title': 'FOMC 议息',
+         'detail': None, 'priority': 'HIGH', 'status': 'scheduled'},
+    ]))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 30.0))
+
+    text = mod.NotificationService.format_calendar_events()
+    assert '⚠️ 事件数据 30 小时未更新' in text
+
+
+def test_earnings_alerts_excludes_watch_codes(monkeypatch):
+    """盯盘股已由日历段覆盖，财报段只报补集，避免同一条消息里重复。"""
+    from app.services import notification as mod
+    from app.services.earnings import EarningsService
+    from app.services.watch_service import WatchService
+
+    monkeypatch.setattr(WatchService, 'get_watch_codes',
+                        staticmethod(lambda: ['603986', '0700.HK']))
+
+    seen = {}
+
+    def _fake(codes, days=7):
+        seen['codes'] = sorted(codes)
+        return []
+
+    monkeypatch.setattr(EarningsService, 'get_upcoming_earnings', staticmethod(_fake))
+
+    mod.NotificationService.format_earnings_alerts(
+        codes=['603986', '0700.HK', '600519', '000725'],
+        name_map={'603986': '兆易创新', '0700.HK': '腾讯控股',
+                  '600519': '贵州茅台', '000725': '京东方A'})
+
+    assert seen['codes'] == ['000725', '600519']
+
+
+def test_earnings_alerts_no_longer_filters_a_shares(monkeypatch):
+    """回归：旧实现用 non_a_codes 剔掉全部 A 股，A 股财报预警长期缺失。"""
+    from app.services import notification as mod
+    from app.services.earnings import EarningsService
+    from app.services.watch_service import WatchService
+
+    monkeypatch.setattr(WatchService, 'get_watch_codes', staticmethod(lambda: []))
+    monkeypatch.setattr(EarningsService, 'get_upcoming_earnings',
+                        staticmethod(lambda codes, days=7: [
+                            {'code': '600519', 'name': '贵州茅台',
+                             'earnings_date': '2026-08-25', 'days_until': 4,
+                             'is_today': False}]))
+
+    out = mod.NotificationService.format_earnings_alerts(
+        codes=['600519'], name_map={'600519': '贵州茅台'})
+
+    assert '贵州茅台(600519)' in out['text']
+
+
+def test_daily_briefing_prompt_includes_calendar_label():
+    from app.llm.prompts.daily_briefing import build_daily_briefing_prompt
+
+    prompt = build_daily_briefing_prompt({
+        'calendar_events': '📅 未来7天事件\n  今天  兆易创新(603986) 中报披露',
+        'earnings_alerts': '📅 财报提醒（未来7天）\n  贵州茅台(600519) - 4天后',
+    })
+
+    assert '【近期事件日历】' in prompt
+    assert prompt.index('【近期事件日历】') < prompt.index('【财报提醒】')
+
+
+def test_build_market_blocks_accepts_calendar_text():
+    from app.services.notification import NotificationService
+
+    blocks = NotificationService.build_market_blocks(
+        indices_text='', futures_text='', etf_text='', sectors_text='',
+        technical_text='', dram_text='', earnings_text='', ai_text='',
+        adr_text='', calendar_text='📅 未来7天事件\n  今天  兆易创新(603986) 中报披露')
+
+    dumped = str(blocks)
+    assert '未来7天事件' in dumped
