@@ -18,6 +18,9 @@ from app.config.notification_config import (
 
 logger = logging.getLogger(__name__)
 
+# Slack section text 硬上限 3000 字，留出余量防表情/转义放大后越界
+CALENDAR_SECTION_MAX_CHARS = 2800
+
 
 class NotificationService:
     """消息推送服务"""
@@ -277,7 +280,26 @@ class NotificationService:
 
             lines.append(f'  {label}{body}')
 
-        return '\n'.join(lines)
+        return NotificationService._cap_calendar_lines(lines)
+
+    @staticmethod
+    def _cap_calendar_lines(lines: list[str]) -> str:
+        """按 Slack section 3000 字上限收口，超出部分折成一行「另有 N 条」
+
+        Slack 会整条拒收 section text 超 3000 字的 chat.postMessage——不设限的话
+        事件一多就是整条推送消失，而不是这一段变短。截断按行边界做，保留最早的事件。
+        """
+        head, body = lines[0], lines[1:]
+        used = len(head)
+        kept = []
+        for i, line in enumerate(body):
+            more = f'  …另有 {len(body) - i} 条事件未显示'
+            if used + 1 + len(line) > CALENDAR_SECTION_MAX_CHARS - len(more) - 1:
+                return '\n'.join([head] + kept + [more])
+            used += 1 + len(line)
+            kept.append(line)
+
+        return '\n'.join([head] + kept)
 
     @staticmethod
     def format_earnings_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
@@ -293,7 +315,8 @@ class NotificationService:
 
         # 排除集需并上 A+H 对应代码：日历段按 WATCH_CODES 顶层代码报（不展开 ah，
         # 否则同公司会在日历段内部重复），但推送层要防的是"同公司被两个段落各报一次"，
-        # 所以这里反过来要展开——两边故意不对称，勿"统一"。见 calendar_event._watch_entries。
+        # 所以这里反过来要展开——两边故意不对称，勿"统一"。见 calendar_event._watch_entries
+        # （那里还记了第三处：简报页 BriefingService.get_earnings_alert_data 走合并口径）。
         watch_codes = set(WatchService.get_watch_codes_with_ah())
         target_codes = [c for c in codes if c not in watch_codes]
 

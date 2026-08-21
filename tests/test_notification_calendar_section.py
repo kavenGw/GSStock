@@ -170,3 +170,54 @@ def test_build_market_blocks_accepts_calendar_text():
 
     dumped = str(blocks)
     assert '未来7天事件' in dumped
+
+
+def test_format_calendar_events_caps_slack_section_length(monkeypatch):
+    """Slack 的 section text 超 3000 字会整条 chat.postMessage 被拒——
+    不是这一段变短，而是整条推送消失。事件多时必须按行截断并标注省略数量。"""
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    events = [{
+        'event_date': '2026-08-%02d' % (21 + i % 7),
+        'event_type': 'earnings',
+        'stock_code': 'CODE%03d' % i,
+        'stock_name': '很长的公司名称示例股份有限公司%03d' % i,
+        'title': '财报披露',
+        'detail': '预约 2026-08-26 → 2026-08-29，业绩预告已出',
+        'status': 'scheduled',
+    } for i in range(200)]
+
+    monkeypatch.setattr(CalendarEventService, 'get_events',
+                        staticmethod(lambda start, end: events))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    text = mod.NotificationService.format_calendar_events()
+
+    assert len(text) <= mod.CALENDAR_SECTION_MAX_CHARS
+    lines = text.split(chr(10))
+    assert lines[0].startswith('📅')
+    assert '另有' in lines[-1] and '条事件未显示' in lines[-1]
+    assert len(lines) > 2, '截断后仍应保留最早的若干条事件'
+    assert 'CODE000' in text, '保留的是最早的事件而非任意一段'
+
+
+def test_format_calendar_events_short_list_not_truncated(monkeypatch):
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    events = [{
+        'event_date': '2026-08-21', 'event_type': 'macro', 'stock_code': '',
+        'stock_name': None, 'title': 'FOMC 议息', 'detail': None,
+        'status': 'scheduled',
+    }]
+    monkeypatch.setattr(CalendarEventService, 'get_events',
+                        staticmethod(lambda start, end: events))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    text = mod.NotificationService.format_calendar_events()
+
+    assert '另有' not in text
+    assert 'FOMC 议息' in text

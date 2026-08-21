@@ -95,6 +95,30 @@ def test_events_api_rejects_oversized_range(client, monkeypatch):
 
 
 def test_refresh_api_returns_202(client, monkeypatch):
+    """必须 mock refresh_all：不 mock 的话路由的守护线程会真的跑起来，
+    一次 CNINFO 全表下载 + 48 次 yfinance 取数 + 约 32 秒重试 sleep，
+    还会改动熔断器与披露表缓存这两个进程级单例，在 pytest-randomly 下
+    污染其它用例。此处只验路由的 202 行为。"""
+    from app.routes import calendar as route_mod
+    from app.services.calendar_event import CalendarEventService
+
+    calls = []
+    monkeypatch.setattr(CalendarEventService, 'refresh_all',
+                        staticmethod(lambda today=None: calls.append(today) or {}))
+
+    class _SyncThread:
+        """同步执行，避免断言与守护线程赛跑"""
+
+        def __init__(self, target, daemon=False):
+            self._target = target
+
+        def start(self):
+            self._target()
+
+    monkeypatch.setattr(route_mod, 'Thread', _SyncThread)
+
     r = client.post('/calendar/api/refresh')
+
     assert r.status_code == 202
     assert '刷新' in r.get_json()['message']
+    assert calls == [None]

@@ -133,7 +133,13 @@ class CalendarEventService:
 
     @staticmethod
     def refresh_all(today: date = None) -> dict:
-        """跑全部 collector 并物化。单个 collector 失败不阻断其余，也不清理它自己那类事件。"""
+        """跑全部 collector 并物化。
+
+        prune 的授权只来自 collector 自报的 complete=True（「本轮确实把它负责的每
+        一份活都从源头取到了」），绝不从「没抛异常」倒推——总失败路径（熔断、全部
+        ticker 重试耗尽、无报告期可取）都会正常返回空列表，据此 prune 会把该 source
+        在整个窗口内的事件全部清空。complete=False 与抛异常一样，本轮不清理该 source。
+        """
         if today is None:
             today = date.today()
 
@@ -146,11 +152,18 @@ class CalendarEventService:
             ('macro', lambda: collect_macro_range(start, end)),
         ]
 
-        events, ok_sources, errors = [], [], []
+        events, ok_sources, errors, incomplete = [], [], [], []
         for key, fn in jobs:
             try:
-                events.extend(fn())
-                ok_sources.extend(_COLLECTOR_SOURCES[key])
+                got, complete = fn()
+                events.extend(got)
+                if complete:
+                    ok_sources.extend(_COLLECTOR_SOURCES[key])
+                else:
+                    incomplete.append(key)
+                    logger.warning(
+                        f'[事件日历] collector {key} 未完整采集，'
+                        f'本轮跳过 {_COLLECTOR_SOURCES[key]} 的清理')
             except Exception as e:
                 errors.append(f'{key}: {e}')
                 logger.error(f'[事件日历] collector {key} 失败: {e}')
@@ -160,7 +173,7 @@ class CalendarEventService:
         removed = CalendarEventService.prune_stale(start, end, ids, ok_sources)
 
         stats = {'collected': len(events), 'upserted': len(ids),
-                 'removed': removed, 'errors': errors}
+                 'removed': removed, 'errors': errors, 'incomplete': incomplete}
         logger.info(f'[事件日历] 刷新完成: {stats}')
         return stats
 
@@ -172,6 +185,10 @@ def _watch_entries(markets: set[str] = None) -> list[dict]:
     WatchService.get_watch_codes_with_ah() 相反：那边要展开 ah，
     防的是"同公司被日历段和财报段各报一次"。两边目标一致（一公司一提），
     机制刻意相反，勿"统一"。
+
+    第三处是 BriefingService.get_earnings_alert_data（简报页财报预警），它跑的是
+    全部分类股票而非盯盘池，用 WatchService.dedup_ah_codes 把两地代码合并成一行。
+    三处口径各不相同但目标同一：一家公司只出现一次。
     """
     return [e for e in WATCH_CODES if markets is None or e.get('market') in markets]
 
@@ -182,19 +199,35 @@ def _yf_ticker(yf_code: str):
     return yf.Ticker(yf_code)
 
 
-def collect_earnings_a(today: date = None) -> list[dict]:
-    """A股财报日 — 巨潮预约披露"""
+def collect_earnings_a(today: date = None) -> tuple[list[dict], bool]:
+    """A股财报日 — 巨潮预约披露
+
+    返回 (events, complete)。complete=True 仅当至少有一个报告期、且每个报告期都
+    真的从巨潮取到了披露表——「本窗口无报告期可取」不是「确认无事件」，不能据此清理。
+    """
     if today is None:
         today = date.today()
 
     watch = {e['code']: e['name'] for e in _watch_entries({'A'})}
     if not watch:
-        return []
+        # 盯盘池里没有A股是本地配置的确定状态，不是取数失败：cninfo 遗留行应被清理
+        return [], True
+
+    periods = period_keys_for_window(today)
+    if not periods:
+        logger.warning('[事件日历] 本窗口无A股报告期，未接触巨潮，本轮不清理 cninfo 事件')
+        return [], False
 
     out = []
-    for period, period_key in period_keys_for_window(today):
+    complete = True
+    for period, period_key in periods:
         title = _REPORT_TITLE.get(period_key[4:], '财报披露')
-        hits = EarningsService.fetch_disclosure_map(period)
+        try:
+            hits = EarningsService.fetch_disclosure_map(period)
+        except Exception as e:
+            logger.warning(f'[事件日历] 巨潮 {period} 取数失败: {e}')
+            complete = False
+            continue
         for code, name in watch.items():
             hit = hits.get(code)
             if not hit:
@@ -213,7 +246,7 @@ def collect_earnings_a(today: date = None) -> list[dict]:
                 'period_key': period_key,
                 'extra': None,
             })
-    return out
+    return out, complete
 
 
 def _yf_dates(value) -> list:
@@ -232,17 +265,27 @@ def _yf_dates(value) -> list:
     return out
 
 
-def collect_calendar_yf(today: date = None) -> list[dict]:
-    """非A股财报日 + 除权日 — yfinance calendar 一次调用产出两类"""
+def collect_calendar_yf(today: date = None) -> tuple[list[dict], bool]:
+    """非A股财报日 + 除权日 — yfinance calendar 一次调用产出两类
+
+    返回 (events, complete)。complete=True 仅当每只被尝试的 ticker 都拿到了可用
+    calendar。熔断跳过、任一 ticker 重试耗尽、返回不可用对象，都会置 False——
+    否则一次 yfinance 限流就会被 refresh_all 当成「确认无事件」，把窗口内全部
+    港/美/韩财报与除权事件清空。
+    """
     if today is None:
         today = date.today()
 
+    # 注意 is_available 是**会改状态**的探针：OPEN 且过了冷却会被提升为 HALF_OPEN
+    # 并返回 True。因此本函数必须同时上报 record_failure，否则只报成功会把熔断器
+    # 替全 app 的其它 yfinance 消费者一起重置。
     if not circuit_breaker.is_available('yfinance'):
-        logger.info('[事件日历] yfinance 已熔断，跳过')
-        return []
+        logger.warning('[事件日历] yfinance 已熔断，跳过采集，本轮不清理 yfinance 事件')
+        return [], False
 
     out = []
     ok = False
+    complete = True
     for entry in _watch_entries():
         if entry.get('market') == 'A':
             continue
@@ -250,6 +293,7 @@ def collect_calendar_yf(today: date = None) -> list[dict]:
         code = entry['code']
         yf_code = MarketIdentifier.to_yfinance(code)
         cal = None
+        exhausted = False
         for attempt in range(YF_MAX_RETRIES):
             try:
                 cal = _yf_ticker(yf_code).calendar
@@ -258,9 +302,14 @@ def collect_calendar_yf(today: date = None) -> list[dict]:
                 if attempt < YF_MAX_RETRIES - 1:
                     time.sleep(YF_RETRY_DELAY)
                 else:
-                    logger.debug(f'[事件日历] {code} calendar 取数失败: {e}')
+                    logger.warning(f'[事件日历] {code} calendar 重试耗尽: {e}')
+                    exhausted = True
+
+        if exhausted:
+            circuit_breaker.record_failure('yfinance')
 
         if not hasattr(cal, 'get'):
+            complete = False
             continue
         ok = True
 
@@ -288,9 +337,11 @@ def collect_calendar_yf(today: date = None) -> list[dict]:
                         'title': '除权除息', 'priority': 'LOW',
                         'period_key': f'XD{d.year}{d.month:02d}'})
 
-    if ok:
+    # 只在全员成功时报 success：部分失败也报成功会把刚累计的 failure_count 清零，
+    # 熔断器永远跳不起来，同一场限流每天重演。
+    if ok and complete:
         circuit_breaker.record_success('yfinance')
-    return out
+    return out, complete
 
 
 def _fhps_report_dates(today: date) -> list[str]:
@@ -305,16 +356,24 @@ def _fhps_report_dates(today: date) -> list[str]:
     return ends[:4]
 
 
-def collect_dividend_a(today: date = None) -> list[dict]:
-    """A股除权除息日 — akshare 分红送配"""
+def collect_dividend_a(today: date = None) -> tuple[list[dict], bool]:
+    """A股除权除息日 — akshare 分红送配
+
+    返回 (events, complete)。任一报告期取数失败即 complete=False：部分成功不足以
+    为整个 akshare source 背书，否则失败那几期的既有除权事件会被 prune 掉。
+    """
     if today is None:
         today = date.today()
 
     watch = {e['code']: e['name'] for e in _watch_entries({'A'})}
     if not watch:
-        return []
+        return [], True
 
     report_dates = _fhps_report_dates(today)
+    if not report_dates:
+        logger.warning('[事件日历] 无可取的分红报告期，本轮不清理 akshare 事件')
+        return [], False
+
     out = []
     errors = []
     for report_date in report_dates:
@@ -353,16 +412,16 @@ def collect_dividend_a(today: date = None) -> list[dict]:
                 'extra': None,
             })
 
-    if report_dates and len(errors) == len(report_dates):
+    if len(errors) == len(report_dates):
         raise RuntimeError(
             f'[事件日历] 分红送配全部 {len(report_dates)} 个报告期取数失败: '
             + '; '.join(f'{d}: {e}' for d, e in errors)
         )
-    return out
+    return out, not errors
 
 
-def collect_macro_range(start: date, end: date) -> list[dict]:
-    """宏观事件 — 纯本地表，不联网"""
+def collect_macro_range(start: date, end: date) -> tuple[list[dict], bool]:
+    """宏观事件 — 纯本地表，不联网，故 complete 恒为 True"""
     out = []
     for e in MACRO_EVENTS:
         d = e['date']
@@ -382,4 +441,4 @@ def collect_macro_range(start: date, end: date) -> list[dict]:
             'period_key': f'{d.isoformat()}-{e["type"]}',
             'extra': None,
         })
-    return out
+    return out, True

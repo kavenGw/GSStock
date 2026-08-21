@@ -36,6 +36,20 @@ class WatchService:
         return codes
 
     @staticmethod
+    def dedup_ah_codes(codes: list[str]) -> list[str]:
+        """同一公司的 A+H 两个代码只留盯盘池顶层代码，保持入参顺序
+
+        用于「一家公司只出一行」的展示场景（如简报财报预警）：两地上市的同一家公司
+        财报只发一次，两个代码都命中就会重复报。只在两个代码都出现时才丢弃 ah 那个，
+        用户只持 A 股那边时仍照常保留。
+        """
+        present = set(codes)
+        drop = {e['ah']['code'] for e in WATCH_CODES
+                if e.get('ah') and e['code'] in present
+                and e['ah']['code'] in present}
+        return [c for c in codes if c not in drop]
+
+    @staticmethod
     def get_market_map() -> dict:
         """{股票代码: 市场}"""
         return {e['code']: e['market'] for e in WATCH_CODES}

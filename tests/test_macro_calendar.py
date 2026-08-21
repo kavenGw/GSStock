@@ -51,6 +51,30 @@ def test_macro_no_partial_years():
         )
 
 
+def test_macro_events_cover_the_next_half_year():
+    """日程表必须始终留出至少半年的前瞻量，否则会「静默过期」。
+
+    宏观 collector 只是把本地表按窗口过滤；表一走完就无声地不再产出任何
+    FOMC，日历页与每日推送里这一段直接消失，没有报错、没有告警。
+    test_macro_no_partial_years 只约束「已存在的年份」要填满，某一年整体缺失
+    时它平凡通过，拦不住这种过期。
+
+    半年是刻意选的：当前表排到 2027-12-10，今天起还有 15 个月余量，绝不误报；
+    而它会在表真正见底前约 7 个月就先红，留足按官方日程补录的时间。
+    补表时把新一年的 8 次 FOMC 一次补齐，并同步更新按年断言的用例。
+    """
+    from datetime import timedelta
+
+    from app.config.macro_calendar import MACRO_EVENTS
+
+    horizon = date.today() + timedelta(days=183)
+    latest = max(e['date'] for e in MACRO_EVENTS)
+    assert latest >= horizon, (
+        f'MACRO_EVENTS 最远只排到 {latest}，不足半年前瞻（需覆盖到 {horizon}）——'
+        '请按 federalreserve.gov 官方日程补录下一年度 FOMC'
+    )
+
+
 def test_cpi_and_nfp_dates_deferred():
     """CPI / 非农发布日期待补——尚无可从本环境读到的可信数据源。
 
@@ -76,8 +100,9 @@ def test_collect_macro_filters_window_and_uses_empty_stock_code(monkeypatch):
         {'date': date(2027, 1, 29), 'type': 'fomc', 'title': 'FOMC 议息'},
     ])
 
-    out = mod.collect_macro_range(date(2026, 8, 1), date(2026, 10, 31))
+    out, complete = mod.collect_macro_range(date(2026, 8, 1), date(2026, 10, 31))
 
+    assert complete is True
     assert len(out) == 1
     e = out[0]
     assert e['event_date'] == date(2026, 9, 16)
@@ -95,7 +120,7 @@ def test_collect_macro_source_per_type(monkeypatch):
         {'date': date(2026, 9, 4), 'type': 'nfp', 'title': '美国 8 月非农'},
     ])
 
-    out = mod.collect_macro_range(date(2026, 9, 1), date(2026, 9, 30))
+    out, _ = mod.collect_macro_range(date(2026, 9, 1), date(2026, 9, 30))
 
     assert {e['source'] for e in out} == {'bls'}
 
@@ -110,7 +135,7 @@ def test_collect_macro_same_date_different_type_no_period_key_collision(monkeypa
         {'date': date(2026, 9, 4), 'type': 'nfp', 'title': '美国 8 月非农'},
     ])
 
-    out = mod.collect_macro_range(date(2026, 9, 1), date(2026, 9, 30))
+    out, _ = mod.collect_macro_range(date(2026, 9, 1), date(2026, 9, 30))
 
     assert len(out) == 2
     keys = {e['period_key'] for e in out}
