@@ -221,17 +221,18 @@ class NotificationService:
         total_profit = total_market_value - total_cost
         total_pct = (total_profit / total_cost * 100) if total_cost > 0 else 0
 
-        text = f"📊 持仓 ({latest_date}) | ¥{total_market_value:,.0f} | {total_pct:+.1f}%\n"
+        _pct = NotificationService.fmt_pct
+        text = f"📊 持仓 ({latest_date}) | ¥{total_market_value:,.0f} | {_pct(total_pct, digits=1)}\n"
 
         sorted_items = sorted(items, key=lambda x: x['profit_pct'], reverse=True)
         gainers = [i for i in sorted_items if i['profit_pct'] >= 0]
         losers = [i for i in sorted_items if i['profit_pct'] < 0]
 
         if gainers:
-            parts = [f"🔴{i['name']} {i['profit_pct']:+.1f}%" for i in gainers]
+            parts = [f"{i['name']} {_pct(i['profit_pct'], digits=1)}" for i in gainers]
             text += ' | '.join(parts) + '\n'
         if losers:
-            parts = [f"🟢{i['name']} {i['profit_pct']:+.1f}%" for i in losers]
+            parts = [f"{i['name']} {_pct(i['profit_pct'], digits=1)}" for i in losers]
             text += ' | '.join(parts)
 
         return {'text': text.rstrip('\n')}
@@ -468,9 +469,8 @@ class NotificationService:
 
             if is_first:
                 lines = [f"{signal} {name}({code})"]
-                arrow = '▲' if (change_pct or 0) >= 0 else '▼'
-                pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
-                lines.append(f"  现价 {current_price} {arrow}{pct_str} | 支撑 {sup_str} | 压力 {res_str}")
+                pct_str = NotificationService.fmt_pct(change_pct, none='')
+                lines.append(f"  现价 {current_price} {pct_str} | 支撑 {sup_str} | 压力 {res_str}")
                 lines.append(f"  💡 {summary}")
                 full_blocks.append("\n".join(lines))
             else:
@@ -480,9 +480,8 @@ class NotificationService:
                     old_label = signal_icons.get(old_signal, old_signal)
                     header += f"  <- {old_label}"
                 lines = [header]
-                arrow = '▲' if (change_pct or 0) >= 0 else '▼'
-                pct_str = f"({change_pct:+.2f}%)" if change_pct is not None else ''
-                lines.append(f"  现价 {current_price} {arrow}{pct_str}")
+                pct_str = NotificationService.fmt_pct(change_pct, none='')
+                lines.append(f"  现价 {current_price} {pct_str}")
                 if changes.get('support'):
                     lines.append(f"  支撑 {sup_str} -> 调整")
                 if changes.get('resistance'):
@@ -565,8 +564,7 @@ class NotificationService:
                     if idx.get('close') is None:
                         continue
                     pct = idx.get('change_percent')
-                    pct_str = f"{pct:+.2f}%" if pct is not None else "—"
-                    parts.append(f"{idx['name']} {idx['close']:,.0f}({pct_str})")
+                    parts.append(f"{idx['name']} {idx['close']:,.0f} {NotificationService.fmt_pct(pct)}")
                 if parts:
                     lines.append(f"{region['name']}: {' '.join(parts)}")
 
@@ -590,8 +588,7 @@ class NotificationService:
                 if f.get('close') is None:
                     continue
                 pct = f.get('change_percent')
-                pct_str = f"{pct:+.2f}%" if pct is not None else "—"
-                parts.append(f"{f['name']} {f['close']:,.2f}({pct_str})")
+                parts.append(f"{f['name']} {f['close']:,.2f} {NotificationService.fmt_pct(pct)}")
 
             return f"期货: {' '.join(parts)}" if parts else ''
         except Exception as e:
@@ -665,13 +662,13 @@ class NotificationService:
                 lines.append("A股:")
                 for s in cn_sectors:
                     leader = f"({s['leader']})" if s.get('leader') else ''
-                    lines.append(f"  {s['name']}{s['change_percent']:+.2f}%{leader}")
+                    lines.append(f"  {s['name']} {NotificationService.fmt_pct(s['change_percent'])}{leader}")
 
             us_sectors = BriefingService.get_us_sectors_data()
             if us_sectors:
                 lines.append("美股:")
                 for s in us_sectors:
-                    lines.append(f"  {s['name']}{s['change_percent']:+.2f}%")
+                    lines.append(f"  {s['name']} {NotificationService.fmt_pct(s['change_percent'])}")
 
             return '\n'.join(lines) if len(lines) > 1 else ''
         except Exception as e:
@@ -693,11 +690,8 @@ class NotificationService:
                 if item.get('avg_price') is None:
                     continue
                 pct = item.get('change_pct')
-                if pct is None or pct == 0:
-                    pct_str = '持平'
-                else:
-                    pct_str = f"{pct:+.2f}%"
-                parts.append(f"{item['label']} ${item['avg_price']:.2f}({pct_str})")
+                pct_str = '持平' if (pct is None or pct == 0) else NotificationService.fmt_pct(pct)
+                parts.append(f"{item['label']} ${item['avg_price']:.2f} {pct_str}")
 
             return f"💾 DRAM: {' | '.join(parts)}" if parts else ''
         except Exception as e:
@@ -953,13 +947,18 @@ class NotificationService:
         }
 
     @staticmethod
-    def _pct_fmt(pct, bold=False) -> str:
+    def fmt_pct(pct, digits=2, code=False, none='—') -> str:
+        """涨跌幅统一渲染：红涨绿跌，色块紧贴百分比。仅用于价格涨跌/盈亏，
+        溢价折价、距离支撑等语义不同的百分比不得走此函数。"""
         if pct is None:
-            return '—'
-        s = f"{pct:+.2f}%"
-        if bold:
-            return f"*{s}*" if pct >= 0 else f"*{s}*"
-        return s
+            return none
+        if pct > 0:
+            dot, s = '🔴', f"{pct:+.{digits}f}%"
+        elif pct < 0:
+            dot, s = '🟢', f"{pct:+.{digits}f}%"
+        else:
+            dot, s = '⚪', f"{0:.{digits}f}%"
+        return f"{dot}`{s}`" if code else f"{dot}{s}"
 
     @staticmethod
     def build_briefing_blocks(briefing_text: str, core_insights: str = '',
@@ -1004,8 +1003,7 @@ class NotificationService:
             return ''
         close_str = f"{close:,.0f}" if close >= 100 else f"{close:,.2f}"
         if pct is not None:
-            arrow = '📈' if pct >= 0 else '📉'
-            return f"{name}  {close_str}  {arrow} `{pct:+.2f}%`"
+            return f"{name}  {close_str}  {NotificationService.fmt_pct(pct, code=True)}"
         return f"{name}  {close_str}"
 
     @staticmethod
@@ -1108,8 +1106,7 @@ class NotificationService:
                     for s in cn_sectors:
                         leader = f"({s['leader']})" if s.get('leader') else ''
                         pct = s['change_percent']
-                        arrow = '📈' if pct >= 0 else '📉'
-                        items.append(f"{s['name']}  {arrow} `{pct:+.2f}%` {leader}")
+                        items.append(f"{s['name']}  {B.fmt_pct(pct, code=True)} {leader}")
                     blocks.append(B._block_section('*A股*'))
                     for i in range(0, len(items), 2):
                         blocks.append(B._block_fields(items[i:i+2]))
@@ -1118,8 +1115,7 @@ class NotificationService:
                     items = []
                     for s in us_sectors:
                         pct = s['change_percent']
-                        arrow = '📈' if pct >= 0 else '📉'
-                        items.append(f"{s['name']}  {arrow} `{pct:+.2f}%`")
+                        items.append(f"{s['name']}  {B.fmt_pct(pct, code=True)}")
                     blocks.append(B._block_section('*美股*'))
                     for i in range(0, len(items), 2):
                         blocks.append(B._block_fields(items[i:i+2]))
