@@ -1,4 +1,5 @@
 """事件日历服务 — 采集并物化盯盘股/宏观重要事件"""
+import calendar as _calmod
 import json
 import logging
 import time
@@ -32,6 +33,14 @@ _MACRO_MARKET = {'fomc': 'US', 'cpi': 'US', 'nfp': 'US'}
 
 _WRITABLE_FIELDS = ('event_date', 'stock_name', 'market', 'title',
                     'detail', 'priority', 'status')
+
+# collector -> 它负责的 source 集合（决定 prune 的作用域）
+_COLLECTOR_SOURCES = {
+    'earnings_a': ['cninfo'],
+    'calendar_yf': ['yfinance'],
+    'dividend_a': ['akshare'],
+    'macro': ['fomc', 'bls'],
+}
 
 
 class CalendarEventService:
@@ -104,6 +113,56 @@ class CalendarEventService:
         if not latest:
             return None
         return (datetime.now() - latest).total_seconds() / 3600
+
+    @staticmethod
+    def window(today: date = None) -> tuple[date, date]:
+        """采集窗口：上月初 ~ 下下月末（比页面展示的双月略宽，避免边界反复增删）"""
+        if today is None:
+            today = date.today()
+
+        y, m = today.year, today.month
+        sy, sm = (y - 1, 12) if m == 1 else (y, m - 1)
+        start = date(sy, sm, 1)
+
+        em = m + 2
+        ey = y + (em - 1) // 12
+        em = (em - 1) % 12 + 1
+        end = date(ey, em, _calmod.monthrange(ey, em)[1])
+
+        return start, end
+
+    @staticmethod
+    def refresh_all(today: date = None) -> dict:
+        """跑全部 collector 并物化。单个 collector 失败不阻断其余，也不清理它自己那类事件。"""
+        if today is None:
+            today = date.today()
+
+        start, end = CalendarEventService.window(today)
+
+        jobs = [
+            ('earnings_a', lambda: collect_earnings_a(today)),
+            ('calendar_yf', lambda: collect_calendar_yf(today)),
+            ('dividend_a', lambda: collect_dividend_a(today)),
+            ('macro', lambda: collect_macro_range(start, end)),
+        ]
+
+        events, ok_sources, errors = [], [], []
+        for key, fn in jobs:
+            try:
+                events.extend(fn())
+                ok_sources.extend(_COLLECTOR_SOURCES[key])
+            except Exception as e:
+                errors.append(f'{key}: {e}')
+                logger.error(f'[事件日历] collector {key} 失败: {e}')
+
+        in_window = [e for e in events if start <= e['event_date'] <= end]
+        ids = CalendarEventService.upsert_events(in_window)
+        removed = CalendarEventService.prune_stale(start, end, ids, ok_sources)
+
+        stats = {'collected': len(events), 'upserted': len(ids),
+                 'removed': removed, 'errors': errors}
+        logger.info(f'[事件日历] 刷新完成: {stats}')
+        return stats
 
 
 def _watch_entries(markets: set[str] = None) -> list[dict]:
