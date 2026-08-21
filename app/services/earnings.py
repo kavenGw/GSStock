@@ -9,6 +9,9 @@ import time
 from datetime import datetime, date, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import akshare as ak
+import pandas as pd
+
 from app.models.unified_cache import UnifiedStockCache
 from app.services.circuit_breaker import circuit_breaker
 from app.utils.market_identifier import MarketIdentifier
@@ -25,6 +28,74 @@ EARNINGS_CACHE_TTL_HOURS = 24
 # 重试配置
 MAX_RETRIES = 3
 RETRY_DELAY = 1.0
+
+# 巨潮预约披露：(period, 取数日) -> {code: {...}}，进程内每期次每天只取一次
+_disclosure_cache: dict = {}
+
+_DISCLOSURE_PICK_ORDER = ['实际披露', '三次变更', '二次变更', '初次变更', '首次预约']
+_DISCLOSURE_CHANGE_COLS = ['三次变更', '二次变更', '初次变更']
+
+# 月份 -> [(报告期中文, 年份偏移)]，覆盖该月可能发生的财报披露
+_MONTH_REPORT_PERIODS = {
+    1: [('年报', -1)],
+    2: [('年报', -1)],
+    3: [('年报', -1)],
+    4: [('年报', -1), ('一季', 0)],
+    5: [('一季', 0)],
+    6: [],
+    7: [('半年报', 0)],
+    8: [('半年报', 0)],
+    9: [('半年报', 0), ('三季', 0)],
+    10: [('三季', 0)],
+    11: [],
+    12: [],
+}
+
+_PERIOD_KEY_SUFFIX = {'年报': 'A', '一季': 'Q1', '半年报': 'H1', '三季': 'Q3'}
+
+
+def _today() -> date:
+    """便于测试注入"""
+    return date.today()
+
+
+def period_keys_for_window(today: date = None) -> list[tuple[str, str]]:
+    """当月与下月覆盖到的报告期，返回 [(akshare 期次参数, period_key)]"""
+    if today is None:
+        today = _today()
+
+    months = [(today.year, today.month)]
+    if today.month == 12:
+        months.append((today.year + 1, 1))
+    else:
+        months.append((today.year, today.month + 1))
+
+    out = []
+    for y, m in months:
+        for label, offset in _MONTH_REPORT_PERIODS.get(m, []):
+            year = y + offset
+            pair = (f'{year}{label}', f'{year}{_PERIOD_KEY_SUFFIX[label]}')
+            if pair not in out:
+                out.append(pair)
+    return out
+
+
+def _cell_date(row, col):
+    """把 pandas 单元格转成 date，NaT/NaN/空串一律 None"""
+    if col not in row:
+        return None
+    v = row[col]
+    if v is None or (isinstance(v, float) and pd.isna(v)) or v is pd.NaT:
+        return None
+    try:
+        if pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    ts = pd.to_datetime(v, errors='coerce')
+    if ts is None or pd.isna(ts):
+        return None
+    return ts.date()
 
 
 class EarningsService:
@@ -195,12 +266,76 @@ class EarningsService:
         return None
 
     @staticmethod
-    def _fetch_earnings_akshare(stock_code: str) -> dict | None:
-        """从akshare获取A股财报数据"""
+    def fetch_disclosure_map(period: str) -> dict:
+        """巨潮预约披露 -> {股票代码: {'date', 'status', 'detail'}}
+
+        期次未发布时 akshare 对空 DataFrame 硬赋列名会抛 ValueError，此处吞掉返回 {}。
+        """
+        cache_key = (period, _today())
+        if cache_key in _disclosure_cache:
+            return _disclosure_cache[cache_key]
+
         try:
+            df = ak.stock_report_disclosure(market='沪深京', period=period)
+        except Exception as e:
+            logger.info(f'[财报.预约披露] 期次 {period} 暂无数据: {e}')
+            _disclosure_cache[cache_key] = {}
+            return {}
+
+        result = {}
+        for _, row in df.iterrows():
+            code = str(row.get('股票代码', '')).strip()
+            if not code:
+                continue
+
+            picked = None
+            for col in _DISCLOSURE_PICK_ORDER:
+                picked = _cell_date(row, col)
+                if picked:
+                    break
+            if not picked:
+                continue
+
+            actual = _cell_date(row, '实际披露')
+            changed = any(_cell_date(row, c) for c in _DISCLOSURE_CHANGE_COLS)
+            if actual:
+                status = 'confirmed'
+            elif changed:
+                status = 'changed'
+            else:
+                status = 'scheduled'
+
+            detail = None
+            first = _cell_date(row, '首次预约')
+            if changed and first and first != picked:
+                detail = f'预约 {first.isoformat()} → {picked.isoformat()}'
+
+            result[code] = {'date': picked, 'status': status, 'detail': detail}
+
+        _disclosure_cache[cache_key] = result
+        return result
+
+    @staticmethod
+    def _fetch_earnings_akshare(stock_code: str) -> dict | None:
+        """从巨潮预约披露获取A股财报日期"""
+        try:
+            today = _today()
+            last_d, next_d = None, None
+
+            for period, _ in period_keys_for_window(today):
+                hit = EarningsService.fetch_disclosure_map(period).get(stock_code)
+                if not hit:
+                    continue
+                d = hit['date']
+                if d < today:
+                    if last_d is None or d > last_d:
+                        last_d = d
+                elif next_d is None or d < next_d:
+                    next_d = d
+
             return {
-                'last_earnings_date': None,
-                'next_earnings_date': None,
+                'last_earnings_date': last_d.isoformat() if last_d else None,
+                'next_earnings_date': next_d.isoformat() if next_d else None,
                 'market': 'A',
                 'fetch_time': datetime.now().isoformat()
             }
