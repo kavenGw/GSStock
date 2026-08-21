@@ -324,6 +324,7 @@ class LoadBalancer:
                     if codes and source in fetch_funcs:
                         futures[executor.submit(fetch_funcs[source], codes)] = (source, codes)
 
+                succeeded_primary = set()
                 for future in as_completed(futures):
                     source, codes = futures[future]
                     try:
@@ -331,6 +332,7 @@ class LoadBalancer:
                         if source_result:
                             result.update(source_result)
                             circuit_breaker.record_success(source)
+                            succeeded_primary.add(source)
                             # 更新失败列表
                             failed_codes = [c for c in failed_codes if c not in source_result]
                         else:
@@ -339,6 +341,22 @@ class LoadBalancer:
                     except Exception as e:
                         logger.warning(f"[负载均衡.优先级] 主数据源 {source} 执行异常: {e}")
                         circuit_breaker.record_failure(source)
+                        succeeded_primary.discard(source)
+
+            # 某主源失败时，其分到的代码先补投给另一健康主源（腾讯/新浪都是实时价），
+            # 避免直接落到东财/yfinance 兜底——yfinance A股日线盘中延时一小时以上
+            for source in succeeded_primary:
+                if not failed_codes:
+                    break
+                try:
+                    retry_result = fetch_funcs[source](failed_codes)
+                except Exception as e:
+                    logger.warning(f"[负载均衡.优先级] 主数据源 {source} 补投异常: {e}")
+                    continue
+                if retry_result:
+                    result.update(retry_result)
+                    failed_codes = [c for c in failed_codes if c not in retry_result]
+                    logger.info(f"[负载均衡.优先级] 主数据源 {source} 补投成功 {len(retry_result)} 只")
         else:
             logger.warning("[负载均衡.优先级] 所有主数据源都已熔断")
 

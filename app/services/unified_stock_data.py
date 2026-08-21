@@ -955,6 +955,8 @@ class UnifiedStockDataService:
                         'prev_close': round(prev_close, 2),
                         'last_fetch_time': now_str,
                         'market': 'A',
+                        # yfinance A股日线盘中延时一小时以上，标记降级供盯盘闸门过滤，避免拿旧价误报急跌/穿均线
+                        '_is_degraded': True,
                     }
                 except Exception as e:
                     logger.debug(f"[数据服务.获取] {code} 失败 (yfinance): {e}")
