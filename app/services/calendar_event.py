@@ -193,6 +193,15 @@ def _watch_entries(markets: set[str] = None) -> list[dict]:
     return [e for e in WATCH_CODES if markets is None or e.get('market') in markets]
 
 
+def _is_no_data_error(exc: Exception) -> bool:
+    """该代码本身无数据（退市/代码有误），而非数据源故障
+
+    判据与 app/services/earnings.py 的 yfinance 分支保持一致。
+    """
+    msg = str(exc).lower()
+    return 'delisted' in msg or 'no data found' in msg
+
+
 def _yf_ticker(yf_code: str):
     """便于测试注入"""
     import yfinance as yf
@@ -294,16 +303,28 @@ def collect_calendar_yf(today: date = None) -> tuple[list[dict], bool]:
         yf_code = MarketIdentifier.to_yfinance(code)
         cal = None
         exhausted = False
+        no_data = False
         for attempt in range(YF_MAX_RETRIES):
             try:
                 cal = _yf_ticker(yf_code).calendar
                 break
             except Exception as e:
+                if _is_no_data_error(e):
+                    # 与 earnings.py 同一约定：该代码本身没有数据（退市/代码有误），
+                    # 不是数据源故障 —— 不计平台失败。也刻意不置 complete=False：
+                    # 这类状态是永久的，一旦让它压制 prune，一只常年坏的代码就会
+                    # 永久冻结 yfinance 的清理，日历再也删不掉已撤销的事件。
+                    logger.warning(f'[事件日历] {code} 无行情数据（疑似退市或代码有误），跳过: {e}')
+                    no_data = True
+                    break
                 if attempt < YF_MAX_RETRIES - 1:
                     time.sleep(YF_RETRY_DELAY)
                 else:
                     logger.warning(f'[事件日历] {code} calendar 重试耗尽: {e}')
                     exhausted = True
+
+        if no_data:
+            continue
 
         if exhausted:
             circuit_breaker.record_failure('yfinance')
