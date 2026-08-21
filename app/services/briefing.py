@@ -3,7 +3,7 @@
 提供每日简报所需的所有数据聚合，包括：
 - 关键股票昨日行情（TSLA, GOOG, NVDA, AAPL, WDC, MU, SK海力士）
 - 主要指数昨日行情（纳指100, 上证, 深证, 创业板, 日经225）
-- ETF溢价率监控（纳指ETF富国, 美国50ETF易方达）
+- ETF溢价率监控（纳指ETF富国, 美国50ETF易方达, 南方港韩科技）
 - 板块评级（根据美股表现评级A股板块风险）
 """
 import logging
@@ -153,9 +153,13 @@ BRIEFING_FUTURES = [
     {'code': 'HG=F', 'name': '纽铜期货'},
 ]
 
+# source 缺省为东财 IOPV（A股 ETF）；signal 缺省 True 走 BUY/SELL_THRESHOLD 判定
 BRIEFING_ETFS = [
     {'code': '159941', 'name': '纳指ETF富国'},
     {'code': '513850', 'name': '美国50ETF易方达'},
+    # 港交所上市，无 IOPV，净值取 Yahoo navPrice（T-1 官方净值，名字里已标注口径）；
+    # 本地 ETF 申赎顺畅、折溢价常态 ±1~2%，套 QDII 阈值会常年误报，故不出信号只报数
+    {'code': '3431.HK', 'name': '南方港韩科技(T-1)', 'source': 'yahoo_nav', 'signal': False},
 ]
 
 # 溢价率阈值
@@ -504,17 +508,48 @@ class BriefingService:
         return None
 
     @staticmethod
+    def _fetch_yahoo_etf_quote(code: str) -> Optional[dict]:
+        """取港股 ETF 的现价与官方净值（Yahoo navPrice，T-1 口径）。
+
+        东财只对 A 股 ETF 给 IOPV，港交所上市 ETF 走这条。走 2 分钟源快照，
+        一次 push 内多处调用（文本行/Slack block/喂 LLM）只打一次网；失败值同样入快照避免重试风暴。
+        """
+        from app.services.unified_stock_data import unified_stock_data_service
+
+        snapshot = unified_stock_data_service._get_source_snapshot('yahoo_etf_nav') or {}
+        if code in snapshot:
+            return snapshot[code]
+
+        quote = None
+        try:
+            import yfinance as yf
+            info = yf.Ticker(code).info or {}
+            price = info.get('regularMarketPrice') or info.get('previousClose')
+            nav = info.get('navPrice')
+            if price and nav:
+                quote = {'price': float(price), 'nav': float(nav)}
+            else:
+                logger.warning(f'[简报.ETF溢价] {code} Yahoo 缺价格或净值: price={price} nav={nav}')
+        except Exception as e:
+            logger.warning(f'[简报.ETF溢价] {code} Yahoo 取数失败: {e}')
+
+        snapshot = dict(snapshot)
+        snapshot[code] = quote
+        unified_stock_data_service._set_source_snapshot('yahoo_etf_nav', snapshot)
+        return quote
+
+    @staticmethod
     def get_etf_premium_data() -> dict:
         """获取ETF溢价率数据
 
-        从 fund_etf_spot_em 一次性获取价格和IOPV，确保同源同时间点。
+        A股 ETF 从 fund_etf_spot_em 一次性获取价格和IOPV，确保同源同时间点；
+        source='yahoo_nav' 的港股 ETF 走 Yahoo（价格与 T-1 净值同源一次取）。
         溢价率 = (价格 / 净值 - 1) × 100%
         """
         from app.services.unified_stock_data import unified_stock_data_service
         from app.services.akshare_client import ak
 
         result = []
-        etf_codes = [etf['code'] for etf in BRIEFING_ETFS]
 
         # 从 fund_etf_spot_em 快照一次性获取（2分钟TTL）
         etf_map = unified_stock_data_service._get_source_snapshot('eastmoney_etf')
@@ -532,6 +567,20 @@ class BriefingService:
         partial = False
         for etf_info in BRIEFING_ETFS:
             code = etf_info['code']
+
+            if etf_info.get('source') == 'yahoo_nav':
+                quote = BriefingService._fetch_yahoo_etf_quote(code)
+                if not quote:
+                    partial = True
+                    result.append({
+                        'code': code, 'name': etf_info['name'],
+                        'price': None, 'nav': None, 'premium_rate': None,
+                        'signal': None, 'error': 'Yahoo价格或净值不可用'
+                    })
+                    continue
+                result.append(BriefingService._build_etf_premium_entry(etf_info, quote['price'], quote['nav']))
+                continue
+
             row = etf_map.get(code) if etf_map else None
 
             if row is None:
@@ -585,8 +634,17 @@ class BriefingService:
                 })
                 continue
 
-            premium_rate = (price / nav - 1) * 100
+            result.append(BriefingService._build_etf_premium_entry(etf_info, price, nav))
 
+        return {'etfs': result, 'partial': partial}
+
+    @staticmethod
+    def _build_etf_premium_entry(etf_info: dict, price: float, nav: float) -> dict:
+        """算溢价并按 signal 开关决定是否出买卖信号（关掉的只报数）"""
+        premium_rate = (price / nav - 1) * 100
+
+        signal = None
+        if etf_info.get('signal', True):
             if premium_rate <= BUY_THRESHOLD:
                 signal = 'buy'
             elif premium_rate >= SELL_THRESHOLD:
@@ -594,14 +652,12 @@ class BriefingService:
             else:
                 signal = 'normal'
 
-            result.append({
-                'code': code, 'name': etf_info['name'],
-                'price': round(price, 3), 'nav': round(nav, 3),
-                'premium_rate': round(premium_rate, 2),
-                'signal': signal, 'error': None
-            })
-
-        return {'etfs': result, 'partial': partial}
+        return {
+            'code': etf_info['code'], 'name': etf_info['name'],
+            'price': round(price, 3), 'nav': round(nav, 3),
+            'premium_rate': round(premium_rate, 2),
+            'signal': signal, 'error': None
+        }
 
     @staticmethod
     def _compute_premium(us_close, home_close, fx_rate, ratio):
