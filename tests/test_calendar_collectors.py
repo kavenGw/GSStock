@@ -198,7 +198,9 @@ def test_collect_calendar_yf_one_bad_ticker_does_not_kill_rest(patched_watch, mo
 
     def _tk(code):
         if code == '0700.HK':
-            raise RuntimeError('delisted')
+            # 必须是真实故障文案：'delisted'/'no data found' 现在被判为
+            # 「该代码无数据」而非数据源故障，会走豁免路径、不置 complete=False。
+            raise RuntimeError('429 Too Many Requests')
         return _FakeTicker({'Earnings Date': [date(2026, 10, 24)]})
 
     monkeypatch.setattr(mod, '_yf_ticker', _tk)
@@ -323,3 +325,49 @@ def test_collect_macro_range_is_always_complete():
     from app.services import calendar_event as mod
     _, complete = mod.collect_macro_range(date(2026, 8, 1), date(2026, 10, 31))
     assert complete is True
+
+
+def test_collect_calendar_yf_delisted_is_not_a_platform_failure(patched_watch, monkeypatch):
+    """退市/代码有误是「该代码没有数据」，不是「数据源故障」。
+
+    与 earnings.py 同一约定：不计平台失败。更关键的是也不能置 complete=False ——
+    否则一只常年坏的代码会永久压制 yfinance 的 prune，日历再也删不掉已撤销的事件。
+    """
+    mod = patched_watch
+    recorded = []
+
+    def _tk(code):
+        raise RuntimeError('%s: possibly delisted; no price data found' % code)
+
+    monkeypatch.setattr(mod, '_yf_ticker', _tk)
+    monkeypatch.setattr(mod.circuit_breaker, 'is_available', lambda name: True)
+    monkeypatch.setattr(mod.circuit_breaker, 'record_failure',
+                        lambda name: recorded.append(name))
+    monkeypatch.setattr(mod.time, 'sleep', lambda s: None)
+
+    events, complete = mod.collect_calendar_yf(date(2026, 8, 21))
+
+    assert events == []
+    assert recorded == [], '退市/无数据不得计入平台失败'
+    assert complete is True, '坏代码不得永久冻结 prune'
+
+
+def test_collect_calendar_yf_real_failure_still_counts(patched_watch, monkeypatch):
+    """反向闸门：真实故障（限流等）仍必须计平台失败并置 complete=False。"""
+    mod = patched_watch
+    recorded = []
+
+    def _tk(code):
+        raise RuntimeError('429 Too Many Requests')
+
+    monkeypatch.setattr(mod, '_yf_ticker', _tk)
+    monkeypatch.setattr(mod.circuit_breaker, 'is_available', lambda name: True)
+    monkeypatch.setattr(mod.circuit_breaker, 'record_failure',
+                        lambda name: recorded.append(name))
+    monkeypatch.setattr(mod.time, 'sleep', lambda s: None)
+
+    events, complete = mod.collect_calendar_yf(date(2026, 8, 21))
+
+    assert events == []
+    assert recorded == ['yfinance', 'yfinance'], '每只重试耗尽的票各记一次'
+    assert complete is False

@@ -802,12 +802,20 @@ class BriefingService:
             # 这是 A+H 处理的第三处，与另两处口径各自不同、刻意不统一：
             #   1. calendar_event._watch_entries —— 不展开 ah（否则日历段内同公司两条）
             #   2. notification.format_earnings_alerts —— 展开 ah 做排除集（防两个段落各报一次）
-            #   3. 此处 —— 合并 ah（两个代码都在分类里时只留顶层代码）
+            #   3. 此处 —— 合并 ah（两个代码都拿到日期时只留顶层代码）
+            #
+            # 折叠必须在【结果侧】做，不能在入参侧先把 ah 代码丢掉：
+            # A+H 的顶层代码全是 .HK，而 EarningsService 按市场分流 —— A 股走巨潮
+            # （可靠），港股走 yfinance（港股财报日常取不到）。入参侧丢掉 A 股代码
+            # 等于丢掉这 8 家公司唯一可靠的来源，港股侧再取不到就一行都不剩。
             from app.services.watch_service import WatchService
-            codes = WatchService.dedup_ah_codes(sorted(all_stock_codes))
 
-            # 获取未来7天内发布财报的股票
-            upcoming = EarningsService.get_upcoming_earnings(codes, days=7)
+            # 获取未来7天内发布财报的股票（两个代码都查）
+            upcoming = EarningsService.get_upcoming_earnings(
+                sorted(all_stock_codes), days=7)
+
+            keep = set(WatchService.dedup_ah_codes([i['code'] for i in upcoming]))
+            upcoming = [i for i in upcoming if i['code'] in keep]
 
             # 格式化结果
             alerts = []
