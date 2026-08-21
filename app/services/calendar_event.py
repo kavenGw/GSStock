@@ -308,12 +308,15 @@ def collect_dividend_a(today: date = None) -> list[dict]:
     if not watch:
         return []
 
+    report_dates = _fhps_report_dates(today)
     out = []
-    for report_date in _fhps_report_dates(today):
+    errors = []
+    for report_date in report_dates:
         try:
             df = ak.stock_fhps_em(date=report_date)
         except Exception as e:
             logger.info(f'[事件日历] 分红送配 {report_date} 取数失败: {e}')
+            errors.append((report_date, e))
             continue
 
         for _, row in df.iterrows():
@@ -343,6 +346,12 @@ def collect_dividend_a(today: date = None) -> list[dict]:
                 'period_key': f'FH{report_date}',
                 'extra': None,
             })
+
+    if report_dates and len(errors) == len(report_dates):
+        raise RuntimeError(
+            f'[事件日历] 分红送配全部 {len(report_dates)} 个报告期取数失败: '
+            + '; '.join(f'{d}: {e}' for d, e in errors)
+        )
     return out
 
 

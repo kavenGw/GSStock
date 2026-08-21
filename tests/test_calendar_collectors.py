@@ -174,13 +174,40 @@ def test_collect_dividend_a_maps_ex_date(patched_watch, monkeypatch):
     assert '实施方案' in e['detail']
 
 
-def test_collect_dividend_a_swallows_source_error(patched_watch, monkeypatch):
+def test_collect_dividend_a_tolerates_one_bad_period(patched_watch, monkeypatch):
+    """单个报告期取数失败不应传染其它已成功报告期——只有全军覆没才是真故障。"""
+    mod = patched_watch
+    ok_df = pd.DataFrame([
+        {'代码': '002156', '名称': '通富微电', '除权除息日': pd.Timestamp('2026-09-05'),
+         '现金分红-现金分红比例': 1.5, '方案进度': '实施方案'},
+    ])
+
+    def _fhps(date):
+        if date == '20251231':
+            raise RuntimeError('akshare down')
+        return ok_df
+
+    monkeypatch.setattr(mod, '_fhps_report_dates', lambda today: ['20251231', '20260930'])
+    monkeypatch.setattr(mod.ak, 'stock_fhps_em', _fhps)
+
+    out = mod.collect_dividend_a(date(2026, 8, 21))
+    assert [e['stock_code'] for e in out] == ['002156']
+
+
+def test_collect_dividend_a_raises_when_all_periods_fail(patched_watch, monkeypatch):
+    """全部报告期都取数失败时必须向上抛出，不能返回 []。
+
+    refresh_all 把「collector 正常返回」等同于「本轮已重新采集」，据此用
+    prune_stale 删除本轮未命中的既有 akshare 行；若这里吞掉全灭异常返回 []，
+    一次 akshare 全站故障就会被误判为"确认无分红"，把历史除权除息事件整体清空。
+    """
     mod = patched_watch
 
     def _boom(date):
         raise RuntimeError('akshare down')
 
-    monkeypatch.setattr(mod, '_fhps_report_dates', lambda today: ['20251231'])
+    monkeypatch.setattr(mod, '_fhps_report_dates', lambda today: ['20251231', '20260930'])
     monkeypatch.setattr(mod.ak, 'stock_fhps_em', _boom)
 
-    assert mod.collect_dividend_a(date(2026, 8, 21)) == []
+    with pytest.raises(RuntimeError):
+        mod.collect_dividend_a(date(2026, 8, 21))
