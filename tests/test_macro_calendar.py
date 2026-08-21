@@ -84,7 +84,7 @@ def test_collect_macro_filters_window_and_uses_empty_stock_code(monkeypatch):
     assert e['stock_code'] == ''
     assert e['event_type'] == 'macro'
     assert e['priority'] == 'HIGH'
-    assert e['period_key'] == '2026-09-16'
+    assert e['period_key'] == '2026-09-16-fomc'
     assert e['source'] == 'fomc'
 
 
@@ -98,3 +98,20 @@ def test_collect_macro_source_per_type(monkeypatch):
     out = mod.collect_macro_range(date(2026, 9, 1), date(2026, 9, 30))
 
     assert {e['source'] for e in out} == {'bls'}
+
+
+def test_collect_macro_same_date_different_type_no_period_key_collision(monkeypatch):
+    """cpi 与 nfp 的 source 都是 'bls'，若 period_key 只用日期，同一天撞出相同的
+    (event_type, stock_code, source, period_key) 业务键，upsert_events 会把后者
+    当成前者的更新，静默覆盖丢掉一条——period_key 必须把 type 编进去以区分。"""
+    from app.services import calendar_event as mod
+    monkeypatch.setattr(mod, 'MACRO_EVENTS', [
+        {'date': date(2026, 9, 4), 'type': 'cpi', 'title': '美国 8 月 CPI'},
+        {'date': date(2026, 9, 4), 'type': 'nfp', 'title': '美国 8 月非农'},
+    ])
+
+    out = mod.collect_macro_range(date(2026, 9, 1), date(2026, 9, 30))
+
+    assert len(out) == 2
+    keys = {e['period_key'] for e in out}
+    assert len(keys) == 2

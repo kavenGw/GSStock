@@ -305,7 +305,7 @@ def collect_macro_range(start: date, end: date) -> list[dict]:
             'priority': 'HIGH',
             'source': _MACRO_SOURCE.get(e['type'], 'fomc'),
             'status': 'scheduled',
-            'period_key': d.isoformat(),
+            'period_key': f'{d.isoformat()}-{e["type"]}',
             'extra': None,
         })
     return out
