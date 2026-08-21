@@ -798,8 +798,16 @@ class BriefingService:
             for s in stocks:
                 stock_name_map[s.stock_code] = s.stock_name
 
+            # A+H 同公司只报一行：本页按公司列「即将发布财报」，两地上市财报只发一次。
+            # 这是 A+H 处理的第三处，与另两处口径各自不同、刻意不统一：
+            #   1. calendar_event._watch_entries —— 不展开 ah（否则日历段内同公司两条）
+            #   2. notification.format_earnings_alerts —— 展开 ah 做排除集（防两个段落各报一次）
+            #   3. 此处 —— 合并 ah（两个代码都在分类里时只留顶层代码）
+            from app.services.watch_service import WatchService
+            codes = WatchService.dedup_ah_codes(sorted(all_stock_codes))
+
             # 获取未来7天内发布财报的股票
-            upcoming = EarningsService.get_upcoming_earnings(list(all_stock_codes), days=7)
+            upcoming = EarningsService.get_upcoming_earnings(codes, days=7)
 
             # 格式化结果
             alerts = []

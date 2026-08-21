@@ -25,6 +25,31 @@ class WatchService:
         return [e['code'] for e in WATCH_CODES]
 
     @staticmethod
+    def get_watch_codes_with_ah() -> list[str]:
+        """盯盘代码 + 各条目 A+H 对应代码的并集（同一公司算一次盯盘覆盖）
+
+        与 get_watch_codes() 语义不同、互不替代：后者是"盯盘池顶层代码"，
+        本方法是"盯盘覆盖到的所有代码"，用于推送时判断某公司是否已被日历段报过。
+        """
+        codes = [e['code'] for e in WATCH_CODES]
+        codes += [e['ah']['code'] for e in WATCH_CODES if e.get('ah')]
+        return codes
+
+    @staticmethod
+    def dedup_ah_codes(codes: list[str]) -> list[str]:
+        """同一公司的 A+H 两个代码只留盯盘池顶层代码，保持入参顺序
+
+        用于「一家公司只出一行」的展示场景（如简报财报预警）：两地上市的同一家公司
+        财报只发一次，两个代码都命中就会重复报。只在两个代码都出现时才丢弃 ah 那个，
+        用户只持 A 股那边时仍照常保留。
+        """
+        present = set(codes)
+        drop = {e['ah']['code'] for e in WATCH_CODES
+                if e.get('ah') and e['code'] in present
+                and e['ah']['code'] in present}
+        return [c for c in codes if c not in drop]
+
+    @staticmethod
     def get_market_map() -> dict:
         """{股票代码: 市场}"""
         return {e['code']: e['market'] for e in WATCH_CODES}

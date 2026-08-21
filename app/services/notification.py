@@ -18,6 +18,9 @@ from app.config.notification_config import (
 
 logger = logging.getLogger(__name__)
 
+# Slack section text 硬上限 3000 字，留出余量防表情/转义放大后越界
+CALENDAR_SECTION_MAX_CHARS = 2800
+
 
 class NotificationService:
     """消息推送服务"""
@@ -234,19 +237,93 @@ class NotificationService:
         return {'text': text.rstrip('\n')}
 
     @staticmethod
+    def format_calendar_events(days: int = 7) -> str:
+        """未来 N 天事件（读 stock_event 表，采集已由 calendar_event 策略在 7:30 完成）"""
+        from datetime import timedelta
+        from app.services.calendar_event import CalendarEventService
+
+        try:
+            today = date.today()
+            events = CalendarEventService.get_events(today, today + timedelta(days=days))
+            stale_hours = CalendarEventService.hours_since_refresh()
+        except Exception as e:
+            logger.warning(f'[通知.事件日历] 读取失败: {e}')
+            return ''
+
+        if not events:
+            return ''
+
+        header = f'📅 未来{days}天事件'
+        if stale_hours is not None and stale_hours >= 24:
+            header += f'（⚠️ 事件数据 {int(stale_hours)} 小时未更新）'
+
+        lines = [header]
+        last_date = None
+        for e in events:
+            iso = e['event_date']
+            if iso == last_date:
+                label = ' ' * 6
+            else:
+                label = '今天  ' if iso == today.isoformat() else f'{iso[5:]} '
+                last_date = iso
+
+            if e['stock_code']:
+                subject = f"{e['stock_name'] or e['stock_code']}({e['stock_code']})"
+                body = f"{subject} {e['title']}"
+            else:
+                body = e['title']
+
+            if e.get('detail'):
+                body += f" · {e['detail']}"
+            elif e.get('status') == 'confirmed':
+                body += ' · 已确认'
+
+            lines.append(f'  {label}{body}')
+
+        return NotificationService._cap_calendar_lines(lines)
+
+    @staticmethod
+    def _cap_calendar_lines(lines: list[str]) -> str:
+        """按 Slack section 3000 字上限收口，超出部分折成一行「另有 N 条」
+
+        Slack 会整条拒收 section text 超 3000 字的 chat.postMessage——不设限的话
+        事件一多就是整条推送消失，而不是这一段变短。截断按行边界做，保留最早的事件。
+        """
+        head, body = lines[0], lines[1:]
+        used = len(head)
+        kept = []
+        for i, line in enumerate(body):
+            more = f'  …另有 {len(body) - i} 条事件未显示'
+            if used + 1 + len(line) > CALENDAR_SECTION_MAX_CHARS - len(more) - 1:
+                return '\n'.join([head] + kept + [more])
+            used += 1 + len(line)
+            kept.append(line)
+
+        return '\n'.join([head] + kept)
+
+    @staticmethod
     def format_earnings_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
-        """生成财报日期提醒（未来7天）"""
+        """生成财报日期提醒（未来7天）
+
+        盯盘池的事件已由 format_calendar_events 覆盖，此处只报补集，避免同条消息重复。
+        """
         from app.services.earnings import EarningsService
-        from app.utils.market_identifier import MarketIdentifier
+        from app.services.watch_service import WatchService
 
         if codes is None or name_map is None:
             codes, name_map = NotificationService._get_all_watched_codes()
-        non_a_codes = [c for c in codes if not MarketIdentifier.is_a_share(c)]
 
-        if not non_a_codes:
+        # 排除集需并上 A+H 对应代码：日历段按 WATCH_CODES 顶层代码报（不展开 ah，
+        # 否则同公司会在日历段内部重复），但推送层要防的是"同公司被两个段落各报一次"，
+        # 所以这里反过来要展开——两边故意不对称，勿"统一"。见 calendar_event._watch_entries
+        # （那里还记了第三处：简报页 BriefingService.get_earnings_alert_data 走合并口径）。
+        watch_codes = set(WatchService.get_watch_codes_with_ah())
+        target_codes = [c for c in codes if c not in watch_codes]
+
+        if not target_codes:
             return {'text': ''}
 
-        upcoming = EarningsService.get_upcoming_earnings(non_a_codes, days=7)
+        upcoming = EarningsService.get_upcoming_earnings(target_codes, days=7)
         if not upcoming:
             return {'text': ''}
 
@@ -936,7 +1013,7 @@ class NotificationService:
                             sectors_text: str, technical_text: str,
                             dram_text: str = '', earnings_text: str = '',
                             ai_text: str = '',
-                            adr_text: str = '') -> list:
+                            adr_text: str = '', calendar_text: str = '') -> list:
         """构建 Message 3 的 Block Kit blocks（市场行情 + 板块 + 技术 + 数据）"""
         B = NotificationService
         blocks = []
@@ -1073,8 +1150,8 @@ class NotificationService:
                 else:
                     blocks.append(B._block_section(line))
 
-        # DRAM / 财报
-        extra_texts = [t for t in [dram_text, earnings_text] if t]
+        # 日历 / DRAM / 财报
+        extra_texts = [t for t in [calendar_text, dram_text, earnings_text] if t]
         if extra_texts:
             blocks.append(B._block_divider())
             for t in extra_texts:
@@ -1116,6 +1193,7 @@ class NotificationService:
         sectors_text = NotificationService.format_sectors_summary()
         dram_text = NotificationService.format_dram_summary()
         technical_text = NotificationService.format_technical_summary()
+        calendar_text = NotificationService.format_calendar_events()
 
         ai_text = ''
         if include_ai:
@@ -1170,6 +1248,7 @@ class NotificationService:
                     'sectors': sectors_text,
                     'dram': dram_text,
                     'technical': technical_text,
+                    'calendar_events': calendar_text,
                     'earnings_alerts': earnings.get('text', ''),
                     'watch_analysis': watch_text,
                 }
@@ -1230,6 +1309,8 @@ class NotificationService:
         if technical_text:
             msg3_parts.append(technical_text)
         data_lines = []
+        if calendar_text:
+            data_lines.append(calendar_text)
         if dram_text:
             data_lines.append(dram_text)
         if earnings.get('text'):
@@ -1240,9 +1321,10 @@ class NotificationService:
             msg3_parts.append(ai_text)
 
         msg3_blocks = NotificationService.build_market_blocks(
-            indices_text, futures_text, etf_text, sectors_text, technical_text,
-            dram_text, earnings.get('text', ''),
-            ai_text, adr_text)
+            indices_text=indices_text, futures_text=futures_text, etf_text=etf_text,
+            sectors_text=sectors_text, technical_text=technical_text,
+            dram_text=dram_text, earnings_text=earnings.get('text', ''),
+            ai_text=ai_text, adr_text=adr_text, calendar_text=calendar_text)
 
         news_messages = []
         news_blocks_list = []

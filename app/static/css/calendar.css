@@ -1,0 +1,156 @@
+:root {
+    --cal-border: rgba(128, 128, 128, 0.25);
+    --cal-cell-bg: transparent;
+    --cal-today: rgba(13, 110, 253, 0.55);
+    --cal-earnings: #3b82f6;
+    --cal-dividend: #10b981;
+    --cal-macro: #f59e0b;
+    --cal-manual: #9ca3af;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+@media (max-width: 991.98px) {
+    .cal-grid { grid-template-columns: 1fr; }
+}
+
+.cal-month-title {
+    font-weight: 600;
+    margin-bottom: .5rem;
+}
+
+.cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.cal-weekhead {
+    text-align: center;
+    font-size: .75rem;
+    opacity: .6;
+    padding: 2px 0;
+}
+
+.cal-cell {
+    min-height: 84px;
+    border: 1px solid var(--cal-border);
+    border-radius: 4px;
+    background: var(--cal-cell-bg);
+    padding: 2px 3px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.cal-cell.is-blank {
+    border: none;
+    cursor: default;
+}
+
+.cal-cell.is-today {
+    border-color: var(--cal-today);
+    border-width: 2px;
+}
+
+.cal-daynum {
+    font-size: .75rem;
+    opacity: .7;
+}
+
+.cal-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cal-ev {
+    display: block;
+    font-size: .7rem;
+    line-height: 1.25;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cal-ev.type-earnings { background: var(--cal-earnings); }
+.cal-ev.type-ex_dividend { background: var(--cal-dividend); }
+.cal-ev.type-macro { background: var(--cal-macro); }
+.cal-ev.type-manual { background: var(--cal-manual); }
+.cal-ev.is-more { background: transparent; color: inherit; opacity: .6; }
+.cal-ev.is-high { border-left: 3px solid rgba(255, 255, 255, .85); }
+
+.cal-filters { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+.cal-chip {
+    border: 1px solid var(--cal-border);
+    background: transparent;
+    color: inherit;
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: .8rem;
+    opacity: .45;
+}
+
+.cal-chip.is-on { opacity: 1; }
+
+.cal-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(360px, 90vw);
+    height: 100%;
+    background: var(--bg-secondary, #fff);
+    border-left: 1px solid var(--cal-border);
+    transform: translateX(100%);
+    transition: transform .18s ease;
+    z-index: 1050;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.cal-drawer.is-open { transform: translateX(0); }
+
+.cal-drawer-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: .75rem;
+}
+
+.cal-drawer-item {
+    border-left: 3px solid var(--cal-border);
+    padding: .35rem .6rem;
+    margin-bottom: .5rem;
+}
+
+.cal-drawer-item.type-earnings { border-left-color: var(--cal-earnings); }
+.cal-drawer-item.type-ex_dividend { border-left-color: var(--cal-dividend); }
+.cal-drawer-item.type-macro { border-left-color: var(--cal-macro); }
+.cal-drawer-item.type-manual { border-left-color: var(--cal-manual); }
+
+.cal-drawer-item-body { font-size: .85rem; opacity: .8; }
+
+/* 抽屉里跳转到 StockDetailDrawer 的个股条目：按钮伪装成链接，保留原生键盘可达性 */
+.cal-stock-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent, #0d6efd);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.cal-stock-link:hover,
+.cal-stock-link:focus-visible {
+    color: var(--cal-today);
+}
