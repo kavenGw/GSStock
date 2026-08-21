@@ -4,7 +4,6 @@ import pytest
 
 def test_alert_bp_not_exported():
     import app.routes as routes
-    importlib.reload(routes)
     assert not hasattr(routes, 'alert_bp')
 
 
