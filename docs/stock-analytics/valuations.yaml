@@ -3947,15 +3947,15 @@
   sector: materials
   commodity: copper
   commodity_impact: positive
-  quality: 5
   rating: watch
-  watch_reason: 生意质地优秀（2025 加权 ROE 33.04%、全球矿产铜前四、低成本分位），但 H 股 PB 4.16x 对应公允 PB 约 2.0x，期望内在价值 17.49 HKD 较现价 36.40 HKD 安全边际 −51.9%，连最乐观 bull 情景（27.28 HKD）都仍是 −25.1%；且 2026H1 矿产铜同比 −6%、全年 120 万吨指引 H1 仅完成 44.5%，指引下修风险未被定价。买点 PB<1.4x（约 12 HKD）。
-  bear: 7.34
-  base: 18.82
-  bull: 27.28
-  dividend_yield: 2.55
-  conviction_date: '2026-08-09'
-  source_doc: sectors/materials/nonferrous/2026-08-09-紫金矿业-buffett分析.md
+  watch_reason: 2026 半年报（8/21 18:28）证实生意质地进一步走强——归母 391.70 亿（+68.17%）、经营现金流 554.72 亿（+92.41%）、资产负债率 49.55%（2012 年以来首次破 50%）、利息保障 26.95x；但 TTM 归母跳增至 676.55 亿后，H 股仍为 PE 13.00x / PB 4.272x，期望内在价值 16.74 HKD 对现价 38.560 HKD 安全边际 −56.6%，最乐观 bull（26.57 HKD）压力测试仍 −31.1%。且半年报自带的商品均价表显示现价金比 H1 均价低 2.0%、银低 10.5%、锂低 6%，H2 价格是「铜正金负」的对冲而非市场直觉的继续冲高；产量全线滞后时序进度（当量碳酸锂完成率仅 36.3%）。买点 PB<1.4x（约 12.6 HKD）。
+  bear: 6.95
+  base: 19.11
+  bull: 26.57
+  dividend_yield: 2.42
+  conviction_date: '2026-08-21'
+  source_doc: sectors/materials/nonferrous/2026-08-21-紫金矿业-buffett分析.md
+  quality: 5
   themes:
   - copper_cycle
   - gold_cycle
