@@ -83,3 +83,99 @@ def test_phase_a_evidence_too_short(tmp_path, capsys):
     out = capsys.readouterr().out
     assert rc == 1
     assert 'lines' in out
+
+
+DOC_FRONTMATTER = """---
+stock_code: '300489'
+rating: watch
+valuation:
+  bull: 120.0
+  base: 88.0
+  bear: 55.0
+---
+
+# 光智科技深度重做
+
+## §9 估值
+基准情景每股内在价值 88.0 元。
+"""
+
+
+def _make_phase_b(tmp_path: Path, *, doc_text=DOC_FRONTMATTER, with_report=True):
+    art = tmp_path / 'artifacts'
+    art.mkdir(exist_ok=True)
+    if with_report:
+        _write(art / f'{STOCK}-{DATE}-phaseB-report.md', _report_body(), 5.0)
+    doc = tmp_path / 'doc.md'
+    _write(doc, doc_text)
+    return art, doc
+
+
+def test_phase_b_all_green(tmp_path, capsys):
+    art, doc = _make_phase_b(tmp_path)
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(doc), '--artifacts', str(art)])
+    assert rc == 0
+    assert 'B READY' in capsys.readouterr().out
+
+
+def test_phase_b_placeholder_left(tmp_path, capsys):
+    """【待锚】残留 = 主体已落盘但填锚未做，不许进审查。"""
+    text = DOC_FRONTMATTER + '\n市值【待锚】亿元。\n前瞻 PE【待锚】倍。\nTODO: 补 §9.10\n'
+    art, doc = _make_phase_b(tmp_path, doc_text=text)
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(doc), '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert '3 处' in out and 'lines' in out
+
+
+def test_phase_b_missing_valuation_block(tmp_path, capsys):
+    text = DOC_FRONTMATTER.replace('valuation:', 'valuations_todo:')
+    art, doc = _make_phase_b(tmp_path, doc_text=text)
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(doc), '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'valuation' in out
+
+
+def test_phase_b_without_doc_arg_is_arg_error(tmp_path):
+    art, _ = _make_phase_b(tmp_path)
+    try:
+        main([STOCK, DATE, '--phase', 'B', '--artifacts', str(art)])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError('缺 --doc 应以退出码 2 结束')
+
+
+def _review_body(spec='SPEC-COMPLIANT', quality='APPROVED-WITH-NITS'):
+    return f'start: 2026-08-22 10:00:00\nend: 2026-08-22 10:04:30\n\n## 规格段\n{spec}\n\n## 质量段\n{quality}\n'
+
+
+def test_review_all_green(tmp_path, capsys):
+    art = tmp_path / 'artifacts'
+    art.mkdir()
+    _write(art / f'{STOCK}-{DATE}-review-report.md', _review_body(), 1.0)
+    rc = main([STOCK, DATE, '--phase', 'review', '--artifacts', str(art)])
+    assert rc == 0
+    assert 'review READY' in capsys.readouterr().out
+
+
+def test_review_missing_quality_verdict(tmp_path, capsys):
+    """审查是「只回 idle / 只写一段」的重灾区，两段结论都要在文件里。"""
+    art = tmp_path / 'artifacts'
+    art.mkdir()
+    body = 'start: 2026-08-22 10:00:00\nend: 2026-08-22 10:04:30\n\n## 规格段\nSPEC-COMPLIANT\n'
+    _write(art / f'{STOCK}-{DATE}-review-report.md', body, 1.0)
+    rc = main([STOCK, DATE, '--phase', 'review', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert '质量段结论' in out
+
+
+def test_review_report_missing(tmp_path, capsys):
+    art = tmp_path / 'artifacts'
+    art.mkdir()
+    rc = main([STOCK, DATE, '--phase', 'review', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'review MISSING: report' in out

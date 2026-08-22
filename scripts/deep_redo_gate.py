@@ -28,6 +28,10 @@ from pathlib import Path
 LANES = ('A1', 'A2', 'A3')
 MIN_EVIDENCE_LINES = 20
 END_STAMP_RE = re.compile(r'^end:\s*\S', re.M)
+PLACEHOLDER_RE = re.compile(r'【待锚】|\bTODO\b|\bTBD\b')
+VALUATION_BLOCK_RE = re.compile(r'^valuation:', re.M)
+SPEC_MARKERS = ('SPEC-COMPLIANT', '规格问题', 'Critical', 'Major', 'Minor')
+QUALITY_MARKERS = ('APPROVED-WITH-NITS', 'CHANGES-REQUESTED', 'APPROVED')
 
 
 def _read(path: Path) -> str:
@@ -77,6 +81,35 @@ def check_phase_a(artifacts: Path, stock: str, date: str,
     return problems
 
 
+def check_phase_b(artifacts: Path, stock: str, date: str, doc: str) -> list[str]:
+    problems = _check_report(artifacts / f'{stock}-{date}-phaseB-report.md', 'B')
+    doc_path = Path(doc)
+    if not doc_path.exists():
+        return problems + [f'B MISSING: 新档 {doc}']
+    text = _read(doc_path)
+    hits = [i for i, line in enumerate(text.splitlines(), 1) if PLACEHOLDER_RE.search(line)]
+    if hits:
+        problems.append(
+            f'B NOT-READY: {len(hits)} 处【待锚】/TODO/TBD at lines '
+            + ','.join(str(i) for i in hits))
+    if not VALUATION_BLOCK_RE.search(text):
+        problems.append('B NOT-READY: frontmatter 缺 valuation: 块')
+    return problems
+
+
+def check_review(artifacts: Path, stock: str, date: str) -> list[str]:
+    report = artifacts / f'{stock}-{date}-review-report.md'
+    problems = _check_report(report, 'review')
+    if not report.exists():
+        return problems
+    text = _read(report)
+    if not any(marker in text for marker in SPEC_MARKERS):
+        problems.append('review MISSING: 规格段结论')
+    if not any(marker in text for marker in QUALITY_MARKERS):
+        problems.append('review MISSING: 质量段结论')
+    return problems
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         description='stock-deep-redo 阶段放行闸门',
@@ -98,7 +131,14 @@ def main(argv: list[str] | None = None) -> int:
     if not artifacts.is_dir():
         ap.error(f'artifacts 目录不存在: {artifacts}')
     now = time.time()
-    problems = check_phase_a(artifacts, args.stock, args.date, args.quiet_min, now)
+    if args.phase == 'A':
+        problems = check_phase_a(artifacts, args.stock, args.date, args.quiet_min, now)
+    elif args.phase == 'B':
+        if not args.doc:
+            ap.error('--phase B 必须给 --doc <新档路径>')
+        problems = check_phase_b(artifacts, args.stock, args.date, args.doc)
+    else:
+        problems = check_review(artifacts, args.stock, args.date)
     if problems:
         for p in problems:
             print(p)
