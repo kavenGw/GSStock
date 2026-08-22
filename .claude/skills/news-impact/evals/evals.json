@@ -21,6 +21,13 @@
       "prompt": "美国 FTC 批准了一桩美股软件公司之间的并购，标的是两家做美国本土 SaaS 的公司。这事对我的持仓有影响吗？",
       "expected_output": "诚实结论：docs 池聚焦 A 股，此事件与池内标的基本无传导。应明确说'无影响/不必建档'，不硬凑关联、不硬写 theme 档。考验诚实标无影响的纪律。",
       "files": []
+    },
+    {
+      "id": 3,
+      "name": "single-stock-preannounce-no-readacross",
+      "prompt": "金山办公发布 2026 年半年度业绩预告：预计归母净利润同比增长 210%-264%，主要系 AI 订阅收入放量及持有基金公允价值变动收益。这对我的持仓有什么影响？",
+      "expected_output": "判为单股事件；用 pool_index.py match 召回后，除本体外池内无标的达中量级（办公软件链在池内无同业 read-across）→ 不建 theme 档，对话里给总览表 + 结论，并明确建议本体重估转 stock-deep-redo。不得在 theme 档里替本体重算估值/目标价。",
+      "files": []
     }
   ]
 }

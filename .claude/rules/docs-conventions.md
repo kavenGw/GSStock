@@ -64,6 +64,10 @@ related_docs:
   - path: ../../quarterly/26q1/2026-04-29-兆易-26Q1季报点评.md
     note: 26Q1 实证点评
     symmetric: true  # 默认 true，要求反向对称
+  - path: ../../themes/2026-08-21-中芯国际26Q2业绩说明会.md
+    note: 供给侧机理获代工方口径确认
+    impact: 动摇      # 可选，news-impact 回写：强化/动摇/推翻/无关
+    magnitude: 中     # 可选：高/中/低；与 impact 一起渲染为【动摇·中】
 ```
 
 h1 之后的 `<!-- BEGIN related_docs -->` / `<!-- END related_docs -->` 块由脚本生成，**不要手编**。

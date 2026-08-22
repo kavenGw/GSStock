@@ -24,6 +24,10 @@ VALUATION_CURRENCIES: set[str] = {'CNY', 'USD', 'HKD'}
 COMMODITIES: set[str] = {'copper', 'lithium'}
 COMMODITY_IMPACTS: set[str] = {'positive', 'neutral', 'negative'}
 
+# related_docs 条目可选键（news-impact 回写：事件对该档旧 thesis 的判定）
+IMPACTS: set[str] = {'强化', '动摇', '推翻', '无关'}
+MAGNITUDES: set[str] = {'高', '中', '低'}
+
 REQUIRED_FIELDS_BY_TYPE: dict[str, set[str]] = {
     'buffett':      {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',
                      'themes', 'rating', 'conviction_date', 'thesis'},
@@ -123,6 +127,16 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
             if cur is not None and cur not in VALUATION_CURRENCIES:
                 violations.append(
                     f"{p}: valuation.currency '{cur}' not in {sorted(VALUATION_CURRENCIES)}")
+
+    rels = fm.get('related_docs')
+    if isinstance(rels, list):
+        for i, r in enumerate(rels):
+            if not isinstance(r, dict):
+                continue
+            for key, allowed in (('impact', IMPACTS), ('magnitude', MAGNITUDES)):
+                if key in r and r[key] not in allowed:
+                    violations.append(
+                        f"{p}: related_docs[{i}].{key} '{r[key]}' not in {sorted(allowed)}")
 
     if 'commodity' in fm and fm['commodity'] not in COMMODITIES:
         violations.append(f"{p}: commodity '{fm['commodity']}' not in {sorted(COMMODITIES)}")

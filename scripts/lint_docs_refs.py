@@ -93,8 +93,10 @@ def _render_block(fm: dict, md_path: Path) -> str:
         rel = ref['path']
         note = ref.get('note', '')
         title = Path(rel).stem
+        tag = '·'.join(str(ref[k]) for k in ('impact', 'magnitude') if ref.get(k))
+        tag = f'【{tag}】' if tag else ''
         suffix = f' — {note}' if note else ''
-        lines.append(f'> - [{title}]({rel}){suffix}')
+        lines.append(f'> - [{title}]({rel}){tag}{suffix}')
     lines.append(BLOCK_END)
     return '\n'.join(lines) + '\n'
 

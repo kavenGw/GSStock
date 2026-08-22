@@ -156,3 +156,28 @@ def test_valuation_rejects_bool():
     fm = _buffett_fm(valuation={'bear': True, 'base': 1.0, 'bull': 2.0, 'currency': 'CNY'})
     violations = validate_frontmatter(fm, Path('/dummy.md'))
     assert any('valuation.bear must be number or null' in v for v in violations)
+
+
+def _theme_fm(**rel):
+    return {
+        'doc_type': 'theme', 'theme_name': 't', 'themes': ['x'], 'date': '2026-08-22',
+        'related_docs': [{'path': '../a.md', 'note': 'n', 'symmetric': True, **rel}],
+    }
+
+
+def test_related_docs_impact_and_magnitude_valid():
+    from scripts._docs_schema import IMPACTS, MAGNITUDES
+    assert IMPACTS == {'强化', '动摇', '推翻', '无关'}
+    assert MAGNITUDES == {'高', '中', '低'}
+    fm = _theme_fm(impact='动摇', magnitude='中')
+    assert validate_frontmatter(fm, Path('t.md')) == []
+
+
+def test_related_docs_impact_optional():
+    assert validate_frontmatter(_theme_fm(), Path('t.md')) == []
+
+
+def test_related_docs_impact_bad_enum():
+    v = validate_frontmatter(_theme_fm(impact='利好', magnitude='巨大'), Path('t.md'))
+    assert any('related_docs[0].impact' in x and '利好' in x for x in v)
+    assert any('related_docs[0].magnitude' in x and '巨大' in x for x in v)

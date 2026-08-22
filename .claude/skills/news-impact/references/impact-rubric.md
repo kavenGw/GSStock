@@ -29,17 +29,19 @@
 - **全员进总览表**：召回的每个候选标的都占一行，按传导强度排序，方向列允许取"弱利好""无影响"，量级列取 高/中/低。弱相关、无影响的**照样列**并标注——这是"我扫过、判过、没漏"的证据，不是灌水。
 - **只深写中/高量级**：量级达到中或高的才单开逐标的分析段（双面 + 接旧 thesis + 操作含义）。低/弱/无影响的留在表里一行带过，或合并成一句"扫描后判定无/弱传导：清单 + 各一句话理由"。
 
-召回时按这四档强度排，但**都要进表**：
-1. 直接命中（新闻点名的公司/产品）
-2. 同 subsector 直接竞品 / 上下游池内标的
-3. 同 sector 但隔了 subsector
-4. 仅 themes 关键词擦边
+召回分档来自 `pool_index.py match`（T1 直接命中 / T2 同 subsector / T3 themes 命中 / T4 仅同 sector、默认隐藏），T1–T3 **都要进表**；上下游池内标的由你从 T1–T3 的 thesis 里补。T4 只在新闻是整条链级别事件（如关税、出口数据）时 `--wide` 铺开。
 
-同一标的多篇 doc 时，以最新 `conviction_date` 的 buffett 档为权威评级锚，其余 doc 进 related_docs。
+同一标的多篇 doc 时，以最新 `conviction_date` 的 buffett 档为权威评级锚（match 输出已去重到这一条）。
 
-## 二之二、建档门槛
+## 二之二、建档门槛与篇幅上限
 
-总览表填完后看最高量级：**至少一只达到"中"或以上 → 建 theme 档**；**全是低/弱/情绪级 → 默认不建档**，只在对话给表+结论并问用户是否仍要归档为主题背书。理由：档案进池会成为后续选股/复查的信噪源，给弱传导事件造档是污染池子。相关性快筛已早退的"纯无交集"事件根本不到这一步。
+总览表填完后过两道门：
+1. **量级门槛**：至少一只达到"中"或以上。全是低/弱/情绪级 → 默认不建档，只在对话给表+结论并问用户是否仍要归档为主题背书。
+2. **read-across 门槛**（SKILL.md 第 1 步判为 `单股事件` 时）：**除本体外** ≥1 只池内标的达中量级。只关本体一家的业绩预告/定增/收购承做 → 不建档，对话里给结论并建议转 `stock-deep-redo` 承做本体。
+
+理由：档案进池会成为后续选股/复查的信噪源，给弱传导或只关一家的事件造档是污染池子。相关性快筛已早退的"纯无交集"事件根本不到这一步。
+
+**篇幅上限**：深写段 ≤8 只、每只 ≤15 行、全文 ≤250 行；不产估值数字（DCF/RIM/目标价/期望内在价值都是 deep-redo 的活）。超限 = 把本体部分截断转 deep-redo，theme 档只留 read-across。
 
 ## 三、theme 档模板
 
@@ -56,7 +58,7 @@ related_codes:
   - '603986'        # 受影响标的代码，字符串引号防 YAML int 化丢前导 0
   - '300223'
 date: '2026-05-31'  # 今天，字符串
-related_docs:
+related_docs:                  # 只收中量级以上标的，低量级不建链
   - path: ../sectors/<sector>/<subsector>/<受影响个股 buffett 档>.md
     note: <一句话说明这只票为何被这条新闻影响>
     symmetric: true
@@ -100,7 +102,19 @@ related_docs:
 theme 档在 frontmatter 里引用了受影响个股 doc（`symmetric: true`），所以那些个股 doc 也要反向引用回 theme 档，否则 `lint_docs_refs.py` 报不对称。两种做法二选一：
 
 - **省事**：写完 theme 档后跑 `python scripts/lint_docs_refs.py --rewrite-blocks`，它按 frontmatter 重生所有顶部 markdown 块。但反向 frontmatter 条目仍需手加。
-- **稳妥**：手动给每个受影响个股 doc 的 frontmatter `related_docs` 加一条指回 theme 档（`symmetric: true`），再跑 `--rewrite-blocks`。
+- **稳妥**：手动给每个受影响个股 doc 的 frontmatter `related_docs` 加一条指回 theme 档，再跑 `--rewrite-blocks`。
+
+反向条目**必带结论回写**两键（schema 枚举校验，渲染为 `【动摇·中】` 标签）：
+
+```yaml
+- path: ../../../themes/YYYY-MM-DD-<主题>.md
+  note: <新闻改变了旧 thesis 的哪个变量>
+  impact: 强化 | 动摇 | 推翻 | 无关
+  magnitude: 高 | 中 | 低
+  symmetric: true
+```
+
+`impact` 取值与总览表"对旧 thesis"列一致；`magnitude` 与"量级"列一致。deep-redo 重做该股时据此清点"有无未消化的动摇/推翻"。
 
 收尾两条命令（路径用 repo 根的 scripts/，不是 skill 内）：
 ```bash
