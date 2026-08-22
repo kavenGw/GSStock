@@ -59,3 +59,13 @@ def test_main_on_clean_doc(tmp_path, capsys):
     rc = main([str(doc)])
     assert rc == 0
     assert '合计 0 行待手算' in capsys.readouterr().out
+
+
+def test_main_missing_doc_is_arg_error(tmp_path):
+    """路径不存在必须响——返回 0 会让「没扫到」看起来像「扫干净了」。"""
+    try:
+        main([str(tmp_path / 'nope.md')])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError('档不存在应以退出码 2 结束')
