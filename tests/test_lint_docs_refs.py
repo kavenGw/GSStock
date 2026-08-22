@@ -164,3 +164,42 @@ def test_refs_rewrite_blocks(tmp_path):
     code2, _ = run_refs(tmp_path, '--rewrite-blocks')
     assert code2 == 0
     assert a.read_text(encoding='utf-8') == a_before
+
+
+def test_refs_rewrite_blocks_renders_impact_tag(tmp_path):
+    a = tmp_path / 'sectors' / 'semiconductor' / 'storage' / 'a.md'
+    t = tmp_path / 'themes' / 't.md'
+    _write(a, """\
+    ---
+    doc_type: buffett
+    stock_code: '600000'
+    stock_name: X
+    sector: semiconductor
+    subsector: storage
+    themes: [t]
+    rating: core
+    conviction_date: 2026-01-01
+    thesis: t
+    related_docs:
+      - path: ../../../themes/t.md
+        note: 供给侧口径确认
+        impact: 动摇
+        magnitude: 中
+    ---
+    # X
+    """)
+    _write(t, """\
+    ---
+    doc_type: theme
+    theme_name: T
+    themes: [t]
+    date: 2026-08-22
+    related_docs:
+      - path: ../sectors/semiconductor/storage/a.md
+        note: 回链
+    ---
+    # T
+    """)
+    code, out = run_refs(tmp_path, '--rewrite-blocks')
+    assert code == 0, out
+    assert '> - [t](../../../themes/t.md)【动摇·中】 — 供给侧口径确认' in a.read_text(encoding='utf-8')
