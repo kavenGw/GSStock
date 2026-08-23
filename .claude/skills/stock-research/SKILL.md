@@ -43,7 +43,7 @@ description: >-
 - `mkdir -p .omc/artifacts`（闸门脚本与临时产物落点，已 gitignore）。
 - 避坑门：`docs/stock-analytics/avoidance-list.yaml` 对模式 1/2 生效，命中按 `.claude/rules/docs-conventions.md` 重验。
 - 收尾闸门：`python scripts/lint_docs_frontmatter.py && python scripts/lint_docs_refs.py` 双 exit 0；
-  写档规格见 `buffett-doc-spec`，删旧档/反向链/valuations 同步/提交协议见 `stock-doc-finalize`。
+  写档规格见 `buffett-doc-spec`，删旧档/反向链/valuations 同步/提交协议见 `references/finalize.md`。
 - 一次性脚本与 `.omc/artifacts/` 产物不入库。
 
 ## references 索引
@@ -58,6 +58,7 @@ description: >-
 | `lessons.md` | 模式 1/2 实测教训 L1–L17，按编号翻 | 控制者 |
 | `sector-lenses.md` | 板块视角注册表，控制者摘原文内联 | 控制者 |
 | `impact-rubric.md` | 模式 3 传导 rubric + theme 档模板 | 控制者 |
+| `finalize.md` | Phase C 收尾动作清单：删旧档 → 反向链 → 双 lint → valuations 同步 → 安全提交 → 亲验 | Phase C 执行者 |
 | `scripts/pool_index.py` | 模式 2 溢出 / 模式 3 候选召回 | 脚本 |
 
 ## 维护规则

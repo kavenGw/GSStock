@@ -59,7 +59,7 @@ evidence 落 `.omc/artifacts/<股票名>-<日期>-evidence-A1-财报.md`，repor
 在模式 1 审查项之上加一项：**diff 审查**——`git diff <文件夹>` 里每处改动都能在 A1 evidence 找到依据；
 没依据的改动列为 Major。闸门 `--phase review`。
 
-### Phase C — 收尾（1 个 sonnet）→ `dispatch.md §4` / `stock-doc-finalize`
+### Phase C — 收尾（1 个 sonnet）→ `dispatch.md §4` / `finalize.md`
 
 无旧档可删、无反向链新增（结构性引用不变），主要是 `valuations.yaml` 同步 + 双 lint + 按并行 session 协议提交。
 

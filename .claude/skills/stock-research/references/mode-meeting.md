@@ -79,7 +79,7 @@ python scripts/lint_docs_frontmatter.py
 python scripts/lint_docs_refs.py
 ```
 
-双 exit 0 后按 `stock-doc-finalize` 的并行 session 安全协议提交（`git add <精确路径...> && git commit -F .git/MSG.txt` 同链）。
+双 exit 0 后按 `finalize.md` 的并行 session 安全协议提交（`git add <精确路径...> && git commit -F .git/MSG.txt` 同链）。
 
 ### 5. 汇报
 

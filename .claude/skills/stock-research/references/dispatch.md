@@ -2,7 +2,7 @@
 
 每个 subagent 都要拿到**完整自包含上下文**：标的 + 代码 + 市场 + 今天日期 + 知识截止须联网 + 本节列出的
 必内联内容 + §0 汇报协议。它自行加载的只有：evidence 片段、旧档、`Skill buffett`、`Skill buffett-doc-spec`
-（写手/审查员）、`Skill stock-doc-finalize`（Phase C）。
+（写手/审查员）、Read `references/finalize.md`（Phase C）。
 
 ## 0. 两条通用协议
 
@@ -110,6 +110,6 @@ Minor nits 可修后控制者直接核验。
 
 ## 4. Phase C — 收尾（1 个 sonnet）
 
-要求 `Skill stock-doc-finalize`（动作清单全在其中）。给：新档文件夹路径、待删旧档清单（仅平铺历史档，控制者已 Read 确认；目标此前已是文件夹则为空）、
+要求 Read `.claude/skills/stock-research/references/finalize.md`（动作清单全在其中）。给：新档文件夹路径、待删旧档清单（仅平铺历史档，控制者已 Read 确认；目标此前已是文件夹则为空）、
 `stock_code`、需补反向条目的被链档路径 + 控制者备好的反向 YAML 条目（path/note/symmetric）、commit message 文件名 `.git/MSG-<股票名>-<日期>.txt`。
 汇报含双 lint 退出码 + valuations 同步状态 + SHA + `git show --stat HEAD` 文件清单 + 遗留检查结论。

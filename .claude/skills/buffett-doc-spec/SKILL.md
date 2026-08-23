@@ -3,7 +3,7 @@ name: buffett-doc-spec
 description: >-
   Use when writing or reviewing a buffett 深度分析档 under docs/stock-analytics（stock-research 模式 1/2 的
   Phase B 写手与合并审查员必须加载）——需要 frontmatter 字段集/rating 枚举、13 节文档结构、场景加权估值铁律、
-  valuation 块字段、8 条质量红线时。不含采证与收尾流程（见 stock-research / stock-doc-finalize）。
+  valuation 块字段、8 条质量红线时。不含采证与收尾流程（见 stock-research 及其 references/finalize.md）。
 ---
 
 # buffett 深度档规格（buffett-doc-spec）
@@ -67,7 +67,7 @@ section 档 frontmatter 仅 `doc_type / stock_code / stock_name / section` 四�
 `quality`（质地星级）**不进 frontmatter**，是 valuations.yaml 条目专属字段，Phase C 按需写。
 
 **写手职责边界**：写完只跑 `python scripts/lint_docs_frontmatter.py`（6 文件齐全 + 占位由 gate `--doc <文件夹>` 校验）；**不跑 refs lint、不 git add/commit、不删旧档、
-不改兄弟档**（这些归 Phase C 的 `stock-doc-finalize`）。
+不改兄弟档**（这些归 Phase C，见 stock-research `references/finalize.md`）。
 
 撰写纪律：三档每股内在价值与正文 §0/§9 一致；分红率与 §3/§11 一致；**所有含数字的 frontmatter 字段**
 （valuation 块 + watch_reason/exclude_reason + thesis）都须与正文镜像一致——审查逐个比对，不只查 valuation。

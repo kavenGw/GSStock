@@ -244,7 +244,7 @@
 ### 【撰写落点（撰写 face）】
 - §3 盈利能力：补充分红率 / 派息覆盖率 / 股东回报率（分红 + 回购）。
 - §11 风险/监控：分红削减风险作为监控指标。
-- **valuations.yaml 同步**：`dividend_yield` 字段必填（取最新年度股息率），见 `stock-doc-finalize`。
+- **valuations.yaml 同步**：`dividend_yield` 字段必填（取最新年度股息率），见 `finalize.md`。
 
 ### 【双面必答】
 - 高分红是否**可持续**（自由现金流覆盖 vs 借债分红 / 一次性特别股息）？
