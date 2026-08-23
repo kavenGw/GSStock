@@ -79,14 +79,15 @@ with app.app_context():
 
 ```python
 def scan_universe(docs_root, config):
-    """扫 docs/stock-analytics/sectors/**/*.md，返回 universe 列表 + 待迁移清单。"""
+    """扫 docs/stock-analytics/sectors/**/*.md，返回 universe 列表 + 待迁移清单。
+    文件夹架构只认 index.md（doc_type=buffett），buffett-section / buffett-events 跳过。"""
     raw_entries = []
     migration_pending = []
 
     for md in glob('docs/stock-analytics/sectors/**/*.md'):
         fm = parse_frontmatter(md)  # 解析文件开头 --- 之间的 YAML；无 --- 或解析失败返回 None
 
-        if fm and 'stock_code' in fm:
+        if fm and fm.get('doc_type') == 'buffett':
             entry = {
                 'stock_code': fm['stock_code'],
                 'stock_name': fm['stock_name'],
