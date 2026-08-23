@@ -63,6 +63,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A --quiet-min 3`，exit 0 **且**所有在途校准项
 已收到「已闭合」回复才派 B [L1][L2]。需等待时按 [L7] 探测模板包一层（超时分支也要发信号）。
 预估按「最慢路 + 1~2 轮校准」[L4]；派发前先粗数必查条数，上限管"查多深"管不住"有多少条"；A+H / 多业务线 / 多 lens 命中往上取。
+某一路报「前提变化」时先 grep 另两路 evidence 确认是否已自发命中，命中就别派校准轮 [L16]。
 
 ### Phase B — 撰写（1 个 opus，不拆）→ dispatch.md §2
 
