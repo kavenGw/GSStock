@@ -83,3 +83,16 @@ def test_build_index_recurses_nested_sector_subdirs(analysis_dir):
     index = BuffettAnalysisService.build_index(analysis_dir)
 
     assert set(index.keys()) == {'兆易创新', '青岛啤酒'}
+
+
+def test_build_index_folder_form_wins_over_flat(analysis_dir):
+    _write(analysis_dir, '2026-04-21-兆易创新-buffett分析.md', body='OLD')
+    d = analysis_dir / 'storage' / '兆易创新'
+    d.mkdir(parents=True)
+    idx = _write(d, 'index.md', body='---\ndoc_type: buffett\nconviction_date: 2026-08-23\n---\n# 兆易创新\n')
+    _write(d, 'thesis.md', body='---\ndoc_type: buffett-section\n---\n# §6')
+
+    index = BuffettAnalysisService.build_index(analysis_dir)
+
+    assert index['兆易创新'] == idx
+    assert set(index.keys()) == {'兆易创新'}
