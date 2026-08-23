@@ -38,7 +38,7 @@ paths:
 
 分类数据是用户数据非 seed（seed 铁律"不覆盖已存在归属"，而改挂分类恰需覆盖）；建/改分类走分类管理 UI 或一次性 DB 写入。
 
-**A+H 双重上市标的取较低估值口径（铁律）**：A+H 股做 buffett 档 / 写 valuations.yaml 时，**取 A 股与 H 股两地中估值更低（安全边际更大）一侧作跟踪主体，不强行用 A 股口径**——H 股通常较 A 股折价，AH 折价是安全边际放大器（实测天岳 A 股口径安全边际 -18.7%，切 H 股 02631 因折价 -38.7% 反转为 +32.7%）。frontmatter `stock_code` 与 valuations 条目（`market`/`currency`/每股内在价值）按选定口径写；同股切换口径时 valuations 按 `stock_code` 覆盖旧条目（688234→02631）。H 口径市值自洽校验见 `data-fetch-conventions.md` 港股节，币种折算（RMB→HKD ×1.08）+ 安全边际两口径对照见 stock-deep-redo playbook §3。
+**A+H 双重上市标的取较低估值口径（铁律）**：A+H 股做 buffett 档 / 写 valuations.yaml 时，**取 A 股与 H 股两地中估值更低（安全边际更大）一侧作跟踪主体，不强行用 A 股口径**——H 股通常较 A 股折价，AH 折价是安全边际放大器（实测天岳 A 股口径安全边际 -18.7%，切 H 股 02631 因折价 -38.7% 反转为 +32.7%）。frontmatter `stock_code` 与 valuations 条目（`market`/`currency`/每股内在价值）按选定口径写；同股切换口径时 valuations 按 `stock_code` 覆盖旧条目（688234→02631）。H 口径市值自洽校验见 `data-fetch-conventions.md` 港股节，币种折算（RMB→HKD ×1.08）+ 安全边际两口径对照见 `buffett-doc-spec` §3。
 
 **A+H 标的在 valuations.yaml 里可能只存 H 股口径代码**：承上铁律——A+H 股若选 H 口径跟踪，valuations 条目的 `stock_code` 就是港股形态（如洛阳钼业实际为 `'03993'` 而非 A 股 `'603993'`，瑞浦兰钧为 `'00666.HK'`）。按 A 股代码索引 valuations 条目的回填/聚合脚本必须预期此形态：用「剥 `.HK` + 去前导零」归一化双向匹配，或直接以 valuations 里的实际 code 为准；勿用 A 股代码硬等值匹配，否则 A+H 标的静默漏命中。
 
