@@ -26,6 +26,7 @@ _BLOCK_RE = re.compile(
     re.DOTALL,
 )
 _H1_RE = re.compile(r'^(# [^\n]+\n)', re.MULTILINE)
+_NEVER_ORPHAN = {'buffett-section', 'buffett-events'}
 
 
 def _resolve(base: Path, rel: str) -> Path:
@@ -79,7 +80,8 @@ def _orphans(docs: dict[Path, dict]) -> list[Path]:
         for ref in fm.get('related_docs') or []:
             if isinstance(ref, dict) and 'path' in ref:
                 referenced.add(_resolve(path, ref['path']))
-    return sorted(p for p in docs if p not in referenced)
+    return sorted(p for p, fm in docs.items()
+                  if p not in referenced and fm.get('doc_type') not in _NEVER_ORPHAN)
 
 
 def _render_block(fm: dict, md_path: Path) -> str:

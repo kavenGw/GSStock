@@ -203,3 +203,44 @@ def test_refs_rewrite_blocks_renders_impact_tag(tmp_path):
     code, out = run_refs(tmp_path, '--rewrite-blocks')
     assert code == 0, out
     assert '> - [t](../../../themes/t.md)【动摇·中】 — 供给侧口径确认' in a.read_text(encoding='utf-8')
+
+
+def test_orphans_skip_folder_sections(tmp_path):
+    d = tmp_path / 'sectors' / 'semiconductor' / 'storage' / '兆易创新'
+    _write(d / 'index.md', """\
+    ---
+    doc_type: buffett
+    stock_code: '603986'
+    stock_name: 兆易创新
+    sector: semiconductor
+    subsector: storage
+    themes: [memory]
+    rating: config
+    conviction_date: 2026-08-23
+    thesis: t
+    related_docs: []
+    ---
+    # 兆易创新
+    """)
+    _write(d / 'thesis.md', """\
+    ---
+    doc_type: buffett-section
+    stock_code: '603986'
+    stock_name: 兆易创新
+    section: thesis
+    ---
+    # §6
+    """)
+    _write(d / 'events.md', """\
+    ---
+    doc_type: buffett-events
+    stock_code: '603986'
+    stock_name: 兆易创新
+    related_docs: []
+    ---
+    # 事件
+    """)
+    rc, out = run_refs(tmp_path, '--check-orphans')
+    assert rc == 0
+    assert 'thesis.md' not in out and 'events.md' not in out
+    assert 'index.md' in out
