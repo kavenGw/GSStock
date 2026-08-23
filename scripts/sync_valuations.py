@@ -1,4 +1,4 @@
-"""扫 docs/stock-analytics/**/*buffett*.md 的 frontmatter valuation 块，
+"""扫 docs/stock-analytics/**/*.md 中 doc_type=buffett 的档（平铺或 <股票名>/index.md）的 frontmatter valuation 块，
 flatten 后 upsert 到 docs/stock-analytics/valuations.yaml。
 
 用法：
@@ -120,7 +120,7 @@ def sync(docs_root: Path, yaml_path: Path, only_code: Optional[str] = None) -> i
     """扫 buffett 档，把含 valuation 块的（可选按 only_code 过滤）upsert 进 yaml，返回 upsert 条数。"""
     entries = _load_entries(yaml_path)
     count = 0
-    for md in sorted(docs_root.rglob('*buffett*.md')):
+    for md in sorted(docs_root.rglob('*.md')):
         fm, _ = parse_frontmatter(md)
         if not fm or fm.get('doc_type') != 'buffett' or 'valuation' not in fm:
             continue

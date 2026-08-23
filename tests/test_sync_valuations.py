@@ -254,3 +254,22 @@ def test_upsert_new_entry_has_no_quality():
     entries = []
     upsert(entries, {'stock_code': '000001', 'rating': 'config'})
     assert 'quality' not in entries[0]
+
+
+def test_sync_picks_folder_index(tmp_path):
+    docs_root = tmp_path / 'docs'
+    d = docs_root / 'sectors' / 'semiconductor' / 'storage' / '兆易创新'
+    d.mkdir(parents=True)
+    (d / 'index.md').write_text(
+        "---\ndoc_type: buffett\nstock_code: '603986'\nstock_name: 兆易创新\n"
+        "sector: semiconductor\nsubsector: storage\nthemes: [memory]\nrating: config\n"
+        "conviction_date: 2026-08-23\nthesis: t\nvaluation:\n  bear: 1\n  base: 2\n  bull: 3\n---\n# x\n",
+        encoding='utf-8')
+    (d / 'valuation.md').write_text(
+        "---\ndoc_type: buffett-section\nstock_code: '603986'\nstock_name: 兆易创新\nsection: valuation\n---\n# §9\n",
+        encoding='utf-8')
+    yaml_path = tmp_path / 'valuations.yaml'
+    n = sync(docs_root, yaml_path)
+    assert n == 1
+    entries = yaml.safe_load(yaml_path.read_text(encoding='utf-8'))
+    assert entries[0]['source_doc'] == 'sectors/semiconductor/storage/兆易创新/index.md'
