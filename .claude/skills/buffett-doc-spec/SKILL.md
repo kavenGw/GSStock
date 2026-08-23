@@ -49,10 +49,24 @@ related_docs:
 <!-- END related_docs -->
 ```
 
-文件命名：`sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md`。
+文件落点：`sectors/<sector>/<subsector>/<股票名>/`（稳定路径，重做原地覆盖，历史靠 git）：
+
+| 文件 | doc_type | 内容 | 体量 |
+|------|----------|------|------|
+| index.md | buffett（上述完整 frontmatter） | §0 + §10 + §11 | ≤12KB |
+| business.md | buffett-section / section: business | §1-§5 | — |
+| thesis.md | buffett-section / section: thesis | §6-§8 | — |
+| valuation.md | buffett-section / section: valuation | §9 + 相对旧档变化清单 | — |
+| sources.md | buffett-section / section: sources | §12 | — |
+| events.md | buffett-events | 只含 frontmatter related_docs（news-impact 回写）+ h1；**重做时不覆盖**，不存在才新建 `related_docs: []` | — |
+
+section 档 frontmatter 仅 `doc_type / stock_code / stock_name / section` 四字段，禁止 rating/valuation/related_docs/themes
+（lint 强校验）。index.md 的 `related_docs` 只放结构性引用（comps/quarterly/cross-sector/兄弟 buffett 档），事件 theme
+一律在 events.md。跨文件引用用相对链接 `[§9](valuation.md)`，不复制正文；每个 section 文件以 `# <股票名> — <节范围>` 开头。
+存量平铺档 `YYYY-MM-DD-<股票名>-buffett分析.md` 是 2026-08-23 前的旧形态，**不再新建**；消费者双模识别。
 `quality`（质地星级）**不进 frontmatter**，是 valuations.yaml 条目专属字段，Phase C 按需写。
 
-**写手职责边界**：写完只跑 `python scripts/lint_docs_frontmatter.py`；**不跑 refs lint、不 git add/commit、不删旧档、
+**写手职责边界**：写完只跑 `python scripts/lint_docs_frontmatter.py`（6 文件齐全 + 占位由 gate `--doc <文件夹>` 校验）；**不跑 refs lint、不 git add/commit、不删旧档、
 不改兄弟档**（这些归 Phase C 的 `stock-doc-finalize`）。
 
 撰写纪律：三档每股内在价值与正文 §0/§9 一致；分红率与 §3/§11 一致；**所有含数字的 frontmatter 字段**
@@ -62,23 +76,23 @@ related_docs:
 
 ## 2. 13 节文档结构
 
-- **§0 结论摘要**（倒金字塔：新评级 + 期望内在价值 + 三情景概率各一句）
-- **§1 能力圈 & 本次重审触发**（为何现在重做：哪些新变量；对比旧档结论）
-- **§2 市场规模**（各业务线 TAM/SAM/SOM + 跑道：当前渗透率/份额距天花板多远）
-- **§3 盈利能力**（最新季报兑现 + 毛利率·ROIC 周期分析 + 涨价/需求弹性精算 + 增长拆量价与增长质量）
-- **§4 全球竞争力**（全球份额、细分龙头识别、vs 国际龙头差距）
-- **§5 核心优势 / 护城河**（类型 + 强度 + 趋势；重评旧档判断）
-- **§6 核心新论点**（逐家拆解 + 受益侧传导 + 周期性 vs 结构性二分判定 + 反驳点）
-- **§7 AI / 概念潜力**（分维度，每维度结尾打 `【真敏感】`/`【蹭概念】` + 一句理由；区分产品层 vs 业绩层；
+- **§0 结论摘要** → index.md（倒金字塔：新评级 + 期望内在价值 + 三情景概率各一句）
+- **§1 能力圈 & 本次重审触发** → business.md（为何现在重做：哪些新变量；对比旧档结论）
+- **§2 市场规模** → business.md（各业务线 TAM/SAM/SOM + 跑道：当前渗透率/份额距天花板多远）
+- **§3 盈利能力** → business.md（最新季报兑现 + 毛利率·ROIC 周期分析 + 涨价/需求弹性精算 + 增长拆量价与增长质量）
+- **§4 全球竞争力** → business.md（全球份额、细分龙头识别、vs 国际龙头差距）
+- **§5 核心优势 / 护城河** → business.md（类型 + 强度 + 趋势；重评旧档判断）
+- **§6 核心新论点** → thesis.md（逐家拆解 + 受益侧传导 + 周期性 vs 结构性二分判定 + 反驳点）
+- **§7 AI / 概念潜力** → thesis.md（分维度，每维度结尾打 `【真敏感】`/`【蹭概念】` + 一句理由；区分产品层 vs 业绩层；
   未兑现概念不许进 §9 的 owner earnings 基础）
-- **§8 周期定位**（周期顶还是结构性新台阶？正反信号对冲）
-- **§9 估值（场景加权）**（见 §3 机制）
-- **§10 评级决策**（期望内在价值 vs 实时市值 → 评级 + 买点/卖点阈值；相对旧档是否翻转）
-- **§11 关键风险 Top 3-5 + 监控指标/卖出触发器**（带硬阈值；复盘旧档触发器现状）
-- **§12 数据来源 & 局限**（逐条列联网来源含日期 + 已知局限 + "不构成投资建议"）
+- **§8 周期定位** → thesis.md（周期顶还是结构性新台阶？正反信号对冲）
+- **§9 估值（场景加权）** → valuation.md（见 §3 机制）
+- **§10 评级决策** → index.md（期望内在价值 vs 实时市值 → 评级 + 买点/卖点阈值；相对旧档是否翻转）
+- **§11 关键风险 Top 3-5 + 监控指标/卖出触发器** → index.md（带硬阈值；复盘旧档触发器现状）
+- **§12 数据来源 & 局限** → sources.md（逐条列联网来源含日期 + 已知局限 + "不构成投资建议"）
 
 节名/侧重可随标的调整，但 §6 + §9 + §10 是骨干，不可省。重做档另须写"相对旧档变化清单"
-（逐条列旧档口径 vs 最新事实 + 变化方向）。
+（逐条列旧档口径 vs 最新事实 + 变化方向，落 valuation.md 末尾）。
 
 ## 3. 场景加权估值机制
 
