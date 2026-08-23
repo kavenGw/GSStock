@@ -10,7 +10,8 @@ paths:
 
 ## 文档目录约定（docs/stock-analytics/）
 
-- `sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md` — 个股 buffett 风格深度分析（按主业务归属）
+- `sectors/<sector>/<subsector>/<股票名>/{index,business,thesis,valuation,sources,events}.md` — 个股 buffett 深度分析文件夹形态（2026-08-23 起新建/重做一律用此；只有 `index.md` 是 `doc_type: buffett`，规格见 `buffett-doc-spec`，设计见 `docs/superpowers/specs/2026-08-23-buffett-doc-folder-architecture-design.md`）
+- `sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md` — 平铺形态（存量档，不再新建；消费者双模识别）
 - `cross-sector/YYYY-MM-DD-<主题>.md` — 多股专题 / 多股 buffett 对比（如 AMD-Intel、立讯-歌尔、工业富联-甲骨文）
 - `themes/YYYY-MM-DD-<主题>.md` — 事件驱动主题（世界杯炒作 / CCL 涨价 / 磷化铟板块）
 - `quarterly/<NNqN>/YYYY-MM-DD-<股票>-<类型>.md` — 季报点评 + 同期专题（时间归档，跨板块横看）

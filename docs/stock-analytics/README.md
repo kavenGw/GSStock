@@ -4,7 +4,8 @@
 
 ## 目录约定
 
-- `sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md` — 个股深度分析（按主业务归属）
+- `sectors/<sector>/<subsector>/<股票名>/{index,business,thesis,valuation,sources,events}.md` — 个股深度分析文件夹形态（2026-08-23 起新建/重做用此；仅 `index.md` 为 `doc_type: buffett`，其余 `buffett-section` / `buffett-events`）
+- `sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md` — 平铺形态（存量档，不再新建）
 - `cross-sector/YYYY-MM-DD-<主题>.md` — 多股专题 / 多股 buffett 对比
 - `themes/YYYY-MM-DD-<主题事件>.md` — 事件驱动主题（世界杯 / CCL 涨价 / etc）
 - `quarterly/<NNqN>/YYYY-MM-DD-<股票>-季报点评.md` — 季报点评（时间归档，跨板块横看）

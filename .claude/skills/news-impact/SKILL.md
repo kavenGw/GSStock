@@ -103,7 +103,12 @@ PYTHONIOENCODING=utf-8 python .claude/skills/news-impact/scripts/pool_index.py -
 
 ### 5. related_docs 对称 + lint 收尾（必做）
 
-theme 档引用了个股 doc，个股 doc 要反向引用回来，否则 refs lint 报不对称。给每个受影响个股 doc 的 frontmatter `related_docs` 加一条指回 theme 档，**反向条目必带结论回写字段**（这是把 theme 结论结构化落回个股档的唯一通道，后续 deep-redo 据此看"有无未消化的动摇/推翻"）：
+theme 档引用了个股 doc，个股 doc 要反向引用回来，否则 refs lint 报不对称。回写位置按个股档形态分支：
+
+- **文件夹档**（存在 `sectors/<sector>/<subsector>/<股票名>/events.md`）→ theme 档的 related_docs 指向 `.../<股票名>/events.md`，反向条目追加到 `events.md` 的 frontmatter `related_docs`（path 比平铺档多一层 `../`，形如 `../../../../themes/YYYY-MM-DD-<主题>.md`）；**index.md 不动**。
+- **平铺档** → 沿用原逻辑，写该档 frontmatter。
+
+给每个受影响个股 doc 的对应位置加一条指回 theme 档，**反向条目必带结论回写字段**（这是把 theme 结论结构化落回个股档的唯一通道，后续 deep-redo 据此看"有无未消化的动摇/推翻"）：
 
 ```yaml
 - path: ../../../themes/YYYY-MM-DD-<主题>.md
