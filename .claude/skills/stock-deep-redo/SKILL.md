@@ -34,7 +34,7 @@ subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：f
 
 | 维度 | 默认 |
 |------|------|
-| 产出形态 | 新建 buffett 档（`conviction_date`=今天）+ `git rm` 该股**所有历史 buffett 档**（comps/theme/quarterly 保留） |
+| 产出形态 | 写 `sectors/<sector>/<subsector>/<股票名>/` 六文件（规格见 `buffett-doc-spec`，`conviction_date`=今天）。该股只有平铺历史档 → 新建文件夹 + Phase C `git rm` 全部平铺 buffett 档（一次性迁移）；已是文件夹 → 原地覆盖 5 文件、`events.md` 不动。comps/theme/quarterly 一律保留 |
 | 证据深度 | 全量联网验证 + 实时行情锚 |
 | 估值框架 | 场景加权 bull/base/bear，概率由证据强度定 |
 | A+H 口径 | 取 A/H 中估值更低一侧作跟踪主体（H 通常折价更优）；`stock_code`/`currency`/每股价值随选定口径；市值自洽校验见 `.claude/rules/data-fetch-conventions.md` 港股节 |
@@ -47,12 +47,14 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### 先做（控制者本人）
 
-1. Glob `docs/stock-analytics/**/*<股票名>*.md` 找底稿，挑最新 buffett 档 + 最相关 comps 作基线。
+1. Glob `docs/stock-analytics/**/*<股票名>*` 找底稿（平铺档或 `<股票名>/index.md`），挑最新 buffett 档 + 最相关 comps 作基线。
+   已有 `<股票名>/events.md` → 读其 related_docs，theme `date` > 旧 index `conviction_date` 的条目即「未消化事件」，
+   摘 note/impact/magnitude 备内联给 A2（dispatch.md §1）。
 2. 确认代码、市场（A/US/HK）、sector/subsector。
 3. **避坑门**：查 `docs/stock-analytics/avoidance-list.yaml`，命中则按 `.claude/rules/docs-conventions.md`
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
-4. **列待删旧档清单**：筛出 `*buffett*.md`，**逐个 Read 确认**档名含目标股票名且 `stock_code` 一致；不符则停下
-   surface 给用户。
+4. **列待删旧档清单**：只筛平铺 `*buffett*.md`（文件夹档不删），**逐个 Read 确认**档名含目标股票名且 `stock_code`
+   一致；不符则停下 surface 给用户。目标已是文件夹 → 清单为空。
 5. **选 lens**：按 subsector 从 `sector-lenses.md` 挑命中节（主 lens + AI/成长两个横切默认都跑识别），把命中节
    原文摘出备内联（dispatch.md §0.2）。
 6. **兄弟档口径摘要**：同板块近期兄弟档读一遍提炼 3-5 行（TTM 分母 / bull 封顶 / 买点折价等），不给全文。
@@ -67,7 +69,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### Phase B — 撰写（1 个 opus，不拆）→ dispatch.md §2
 
-闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档路径>`（含占位检查，对应
+闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档文件夹>`（查 6 文件齐全 + 占位，对应
 "主体 + 填锚"抗中断设计 [L14][L10]）。预估 17-30min，由成稿长度驱动，不可并行（拆写手断"论点→估值→评级"链）。
 
 ### 合并审查（1 个 read-only sonnet；异常升 opus）→ dispatch.md §3
@@ -84,10 +86,10 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 - 会话中断杀掉全部 subagent；"到点再做"别交给 subagent，能亲自接棒就别等 [L6]。
 - 跨日第一件事：复核基本面基线是否仍成立（期间落了财报就是实质返修，不是刷新锚）[L9]。
-- 刷新价格锚后派生数 grep 扫不到，必须逐句手算 [L8]：`python scripts/deep_redo_anchor_audit.py <新档> --old <旧价> --new <新价>`
+- 刷新价格锚后派生数 grep 扫不到，必须逐句手算 [L8]：`python scripts/deep_redo_anchor_audit.py <新档文件夹> --old <旧价> --new <新价>`
   只列清单不算数。
 - 亲验用精确锚点（tail + 关键词计数 + mtime + report `end:`），别用模糊 grep [L13]。
-- Phase B 中断续跑给"只填占位、不重写已有内容"的收口棒，不重派完整写手 [L14]。
+- Phase B 中断续跑给"只补缺的文件 / 只填占位、不重写已有内容"的收口棒，不重派完整写手 [L14]。
 
 ## 收尾（控制者本人）
 

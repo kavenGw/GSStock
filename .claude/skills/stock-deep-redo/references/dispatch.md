@@ -65,7 +65,8 @@ akshare 限流/失效、新浪 IR PDF 无法解析、腾讯港股字段等取数
 
 **A2 论点验证**（`-evidence-A2-论点.md`）：给旧档核心多空论点清单 + 本次重审触发的新变量；逐条联网核实，
 每条给证据分级 + URL + 日期 + **反驳点**；供给侧论点逐家拆退出/扩产/政策的范围+时间表+动机；报价/需求数据
-注明机构间分歧；标的最新动向（季报/路线图）。
+注明机构间分歧；标的最新动向（季报/路线图）。目标已是文件夹档时，内联 `events.md` 里的未消化事件
+（theme `date` > 旧 index `conviction_date` 的条目：note/impact/magnitude）作为必核新变量，逐条判强化/动摇/推翻是否成立。
 
 **A3 lens 专项**（`-evidence-A3-lens.md`）：内联命中 lens 的【必查清单】原文，逐条核实，查不到明写不许跳过；
 概念维度线索标【实证/概念】。
@@ -79,7 +80,9 @@ akshare 限流/失效、新浪 IR PDF 无法解析、腾讯港股字段等取数
 ## 2. Phase B — 撰写（1 个 opus，不拆）
 
 要求先 `Skill buffett` 再 `Skill buffett-doc-spec`（frontmatter/13 节/估值机制/红线/变化清单均在该规格里，
-不必再由控制者内联）。给：三份 evidence 路径 + 旧档路径 + 新档目标路径。
+不必再由控制者内联）。给：三份 evidence 路径 + 旧档路径（平铺档或旧 index.md）+ 新档目标文件夹
+`sectors/<sector>/<subsector>/<股票名>/`。产出 6 文件（index/business/thesis/valuation/sources/events，节落点见规格）；
+**events.md 已存在则不碰**，不存在才新建 `related_docs: []`；index.md ≤12KB，§0/§10/§11 引其他文件用相对链接不复制正文。
 
 必内联：
 - 命中 lens 的【撰写落点】【双面必答】【监控指标模板】原文——命中 lens 的每个必查项正文都要有回应
@@ -87,17 +90,18 @@ akshare 限流/失效、新浪 IR PDF 无法解析、腾讯港股字段等取数
 - A1 关键事实锚（实时市值/PB/PS/股本/汇率）+ 需纠正的旧档错误假设
 - A+H 口径选定结果（取估值更低一侧，`stock_code`/`currency` 随之）
 
-交办：写"相对旧档变化清单"；标注 A2/A3 与 A1 的数字冲突（取 A1 并显式标注）；
+交办：写"相对旧档变化清单"（valuation.md 末尾）；标注 A2/A3 与 A1 的数字冲突（取 A1 并显式标注）；
 只跑 `python scripts/lint_docs_frontmatter.py`，**不跑 refs、不 git add/commit**。
 抗中断：先落主体、市值分母等待锚处留 `【待锚】` 再填 [L14]；财报盘后披露 + 次日盘前采证时开盘后补锚 [L10]。
 汇报含评级 + 期望内在价值 + 安全边际 + 最脆弱论点自评。
 
-**派发坑**：写 300+ 行可能报 `Stream idle timeout`、文件 0 落盘。先 `ls`/行数确认确实未生成，再用
-`SendMessage` 按原 agentId 续跑（"立即一次性 Write 完整篇、勿再读文件/联网、勿分段"），**别重派**。
+**派发坑**：写 300+ 行可能报 `Stream idle timeout`、文件 0 落盘。先 `ls <文件夹>`/逐文件行数确认哪些未生成，再用
+`SendMessage` 按原 agentId 续跑（"只 Write 缺的文件、勿再读文件/联网、勿分段"），**别重派**。六文件天然分段，
+落盘顺序建议 index → valuation → thesis → business → sources → events，先保结论与估值。
 
 ## 3. 合并审查（1 个 read-only sonnet；异常升 opus）
 
-给：新档路径 + 三份 evidence 路径；要求 `Skill buffett-doc-spec`（审查输出格式与红线在其 §4-§5）。
+给：新档文件夹路径（6 文件全读）+ 三份 evidence 路径；要求 `Skill buffett-doc-spec`（审查输出格式与红线在其 §4-§5）。
 必内联：命中 lens 的【必查清单】【双面必答】原文；「所有含数字的 frontmatter 字段都要与正文 §0/§9 逐个比对」。
 两段正文全文写进 report 文件——审查是"只回 idle 不给正文"的重灾区。
 
@@ -106,6 +110,6 @@ Minor nits 可修后控制者直接核验。
 
 ## 4. Phase C — 收尾（1 个 sonnet）
 
-要求 `Skill stock-doc-finalize`（动作清单全在其中）。给：新档路径、待删旧档清单（控制者已 Read 确认）、
+要求 `Skill stock-doc-finalize`（动作清单全在其中）。给：新档文件夹路径、待删旧档清单（仅平铺历史档，控制者已 Read 确认；目标此前已是文件夹则为空）、
 `stock_code`、需补反向条目的被链档路径 + 控制者备好的反向 YAML 条目（path/note/symmetric）、commit message 文件名 `.git/MSG-<股票名>-<日期>.txt`。
 汇报含双 lint 退出码 + valuations 同步状态 + SHA + `git show --stat HEAD` 文件清单 + 遗留检查结论。
