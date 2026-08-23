@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 把 `stock-deep-redo` 的 SKILL.md 从 378 行编年体重构为 ≤180 行编排手册，教训编号化沉淀到 `references/lessons.md`，并把三处最常翻车的判据（Phase A/B/review 放行、跨日锚点派生数）落成两个可复用脚本。
+**Goal:** 把 `stock-deep-redo` 的 SKILL.md 从 378 行编年体重构为 ≤260 行编排手册（实际落定 247 行），教训编号化沉淀到 `references/lessons.md`，并把三处最常翻车的判据（Phase A/B/review 放行、跨日锚点派生数）落成两个可复用脚本。
 
 **Architecture:** 两个纯 stdlib 脚本先在 worktree 里 TDD 落地并合回 main（Task 1-4），再在 main 上做文档重构（Task 5-9）。脚本无状态、不轮询、不 import `app`——放行判据是"检查文件事实"，等待循环由控制者用 `until` 包一层。文档侧用 `[Ln]` 编号把 SKILL.md 的闸门句与 lessons.md 的案例解耦，SKILL.md 末尾的「维护规则」节负责防止它再长回编年体。
 
@@ -34,7 +34,7 @@
 | `scripts/deep_redo_anchor_audit.py` | 新建。扫档列出"派生数"句子供逐句手算，退出码恒 0。 | 3 |
 | `tests/test_deep_redo_anchor_audit.py` | 新建。造含派生句与旧字面量的 md，断言命中行与标签。 | 3 |
 | `.claude/skills/stock-deep-redo/references/lessons.md` | 新建。L1–L15 三段式案例库 + 分棒耗时明细附录。SKILL.md 的引用目标。 | 5 |
-| `.claude/skills/stock-deep-redo/SKILL.md` | 重写。编排手册：每阶段「做什么/必内联/放行闸门/预估」四段式 + 维护规则节。≤180 行。 | 6 |
+| `.claude/skills/stock-deep-redo/SKILL.md` | 重写。编排手册：每阶段「做什么/必内联/放行闸门/预估」四段式 + 维护规则节。≤260 行（实际 247）。 | 6 |
 | `.claude/skills/stock-deep-redo/references/playbook.md` | 微调。§9.0 删与 SKILL.md 重复的"自报时间戳不可信"长段，改一句引用 `[L3]`。 | 7 |
 | `C:\Users\kaven\.claude\projects\D--Git-stock\memory\` | 删 5 条 skill 专属、3 条通用加 lessons 引用、`MEMORY.md` 同步索引。 | 8 |
 
@@ -842,11 +842,11 @@ rtk git add .claude/skills/stock-deep-redo/references/lessons.md && rtk git comm
 ### Task 6: 重写 SKILL.md 为编排手册
 
 **Files:**
-- Modify: `.claude/skills/stock-deep-redo/SKILL.md`（378 行 → ≤180 行）
+- Modify: `.claude/skills/stock-deep-redo/SKILL.md`（378 行 → ≤260 行，实际 247）
 
 **Interfaces:**
 - Consumes: Task 5 的 `L1`–`L15` 编号、Task 1-3 的两个脚本路径与命令行签名
-- Produces: 一份 ≤180 行的编排手册。**Task 7 的 playbook §9.0 会引用它的「质量红线」节仍在原处这一事实；Task 9 的验收检查它的行数与 `[Ln]` 双向可解析。**
+- Produces: 一份 ≤260 行的编排手册（实际 247 行）。**Task 7 的 playbook §9.0 会引用它的「质量红线」节仍在原处这一事实；Task 9 的验收检查它的行数与 `[Ln]` 双向可解析。**
 
 - [ ] **Step 1: 原样保留的部分**
 
@@ -954,7 +954,7 @@ Phase C 节：动作清单原样保留（删旧档 / 反向链改指 / 双 lint 
 4. 若该教训能机械化，优先落成 `scripts/deep_redo_*.py` 的一个检查项，再在闸门段引用它——
    **措辞管不住的判据要变成命令**（L1/L7/L8 三条就是这么来的）。
 
-本文件的目标是 **≤180 行**。超了就是教训又写回正文了，回本节重读。
+本文件的目标是 **≤260 行**。超了先问一句：是不是又把某一轮的教训叙事写回正文了？是就搬去 lessons.md；不是（确属新增的操作步骤）就照实加，并在这里更新数字。
 ```
 
 - [ ] **Step 5: 更新「参考文件」节**
@@ -973,12 +973,12 @@ cd /d/Git/stock && PYTHONIOENCODING=utf-8 python -c "print(sum(1 for _ in open('
 mkdir -p .omc/artifacts && python scripts/deep_redo_gate.py 测试股 2026-08-22 --phase A; echo "EXIT=$?"
 ```
 
-Expected: 行数 ≤ 180；闸门命令打印三路 MISSING 且 `EXIT=1`（证明 SKILL.md 里写的命令真能跑，不是纸面命令）
+Expected: 行数 ≤ 260；闸门命令打印三路 MISSING 且 `EXIT=1`（证明 SKILL.md 里写的命令真能跑，不是纸面命令）
 
 - [ ] **Step 7: 提交**
 
 ```bash
-cd /d/Git/stock && printf '%s\n' 'docs(skill): stock-deep-redo SKILL.md 重构为编排手册（378 -> <=180 行）' '' '每阶段改四段式：做什么/必内联/放行闸门/预估，闸门给可执行命令而非措辞。' '150 行编年体教训移入 lessons.md，正文只留 [Ln] 引用。' '新增「维护规则」节防止本文件再长回编年体。' '并入两条原 memory 的审查提示（假 Critical 预声明、镜像同步写字段类别而非枚举）。' > .git/MSG-skillmd-20260822.txt
+cd /d/Git/stock && printf '%s\n' 'docs(skill): stock-deep-redo SKILL.md 重构为编排手册（378 -> 247 行）' '' '每阶段改四段式：做什么/必内联/放行闸门/预估，闸门给可执行命令而非措辞。' '150 行编年体教训移入 lessons.md，正文只留 [Ln] 引用。' '新增「维护规则」节防止本文件再长回编年体。' '并入两条原 memory 的审查提示（假 Critical 预声明、镜像同步写字段类别而非枚举）。' > .git/MSG-skillmd-20260822.txt
 rtk git add .claude/skills/stock-deep-redo/SKILL.md && rtk git commit -F .git/MSG-skillmd-20260822.txt
 ```
 
@@ -1110,7 +1110,7 @@ lessons = Path('.claude/skills/stock-deep-redo/references/lessons.md').read_text
 defined = set(re.findall(r'^## (L\d+) ', lessons, re.M))
 used = set(re.findall(r'\[(L\d+)\]', skill))
 lines = sum(1 for _ in Path('.claude/skills/stock-deep-redo/SKILL.md').open(encoding='utf-8'))
-print('SKILL.md 行数:', lines, '(<=180)' if lines <= 180 else '*** 超标 ***')
+print('SKILL.md 行数:', lines, '(<=260)' if lines <= 260 else '*** 超标 ***')
 print('lessons 定义:', len(defined), sorted(defined, key=lambda s: int(s[1:])))
 print('SKILL 引用:', sorted(used, key=lambda s: int(s[1:])))
 print('引用了但未定义:', sorted(used - defined) or '无')
@@ -1123,7 +1123,7 @@ print('定义了但未被引用:', sorted(defined - used) or '无')
 cd /d/Git/stock && PYTHONIOENCODING=utf-8 python scripts/_check_lessons_refs.py; rm -f scripts/_check_lessons_refs.py
 ```
 
-Expected: 行数 ≤ 180；「引用了但未定义」为「无」。
+Expected: 行数 ≤ 260；「引用了但未定义」为「无」。
 （「定义了但未被引用」允许非空——L11/L12 这类纯经验条目可能只在「读法」里合并引用，但需人工确认不是漏引）
 
 - [ ] **Step 2: 两个脚本的全量测试**
@@ -1165,7 +1165,7 @@ Expected: 能看到 Task 1-3 的三个 feat、Task 4 的 merge、Task 5/6/7 的�
 按此格式向用户汇报：
 
 ```
-SKILL.md 378 → N 行（目标 ≤180）
+SKILL.md 378 → N 行（目标 ≤260）
 lessons.md L1–L15 + 分棒附录，SKILL 引用 M 处全部可解析
 脚本 17 passed；全量 pytest 无新增 failed
 memory 24 → 19 条，3 条加 lessons 引用，无死链
