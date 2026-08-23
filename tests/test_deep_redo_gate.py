@@ -189,3 +189,31 @@ def test_phase_a_stale_but_green_still_ready(tmp_path, capsys):
     assert rc == 0
     assert 'A READY' in out
     assert 'NOTE' in out and '卡住' in out
+
+
+def _make_folder(tmp_path: Path, names=('business', 'thesis', 'valuation', 'sources')) -> Path:
+    d = tmp_path / STOCK
+    d.mkdir()
+    _write(d / 'index.md', DOC_FRONTMATTER)
+    for n in names:
+        _write(d / f'{n}.md', f'---\ndoc_type: buffett-section\nsection: {n}\n---\n# x\n正文')
+    _write(d / 'events.md', '---\ndoc_type: buffett-events\nrelated_docs: []\n---\n# 事件\n')
+    return d
+
+
+def test_phase_b_folder_doc(tmp_path, capsys):
+    art, _ = _make_phase_b(tmp_path)
+    d = _make_folder(tmp_path)
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(d), '--artifacts', str(art)])
+    assert rc == 0 and 'B READY' in capsys.readouterr().out
+
+
+def test_phase_b_folder_missing_file_and_placeholder(tmp_path, capsys):
+    art, _ = _make_phase_b(tmp_path)
+    d = _make_folder(tmp_path, names=('thesis',))
+    _write(d / 'thesis.md', '---\ndoc_type: buffett-section\nsection: thesis\n---\n# x\n市值【待锚】')
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(d), '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'business.md' in out and 'sources.md' in out
+    assert 'thesis.md 1 处' in out

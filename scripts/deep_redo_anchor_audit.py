@@ -1,7 +1,7 @@
 """stock-deep-redo 跨日锚点审计：列出正文里所有「派生数」句子供逐句手算。
 
 用法：
-    python scripts/deep_redo_anchor_audit.py <档路径>
+    python scripts/deep_redo_anchor_audit.py <档路径|文件夹>
     python scripts/deep_redo_anchor_audit.py <档路径> --old 60.64 --new 54.20
 
 **它不算数，只保证逐句过一遍。** 雷赛轮跨 3 天中断后控制者做了 71 处字面量
@@ -50,19 +50,24 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         description='列出档内派生数句子供逐句手算（不算数、不裁定）',
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('doc', help='buffett 深度档路径')
+    ap.add_argument('doc', help='buffett 深度档路径（平铺 .md 或 <股票名>/ 文件夹）')
     ap.add_argument('--old', help='旧价/旧市值字面量，命中即标 STALE-LITERAL')
     ap.add_argument('--new', help='新价/新市值，仅打印在表头供人工比对')
     args = ap.parse_args(argv)
     doc = Path(args.doc)
     if not doc.exists():
         ap.error(f'档不存在: {doc}')
-    rows = scan(doc.read_text(encoding='utf-8'), args.old)
+    files = sorted(doc.glob('*.md')) if doc.is_dir() else [doc]
     if args.old or args.new:
         print(f'锚点刷新：{args.old or "?"} → {args.new or "?"}')
-    for lineno, tags, snippet in rows:
-        print(f'{lineno:>5} | {",".join(tags):<24} | {snippet}')
-    print(f'合计 {len(rows)} 行待手算（本工具不算数，逐句核对派生关系）')
+    total = 0
+    for f in files:
+        rows = scan(f.read_text(encoding='utf-8'), args.old)
+        prefix = f'{f.name}:' if doc.is_dir() else ''
+        for lineno, tags, snippet in rows:
+            print(f'{prefix}{lineno:>5} | {",".join(tags):<24} | {snippet}')
+        total += len(rows)
+    print(f'合计 {total} 行待手算（本工具不算数，逐句核对派生关系）')
     return 0
 
 

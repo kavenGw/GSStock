@@ -2,7 +2,7 @@
 
 用法：
     python scripts/deep_redo_gate.py <股票名> <日期> --phase A [--quiet-min 3]
-    python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档路径>
+    python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档路径|文件夹>
     python scripts/deep_redo_gate.py <股票名> <日期> --phase review
 
 退出码：0=全绿可放行 / 1=有项未就绪 / 2=参数错。
@@ -32,6 +32,7 @@ PLACEHOLDER_RE = re.compile(r'【待锚】|\bTODO\b|\bTBD\b')
 VALUATION_BLOCK_RE = re.compile(r'^valuation:', re.M)
 SPEC_MARKERS = ('SPEC-COMPLIANT', '规格问题', 'Critical', 'Major', 'Minor')
 QUALITY_MARKERS = ('APPROVED-WITH-NITS', 'CHANGES-REQUESTED', 'APPROVED')
+FOLDER_FILES = ('index.md', 'business.md', 'thesis.md', 'valuation.md', 'sources.md', 'events.md')
 
 
 def _read(path: Path) -> str:
@@ -87,18 +88,31 @@ def check_phase_a(artifacts: Path, stock: str, date: str,
     return problems, notes
 
 
+def _placeholder_hits(path: Path) -> list[int]:
+    return [i for i, line in enumerate(_read(path).splitlines(), 1) if PLACEHOLDER_RE.search(line)]
+
+
 def check_phase_b(artifacts: Path, stock: str, date: str, doc: str) -> list[str]:
     problems = _check_report(artifacts / f'{stock}-{date}-phaseB-report.md', 'B')
     doc_path = Path(doc)
     if not doc_path.exists():
         return problems + [f'B MISSING: 新档 {doc}']
-    text = _read(doc_path)
-    hits = [i for i, line in enumerate(text.splitlines(), 1) if PLACEHOLDER_RE.search(line)]
-    if hits:
-        problems.append(
-            f'B NOT-READY: {len(hits)} 处【待锚】/TODO/TBD at lines '
-            + ','.join(str(i) for i in hits))
-    if not VALUATION_BLOCK_RE.search(text):
+    if doc_path.is_dir():
+        files = [doc_path / n for n in FOLDER_FILES]
+        missing = [f.name for f in files if not f.exists()]
+        if missing:
+            problems.append('B MISSING: 文件夹缺 ' + ','.join(missing))
+        files = [f for f in files if f.exists()]
+        index = doc_path / 'index.md'
+    else:
+        files, index = [doc_path], doc_path
+    for f in files:
+        hits = _placeholder_hits(f)
+        if hits:
+            problems.append(
+                f'B NOT-READY: {f.name} {len(hits)} 处【待锚】/TODO/TBD at lines '
+                + ','.join(str(i) for i in hits))
+    if index.exists() and not VALUATION_BLOCK_RE.search(_read(index)):
         problems.append('B NOT-READY: frontmatter 缺 valuation: 块')
     return problems
 
@@ -127,7 +141,7 @@ def build_parser() -> argparse.ArgumentParser:
                     help='evidence mtime 至少多少分钟不变才算收工（默认 3）')
     ap.add_argument('--stale-min', type=float, default=20.0,
                     help='evidence mtime 超过多少分钟提示核实是否卡住而非收工（默认 20，仅 --phase A 用）')
-    ap.add_argument('--doc', help='--phase B 必给：新档路径')
+    ap.add_argument('--doc', help='--phase B 必给：新档路径（平铺 .md 或 <股票名>/ 文件夹）')
     ap.add_argument('--artifacts', default='.omc/artifacts')
     return ap
 

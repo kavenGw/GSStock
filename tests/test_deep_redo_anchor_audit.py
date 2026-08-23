@@ -92,3 +92,15 @@ def test_scan_forward_pe_does_not_flag_plain_pe():
     rows = scan('公司当前 P/E 为 15 倍。\n')
     tags = {tag for _, tags, _ in rows for tag in tags}
     assert '前瞻PE' not in tags
+
+
+def test_audit_accepts_directory(tmp_path, capsys):
+    d = tmp_path / 'x'
+    d.mkdir()
+    (d / 'index.md').write_text('按当前市值反推 10 倍\n', encoding='utf-8')
+    (d / 'valuation.md').write_text('无\n隐含 PE 12x\n', encoding='utf-8')
+    rc = main([str(d)])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert 'index.md:' in out and 'valuation.md:' in out
+    assert '合计 2 行' in out
