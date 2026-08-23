@@ -34,7 +34,7 @@ subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：f
 
 | 维度 | 默认 |
 |------|------|
-| 产出形态 | 写 `sectors/<sector>/<subsector>/<股票名>/` 六文件（规格见 `buffett-doc-spec`，`conviction_date`=今天）。该股只有平铺历史档 → 新建文件夹 + Phase C `git rm` 全部平铺 buffett 档（一次性迁移）；已是文件夹 → 原地覆盖 5 文件、`events.md` 不动。comps/theme/quarterly 一律保留 |
+| 产出形态 | 写 `sectors/<sector>/<subsector>/<股票名>/` 六文件（规格见 `buffett-doc-spec`，`conviction_date`=今天）。该股只有平铺历史档 → 新建文件夹 + Phase C `git rm` 全部平铺 buffett 档（一次性迁移，旧档事件 theme 须迁进 `events.md` 而非新建空档 [L17]）；已是文件夹 → 原地覆盖 5 文件、`events.md` 不动。comps/theme/quarterly 一律保留 |
 | 证据深度 | 全量联网验证 + 实时行情锚 |
 | 估值框架 | 场景加权 bull/base/bear，概率由证据强度定 |
 | A+H 口径 | 取 A/H 中估值更低一侧作跟踪主体（H 通常折价更优）；`stock_code`/`currency`/每股价值随选定口径；市值自洽校验见 `.claude/rules/data-fetch-conventions.md` 港股节 |
