@@ -64,7 +64,7 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 ## 开发规范
 
-**分支策略：投研写档在 main，其他功能开 worktree**：投研写档类 skill 一律在 **main 分支**直接进行，不开 worktree —— `stock-deep-redo` / `news-impact` / `buffett` / `analyze-category` / `portfolio-rebalance` / `liquidation-strategy`（凡主要往 `docs/stock-analytics/` 写分析档/主题档的 skill 都算）。理由：这些 skill 共享同一份 docs/stock-analytics doc 池，跨文档 `related_docs` 对称、lint 引用校验都依赖在同一工作树里看到全部兄弟档；开 worktree 会让反向链引用错位、对称收尾踩坑。其他功能（尤其改 `app/` 代码的）→ 先新建**独立 git worktree** 隔离再动手，避免污染 main、避免并行 session 抢 git index。
+**分支策略：投研写档在 main，其他功能开 worktree**：投研写档类 skill 一律在 **main 分支**直接进行，不开 worktree —— `stock-research` / `buffett` / `analyze-category` / `portfolio-rebalance` / `liquidation-strategy`（凡主要往 `docs/stock-analytics/` 写分析档/主题档的 skill 都算）。理由：这些 skill 共享同一份 docs/stock-analytics doc 池，跨文档 `related_docs` 对称、lint 引用校验都依赖在同一工作树里看到全部兄弟档；开 worktree 会让反向链引用错位、对称收尾踩坑。其他功能（尤其改 `app/` 代码的）→ 先新建**独立 git worktree** 隔离再动手，避免污染 main、避免并行 session 抢 git index。
 
 **测试目录布局**：单测放 `tests/test_*.py` 平铺，不用 `tests/services/` 等子目录（仅存空 `__pycache__`）
 
@@ -82,7 +82,7 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 **并行 session 抢 git index**：多 Claude session 同跑一仓时，`git add` 暂存的文件会被另一 session 的 `git reset`/`git add` 在你两次 Bash 调用之间清空（实测 staged 下一条命令就消失，`git diff --cached` 变空 → 提交漏文件）。铁律：**`git add` 与 `git commit` 放进同一条 Bash 命令链**（`git add <精确路径...> && git commit -F .git/MSG.txt`，中文多行 message 走文件避免 heredoc 失配），切勿跨工具调用分开；提交后 `git show --stat <sha>` 确认只含本任务文件、未裹挟他人在写档。删除文件用 `git rm -q --ignore-unmatch <path>` 同链处理（文件已不在磁盘时 `git add` 该路径会 pathspec 报错）。
 
-**别用 `git commit -- <pathspec>` 防裹挟——它提交的是工作区而非暂存区**：想「只提交本任务文件」时容易误用 `git commit -F msg -- <path>`，但带 pathspec 的 commit **绕过 index、直接取这些路径的工作区内容**（等价于对这些路径隐式 `git add`）。并行 session 正在改同一文件时，这恰恰把对方的在写改动一起吃进你的 commit —— 与你的本意相反。实测 stock-deep-redo 收尾时用此形式提交 `valuations.yaml`，把并行 session 的另一只股条目裹挟进来，**且自己那只股的同步结果反被对方工作区版本覆盖掉**（自报"已同步"、磁盘上仍是旧值）。正确做法仍是 `git add <精确路径...> && git commit -F .git/MSG.txt` 同链。
+**别用 `git commit -- <pathspec>` 防裹挟——它提交的是工作区而非暂存区**：想「只提交本任务文件」时容易误用 `git commit -F msg -- <path>`，但带 pathspec 的 commit **绕过 index、直接取这些路径的工作区内容**（等价于对这些路径隐式 `git add`）。并行 session 正在改同一文件时，这恰恰把对方的在写改动一起吃进你的 commit —— 与你的本意相反。实测 stock-research 模式 1 收尾时用此形式提交 `valuations.yaml`，把并行 session 的另一只股条目裹挟进来，**且自己那只股的同步结果反被对方工作区版本覆盖掉**（自报"已同步"、磁盘上仍是旧值）。正确做法仍是 `git add <精确路径...> && git commit -F .git/MSG.txt` 同链。
 
 **`valuations.yaml` 这类单文件聚合无法按条目分离暂存**：多 session 同时 sync 时，`git add` 必然连带对方刚写入的条目（git 只有文件粒度）。此时**别为了"干净"而回退对方内容**（破坏其工作）——连带提交并在 commit message 注明该条目非本任务产物即可，双方内容都不丢。**提交后必须 `git show HEAD:<file>` 复核自己那条真的落库**：另一 session 可能在你两次调用之间抢先提交（连带你的改动，属良性），也可能其工作区版本较旧而把你的改动覆盖（需重跑 sync 补正）。sync 类脚本的"已同步"自报一律不可信，以 `git show HEAD:` 读到的内容为准。
 

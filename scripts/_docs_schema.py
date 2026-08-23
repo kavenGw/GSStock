@@ -27,7 +27,7 @@ VALUATION_CURRENCIES: set[str] = {'CNY', 'USD', 'HKD'}
 COMMODITIES: set[str] = {'copper', 'lithium'}
 COMMODITY_IMPACTS: set[str] = {'positive', 'neutral', 'negative'}
 
-# related_docs 条目可选键（news-impact 回写：事件对该档旧 thesis 的判定）
+# related_docs 条目可选键（stock-research 模式 3 回写：事件对该档旧 thesis 的判定）
 IMPACTS: set[str] = {'强化', '动摇', '推翻', '无关'}
 MAGNITUDES: set[str] = {'高', '中', '低'}
 

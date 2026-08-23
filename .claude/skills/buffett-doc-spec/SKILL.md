@@ -1,9 +1,9 @@
 ---
 name: buffett-doc-spec
 description: >-
-  Use when writing or reviewing a buffett 深度分析档 under docs/stock-analytics（stock-deep-redo 的
+  Use when writing or reviewing a buffett 深度分析档 under docs/stock-analytics（stock-research 模式 1/2 的
   Phase B 写手与合并审查员必须加载）——需要 frontmatter 字段集/rating 枚举、13 节文档结构、场景加权估值铁律、
-  valuation 块字段、8 条质量红线时。不含采证与收尾流程（见 stock-deep-redo / stock-doc-finalize）。
+  valuation 块字段、8 条质量红线时。不含采证与收尾流程（见 stock-research / stock-doc-finalize）。
 ---
 
 # buffett 深度档规格（buffett-doc-spec）
@@ -58,7 +58,7 @@ related_docs:
 | thesis.md | buffett-section / section: thesis | §6-§8 | — |
 | valuation.md | buffett-section / section: valuation | §9 + 相对旧档变化清单 | — |
 | sources.md | buffett-section / section: sources | §12 | — |
-| events.md | buffett-events | 只含 frontmatter related_docs（news-impact 回写）+ h1；**重做时不覆盖**，不存在才新建 `related_docs: []` | — |
+| events.md | buffett-events | 只含 frontmatter related_docs（stock-research 模式 3 回写）+ h1；**重做时不覆盖**，不存在才新建 `related_docs: []` | — |
 
 section 档 frontmatter 仅 `doc_type / stock_code / stock_name / section` 四字段，禁止 rating/valuation/related_docs/themes
 （lint 强校验）。index.md 的 `related_docs` 只放结构性引用（comps/quarterly/cross-sector/兄弟 buffett 档），事件 theme

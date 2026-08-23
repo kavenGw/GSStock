@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **通用约定**：响应中文；不写多余注释；不写 backup 文件（git 留痕足够）；所有 git/cargo/npm/pytest 命令前加 `rtk`，链式 `&&` 中也要。
 
-**投研 skill 路由**：个股/持仓/板块投研一律走本仓 skill（`buffett` / `stock-deep-redo` / `analyze-category` / `portfolio-init` / `portfolio-rebalance` / `news-impact` / `liquidation-strategy`）。全局插件 `equity-research` / `investment-banking` / `private-equity` 面向卖方/PE 工作流，**不适用于本仓**，勿因"分析某股"等模糊请求误触发。
+**投研 skill 路由**：个股/持仓/板块投研一律走本仓 skill（`stock-research`（深度分析/财报/新闻影响/会议纪要四模式自动路由）/ `buffett` / `analyze-category` / `portfolio-init` / `portfolio-rebalance` / `liquidation-strategy`）。全局插件 `equity-research` / `investment-banking` / `private-equity` 面向卖方/PE 工作流，**不适用于本仓**，勿因"分析某股"等模糊请求误触发。
 
 ## 常用命令
 

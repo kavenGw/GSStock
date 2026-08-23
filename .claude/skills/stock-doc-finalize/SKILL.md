@@ -1,8 +1,8 @@
 ---
 name: stock-doc-finalize
 description: >-
-  Use when 收尾一份写入 docs/stock-analytics 的分析档（stock-deep-redo Phase C 必加载；buffett /
-  news-impact 等写档收尾亦可用）——需要删旧档、related_docs 反向链改指/补对称、双 lint 过关、
+  Use when 收尾一份写入 docs/stock-analytics 的分析档（stock-research 模式 1/2 Phase C 必加载；buffett /
+  stock-research 模式 3/4 等写档收尾亦可用）——需要删旧档、related_docs 反向链改指/补对称、双 lint 过关、
   valuations.yaml 同步、quality/commodity 字段、按并行 session 安全协议 git 提交时。
 ---
 

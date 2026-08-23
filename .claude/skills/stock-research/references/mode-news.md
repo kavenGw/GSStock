@@ -1,16 +1,5 @@
----
-name: news-impact
-description: >-
-  把一条新闻/事件映射到 docs/stock-analytics 已建档的标的池，逐个判断传导路径、方向、量级，
-  并落到每只票 doc 里的旧 thesis（强化/动摇/推翻），最后产出一份 themes/ 专题档并做 related_docs 对称收尾。
-  当用户给出一条新闻、政策、财报、涨价/扩产、并购、行业事件，并想知道"这对我关注的股票/持仓有什么影响""利好/利空哪些标的"
-  "哪些票该重看"时，务必触发本 skill——即使用户没说"影响分析"也要触发。典型触发语：
-  "这条新闻对我的股票有什么影响""某事件利好哪些标的""帮我看看这个政策影响哪些票""粘一段新闻分析下影响"。
-  不要用于：单只个股深度重做（用 stock-deep-redo）、板块批量分析（用 analyze-category）、
-  纯季报点评（quarterly 流程）、持仓再平衡（portfolio-rebalance）、清仓（liquidation-strategy）。
----
 
-# 新闻事件影响分析（news-impact）
+# 模式 3 · 新闻事件影响分析（原 news-impact）
 
 拿一条新闻，问一个问题：**它改变了我 docs 池里哪些标的的投资逻辑，怎么改的？**
 
@@ -20,7 +9,7 @@ description: >-
 
 **用**：用户给一条新闻/事件（粘文本或给 URL），想知道对 docs 池内标的的影响、利好利空、哪些该重看评级。
 
-**不用**：单股深度重估 → `stock-deep-redo`；板块批量 → `analyze-category`；季报点评 → quarterly 流程；再平衡 → `portfolio-rebalance`；清仓 → `liquidation-strategy`；只查实时价/单个事实 → 直接查不起 skill。
+**不用**：单股深度重估 → 模式 1；单股财报点评本体 → 模式 2；单股会议纪要 → 模式 4；板块批量 → `analyze-category`；再平衡 → `portfolio-rebalance`；清仓 → `liquidation-strategy`；只查实时价/单个事实 → 直接查。
 
 ## 默认参数（烘进流程，不必每次问）
 
@@ -32,7 +21,7 @@ description: >-
 | 搜索范围 | **仅 docs/stock-analytics 池**（不外扩 supply_chain.py 图谱），但池内上下游/同业二阶联动要追到 |
 | 新闻核实 | **先核实再分析**，按信源分层（官方 1 家 / 媒体传闻 2-3 家）：传闻/标题党/已辟谣的，置信度压低并写明 |
 | 产出形态 | 过建档门槛才写 `docs/stock-analytics/themes/YYYY-MM-DD-<主题>.md`（date=今天，≤250 行）+ related_docs 对称收尾（反向条目带 `impact`/`magnitude`）+ lint |
-| 估值视角 | 影响落到旧 thesis/评级，不重算 DCF/RIM/目标价（要重估单股请转 stock-deep-redo） |
+| 估值视角 | 影响落到旧 thesis/评级，不重算 DCF/RIM/目标价（要重估单股请转模式 1） |
 | 语言 | 中文 |
 
 ## 流程
@@ -54,7 +43,7 @@ description: >-
 把第 1 步抽出的要素喂给 bundled 脚本，直接拿分档候选清单（`--out` 必须在 `match` 之前）：
 
 ```bash
-PYTHONIOENCODING=utf-8 python .claude/skills/news-impact/scripts/pool_index.py --out .omc/artifacts/pool_match.json \
+PYTHONIOENCODING=utf-8 python .claude/skills/stock-research/scripts/pool_index.py --out .omc/artifacts/pool_match.json \
   match --keywords "公司名片段,产品,主题词,subsector名" [--codes 603986,688766] [--sector semiconductor --subsector mcu]
 ```
 
@@ -68,7 +57,7 @@ PYTHONIOENCODING=utf-8 python .claude/skills/news-impact/scripts/pool_index.py -
 
 ### 3. 逐标的判传导（核心步骤）
 
-读 `references/impact-rubric.md` 的传导 rubric。这步分两层，**先全后深**——既要覆盖广度（不漏弱相关标的），又不在弱标的上浪费篇幅：
+读 `impact-rubric.md` 的传导 rubric。这步分两层，**先全后深**——既要覆盖广度（不漏弱相关标的），又不在弱标的上浪费篇幅：
 
 **(a) 全员进总览表**：上一步召回的**每一个**候选标的都在影响总览表占一行，填齐：传导路径 / 方向（含"弱利好""无影响"）/ 量级（高/中/低）/ 时间窗 / **对旧 thesis** / 是否已 priced in / 置信度。弱相关、无影响的也要列出来并明确标注——这是给用户"我扫过、判过、不漏"的证据。
 
@@ -87,16 +76,16 @@ PYTHONIOENCODING=utf-8 python .claude/skills/news-impact/scripts/pool_index.py -
 
 **建档门槛**（两道，都要过）——档案进了池子会成为后续选股/复查的信噪源，给"全是弱/情绪级利好"或"只关本体一家"的事件建档是污染：
 1. **量级门槛**：至少一只标的传导量级达到"中"或以上。
-2. **read-across 门槛（仅单股事件）**：第 1 步判为 `单股事件` 的，**除本体外**还须 ≥1 只池内标的达中量级。只影响本体的财报/预告/定增/收购承做，**不建 theme 档**——在对话里给总览表 + 结论，并明确一句"本体重估请转 `stock-deep-redo`"。本体的 thesis 变化归 deep-redo 承做，不在 theme 档里替它重估。
+2. **read-across 门槛（仅单股事件）**：第 1 步判为 `单股事件` 的，**除本体外**还须 ≥1 只池内标的达中量级。只影响本体的财报/预告/定增/收购承做，**不建 theme 档**——在对话里给总览表 + 结论，并明确一句"本体重估请转模式 1/2"。本体的 thesis 变化归模式 1/2 承做，不在 theme 档里替它重估。
 
 不达标 → 默认**不建档**，只在对话里给影响总览表 + 结论，并问用户一句"要不要仍归档为主题背书？"——用户要才建。
 
 **篇幅上限**（硬约束，写完自查）：
 - 总览表不限行；逐标的深写段 **≤ 8 只、每只 ≤ 15 行**；全文（含 frontmatter）**≤ 250 行**。
 - 正文出现"重算估值 / DCF / RIM / 目标价 / 期望内在价值"等重估动作即越界——theme 档只改 thesis/评级方向，不产估值数字。
-- 超限说明事件本身是 deep-redo 量级：theme 档只留 read-across 部分，本体部分截断并在"操作含义"里写"转 stock-deep-redo"。
+- 超限说明事件本身是模式 1 量级：theme 档只留 read-across 部分，本体部分截断并在"操作含义"里写"转模式 1"。
 
-落档模板见 `references/impact-rubric.md`，写到 `docs/stock-analytics/themes/YYYY-MM-DD-<主题>.md`：
+落档模板见 `impact-rubric.md`，写到 `docs/stock-analytics/themes/YYYY-MM-DD-<主题>.md`：
 - frontmatter 必填 `doc_type: theme` / `theme_name` / `themes` / `date`；`related_codes` 用字符串引号防丢前导 0；`related_docs` 只收**中量级以上**标的（低量级只进总览表、不建链，避免 related_docs 膨胀），加 `symmetric: true`。
 - 正文：事件核实 → 影响总览表（全员）→ 逐标的传导分析（仅中量级以上展开）→ 操作含义。
 - `<!-- BEGIN/END related_docs -->` 块留空，由 lint 生成。
@@ -108,7 +97,7 @@ theme 档引用了个股 doc，个股 doc 要反向引用回来，否则 refs li
 - **文件夹档**（存在 `sectors/<sector>/<subsector>/<股票名>/events.md`）→ theme 档的 related_docs 指向 `.../<股票名>/events.md`，反向条目追加到 `events.md` 的 frontmatter `related_docs`（path 比平铺档多一层 `../`，形如 `../../../../themes/YYYY-MM-DD-<主题>.md`）；**index.md 不动**。
 - **平铺档** → 沿用原逻辑，写该档 frontmatter。
 
-给每个受影响个股 doc 的对应位置加一条指回 theme 档，**反向条目必带结论回写字段**（这是把 theme 结论结构化落回个股档的唯一通道，后续 deep-redo 据此看"有无未消化的动摇/推翻"）：
+给每个受影响个股 doc 的对应位置加一条指回 theme 档，**反向条目必带结论回写字段**（这是把 theme 结论结构化落回个股档的唯一通道，后续模式 1/2 据此看"有无未消化的动摇/推翻"）：
 
 ```yaml
 - path: ../../../themes/YYYY-MM-DD-<主题>.md
@@ -130,4 +119,4 @@ python scripts/lint_docs_refs.py                    # 路径 + 反向对称，�
 
 ### 6. 收尾汇报
 
-向用户一句话总结：核实结论 + 命中 N 只标的（按方向/量级排序的前几只）+ 哪些该调评级（以及哪只本体该转 deep-redo）+ theme 档路径与行数 + lint 是否通过。一次性数据脚本（如临时 pool_match.json 在 .omc/artifacts/ 已 gitignore）不入库。
+向用户一句话总结：核实结论 + 命中 N 只标的（按方向/量级排序的前几只）+ 哪些该调评级（以及哪只本体该转模式 1/2）+ theme 档路径与行数 + lint 是否通过。一次性数据脚本（如临时 pool_match.json 在 .omc/artifacts/ 已 gitignore）不入库。

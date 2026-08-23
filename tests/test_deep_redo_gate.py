@@ -51,6 +51,17 @@ def test_phase_a_all_green(tmp_path, capsys):
     assert 'A READY' in capsys.readouterr().out
 
 
+def test_phase_a_lanes_a1_only(tmp_path, capsys):
+    """模式 2（财报）只派 A1：--lanes A1 时 A2/A3 缺失不算问题。"""
+    art = _make_phase_a(tmp_path, lanes=('A1',))
+    rc = main([STOCK, DATE, '--phase', 'A', '--lanes', 'A1', '--artifacts', str(art)])
+    assert rc == 0, capsys.readouterr().out
+    rc = main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)])
+    assert rc == 1
+    out = capsys.readouterr().out
+    assert 'A2 MISSING' in out and 'A3 MISSING' in out
+
+
 def test_phase_a_missing_report(tmp_path, capsys):
     art = _make_phase_a(tmp_path, lanes=('A1', 'A2'))
     _write(art / f'{STOCK}-{DATE}-evidence-A3-lens.md', _evidence_body(), 5.0)

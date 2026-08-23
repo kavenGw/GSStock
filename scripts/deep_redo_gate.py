@@ -1,7 +1,7 @@
-"""stock-deep-redo 阶段放行闸门：检查 subagent 产物是否真的就绪。
+"""stock-research 模式 1/2 阶段放行闸门：检查 subagent 产物是否真的就绪。
 
 用法：
-    python scripts/deep_redo_gate.py <股票名> <日期> --phase A [--quiet-min 3]
+    python scripts/deep_redo_gate.py <股票名> <日期> --phase A [--quiet-min 3] [--lanes A1]  # 模式 2 只查 A1
     python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档路径|文件夹>
     python scripts/deep_redo_gate.py <股票名> <日期> --phase review
 
@@ -63,11 +63,12 @@ def _check_report(path: Path, tag: str) -> list[str]:
 
 def check_phase_a(artifacts: Path, stock: str, date: str,
                   quiet_min: float, now: float,
-                  stale_min: float = 20.0) -> tuple[list[str], list[str]]:
+                  stale_min: float = 20.0,
+                  lanes: tuple[str, ...] = LANES) -> tuple[list[str], list[str]]:
     problems: list[str] = []
     notes: list[str] = []
     prefix = f'{stock}-{date}'
-    for lane in LANES:
+    for lane in lanes:
         evidence = _find_one(artifacts, f'{prefix}-evidence-{lane}-*.md')
         if evidence is None:
             problems.append(f'{lane} MISSING: evidence')
@@ -132,7 +133,7 @@ def check_review(artifacts: Path, stock: str, date: str) -> list[str]:
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
-        description='stock-deep-redo 阶段放行闸门',
+        description='stock-research 模式 1/2 阶段放行闸门',
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('stock', help='股票名（与 .omc/artifacts 文件名前缀一致）')
     ap.add_argument('date', help='日期，形如 2026-08-22')
@@ -141,6 +142,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help='evidence mtime 至少多少分钟不变才算收工（默认 3）')
     ap.add_argument('--stale-min', type=float, default=20.0,
                     help='evidence mtime 超过多少分钟提示核实是否卡住而非收工（默认 20，仅 --phase A 用）')
+    ap.add_argument('--lanes', nargs='+', choices=LANES, default=list(LANES),
+                    help='--phase A 只查这些采证路（模式 2 财报分析给 A1）')
     ap.add_argument('--doc', help='--phase B 必给：新档路径（平铺 .md 或 <股票名>/ 文件夹）')
     ap.add_argument('--artifacts', default='.omc/artifacts')
     return ap
@@ -156,7 +159,8 @@ def main(argv: list[str] | None = None) -> int:
     notes: list[str] = []
     if args.phase == 'A':
         problems, notes = check_phase_a(
-            artifacts, args.stock, args.date, args.quiet_min, now, args.stale_min)
+            artifacts, args.stock, args.date, args.quiet_min, now, args.stale_min,
+            tuple(args.lanes))
     elif args.phase == 'B':
         if not args.doc:
             ap.error('--phase B 必须给 --doc <新档路径>')

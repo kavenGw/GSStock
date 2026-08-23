@@ -1,25 +1,14 @@
----
-name: stock-deep-redo
-description: >-
-  个股 buffett 深度重做分析（re-underwrite）全流程编排：全量联网验证供需事实 → 实时行情锚定 →
-  场景加权估值 → 写入 docs/stock-analytics 的 buffett 分析档 → frontmatter/lint/related_docs 对称收尾。
-  当用户要求对某只股票做深度分析、重做/重估/重新承做、用新事实（供给侧变化、涨价、AI、政策、财报、并购）
-  刷新或推翻旧结论、或产出/更新某股的 buffett 深度分析文档时，务必使用本 skill——即使用户没说
-  "buffett""重做""re-underwrite"也要触发。典型触发语："深度分析 XX""重做 XX 的分析""XX 还能不能买"
-  "用最新存储涨价重估 XX""考虑 AI/供给侧重新看 XX"。不要用于：板块批量分析（用 analyze-category）、
-  纯季报点评（quarterly 流程）、持仓再平衡（portfolio-rebalance）、清仓策略（liquidation-strategy）。
----
 
-# 个股 buffett 深度重做分析（stock-deep-redo）
+# 模式 1 · 个股深度分析（原 stock-deep-redo）
 
 把一只股票的投资结论"重新承做一遍"：最新事实（联网验证）+ 实时估值，套 buffett 框架，场景加权给出一个
 **能经得起反驳**的新评级，落档到 `docs/stock-analytics/`。价值在**纪律**而非篇幅：联网核实、证据分硬软、
 强论点双面、拒绝周期顶定价、诚实面对"贵"、撰写≠审查上下文。
 
 本文件只做**编排**（谁、何时、闸门）。三份配套：
-- `references/dispatch.md` — 每个 subagent 的派发内容（必内联项 / prompt 骨架 / 派发坑）。**派发前必读对应节。**
-- `references/sector-lenses.md` — 板块视角注册表；控制者读并摘原文内联，subagent 不自读。
-- `references/lessons.md` — 十三轮实测教训 L1–L15 + 耗时附录；按 `[Ln]` 编号翻，不通读。
+- `dispatch.md` — 每个 subagent 的派发内容（必内联项 / prompt 骨架 / 派发坑）。**派发前必读对应节。**
+- `sector-lenses.md` — 板块视角注册表；控制者读并摘原文内联，subagent 不自读。
+- `lessons.md` — 十三轮实测教训 L1–L15 + 耗时附录；按 `[Ln]` 编号翻，不通读。
 
 subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：frontmatter/13 节/估值机制/8 条红线）、
 `stock-doc-finalize`（Phase C：删旧档/反向链/lint/valuations 同步/提交协议）。
@@ -27,7 +16,7 @@ subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：f
 ## 何时用 / 何时不用
 
 **用**：单只个股深度分析或重估，尤其有新变量（涨价周期、供给侧出清、AI、政策、重大财报/并购）需刷新或推翻旧结论。
-**不用**：板块批量 → `analyze-category`；季报点评 → quarterly；再平衡 → `portfolio-rebalance`；
+**不用**：已有文件夹档 + 附带财报 → 模式 2（`mode-earnings.md`）；板块批量 → `analyze-category`；再平衡 → `portfolio-rebalance`；
 清仓 → `liquidation-strategy`；只要个实时价 → 直接查。
 
 ## 默认参数（开工时一句话说明即可）
@@ -102,7 +91,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ## 维护规则
 
-新一轮有教训时：只在 `lessons.md` 追加 `Ln`（三段式写全；编号永不复用/重排）→ 本文件对应闸门处加 `[Ln]` 引用不写叙事 →
+新一轮有教训时（模式 1/2 共用）：只在 `lessons.md` 追加 `Ln`（三段式写全；编号永不复用/重排）→ 本文件对应闸门处加 `[Ln]` 引用不写叙事 →
 基线表只加一行 → 能机械化的优先落成 `scripts/deep_redo_*.py` 检查项再在闸门引用（L1/L7/L8 就是这么来的）。
 派发内容变化改 `dispatch.md`；文档规格变化改 `buffett-doc-spec`；收尾动作变化改 `stock-doc-finalize`。
-本文件目标 **≤130 行**。
+本文件目标 **≤130 行**；路由判据归 `../SKILL.md`，本文件不写"何时触发"。

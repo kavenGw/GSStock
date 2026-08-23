@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """扫描 docs/stock-analytics 全部文档的 frontmatter，输出一份紧凑 JSON 索引。
 
-这是 news-impact skill 的匹配底料：一次扫描代替逐个读 161 篇 doc，
+这是 stock-research 模式 3（新闻影响）的匹配底料：一次扫描代替逐个读 161 篇 doc，
 让新闻→标的的映射在一个小 JSON 上完成，省 token 且不漏标的。
 
 用法：

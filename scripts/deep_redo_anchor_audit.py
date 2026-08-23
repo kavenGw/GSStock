@@ -1,4 +1,4 @@
-"""stock-deep-redo 跨日锚点审计：列出正文里所有「派生数」句子供逐句手算。
+"""stock-research 模式 1/2 跨日锚点审计：列出正文里所有「派生数」句子供逐句手算。
 
 用法：
     python scripts/deep_redo_anchor_audit.py <档路径|文件夹>

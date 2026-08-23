@@ -1,4 +1,4 @@
-# stock-deep-redo 派发手册（控制者读；subagent 不读）
+# stock-research 模式 1/2 派发手册（控制者读；subagent 不读）
 
 每个 subagent 都要拿到**完整自包含上下文**：标的 + 代码 + 市场 + 今天日期 + 知识截止须联网 + 本节列出的
 必内联内容 + §0 汇报协议。它自行加载的只有：evidence 片段、旧档、`Skill buffett`、`Skill buffett-doc-spec`

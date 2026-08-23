@@ -29,7 +29,7 @@ paths:
 
 ## 建档 gating：低质地非科技标的不建档
 
-跑 buffett / stock-deep-redo / analyze-category 时，若标的**质地很差（ROE 长期偏低、曾巨亏、无护城河的低质量多元化制造）且不属于科技类**，直接判掉——不建 buffett/分析档、不写 valuations.yaml，采证阶段先粗筛命中即口头说明「不建档」后停手，不进入写档/estimate/valuations 流程。这类"蹭题材热度"的 exclude 档只是给炒作背书、占用 doc 池，价值为负（案例：露笑 002617 多元化工业蹭 SiC 概念，建 exclude 档后被要求删除并撤 valuations 条目，2026-07-03）。
+跑 buffett / stock-research / analyze-category 时，若标的**质地很差（ROE 长期偏低、曾巨亏、无护城河的低质量多元化制造）且不属于科技类**，直接判掉——不建 buffett/分析档、不写 valuations.yaml，采证阶段先粗筛命中即口头说明「不建档」后停手，不进入写档/estimate/valuations 流程。这类"蹭题材热度"的 exclude 档只是给炒作背书、占用 doc 池，价值为负（案例：露笑 002617 多元化工业蹭 SiC 概念，建 exclude 档后被要求删除并撤 valuations 条目，2026-07-03）。
 
 例外：**科技类**标的即便评 exclude/watch 仍可建档（记录反面对照有价值）；**非科技的高质地**标的（消费/金融龙头等）不受此限。删已建档时同步删 valuations 条目 + 清理兄弟档 related_docs 反向链，跑 `lint_docs_refs.py` 收尾（exit 0 为真闸）。
 
@@ -37,7 +37,7 @@ paths:
 
 ## 建档前避坑列表验证（硬门）
 
-建档 skill（buffett / stock-deep-redo / analyze-category）采证阶段**第一步**先 load `docs/stock-analytics/avoidance-list.yaml`，按 `stock_code` 查命中：
+建档 skill（buffett / stock-research / analyze-category）采证阶段**第一步**先 load `docs/stock-analytics/avoidance-list.yaml`，按 `stock_code` 查命中：
 
 - **未命中** → 正常建档流程。
 - **命中** → 强制「避坑原因验证」:用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，对照 `avoid_reason` **逐条**判「仍成立 / 被推翻」，**必须列出每条原因 + 当前实测值对照**，不接受空口「改善了」。
@@ -67,7 +67,7 @@ related_docs:
     symmetric: true  # 默认 true，要求反向对称
   - path: ../../themes/2026-08-21-中芯国际26Q2业绩说明会.md
     note: 供给侧机理获代工方口径确认
-    impact: 动摇      # 可选，news-impact 回写：强化/动摇/推翻/无关
+    impact: 动摇      # 可选，stock-research 模式 3 回写：强化/动摇/推翻/无关
     magnitude: 中     # 可选：高/中/低；与 impact 一起渲染为【动摇·中】
 ```
 
@@ -90,5 +90,5 @@ python scripts/lint_docs_refs.py --check-orphans   # 列孤儿文档
 > 编码坑见 dev-environment.md
 - `--check-orphans` 会因 print 含中文（如「铜」）的孤儿路径撞 cp950 抛 `UnicodeEncodeError` 返回 exit 1，**而 orphan 判定逻辑其实已跑完**——加 `PYTHONIOENCODING=utf-8` 才得真实 exit 0，别误判为 lint 失败。
 - `--rewrite-blocks` 会重生**所有** block 与 frontmatter 失步的文档（含并行 session 未提交的在写档），易产生跨任务连带 diff。跑完**只精确 `git add` 本任务的档**，**勿 `git add -A`**，避免裹挟他人半成品。
-- 但"精确 add"仍有盲区：refs `symmetric: true` **强制**你 touch 兄弟档补反向条目才过 lint，若该兄弟档正被并行 session 改（带未提交分析改动），`git add <兄弟档>` 会连其未提交改动一并裹挟进你的 commit。add 前先 `git diff <兄弟档>`：若有 `related_docs` 块以外的改动即对方在写，归其自行提交（其后续 commit 会干净收尾、非破坏性，但勿误判为本任务产物）。**对偶情形**：并行 session 同跑 stock-deep-redo 于同板块兄弟股、共享同一 comps 时，指向你新档的反向条目可能已被对方抢先写入并 committed——补反向链前先 `grep <新档名> <兄弟档>`，已在则跳过（勿重复追加），以 `refs lint exit 0` 为真闸而非"必须由我添加"。
+- 但"精确 add"仍有盲区：refs `symmetric: true` **强制**你 touch 兄弟档补反向条目才过 lint，若该兄弟档正被并行 session 改（带未提交分析改动），`git add <兄弟档>` 会连其未提交改动一并裹挟进你的 commit。add 前先 `git diff <兄弟档>`：若有 `related_docs` 块以外的改动即对方在写，归其自行提交（其后续 commit 会干净收尾、非破坏性，但勿误判为本任务产物）。**对偶情形**：并行 session 同跑 stock-research 模式 1 于同板块兄弟股、共享同一 comps 时，指向你新档的反向条目可能已被对方抢先写入并 committed——补反向链前先 `grep <新档名> <兄弟档>`，已在则跳过（勿重复追加），以 `refs lint exit 0` 为真闸而非"必须由我添加"。
 - **`--rewrite-blocks` 是全局 fail-closed**：`lint_docs_refs.py` 的 `main()` 一旦 `_check` 发现**任何**违例就**早于** rewrite 直接 return（exit 1），**一个 block 都不渲染**——含并行 session 在写档的**无关**不对称（实测他人 `希荻微→模拟功率芯片` 档的不对称把本任务 theme 的块渲染全堵死）。绕过：`import` 该模块后对**只含本任务文件的 dict** 调 `_rewrite_blocks(sub)`（`sub={(root/p).resolve():docs[(root/p).resolve()] for p in mine}`），跳过全局 `_check` 只渲染自己的块；无关违例留对方收尾，勿动他人档。
