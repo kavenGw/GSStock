@@ -179,3 +179,13 @@ def test_review_report_missing(tmp_path, capsys):
     out = capsys.readouterr().out
     assert rc == 1
     assert 'review MISSING: report' in out
+
+
+def test_phase_a_stale_but_green_still_ready(tmp_path, capsys):
+    """evidence mtime 很旧但其余全绿：不能因「沉默」就判失败（L7），只提示核实。"""
+    art = _make_phase_a(tmp_path, age_min=30.0)
+    rc = main([STOCK, DATE, '--phase', 'A', '--quiet-min', '3', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert 'A READY' in out
+    assert 'NOTE' in out and '卡住' in out

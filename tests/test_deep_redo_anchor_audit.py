@@ -69,3 +69,26 @@ def test_main_missing_doc_is_arg_error(tmp_path):
         assert exc.code == 2
     else:
         raise AssertionError('档不存在应以退出码 2 结束')
+
+
+UNCOVERED_DOC = """前瞻 PE 约 22 倍，对应明年出货量。
+估值区间 × 1.5 倍作为情景加权。
+较可比公司均值折价 32%。
+每股内在价值 = 权益价值 ÷ 总股本。
+= 356 / 7.6 = 46.8x
+公司当前 P/E 为 15 倍。
+"""
+
+
+def test_scan_hits_each_derived_pattern_at_least_once():
+    rows = scan(UNCOVERED_DOC)
+    all_tags = {tag for _, tags, _ in rows for tag in tags}
+    for expected in ('前瞻PE', 'N倍乘法', '折溢价', '股本除法', '数式推导'):
+        assert expected in all_tags, f'{expected} 未被任何测试行命中'
+
+
+def test_scan_forward_pe_does_not_flag_plain_pe():
+    """「当前 P/E」不是「前瞻PE」——F2 修复正则的低优先级 `|` 误报。"""
+    rows = scan('公司当前 P/E 为 15 倍。\n')
+    tags = {tag for _, tags, _ in rows for tag in tags}
+    assert '前瞻PE' not in tags

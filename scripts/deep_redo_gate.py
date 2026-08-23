@@ -61,8 +61,10 @@ def _check_report(path: Path, tag: str) -> list[str]:
 
 
 def check_phase_a(artifacts: Path, stock: str, date: str,
-                  quiet_min: float, now: float) -> list[str]:
+                  quiet_min: float, now: float,
+                  stale_min: float = 20.0) -> tuple[list[str], list[str]]:
     problems: list[str] = []
+    notes: list[str] = []
     prefix = f'{stock}-{date}'
     for lane in LANES:
         evidence = _find_one(artifacts, f'{prefix}-evidence-{lane}-*.md')
@@ -77,8 +79,12 @@ def check_phase_a(artifacts: Path, stock: str, date: str,
             if age < quiet_min:
                 problems.append(
                     f'{lane} NOT-READY: evidence mtime {age:.1f}min ago (<{quiet_min})')
+            elif age > stale_min:
+                notes.append(
+                    f'{lane} NOTE: evidence mtime {age:.1f}min ago — 若该路仍在跑，'
+                    '确认它是收工而非卡住')
         problems += _check_report(artifacts / f'{prefix}-phase{lane}-report.md', lane)
-    return problems
+    return problems, notes
 
 
 def check_phase_b(artifacts: Path, stock: str, date: str, doc: str) -> list[str]:
@@ -119,6 +125,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument('--phase', required=True, choices=['A', 'B', 'review'])
     ap.add_argument('--quiet-min', type=float, default=3.0,
                     help='evidence mtime 至少多少分钟不变才算收工（默认 3）')
+    ap.add_argument('--stale-min', type=float, default=20.0,
+                    help='evidence mtime 超过多少分钟提示核实是否卡住而非收工（默认 20，仅 --phase A 用）')
     ap.add_argument('--doc', help='--phase B 必给：新档路径')
     ap.add_argument('--artifacts', default='.omc/artifacts')
     return ap
@@ -131,14 +139,18 @@ def main(argv: list[str] | None = None) -> int:
     if not artifacts.is_dir():
         ap.error(f'artifacts 目录不存在: {artifacts}')
     now = time.time()
+    notes: list[str] = []
     if args.phase == 'A':
-        problems = check_phase_a(artifacts, args.stock, args.date, args.quiet_min, now)
+        problems, notes = check_phase_a(
+            artifacts, args.stock, args.date, args.quiet_min, now, args.stale_min)
     elif args.phase == 'B':
         if not args.doc:
             ap.error('--phase B 必须给 --doc <新档路径>')
         problems = check_phase_b(artifacts, args.stock, args.date, args.doc)
     else:
         problems = check_review(artifacts, args.stock, args.date)
+    for n in notes:
+        print(n)
     if problems:
         for p in problems:
             print(p)

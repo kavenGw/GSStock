@@ -26,8 +26,11 @@ DERIVED_PATTERNS: list[tuple[str, re.Pattern]] = [
     ('对照当前市值', re.compile(r'(对照|按)当前市值')),
     ('市值除法', re.compile(r'市值\s*[/÷]|[/÷]\s*市值')),
     ('相当于N倍', re.compile(r'相当于\s*\d+(?:\.\d+)?\s*倍')),
-    ('前瞻PE', re.compile(r'前瞻\s*PE|P/E')),
+    ('前瞻PE', re.compile(r'前瞻\s*P/?E')),
     ('N倍乘法', re.compile(r'[×x]\s*\d+(?:\.\d+)?\s*倍')),
+    ('折溢价', re.compile(r'(折价|溢价)\s*\d+(?:\.\d+)?\s*%')),
+    ('股本除法', re.compile(r'[/÷]\s*(总股本|股本|总股数)')),
+    ('数式推导', re.compile(r'=\s*\d+(?:\.\d+)?\s*[/÷]\s*\d+')),
 ]
 SNIPPET_LEN = 120
 
