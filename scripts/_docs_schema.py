@@ -9,7 +9,10 @@ from typing import Any
 
 import yaml
 
-DOC_TYPES: set[str] = {'buffett', 'quarterly', 'cross-sector', 'theme', 'comps'}
+DOC_TYPES: set[str] = {'buffett', 'buffett-section', 'buffett-events',
+                       'quarterly', 'cross-sector', 'theme', 'comps'}
+SECTIONS: set[str] = {'business', 'thesis', 'valuation', 'sources'}
+SECTION_FORBIDDEN: tuple[str, ...] = ('rating', 'valuation', 'related_docs', 'themes')
 
 SECTORS: set[str] = {
     'semiconductor', 'electronics', 'consumer', 'materials',
@@ -31,6 +34,8 @@ MAGNITUDES: set[str] = {'高', '中', '低'}
 REQUIRED_FIELDS_BY_TYPE: dict[str, set[str]] = {
     'buffett':      {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',
                      'themes', 'rating', 'conviction_date', 'thesis'},
+    'buffett-section': {'doc_type', 'stock_code', 'stock_name', 'section'},
+    'buffett-events': {'doc_type', 'stock_code', 'stock_name'},
     'quarterly':    {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',
                      'period', 'date'},
     'cross-sector': {'doc_type', 'stock_codes', 'stock_names', 'themes', 'date'},
@@ -83,6 +88,13 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
             violations.append(f"{p}: rating=watch requires watch_reason")
         if fm.get('rating') == 'exclude' and not fm.get('exclude_reason'):
             violations.append(f"{p}: rating=exclude requires exclude_reason")
+
+    if dt == 'buffett-section':
+        if fm.get('section') not in SECTIONS:
+            violations.append(f"{p}: section '{fm.get('section')}' not in {sorted(SECTIONS)}")
+        for field in SECTION_FORBIDDEN:
+            if field in fm:
+                violations.append(f"{p}: buffett-section must not carry '{field}'")
 
     if 'stock_code' in fm and not isinstance(fm['stock_code'], str):
         violations.append(f"{p}: stock_code must be str (got {type(fm['stock_code']).__name__})")

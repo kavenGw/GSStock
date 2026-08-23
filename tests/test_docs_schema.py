@@ -11,7 +11,8 @@ from scripts._docs_schema import (
 FIXTURE_DIR = Path(__file__).parent / 'fixtures' / 'docs_stub'
 
 def test_enums_are_correct():
-    assert DOC_TYPES == {'buffett', 'quarterly', 'cross-sector', 'theme', 'comps'}
+    assert DOC_TYPES == {'buffett', 'buffett-section', 'buffett-events',
+                         'quarterly', 'cross-sector', 'theme', 'comps'}
     assert 'semiconductor' in SECTORS
     assert 'other' in SECTORS
     assert RATINGS == {'core', 'config', 'watch', 'exclude'}
@@ -181,3 +182,24 @@ def test_related_docs_impact_bad_enum():
     v = validate_frontmatter(_theme_fm(impact='利好', magnitude='巨大'), Path('t.md'))
     assert any('related_docs[0].impact' in x and '利好' in x for x in v)
     assert any('related_docs[0].magnitude' in x and '巨大' in x for x in v)
+
+
+def test_buffett_section_valid():
+    fm = {'doc_type': 'buffett-section', 'stock_code': '603986',
+          'stock_name': '兆易创新', 'section': 'thesis'}
+    assert validate_frontmatter(fm, Path('x/thesis.md')) == []
+
+
+def test_buffett_section_rejects_bad_section_and_rating():
+    fm = {'doc_type': 'buffett-section', 'stock_code': '603986',
+          'stock_name': '兆易创新', 'section': 'foo', 'rating': 'watch'}
+    v = validate_frontmatter(fm, Path('x/foo.md'))
+    assert any("section 'foo'" in s for s in v)
+    assert any('must not carry' in s for s in v)
+
+
+def test_buffett_events_valid_with_impact_refs():
+    fm = {'doc_type': 'buffett-events', 'stock_code': '603986', 'stock_name': '兆易创新',
+          'related_docs': [{'path': '../../../../themes/a.md', 'impact': '动摇',
+                            'magnitude': '中', 'symmetric': True}]}
+    assert validate_frontmatter(fm, Path('x/events.md')) == []
