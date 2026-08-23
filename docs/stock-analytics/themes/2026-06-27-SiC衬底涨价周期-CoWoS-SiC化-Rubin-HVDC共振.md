@@ -33,7 +33,7 @@ related_docs:
 - path: ../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md
   note: 华润微（功率IDM）——SiC器件涨价受益但估值已透支
   symmetric: true
-- path: ../sectors/semiconductor/power/2026-06-19-士兰微-buffett分析.md
+- path: ../sectors/semiconductor/power/士兰微/events.md
   note: 士兰微（功率IDM+SiC主驱）——SiC器件涨价受益但估值已透支
   symmetric: true
 - path: ../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md
@@ -63,7 +63,7 @@ related_docs:
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安光电（含SiC衬底的全产业链IDM）——SiC涨价+缺货利好其SiC分部减亏
 > - [2026-06-19-晶盛机电-buffett分析](../sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md) — 晶盛机电（SiC长晶设备+12英寸SiC中介层晶体设备）——卖铲人，不直接受价格战伤害
 > - [2026-06-19-华润微-buffett分析](../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md) — 华润微（功率IDM）——SiC器件涨价受益但估值已透支
-> - [2026-06-19-士兰微-buffett分析](../sectors/semiconductor/power/2026-06-19-士兰微-buffett分析.md) — 士兰微（功率IDM+SiC主驱）——SiC器件涨价受益但估值已透支
+> - [events](../sectors/semiconductor/power/士兰微/events.md) — 士兰微（功率IDM+SiC主驱）——SiC器件涨价受益但估值已透支
 > - [2026-06-25-斯达半导-buffett分析](../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md) — 斯达半导（车规IGBT+SiC模块）——衬底涨价对其是成本压力的双面性
 > - [2026-06-25-扬杰科技-buffett分析](../sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md) — 扬杰科技（功率器件+SiC高端化）——器件涨价受益但估值已透支
 > - [2026-06-24-捷捷微电-buffett分析](../sectors/semiconductor/power/2026-06-24-捷捷微电-buffett分析.md) — 捷捷微电（MOS国产替代）——储能低压MOS缺货涨价受益但估值已透支
