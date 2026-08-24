@@ -64,6 +64,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 ### 合并审查（1 个 read-only sonnet；异常升 opus）→ dispatch.md §3
 
 闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase review`。两段正文都要在文件里，控制者读文件不追要。
+审查报的「两路 evidence 数字冲突」先核是不是同一张表的不同列，再决定改数还是补口径说明 [L19]。
 预估 4-10min，复核另计。
 
 ### Phase C — 收尾（1 个 sonnet）→ dispatch.md §4
