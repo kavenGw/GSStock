@@ -244,3 +244,161 @@ def test_orphans_skip_folder_sections(tmp_path):
     assert rc == 0
     assert 'thesis.md' not in out and 'events.md' not in out
     assert 'index.md' in out
+
+
+def test_refs_folder_symmetry_via_related_md(tmp_path):
+    d = tmp_path / 'sectors' / 'semiconductor' / 'power' / '扬杰科技'
+    c = tmp_path / 'comps' / 'c.md'
+    _write(d / 'index.md', """\
+    ---
+    doc_type: buffett
+    stock_code: '300373'
+    stock_name: 扬杰科技
+    sector: semiconductor
+    subsector: power
+    themes: [功率半导体]
+    rating: watch
+    watch_reason: w
+    conviction_date: 2026-08-24
+    thesis: t
+    ---
+    # 扬杰科技
+    """)
+    _write(d / 'related.md', """\
+    ---
+    doc_type: buffett-related
+    stock_code: '300373'
+    stock_name: 扬杰科技
+    related_docs:
+      - path: ../../../../comps/c.md
+        note: 七方横评
+    ---
+    # 扬杰科技 关联文档
+    """)
+    _write(c, """\
+    ---
+    doc_type: comps
+    stock_codes: ['300373']
+    stock_names: [扬杰科技]
+    themes: [功率半导体]
+    period: 26h1
+    date: 2026-07-03
+    related_docs:
+      - path: ../sectors/semiconductor/power/扬杰科技/index.md
+        note: 质地第一档
+    ---
+    # C
+    """)
+    code, out = run_refs(tmp_path)
+    assert code == 0, out
+
+
+def test_refs_rejects_same_folder_self_ref(tmp_path):
+    d = tmp_path / 'sectors' / 'semiconductor' / 'power' / '扬杰科技'
+    _write(d / 'index.md', """\
+    ---
+    doc_type: buffett
+    stock_code: '300373'
+    stock_name: 扬杰科技
+    sector: semiconductor
+    subsector: power
+    themes: [功率半导体]
+    rating: watch
+    watch_reason: w
+    conviction_date: 2026-08-24
+    thesis: t
+    ---
+    # 扬杰科技
+    """)
+    _write(d / 'related.md', """\
+    ---
+    doc_type: buffett-related
+    stock_code: '300373'
+    stock_name: 扬杰科技
+    related_docs:
+      - path: index.md
+        note: 自指
+    ---
+    # 关联
+    """)
+    code, out = run_refs(tmp_path)
+    assert code != 0
+    assert '同一股票文件夹' in out
+
+
+def test_refs_non_folder_dirs_stay_strict(tmp_path):
+    a = tmp_path / 'themes' / 'a.md'
+    b = tmp_path / 'themes' / 'b.md'
+    _write(a, """\
+    ---
+    doc_type: theme
+    theme_name: A
+    themes: [t]
+    date: 2026-08-01
+    related_docs:
+      - path: b.md
+        note: 同目录兄弟
+    ---
+    # A
+    """)
+    _write(b, """\
+    ---
+    doc_type: theme
+    theme_name: B
+    themes: [t]
+    date: 2026-08-02
+    related_docs: []
+    ---
+    # B
+    """)
+    code, out = run_refs(tmp_path)
+    assert code != 0
+    assert 'asymmetric' in out.lower()
+
+
+def test_orphans_folder_referenced_through_index(tmp_path):
+    d = tmp_path / 'sectors' / 'semiconductor' / 'power' / '扬杰科技'
+    c = tmp_path / 'comps' / 'c.md'
+    _write(d / 'index.md', """\
+    ---
+    doc_type: buffett
+    stock_code: '300373'
+    stock_name: 扬杰科技
+    sector: semiconductor
+    subsector: power
+    themes: [功率半导体]
+    rating: watch
+    watch_reason: w
+    conviction_date: 2026-08-24
+    thesis: t
+    ---
+    # 扬杰科技
+    """)
+    _write(d / 'related.md', """\
+    ---
+    doc_type: buffett-related
+    stock_code: '300373'
+    stock_name: 扬杰科技
+    related_docs:
+      - path: ../../../../comps/c.md
+        note: 七方横评
+    ---
+    # 关联
+    """)
+    _write(c, """\
+    ---
+    doc_type: comps
+    stock_codes: ['300373']
+    stock_names: [扬杰科技]
+    themes: [功率半导体]
+    period: 26h1
+    date: 2026-07-03
+    related_docs:
+      - path: ../sectors/semiconductor/power/扬杰科技/index.md
+        note: 质地第一档
+    ---
+    # C
+    """)
+    rc, out = run_refs(tmp_path, '--check-orphans')
+    assert rc == 0
+    assert 'No orphans' in out

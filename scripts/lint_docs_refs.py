@@ -26,11 +26,33 @@ _BLOCK_RE = re.compile(
     re.DOTALL,
 )
 _H1_RE = re.compile(r'^(# [^\n]+\n)', re.MULTILINE)
-_NEVER_ORPHAN = {'buffett-section', 'buffett-events'}
+_NEVER_ORPHAN = {'buffett-section', 'buffett-events', 'buffett-related'}
 
 
 def _resolve(base: Path, rel: str) -> Path:
     return (base.parent / rel).resolve()
+
+
+def _folders(docs: dict[Path, dict]) -> set[Path]:
+    """股票文件夹档目录集合：含 doc_type: buffett 的 index.md 的那个目录。"""
+    return {p.parent for p, fm in docs.items()
+            if p.name == 'index.md' and fm.get('doc_type') == 'buffett'}
+
+
+def _node(p: Path, folders: set[Path]) -> Path:
+    """引用节点：文件夹档内任一文件归并到文件夹本身，其余按文件自身。"""
+    return p.parent if p.parent in folders else p
+
+
+def _node_refs(docs: dict[Path, dict], folders: set[Path]) -> dict[Path, set[Path]]:
+    """node -> 该 node 全部文件出链指向的 node 集合。"""
+    out: dict[Path, set[Path]] = {}
+    for path, fm in docs.items():
+        bucket = out.setdefault(_node(path, folders), set())
+        for r in fm.get('related_docs') or []:
+            if isinstance(r, dict) and 'path' in r:
+                bucket.add(_node(_resolve(path, r['path']), folders))
+    return out
 
 
 def _gather(root: Path) -> dict[Path, dict]:
@@ -46,6 +68,8 @@ def _gather(root: Path) -> dict[Path, dict]:
 
 def _check(docs: dict[Path, dict]) -> list[str]:
     violations: list[str] = []
+    folders = _folders(docs)
+    node_refs = _node_refs(docs, folders)
     for path, fm in docs.items():
         rels = fm.get('related_docs') or []
         if not isinstance(rels, list):
@@ -63,25 +87,29 @@ def _check(docs: dict[Path, dict]) -> list[str]:
             if target not in docs:
                 violations.append(f"{path}: related_docs[{i}].path -> '{rel}' not found")
                 continue
-            if ref.get('symmetric', True):
-                back = docs[target].get('related_docs') or []
-                back_paths = {_resolve(target, r['path']) for r in back
-                              if isinstance(r, dict) and 'path' in r}
-                if path not in back_paths:
-                    violations.append(
-                        f"{path}: asymmetric ref to {target} "
-                        f"(set symmetric: false to allow one-way)")
+            src, dst = _node(path, folders), _node(target, folders)
+            if src == dst:
+                violations.append(
+                    f"{path}: related_docs[{i}].path '{rel}' 指向同一股票文件夹内部，"
+                    f"应改用正文相对链接")
+                continue
+            if ref.get('symmetric', True) and src not in node_refs.get(dst, set()):
+                violations.append(
+                    f"{path}: asymmetric ref to {target} "
+                    f"(set symmetric: false to allow one-way)")
     return violations
 
 
 def _orphans(docs: dict[Path, dict]) -> list[Path]:
+    folders = _folders(docs)
     referenced: set[Path] = set()
     for path, fm in docs.items():
         for ref in fm.get('related_docs') or []:
             if isinstance(ref, dict) and 'path' in ref:
-                referenced.add(_resolve(path, ref['path']))
+                referenced.add(_node(_resolve(path, ref['path']), folders))
     return sorted(p for p, fm in docs.items()
-                  if p not in referenced and fm.get('doc_type') not in _NEVER_ORPHAN)
+                  if _node(p, folders) not in referenced
+                  and fm.get('doc_type') not in _NEVER_ORPHAN)
 
 
 def _render_block(fm: dict, md_path: Path) -> str:
