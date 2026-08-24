@@ -33,7 +33,7 @@
       "id": 4,
       "name": "route-deep",
       "prompt": "深度分析一下拓荆科技，现在还能不能买？",
-      "expected_output": "识别为模式 1（单股、无附带材料、意图重估）；走 mode-deep.md 编排产出文件夹六文件。",
+      "expected_output": "识别为模式 1（单股、无附带材料、意图重估）；走 mode-deep.md 编排产出文件夹七文件。",
       "files": []
     },
     {

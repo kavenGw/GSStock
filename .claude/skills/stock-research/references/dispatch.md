@@ -102,7 +102,7 @@ akshare 限流/失效、新浪 IR PDF 无法解析、腾讯港股字段等取数
 
 ## 3. 合并审查（1 个 read-only sonnet；异常升 opus）
 
-给：新档文件夹路径（6 文件全读）+ 三份 evidence 路径；要求 `Skill buffett-doc-spec`（审查输出格式与红线在其 §4-§5）。
+给：新档文件夹路径（7 文件全读）+ 三份 evidence 路径；要求 `Skill buffett-doc-spec`（审查输出格式与红线在其 §4-§5）。
 必内联：命中 lens 的【必查清单】【双面必答】原文；「所有含数字的 frontmatter 字段都要与正文 §0/§9 逐个比对」。
 两段正文全文写进 report 文件——审查是"只回 idle 不给正文"的重灾区。
 

@@ -58,7 +58,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### Phase B — 撰写（1 个 opus，不拆）→ dispatch.md §2
 
-闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档文件夹>`（查 6 文件齐全 + 占位，对应
+闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档文件夹>`（查 7 文件齐全 + 占位，对应
 "主体 + 填锚"抗中断设计 [L14][L10]）。预估 17-30min，由成稿长度驱动，不可并行（拆写手断"论点→估值→评级"链）。
 
 ### 合并审查（1 个 read-only sonnet；异常升 opus）→ dispatch.md §3

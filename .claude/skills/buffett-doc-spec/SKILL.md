@@ -84,7 +84,7 @@ related_docs 属**合规存量**，不迁移。跨文件引用用相对链接 `[
 存量平铺档 `YYYY-MM-DD-<股票名>-buffett分析.md` 是 2026-08-23 前的旧形态，**不再新建**；消费者双模识别。
 `quality`（质地星级）**不进 frontmatter**，是 valuations.yaml 条目专属字段，Phase C 按需写。
 
-**写手职责边界**：写完只跑 `python scripts/lint_docs_frontmatter.py`（6 文件齐全 + 占位由 gate `--doc <文件夹>` 校验）；**不跑 refs lint、不 git add/commit、不删旧档、
+**写手职责边界**：写完只跑 `python scripts/lint_docs_frontmatter.py`（7 文件齐全 + 占位由 gate `--doc <文件夹>` 校验）；**不跑 refs lint、不 git add/commit、不删旧档、
 不改兄弟档**（这些归 Phase C，见 stock-research `references/finalize.md`）。
 
 撰写纪律：三档每股内在价值与正文 §0/§9 一致；分红率与 §3/§11 一致；**所有含数字的 frontmatter 字段**
