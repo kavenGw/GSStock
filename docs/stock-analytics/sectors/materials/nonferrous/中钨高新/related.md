@@ -1,0 +1,28 @@
+---
+doc_type: buffett-related
+stock_code: '000657'
+stock_name: 中钨高新
+related_docs:
+- path: ../2026-06-11-章源钨业-buffett分析.md
+  note: 同钨产业链同业对照。两档共用 Method 3 穿越周期正常化盈利法与 bull 概率门控纪律；章源 2026H1 归母 6.88 亿、同比 +497.4%（高于中钨的 +280.5%），市值 306.96 亿 / PE(TTM) 35.57× / PB 10.64× —— 是"2026H1 的利润跃升是全行业钨价 β 而非中钨独有 alpha"的直接佐证（见 business.md §4.2 / thesis.md §8.5）
+  symmetric: true
+- path: ../../../electronics/pcb/2026-08-14-生益电子-buffett分析.md
+  note: AI-PCB 需求端对照。金洲精工的微钻消耗由 M8/M9 高端板材的层数与孔数驱动，生益电子档提供 PCB/CCL 侧景气与"低端过剩、高端紧缺"的结构性过剩口径，是本档 thesis.md §6.5 判定"扩产中端偏赌景气"的下游依据
+  symmetric: false
+- path: ../../../electronics/pcb-equipment/2026-06-20-大族数控-buffett分析.md
+  note: PCB 钻孔的设备端 vs 耗材端对照。大族数控卖钻机（资本开支品）、金洲卖钻针（耗材），同一条 AI PCB 钻孔需求链的两端，兑现节奏与周期属性相反——可用于交叉验证 PCB 厂 capex 到微钻订单的传导
+  symmetric: false
+- path: ../../../electronics/pcb/2026-06-04-沪电股份-buffett分析.md
+  note: 调研纪要转述的金洲下游客户之一（沪电/深南/胜宏/欣兴/AT&S）。**公司从未具名披露任何客户**，此链接仅供顺链核对下游 capex 与出货节奏，不得据此认定客户关系（见 sources.md【缺】清单第 4 条）
+  symmetric: false
+---
+
+# 中钨高新（000657）关联文档
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [2026-06-11-章源钨业-buffett分析](../2026-06-11-章源钨业-buffett分析.md) — 同钨产业链同业对照。两档共用 Method 3 穿越周期正常化盈利法与 bull 概率门控纪律；章源 2026H1 归母 6.88 亿、同比 +497.4%（高于中钨的 +280.5%），市值 306.96 亿 / PE(TTM) 35.57× / PB 10.64× —— 是"2026H1 的利润跃升是全行业钨价 β 而非中钨独有 alpha"的直接佐证（见 business.md §4.2 / thesis.md §8.5）
+> - [2026-08-14-生益电子-buffett分析](../../../electronics/pcb/2026-08-14-生益电子-buffett分析.md) — AI-PCB 需求端对照。金洲精工的微钻消耗由 M8/M9 高端板材的层数与孔数驱动，生益电子档提供 PCB/CCL 侧景气与"低端过剩、高端紧缺"的结构性过剩口径，是本档 thesis.md §6.5 判定"扩产中端偏赌景气"的下游依据
+> - [2026-06-20-大族数控-buffett分析](../../../electronics/pcb-equipment/2026-06-20-大族数控-buffett分析.md) — PCB 钻孔的设备端 vs 耗材端对照。大族数控卖钻机（资本开支品）、金洲卖钻针（耗材），同一条 AI PCB 钻孔需求链的两端，兑现节奏与周期属性相反——可用于交叉验证 PCB 厂 capex 到微钻订单的传导
+> - [2026-06-04-沪电股份-buffett分析](../../../electronics/pcb/2026-06-04-沪电股份-buffett分析.md) — 调研纪要转述的金洲下游客户之一（沪电/深南/胜宏/欣兴/AT&S）。**公司从未具名披露任何客户**，此链接仅供顺链核对下游 capex 与出货节奏，不得据此认定客户关系（见 sources.md【缺】清单第 4 条）
+<!-- END related_docs -->

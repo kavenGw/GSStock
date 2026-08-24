@@ -2095,13 +2095,13 @@
   currency: CNY
   sector: materials
   rating: watch
-  bear: 6.3
-  base: 13.7
-  bull: 30.9
-  dividend_yield: 0.23
-  conviction_date: '2026-06-13'
-  source_doc: sectors/materials/nonferrous/2026-06-13-中钨高新-buffett分析.md
-  note: 每股内在价值场景加权（bear/base/bull）；2026Q1为钨价周期顶利润不可外推
+  bear: 5.09
+  base: 11.41
+  bull: 21.11
+  dividend_yield: 0.345
+  conviction_date: '2026-08-24'
+  source_doc: sectors/materials/nonferrous/中钨高新/index.md
+  note: 每股内在价值场景加权（bear/base/bull）；矿端=全部归母、AI微钻仅占15.6%；H2钨价基准较H1均价低约40%
   themes:
   - 钨
   - 小金属
@@ -2109,6 +2109,7 @@
   - 出口管制
   - 硬质合金
   - 数控刀片
+  - AI-PCB
   - commodity-cyclical
 - stock_code: '600487'
   stock_name: 亨通光电
