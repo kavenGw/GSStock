@@ -70,7 +70,7 @@ related_docs:
 
 ### 4. 反向链 + lint
 
-给被链个股档补反向条目（文件夹 → `index.md` frontmatter `related_docs`，属结构性引用；平铺 → 该档 frontmatter），
+给被链个股档补反向条目（文件夹 → `related.md` frontmatter `related_docs`（结构性引用）；平铺 → 该档 frontmatter），
 path 按相对目录算（`sectors/<s>/<ss>/<股票名>/index.md` → `../../../../quarterly/<NNqN>/<档名>.md`），`symmetric: true`。然后：
 
 ```bash
