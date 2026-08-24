@@ -600,23 +600,24 @@
   - 智能驾驶
   - 定增摊薄
 - stock_code: 09868
-  stock_name: 小鹏汽车
+  stock_name: 小鹏集团
   market: HK
   currency: HKD
   sector: industrial
   rating: watch
-  watch_reason: 股价两个月跌31.4%已抹平旧档的估值溢价，但正常化营收基数同步从767亿下修至739亿、2026交付目标事实上落空、bull概率因增长证据包三项无一为硬被压至20%，重算后安全边际仍为-27.6%；且2026Q2财报8/24才发，毛利率/现金/Q3指引全未知，估值缺最关键一块拼图
-  bear: 18.77
-  base: 35.45
-  bull: 56.31
-  conviction_date: '2026-08-08'
-  source_doc: sectors/industrial/ev/2026-08-08-小鹏汽车-buffett分析.md
-  note: PS估值法，三情景PS 0.45x/0.85x/1.35x × TTM营收739.4亿RMB × 1.08汇率
+  watch_reason: Q2财报把旧档8个卖出触发器全判为未触发、C1亏损扩大与C6交付负增长两条链同时中断，主论点未被证伪故不下调；但同一份财报暴露旧档完全没有的融资结构恶化——净现金单季-47.87亿、有息负债9个月+95.18亿、表观现金稳定靠借债维持，剥离大众里程碑后"亏损收窄25.1%"缩水甚至消失。主锚用美股盘中隐含市值843.9亿港元，期望内在价值574.8亿港元（30.00港元/股）安全边际-31.9%，港股收盘口径-37.1%，bull上行也仅+21.9%，够不上买入门槛
+  bear: 15.17
+  base: 30.33
+  bull: 53.7
+  conviction_date: '2026-08-24'
+  source_doc: sectors/industrial/ev/小鹏集团/index.md
+  note: PS估值法，汽车主业三情景PS 0.36x/0.72x/1.05x × 剥离大众里程碑后可比TTM营收747.4亿RMB × 1.08汇率；bull另加Dogotix机器人权益SOTP 181.4亿HKD（63亿美元投后 × 81.97%持股 × 46%折价），base/bear计0；主锚用美股盘中隐含市值843.9亿HKD而非港股收盘913.61亿（财报美东盘前发布，港股当日16:08收盘未消化）
   themes:
   - ev
   - autonomous_driving
   - 大众合作
   - robotaxi
+  - 具身智能
   - 增程
 - stock_code: '600353'
   stock_name: 旭光电子
