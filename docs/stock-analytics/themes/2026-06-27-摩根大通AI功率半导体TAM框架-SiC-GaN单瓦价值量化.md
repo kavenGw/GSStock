@@ -44,8 +44,8 @@ related_docs:
 - path: ../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md
   note: 斯达半导（车规IGBT+SiC模块）——SiC增长引擎获TAM背书，衬底涨价双面性
   symmetric: true
-- path: ../sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md
-  note: 扬杰科技（功率分立+AI服务器电源转型）——AI电源敞口获需求验证但尚未单列坐实
+- path: ../sectors/semiconductor/power/扬杰科技/events.md
+  note: 扬杰科技（300373）事件回写；AI 敞口从「未单列」推进到「增速近翻倍、基数未知」，JPM 2028 年 $16B 中 Si 占 70% 正是其主池，但公司亲口排除 GPU/CPU/CPO 核心供电、AI 募投锚定小信号，估值中 owner earnings 贡献按 0 计入
   symmetric: true
 - path: ../sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md
   note: 晶盛机电（SiC长晶设备）——卖铲人，SiC含量翻倍间接放大衬底设备需求
@@ -79,7 +79,7 @@ related_docs:
 > - [events](../sectors/semiconductor/power/士兰微/events.md) — 士兰微（功率IDM+SiC主驱）——AI电源+SiC双引擎获TAM背书但估值已透支
 > - [2026-06-19-华润微-buffett分析](../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md) — 华润微（功率全平台IDM）——AI电源卡位获需求验证但用周期顶定价
 > - [2026-06-25-斯达半导-buffett分析](../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md) — 斯达半导（车规IGBT+SiC模块）——SiC增长引擎获TAM背书，衬底涨价双面性
-> - [2026-06-25-扬杰科技-buffett分析](../sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md) — 扬杰科技（功率分立+AI服务器电源转型）——AI电源敞口获需求验证但尚未单列坐实
+> - [events](../sectors/semiconductor/power/扬杰科技/events.md) — 扬杰科技（300373）事件回写；AI 敞口从「未单列」推进到「增速近翻倍、基数未知」，JPM 2028 年 $16B 中 Si 占 70% 正是其主池，但公司亲口排除 GPU/CPU/CPO 核心供电、AI 募投锚定小信号，估值中 owner earnings 贡献按 0 计入
 > - [2026-06-19-晶盛机电-buffett分析](../sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md) — 晶盛机电（SiC长晶设备）——卖铲人，SiC含量翻倍间接放大衬底设备需求
 > - [2026-06-02-麦格米特-buffett分析](../sectors/electronics/power-electronics/2026-06-02-麦格米特-buffett分析.md) — 麦格米特（AI服务器/HVDC电源）——note第2条机电→固态替代直接映射，但估值极度透支
 > - [2026-05-18-中恒电气-buffett分析](../sectors/industrial/power-electronics/2026-05-18-中恒电气-buffett分析.md) — 中恒电气（HVDC配电/固态断路器概念）——机电→固态替代最直接概念映射，估值已透支

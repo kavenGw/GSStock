@@ -39,8 +39,8 @@ related_docs:
 - path: ../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md
   note: 斯达半导（车规IGBT+SiC模块）——衬底涨价对其是成本压力的双面性
   symmetric: true
-- path: ../sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md
-  note: 扬杰科技（功率器件+SiC高端化）——器件涨价受益但估值已透支
+- path: ../sectors/semiconductor/power/扬杰科技/events.md
+  note: 扬杰科技（300373）事件回写；方向须纠正——扬杰在器件端，衬底涨价对其是成本项而非收入项；其 SiC 仅 6 吋线且无 8 寸规划，「8 寸替代」风险应挂国内 6 吋 SiC 线而非越南线
   symmetric: true
 - path: ../sectors/semiconductor/power/2026-06-24-捷捷微电-buffett分析.md
   note: 捷捷微电（MOS国产替代）——储能低压MOS缺货涨价受益但估值已透支
@@ -65,7 +65,7 @@ related_docs:
 > - [2026-06-19-华润微-buffett分析](../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md) — 华润微（功率IDM）——SiC器件涨价受益但估值已透支
 > - [events](../sectors/semiconductor/power/士兰微/events.md) — 士兰微（功率IDM+SiC主驱）——SiC器件涨价受益但估值已透支
 > - [2026-06-25-斯达半导-buffett分析](../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md) — 斯达半导（车规IGBT+SiC模块）——衬底涨价对其是成本压力的双面性
-> - [2026-06-25-扬杰科技-buffett分析](../sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md) — 扬杰科技（功率器件+SiC高端化）——器件涨价受益但估值已透支
+> - [events](../sectors/semiconductor/power/扬杰科技/events.md) — 扬杰科技（300373）事件回写；方向须纠正——扬杰在器件端，衬底涨价对其是成本项而非收入项；其 SiC 仅 6 吋线且无 8 寸规划，「8 寸替代」风险应挂国内 6 吋 SiC 线而非越南线
 > - [2026-06-24-捷捷微电-buffett分析](../sectors/semiconductor/power/2026-06-24-捷捷微电-buffett分析.md) — 捷捷微电（MOS国产替代）——储能低压MOS缺货涨价受益但估值已透支
 > - [2026-06-19-碳化硅-氮化镓-第三代半导体板块专题](2026-06-19-碳化硅-氮化镓-第三代半导体板块专题.md) — SiC+GaN 板块格局专题，本档为其涨价周期事件驱动切片
 > - [2026-06-26-三安光电-天岳先进-SiC价值链对比-comps](../comps/2026-06-26-三安光电-天岳先进-SiC价值链对比-comps.md) — 三安(IDM) vs 天岳(纯衬底) SiC 价值链对比 comps，本档涨价传导的价值链背景
