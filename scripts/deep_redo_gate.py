@@ -32,7 +32,8 @@ PLACEHOLDER_RE = re.compile(r'【待锚】|\bTODO\b|\bTBD\b')
 VALUATION_BLOCK_RE = re.compile(r'^valuation:', re.M)
 SPEC_MARKERS = ('SPEC-COMPLIANT', '规格问题', 'Critical', 'Major', 'Minor')
 QUALITY_MARKERS = ('APPROVED-WITH-NITS', 'CHANGES-REQUESTED', 'APPROVED')
-FOLDER_FILES = ('index.md', 'business.md', 'thesis.md', 'valuation.md', 'sources.md', 'events.md')
+FOLDER_FILES = ('index.md', 'related.md', 'business.md', 'thesis.md',
+                'valuation.md', 'sources.md', 'events.md')
 
 
 def _read(path: Path) -> str:

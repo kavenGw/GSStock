@@ -3,7 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / '.claude' / 'skills' / 'stock-research' / 'scripts'))
-from pool_index import match_pool  # noqa: E402
+from pool_index import match_pool, parse_doc  # noqa: E402
 
 
 def _rec(code, name, sector, subsector, date, themes=(), doc_type='buffett', rating='watch'):
@@ -78,3 +78,18 @@ def test_no_hit_returns_empty_tiers():
     out = match_pool(POOL, keywords=['不存在'])
     assert all(out[t] == [] for t in ('T1', 'T2', 'T3', 'T4'))
     assert out['T4_count'] == 0
+
+
+def test_parse_doc_skips_buffett_related(tmp_path):
+    p = tmp_path / 'related.md'
+    p.write_text(
+        "---\n"
+        "doc_type: buffett-related\n"
+        "stock_code: '300373'\n"
+        "stock_name: 扬杰科技\n"
+        "related_docs: []\n"
+        "---\n"
+        "# 扬杰科技 关联文档\n",
+        encoding='utf-8',
+    )
+    assert parse_doc(p, tmp_path) is None

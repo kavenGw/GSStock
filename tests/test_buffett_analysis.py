@@ -48,6 +48,20 @@ def test_build_index_ignores_unrelated_files(analysis_dir):
     assert list(index.keys()) == ['真公司']
 
 
+def test_build_index_ignores_related_md(analysis_dir):
+    d = analysis_dir / '扬杰科技'
+    d.mkdir()
+    _write(d, 'index.md',
+           body="---\ndoc_type: buffett\nconviction_date: 2026-08-24\n---\n# 扬杰科技\n")
+    _write(d, 'related.md',
+           body="---\ndoc_type: buffett-related\nrelated_docs: []\n---\n# 关联文档\n")
+
+    index = BuffettAnalysisService.build_index(analysis_dir)
+
+    assert set(index.keys()) == {'扬杰科技'}
+    assert index['扬杰科技'].name == 'index.md'
+
+
 def test_get_html_returns_rendered_markdown(analysis_dir):
     _write(
         analysis_dir,

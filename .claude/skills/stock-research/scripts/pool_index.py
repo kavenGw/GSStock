@@ -57,7 +57,7 @@ def parse_doc(path: Path, root: Path):
         return None
     if not isinstance(fm, dict):
         return None
-    if fm.get('doc_type') in ('buffett-section', 'buffett-events'):
+    if fm.get('doc_type') in ('buffett-section', 'buffett-events', 'buffett-related'):
         return None
 
     # 代码/名字：单档用 stock_code/stock_name，多档用 stock_codes/stock_names，

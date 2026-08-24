@@ -209,6 +209,7 @@ def _make_folder(tmp_path: Path, names=('business', 'thesis', 'valuation', 'sour
     for n in names:
         _write(d / f'{n}.md', f'---\ndoc_type: buffett-section\nsection: {n}\n---\n# x\n正文')
     _write(d / 'events.md', '---\ndoc_type: buffett-events\nrelated_docs: []\n---\n# 事件\n')
+    _write(d / 'related.md', '---\ndoc_type: buffett-related\nrelated_docs: []\n---\n# 关联文档\n')
     return d
 
 
@@ -228,3 +229,13 @@ def test_phase_b_folder_missing_file_and_placeholder(tmp_path, capsys):
     assert rc == 1
     assert 'business.md' in out and 'sources.md' in out
     assert 'thesis.md 1 处' in out
+
+
+def test_phase_b_folder_missing_related(tmp_path, capsys):
+    art, _ = _make_phase_b(tmp_path)
+    d = _make_folder(tmp_path)
+    (d / 'related.md').unlink()
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(d), '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'related.md' in out
