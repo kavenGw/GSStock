@@ -3,6 +3,7 @@
 """
 import json
 import logging
+import re
 import ssl
 import threading
 from datetime import date, datetime, timedelta
@@ -17,6 +18,9 @@ from app.config.notification_config import (
 )
 
 logger = logging.getLogger(__name__)
+
+# 港股代码防 Slack autolink：`0358.HK` 形如域名（.hk 是 TLD）
+_HK_CODE_RE = re.compile(r'\b(\d{4,5})\.HK\b')
 
 # Slack section text 硬上限 3000 字，留出余量防表情/转义放大后越界
 CALENDAR_SECTION_MAX_CHARS = 2800
@@ -127,15 +131,31 @@ class NotificationService:
         return pushed > 0
 
     @staticmethod
-    def send_slack(message: str, channel: str = CHANNEL_NEWS, blocks: list = None) -> bool:
-        if not SLACK_ENABLED:
-            logger.warning('[通知.Slack] Slack 未配置')
-            return False
+    def _sanitize_hk_codes(text: str) -> str:
+        """`0358.HK` → `HK 0358`
 
+        .hk 是有效 TLD，Slack 会把港股代码 autolink 成 http://0358.hk 超链接。
+        限定「前导数字 + 大写 .HK」，不误伤 release 推送里的真实 URL。
+        """
+        return _HK_CODE_RE.sub(r'HK \1', text) if text else text
+
+    @staticmethod
+    def _sanitize_blocks(node):
+        """递归改写 Block Kit 里所有 text 字段（section/header/fields 都覆盖）"""
+        if isinstance(node, dict):
+            return {
+                k: NotificationService._sanitize_hk_codes(v)
+                if k == 'text' and isinstance(v, str)
+                else NotificationService._sanitize_blocks(v)
+                for k, v in node.items()
+            }
+        if isinstance(node, list):
+            return [NotificationService._sanitize_blocks(i) for i in node]
+        return node
+
+    @staticmethod
+    def _post_slack(data: dict) -> bool:
         try:
-            data = {'channel': channel, 'text': message}
-            if blocks:
-                data['blocks'] = blocks[:50]
             payload = json.dumps(data).encode('utf-8')
             req = Request(
                 'https://slack.com/api/chat.postMessage',
@@ -155,6 +175,17 @@ class NotificationService:
         except Exception as e:
             logger.error(f'[通知.Slack] 推送失败: {e}', exc_info=True)
             return False
+
+    @staticmethod
+    def send_slack(message: str, channel: str = CHANNEL_NEWS, blocks: list = None) -> bool:
+        if not SLACK_ENABLED:
+            logger.warning('[通知.Slack] Slack 未配置')
+            return False
+
+        data = {'channel': channel, 'text': NotificationService._sanitize_hk_codes(message)}
+        if blocks:
+            data['blocks'] = NotificationService._sanitize_blocks(blocks[:50])
+        return NotificationService._post_slack(data)
 
     @staticmethod
     def _get_all_watched_codes() -> tuple[list[str], dict[str, str]]:
@@ -301,42 +332,6 @@ class NotificationService:
             kept.append(line)
 
         return '\n'.join([head] + kept)
-
-    @staticmethod
-    def format_earnings_alerts(codes: list[str] = None, name_map: dict[str, str] = None) -> dict:
-        """生成财报日期提醒（未来7天）
-
-        盯盘池的事件已由 format_calendar_events 覆盖，此处只报补集，避免同条消息重复。
-        """
-        from app.services.earnings import EarningsService
-        from app.services.watch_service import WatchService
-
-        if codes is None or name_map is None:
-            codes, name_map = NotificationService._get_all_watched_codes()
-
-        # 排除集需并上 A+H 对应代码：日历段按 WATCH_CODES 顶层代码报（不展开 ah，
-        # 否则同公司会在日历段内部重复），但推送层要防的是"同公司被两个段落各报一次"，
-        # 所以这里反过来要展开——两边故意不对称，勿"统一"。见 calendar_event._watch_entries
-        # （那里还记了第三处：简报页 BriefingService.get_earnings_alert_data 走合并口径）。
-        watch_codes = set(WatchService.get_watch_codes_with_ah())
-        target_codes = [c for c in codes if c not in watch_codes]
-
-        if not target_codes:
-            return {'text': ''}
-
-        upcoming = EarningsService.get_upcoming_earnings(target_codes, days=7)
-        if not upcoming:
-            return {'text': ''}
-
-        text = "📅 财报提醒（未来7天）\n"
-        for item in upcoming:
-            name = name_map.get(item['code'], item['code'])
-            if item['is_today']:
-                text += f"  {name}({item['code']}) - 今天发布财报\n"
-            else:
-                text += f"  {name}({item['code']}) - {item['days_until']}天后({item['earnings_date']})\n"
-
-        return {'text': text.rstrip('\n')}
 
     @staticmethod
     def format_ai_report(analyses: list) -> dict:
@@ -1009,8 +1004,7 @@ class NotificationService:
     @staticmethod
     def build_market_blocks(indices_text: str, futures_text: str, etf_text: str,
                             sectors_text: str, technical_text: str,
-                            dram_text: str = '', earnings_text: str = '',
-                            ai_text: str = '',
+                            dram_text: str = '', ai_text: str = '',
                             adr_text: str = '', calendar_text: str = '') -> list:
         """构建 Message 3 的 Block Kit blocks（市场行情 + 板块 + 技术 + 数据）"""
         B = NotificationService
@@ -1146,8 +1140,8 @@ class NotificationService:
                 else:
                     blocks.append(B._block_section(line))
 
-        # 日历 / DRAM / 财报
-        extra_texts = [t for t in [calendar_text, dram_text, earnings_text] if t]
+        # 日历 / DRAM
+        extra_texts = [t for t in [calendar_text, dram_text] if t]
         if extra_texts:
             blocks.append(B._block_divider())
             for t in extra_texts:
@@ -1176,11 +1170,8 @@ class NotificationService:
 
         subject = f'每日股票分析报告 - {today}'
 
-        codes, name_map = NotificationService._get_all_watched_codes()
-
         # 收集所有结构化数据
         briefing = NotificationService.format_briefing_summary()
-        earnings = NotificationService.format_earnings_alerts(codes, name_map)
 
         indices_text = NotificationService.format_indices_summary()
         futures_text = NotificationService.format_futures_summary()
@@ -1245,7 +1236,6 @@ class NotificationService:
                     'dram': dram_text,
                     'technical': technical_text,
                     'calendar_events': calendar_text,
-                    'earnings_alerts': earnings.get('text', ''),
                     'watch_analysis': watch_text,
                 }
                 prompt = build_daily_briefing_prompt(all_data)
@@ -1309,8 +1299,6 @@ class NotificationService:
             data_lines.append(calendar_text)
         if dram_text:
             data_lines.append(dram_text)
-        if earnings.get('text'):
-            data_lines.append(earnings['text'])
         if data_lines:
             msg3_parts.append('\n'.join(data_lines))
         if ai_text:
@@ -1319,8 +1307,8 @@ class NotificationService:
         msg3_blocks = NotificationService.build_market_blocks(
             indices_text=indices_text, futures_text=futures_text, etf_text=etf_text,
             sectors_text=sectors_text, technical_text=technical_text,
-            dram_text=dram_text, earnings_text=earnings.get('text', ''),
-            ai_text=ai_text, adr_text=adr_text, calendar_text=calendar_text)
+            dram_text=dram_text, ai_text=ai_text,
+            adr_text=adr_text, calendar_text=calendar_text)
 
         news_messages = []
         news_blocks_list = []

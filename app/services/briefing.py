@@ -799,10 +799,9 @@ class BriefingService:
                 stock_name_map[s.stock_code] = s.stock_name
 
             # A+H 同公司只报一行：本页按公司列「即将发布财报」，两地上市财报只发一次。
-            # 这是 A+H 处理的第三处，与另两处口径各自不同、刻意不统一：
+            # 这是 A+H 处理的第二处，与另一处口径不同、刻意不统一：
             #   1. calendar_event._watch_entries —— 不展开 ah（否则日历段内同公司两条）
-            #   2. notification.format_earnings_alerts —— 展开 ah 做排除集（防两个段落各报一次）
-            #   3. 此处 —— 合并 ah（两个代码都拿到日期时只留顶层代码）
+            #   2. 此处 —— 合并 ah（两个代码都拿到日期时只留顶层代码）
             #
             # 折叠必须在【结果侧】做，不能在入参侧先把 ah 代码丢掉：
             # A+H 的顶层代码全是 .HK，而 EarningsService 按市场分流 —— A 股走巨潮

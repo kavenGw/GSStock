@@ -13,7 +13,6 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
         all_data: 包含以下 key 的字典，每个 value 为格式化后的文本字符串：
             - position_summary: 持仓概览
             - calendar_events: 近期事件日历
-            - earnings_alerts: 财报提醒
             - watch_analysis: 盯盘分析(7d+30d)
             - indices: 指数行情
             - futures: 期货数据
@@ -34,7 +33,6 @@ def build_daily_briefing_prompt(all_data: dict) -> str:
         'dram': 'DRAM价格',
         'technical': '技术评分',
         'calendar_events': '近期事件日历',
-        'earnings_alerts': '财报提醒',
         'watch_analysis': '盯盘分析',
     }
 

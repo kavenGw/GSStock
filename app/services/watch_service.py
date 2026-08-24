@@ -25,17 +25,6 @@ class WatchService:
         return [e['code'] for e in WATCH_CODES]
 
     @staticmethod
-    def get_watch_codes_with_ah() -> list[str]:
-        """盯盘代码 + 各条目 A+H 对应代码的并集（同一公司算一次盯盘覆盖）
-
-        与 get_watch_codes() 语义不同、互不替代：后者是"盯盘池顶层代码"，
-        本方法是"盯盘覆盖到的所有代码"，用于推送时判断某公司是否已被日历段报过。
-        """
-        codes = [e['code'] for e in WATCH_CODES]
-        codes += [e['ah']['code'] for e in WATCH_CODES if e.get('ah')]
-        return codes
-
-    @staticmethod
     def dedup_ah_codes(codes: list[str]) -> list[str]:
         """同一公司的 A+H 两个代码只留盯盘池顶层代码，保持入参顺序
 
