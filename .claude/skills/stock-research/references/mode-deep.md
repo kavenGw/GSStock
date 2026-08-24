@@ -65,6 +65,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase review`。两段正文都要在文件里，控制者读文件不追要。
 审查报的「两路 evidence 数字冲突」先核是不是同一张表的不同列，再决定改数还是补口径说明 [L19]。
+返修单只下"结构/格式/补解释"指令；**凡引入新事实或因果论断的，先经一路验证或写成「请核实 X 是否成立」，不得直接写成「请补写 X」** [L21]。
 预估 4-10min，复核另计。
 
 ### Phase C — 收尾（1 个 sonnet）→ dispatch.md §4
