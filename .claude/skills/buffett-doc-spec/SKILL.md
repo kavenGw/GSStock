@@ -38,10 +38,6 @@ valuation:                   # Phase B 写入，Phase C 用 sync_valuations.py �
   dividend_yield: 2.8        # 分红率（%），无分红填 null
 commodity: copper            # 可选，仅矿产/商品标的；枚举见 scripts/_docs_schema.py:COMMODITIES
 commodity_impact: positive   # positive=上游资源（涨价利好）/ negative=下游买方（涨价是成本）/ neutral=中游冶炼（加工费驱动）
-related_docs:
-- path: <相对路径>            # 按所在目录算：storage 档→comps ../../../comps/<file>.md；comps→storage ../sectors/semiconductor/storage/<file>.md；同目录直接文件名
-  note: ...
-  symmetric: true            # true 要求被链档补反向条目（Phase C 做）；不想补就 false
 ---
 # <标题>
 
@@ -53,16 +49,38 @@ related_docs:
 
 | 文件 | doc_type | 内容 | 体量 |
 |------|----------|------|------|
-| index.md | buffett（上述完整 frontmatter） | §0 + §10 + §11 | ≤12KB |
+| index.md | buffett（上述完整 frontmatter，**不含 related_docs**） | §0 + §10 + §11 | ≤12KB |
+| related.md | buffett-related | 只含 frontmatter related_docs（结构性引用）+ h1；重做时**重写** | — |
 | business.md | buffett-section / section: business | §1-§5 | — |
 | thesis.md | buffett-section / section: thesis | §6-§8 | — |
 | valuation.md | buffett-section / section: valuation | §9 + 相对旧档变化清单 | — |
 | sources.md | buffett-section / section: sources | §12 | — |
 | events.md | buffett-events | 只含 frontmatter related_docs（stock-research 模式 3 回写）+ h1；**重做时不覆盖**，不存在才新建 `related_docs: []` | — |
 
+`related.md` 形态（结构性引用唯一落点）：
+
+```yaml
+---
+doc_type: buffett-related
+stock_code: '300373'
+stock_name: 扬杰科技
+related_docs:
+- path: <相对路径>            # 按 related.md 所在目录算（与 index.md 同目录，写法同旧档）
+  note: ...
+  symmetric: true            # true 要求被链档补反向条目（Phase C 做）；不想补就 false
+---
+# <股票名>（<code>）关联文档
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+<!-- END related_docs -->
+```
+
 section 档 frontmatter 仅 `doc_type / stock_code / stock_name / section` 四字段，禁止 rating/valuation/related_docs/themes
-（lint 强校验）。index.md 的 `related_docs` 只放结构性引用（comps/quarterly/cross-sector/兄弟 buffett 档），事件 theme
-一律在 events.md。跨文件引用用相对链接 `[§9](valuation.md)`，不复制正文；每个 section 文件以 `# <股票名> — <节范围>` 开头。
+（lint 强校验）。`related.md` 仅 `doc_type / stock_code / stock_name / related_docs` 四字段，禁止 rating/valuation/themes/section。
+**index.md 不写 `related_docs`**：结构性引用（comps/quarterly/cross-sector/兄弟 buffett 档）一律在 `related.md`，事件 theme
+一律在 `events.md`。三者覆盖语义不同：index 重做覆盖、related 重做重写、events 永不覆盖。外部档指过来时**一律指 `<股票名>/index.md`**
+（阅读入口），对称性由 refs lint 按文件夹粒度判定，不必指 related.md。存量文件夹档（2026-08-24 前建的）index.md 里仍带
+related_docs 属**合规存量**，不迁移。跨文件引用用相对链接 `[§9](valuation.md)`，不复制正文；每个 section 文件以 `# <股票名> — <节范围>` 开头。
 存量平铺档 `YYYY-MM-DD-<股票名>-buffett分析.md` 是 2026-08-23 前的旧形态，**不再新建**；消费者双模识别。
 `quality`（质地星级）**不进 frontmatter**，是 valuations.yaml 条目专属字段，Phase C 按需写。
 

@@ -64,7 +64,8 @@ related_docs:
 ```
 
 必填字段 `doc_type / stock_code / stock_name`（与 `buffett-events` 同集）；禁带 `rating / valuation / themes / section`
-（复用 `SECTION_FORBIDDEN`）。相对路径按 `related.md` 自身所在目录算——与 index.md 同目录，故存量写法可直接平移。
+（新增 `RELATED_FORBIDDEN = ('rating', 'valuation', 'themes', 'section')`，不能复用 `SECTION_FORBIDDEN`，后者含 `related_docs`）。
+相对路径按 `related.md` 自身所在目录算——与 index.md 同目录，故存量写法可直接平移。
 
 **`_docs_schema.py` 仍允许 index.md 携带 `related_docs`**（不加禁令）：这是 D6 零迁移的兜底，士兰微/扬杰两份
 现存文件夹档不动也合规。规格层面（`buffett-doc-spec`）写「新档不写」，由写手与审查员保证。
@@ -99,7 +100,7 @@ def _node(p: Path, folders: set[Path]) -> Path:
 
 | 文件 | 改动 |
 |------|------|
-| `scripts/_docs_schema.py` | `DOC_TYPES` + `REQUIRED_FIELDS_BY_TYPE` 加 `buffett-related`；对其复用 `SECTION_FORBIDDEN` 校验 |
+| `scripts/_docs_schema.py` | `DOC_TYPES` + `REQUIRED_FIELDS_BY_TYPE` 加 `buffett-related`；新增 `RELATED_FORBIDDEN = ('rating', 'valuation', 'themes', 'section')`（不能复用 `SECTION_FORBIDDEN`，后者含 `related_docs`）校验 |
 | `scripts/lint_docs_refs.py` | §4 的 node 归并 + 自指守卫 |
 | `scripts/deep_redo_gate.py:35` | `FOLDER_FILES` 加 `'related.md'`（Phase B 闸门查七文件齐全 + 占位） |
 | `.claude/skills/stock-research/scripts/pool_index.py:60` | 跳过集合加 `'buffett-related'`，否则混进一条无 sector 的池索引记录 |

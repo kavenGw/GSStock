@@ -75,6 +75,8 @@ h1 之后的 `<!-- BEGIN related_docs -->` / `<!-- END related_docs -->` 块由�
 
 **首建档 `related_docs: []` 的预期行为**：`--rewrite-blocks` 会移除空的 `<!-- BEGIN/END related_docs -->` 占位块（empty list 无内容可渲染），不是脏 diff；`--check-orphans` 会把无反向链的首建档列为孤儿——**属预期，非硬错误**，frontmatter lint 仍 exit 0 即合规。
 
+**文件夹档的 related_docs 落点（2026-08-24 起）**：`<股票名>/related.md` 放结构性引用（comps/quarterly/cross-sector/兄弟 buffett 档），`<股票名>/events.md` 放事件 theme 回写，`index.md` 不写 related_docs。`lint_docs_refs.py` 的对称与孤儿判定按**文件夹粒度**：`<股票名>/` 下任一文件视为同一引用节点，故外部档指 `index.md`、回链写在 `related.md` 里也算对称；同一文件夹内部互指则报错（文件夹内用正文相对链接 `[§9](valuation.md)`）。2026-08-24 前建的文件夹档 index.md 里仍带 related_docs，属合规存量，不迁移。
+
 ## Lint 脚本（手动 run）
 
 ```bash

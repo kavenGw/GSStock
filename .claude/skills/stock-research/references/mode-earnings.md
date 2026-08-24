@@ -6,7 +6,7 @@
 
 ## 前置（不满足则升模式 1）
 
-- 该股已有 `sectors/<sector>/<subsector>/<股票名>/` 六文件。只有平铺档或无档 → 首建/迁移需要完整承做，升模式 1，
+- 该股已有 `sectors/<sector>/<subsector>/<股票名>/` 七文件。只有平铺档或无档 → 首建/迁移需要完整承做，升模式 1，
   财报作为 A1 的必查项内联进去。
 - 财报是**本体**的（主体一家）。用户意图若是"这份财报对池内其他票有什么影响" → 模式 3。
 
@@ -14,7 +14,7 @@
 
 | 维度 | 默认 |
 |------|------|
-| 产出 | 原地差量覆盖 `index/business/thesis/valuation/sources.md`；`events.md` 不动；`conviction_date`=今天 |
+| 产出 | 原地差量覆盖 `index/business/thesis/valuation/sources.md`；`events.md` / `related.md` 不动（结构性引用有增删才改 `related.md`）；`conviction_date`=今天 |
 | 评级 | 可更新三情景数字与期望内在价值；**评级翻转不在本模式内做**——主论点被证伪即走 `SKILL.md` 歧义门 2，报用户并建议升模式 1 |
 | 采证 | 单路 A1：财报原文（交易所/公司 PDF 一家核实即可）+ 指引/管理层口径 + 实时行情锚 |
 | 溢出 | 财报暴露的行业信号对池内其他标的 ≥ 中量级时，用 `scripts/pool_index.py match` 召回并在汇报里列"建议看池的标的"，**不写 theme 档** |
@@ -23,7 +23,7 @@
 
 ### 先做（控制者本人）
 
-1. Read 六文件。从 `valuation.md` 抽**旧档关键假设清单**（收入增速 / 毛利率 / 资本开支 / 分红 / 三情景概率与每股价值），
+1. Read 七文件。从 `valuation.md` 抽**旧档关键假设清单**（收入增速 / 毛利率 / 资本开支 / 分红 / 三情景概率与每股价值），
    从 `index.md` §11 抽**监控指标与卖出触发器**——这两张清单是 A1 对账的靶子，必内联。
 2. 读 `events.md` 的 related_docs，theme `date` > 旧 `conviction_date` 的条目即「未消化事件」，摘 note/impact/magnitude 备内联。
 3. 避坑门（`avoidance-list.yaml`）。
@@ -44,7 +44,7 @@ evidence 落 `.omc/artifacts/<股票名>-<日期>-evidence-A1-财报.md`，repor
 
 ### Phase B' — 差量撰写（1 个 opus）→ `dispatch.md §2` + 以下差量交办
 
-内联：A1 evidence 全文、旧档六文件路径（写手 Read）、对账结果、兄弟档口径摘要可省。交办铁律：
+内联：A1 evidence 全文、旧档七文件路径（写手 Read）、对账结果、兄弟档口径摘要可省。交办铁律：
 - **只改受财报影响的段落**，逐文件：`business.md` 经营数据与分部；`thesis.md` 被证实/证伪的论点（证伪的改写并标"26QN 财报证伪"）；
   `valuation.md` 假设与三情景数字 + 末尾"相对旧档变化清单"（必须列出每个改动的数字：旧 → 新 → 依据）；
   `index.md` §0/§10/§11 与 frontmatter `valuation` 块、`thesis`、`conviction_date`；`sources.md` 追加财报来源。

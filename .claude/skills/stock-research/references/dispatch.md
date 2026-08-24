@@ -81,7 +81,8 @@ akshare 限流/失效、新浪 IR PDF 无法解析、腾讯港股字段等取数
 
 要求先 `Skill buffett` 再 `Skill buffett-doc-spec`（frontmatter/13 节/估值机制/红线/变化清单均在该规格里，
 不必再由控制者内联）。给：三份 evidence 路径 + 旧档路径（平铺档或旧 index.md）+ 新档目标文件夹
-`sectors/<sector>/<subsector>/<股票名>/`。产出 6 文件（index/business/thesis/valuation/sources/events，节落点见规格）；
+`sectors/<sector>/<subsector>/<股票名>/`。产出 7 文件（index/related/business/thesis/valuation/sources/events，节落点见规格）；
+**`index.md` 的 frontmatter 不写 `related_docs`，结构性引用（comps/兄弟档/quarterly/cross-sector）全部写进 `related.md`**；
 **events.md 已存在则不碰**，不存在才新建 `related_docs: []`；index.md ≤12KB，§0/§10/§11 引其他文件用相对链接不复制正文。
 
 必内联：
@@ -96,8 +97,8 @@ akshare 限流/失效、新浪 IR PDF 无法解析、腾讯港股字段等取数
 汇报含评级 + 期望内在价值 + 安全边际 + 最脆弱论点自评。
 
 **派发坑**：写 300+ 行可能报 `Stream idle timeout`、文件 0 落盘。先 `ls <文件夹>`/逐文件行数确认哪些未生成，再用
-`SendMessage` 按原 agentId 续跑（"只 Write 缺的文件、勿再读文件/联网、勿分段"），**别重派**。六文件天然分段，
-落盘顺序建议 index → valuation → thesis → business → sources → events，先保结论与估值。
+`SendMessage` 按原 agentId 续跑（"只 Write 缺的文件、勿再读文件/联网、勿分段"），**别重派**。七文件天然分段，
+落盘顺序建议 index → valuation → thesis → business → sources → related → events，先保结论与估值。
 
 ## 3. 合并审查（1 个 read-only sonnet；异常升 opus）
 

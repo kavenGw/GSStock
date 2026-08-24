@@ -12,7 +12,7 @@
    comps/theme/quarterly 一律保留）。无清单（首建档）跳过。
 3. **反向链改指**：全仓扫 `symmetric: true` 指向被删档的 related_docs 条目（comps/theme/quarterly 里）→
    改指到新档 `<股票名>/index.md`，或删该条目。再 `grep -rn <旧档文件名> docs/` 抓正文行内死链（refs lint 抓不到行内链接）。
-4. 给新档 `symmetric: true` 指向的每份外部文档补反向 related_docs 条目（path 按被链档所在目录算相对路径）。
+4. 给新档 `related.md` 里 `symmetric: true` 指向的每份外部文档补反向 related_docs 条目（path 按被链档所在目录算相对路径，**指向 `<股票名>/index.md`** —— 阅读入口；refs lint 按文件夹粒度判对称，指 index.md 即可与 related.md 里的正向条目配对）。
 5. 重生顶部块 + 双 lint + 孤儿检查：
 
 ```bash
