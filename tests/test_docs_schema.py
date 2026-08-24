@@ -11,7 +11,7 @@ from scripts._docs_schema import (
 FIXTURE_DIR = Path(__file__).parent / 'fixtures' / 'docs_stub'
 
 def test_enums_are_correct():
-    assert DOC_TYPES == {'buffett', 'buffett-section', 'buffett-events',
+    assert DOC_TYPES == {'buffett', 'buffett-section', 'buffett-events', 'buffett-related',
                          'quarterly', 'cross-sector', 'theme', 'comps'}
     assert 'semiconductor' in SECTORS
     assert 'other' in SECTORS
@@ -203,3 +203,28 @@ def test_buffett_events_valid_with_impact_refs():
           'related_docs': [{'path': '../../../../themes/a.md', 'impact': '动摇',
                             'magnitude': '中', 'symmetric': True}]}
     assert validate_frontmatter(fm, Path('x/events.md')) == []
+
+
+def test_buffett_related_valid():
+    fm = {
+        'doc_type': 'buffett-related',
+        'stock_code': '300373',
+        'stock_name': '扬杰科技',
+        'related_docs': [{'path': '../x.md', 'note': 'n', 'symmetric': True}],
+    }
+    assert validate_frontmatter(fm, Path('related.md')) == []
+
+
+def test_buffett_related_required_and_forbidden():
+    fm = {
+        'doc_type': 'buffett-related',
+        'stock_name': 'X',
+        'rating': 'core',
+        'themes': ['t'],
+        'related_docs': [{'path': '../a.md'}],
+    }
+    violations = validate_frontmatter(fm, Path('related.md'))
+    assert any("missing required field 'stock_code'" in v for v in violations)
+    assert any("must not carry 'rating'" in v for v in violations)
+    assert any("must not carry 'themes'" in v for v in violations)
+    assert not any("must not carry 'related_docs'" in v for v in violations)

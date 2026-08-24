@@ -9,10 +9,11 @@ from typing import Any
 
 import yaml
 
-DOC_TYPES: set[str] = {'buffett', 'buffett-section', 'buffett-events',
+DOC_TYPES: set[str] = {'buffett', 'buffett-section', 'buffett-events', 'buffett-related',
                        'quarterly', 'cross-sector', 'theme', 'comps'}
 SECTIONS: set[str] = {'business', 'thesis', 'valuation', 'sources'}
 SECTION_FORBIDDEN: tuple[str, ...] = ('rating', 'valuation', 'related_docs', 'themes')
+RELATED_FORBIDDEN: tuple[str, ...] = ('rating', 'valuation', 'themes', 'section')
 
 SECTORS: set[str] = {
     'semiconductor', 'electronics', 'consumer', 'materials',
@@ -36,6 +37,7 @@ REQUIRED_FIELDS_BY_TYPE: dict[str, set[str]] = {
                      'themes', 'rating', 'conviction_date', 'thesis'},
     'buffett-section': {'doc_type', 'stock_code', 'stock_name', 'section'},
     'buffett-events': {'doc_type', 'stock_code', 'stock_name'},
+    'buffett-related': {'doc_type', 'stock_code', 'stock_name'},
     'quarterly':    {'doc_type', 'stock_code', 'stock_name', 'sector', 'subsector',
                      'period', 'date'},
     'cross-sector': {'doc_type', 'stock_codes', 'stock_names', 'themes', 'date'},
@@ -95,6 +97,11 @@ def validate_frontmatter(fm: dict[str, Any], path: Path) -> list[str]:
         for field in SECTION_FORBIDDEN:
             if field in fm:
                 violations.append(f"{p}: buffett-section must not carry '{field}'")
+
+    if dt == 'buffett-related':
+        for field in RELATED_FORBIDDEN:
+            if field in fm:
+                violations.append(f"{p}: buffett-related must not carry '{field}'")
 
     if 'stock_code' in fm and not isinstance(fm['stock_code'], str):
         violations.append(f"{p}: stock_code must be str (got {type(fm['stock_code']).__name__})")
