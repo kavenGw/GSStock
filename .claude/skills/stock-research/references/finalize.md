@@ -16,7 +16,7 @@
 5. 重生顶部块 + 双 lint + 孤儿检查：
 
 ```bash
-python scripts/lint_docs_refs.py --rewrite-blocks   # 别手编块；有 violation 时它提前 return 不重写，故必须排在步骤 3-4 之后 [L18]
+python scripts/lint_docs_refs.py --rewrite-blocks   # 别手编块；有 violation 时它提前 return 不重写，故必须排在步骤 3-4 之后 [L18]，且必须排在步骤 2 的旧档物理删除之后——改完反向链而旧档还在磁盘上时，旧档自己的正向 symmetric 条目会变单向悬空、必然报 violation [L20]
 python scripts/lint_docs_frontmatter.py             # exit 0
 python scripts/lint_docs_refs.py                    # exit 0
 python scripts/lint_docs_refs.py --check-orphans    # 新档非孤儿
