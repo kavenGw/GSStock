@@ -40,7 +40,7 @@ A1 交办在模式 1 的 A1 清单之上加三项：
 - **指引与口径**：管理层对下季/全年的指引、订单/库存/产能利用率口径，原话摘要 + 来源。
 - **一次性项剥离**：非经常损益、减值、汇兑、政府补助——写出扣除后的可比口径。
 
-evidence 落 `.omc/artifacts/<股票名>-<日期>-evidence-A1-财报.md`，report `…-phaseA1-report.md`。
+产出落 `.omc/artifacts/<股票名>-<日期>-A1.md`（明细层 + 结论层，见 `dispatch.md §0.1`）。
 
 闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A --lanes A1 --quiet-min 3`，exit 0 才派 B'。
 等待按 [L7] 探测模板包一层。A1 报「前提变化」（主论点被证伪）→ 停，走歧义门 2。

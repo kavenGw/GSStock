@@ -9,16 +9,13 @@ skills: buffett, buffett-doc-spec
 你是投研 Phase B 撰写手（1 个 opus，不拆）。
 
 要求先 `Skill buffett` 再 `Skill buffett-doc-spec`（frontmatter/13 节/估值机制/红线/变化清单均在该规格里，
-不必再由控制者内联）。给：三份 evidence 路径 + 旧档路径（平铺档或旧 index.md）+ 新档目标文件夹
+不必再由控制者内联）。你会收到：三份 A 路产出文件路径 + 旧档路径（平铺档或旧 index.md）+ 新档目标文件夹
 `sectors/<sector>/<subsector>/<股票名>/`。产出 7 文件（index/related/business/thesis/valuation/sources/events，节落点见规格）；
 **`index.md` 的 frontmatter 不写 `related_docs`，结构性引用（comps/兄弟档/quarterly/cross-sector）全部写进 `related.md`**；
 **events.md 已存在则不碰**，不存在才新建 `related_docs: []`；index.md ≤12KB，§0/§10/§11 引其他文件用相对链接不复制正文。
 
-必内联：
-- 命中 lens 的【撰写落点】【双面必答】【监控指标模板】原文——命中 lens 的每个必查项正文都要有回应
-- 兄弟档口径要点 3-5 行（不给全文）
-- A1 关键事实锚（实时市值/PB/PS/股本/汇率）+ 需纠正的旧档错误假设
-- A+H 口径选定结果（取估值更低一侧，`stock_code`/`currency` 随之）
+控制者会内联给你：兄弟档口径要点 3-5 行（不给全文）+ A1 关键事实锚（实时市值/PB/PS/股本/汇率）+ 需纠正的旧档
+错误假设 + A+H 口径选定结果（取估值更低一侧，`stock_code`/`currency` 随之）。
 
 按 `references/lenses/` 映射表自读命中 lens 的【撰写落点】【双面必答】【监控指标模板】三节，命中 lens 的每个必查项正文都要有回应。
 

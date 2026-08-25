@@ -6,8 +6,8 @@
 强论点双面、拒绝周期顶定价、诚实面对"贵"、撰写≠审查上下文。
 
 本文件只做**编排**（谁、何时、闸门）。三份配套：
-- `dispatch.md` — 每个 subagent 的派发内容（必内联项 / prompt 骨架 / 派发坑）。**派发前必读对应节。**
-- `sector-lenses.md` — 板块视角注册表；控制者读并摘原文内联，subagent 不自读。
+- `dispatch.md` — 每个 subagent 的**变量清单**（固定协议已在对应 `.claude/agents/sr-*.md`）。**派发前必读对应节。**
+- `references/lenses/` — 板块视角，已按精确粒度拆分；**由 sr-a3-lens / sr-writer 自读，控制者不再摘原文内联**。
 - `lessons.md` — 十三轮实测教训 L1–L15 + 耗时附录；按 `[Ln]` 编号翻，不通读。
 
 subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：frontmatter/13 节/估值机制/8 条红线）、
@@ -44,8 +44,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
 4. **列待删旧档清单**：只筛平铺 `*buffett*.md`（文件夹档不删），**逐个 Read 确认**档名含目标股票名且 `stock_code`
    一致；不符则停下 surface 给用户。目标已是文件夹 → 清单为空。
-5. **选 lens**：按 subsector 从 `sector-lenses.md` 挑命中节（主 lens + AI/成长两个横切默认都跑识别），把命中节
-   原文摘出备内联（dispatch.md §0.2）。
+5. **确认 lens 命中**：按 subsector 对照 `references/lenses/` 映射表，把命中的板块专属 lens 文件名写进派发（横切 `x-*.md` 由 agent 默认全加载）。**不再摘原文内联。**
 6. **兄弟档口径摘要**：同板块近期兄弟档读一遍提炼 3-5 行（TTM 分母 / bull 封顶 / 买点折价等），不给全文。
 7. `mkdir -p .omc/artifacts`（闸门脚本要求存在）。
 
@@ -79,7 +78,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 - 跨日第一件事：复核基本面基线是否仍成立（期间落了财报就是实质返修，不是刷新锚）[L9]。
 - 刷新价格锚后派生数 grep 扫不到，必须逐句手算 [L8]：`python scripts/deep_redo_anchor_audit.py <新档文件夹> --old <旧价> --new <新价>`
   只列清单不算数。
-- 亲验用精确锚点（tail + 关键词计数 + mtime + report `end:`），别用模糊 grep [L13]；且必须等 agent 结束后再验，对关键结论整节读、不靠关键词抽样（写盘中的产物会给出过渡态）[L23]。
+- 亲验用精确锚点（tail + 关键词计数 + mtime + 六份产出文件（`A1`/`A2`/`A3`/`B`/`review`/`C`）的 `end:` 戳），别用模糊 grep [L13]；且必须等 agent 结束后再验，对关键结论整节读、不靠关键词抽样（写盘中的产物会给出过渡态）[L23]。
 - Phase B 中断续跑给"只补缺的文件 / 只填占位、不重写已有内容"的收口棒，不重派完整写手 [L14]。
 
 ## 收尾（控制者本人）
