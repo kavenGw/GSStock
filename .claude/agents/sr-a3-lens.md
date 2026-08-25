@@ -34,7 +34,7 @@ effort: medium
 | `pcb-ccl.md` | 板块专属 | sector=electronics 且 subsector 含 pcb / components / ccl / 覆铜板 / 载板 / HDI |
 | `storage-dram-nand.md` | 板块专属 | sector=semiconductor 且 subsector 含 storage / memory / dram / nand / 利基存储 |
 | `storage-nor-flash.md` | 板块专属 | sector=semiconductor 且 subsector 含 storage / memory；主营含 NOR / SPI NOR / 串行闪存 / 代码型闪存 / AMOLED 驱动存储 / EEPROM |
-| `metals-copper.md` | 板块专属 | sector=materials 且 subsector 含 copper / 铜 / 有色 / 矿业 |
+| `metals-copper.md` | 板块专属 | sector=materials 且 subsector 含 copper / 铜 / 有色 / 矿业 / 冶炼 |
 
 ## 证据分级
 
