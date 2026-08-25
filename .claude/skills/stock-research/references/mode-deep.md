@@ -8,7 +8,8 @@
 本文件只做**编排**（谁、何时、闸门）。三份配套：
 - `dispatch.md` — 每个 subagent 的**变量清单**（固定协议已在对应 `.claude/agents/sr-*.md`）。**派发前必读对应节。**
 - `references/lenses/` — 板块视角，已按精确粒度拆分；**由 sr-a3-lens / sr-writer / sr-reviewer 自读，控制者不再摘原文内联**。
-- `lessons.md` — 实测教训 + 耗时附录；按 `[Ln]` 编号翻，不通读。
+- `lessons.md` — 实测教训；**不通读**，按族索引表定位后 `grep -n "^## L19"` 翻单条。
+- `timing-baseline.md` — 十五轮分棒耗时明细；收尾报账时查、每轮追加一行。
 
 subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：frontmatter/13 节/估值机制/8 条红线）。
 
@@ -83,16 +84,18 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 ## 收尾（控制者本人）
 
 耗时账以控制者自记派发/收回时刻为准 [L3]，一行报给用户：`A1 x / A2 y / A3 z（取最大）+ B + 审查 + C ≈ 合计`。
-**按 40-60min 预估**（十三轮中位数 56.6min、区间 32.3-86min；A+H 标的在中位数之上 [L9][L11][L12]；首建档
-少读旧档/写变化清单/删旧档/反向链约 3-5min）。基线明细见 `lessons.md` 附录。
+**按 40-60min 预估**（十五轮中位数 63min、区间 32.3-86min，均按净耗时口径；A+H 标的在中位数之上 [L9][L11][L12]；
+首建档少读旧档/写变化清单/删旧档/反向链约 3-5min）。基线明细见 `timing-baseline.md`。
 
 `git log --oneline` + `git status` 确认 commit 链干净、双 lint 全绿，向用户汇报评级是否翻转、期望内在价值、安全边际。
 默认在 `main` 直接提交；**不主动 push**。
 
 ## 维护规则
 
-新一轮有教训时（模式 1/2 共用）：只在 `lessons.md` 追加 `Ln`（三段式写全；编号永不复用/重排）→ 本文件对应闸门处加 `[Ln]` 引用不写叙事 →
-基线表只加一行 → 能机械化的优先落成 `scripts/deep_redo_*.py` 检查项再在闸门引用（L1/L7/L8 就是这么来的）。
+新一轮有教训时（模式 1/2 共用）：只在 `lessons.md` 追加 `Ln`（三段式写全；编号永不复用/重排）+ 同步进其族索引行 →
+本文件对应闸门处加 `[Ln]` 引用不写叙事 → `timing-baseline.md` 加一行 → 能机械化的优先落成
+`scripts/deep_redo_*.py` / `quote_guard.py` 检查项或写进 `.claude/agents/sr-*.md`，落成后按退役规则把该条案例压缩为一句
+（L1/L7/L8/L24/L25 就是这么来的）。
 派发内容变化改 `dispatch.md`；文档规格变化改 `buffett-doc-spec`；收尾动作变化改 `finalize.md` **与**
 `.claude/agents/sr-finalize.md`（同源两份）。
 本文件目标 **≤130 行**；路由判据归 `../SKILL.md`，本文件不写"何时触发"。
