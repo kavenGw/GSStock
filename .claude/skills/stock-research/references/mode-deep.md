@@ -50,10 +50,11 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### Phase A — 联网采证（A1 数据锚 / A2 论点 / A3 lens，并行，均 opus）→ dispatch.md §1
 
-闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A`，exit 0 **且**所有在途校准项
+闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A`（结论层标题按 `^##.*结论层$` 匹配，agent 自加编号前缀不算缺项 [L28]），exit 0 **且**所有在途校准项
 已收到「已闭合」回复才派 B [L1][L2]。需等待时按 [L7] 探测模板包一层（超时分支也要发信号）；探测点报 TIMEOUT 后先 `ls` 全部产物 + `ListAgents` 看状态，分辨 agent 是死在交付前还是交付后 [L22]。
 预估按「最慢路 + 1~2 轮校准」[L4]；派发前先粗数必查条数，上限管"查多深"管不住"有多少条"；A+H / 多业务线 / 多 lens 命中往上取。
 某一路报「前提变化」时先 grep 另两路 evidence 确认是否已自发命中，命中就别派校准轮 [L16]。
+**三路未齐前，任一路的强断言只能记为「待另两路复核」，不得写进控制者裁定** —— 先到的路会被后到的路证伪，错误口径一旦以「裁定」身份落进写手的最高优先级输入，只能靠追加修正节覆盖，且两节并存本身是新的误读风险 [L29]。
 
 ### Phase B — 撰写（1 个 opus，不拆）→ dispatch.md §2
 
@@ -68,6 +69,8 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 预估 4-10min，复核另计。
 
 ### Phase C — 收尾（1 个 sonnet）→ dispatch.md §4
+
+清理「一次性脚本」前必须验 mtime 与内容归属：`scripts/_a1_*`/`_a3_*` 是各轮共用前缀，并行 session 的在写产物同名且无 git 留痕，按前缀一把删不可恢复 [L30]。
 
 闸门：`lint_docs_frontmatter.py` / `lint_docs_refs.py` 双 exit 0 + `git show HEAD:docs/stock-analytics/valuations.yaml`
 复核本股条目。预估 3-10min。
@@ -84,7 +87,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 ## 收尾（控制者本人）
 
 耗时账以控制者自记派发/收回时刻为准 [L3]，一行报给用户：`A1 x / A2 y / A3 z（取最大）+ B + 审查 + C ≈ 合计`。
-**按 40-60min 预估**（十五轮中位数 63min、区间 32.3-86min，均按净耗时口径；A+H 标的在中位数之上 [L9][L11][L12]；
+**按 40-60min 预估**（十六轮中位数 63.5min、区间 32.3-107min，均按净耗时口径；A+H 标的在中位数之上 [L9][L11][L12]；
 首建档少读旧档/写变化清单/删旧档/反向链约 3-5min）。基线明细见 `timing-baseline.md`。
 
 `git log --oneline` + `git status` 确认 commit 链干净、双 lint 全绿，向用户汇报评级是否翻转、期望内在价值、安全边际。

@@ -65,7 +65,9 @@ def _check_report(path: Path, tag: str) -> list[str]:
     return []
 
 
-CONCLUSION_RE = re.compile(r'^##\s*结论层', re.M)
+# L28：三路 agent 会给结论层加自己的编号前缀（「第四段 · 结论层」/「§D 结论层」/「§6 结论层」），
+# 只认字面 '## 结论层' 会把三份齐全的产出全判 NOT-READY。放宽为「标题行以结论层收尾」。
+CONCLUSION_RE = re.compile(r'^##.*结论层\s*$', re.M)
 
 
 def _lane_docs(artifacts: Path, prefix: str, lane: str
