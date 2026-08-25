@@ -32,6 +32,10 @@ def test_infer_market():
     assert infer_market('sh600183') == 'A'
     assert infer_market('sz300757') == 'A'
     assert infer_market('NVDA') == 'US'
+    assert infer_market('1888.HK') == 'HK'
+    assert infer_market('1888.hk') == 'HK'
+    assert infer_market('600183.SS') == 'A'
+    assert infer_market('300757.SZ') == 'A'
 
 
 def test_in_session_hk():
@@ -74,3 +78,18 @@ def test_allow_preopen_passes_but_marks_warning():
     q = _quote(40.360, 95, datetime(2026, 8, 25, 9, 0, 20))
     out = guard(q, allow_preopen=True)
     assert '不可作行情锚' in out['preopen_warning']
+
+
+def test_suffix_style_hk_code_still_rejects_lunch_break():
+    """1888.HK 若被误判成 US，港股午休快照会被美股时段放行 —— 本条锁住它。"""
+    q = _quote(35.320, 5_000_000, datetime(2026, 8, 25, 12, 30), code='1888.HK')
+    with pytest.raises(QuoteRejected):
+        guard(q)
+
+
+def test_rejects_missing_market_cap():
+    """市值缺失 = 自洽校验无法进行；无法验证不等于验证通过。"""
+    q = _quote(35.320, 5_000_000, datetime(2026, 8, 25, 10, 13), market_cap=0)
+    with pytest.raises(QuoteRejected) as exc:
+        guard(q)
+    assert '市值' in str(exc.value)

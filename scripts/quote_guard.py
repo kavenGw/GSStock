@@ -29,6 +29,10 @@ class QuoteRejected(Exception):
 
 def infer_market(code: str) -> str:
     c = code.lower()
+    if c.endswith('.hk'):
+        return 'HK'
+    if c.endswith(('.ss', '.sz')):
+        return 'A'
     if c.startswith('hk'):
         return 'HK'
     if c.startswith(('sh', 'sz')):
@@ -57,7 +61,10 @@ def guard(quote: dict, *, allow_preopen: bool = False) -> dict:
             f"{quote['code']} 成交量仅 {quote['volume']} —— 疑为竞价挂单或停牌，不可作行情锚")
     implied = quote['price'] * quote['shares']
     cap = quote['market_cap']
-    if cap and abs(implied - cap) / cap > MARKET_CAP_TOLERANCE:
+    if not cap:
+        raise QuoteRejected(
+            f"{quote['code']} 市值缺失 —— 自洽校验无法进行")
+    if abs(implied - cap) / cap > MARKET_CAP_TOLERANCE:
         raise QuoteRejected(
             f"{quote['code']} 市值不自洽：价×股本={implied:,.0f} vs 报市值={cap:,.0f} —— "
             '疑为字段索引错位')
