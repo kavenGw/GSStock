@@ -39,7 +39,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 1. Glob `docs/stock-analytics/**/*<股票名>*` 找底稿（平铺档或 `<股票名>/index.md`），挑最新 buffett 档 + 最相关 comps 作基线。
    已有 `<股票名>/events.md` → 读其 related_docs，theme `date` > 旧 index `conviction_date` 的条目即「未消化事件」，
    摘 note/impact/magnitude 备内联给 A2（dispatch.md §1）。
-2. 确认代码、市场（A/US/HK）、sector/subsector。
+2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]。
 3. **避坑门**：查 `docs/stock-analytics/avoidance-list.yaml`，命中则按 `.claude/rules/docs-conventions.md`
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
 4. **列待删旧档清单**：只筛平铺 `*buffett*.md`（文件夹档不删），**逐个 Read 确认**档名含目标股票名且 `stock_code`
@@ -58,7 +58,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### Phase B — 撰写（1 个 opus，不拆）→ dispatch.md §2
 
-闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档文件夹>`（查 7 文件齐全 + 占位，对应
+闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档文件夹>`（要求写手达成某条规格前先全仓统计其实际执行状况；subagent 拿证据顶回指令时先亲验它的证据 [L26]）（查 7 文件齐全 + 占位，对应
 "主体 + 填锚"抗中断设计 [L14][L10]）。预估 17-30min，由成稿长度驱动，不可并行（拆写手断"论点→估值→评级"链）。
 
 ### 合并审查（1 个 read-only sonnet；异常升 opus）→ dispatch.md §3
