@@ -7,6 +7,9 @@
 
 退出码：0=全绿可放行 / 1=有项未就绪 / 2=参数错。
 
+新旧两种产物格式并存：优先找 <股票名>-<日期>-<lane>.md（evidence+report 合并，
+明细层 + 结论层 + end: 戳），找不到才回退旧的 -evidence-<lane>-*.md 与 -phase<lane>-report.md。
+
 本脚本**不轮询**（保持无状态可单测），等待由控制者包一层：
 
     T=1800; E=0
@@ -62,6 +65,44 @@ def _check_report(path: Path, tag: str) -> list[str]:
     return []
 
 
+CONCLUSION_RE = re.compile(r'^##\s*结论层', re.M)
+
+
+def _lane_docs(artifacts: Path, prefix: str, lane: str
+               ) -> tuple[Path | None, Path | None, Path | None]:
+    """新格式优先：合并单文件存在则用它，否则回退旧的 evidence + report 双文件。"""
+    merged = artifacts / f'{prefix}-{lane}.md'
+    if merged.exists():
+        return merged, None, None
+    evidence = _find_one(artifacts, f'{prefix}-evidence-{lane}-*.md')
+    legacy = 'review' if lane == 'review' else f'phase{lane}'
+    return None, evidence, artifacts / f'{prefix}-{legacy}-report.md'
+
+
+def _check_merged(path: Path, tag: str, now: float,
+                  quiet_min: float, stale_min: float) -> tuple[list[str], list[str]]:
+    """合并格式的三条判据：篇幅、结论层、end 戳。"""
+    problems: list[str] = []
+    notes: list[str] = []
+    text = _read(path)
+    lines = _count_lines(path)
+    if lines < MIN_EVIDENCE_LINES:
+        problems.append(f'{tag} NOT-READY: only {lines} lines (<{MIN_EVIDENCE_LINES})')
+    if not CONCLUSION_RE.search(text):
+        problems.append(f'{tag} NOT-READY: 缺 ## 结论层')
+    age = _age_min(path, now)
+    if not END_STAMP_RE.search(text):
+        if age > stale_min:
+            problems.append(
+                f'{tag} NOT-READY: 缺 end: 时间戳且 {age:.1f}min 未动 —— '
+                '大概率死在交付前，控制者接管')
+        else:
+            problems.append(f'{tag} NOT-READY: 缺 end: 时间戳')
+    elif age < quiet_min:
+        problems.append(f'{tag} NOT-READY: mtime {age:.1f}min ago (<{quiet_min})')
+    return problems, notes
+
+
 def check_phase_a(artifacts: Path, stock: str, date: str,
                   quiet_min: float, now: float,
                   stale_min: float = 20.0,
@@ -70,7 +111,12 @@ def check_phase_a(artifacts: Path, stock: str, date: str,
     notes: list[str] = []
     prefix = f'{stock}-{date}'
     for lane in lanes:
-        evidence = _find_one(artifacts, f'{prefix}-evidence-{lane}-*.md')
+        merged, evidence, report = _lane_docs(artifacts, prefix, lane)
+        if merged is not None:
+            p, n = _check_merged(merged, lane, now, quiet_min, stale_min)
+            problems += p
+            notes += n
+            continue
         if evidence is None:
             problems.append(f'{lane} MISSING: evidence')
         else:
@@ -86,7 +132,7 @@ def check_phase_a(artifacts: Path, stock: str, date: str,
                 notes.append(
                     f'{lane} NOTE: evidence mtime {age:.1f}min ago — 若该路仍在跑，'
                     '确认它是收工而非卡住')
-        problems += _check_report(artifacts / f'{prefix}-phase{lane}-report.md', lane)
+        problems += _check_report(report, lane)
     return problems, notes
 
 
@@ -94,8 +140,15 @@ def _placeholder_hits(path: Path) -> list[int]:
     return [i for i, line in enumerate(_read(path).splitlines(), 1) if PLACEHOLDER_RE.search(line)]
 
 
-def check_phase_b(artifacts: Path, stock: str, date: str, doc: str) -> list[str]:
-    problems = _check_report(artifacts / f'{stock}-{date}-phaseB-report.md', 'B')
+def check_phase_b(artifacts: Path, stock: str, date: str, doc: str,
+                  now: float = 0.0, quiet_min: float = 0.5,
+                  stale_min: float = 20.0) -> list[str]:
+    prefix = f'{stock}-{date}'
+    merged, _, report = _lane_docs(artifacts, prefix, 'B')
+    if merged is not None:
+        problems, _ = _check_merged(merged, 'B', now or time.time(), quiet_min, stale_min)
+    else:
+        problems = _check_report(report, 'B')
     doc_path = Path(doc)
     if not doc_path.exists():
         return problems + [f'B MISSING: 新档 {doc}']
@@ -119,9 +172,17 @@ def check_phase_b(artifacts: Path, stock: str, date: str, doc: str) -> list[str]
     return problems
 
 
-def check_review(artifacts: Path, stock: str, date: str) -> list[str]:
-    report = artifacts / f'{stock}-{date}-review-report.md'
-    problems = _check_report(report, 'review')
+def check_review(artifacts: Path, stock: str, date: str,
+                 now: float = 0.0, quiet_min: float = 0.5,
+                 stale_min: float = 20.0) -> list[str]:
+    prefix = f'{stock}-{date}'
+    merged, _, legacy = _lane_docs(artifacts, prefix, 'review')
+    report = merged if merged is not None else legacy
+    if merged is not None:
+        problems, _ = _check_merged(merged, 'review', now or time.time(),
+                                    quiet_min, stale_min)
+    else:
+        problems = _check_report(report, 'review')
     if not report.exists():
         return problems
     text = _read(report)
@@ -139,8 +200,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument('stock', help='股票名（与 .omc/artifacts 文件名前缀一致）')
     ap.add_argument('date', help='日期，形如 2026-08-22')
     ap.add_argument('--phase', required=True, choices=['A', 'B', 'review'])
-    ap.add_argument('--quiet-min', type=float, default=3.0,
-                    help='evidence mtime 至少多少分钟不变才算收工（默认 3）')
+    ap.add_argument('--quiet-min', type=float, default=0.5,
+                    help='mtime 至少多少分钟不变才算收工（默认 0.5；合并格式下 end: 戳是主判据，'
+                         'mtime 仅作保险）')
     ap.add_argument('--stale-min', type=float, default=20.0,
                     help='evidence mtime 超过多少分钟提示核实是否卡住而非收工（默认 20，仅 --phase A 用）')
     ap.add_argument('--lanes', nargs='+', choices=LANES, default=list(LANES),
@@ -165,9 +227,11 @@ def main(argv: list[str] | None = None) -> int:
     elif args.phase == 'B':
         if not args.doc:
             ap.error('--phase B 必须给 --doc <新档路径>')
-        problems = check_phase_b(artifacts, args.stock, args.date, args.doc)
+        problems = check_phase_b(artifacts, args.stock, args.date, args.doc,
+                                 now, args.quiet_min, args.stale_min)
     else:
-        problems = check_review(artifacts, args.stock, args.date)
+        problems = check_review(artifacts, args.stock, args.date,
+                                now, args.quiet_min, args.stale_min)
     for n in notes:
         print(n)
     if problems:

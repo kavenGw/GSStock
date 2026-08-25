@@ -239,3 +239,92 @@ def test_phase_b_folder_missing_related(tmp_path, capsys):
     out = capsys.readouterr().out
     assert rc == 1
     assert 'related.md' in out
+
+
+# ---------- 合并格式（evidence + report 单文件）----------
+
+def _merged_body(lines: int = 30, *, with_end: bool = True,
+                 with_conclusion: bool = True) -> str:
+    parts = ['start: 2026-08-22 08:30:00', '', '## 明细层', '']
+    parts += [f'- 证据行 {i}：https://example.com/{i} （2026-08-22）' for i in range(lines)]
+    if with_conclusion:
+        parts += ['', '## 结论层', '', '对账：证实 3 / 证伪 1 / 无信息 2。']
+    if with_end:
+        parts += ['', 'end: 2026-08-22 08:52:00']
+    return '\n'.join(parts) + '\n'
+
+
+def _make_merged_a(tmp_path: Path, *, lanes=('A1', 'A2', 'A3'), age_min=5.0, **kw):
+    art = tmp_path / 'artifacts'
+    art.mkdir(exist_ok=True)
+    for lane in lanes:
+        _write(art / f'{STOCK}-{DATE}-{lane}.md', _merged_body(**kw), age_min)
+    return art
+
+
+def test_merged_phase_a_all_green(tmp_path, capsys):
+    art = _make_merged_a(tmp_path)
+    rc = main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)])
+    assert rc == 0, capsys.readouterr().out
+    assert 'A READY' in capsys.readouterr().out
+
+
+def test_merged_missing_end_stamp(tmp_path, capsys):
+    """end: 戳写在文件最末，它的存在即「全文写完」——这是合并格式的核心判据。"""
+    art = _make_merged_a(tmp_path, with_end=False)
+    rc = main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'end:' in out
+
+
+def test_merged_missing_conclusion_section(tmp_path, capsys):
+    """只有明细层没有结论层 = 采证完了但没做对账，不许放行。"""
+    art = _make_merged_a(tmp_path, with_conclusion=False, with_end=False)
+    rc = main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert '结论层' in out
+
+
+def test_merged_no_end_and_stale_reports_died_before_delivery(tmp_path, capsys):
+    """明细层有内容、无 end 戳、且很久没动 = 大概率死在交付前（L22）。"""
+    art = _make_merged_a(tmp_path, with_end=False, age_min=30.0)
+    rc = main([STOCK, DATE, '--phase', 'A', '--stale-min', '20',
+               '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert '死在交付前' in out
+
+
+def test_merged_format_takes_precedence_over_legacy(tmp_path, capsys):
+    """两种格式同时存在时以合并格式为准，避免读到上一轮的残留旧文件。"""
+    art = _make_phase_a(tmp_path)                      # 旧格式，全绿
+    _write(art / f'{STOCK}-{DATE}-A1.md',
+           _merged_body(with_end=False), 5.0)          # 新格式 A1 未完成
+    rc = main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'A1' in out and 'end:' in out
+
+
+def test_default_quiet_min_is_half_minute(tmp_path, capsys):
+    """合并后 end 戳是主判据，mtime 只作保险 —— 默认从 3.0 降到 0.5。"""
+    from scripts.deep_redo_gate import build_parser
+    assert build_parser().parse_args([STOCK, DATE, '--phase', 'A']).quiet_min == 0.5
+
+
+def test_merged_phase_b_and_review(tmp_path, capsys):
+    art = tmp_path / 'artifacts'
+    art.mkdir()
+    _write(art / f'{STOCK}-{DATE}-B.md', _merged_body(), 5.0)
+    d = _make_folder(tmp_path)
+    rc = main([STOCK, DATE, '--phase', 'B', '--doc', str(d), '--artifacts', str(art)])
+    assert rc == 0, capsys.readouterr().out
+
+    body = _merged_body().replace(
+        '对账：证实 3 / 证伪 1 / 无信息 2。',
+        'SPEC-COMPLIANT\n\nAPPROVED-WITH-NITS')
+    _write(art / f'{STOCK}-{DATE}-review.md', body, 1.0)
+    rc = main([STOCK, DATE, '--phase', 'review', '--artifacts', str(art)])
+    assert rc == 0, capsys.readouterr().out
