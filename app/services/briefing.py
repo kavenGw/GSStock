@@ -139,6 +139,7 @@ BRIEFING_INDICES = [
     {'code': '^DJI', 'name': '道琼斯', 'region': 'us'},
     {'code': '^NDX', 'name': '纳指100', 'region': 'us'},
     {'code': '^GSPC', 'name': '标普500', 'region': 'us'},
+    {'code': '^SOX', 'name': '费城半导体', 'region': 'us'},
     {'code': '^KS11', 'name': '韩国KOSPI', 'region': 'asia'},
     {'code': '000001.SS', 'name': '上证指数', 'region': 'china_a'},
     {'code': '399001.SZ', 'name': '深证成指', 'region': 'china_a'},
@@ -288,7 +289,7 @@ class BriefingService:
 
         today = SmartCacheStrategy.get_effective_cache_date('600519')
         cache_type = 'briefing_index'
-        cache_key = 'BRIEFING_INDICES_V2'
+        cache_key = 'BRIEFING_INDICES_V3'
 
         # 检查当天缓存
         cached = UnifiedStockCache.get_cached_data(cache_key, cache_type, today)

@@ -145,3 +145,42 @@ def test_format_calendar_events_short_list_not_truncated(monkeypatch):
 
     assert '另有' not in text
     assert 'FOMC 议息' in text
+
+
+def test_format_calendar_events_repeats_date_on_every_line(monkeypatch):
+    """Slack 比例字体下缩进对不齐，同日第二条起若省略日期就像没有日期。"""
+    from datetime import timedelta
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    day = date.today() + timedelta(days=4)
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(lambda s, e: [
+        {'event_date': day.isoformat(), 'event_type': 'earnings',
+         'stock_code': '002156', 'stock_name': '通富微电', 'title': '中报披露',
+         'detail': None, 'priority': 'HIGH', 'status': 'scheduled'},
+        {'event_date': day.isoformat(), 'event_type': 'earnings',
+         'stock_code': '000725', 'stock_name': '京东方A', 'title': '中报披露',
+         'detail': None, 'priority': 'HIGH', 'status': 'scheduled'},
+    ]))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    lines = mod.NotificationService.format_calendar_events().split(chr(10))[1:]
+
+    assert len(lines) == 2
+    md = day.isoformat()[5:]
+    weekday = '周' + '一二三四五六日'[day.weekday()]
+    for line in lines:
+        assert line.startswith('`%s %s` ' % (md, weekday)), line
+
+
+def test_calendar_date_label_today_and_tomorrow():
+    from datetime import timedelta
+    from app.services.notification import NotificationService
+
+    today = date(2026, 8, 25)
+    label = NotificationService._calendar_date_label
+    assert label('2026-08-25', today) == '08-25 今天'
+    assert label('2026-08-26', today) == '08-26 明天'
+    assert label('2026-08-29', today) == '08-29 周六'
+    assert label('not-a-date', today) == 'not-a-date'

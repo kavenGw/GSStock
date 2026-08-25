@@ -290,14 +290,8 @@ class NotificationService:
             header += f'（⚠️ 事件数据 {int(stale_hours)} 小时未更新）'
 
         lines = [header]
-        last_date = None
         for e in events:
-            iso = e['event_date']
-            if iso == last_date:
-                label = ' ' * 6
-            else:
-                label = '今天  ' if iso == today.isoformat() else f'{iso[5:]} '
-                last_date = iso
+            label = NotificationService._calendar_date_label(e['event_date'], today)
 
             if e['stock_code']:
                 subject = f"{e['stock_name'] or e['stock_code']}({e['stock_code']})"
@@ -310,9 +304,30 @@ class NotificationService:
             elif e.get('status') == 'confirmed':
                 body += ' · 已确认'
 
-            lines.append(f'  {label}{body}')
+            lines.append(f'`{label}` {body}')
 
         return NotificationService._cap_calendar_lines(lines)
+
+    @staticmethod
+    def _calendar_date_label(iso: str, today: date) -> str:
+        """事件日期标签：`MM-DD 今天/明天/周X`
+
+        每行都带完整日期——Slack 用比例字体，早先靠缩进省略同日重复日期的写法
+        在客户端里看不出对齐，同一天的第二条起就像没有日期。
+        """
+        try:
+            d = date.fromisoformat(iso)
+        except (TypeError, ValueError):
+            return iso
+
+        delta = (d - today).days
+        if delta == 0:
+            rel = '今天'
+        elif delta == 1:
+            rel = '明天'
+        else:
+            rel = '周' + '一二三四五六日'[d.weekday()]
+        return f'{iso[5:]} {rel}'
 
     @staticmethod
     def _cap_calendar_lines(lines: list[str]) -> str:
