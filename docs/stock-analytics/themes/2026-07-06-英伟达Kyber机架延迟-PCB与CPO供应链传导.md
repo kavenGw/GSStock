@@ -38,7 +38,7 @@ related_docs:
   - path: ../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md
     note: 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久
     symmetric: true
-  - path: ../sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md
+  - path: ../sectors/electronics/components/沃尔核材/index.md
     note: 光互联/CPO 推迟间接利好高速铜缆景气延续
     symmetric: true
   - path: ../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md
@@ -67,7 +67,7 @@ related_docs:
 > - [2026-06-04-沪电股份-buffett分析](../sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md) — 下一代 78 层中板放量推迟给过热 AI-PCB 估值降温，当前代高多层业绩 intact
 > - [2026-06-20-胜宏科技-buffett分析](../sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md) — Kyber 主板放量推迟削弱最激进增长曲线，强化"安全边际为负、等回调"
 > - [2026-05-31-立讯精密-buffett分析](../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md) — 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久
-> - [2026-06-19-沃尔核材-buffett分析](../sectors/electronics/components/2026-06-19-沃尔核材-buffett分析.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
+> - [index](../sectors/electronics/components/沃尔核材/index.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
 > - [2026-05-06-通富微电-AMD26Q1财报联动专题](../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md) — 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
 > - [2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪](2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md) — 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
 > - [2026-07-31-芯碁微装-buffett分析](../sectors/semiconductor/equipment/2026-07-31-芯碁微装-buffett分析.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
