@@ -55,10 +55,10 @@ description: >-
 | `mode-news.md` | 模式 3 六步流程：核实 → 脚本召回 → 判传导 → theme 档门槛 → 对称 → 汇报 | 控制者 |
 | `mode-meeting.md` | 模式 4 流程：核实 → 判主体 → 读旧档 → quarterly 档 → 反向链 | 控制者 |
 | `dispatch.md` | 每个 subagent 的**变量清单**（固定协议已在 `.claude/agents/sr-*.md`） | 控制者，派发前读对应节 |
-| `lessons.md` | 模式 1/2 实测教训 L1–L17，按编号翻 | 控制者 |
-| `lenses/` | 板块视角（7 份精确粒度） | sr-a3-lens / sr-writer **自读** |
+| `lessons.md` | 模式 1/2 实测教训，按 `[Ln]` 编号翻 | 控制者 |
+| `lenses/` | 板块视角（7 份精确粒度） | sr-a3-lens / sr-writer / sr-reviewer **自读** |
 | `impact-rubric.md` | 模式 3 传导 rubric + theme 档模板 | 控制者 |
-| `finalize.md` | Phase C 收尾动作清单：删旧档 → 反向链 → 双 lint → valuations 同步 → 安全提交 → 亲验 | Phase C 执行者 |
+| `finalize.md` | Phase C 收尾动作清单：删旧档 → 反向链 → 双 lint → valuations 同步 → 安全提交 → 亲验 | 模式 3/4 与 buffett 写档收尾（模式 1/2 已内置进 `sr-finalize`） |
 | `scripts/pool_index.py` | 模式 2 溢出 / 模式 3 候选召回 | 脚本 |
 
 ## 维护规则

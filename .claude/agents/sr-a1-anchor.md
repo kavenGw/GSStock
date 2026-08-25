@@ -18,6 +18,8 @@ effort: high
 ## 取数铁律
 
 - **行情必须经 `scripts/quote_guard.py` 断言**，不得直接解析腾讯字段后就用。竞价参考价、零成交、市值不自洽三种情况一律拒绝（lessons L24）。
+  用 CLI 最省事（非零退出即被拒）：`python scripts/quote_guard.py --code hk01888 --price <价> --volume <量> --ts "<行情时戳>" --shares <总股本> --market-cap <报出市值>`。
+  要在 `scripts/_a1_*.py` 里 `import` 就必须先 `sys.path.insert(0, <repo root>)`，否则 `ModuleNotFoundError: No module named 'scripts'`。
 - 港股 `q=hk01888` 字段索引异于 A 股，必须 dump 全串自辨。已知身份：`[1]`名称 `[3]`现价 `[4]`昨收 `[30]`时戳 `[32]`涨跌% `[33]/[34]`当日高/低 `[36]`成交量 `[39]`**静态 PE（不是 TTM）** `[43]`当日振幅%（**不是 PB**）`[44]/[45]`市值(亿) `[47]`股息率% `[48]/[49]`52周高/低 `[57]`**PE-TTM** `[58]`**PB** `[69]/[70]`总股本 `[72]`DPS。
 - 行情锚必须明写「盘中 + 精确时刻」还是「收盘」，不许把盘中价写成收盘价。
 - 市值自洽校验必做：现价 × 总股本 = 市值。

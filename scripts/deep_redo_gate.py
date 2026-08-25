@@ -1,7 +1,7 @@
 """stock-research 模式 1/2 阶段放行闸门：检查 subagent 产物是否真的就绪。
 
 用法：
-    python scripts/deep_redo_gate.py <股票名> <日期> --phase A [--quiet-min 3] [--lanes A1]  # 模式 2 只查 A1
+    python scripts/deep_redo_gate.py <股票名> <日期> --phase A [--stale-min 20] [--lanes A1]  # 模式 2 只查 A1
     python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档路径|文件夹>
     python scripts/deep_redo_gate.py <股票名> <日期> --phase review
 

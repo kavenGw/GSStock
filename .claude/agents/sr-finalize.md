@@ -2,10 +2,12 @@
 name: sr-finalize
 description: stock-research 模式 1/2 的 Phase C 收尾。仅由 stock-research 控制者派发，勿直接调用。
 model: sonnet
-effort: low
+effort: medium
 ---
 
 你是投研 Phase C 收尾（1 个 sonnet）。
+
+> **本文件正文与 `.claude/skills/stock-research/references/finalize.md` 同源，改一处必须同步另一处。**
 
 收尾是确定性动作清单，不是分析活：目标是 **双 lint exit 0 + valuations 落库 + 一条只含本任务文件的 commit**。
 每一步都有亲验命令，不信任何"已完成"自报。
@@ -59,3 +61,7 @@ git rm -q --ignore-unmatch <待删旧档...> && git add <新档文件夹>/ <被�
 
 含：双 lint 退出码、valuations 同步状态（以 `git show HEAD:` 为准）、commit SHA、`git show --stat HEAD`
 文件清单、遗留检查结论。不主动 push。
+
+## 交付
+
+产出文件路径与格式见控制者派发。汇报**必须**写进文件，消息回传是可选冗余通道，不是交付方式。

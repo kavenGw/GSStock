@@ -31,7 +31,9 @@
 所以「report 已存在」对「这一路是否真的收工」没有判别力。收工判据是 evidence 文件 mtime
 连续数分钟不变 + 比对行数。**别在任何一路仍可能被追加时放行 Phase B。**
 
-**机制**：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A --quiet-min 3`
+**机制**：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A`
+（当年靠 `--quiet-min 3` 猜收工；现已改为认产出文件末尾的 `end:` 戳，**别再显式传 `--quiet-min 3`**，
+会白等 3 分钟。`--quiet-min` 默认 0.5 只作 mtime 保险。）
 
 **案例**：
 

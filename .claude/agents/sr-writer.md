@@ -17,7 +17,9 @@ skills: buffett, buffett-doc-spec
 控制者会内联给你：兄弟档口径要点 3-5 行（不给全文）+ A1 关键事实锚（实时市值/PB/PS/股本/汇率）+ 需纠正的旧档
 错误假设 + A+H 口径选定结果（取估值更低一侧，`stock_code`/`currency` 随之）。
 
-按 `references/lenses/` 映射表自读命中 lens 的【撰写落点】【双面必答】【监控指标模板】三节，命中 lens 的每个必查项正文都要有回应。
+按**控制者给的本轮命中 lens 文件名**，自读 `.claude/skills/stock-research/references/lenses/` 对应文件的
+【撰写落点（撰写 face）】【双面必答】【监控指标模板】三节，命中 lens 的每个必查项正文都要有回应
+（审查员自读的是同一批文件名，它审的正是"你是否逐条回应了这份清单"）。
 
 交办：写"相对旧档变化清单"（valuation.md 末尾）；标注 A2/A3 与 A1 的数字冲突（取 A1 并显式标注）；
 只跑 `python scripts/lint_docs_frontmatter.py`，**不跑 refs、不 git add/commit**。

@@ -16,7 +16,9 @@ EXPECTED = {
     'sr-a3-lens': {'model': 'opus', 'effort': 'medium'},
     'sr-writer': {'model': 'opus', 'effort': 'high'},
     'sr-reviewer': {'model': 'sonnet', 'effort': 'high'},
-    'sr-finalize': {'model': 'sonnet', 'effort': 'low'},
+    # Phase C 是六路里唯一做不可逆动作（git rm / 改反向链 / commit）且失败静默的一路，
+    # 而 effort 档位差异至今无行为级验证 —— 先提 medium，拿到证据再降回 low。
+    'sr-finalize': {'model': 'sonnet', 'effort': 'medium'},
 }
 
 VALID_MODELS = {'opus', 'sonnet', 'haiku', 'fable'}

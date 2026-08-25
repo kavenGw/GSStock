@@ -1,6 +1,8 @@
 # 分析档收尾（Phase C）
 
-> 适用：模式 1/2 的 Phase C 必读；模式 3/4 及 buffett 等写档收尾按需取用。执行者通常是控制者派的 sonnet，派发时要求其 **Read 本文件**。
+> 适用：模式 3/4 及 buffett 等写档收尾按需取用（模式 1/2 的 Phase C 已由 `.claude/agents/sr-finalize.md` 内置承载）。执行者通常是控制者派的 sonnet，派发时要求其 **Read 本文件**。
+>
+> **本文件正文与 `.claude/agents/sr-finalize.md` 同源，改一处必须同步另一处。**
 
 收尾是确定性动作清单，不是分析活：目标是 **双 lint exit 0 + valuations 落库 + 一条只含本任务文件的 commit**。
 每一步都有亲验命令，不信任何"已完成"自报。

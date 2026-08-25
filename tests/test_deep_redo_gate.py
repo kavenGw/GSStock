@@ -269,6 +269,15 @@ def test_merged_phase_a_all_green(tmp_path, capsys):
     assert 'A READY' in capsys.readouterr().out
 
 
+def test_merged_with_end_stamp_but_too_fresh_is_held(tmp_path, capsys):
+    """end: 戳齐全但文件刚落盘 —— mtime 保险仍应拦住（quiet_min 的唯一现役作用）。"""
+    art = _make_merged_a(tmp_path, age_min=0.1)
+    rc = main([STOCK, DATE, '--phase', 'A', '--quiet-min', '0.5', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert 'mtime' in out
+
+
 def test_merged_missing_end_stamp(tmp_path, capsys):
     """end: 戳写在文件最末，它的存在即「全文写完」——这是合并格式的核心判据。"""
     art = _make_merged_a(tmp_path, with_end=False)

@@ -42,17 +42,18 @@ A1 交办在模式 1 的 A1 清单之上加三项：
 
 产出落 `.omc/artifacts/<股票名>-<日期>-A1.md`（明细层 + 结论层，见 `dispatch.md §0.1`）。
 
-闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A --lanes A1 --quiet-min 3`，exit 0 才派 B'。
+闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A --lanes A1`，exit 0 才派 B'。
 等待按 [L7] 探测模板包一层。A1 报「前提变化」（主论点被证伪）→ 停，走歧义门 2。
 
 ### Phase B' — 差量撰写（1 个 opus）→ `dispatch.md §2` + 以下差量交办
 
-内联：A1 evidence 全文、旧档七文件路径（写手 Read）、对账结果、兄弟档口径摘要可省。交办铁律：
+内联：**A1 产出文件路径**（写手自 Read 明细层，勿把全文抄进 prompt）、旧档七文件路径、对账结果；兄弟档口径摘要可省。交办铁律：
 - **只改受财报影响的段落**，逐文件：`business.md` 经营数据与分部；`thesis.md` 被证实/证伪的论点（证伪的改写并标"26QN 财报证伪"）；
   `valuation.md` 假设与三情景数字 + 末尾"相对旧档变化清单"（必须列出每个改动的数字：旧 → 新 → 依据）；
   `index.md` §0/§10/§11 与 frontmatter `valuation` 块、`thesis`、`conviction_date`；`sources.md` 追加财报来源。
 - 未受影响段落**原文保留**，不润色、不重排。`events.md` 不动。
-- 评级字段 `rating` 不改；若写手判断该翻，在 report 里写「建议升模式 1：<理由>」而非自行改。
+- 评级字段 `rating` 不改；若写手判断该翻，在**产出文件的结论层**写「建议升模式 1：<理由>」并在消息里点名，
+  **不写进新档正文**（这是给控制者的信号，绝不该进 docs）。
 - 数字镜像：frontmatter 所有含数字字段与正文一致（`buffett-doc-spec` 撰写纪律）。
 
 闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <文件夹>`。
@@ -62,7 +63,7 @@ A1 交办在模式 1 的 A1 清单之上加三项：
 在模式 1 审查项之上加一项：**diff 审查**——`git diff <文件夹>` 里每处改动都能在 A1 evidence 找到依据；
 没依据的改动列为 Major。闸门 `--phase review`。
 
-### Phase C — 收尾（1 个 sonnet）→ `dispatch.md §4` / `finalize.md`
+### Phase C — 收尾（1 个 sonnet）→ `dispatch.md §4`（动作清单已在 `sr-finalize` 定义里）
 
 无旧档可删、无反向链新增（结构性引用不变），主要是 `valuations.yaml` 同步 + 双 lint + 按并行 session 协议提交。
 
