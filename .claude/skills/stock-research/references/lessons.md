@@ -50,7 +50,7 @@ grep -n "^## L19" .claude/skills/stock-research/references/lessons.md   # 定位
 | | L17 | 平铺档迁文件夹档时 `events.md` 是「迁移事件关联」不是「新建空档」 | 措辞 |
 | | L21 | 返修单里的**新事实性论断**绕过 A 路证据链，写手会照写不误 | 措辞 |
 | | L26 | 要求 subagent 达成某规格前，先全仓统计该规格的实际执行状况 | 措辞 |
-| **收尾与 lint**（跨模式） | L18 | `--rewrite-blocks` 在有 violation 时提前 return，根本不重写 | `finalize.md` 步骤 5 已内联 |
+| **收尾与 lint**（跨模式） | L18 | `--rewrite-blocks` 在有 violation 时提前 return，根本不重写；**违规判定是全仓的、不分归属 ⇒ 并行 session 互锁** | `finalize.md` 步骤 5 已内联 |
 | | L20 | 其前置还包括「旧档已从磁盘物理删除」 | 同上 |
 | **元方法** | L27 | 验证「agent 定义是否生效」只能看行为，不能问 subagent 自己 | 措辞 |
 
@@ -441,6 +441,17 @@ B-1 组 7 份 theme 改指 `士兰微/events.md`、B-2 组 3 份结构性档改�
 把 auto-block 的重生交给 Phase C；控制者阶段改 frontmatter note 后**不必也不该**自己补跑重写。
 **副产品**：控制者若在此处误判为「脚本坏了」而手编 BEGIN/END 块，就会踩到
 `finalize.md` 明令禁止的「别手编 auto-block」。
+
+**2026-08-26 北方华创轮补充：违规判定是全仓的、不分归属，因此并行 session 会互相锁死。**
+`main()` 里 `violations = _check(docs)` 的 `docs` 是**全仓所有档**，`if violations: return 1`
+在 `if args.rewrite_blocks:` 之前 —— 意味着**只要仓内任何一份档还有 asymmetric ref（哪怕完全属于另一个
+并行 session 的在写档），本任务就永远跑不到重写分支**，即便自己这 14 份文件的引用图早已自洽。
+本轮 Phase C 实测：本任务 0 违规、卓胜微（并行 session 在写）7 违规 → `--rewrite-blocks` 拒绝重写任何文件。
+**绕过方式**（Phase C 已验证幂等）：直接复用脚本内的 `_render_block` / `_BLOCK_RE` 纯函数，
+只对本任务文件按各自 frontmatter 做等价重写——纯函数、与全仓其他违规无关，
+结果与「全仓无违规时跑官方命令」完全一致。**待全仓收尾干净后可再跑一次官方命令双重确认**（预期 `Rewrote 0 file(s)`）。
+⇒ **这已不只是顺序问题，而是脚本在多 session 仓里的一个结构性缺陷**（`--rewrite-blocks` 的违规闸门
+应当只覆盖它将要重写的文件，而非全仓）。修脚本属跨任务改动，本轮只记录、未改。
 
 ---
 
