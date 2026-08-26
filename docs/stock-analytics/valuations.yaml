@@ -2122,13 +2122,14 @@
   currency: CNY
   sector: industrial
   rating: watch
-  bear: 20.5
-  base: 32.8
-  bull: 61.6
-  dividend_yield: 0.26
-  conviction_date: '2026-06-14'
-  source_doc: sectors/industrial/cable/2026-06-14-亨通光电-buffett分析.md
-  note: 每股=情景内在价值(亿)/股本约24.36亿股；当前股价极端高估(PE TTM~80x)
+  watch_reason: 旧档「极端高估 PE TTM 80x」与「AI 业绩层零兑现」两条判词本轮均已失效（PE-TTM 38.19x、26H1 归母 31.196 亿 +93.38%），但期望内在价值 478 亿（三情景真概率加权精确值）对 2026-08-26 市值 1,598.96 亿仍为安全边际 -70.1%——差额买的是「裸纤价格永久站在周期高位」这一未经验证的假设。质地实为改善（扣非 > 归母、加权 ROE 纠偏年化约 15.5%、控股股东质押 60.40%→52.66% 且明示不再续押），故是 watch 而非 exclude。压制项为硬：H1 经营现金流 +0.049 亿→-8.648 亿、合同资产 +53.0% 快于营收 +31.1%、财务费用 +237.94%，同期长飞 +18.261 亿/永鼎 +3.465 亿为正，季节性解释不了。监控：裸纤现货价、Q3/年报经营现金流与合同资产、空芯光纤首次收入确认、内蒙二期达产、质押率
+  bear: 10.95
+  base: 19.46
+  bull: 28.38
+  dividend_yield: 0.42
+  conviction_date: '2026-08-26'
+  source_doc: sectors/industrial/cable/亨通光电/index.md
+  note: 每股=情景内在价值(亿)/股本24.6639亿股；PE-TTM 38.19x（26H1口径），经营现金流转负(-8.648亿)是主要压制项
   themes:
   - 海缆
   - 海上风电
