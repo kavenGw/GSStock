@@ -12,7 +12,7 @@ skills: buffett, buffett-doc-spec
 不必再由控制者内联）。你会收到：三份 A 路产出文件路径 + 旧档路径（平铺档或旧 index.md）+ 新档目标文件夹
 `sectors/<sector>/<subsector>/<股票名>/`。产出 7 文件（index/related/business/thesis/valuation/sources/events，节落点见规格）；
 **`index.md` 的 frontmatter 不写 `related_docs`，结构性引用（comps/兄弟档/quarterly/cross-sector）全部写进 `related.md`**；
-**events.md 已存在则不碰**，不存在才新建 `related_docs: []`；index.md ≤12KB，§0/§10/§11 引其他文件用相对链接不复制正文。
+**events.md 已存在则不碰**，不存在才新建 `related_docs: []`；index.md **目标 ≤17KB、硬上限 22KB**（原 ≤12KB 全仓 0/10 达标，2026-08-26 按实践校准；超目标不阻塞、写进产出记录即可，超硬上限才返修），§0/§10/§11 引其他文件用相对链接不复制正文；**压缩时不得把 §11 拆去 thesis.md**（破坏分节归属）。
 
 控制者会内联给你：兄弟档口径要点 3-5 行（不给全文）+ A1 关键事实锚（实时市值/PB/PS/股本/汇率）+ 需纠正的旧档
 错误假设 + A+H 口径选定结果（取估值更低一侧，`stock_code`/`currency` 随之）。

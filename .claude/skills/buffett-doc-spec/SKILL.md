@@ -49,13 +49,20 @@ commodity_impact: positive   # positive=上游资源（涨价利好）/ negative
 
 | 文件 | doc_type | 内容 | 体量 |
 |------|----------|------|------|
-| index.md | buffett（上述完整 frontmatter，**不含 related_docs**） | §0 + §10 + §11 | ≤12KB |
+| index.md | buffett（上述完整 frontmatter，**不含 related_docs**） | §0 + §10 + §11 | **目标 ≤17KB，硬上限 22KB**（见下） |
 | related.md | buffett-related | 只含 frontmatter related_docs（结构性引用）+ h1；重做时**重写** | — |
 | business.md | buffett-section / section: business | §1-§5 | — |
 | thesis.md | buffett-section / section: thesis | §6-§8 | — |
 | valuation.md | buffett-section / section: valuation | §9 + 相对旧档变化清单 | — |
 | sources.md | buffett-section / section: sources | §12 | — |
 | events.md | buffett-events | 只含 frontmatter related_docs（stock-research 模式 3 回写）+ h1；**重做时不覆盖**，不存在才新建 `related_docs: []` | — |
+
+> **关于 index.md 体量（2026-08-26 校准）**：原条款写 `≤12KB`，实测**全仓 10 份文件夹档无一份达标**
+> —— 最小 12,894（建滔积层板）、中位 16,600、最大 21,192（沪电股份）字节。一条无人满足的上限不是约束，
+> 只会让每一轮都在收尾时重开一次「要不要为它返修」的讨论。故按实践校准为
+> **目标 ≤17KB（≈中位）、硬上限 22KB**。超目标不阻塞、写进产出记录即可；**超硬上限才返修**。
+> 压缩时**不得把 §11 拆去 thesis.md**——规格把 §0/§10/§11 指派给 index.md，拆走会破坏分节归属；
+> 正确的压缩手段是把 §0/§10/§11 里**重复 business/thesis/valuation 的论证过程**换成相对链接。
 
 `related.md` 形态（结构性引用唯一落点）：
 

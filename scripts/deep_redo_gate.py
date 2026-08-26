@@ -67,7 +67,10 @@ def _check_report(path: Path, tag: str) -> list[str]:
 
 # L28：三路 agent 会给结论层加自己的编号前缀（「第四段 · 结论层」/「§D 结论层」/「§6 结论层」），
 # 只认字面 '## 结论层' 会把三份齐全的产出全判 NOT-READY。放宽为「标题行以结论层收尾」。
-CONCLUSION_RE = re.compile(r'^##.*结论层\s*$', re.M)
+# 2026-08-26（北方华创轮）：L28 只放宽了前缀、没放宽**标题层级**——dispatch.md §0.1 的模板写
+# '## 结论层'，而 sr-writer / sr-a1-anchor 实际常写一级 '# 结论层'（配套 '# 明细层'），
+# 于是七文件齐全、end: 戳已落的产出仍被判「缺 ## 结论层」，属稳定假阴性。放宽为 1-6 级标题。
+CONCLUSION_RE = re.compile(r'^#{1,6}.*结论层\s*$', re.M)
 
 
 def _lane_docs(artifacts: Path, prefix: str, lane: str
@@ -91,7 +94,7 @@ def _check_merged(path: Path, tag: str, now: float,
     if lines < MIN_EVIDENCE_LINES:
         problems.append(f'{tag} NOT-READY: only {lines} lines (<{MIN_EVIDENCE_LINES})')
     if not CONCLUSION_RE.search(text):
-        problems.append(f'{tag} NOT-READY: 缺 ## 结论层')
+        problems.append(f'{tag} NOT-READY: 缺「结论层」标题行（1-6 级 # 均可）')
     age = _age_min(path, now)
     if not END_STAMP_RE.search(text):
         if age > stale_min:

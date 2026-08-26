@@ -8,6 +8,8 @@
     python scripts/lint_docs_refs.py
     python scripts/lint_docs_refs.py --rewrite-blocks
     python scripts/lint_docs_refs.py --check-orphans
+    # 多 session 并行时，把闸门与重写都收窄到自己这一批档，避开他人在写档造成的互锁：
+    python scripts/lint_docs_refs.py --rewrite-blocks --only docs/stock-analytics/sectors/x/y/某股
 """
 from __future__ import annotations
 import argparse
@@ -131,9 +133,9 @@ def _render_block(fm: dict, md_path: Path) -> str:
     return '\n'.join(lines) + '\n'
 
 
-def _rewrite_blocks(docs: dict[Path, dict]) -> int:
+def _rewrite_blocks(docs: dict[Path, dict], targets: dict[Path, dict] | None = None) -> int:
     changed = 0
-    for path, fm in docs.items():
+    for path, fm in (targets if targets is not None else docs).items():
         text = path.read_text(encoding='utf-8')
         new_block = _render_block(fm, path)
         if _BLOCK_RE.search(text):
@@ -160,6 +162,10 @@ def main() -> int:
                     help='根据 frontmatter 重生 h1 后的 related_docs markdown 块')
     ap.add_argument('--check-orphans', action='store_true',
                     help='列出 0 反向引用文档')
+    ap.add_argument('--only', action='append', default=[], metavar='PATH',
+                    help='把违规闸门与 --rewrite-blocks 都收窄到该路径（文件或目录，可重复）。'
+                         '引用图仍按全仓构建（对称性判定需要全局上下文），但只报告/阻断'
+                         '「以目标档为来源」的违规。用于多 session 并行时避开他人在写档造成的互锁')
     args = ap.parse_args()
 
     root = Path(args.root)
@@ -179,7 +185,25 @@ def main() -> int:
             print("No orphans")
         return 0
 
+    targets = docs
+    if args.only:
+        prefixes = [Path(o).resolve() for o in args.only]
+        targets = {q: fm for q, fm in docs.items()
+                   if any(q.resolve() == pre or pre in q.resolve().parents
+                          for pre in prefixes)}
+        if not targets:
+            print(f'ERROR: --only matched 0 docs: {args.only}')
+            return 2
+
+    # 引用图始终按全仓构建——对称性判定需要全局上下文；--only 只收窄「报告/阻断」的范围。
     violations = _check(docs)
+    if args.only:
+        scoped = [v for v in violations if any(v.startswith(f'{q}:') for q in targets)]
+        skipped = len(violations) - len(scoped)
+        if skipped:
+            print(f'(--only: {skipped} violation(s) outside scope, not blocking)')
+        violations = scoped
+
     if violations:
         for v in violations:
             print(v)
@@ -187,10 +211,10 @@ def main() -> int:
         return 1
 
     if args.rewrite_blocks:
-        changed = _rewrite_blocks(docs)
+        changed = _rewrite_blocks(docs, targets)
         print(f"Rewrote {changed} file(s)")
 
-    print(f"OK: {len(docs)} file(s)")
+    print(f"OK: {len(targets)} file(s)" if args.only else f"OK: {len(docs)} file(s)")
     return 0
 
 

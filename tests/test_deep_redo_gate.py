@@ -244,11 +244,11 @@ def test_phase_b_folder_missing_related(tmp_path, capsys):
 # ---------- 合并格式（evidence + report 单文件）----------
 
 def _merged_body(lines: int = 30, *, with_end: bool = True,
-                 with_conclusion: bool = True) -> str:
-    parts = ['start: 2026-08-22 08:30:00', '', '## 明细层', '']
+                 with_conclusion: bool = True, heading: str = '##') -> str:
+    parts = ['start: 2026-08-22 08:30:00', '', f'{heading} 明细层', '']
     parts += [f'- 证据行 {i}：https://example.com/{i} （2026-08-22）' for i in range(lines)]
     if with_conclusion:
-        parts += ['', '## 结论层', '', '对账：证实 3 / 证伪 1 / 无信息 2。']
+        parts += ['', f'{heading} 结论层', '', '对账：证实 3 / 证伪 1 / 无信息 2。']
     if with_end:
         parts += ['', 'end: 2026-08-22 08:52:00']
     return '\n'.join(parts) + '\n'
@@ -294,6 +294,26 @@ def test_merged_missing_conclusion_section(tmp_path, capsys):
     out = capsys.readouterr().out
     assert rc == 1
     assert '结论层' in out
+
+
+def test_merged_conclusion_accepts_h1_heading(tmp_path, capsys):
+    """L28 只放宽了标题前缀、没放宽层级；写手与 A1 实际常写一级 `# 结论层`（配套 `# 明细层`），
+    旧正则 `^##.*结论层$` 会把七文件齐全、end: 已落的产出判成「缺结论层」——稳定假阴性。"""
+    art = _make_merged_a(tmp_path, heading='#')
+    rc = main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert 'A READY' in out
+
+
+def test_merged_conclusion_accepts_deeper_headings(tmp_path, capsys):
+    """三级及更深同样放行；但正文里裸写「结论层」三个字不算标题、仍须拦下。"""
+    art = _make_merged_a(tmp_path, heading='####')
+    assert main([STOCK, DATE, '--phase', 'A', '--artifacts', str(art)]) == 0
+    capsys.readouterr()
+    from scripts.deep_redo_gate import CONCLUSION_RE
+    assert not CONCLUSION_RE.search('正文里提到结论层这三个字')
+    assert not CONCLUSION_RE.search('## 结论')
 
 
 def test_merged_no_end_and_stale_reports_died_before_delivery(tmp_path, capsys):

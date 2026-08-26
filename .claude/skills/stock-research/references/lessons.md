@@ -451,7 +451,14 @@ B-1 组 7 份 theme 改指 `士兰微/events.md`、B-2 组 3 份结构性档改�
 只对本任务文件按各自 frontmatter 做等价重写——纯函数、与全仓其他违规无关，
 结果与「全仓无违规时跑官方命令」完全一致。**待全仓收尾干净后可再跑一次官方命令双重确认**（预期 `Rewrote 0 file(s)`）。
 ⇒ **这已不只是顺序问题，而是脚本在多 session 仓里的一个结构性缺陷**（`--rewrite-blocks` 的违规闸门
-应当只覆盖它将要重写的文件，而非全仓）。修脚本属跨任务改动，本轮只记录、未改。
+应当只覆盖它将要重写的文件，而非全仓）。
+
+**已修（2026-08-26）**：`lint_docs_refs.py` 新增 `--only PATH`（可重复）——引用图仍按全仓构建
+（对称性判定需要全局上下文），但**只报告/阻断「以目标档为来源」的违规**，`--rewrite-blocks` 同步收窄。
+默认行为完全不变。用法：`python scripts/lint_docs_refs.py --rewrite-blocks --only <本股档文件夹>`。
+北方华创轮实测：本任务 0 违规 → 打印 `(--only: 7 violation(s) outside scope, not blocking)` 并放行；
+`--only` 指向卓胜微则仍 `FAIL` exit 1；匹配 0 份 exit 2。
+**顺带证实**：该轮 Phase C 手工复用 `_render_block` 的重写与官方命令幂等——补跑官方命令输出 `Rewrote 0 file(s)`。
 
 ---
 
