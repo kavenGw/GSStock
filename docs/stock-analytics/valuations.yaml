@@ -4267,6 +4267,7 @@
   bear: 3.47
   base: 5.03
   bull: 9.11
+  dividend_yield: null
   conviction_date: '2026-08-26'
   source_doc: sectors/industrial/cable/杭电股份/index.md
   themes:
