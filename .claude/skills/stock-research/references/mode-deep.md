@@ -60,6 +60,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase B --doc <新档文件夹>`（要求写手达成某条规格前先全仓统计其实际执行状况；subagent 拿证据顶回指令时先亲验它的证据 [L26]）（查 7 文件齐全 + 占位，对应
 "主体 + 填锚"抗中断设计 [L14][L10]）。预估 17-30min，由成稿长度驱动，不可并行（拆写手断"论点→估值→评级"链）。
+财报盘后披露、次日建档时，**等开盘取锚并把等待窗口排成同一个写手的三段式**（非价格段 → §9 非价格部分 → 填锚收口），别用作废锚写完再回填 [L34]。
 
 ### 合并审查（1 个 read-only sonnet；异常升 opus）→ dispatch.md §3
 
@@ -73,7 +74,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 清理「一次性脚本」前必须验 mtime 与内容归属：`scripts/_a1_*`/`_a3_*` 是各轮共用前缀，并行 session 的在写产物同名且无 git 留痕，按前缀一把删不可恢复 [L30]。
 
 闸门：`lint_docs_frontmatter.py` / `lint_docs_refs.py` 双 exit 0 + `git show HEAD:docs/stock-analytics/valuations.yaml`
-复核本股条目。预估 3-10min。
+复核本股条目。预估 3-10min。C 路 agent idle 而产出文件缺席时**别重派**——交付物是 commit/lint/valuations 本身，自己验完补记录 [L35]。
 
 ## 跨日重启 / 中断恢复（控制者本人）
 

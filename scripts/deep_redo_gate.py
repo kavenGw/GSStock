@@ -30,7 +30,9 @@ from pathlib import Path
 
 LANES = ('A1', 'A2', 'A3')
 MIN_EVIDENCE_LINES = 20
-END_STAMP_RE = re.compile(r'^end:\s*\S', re.M)
+# `end:` 后允许无戳值：agent 被额度/超时杀在写戳值前 1-2 秒时，正文其实已完整
+# （L34）。收工判据是这一行存在 + `## 结论层` 存在 + mtime 静默，不是戳值本身。
+END_STAMP_RE = re.compile(r'^end:[ 	]*$|^end:\s*\S', re.M)
 PLACEHOLDER_RE = re.compile(r'【待锚】|\bTODO\b|\bTBD\b')
 VALUATION_BLOCK_RE = re.compile(r'^valuation:', re.M)
 SPEC_MARKERS = ('SPEC-COMPLIANT', '规格问题', 'Critical', 'Major', 'Minor')
