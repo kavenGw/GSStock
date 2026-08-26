@@ -65,7 +65,11 @@ A1 交办在模式 1 的 A1 清单之上加三项：
 
 ### Phase C — 收尾（1 个 sonnet）→ `dispatch.md §4`（动作清单已在 `sr-finalize` 定义里）
 
-无旧档可删、无反向链新增（结构性引用不变），主要是 `valuations.yaml` 同步 + 双 lint + 按并行 session 协议提交。
+无平铺旧档可删、无反向链新增（结构性引用不变），主要是 `valuations.yaml` 同步 + 双 lint + 按并行 session 协议提交。
+
+**但本模式是季报点评清理的主触发场景**（写中报时清同股一季报）：控制者按 `mode-deep.md` 步骤 **4b** 判据扫本股
+被本次覆盖期取代的 `quarterly/**/*季报点评.md`，**surface 给用户确认后**并入待删清单传给 Phase C。
+无命中或用户不确认 → 清单为空，按原流程走。
 
 ## 溢出 read-across（控制者本人，可选）
 

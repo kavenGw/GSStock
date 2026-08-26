@@ -42,8 +42,21 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]。
 3. **避坑门**：查 `docs/stock-analytics/avoidance-list.yaml`，命中则按 `.claude/rules/docs-conventions.md`
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
-4. **列待删旧档清单**：只筛平铺 `*buffett*.md`（文件夹档不删），**逐个 Read 确认**档名含目标股票名且 `stock_code`
-   一致；不符则停下 surface 给用户。目标已是文件夹 → 清单为空。
+4. **列待删旧档清单**（两类，合并成一份清单传给 Phase C）：
+
+   **4a 平铺 buffett 旧档**：只筛平铺 `*buffett*.md`（文件夹档不删），**逐个 Read 确认**档名含目标股票名且 `stock_code`
+   一致；不符则停下 surface 给用户。目标已是文件夹 → 本类为空。
+
+   **4b 被本次新档取代的季报点评**：扫 `docs/stock-analytics/quarterly/**/` 下同时满足三条的档 ——
+   ① `doc_type: quarterly` 且**文件名含「季报点评」**（专题档、业绩说明会档**不在范围内**：它们没有「更新期取代者」这个概念，
+   要清是逐份人工判断，不走本规则）；② 归属本股 —— `stock_code` 一致 **OR** `stock_name` 一致，**两键取并集**
+   （两个键都单独失配过：青岛啤酒 A/H 双代码 `600600` vs `'00168'`、北京君正名称不一致 `君正股份` vs `北京君正`）；
+   ③ 其 `period` 早于本次新档覆盖期（`NNqN` 解析，`h1`≡`q2`、`a`≡`q4`）。
+   **本股在 quarterly 下没有更新期档、也没有其他 conviction_date 更晚的 buffett 档时，本次新档即唯一取代者**——
+   仍可删，但清单里要标出这是该股当时唯一的定期报告论据。
+
+   **确认闸**：4b 清单**必须 surface 给用户、得到确认才传给 Phase C**（删除不可逆；4a 沿用原有自动流程）。
+   用户未确认的条目不进清单。
 5. **确认 lens 命中**：按 subsector 对照 `references/lenses/` 映射表，把命中的板块专属 lens 文件名写进 **§2 写手与 §3 审查员**的派发（横切 `x-*.md` 由 agent 默认全加载）。**不再摘原文内联。**
 6. **兄弟档口径摘要**：同板块近期兄弟档读一遍提炼 3-5 行（TTM 分母 / bull 封顶 / 买点折价等），不给全文。
 7. `mkdir -p .omc/artifacts`（闸门脚本要求存在）。
