@@ -29,8 +29,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
     note: 可插拔器件景气延续利好，CPO 配套(FAU/ELS)放量预期推后，净中性偏多
     symmetric: true
-  - path: ../sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md
-    note: 下一代 78 层中板放量推迟给过热 AI-PCB 估值降温，当前代高多层业绩 intact
+  - path: ../sectors/electronics/pcb/沪电股份/index.md
+    note: 沪电中报重做（2026-08-25，watch）裁定回写：不得沿用本档既定口径——SemiAnalysis 报延至 2028 vs 英伟达公开否认「roadmap is intact」，截至 2026-08-25 无任何裁决性新证据【缺】，时点分歧未解。被延后的 78 层正交中板属 Rubin Ultra 机架内连接，与沪电 26H1 的 71.39 亿交换机整机主板是两条产品线，属尚未兑现的期权而非在手订单；若 Kyber 确实推到 2028，该期权贴现要后推两年，对估值是减项
     symmetric: true
   - path: ../sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md
     note: Kyber 主板放量推迟削弱最激进增长曲线，强化"安全边际为负、等回调"
@@ -64,7 +64,7 @@ related_docs:
 > - [2026-07-02-中际旭创-buffett分析](../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md) — CPO 延迟直接延长可插拔光模块景气，缓解其长期核心 overhang
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 旧档明列"CPO 2027+ 蚕食可插拔"为核心 overhang，本次 CPO 延迟正击此点
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 可插拔器件景气延续利好，CPO 配套(FAU/ELS)放量预期推后，净中性偏多
-> - [2026-06-04-沪电股份-buffett分析](../sectors/electronics/pcb/2026-06-04-沪电股份-buffett分析.md) — 下一代 78 层中板放量推迟给过热 AI-PCB 估值降温，当前代高多层业绩 intact
+> - [index](../sectors/electronics/pcb/沪电股份/index.md) — 沪电中报重做（2026-08-25，watch）裁定回写：不得沿用本档既定口径——SemiAnalysis 报延至 2028 vs 英伟达公开否认「roadmap is intact」，截至 2026-08-25 无任何裁决性新证据【缺】，时点分歧未解。被延后的 78 层正交中板属 Rubin Ultra 机架内连接，与沪电 26H1 的 71.39 亿交换机整机主板是两条产品线，属尚未兑现的期权而非在手订单；若 Kyber 确实推到 2028，该期权贴现要后推两年，对估值是减项
 > - [2026-06-20-胜宏科技-buffett分析](../sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md) — Kyber 主板放量推迟削弱最激进增长曲线，强化"安全边际为负、等回调"
 > - [2026-05-31-立讯精密-buffett分析](../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md) — 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久
 > - [index](../sectors/electronics/components/沃尔核材/index.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
