@@ -3822,12 +3822,13 @@
   currency: HKD
   sector: ai-application
   rating: watch
-  watch_reason: 三重改善（收入 +158.9%、毛利率 12.2%→25.4%、销售费用 −40.3%）是硬证据且极罕见，但 25.4% 的毛利率绝对水平意味着单位经济尚未跑通——毛利 US$20.08M 覆盖不了研发 US$252.8M 的 8%；143.8x TTM PS（完全稀释 151.8x）在任何口径下都无安全边际，期望内在价值 117.4 HKD 较现价 253.80 HKD 低 53.7%，即便 bull 完全兑现安全边际也只有 +4.1%；且 ARR 口径分裂 12.6 倍、具名客户为零、2027-01-09 还有 25%+ 战略股东解禁，2026 中报（≤8/31）将在 4 周内刷新全部 TTM 口径
-  bear: 31.9
-  base: 109.9
-  bull: 264.3
-  conviction_date: '2026-08-05'
-  source_doc: sectors/ai-application/llm/2026-08-05-MiniMax-buffett分析.md
+  watch_reason: 2026 中报把多空两侧同时推向极端——收入 US$116.573M（+283.1%）单半年超过 FY2025 全年、开放平台 +703.1% 占比 63.4%、销售费用连降两期，ARR 叙事未被打回原形；但混合毛利率 12.1%→33.7%→17.9%（环比腰斩 15.8pct）、边际毛利率仅 6.5%、经调整净亏扩大 111.2% 至 US$293.0M（月烧 US$48.8M 为旧档假设的 1.75 倍）。旧档自设的 T2a 与 T4a/T4b 三条触发器同时命中，base 终局 EV/S 由 6x 执行下修至 4x、bull 概率按 T1c 与 T4 两条下调闸执行由 20% 降至 10%，期望内在价值由 117.4 降至 83.9 HKD，而股价同期上涨 19.4%，安全边际由 −53.7% 恶化至 −72.3%，连 bull 单档也已由 +4.1% 转为 −12.3%
+  bear: 35.1
+  base: 86.5
+  bull: 265.7
+  dividend_yield: null
+  conviction_date: '2026-08-26'
+  source_doc: sectors/ai-application/llm/MiniMax/index.md
   themes:
   - AI大模型
   - AI应用出海
