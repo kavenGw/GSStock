@@ -44,7 +44,19 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
    ★1 留给"质地很差"。一致时留空。
 8. **矿产/商品标的**：frontmatter 与 valuations.yaml 同步写 `commodity`（枚举 `scripts/_docs_schema.py:COMMODITIES`）
    + `commodity_impact`（positive/negative/neutral，按产业链位置）。
-9. 遗留检查：一次性采证脚本 `scripts/_*.py` 已删；`.omc/artifacts/` 下 evidence/report 未被 `git add`。
+9. 遗留检查：`.omc/artifacts/` 下 evidence/report 未被 `git add`。
+    **一次性脚本清理必须用正向白名单，禁止按 `scripts/_*.py` 一把删**（见 lessons [L30][L31]）——
+    同仓常有并行 session 在跑别的标的，且其文件名**不一定带你认得出的前缀**。
+    只删**你自己本轮创建**的脚本（自己建了哪些自己清楚，按名逐个 `rm`）；`scripts/` 下其余
+    `_a1_*`/`_a2_*`/`_a3_*`/`_ctl_*` 等**一律视为他人产物，不得删除**。拿不准的**留着**并在报告里列出交控制者判——
+    留下的垃圾下轮可清，删掉的 untracked 文件**永久不可恢复**。删前可跑一次归属检查：
+    ```bash
+    PYTHONIOENCODING=utf-8 python -c "
+    import glob,os,time
+    for p in sorted(glob.glob('scripts/_a*_*')):
+        print(time.strftime('%m-%d %H:%M:%S',time.localtime(os.path.getmtime(p))), p)"
+    ```
+    mtime 早于本轮开工、或主题与本轮标的无关者 = 不是你的。
 10. **提交**（删增与 commit 必须同一条命令链，防并行 session 抢 index）：
 
 ```bash
