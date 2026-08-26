@@ -39,7 +39,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 1. Glob `docs/stock-analytics/**/*<股票名>*` 找底稿（平铺档或 `<股票名>/index.md`），挑最新 buffett 档 + 最相关 comps 作基线。
    已有 `<股票名>/events.md` → 读其 related_docs，theme `date` > 旧 index `conviction_date` 的条目即「未消化事件」，
    摘 note/impact/magnitude 备内联给 A2（dispatch.md §1）。
-2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]。
+2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]；`quote_guard` 传代码带市场前缀（`sh603618` 而非 `603618`），收盘后用当日收盘价作锚走 `--allow-preopen` [L36]。
 3. **避坑门**：查 `docs/stock-analytics/avoidance-list.yaml`，命中则按 `.claude/rules/docs-conventions.md`
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
 4. **列待删旧档清单**（两类，合并成一份清单传给 Phase C）：

@@ -63,6 +63,12 @@ def infer_market(code: str) -> str:
         return 'HK'
     if c.startswith(('sh', 'sz')):
         return 'A'
+    # 裸代码（无前缀/后缀）按位数判市场：A 股 6 位、港股 4-5 位，均为纯数字；
+    # 美股 ticker 是字母。缺了这一条，'603618' 会静默落到 US —— 而 US 时段
+    # 是 9:30-16:00 连续一段，A 股 14:57 后的收盘快照会被**误判为盘中通过**
+    # （假阳性），比报错更危险。见 lessons.md L36。
+    if c.isdigit():
+        return 'A' if len(c) == 6 else 'HK'
     return 'US'
 
 
