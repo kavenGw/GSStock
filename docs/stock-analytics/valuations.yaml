@@ -4258,3 +4258,20 @@
   - 折旧压顶
   - L-PAMiD
   - 光互联概念
+- stock_code: '603618'
+  stock_name: 杭电股份
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: exclude
+  bear: 3.47
+  base: 5.03
+  bull: 9.11
+  conviction_date: '2026-08-26'
+  source_doc: sectors/industrial/cable/杭电股份/index.md
+  themes:
+  - 光纤涨价
+  - AI算力
+  - 铜
+  - 定增摊薄
+  - 周期弹性

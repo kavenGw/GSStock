@@ -35,6 +35,7 @@ effort: medium
 | `storage-dram-nand.md` | 板块专属 | sector=semiconductor 且 subsector 含 storage / memory / dram / nand / 利基存储 |
 | `storage-nor-flash.md` | 板块专属 | sector=semiconductor 且 subsector 含 storage / memory；主营含 NOR / SPI NOR / 串行闪存 / 代码型闪存 / AMOLED 驱动存储 / EEPROM |
 | `metals-copper.md` | 板块专属 | sector=materials 且 subsector 含 copper / 铜 / 有色 / 矿业 / 冶炼 |
+| `optical-fiber-cable.md` | 板块专属 | sector ∈ {industrial, electronics} 且 subsector 含 cable / 光缆 / 光纤 / optical / 光通信；或主营含光棒/裸纤/光缆/海缆/特种光纤/空芯光纤。电线电缆企业的光通信板块利润占比显著高于收入占比时同样命中 |
 
 ## 证据分级
 
