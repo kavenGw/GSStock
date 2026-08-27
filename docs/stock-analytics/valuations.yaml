@@ -1907,10 +1907,10 @@
   bear: 4.89
   base: 8.44
   bull: 12.67
-  dividend_yield: 0.0006
+  dividend_yield: 0.000524
   conviction_date: '2026-08-27'
   source_doc: sectors/materials/copper-foil/铜冠铜箔/index.md
-  note: 市值估算约 970 亿元（2026-05），安全边际为负
+  note: 市值 949.47 亿（2026-08-27 收盘 114.53 元），期望内在价值 61.7 亿，安全边际 -93.5%，中报证伪扩产叙事
   themes:
   - AI服务器
   - HVLP铜箔
