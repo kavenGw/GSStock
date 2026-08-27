@@ -15,8 +15,8 @@ effort: medium
 ## 动作清单（按序）
 
 1. `git status` 查遗留改动，确认工作区没有他人在写的文件会被裹挟。
-2. **删除旧档**（目标此前已是 `<股票名>/` 文件夹**且**清单内无季报点评 → 步骤 2/3 整体跳过，路径稳定无反向链可改）：对控制者传来的待删清单逐个 `git rm -q --ignore-unmatch <path>`。清单只含两类：
-   **该股历史 buffett 档**，以及**控制者已 surface 用户确认、被本次新档取代的 `quarterly/**/*季报点评.md`**（判据见 `mode-deep.md` 步骤 4b）。
+2. **删除旧档**（目标此前已是 `<股票名>/` 文件夹**且**清单内无季报点评/预告 theme → 步骤 2/3 整体跳过，路径稳定无反向链可改）：对控制者传来的待删清单逐个 `git rm -q --ignore-unmatch <path>`。清单只含三类：
+   **该股历史 buffett 档**，以及**控制者已 surface 用户确认、被本次新档取代的 `quarterly/**/*季报点评.md` 与单主体业绩预告 theme**（判据见 `mode-deep.md` 步骤 4b/4c）。
    **comps / theme / quarterly 下的专题档与业绩说明会档一律保留**。无清单（首建档）跳过。
 3. **反向链收尾**（两类被删档处理方式不同，别混）：
 
@@ -24,6 +24,7 @@ effort: medium
    |---|---|
    | buffett 旧档 | 全仓扫 `symmetric: true` 指向它的 related_docs 条目（comps/theme/quarterly 里）→ **改指**新档 `<股票名>/index.md`，或删该条目 |
    | 季报点评 | related_docs 条目**整条摘除**（不改指）；某档 `related_docs` 因此摘空则删掉整个 key |
+    | 业绩预告 theme（单主体） | 同上**整条摘除**；其对账结论已由新档 `events.md` note 承接，不再改指 |
 
    **硬闸**：对每个被删档 `grep -rn <被删档文件名> docs/` **必须零命中**才算本步完成 —— refs lint 抓不到正文行内死链，
    而行内链是句子的一部分（"详见 [26Q1 点评](...)"），必须人工改写措辞，不能机械删掉留下病句。

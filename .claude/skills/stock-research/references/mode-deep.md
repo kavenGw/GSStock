@@ -23,7 +23,7 @@ subagent 自行加载的规格 skill：`buffett-doc-spec`（写手/审查员：f
 
 | 维度 | 默认 |
 |------|------|
-| 产出形态 | 写 `sectors/<sector>/<subsector>/<股票名>/` 七文件（规格见 `buffett-doc-spec`，`conviction_date`=今天）。该股只有平铺历史档 → 新建文件夹 + Phase C `git rm` 全部平铺 buffett 档（一次性迁移，旧档事件 theme 须迁进 `events.md` 而非新建空档 [L17]）；已是文件夹 → 原地覆盖 6 文件（含 `related.md`）、`events.md` 不动；存量文件夹档 index.md 里的 `related_docs` 本轮迁进 `related.md` 并从 index.md 删除。comps/theme/quarterly 一律保留 |
+| 产出形态 | 写 `sectors/<sector>/<subsector>/<股票名>/` 七文件（规格见 `buffett-doc-spec`，`conviction_date`=今天）。该股只有平铺历史档 → 新建文件夹 + Phase C `git rm` 全部平铺 buffett 档（一次性迁移，旧档事件 theme 须迁进 `events.md` 而非新建空档 [L17]）；已是文件夹 → 原地覆盖 6 文件（含 `related.md`）、`events.md` 不动；存量文件夹档 index.md 里的 `related_docs` 本轮迁进 `related.md` 并从 index.md 删除。comps 与非预告类 theme 一律保留，quarterly 与单主体业绩预告 theme 按步骤 4b/4c 判 |
 | 证据深度 | 全量联网验证 + 实时行情锚 |
 | 估值框架 | 场景加权 bull/base/bear，概率由证据强度定 |
 | A+H 口径 | 取 A/H 中估值更低一侧作跟踪主体（H 通常折价更优）；`stock_code`/`currency`/每股价值随选定口径；市值自洽校验见 `.claude/rules/data-fetch-conventions.md` 港股节 |
@@ -42,7 +42,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]；`quote_guard` 传代码带市场前缀（`sh603618` 而非 `603618`），收盘后用当日收盘价作锚走 `--allow-preopen` [L36]。
 3. **避坑门**：查 `docs/stock-analytics/avoidance-list.yaml`，命中则按 `.claude/rules/docs-conventions.md`
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
-4. **列待删旧档清单**（两类，合并成一份清单传给 Phase C）：
+4. **列待删旧档清单**（三类，合并成一份清单传给 Phase C）：
 
    **4a 平铺 buffett 旧档**：只筛平铺 `*buffett*.md`（文件夹档不删），**逐个 Read 确认**档名含目标股票名且 `stock_code`
    一致；不符则停下 surface 给用户。目标已是文件夹 → 本类为空。
@@ -57,8 +57,17 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
    **本股在 quarterly 下没有更新期档、也没有其他 conviction_date 更晚的 buffett 档时，本次新档即唯一取代者**——
    仍可删，但清单里要标出这是该股当时唯一的定期报告论据。
 
-   **确认闸**：4b 清单**必须 surface 给用户、得到确认才传给 Phase C**（删除不可逆；4a 沿用原有自动流程）。
-   用户未确认的条目不进清单。
+   **4c 被本次新档取代的业绩预告 theme**：扫 `docs/stock-analytics/themes/` 下**同时**满足四条的档 ——
+   ① 主题本体是本股的**业绩预告/快报/业绩指引**（`theme_name` 或文件名含「业绩预告/预增/预减/业绩快报」）；
+   ② **单主体** —— `related_codes` 只含本股一个代码。**多主体 theme 一律保留**：它对其他股仍是有效事件，
+   删了会同时打断别股的事件链与反向链（如 2026-07-19 铜冠预告档挂着 5 个 related_codes → 不删）；
+   ③ 该预告覆盖期的**正式定期报告已在本轮落地并完成对账**（本轮 conviction 即基于该期财报）；
+   ④ 其"预告 vs 实际"对账链**已由新档 `events.md` 的 note 承接**（note 里写明实际值与预告区间的对比）——
+   **未承接不得删**：预告 theme 的信息量在正式财报落地后确被完全覆盖，唯一残值就是这条对账链。
+   删前全仓 grep 该档名，本股新档以外仍有引用者 → 改指或保留。
+
+   **确认闸**：4b/4c 清单**必须 surface 给用户、得到确认才传给 Phase C**（删除不可逆；4a 沿用原有自动流程）。
+   用户未确认的条目不进清单。comps 与非预告类 theme（政策/行业/read-across）**始终保留**，不走本规则。
 5. **确认 lens 命中**：按 subsector 对照 `references/lenses/` 映射表，把命中的板块专属 lens 文件名写进 **§2 写手与 §3 审查员**的派发（横切 `x-*.md` 由 agent 默认全加载）。**不再摘原文内联。**
 6. **兄弟档口径摘要**：同板块近期兄弟档读一遍提炼 3-5 行（TTM 分母 / bull 封顶 / 买点折价等），不给全文。
 7. `mkdir -p .omc/artifacts`（闸门脚本要求存在）。
