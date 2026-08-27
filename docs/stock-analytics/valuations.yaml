@@ -1902,6 +1902,8 @@
   market: A
   currency: CNY
   sector: materials
+  commodity: copper
+  commodity_impact: neutral
   rating: watch
   watch_reason: 中报证实盈利能力上台阶（综合毛利率 8.42%）但同时证伪扩产叙事（capex -80.96%、在建工程 835 万、销量仅 +3.28%）；期望内在价值 61.7 亿 vs 市值 949.47 亿，安全边际 -93.5%，PE-TTM 391x / PB 16.93x —— 需 PE（正常化 3.5 亿口径）回落至 25-30x（88-105 亿市值）才重新评估买点
   bear: 4.89
