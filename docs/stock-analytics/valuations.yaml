@@ -164,15 +164,17 @@
   currency: HKD
   sector: consumer
   rating: watch
-  bear: 64.36
-  base: 90.1
-  bull: 114.41
-  conviction_date: '2026-06-03'
-  source_doc: sectors/consumer/sportswear/2026-06-03-安踏体育-buffett分析.md
+  watch_reason: 旧档 PE<14x 触发器已满足（经调整 PE-TTM 13.03x）但安全边际仅 +19.6% 未达 30% 阈值；主品牌增收不增利且已换将，增长单点依赖占收入 24.6% 的其他品牌；PUMA 29.06% 与 €15 亿零息票据合计约 248 亿元 RMB 现金承诺尚未在报表体现
+  bear: 67.52
+  base: 96.71
+  bull: 128.03
+  dividend_yield: 3.29
+  conviction_date: '2026-08-27'
+  source_doc: sectors/consumer/sportswear/安踏体育/index.md
   themes:
-  - 国产替代
   - 多品牌矩阵
   - 高端户外
+  - 跨境并购
 - stock_code: 2331.HK
   stock_name: 李宁
   market: HK
@@ -1900,15 +1902,14 @@
   market: A
   currency: CNY
   sector: materials
-  commodity: copper
-  commodity_impact: negative
   rating: watch
-  bear: 5.43
-  base: 15.1
-  bull: 49.52
-  dividend_yield: null
-  conviction_date: '2026-06-08'
-  source_doc: sectors/materials/copper-foil/2026-06-08-铜冠铜箔-buffett分析.md
+  watch_reason: 中报证实盈利能力上台阶（综合毛利率 8.42%）但同时证伪扩产叙事（capex -80.96%、在建工程 835 万、销量仅 +3.28%）；期望内在价值 61.7 亿 vs 市值 949.47 亿，安全边际 -93.5%，PE-TTM 391x / PB 16.93x —— 需 PE（正常化 3.5 亿口径）回落至 25-30x（88-105 亿市值）才重新评估买点
+  bear: 4.89
+  base: 8.44
+  bull: 12.67
+  dividend_yield: 0.0006
+  conviction_date: '2026-08-27'
+  source_doc: sectors/materials/copper-foil/铜冠铜箔/index.md
   note: 市值估算约 970 亿元（2026-05），安全边际为负
   themes:
   - AI服务器
@@ -2100,6 +2101,7 @@
   currency: CNY
   sector: materials
   rating: watch
+  watch_reason: 深度重做（取代 2026-06-13 平铺档）。半年报同时钉死两件事：①旧档"AI（PCB 微钻）=蹭概念"被证伪——金洲精工 2026H1 营收 11.83 亿/净利 4.3173 亿由半年报附注直接披露，归属上市公司 3.238 亿 = 归母的 15.60%；②但利润 100% 来自矿端——柿竹园 15.453 + 远景钨业 5.423 = 20.876 亿已 ≥ 集团全部归母 20.7623 亿，整个下游加工（含金洲）在合并抵销与 7.04 亿减值后净额约等于零。估值口径同步重做：正常化利润按"矿端价格函数 + 金洲 + 其他下游"三段重估（bear 14.5 / base 26.0 / bull 37.0 亿，均低于 2026H1 年化 41.5 亿），倍数从旧档 18/26/32× 降回商品档 8/10/13×（旧档 base 26× 已越出商品档 10–12× 框架）。期望内在价值 265.4 亿 / 每股 11.65 元，对现价 66.76 元 / 市值 1,521.20 亿安全边际 −82.6%（现价 = 期望内在价值的 5.73 倍），bull 单独压测仍 −68.4%。三条硬压制：H2 钨价基准 41.2–41.5 万元/标吨比 H1 均价 69.04 万低约 40%（Q2 均价只低 13.35%，故均值回归是被推迟不是被推翻）；原材料+在产品 68.09 亿计提率仅 9.63%/8.66%，高成本存货流入营业成本压毛利率且不进减值科目；营运资本吞噬 81.85 亿 = 归母 3.94 倍、有息负债 39→约 67 亿、财务费用 +323.79%、资产负债率 50.78%→60.50%。PB 13.49× 处近 10 年 97.0% 分位（中位仅 2.49×），比 PE 分位 85.3% 更能反映真实位置。维持 watch
   bear: 5.09
   base: 11.41
   bull: 21.11
@@ -2885,9 +2887,9 @@
   base: 37
   bull: 88
   dividend_yield: 0.17
-  quality: 4
   conviction_date: '2026-06-28'
   source_doc: sectors/semiconductor/optical-chip/2026-06-28-仕佳光子-buffett分析.md
+  quality: 4
   themes:
   - AI算力
   - 光芯片
@@ -2904,9 +2906,9 @@
   base: 52.0
   bull: 112.5
   dividend_yield: 0.82
-  quality: 4
   conviction_date: '2026-06-28'
   source_doc: sectors/semiconductor/design/2026-06-28-瑞芯微-buffett分析.md
+  quality: 4
   themes:
   - 端侧AI-SoC
   - AIoT
@@ -3002,13 +3004,13 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  quality: 2
   watch_reason: 业绩拐点真实（2026Q1扣非转正+毛利率6.6%→20.6%双印证）但属强周期涨价beta而非稳态成长；PB 9.9处5年高位、拐点已大幅price-in，叠加治理警示函红旗+模拟二线无护城河+四年累计亏约9.5亿，期望内在价值较市值折让逾80%、即便最乐观bull仍-52%，无安全边际。等价格回调至接近净资产或拐点经3-4季度持续验证且治理整改落实后再评。
   bear: 5.6
   base: 10.2
   bull: 33.9
   conviction_date: '2026-06-28'
   source_doc: sectors/semiconductor/analog-power/2026-06-28-富满微-buffett分析.md
+  quality: 2
   themes:
   - 涨价周期
   - 国产替代
@@ -3075,9 +3077,9 @@
   base: 125
   bull: 204
   dividend_yield: 0.2
-  quality: 4
   conviction_date: '2026-07-02'
   source_doc: sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
+  quality: 4
   themes:
   - ai_compute
   - 光模块
@@ -3108,9 +3110,9 @@
   bear: 90
   base: 195
   bull: 340
-  quality: 4
   conviction_date: '2026-07-02'
   source_doc: sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md
+  quality: 4
   themes:
   - ai_compute
   - 光模块
@@ -3126,9 +3128,9 @@
   base: 36.7
   bull: 52.3
   dividend_yield: 0.2
-  quality: 4
   conviction_date: '2026-07-02'
   source_doc: sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
+  quality: 4
   themes:
   - ai_compute
   - 光器件
@@ -3144,9 +3146,9 @@
   base: 336
   bull: 520
   dividend_yield: 0.12
-  quality: 5
   conviction_date: '2026-07-02'
   source_doc: sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md
+  quality: 5
   themes:
   - ai_compute
   - 光模块
@@ -3161,9 +3163,9 @@
   base: 26.3
   bull: 47.9
   dividend_yield: 0.001
-  quality: 4
   conviction_date: '2026-07-03'
   source_doc: sectors/semiconductor/design/2026-07-03-圣邦股份-buffett分析.md
+  quality: 4
   themes:
   - 模拟芯片涨价
   - 国产替代
@@ -3234,9 +3236,9 @@
   base: 64
   bull: 108
   dividend_yield: 0.57
-  quality: 5
   conviction_date: '2026-07-04'
   source_doc: sectors/electronics/optical-communications/2026-07-04-康宁-buffett分析.md
+  quality: 5
   themes:
   - AI光通信
   - 数据中心
@@ -3247,9 +3249,6 @@
   market: A
   currency: CNY
   sector: materials
-  commodity: lithium
-  commodity_impact: positive
-  quality: 4
   rating: watch
   watch_reason: 钾锂双料全球最左成本曲线、五矿重组已落地，生意质地一流；但 PE_TTM 15x / PB 3.48 已把周期上行与重组红利充分定价，三情景期望内在价值 16.24 元对现价 29.41 元安全边际 -44.8%，连 bull 情景亦 -9.8%——好公司当前太贵，等回调不追高。
   bear: 7.26
@@ -3257,6 +3256,7 @@
   bull: 26.53
   conviction_date: '2026-07-05'
   source_doc: sectors/materials/potash/2026-07-05-盐湖股份-buffett分析.md
+  quality: 4
   themes:
   - potash
   - lithium
@@ -3275,8 +3275,6 @@
   dividend_yield: 1.22
   conviction_date: '2026-07-05'
   source_doc: sectors/materials/electrolyte/2026-07-05-新宙邦-buffett分析.md
-  commodity: lithium
-  commodity_impact: negative
   themes:
   - 电解液周期
   - 有机氟/PFAS承接
@@ -3329,9 +3327,9 @@
   base: 14.3
   bull: 24.0
   dividend_yield: 1.06
-  quality: 4
   conviction_date: '2026-07-09'
   source_doc: sectors/materials/nonferrous/2026-07-09-赤峰黄金-buffett分析.md
+  quality: 4
   themes:
   - gold_defense
   - 央行购金
@@ -3360,14 +3358,14 @@
   currency: CNY
   sector: materials
   rating: watch
-  watch_reason: 资产是真的（秦淮数据 782MW 在运 + 310 亿算力长单 + 12x PE 收来的 IDC），但价格离谱——PB 11.26 处近十年 98.4% 分位、扣非 PE 157–183x；SOTP 场景加权期望内在价值 8.03 元/股 vs 现价 37.15 元，安全边际 −78%，即便最乐观 bull 情景（13.03 元）安全边际仍为 −65%。叠加控股股东质押 81–87%、连续两年零分红、关联交易重组未过审且业绩承诺未签、摊薄 22%+——不买，只跟踪；需重组落地并表兑现 + 客户身份披露 + 股价回落 60%+ 才重新承做
+  watch_reason: 资产是真的（秦淮数据 782MW 在运 + 390–460 亿算力长单 + 12x PE 收来的 IDC），但价格离谱——PB 11.26 处近十年 98.4% 分位、扣非 PE 157–183x；SOTP 场景加权期望内在价值 8.03 元/股 vs 现价 37.15 元，安全边际 −78%，即便最乐观 bull 情景（13.03 元）安全边际仍为 −65%。叠加控股股东质押 81–87%、连续两年零分红、关联交易重组未过审且业绩承诺未签、摊薄 22%+、三笔长单客户全匿名且验收条款单向不对称——不买，只跟踪；需重组落地并表兑现 + 客户身份披露 + 股价回落 60%+ 才重新承做
   bear: 3.16
   base: 8.96
   bull: 13.03
   dividend_yield: 0.0
-  quality: 2
   conviction_date: '2026-07-12'
   source_doc: sectors/materials/aluminum-foil/2026-07-12-东阳光-buffett分析.md
+  quality: 2
   themes:
   - AIDC
   - 算力
@@ -3381,7 +3379,6 @@
   currency: HKD
   sector: healthcare
   rating: watch
-  quality: 4
   watch_reason: 国内临床前安评龙头、GLP 资质+自供实验猴壁垒真实，但 2025-2026 报表净利几乎全部来自实验猴（食蟹猴）生物资产公允价值变动这一非现金 mark-to-market 收益，实验室主业连续亏损（2025 实验室服务及其他 -1.64 亿）；剔猴价后经营利润为负，H 现价 27.90 HKD 对应 PB 2.39、近 52 周高位，期望内在价值 ≈14.4 HKD、安全边际 −48.6%，连最乐观 bull（21 HKD）都在现价下方 25% —— 好资产、被猴价利润幻觉与订单复苏叙事推到远高于任何诚实内在价值，等主业真实扭亏 + 价格腰斩再看
   bear: 11
   base: 14
@@ -3389,6 +3386,7 @@
   dividend_yield: 0.05
   conviction_date: '2026-07-16'
   source_doc: sectors/healthcare/cro/2026-07-16-昭衍新药-buffett分析.md
+  quality: 4
   themes:
   - CRO
   - 生物资产
@@ -3436,14 +3434,19 @@
   currency: CNY
   sector: energy
   rating: watch
-  watch_reason: 护城河顶级（长江干流梯级水电=不可再造的自然垄断）但当前价格不便宜——PB 约 3.2 处近 5 年偏高区间、股息率被股价上涨压缩至约 3.45%（低于历史 3–4% 中枢下沿）。场景加权期望内在价值约 25.2 元/股，低于现价 28.98 元，安全边际约 -13%；即便利率下行重估的 bull 情景压力测试也仅 +7%。好公司、当前价格安全边际不足，等回撤。
+  watch_reason: 护城河仍属 A 股顶级（长江干流梯级=不可再造的自然垄断），但 2026H1 发电量公告暴露"量增价减"的结构劣化——总量 +4.81% 创同期新高，增量却全部来自低电价的三峡(+31.62%)/葛洲坝(+11.05%)，四座高电价上游站全部负增长，Q2 单季发电量增速降至 +2.82%，券商预测 Q2 单季归母 −3.0%。叠加云川公司"三免三减半"到期带来 6.8 亿真实现金税负、而对冲项 4.4 亿折旧到期只是会计增量不产生现金流，正常化利润与合理倍数双双下修。场景加权期望内在价值 24.14 元/股（约 5906.58 亿），低于现价 29.09 元与市值 7117.80 亿，安全边际 −17.0%，较旧档 −13.1% 进一步恶化；即便 bull 兑现相对现价也仅 +4.7%。评级维持 watch，但理由从"价格偏贵"升级为"价格偏贵 + 利润引擎被证伪"。
+  bear: 17.17
+  base: 25.01
+  bull: 30.47
+  dividend_yield: 3.44
+  conviction_date: '2026-08-01'
+  source_doc: sectors/energy/hydropower/2026-08-01-长江电力-buffett分析.md
   quality: 5
-  bear: 17.7
-  base: 26.0
-  bull: 31.0
-  dividend_yield: 3.45
-  conviction_date: '2026-07-21'
-  source_doc: sectors/energy/hydropower/2026-07-21-长江电力-buffett分析.md
+  themes:
+  - 高股息
+  - 类债券资产
+  - 利率下行受益
+  - 水电龙头
 - stock_code: '600183'
   stock_name: 生益科技
   market: A
@@ -3470,7 +3473,7 @@
   currency: HKD
   sector: materials
   rating: watch
-  watch_reason: 期望内在价值 ~33.7 HKD 较现价 27.26 仅 +24% 上行，对"单一国别/单一产品氧化铝 + 供给过剩硬风险 + 周期高位低 PE 陷阱"这类低确定性 commodity 标的所需的 40-50% 安全边际明显不足；等 PB ≤ 1.0（约 ≤ 22-24 HKD，接近 bear/账面）或氧化铝跌至成本线市场恐慌期，给足周期股该有的安全边际再认真加仓。
+  watch_reason: 期望内在价值 ~33.7 HKD 较现价 27.26 仅 +24% 上行，对"单一国别/单一产品氧化铝 + 供给过剩硬风险 + 周期高位低 PE 陷阱"这类低确定性 commodity 标的所需的 40-50% 安全边际明显不足；等 PB ≤ 1.0（约 ≤ 22-24 HKD，接近 bear/账面）或氧化铝跌至成本线市场恐慌期，给足周期股该有的安全边际再认真加仓。【2026-08-04 更新·买点失效待重算】2026H1 盈利预警显示权益净利同比 −75%、年化约 1.26 亿 USD，仅为 bear 正常化 OE 2.3 亿的 55%，§9 三档全部被击穿，故由 bear 21.9 推出的 22-24 HKD 买点不再成立；现价对应实际年化 PE 约 17x（低 PE 陷阱已兑现），不买入的理由较建档时更强。三档与买点待 8 月下旬中期业绩正式公告后经 stock-deep-redo 重算。质地不下修——ASP 跌 39.5% 仍盈利、单吨成本稳定，成本护城河反获实盘验证。详见 themes/2026-08-04-南山铝业国际盈利预警-氧化铝价崩验证.md
   bear: 21.9
   base: 34.7
   bull: 52.0
@@ -3492,9 +3495,9 @@
   bear: 23.94
   base: 59.84
   bull: 145.21
-  quality: 4
   conviction_date: '2026-07-23'
   source_doc: sectors/consumer/auto-ev/2026-07-23-特斯拉-buffett分析.md
+  quality: 4
   themes:
   - ev
   - robotaxi
@@ -3512,9 +3515,9 @@
   base: 286
   bull: 370
   dividend_yield: 0.26
-  quality: 5
   conviction_date: '2026-07-23'
   source_doc: sectors/media/internet-platform/2026-07-23-谷歌-buffett分析.md
+  quality: 5
   themes:
   - AI
   - cloud
@@ -3548,9 +3551,9 @@
   base: 7.24
   bull: 10.64
   dividend_yield: 0.9
-  quality: 4
   conviction_date: '2026-07-23'
   source_doc: sectors/materials/nonferrous/2026-07-23-宏桥控股-buffett分析.md
+  quality: 4
   themes:
   - 有色金属
   - 电解铝
@@ -3664,9 +3667,9 @@
   base: 358
   bull: 442
   dividend_yield: 0.85
-  quality: 5
   conviction_date: '2026-07-30'
   source_doc: sectors/ai-application/cloud/2026-07-30-微软-buffett分析.md
+  quality: 5
   themes:
   - AI
   - cloud
@@ -3683,9 +3686,9 @@
   bear: 60
   base: 140
   bull: 182.4
-  quality: 5
   conviction_date: '2026-07-31'
   source_doc: sectors/consumer/e-commerce/2026-07-31-亚马逊-buffett分析.md
+  quality: 5
   themes:
   - AI
   - cloud
@@ -3704,9 +3707,9 @@
   base: 118.4
   bull: 163.9
   dividend_yield: 0.46
-  quality: 4
   conviction_date: '2026-07-31'
   source_doc: sectors/ai-application/software/2026-07-31-金山办公-buffett分析.md
+  quality: 4
   themes:
   - AI办公
   - 信创
@@ -3774,8 +3777,8 @@
   base: 43.4
   bull: 88.1
   conviction_date: '2026-08-03'
-  quality: 2
   source_doc: sectors/ai-application/software/2026-08-03-迅策科技-buffett分析.md
+  quality: 2
   themes:
   - AI应用
   - Token经济
@@ -3803,7 +3806,6 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  quality: 2
   watch_reason: 生意看得懂、资产负债表干净（零有息负债、净现金 11.2 亿），DCI 敞口也是真业绩（2025 接入和数据类 +180.55%）；但 2025 年在 AI 光通信最猛景气中是同业唯一营收仅 +10.99%、归母 −28.77% 的公司，ROE 3.14%（扣非 1.70%）远低于股权成本，毛利率 34.39%(2020)→25.73%(2026Q1) 单边下行；现价 126.15 元对应 PE_TTM 262x（扣非 467x）、PB 8.52 仍处 5 年 82% 分位，三情景加权期望内在价值约 14.84 元/股、安全边际约 −88%。观察点是「盈利能力能否修复」而非「AI 会不会来」——扣非年化回到 2.5 亿以上且单季毛利率站上 32% 之前，价格与基本面之间不存在任何可执行的买入区间。
   bear: 9.29
   base: 13.25
@@ -3811,6 +3813,7 @@
   dividend_yield: 0.08
   conviction_date: '2026-08-04'
   source_doc: sectors/semiconductor/optical/2026-08-04-德科立-buffett分析.md
+  quality: 2
   themes:
   - ai_compute
   - DCI
@@ -3826,7 +3829,6 @@
   bear: 35.1
   base: 86.5
   bull: 265.7
-  dividend_yield: null
   conviction_date: '2026-08-26'
   source_doc: sectors/ai-application/llm/MiniMax/index.md
   themes:
@@ -3876,25 +3878,25 @@
   bull: 2.15
   conviction_date: '2026-08-06'
   source_doc: sectors/materials/nonferrous/2026-08-06-白银有色-buffett分析.md
+  quality: 1
   themes:
   - 有色金属
   - 铜
   - 白银
   - 冶炼加工
-  quality: 1
 - stock_code: '688548'
   stock_name: 广钢气体
   market: A
   currency: CNY
   sector: materials
   rating: exclude
-  quality: 3
   bear: 1.09
   base: 2.66
   bull: 5.46
   dividend_yield: 0.3
   conviction_date: '2026-08-06'
   source_doc: sectors/materials/industrial-gas/2026-08-06-广钢气体-buffett分析.md
+  quality: 3
   themes:
   - 工业气体
   - 电子大宗气体
@@ -3939,7 +3941,6 @@
   currency: HKD
   sector: electronics
   rating: watch
-  quality: 5
   watch_reason: 生意质地在被动元件里仍是最好的一档（毛利率十年 39.8%–54.2%、净利率 29%、负债率 17%、多品类全球第一），2026H1 归母预告 +45%~65% 是硬兑现。但价格已把行业最乐观情形全额贴现：A 股 PE-TTM 85.65x、名义 PB 11.44x（港股募资 pro-forma 修正后仍 8.2x，5 年 90+ 分位），合并市值 2443 亿元对期望内在价值 743 亿元，A 侧安全边际 −69.8%、H 侧 −60.8%。三环在本轮涨价里是价格接受者不是制定者（公司自述「价格修复至原有合理价值」而非提价），AI 具名客户/订单/长约全网零证据，且 2019/2022 两次周期下行净利 −33.9%/−25.2% 是它自己的硬历史。等回撤到 H 股 30 港元以下（A 股约 28 元）再谈安全边际。
   bear: 22.59
   base: 43.87
@@ -3947,6 +3948,7 @@
   dividend_yield: 0.47
   conviction_date: '2026-08-07'
   source_doc: sectors/electronics/components/2026-08-07-三环集团-buffett分析.md
+  quality: 5
   themes:
   - MLCC
   - MLCC涨价
@@ -3962,8 +3964,6 @@
   market: HK
   currency: HKD
   sector: materials
-  commodity: copper
-  commodity_impact: positive
   rating: watch
   watch_reason: 2026 半年报（8/21 18:28）证实生意质地进一步走强——归母 391.70 亿（+68.17%）、经营现金流 554.72 亿（+92.41%）、资产负债率 49.55%（2012 年以来首次破 50%）、利息保障 26.95x；但 TTM 归母跳增至 676.55 亿后，H 股仍为 PE 13.00x / PB 4.272x，期望内在价值 16.74 HKD 对现价 38.560 HKD 安全边际 −56.6%，最乐观 bull（26.57 HKD）压力测试仍 −31.1%。且半年报自带的商品均价表显示现价金比 H1 均价低 2.0%、银低 10.5%、锂低 6%，H2 价格是「铜正金负」的对冲而非市场直觉的继续冲高；产量全线滞后时序进度（当量碳酸锂完成率仅 36.3%）。买点 PB<1.4x（约 12.6 HKD）。
   bear: 6.95
@@ -4015,8 +4015,6 @@
   market: A
   currency: CNY
   sector: materials
-  commodity: copper
-  commodity_impact: positive
   rating: watch
   watch_reason: 生意实体是「察尔汗钾锂主业（利润 22%）+ 巨龙铜业 30.78% 无控制权参股（利润 78%）」的组合，现金分红回流真实（2026 年内已实收 30.78 亿元、覆盖账面权益法收益 86.7%）；但铜/锂/钾三种商品同时处于景气高位形成三重周期共振顶，SOTP 场景加权期望内在价值 30.81 元对现价 80.05 元安全边际 -61.5%，连 bull 情景 45.50 元仍 -43.2%，把「参股不折价 + 主业 13x」的极端多头假设全部叠满也只有 54.43 元（-32.0%）——公司资产真实、价格无法接受，列 watch 不买。历史系统性财务造假主体已于 2025-05 完全出局，判定不构成自动否决，但折价已显性计入倍数与 bear 赋权。
   bear: 16.99
@@ -4144,7 +4142,6 @@
   - A+H
 - stock_code: '300489'
   stock_name: 光智科技
-  quality: 1
   market: A
   currency: CNY
   sector: semiconductor
@@ -4155,6 +4152,7 @@
   dividend_yield: 0
   conviction_date: '2026-08-17'
   source_doc: sectors/semiconductor/materials/2026-08-17-光智科技-buffett分析.md
+  quality: 1
   themes:
   - 磷化铟
   - 红外光学
@@ -4202,7 +4200,6 @@
   currency: USD
   sector: consumer
   rating: watch
-  quality: 4
   watch_reason: '以 2026-08-19 收盘 US$128.90（市值 US$300.84bn / 2,334M ADS）为主锚，场景加权期望内在价值 US$110.63 / ADS， 安全边际 −14.2%，即当前价高于我的期望内在价值，没有任何折价可言。观察而非排除的理由有三： (1) 生意本体没坏——电商集团经调整 EBITA 同比仅 −1%（RMB 39,749M），AI 云收入与外部客户收入双双 +45%、分部 EBITA +133%、margin 升至 11.6%， 经营现金流仍 +11%，账上净现金 US$30.83bn（每 ADS US$13.21，占现价 10.2%）； (2) 利润塌陷的归因高度集中且技术上可逆——集团经调整 EBITA 同比减少 RMB 115.15 亿，其中 106.37 亿（92.4%）来自 AI Labs 一个分部 （另有 All others 恶化 40.30 亿即 35%，被 AI 云 +32.09 亿的改善部分抵销），含闪购在内的电商基本盘仅 −2.39 亿（−1%）， 这是一笔管理层可自主关停的新投入，不是核心业务失血； (3) 但价格不认这些好消息还不够——真实 TTM PE 30.3×（第三方广泛引用的 20.20× 窗口截至 2026-03-31、不含本季，已失效）， 隐含 ROE 仅 6.69%（Non-GAAP 4.56%），TTM 自由现金流 −US$10.74bn，本季 capex : 回购 = 62 : 1， 基本加权股本反而同比 +0.54%（RSU 归属已超回购，股东在被稀释）。 按剩余收益模型反推，现价 PB 1.93× 隐含市场要求可持续 ROE 18.4%（或永续增长 15.6%）， 两者都要求利润回到并超越历史峰值——这是"用周期顶利润定价"的典型形态，而阿里连续 4 季 EPS miss、本季 Non-GAAP EPS MISS 约 29%。 另有两项使确定性降档：折旧洪峰刚开始（折旧及土地租赁成本 RMB 118.14 亿 vs 去年 68.91 亿，而 TTM capex 已达 RMB 1,550.65 亿）， 以及同一季三次口径调整（补贴改记收入冲减、闪购并入大分部、AliExpress 盈利只给形容词）净效果一致指向关键经营变量不可外部验证——诚信黄灯，非红灯。 评级为 watch 而非 config：不是因为公司不好，而是因为在 US$128.90 上买不到 buffett 要求的折价。买点 US$66 / ADS。'
   bear: 60.88
   base: 120.54
@@ -4210,6 +4207,7 @@
   dividend_yield: 0.81
   conviction_date: '2026-08-20'
   source_doc: sectors/consumer/e-commerce/2026-08-20-阿里巴巴-buffett分析.md
+  quality: 4
   themes:
   - 电商
   - AI
@@ -4225,7 +4223,7 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  watch_reason: 首建档。**生意是好生意，价格不是好价格，分歧不在倍数在利润。** 三档正常化扣非 **46/58/65 亿**（base 即 2026E 中枢、零增长外推；三档均低于 26H1 扣非年化 66.82 亿）× **18/26/34 倍**（按分部利润权重加权导出、锚国际 semicap PE-TTM 中枢 48.20× 折让；相对兄弟档拓荆的 18/32/45 是 **base/bull 更低、bear 持平**）→ 期望内在价值 **1,410.4 亿 / 194.35 元/股**，对 08-25 收盘 5,082.73 亿（**pre-report**，半年报当日 17:05 盘后披露）安全边际 **−72.3%**。四条硬事实：①归母 +5.05%、**合并净利润仅 +0.85%**、内生营收 **+19.58%**（上市以来首破 20%）在四家可比里垫底；②"毛利率已企稳"是无效读数——H2 系统性低于 H1 3.5–4.8pct，26H2 外推仅 **35.3%–36.6%**，26Q2 单季 39.33% 已连降四季；③不是单边见顶而是**单腿站立**——成熟制程腿半年断 **−23.25%**、光伏腿仍在调整，全靠存储腿 **+56.43%**；④四项 AI 直连产品**零营收**，管理层自述 2028-2029 才形成收入，base/bear 贡献计 0。并列正面事实：扣非/归母 **99.13%**（拓荆 27.5%、中微 39.7%），四条领先指标同向转强（合同负债 26Q2 环比 **+26.6%**、存货周转 526.62→**440.42 天**、应收 +8.8% << 营收 +24.9%、OCF **+37.74 亿**），**与拓荆的"三条同向转弱"方向相反**。买点 ≤125 元距 08-25 收盘 **−82.2%**，照昀冢先例明写实操上等价于不设买点。**08-26（半年报后首个交易日）盘中 681.57 元回填锚**：市值 4,946.08 亿、安全边际 **−71.48%**、扣非 PE-TTM **90.00**、PB 12.20、PE/PB 近三年分位 93.8%/92.9%——**收窄的 0.77pct 全部来自价格下跌，内在价值未动，评级与买点不变**
+  watch_reason: 首建档。**生意是好生意，价格不是好价格，分歧不在倍数在利润。** 三档正常化扣非 **46/58/65 亿**（base 即 2026E 中枢、零增长外推；三档均低于 26H1 扣非年化 66.82 亿）× **18/26/34 倍**（按分部利润权重加权导出、锚国际 semicap PE-TTM 中枢 48.20× 折让；相对兄弟档拓荆的 18/32/45 是 **base/bull 更低、bear 持平**）→ 期望内在价值 **1,410.4 亿 / 194.35 元/股**，对 08-25 收盘 5,082.73 亿（**pre-report**，半年报当日 17:05 盘后披露）安全边际 **−72.3%**。四条硬事实：①归母 +5.05%、**合并净利润仅 +0.85%**、内生营收 **+19.58%**（上市以来首破 20%）在四家可比里垫底；②"毛利率已企稳"是无效读数——H2 系统性低于 H1 3.5–4.8pct，26H2 外推仅 **35.3%–36.6%**，26Q2 单季 39.33% 已连降四季；③不是单边见顶而是**单腿站立**——成熟制程腿半年断 **−23.25%**、光伏腿仍在调整，全靠存储腿 **+56.43%**；④四项 AI 直连产品**零营收**，管理层自述 2028-2029 才形成收入，base/bear 贡献计 0。并列正面事实：扣非/归母 **99.13%**（拓荆 27.5%、中微 39.7%），四条领先指标同向转强（合同负债 26Q2 环比 **+26.6%**、存货周转 526.62→**440.42 天**、应收 +8.8% << 营收 +24.9%、OCF **+37.74 亿**），**与拓荆的"三条同向转弱"方向相反**。买点 ≤125 元距 08-25 收盘 **−82.2%**，照昀冢先例明写实操上等价于不设买点
   bear: 114.1
   base: 207.8
   bull: 304.54
@@ -4250,9 +4248,9 @@
   bear: 10.21
   base: 15.9
   bull: 22.52
-  quality: 2
   conviction_date: '2026-08-26'
   source_doc: sectors/semiconductor/design/卓胜微/index.md
+  quality: 2
   themes:
   - 射频前端
   - 国产替代
@@ -4269,7 +4267,6 @@
   bear: 3.47
   base: 5.03
   bull: 9.11
-  dividend_yield: null
   conviction_date: '2026-08-26'
   source_doc: sectors/industrial/cable/杭电股份/index.md
   themes:
