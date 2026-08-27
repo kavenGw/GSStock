@@ -4277,3 +4277,20 @@
   - 铜
   - 定增摊薄
   - 周期弹性
+- stock_code: '688169'
+  stock_name: 石头科技
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: watch
+  watch_reason: 期望内在价值 109.48 元/股，低于 2026-08-27 收盘 130.60 元，安全边际 −16.2%（贵）。可比口径 PE 28.16x 处近 5 年 74.2% 分位；2026H1 利润改善的主要来源是一次性关税退税 1.9221 亿 + 不可外推的销售费用杠杆，毛利率同口径反而 −3.21pct。等回落至 92.80 元以下再议。
+  bear: 62.61
+  base: 114.62
+  bull: 201.73
+  dividend_yield: 0.4
+  conviction_date: '2026-08-27'
+  source_doc: sectors/consumer/home-appliance/石头科技/index.md
+  themes:
+  - 智能清洁电器
+  - 出海
+  - 价格战
