@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -38,7 +38,8 @@ def test_format_calendar_events_groups_by_date(monkeypatch):
         {'event_date': today.isoformat(), 'event_type': 'ex_dividend',
          'stock_code': '0700.HK', 'stock_name': '腾讯控股', 'title': '除权除息',
          'detail': None, 'priority': 'LOW', 'status': 'scheduled'},
-        {'event_date': '2026-09-16', 'event_type': 'macro', 'stock_code': '',
+        {'event_date': (today + timedelta(days=5)).isoformat(),
+         'event_type': 'macro', 'stock_code': '',
          'stock_name': None, 'title': 'FOMC 议息', 'detail': None,
          'priority': 'HIGH', 'status': 'scheduled'},
     ]))
@@ -184,3 +185,109 @@ def test_calendar_date_label_today_and_tomorrow():
     assert label('2026-08-26', today) == '08-26 明天'
     assert label('2026-08-29', today) == '08-29 周六'
     assert label('not-a-date', today) == 'not-a-date'
+
+
+def _stub_last_trading_day(monkeypatch):
+    """交易日历用纯工作日近似，避免测试依赖 exchange-calendars 的节假日数据"""
+    from app.services.trading_calendar import TradingCalendarService
+
+    def _prev(cls, market, before=None):
+        d = before - timedelta(days=1)
+        while d.weekday() >= 5:
+            d -= timedelta(days=1)
+        return d
+
+    monkeypatch.setattr(TradingCalendarService, 'get_last_trading_day',
+                        classmethod(_prev))
+
+
+def test_a_share_earnings_shifted_to_previous_session_after_close(monkeypatch):
+    """A股预约披露日 T 指见报日，公告 T-1 交易日盘后就已挂网——推送按盘后落位。"""
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    _stub_last_trading_day(monkeypatch)
+    today = date.today()
+    disclose = today + timedelta(days=3)
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(lambda s, e: [
+        {'event_date': disclose.isoformat(), 'event_type': 'earnings',
+         'stock_code': '603986', 'stock_name': '兆易创新', 'market': 'A',
+         'title': '中报披露', 'detail': None, 'priority': 'HIGH',
+         'status': 'scheduled'},
+    ]))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    line = mod.NotificationService.format_calendar_events().split(chr(10))[1]
+
+    from app.services.trading_calendar import TradingCalendarService
+    eff = TradingCalendarService.get_last_trading_day('A', before=disclose)
+    assert line.startswith('`%s ' % eff.isoformat()[5:])
+    assert '盘后`' in line
+    assert disclose.isoformat()[5:] not in line
+
+
+def test_non_a_share_and_ex_dividend_keep_original_date(monkeypatch):
+    """除权除息是真实当日事件，港美股财报按各自日历——都不前移。"""
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    _stub_last_trading_day(monkeypatch)
+    day = date.today() + timedelta(days=2)
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(lambda s, e: [
+        {'event_date': day.isoformat(), 'event_type': 'ex_dividend',
+         'stock_code': '600519', 'stock_name': '贵州茅台', 'market': 'A',
+         'title': '除权除息', 'detail': None, 'priority': 'LOW',
+         'status': 'scheduled'},
+        {'event_date': day.isoformat(), 'event_type': 'earnings',
+         'stock_code': '0700.HK', 'stock_name': '腾讯控股', 'market': 'HK',
+         'title': '财报披露', 'detail': None, 'priority': 'MEDIUM',
+         'status': 'scheduled'},
+    ]))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    lines = mod.NotificationService.format_calendar_events().split(chr(10))[1:]
+
+    assert len(lines) == 2
+    for line in lines:
+        assert line.startswith('`%s ' % day.isoformat()[5:]), line
+        assert '盘后' not in line
+
+
+def test_a_share_earnings_on_window_edge_shifts_into_window(monkeypatch):
+    """窗口末日之后一天的披露，其盘后时点落在窗口内，必须仍然出现。"""
+    from app.services import notification as mod
+    from app.services.calendar_event import CalendarEventService
+
+    _stub_last_trading_day(monkeypatch)
+    today = date.today()
+    captured = {}
+
+    def _get_events(start, end):
+        captured['end'] = end
+        return [{'event_date': (today + timedelta(days=8)).isoformat(),
+                 'event_type': 'earnings', 'stock_code': '000725',
+                 'stock_name': '京东方A', 'market': 'A', 'title': '中报披露',
+                 'detail': None, 'priority': 'HIGH', 'status': 'scheduled'},
+                {'event_date': (today + timedelta(days=8)).isoformat(),
+                 'event_type': 'macro', 'stock_code': '', 'stock_name': None,
+                 'market': 'US', 'title': 'FOMC 议息', 'detail': None,
+                 'priority': 'HIGH', 'status': 'scheduled'}]
+
+    monkeypatch.setattr(CalendarEventService, 'get_events', staticmethod(_get_events))
+    monkeypatch.setattr(CalendarEventService, 'hours_since_refresh',
+                        staticmethod(lambda: 1.0))
+
+    text = mod.NotificationService.format_calendar_events()
+
+    assert captured['end'] == today + timedelta(days=8), '需多取一天兜住前移的A股财报'
+    assert '京东方A' in text
+    assert 'FOMC' not in text, '未前移的事件超出7天窗口应被剔除'
+
+
+def test_calendar_date_label_yesterday_for_shifted_release():
+    from app.services.notification import NotificationService
+
+    label = NotificationService._calendar_date_label
+    assert label('2026-08-24', date(2026, 8, 25)) == '08-24 昨天'

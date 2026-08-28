@@ -271,18 +271,30 @@ class NotificationService:
     @staticmethod
     def format_calendar_events(days: int = 7) -> str:
         """未来 N 天事件（读 stock_event 表，采集已由 calendar_event 策略在 7:30 完成）"""
-        from datetime import timedelta
-        from app.services.calendar_event import CalendarEventService
+        from app.services.calendar_event import CalendarEventService, PRIORITY_ORDER
 
         try:
             today = date.today()
-            events = CalendarEventService.get_events(today, today + timedelta(days=days))
+            # 多取一天：A股财报按上一交易日盘后落位，窗口末日之后的披露会前移进窗口
+            events = CalendarEventService.get_events(
+                today, today + timedelta(days=days + 1))
             stale_hours = CalendarEventService.hours_since_refresh()
         except Exception as e:
             logger.warning(f'[通知.事件日历] 读取失败: {e}')
             return ''
 
-        if not events:
+        deadline = today + timedelta(days=days)
+        rows = []
+        for e in events:
+            eff, after_close = NotificationService._calendar_effective_date(e)
+            if eff and eff > deadline:
+                continue
+            rows.append((eff or deadline,
+                         PRIORITY_ORDER.get(e.get('priority'), 1),
+                         e.get('stock_code') or '', eff, after_close, e))
+        rows.sort(key=lambda r: r[:3])
+
+        if not rows:
             return ''
 
         header = f'📅 未来{days}天事件'
@@ -290,8 +302,11 @@ class NotificationService:
             header += f'（⚠️ 事件数据 {int(stale_hours)} 小时未更新）'
 
         lines = [header]
-        for e in events:
-            label = NotificationService._calendar_date_label(e['event_date'], today)
+        for _, _, _, eff, after_close, e in rows:
+            label = NotificationService._calendar_date_label(
+                eff.isoformat() if eff else e['event_date'], today)
+            if after_close:
+                label += '盘后'
 
             if e['stock_code']:
                 subject = f"{e['stock_name'] or e['stock_code']}({e['stock_code']})"
@@ -307,6 +322,29 @@ class NotificationService:
             lines.append(f'`{label}` {body}')
 
         return NotificationService._cap_calendar_lines(lines)
+
+    @staticmethod
+    def _calendar_effective_date(e: dict) -> tuple[date | None, bool]:
+        """事件实际可读到的日期 + 是否盘后
+
+        A股定期报告的预约披露日 T 指的是「T 日见报」，公告在 T 的上一交易日盘后就已
+        挂上交易所/巨潮。按 T 提示等于比信息晚一天，故 A股 earnings 一律前移到上一
+        交易日并标注盘后；除权除息与港美股财报是真实当日事件，不动。
+        """
+        try:
+            d = date.fromisoformat(e['event_date'])
+        except (TypeError, ValueError):
+            return None, False
+
+        if e.get('event_type') != 'earnings' or e.get('market') != 'A':
+            return d, False
+
+        from app.services.trading_calendar import TradingCalendarService
+        try:
+            return TradingCalendarService.get_last_trading_day('A', before=d), True
+        except Exception as exc:
+            logger.warning(f'[通知.事件日历] 取上一交易日失败 {d}: {exc}')
+            return d - timedelta(days=1), True
 
     @staticmethod
     def _calendar_date_label(iso: str, today: date) -> str:
@@ -325,6 +363,8 @@ class NotificationService:
             rel = '今天'
         elif delta == 1:
             rel = '明天'
+        elif delta == -1:
+            rel = '昨天'
         else:
             rel = '周' + '一二三四五六日'[d.weekday()]
         return f'{iso[5:]} {rel}'
