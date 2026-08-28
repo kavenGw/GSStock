@@ -7,8 +7,6 @@ related_docs: []
 
 # 安踏体育（2020.HK）事件流
 
-<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
-<!-- END related_docs -->
 
 > 本文件由 stock-research 模式 3（新闻影响）回写 theme 引用，**重做深度档时不覆盖**。
 > 下表为建档时（2026-08-27）整理的既往事件基线，供后续增量对照。
