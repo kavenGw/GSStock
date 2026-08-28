@@ -44,6 +44,9 @@ related_docs:
   - path: ../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md
     note: 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
     symmetric: true
+  - path: ../sectors/semiconductor/design/英伟达/index.md
+    note: 延迟主体本身的回写（英伟达 FY27Q2 后全量重做，2026-08-28，watch）——**截至 2026-08-28 维持未决**：FY27Q2 财报与 10-Q 全文未提及 Kyber / NVL144 / NVL576 / Rubin Ultra 任何字样（已全文检索确认），SemiAnalysis 未撤稿，英伟达的否认仍停留在「Our roadmap is intact」这句笼统措辞、未给出具体日期。**不得因 Q2 财报大超预期而反向推断 Kyber 已解决**——Q2 确认的是 VR200 NVL72（Oberon 机架世代）按计划爬坡，而 Kyber 属 Rubin Ultra 世代，Q2 的强劲对 Kyber 时点不具判别力。英伟达档因此在三情景中均未对 Kyber 作任何假设，与本仓沪电档、建滔档的裁定一致
+    symmetric: true
   - path: 2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md
     note: 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
     symmetric: true
@@ -69,6 +72,7 @@ related_docs:
 > - [2026-05-31-立讯精密-buffett分析](../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md) — 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久
 > - [index](../sectors/electronics/components/沃尔核材/index.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
 > - [2026-05-06-通富微电-AMD26Q1财报联动专题](../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md) — 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
+> - [index](../sectors/semiconductor/design/英伟达/index.md) — 延迟主体本身的回写（英伟达 FY27Q2 后全量重做，2026-08-28，watch）——**截至 2026-08-28 维持未决**：FY27Q2 财报与 10-Q 全文未提及 Kyber / NVL144 / NVL576 / Rubin Ultra 任何字样（已全文检索确认），SemiAnalysis 未撤稿，英伟达的否认仍停留在「Our roadmap is intact」这句笼统措辞、未给出具体日期。**不得因 Q2 财报大超预期而反向推断 Kyber 已解决**——Q2 确认的是 VR200 NVL72（Oberon 机架世代）按计划爬坡，而 Kyber 属 Rubin Ultra 世代，Q2 的强劲对 Kyber 时点不具判别力。英伟达档因此在三情景中均未对 Kyber 作任何假设，与本仓沪电档、建滔档的裁定一致
 > - [2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪](2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md) — 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
 > - [2026-07-31-芯碁微装-buffett分析](../sectors/semiconductor/equipment/2026-07-31-芯碁微装-buffett分析.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
 > - [2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点](2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md) — 同一 CPO 时点争议链条的相反方向证据——本档是机架延迟（推后），彼档是 FAU 量产整线下单（推进），须并读避免单边取证
