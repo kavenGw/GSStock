@@ -27,7 +27,7 @@ period: 25a
 date: '2026-05-30'
 related_docs:
   - path: ../sectors/electronics/components/三环集团/index.md
-    note: 三环集团个股 buffett 深度（五家质量之王、唯一真实定价权）——2026-08-07 re-underwrite 切 H 股 06951 口径，评级维持 watch 但买点大幅下修，期望内在价值 40.74 HKD、安全边际约 −61%
+    note: 三环集团个股 buffett 深度（2026-08-27 中报后全量重做为文件夹档）——本档裁定三环在本轮涨价中是**价格接受者而非制定者**，中报把该裁定加强（全文「提价」「涨价」各 0 次，仍用「价格修复至原有合理价值」）；期望内在价值 38.70 HKD、H 侧安全边际 −65.3%，评级维持 watch。**横评若引用三环旧数请更新**：TTM 归母 45.1 → 33.13 亿，总股本 19.9672 亿股，倍数阶梯 12x/20x/28x → 11x/16x/20x
     symmetric: true
   - path: ../sectors/electronics/components/2026-05-30-顺络电子-buffett分析.md
     note: 顺络电子个股 buffett 深度（五家性价比相对最优）
@@ -52,7 +52,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [index](../sectors/electronics/components/三环集团/index.md) — 三环集团个股 buffett 深度（五家质量之王、唯一真实定价权）——2026-08-07 re-underwrite 切 H 股 06951 口径，评级维持 watch 但买点大幅下修，期望内在价值 40.74 HKD、安全边际约 −61%
+> - [index](../sectors/electronics/components/三环集团/index.md) — 三环集团个股 buffett 深度（2026-08-27 中报后全量重做为文件夹档）——本档裁定三环在本轮涨价中是**价格接受者而非制定者**，中报把该裁定加强（全文「提价」「涨价」各 0 次，仍用「价格修复至原有合理价值」）；期望内在价值 38.70 HKD、H 侧安全边际 −65.3%，评级维持 watch。**横评若引用三环旧数请更新**：TTM 归母 45.1 → 33.13 亿，总股本 19.9672 亿股，倍数阶梯 12x/20x/28x → 11x/16x/20x
 > - [2026-05-30-顺络电子-buffett分析](../sectors/electronics/components/2026-05-30-顺络电子-buffett分析.md) — 顺络电子个股 buffett 深度（五家性价比相对最优）
 > - [2026-05-30-风华高科-buffett分析](../sectors/electronics/components/2026-05-30-风华高科-buffett分析.md) — 风华高科个股 buffett 深度（本篇横评中 MLCC 涨价利润弹性最高、但商业质量垫底的标的）
 > - [2026-08-07-昀冢科技-buffett分析](../sectors/electronics/components/2026-08-07-昀冢科技-buffett分析.md) — 昀冢科技个股 buffett 深度（本篇第五家，MLCC 反面极端样本：连亏四年、MLCC 单品毛利率 −55.14%、PB 76.2 为同业中位 8 倍以上）
