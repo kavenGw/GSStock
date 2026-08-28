@@ -39,7 +39,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 1. Glob `docs/stock-analytics/**/*<股票名>*` 找底稿（平铺档或 `<股票名>/index.md`），挑最新 buffett 档 + 最相关 comps 作基线。
    已有 `<股票名>/events.md` → 读其 related_docs，theme `date` > 旧 index `conviction_date` 的条目即「未消化事件」，
    摘 note/impact/magnitude 备内联给 A2（dispatch.md §1）。
-2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]；`quote_guard` 传代码带市场前缀（`sh603618` 而非 `603618`），收盘后用当日收盘价作锚走 `--allow-preopen` [L36]。
+2. 确认代码、市场（A/US/HK）、sector/subsector。控制者自取行情做前置观察时，须验时戳与成交量非集合竞价时段 [L24]；`quote_guard` 传代码带市场前缀（`sh603618` 而非 `603618`），收盘后用当日收盘价作锚走 `--allow-preopen`（该场景**必然**附带「竞价参考价」警告，属窗口边界，看成交量与价×股本偏差判真伪，别退回盘中价）[L36][L43]。
 3. **避坑门**：查 `docs/stock-analytics/avoidance-list.yaml`，命中则按 `.claude/rules/docs-conventions.md`
    「建档前避坑列表验证」重验；理由仍成立即中断建档；被推翻才放行，建档后从列表移除并 commit。
 4. **列待删旧档清单**（三类，合并成一份清单传给 Phase C）：
@@ -80,6 +80,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 某一路报「前提变化」时先 grep 另两路 evidence 确认是否已自发命中，命中就别派校准轮 [L16]。
 **三路未齐前，任一路的强断言只能记为「待另两路复核」，不得写进控制者裁定** —— 先到的路会被后到的路证伪，错误口径一旦以「裁定」身份落进写手的最高优先级输入，只能靠追加修正节覆盖，且两节并存本身是新的误读风险 [L29]。
 裁定里凡写「落后/领先 X pct」这类**跨主体比较的派生量**，控制者落笔前须自算算式并**显式标注口径**（营收？归母？扣非？）—— 写手会逐字照录并放大到全档，三路 evidence 都对也拦不住 [L40]。
+**裁定里凡含量化拆分（量/价、成本归因、分部反解），落笔前必须用该量的关键词 grep 三路的明细层全文**——结论层只是各路自认为重要的东西，不是裁定所需要的东西 [L42]。
 
 ### Phase B — 撰写（1 个 opus，不拆）→ dispatch.md §2
 
