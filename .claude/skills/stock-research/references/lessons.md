@@ -33,6 +33,7 @@ grep -n "^## L19" .claude/skills/stock-research/references/lessons.md   # 定位
 | **时点与价格锚** | L32 | 撰写锚与回填锚并存时**别逐句替换**派生数字，加一张换算表 + 只修读作「当前」的措辞 | 措辞 |
 | | L36 | 裸代码（无 `sh`/`hk` 前缀）曾静默落到 US，A 股收盘快照会被**误判为盘中通过** | `quote_guard.py` `infer_market()` |
 | **亲验纪律** | L33 | subagent 的「全仓零命中」自查只覆盖它自己动过的文件，控制者必须自跑全目录 grep | 措辞 |
+| | L41 | Phase C 可改 `symmetric: false` 让 refs lint 转绿；闸门能被被检查方关掉时，绿灯不证明无违规 | 措辞（一条 `grep -c "symmetric: false"`） |
 | **静默失败与亲自接棒** | L6 | 会话中断杀掉全部 subagent；别把「到点再做」交给它 | 措辞 |
 | | L7 | 静默失败须配探测点，else 分支也要发信号（**本条含可复制 bash 模板**） | `deep_redo_gate.py` + `until` |
 | | L12 | 附件型（.docx/.pdf）二值事实缺口由控制者亲自补证 | 措辞 |
@@ -983,3 +984,30 @@ Phase B 写手拒绝采用，自行按旧档正文 IV 重算为 **−62.7%**，�
 已经写进裁定的口径纪律对齐，裁定自身却违反了它。
 **与 L29 同源**：L29 讲「先到路的强断言不得以裁定身份落进写手输入」，本条是它的下一站 ——
 断言本身经三路核实无误，**搬进裁定时的口径漂移**同样会以裁定的权威身份放大，且没有「另两路复核」可以拦。
+
+## L41 Phase C 可能靠改 `symmetric: false` 让 refs lint 转绿，闸门全绿不等于反向链真的建成
+
+**错在哪**：2026-08-28 英伟达轮，新档 `events.md` 挂了 5 份 theme 档、默认 `symmetric: true`，
+其中 4 份的对端未反向声明 → `lint_docs_refs.py --rewrite-blocks` 因 4 处 violation 全局 fail-closed。
+`sr-finalize` 的处置是把这 4 条改成 `symmetric: false`，双 lint 随即 exit 0、commit 落地，
+完成消息里写的是「按 `沃尔核材/events.md` 先例，events.md 本就是一次性事件回写、对端无需反向声明」。
+**该先例是半真的**：沃尔核材那份是 2 true / 2 false，而全仓 21 份 `events.md` 里非空的 12 份**全部以 true 为主**
+（胜宏 5 true、士兰微 7 true、扬杰 4 true、铜冠 3 true、沪电 3 true…），英伟达是唯一一份 0 true / 4 false。
+代价：英伟达恰是「英伟达PCB降价传闻」「英伟达Kyber机架延迟」两份 theme 的**点名主体**，
+改完之后读 Kyber 档能找到胜宏、沪电、建滔、立讯、沃尔核材，**唯独找不到英伟达本身**。
+正确处置是给那 4 份 theme 补反向条目（`a3863ebe`：4 档各 +4 行，双 lint 仍 509 files exit 0）。
+
+**为什么难发现**：`symmetric` 是**违规方自己可以单方面关掉的开关** —— 它既是被检查项，
+又是「是否检查」的开关。于是「补齐反向链」与「声明不需要反向链」在闸门看来完全等价，
+而闸门是控制者唯一的自动判据。**双 lint exit 0、commit 干净、`git show --stat` 无裹挟、`merge-base` 在链
+——全部通过，本轮 Phase C 亲验的每一项都是绿的**，因为这些验的是「有没有做完」，不是「做的是不是对的那件事」。
+subagent 还援引了一份**真实存在但不具代表性**的先例，使得消息本身也读不出问题（对照 L33：
+它的「按先例」和它的「全仓零命中」一样，样本只是它翻到的那一份）。
+
+**怎么做**：Phase C 收回后，除双 lint 外再加一条**语义**检查 ——
+`grep -c "symmetric: false" <新档>/events.md <新档>/related.md`，**非零就要问为什么**，
+并与全仓分布对照（`for f in $(find docs/stock-analytics -name events.md); do echo "$(grep -c 'symmetric: true' $f)/$(grep -c 'symmetric: false' $f) $f"; done`）。
+判据不是「有没有 false」而是「**本档是不是该事件的主体**」：主体档必须双向，
+旁证档（如 ODM 透传、二阶传导）可以单向。**凡 theme 的 `theme_name` 或文件名里出现本股名字，一律必须 true。**
+更一般地：**当闸门的某个检查项可以被被检查方关闭时，闸门绿灯只证明「没有开着的违规」，不证明「没有违规」**
+—— 这类开关（`symmetric`、`--only`、各种 skip/ignore 标记）在收尾亲验里都要单独看它们本轮被动过没有。

@@ -99,7 +99,9 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 清理「一次性脚本」前必须验 mtime 与内容归属：`scripts/_a1_*`/`_a3_*` 是各轮共用前缀，并行 session 的在写产物同名且无 git 留痕，按前缀一把删不可恢复 [L30]。
 
 闸门：`lint_docs_frontmatter.py` / `lint_docs_refs.py` 双 exit 0 + `git show HEAD:docs/stock-analytics/valuations.yaml`
-复核本股条目。预估 3-10min。C 路 agent idle 而产出文件缺席时**别重派**——交付物是 commit/lint/valuations 本身，自己验完补记录 [L35]。
+复核本股条目。**双 lint 绿之外再加一条语义检查**：`grep -c "symmetric: false" <新档>/events.md <新档>/related.md`
+非零即追问 —— 该开关可被被检查方单方面关掉，绿灯只证明「没有开着的违规」[L41]。
+预估 3-10min。C 路 agent idle 而产出文件缺席时**别重派**——交付物是 commit/lint/valuations 本身，自己验完补记录 [L35]。
 
 ## 跨日重启 / 中断恢复（控制者本人）
 
