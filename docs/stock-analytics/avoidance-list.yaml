@@ -21,3 +21,24 @@
     worst_loss_year: '2022'  # 该年归母巨亏
     theme_revenue_pct: 0     # SiC 题材收入占营收 ≈0
   source: 已删 exclude 档（原 sectors/industrial/.../露笑科技-buffett分析.md，删于 2026-07-03）
+- stock_code: '605006'
+  stock_name: 山东玻纤
+  sector: materials
+  avoid_reason: 玻纤粗纱+热电联产二线厂被 AI 电子布题材硬带；公司 2026-06-18 与 06-27 两份股票交易异常波动公告逐字重复"当前，公司没有电子布产品"，年报/半年报全文该词无一处主语为本公司，电子纱仅为年报"适时布局"的将来时意向；ROE 2023-2025 为 3.76%/-3.61%/-0.51%（连续两年年度亏损），TTM 扣非仍为负，FY2024-25 连续两年不派现金；2026H1 毛利率 16.20%（同比 -0.84pct）为可比同业垫底且是唯一同比下滑者，同期中国巨石 42.14%（+9.93pct）
+  avoid_date: '2026-08-28'
+  key_metrics_snapshot:
+    roe_2023: 3.76           # 加权 ROE，%
+    roe_2024: -3.61          # 归母 -0.989 亿
+    roe_2025: -0.51          # 归母 -0.134 亿，扣非 -0.241 亿
+    roe_2026h1: 0.95         # 摊薄；加权口径 1.10
+    ttm_net_profit_wan: 706.79        # TTM 归母，万元
+    ttm_deducted_wan: -582.54         # TTM 扣非归母，万元，仍为负
+    gross_margin_2026h1: 16.20        # 同比 -0.84pct
+    gross_margin_peer_jushi: 42.14    # 中国巨石 2026H1，同比 +9.93pct
+    theme_revenue_pct: 0              # 电子布/电子纱收入占营收 = 0，公司两次书面否认
+    pb_at_judgment: 3.29              # 2026-08-28 收 15.54（涨停 +9.98%），市值 101.57 亿
+    net_interest_bearing_debt_yi: 27.95   # 净有息负债 = 归母净资产的 90.1%
+    current_ratio: 0.895              # < 1
+    dividend_yield: 0                 # FY2024/FY2025 连续两年不派现金
+  recheck_condition: 若公司出具正式的电子布/低介电项目投资或技改公告（2026-08-26 业绩说明会上对"是否有电子布投资准备""电子纱电子布产能收入占比"两问均以"请关注公告"回避，口径较 6 月的明确否认有松动），本条须整体重估
+  source: stock-research 模式 1（2026-08-28，三路采证 A1/A2/A3 独立收敛）判掉，未建档；异动公告原文经控制者下载 PDF 亲验
