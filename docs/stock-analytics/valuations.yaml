@@ -1837,17 +1837,20 @@
   currency: USD
   sector: semiconductor
   rating: watch
-  bear: 90.0
-  base: 154.0
-  bull: 225.0
-  conviction_date: '2026-05-21'
-  source_doc: sectors/semiconductor/design/2026-05-21-英伟达-buffett分析.md
-  note: 情景市值$2.2T/$3.75T/$5.5T÷约244亿股；USD/股
+  watch_reason: FY27Q2 把「兑现」推到极致（Data Center $89.023B/+117%、H1 营收 $177.837B/+95.8%），但同一份 10-Q 第一次把兑现的代价摆上报表——毛利率由管理层自证下移（Q3 74% → Q4 FY27 触底 71–72% → FY2028 稳态 72–73%）、H1 经营现金流/GAAP 净利仅 63.1%、长期债务 $7.469B→$32.366B、担保最大敞口 $108.5B。场景加权期望内在价值 $189/股（市值约 $4.56T），对 2026-08-27 收盘 $227.98 安全边际 −17.1%，未达 30% 门槛，故观察不买。旧档买点 $85–100/股已作废：它只给到 6.5–7.6 倍 FY2028 盈利（Street 未上修口径 EPS $13.13），隐含「盈利立即腰斩且永不恢复」却从未把该假设写出来受检验。新买点 $139/股（市值约 $3.36T），并随 M-1/M-5 恶化同步下修至 $129。
+  bear: 69
+  base: 199
+  bull: 316
+  dividend_yield: 0.44
+  conviction_date: '2026-08-28'
+  source_doc: sectors/semiconductor/design/英伟达/index.md
+  note: 情景每股价值按FY2028E non-GAAP EPS×正常化保留率×倍数÷241.47亿股；期望内在价值$189/股(市值约$4.56T)，对2026-08-27收盘$227.98安全边际-17.1%；买点$139/股。USD/股
   themes:
   - ai-infra
   - gpu
   - cuda
   - hyperscaler-capex
+  - 表外担保
 - stock_code: '688017'
   stock_name: 绿的谐波
   market: A

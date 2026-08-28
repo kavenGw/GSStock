@@ -26,8 +26,8 @@ related_docs:
 - path: ../../../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md
   note: 通富微电 AMD 后段封测占其营收 60%+，是 AMD 数据中心出货的供应链侧第三方读数。本档 Q2 DC 营收 $6.718bn/+107% 从需求端正向确认该联动链路仍在放量，但通富利润端以持股重估为主、对 AMD 无反向信息量
   symmetric: true
-- path: 2026-05-21-英伟达-buffett分析.md
-  note: 同板块直接竞争对手档，两档结论同构且互为镜像——NVDA 亦评 watch（护城河更强、CUDA 生态更真，但同样已按最乐观未来定价）。本档 §4/§7 的竞争位判断以 NVDA 档为对照：Vera Rubin 已满产出货 vs MI450 刚量产，AMD 这一代仍是落后者而非并跑者；两档共享同一个 hyperscaler capex 拐点风险源
+- path: 英伟达/index.md
+  note: 同板块直接竞争对手档，两档同评 watch，但估值透支程度已不同构——NVDA 安全边际 −17.1% vs 本档 −57.0%，相差一个量级（NVDA 盈利分母三个月内跳升，倍数被压缩到 TTM 28.8×）。本档 §4/§7 的竞争位判断以 NVDA 档为对照：Vera Rubin 已满产出货 vs MI450 刚量产，AMD 这一代仍是落后者而非并跑者；两档共享同一个 hyperscaler capex 拐点风险源
   symmetric: true
 ---
 # AMD（NASDAQ: AMD）— Buffett 框架深度分析（2026-08-05）
@@ -36,7 +36,7 @@ related_docs:
 > **关联文档**
 > - [2026-05-08-AMD-Intel-buffett对比分析](../../../cross-sector/2026-05-08-AMD-Intel-buffett对比分析.md) — 本档的直接基线底稿（2026-05-08，结论 Keep Watching / 合理估值上限 $200 一股）。本次重审在 Q2 财报 + 2027 DC 翻倍指引后重跑，base 档 $210 与旧档 $200 上限基本吻合——三个月的强财报没有改变估值框架的结论，只是把 bull 情景的兑现概率往上挪了一档；旧档「27H1 NVIDIA Vera Rubin 反向夺份额」风险已部分实证（Rubin 已满产出货，MI450 才刚量产）
 > - [2026-05-06-通富微电-AMD26Q1财报联动专题](../../../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md) — 通富微电 AMD 后段封测占其营收 60%+，是 AMD 数据中心出货的供应链侧第三方读数。本档 Q2 DC 营收 $6.718bn/+107% 从需求端正向确认该联动链路仍在放量，但通富利润端以持股重估为主、对 AMD 无反向信息量
-> - [2026-05-21-英伟达-buffett分析](2026-05-21-英伟达-buffett分析.md) — 同板块直接竞争对手档，两档结论同构且互为镜像——NVDA 亦评 watch（护城河更强、CUDA 生态更真，但同样已按最乐观未来定价）。本档 §4/§7 的竞争位判断以 NVDA 档为对照：Vera Rubin 已满产出货 vs MI450 刚量产，AMD 这一代仍是落后者而非并跑者；两档共享同一个 hyperscaler capex 拐点风险源
+> - [index](英伟达/index.md) — 同板块直接竞争对手档，两档同评 watch，但估值透支程度已不同构——NVDA 安全边际 −17.1% vs 本档 −57.0%，相差一个量级（NVDA 盈利分母三个月内跳升，倍数被压缩到 TTM 28.8×）。本档 §4/§7 的竞争位判断以 NVDA 档为对照：Vera Rubin 已满产出货 vs MI450 刚量产，AMD 这一代仍是落后者而非并跑者；两档共享同一个 hyperscaler capex 拐点风险源
 <!-- END related_docs -->
 
 > 撰写日期：2026-08-05（Q2 FY2026 财报次日）
