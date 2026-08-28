@@ -34,7 +34,7 @@ related_docs:
   - path: ../themes/2026-05-29-Rubin-VR200-BOM拆解-价值分配.md
     note: 大摩 VR200 BOM 拆解 ASP 翻倍与价值分配（胜宏 GPU 算力板卡位）
     symmetric: true
-  - path: ../sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md
+  - path: ../sectors/semiconductor/pcb/胜宏科技/index.md
     note: 胜宏 buffett 个股深度分析（六维 + 多情景估值）
     symmetric: true
   - path: ../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md
@@ -54,7 +54,7 @@ related_docs:
 > - [2026-04-27-兴森科技-comps-成长性与投资决策](quarterly/26q1/2026-04-27-兴森科技-comps-成长性与投资决策.md) — 4-27 PCB 同业横向对比基线
 > - [2026-05-24-H200-vs-Rubin-供应链对比专题](../themes/2026-05-24-H200-vs-Rubin-供应链对比专题.md) — H200/Rubin 全供应链差异（含 PCB/光模块/液冷）
 > - [2026-05-29-Rubin-VR200-BOM拆解-价值分配](../themes/2026-05-29-Rubin-VR200-BOM拆解-价值分配.md) — 大摩 VR200 BOM 拆解 ASP 翻倍与价值分配（胜宏 GPU 算力板卡位）
-> - [2026-06-20-胜宏科技-buffett分析](../sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md) — 胜宏 buffett 个股深度分析（六维 + 多情景估值）
+> - [index](../sectors/semiconductor/pcb/胜宏科技/index.md) — 胜宏 buffett 个股深度分析（六维 + 多情景估值）
 > - [2026-06-04-世运电路-buffett分析](../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md) — 世运电路 buffett 深度分析
 > - [index](../sectors/electronics/pcb/沪电股份/index.md) — 沪电中报重做（2026-08-25，watch）：两条核心口径双双被推翻——「良率 95%（行业平均 80%）」全网无公开出处（半年报/2025年报/港交所443页文件/2026年17份IR记录均无）；「沪电英伟达份额 >50%」证伪（最大客户仅 14.26%，单一终端 >50% 算术上不可能）；「沪电客户比胜宏分散」亦证伪（2025 同口径沪电五大 53.32% vs 胜宏 41.98%）
 <!-- END related_docs -->

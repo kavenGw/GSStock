@@ -1370,21 +1370,22 @@
   currency: HKD
   sector: semiconductor
   rating: watch
-  bear: 35.6
-  base: 115.3
-  bull: 197.7
-  dividend_yield: null
-  conviction_date: '2026-06-20'
-  source_doc: sectors/semiconductor/pcb/2026-06-20-胜宏科技-buffett分析.md
-  note: 每股内在价值=情景市值/9.829亿股反推×1.08(RMB→HKD)；2026-07-02 H(02476)对A由06-20反溢价+3.3%转折价-11.5%,按A+H取较低口径铁律切H跟踪(覆盖旧300476条);H口径安全边际-59%仍深度负,维持watch
+  watch_reason: 26H1 中报把估值风险的性质从「分子对、分母贵」切换为「分母不贵、分子可能缩」——PE-TTM 51.44x（A）/ 42.52x（H，CNY 可比）、五年 72.1 分位已是五家 AI-PCB comps 中最低，H 对 A 折价 −17.3%，净现金 +121.8 亿，旧档「90 分位极度透支」前提失效；但 26Q2 单季扣非净利 11.61 亿、同比 −5.28% 首次转负，H1 扣非仅 +12.50%，扣非口径落后沪电/深南/生益 53–118pct（营收口径 18–32pct），毛利率 33.22% 被沪电 38.72% 反超，Rubin 世代二供已切入。重设三档正常化扣非（熊 23 / 基准 35 / 牛 45 亿，全部低于扣非年化顶部 48.4 亿）后期望内在价值 953.5 亿 CNY，对 H 口径市值 2137.13 亿 CNY 安全边际 −55.4%，连最乐观情景仍 −15.8%，无一档进入买入区间，维持 watch。
+  bear: 40.85
+  base: 116.03
+  bull: 213.1
+  dividend_yield: 0.92
+  conviction_date: '2026-08-28'
+  source_doc: sectors/semiconductor/pcb/胜宏科技/index.md
+  note: 26H1 中报重做；三档正常化扣非 23/35/45 亿（全部低于扣非年化顶部 48.4 亿）×15/28/40x，期望内在价值 953.5 亿 CNY，对 H 口径市值 2137.13 亿 CNY 安全边际-55.4%，bull 情景仍-15.8%，无一档进入买入区间；H 对 A 折价-17.3%故维持H口径跟踪；估值风险由"分子对分母贵"切换为"分母不贵分子可能缩"，维持watch
   themes:
   - AI-PCB
   - Rubin
   - HDI
   - NVIDIA链
-  - 供给侧
-  - 增速断档
-  - AH溢价
+  - 扣非转负
+  - AH折价
+  - 产能周期
 - stock_code: '300666'
   stock_name: 江丰电子
   market: A
