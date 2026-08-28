@@ -103,7 +103,6 @@ WATCH_CODES = [
     {'code': '1888.HK',   'name': '建滔积层板', 'market': 'HK'},
     {'code': '9868.HK',   'name': '小鹏集团-W', 'market': 'HK'},
     {'code': '9618.HK',   'name': '京东集团-SW', 'market': 'HK'},
-    {'code': '300274',    'name': '阳光电源',  'market': 'A'},
     {'code': '002156',    'name': '通富微电',  'market': 'A'},
     {'code': '600988',    'name': '赤峰黄金',  'market': 'A'},
     {'code': '000725',    'name': '京东方A',   'market': 'A'},
