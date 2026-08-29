@@ -24,6 +24,9 @@ related_docs:
   - path: ../themes/2026-08-16-SkyHighMemory-普冉收购标的-深度承做.md
     note: 本档原判"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"已失效——SHM 并表后普冉成为三家中 SLC NAND/eMMC 敞口最直接一家；该档给出 SHM 的定量卡位（2025 收入 13.49 亿、eMMC 占 64.13%、晶圆配额约 6.3 万片/年）与"只传导价、不传导量"的传导判定，是本档的 SLC NAND 敞口补丁
     symmetric: true
+  - path: ../sectors/semiconductor/storage/君正股份/index.md
+    note: 君正股份 8-28 半年报全量重做（watch，切 H 口径 03223.HK）对本档做两处替换：①"君正是 DDR4+LPDDR4 涨价的纯弹性标的"须双向修正——招股书量价拆分显示存储收入 +53.6% 中量贡献约 72%、价只贡献约 28%，真正的纯涨价弹性那条腿是计算芯片（价 +32.5%、成本 yoy −0.60%）；②NOR 容量段分化是新增区分维度，君正在 512Mb/1Gb 大容量段、普冉在中小容量段，2H26 分水岭在容量段而非"是否有 SLC NAND 敏感度"
+    symmetric: true
 ---
 # 利基型存储「接涨」专题 — SLC NAND / NOR / DDR3 涨价对兆易・君正・普冉的弹性差异
 
@@ -35,6 +38,7 @@ related_docs:
 > - [2026-05-31-东芯股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md) — 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
 > - [2026-06-03-佰维存储-buffett分析](../sectors/semiconductor/storage/2026-06-03-佰维存储-buffett分析.md) — 佰维 6-03 buffett 分析（Watch/AI端侧最纯敞口、周期顶部估值）
 > - [2026-08-16-SkyHighMemory-普冉收购标的-深度承做](../themes/2026-08-16-SkyHighMemory-普冉收购标的-深度承做.md) — 本档原判"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"已失效——SHM 并表后普冉成为三家中 SLC NAND/eMMC 敞口最直接一家；该档给出 SHM 的定量卡位（2025 收入 13.49 亿、eMMC 占 64.13%、晶圆配额约 6.3 万片/年）与"只传导价、不传导量"的传导判定，是本档的 SLC NAND 敞口补丁
+> - [index](../sectors/semiconductor/storage/君正股份/index.md) — 君正股份 8-28 半年报全量重做（watch，切 H 口径 03223.HK）对本档做两处替换：①"君正是 DDR4+LPDDR4 涨价的纯弹性标的"须双向修正——招股书量价拆分显示存储收入 +53.6% 中量贡献约 72%、价只贡献约 28%，真正的纯涨价弹性那条腿是计算芯片（价 +32.5%、成本 yoy −0.60%）；②NOR 容量段分化是新增区分维度，君正在 512Mb/1Gb 大容量段、普冉在中小容量段，2H26 分水岭在容量段而非"是否有 SLC NAND 敏感度"
 <!-- END related_docs -->
 
 > 分析日期：2026-05-15
@@ -47,8 +51,7 @@ related_docs:
 > - [2026-04-29 兆易创新 26Q1 季报点评](../quarterly/26q1/2026-04-29-兆易创新-26Q1季报点评.md)（已实证：48 亿权益融资 + 顶端扩产）
 > - [2026-04-25 兆易创新 A 股同业横向对比](26q1/2026-04-25-兆易创新-comps-成长性与投资决策.md)（5 家同业基线对比）
 > - [2026-05-08 兆易-通富 减持事件对比](26q1/2026-05-08-兆易创新-通富微电-减持事件对比分析.md)（朱一明减持已硬触发 4-29 卖出线）
-> - [2026-04-21 北京君正 buffett 分析](../sectors/semiconductor/storage/2026-04-21-北京君正-buffett分析.md)（Pass）
-> - [2026-04-28 北京君正 26Q1 季报点评](../quarterly/26q1/2026-04-28-北京君正-26Q1季报点评.md)（应收 +50% 红线已触发）
+> - [君正股份 buffett 分析](../sectors/semiconductor/storage/君正股份/index.md)（8-28 半年报全量重做，watch，切 H 口径 03223.HK）
 > - [2026-05-31 普冉股份 buffett 分析](../sectors/semiconductor/storage/2026-05-31-普冉股份-buffett分析.md)（Exclude）
 > - [2026-04-29 普冉股份 26Q1 季报点评](../quarterly/26q1/2026-04-29-普冉股份-26Q1季报点评.md)（OCF/EPS 0.97 单季验证）
 

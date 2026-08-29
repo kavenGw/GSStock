@@ -1305,23 +1305,27 @@
   - CMP抛光垫国产替代
   - 半导体显示PI/TFE-INK
   - 先进封装临时键合胶
-- stock_code: '300223'
+- stock_code: '03223'
   stock_name: 君正股份
-  market: A
-  currency: CNY
+  market: HK
+  currency: HKD
   sector: semiconductor
-  rating: exclude
-  bear: 12.5
-  base: 27.9
-  bull: 52.1
-  conviction_date: '2026-06-21'
-  source_doc: sectors/semiconductor/storage/2026-06-21-北京君正-buffett分析.md
-  note: 君正股份（原北京君正，2026 年更名）；bear60.5/base135/bull252亿÷4.836亿股
+  rating: watch
+  bear: 10.84
+  base: 29.82
+  bull: 54.22
+  dividend_yield: 0.18
+  conviction_date: '2026-08-28'
+  source_doc: sectors/semiconductor/storage/君正股份/index.md
+  note: 君正股份（原北京君正）；A+H 铁律切 H 股跟踪（H 较 A 折价 37.36%）；bear48/base132/bull240亿元÷0.8595÷5.14951667亿股
   themes:
   - memory
+  - 利基存储
   - 供给侧
   - 车规存储
-  - SBW
+  - NOR
+  - A+H
+  - 周期顶
 - stock_code: '300327'
   stock_name: 中颖电子
   market: A
