@@ -4388,3 +4388,21 @@
   - 陶瓷基板
   - CCL涨价
   - 亏损转型
+- stock_code: '688146'
+  stock_name: 中船特气
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 8.61
+  base: 15.11
+  bull: 26.9
+  dividend_yield: 0.08
+  conviction_date: '2026-08-29'
+  source_doc: sectors/semiconductor/materials/中船特气/index.md
+  themes:
+  - 电子特气
+  - 六氟化钨
+  - 三氟化氮
+  - 出口管制
+  - AI
