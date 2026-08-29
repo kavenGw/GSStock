@@ -4371,3 +4371,20 @@
   - 工业气体
   - 电子特气
   - 重资产扩张
+- stock_code: '300903'
+  stock_name: 科翔股份
+  market: A
+  currency: CNY
+  sector: electronics
+  rating: exclude
+  bear: 2.99
+  base: 5.01
+  bull: 8.34
+  conviction_date: '2026-08-29'
+  source_doc: sectors/electronics/pcb/科翔股份/index.md
+  themes:
+  - AI-PCB
+  - HDI
+  - 陶瓷基板
+  - CCL涨价
+  - 亏损转型
