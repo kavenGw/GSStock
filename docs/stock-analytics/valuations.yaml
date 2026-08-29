@@ -269,12 +269,14 @@
   currency: CNY
   sector: electronics
   rating: watch
-  bear: 4.03
-  base: 5.5
-  bull: 6.6
-  conviction_date: '2026-06-01'
-  source_doc: sectors/electronics/display/2026-06-01-京东方-buffett分析.md
-  note: 京东方A；三情景市值1495/2040/2446亿÷370.8亿股
+  watch_reason: 期望内在价值 1758.8 亿 / 每股 4.75 元，低于市值 2193.02 亿，安全边际 −19.8%；PB 1.647x 处近五年 93.32 分位（中位仅 1.19x），且卖出触发器 T2「单季毛利率环比降 > 1pct」已命中（2026Q2 14.48% vs Q1 15.60% = −1.12pct）——好生意、坏价格
+  bear: 3.59
+  base: 4.67
+  bull: 6.83
+  dividend_yield: 0.94
+  conviction_date: '2026-08-29'
+  source_doc: sectors/electronics/display/京东方/index.md
+  note: 2026-08-29 半年报重估：扣非 30.08 亿低于预告下限，主业显示器件收入 −3.20%，PB 分位口径修正后处近五年 93 分位，安全边际 −19.8%；卖出触发器 T2（Q2 毛利率环比 −1.12pct）已命中
   themes:
   - 面板周期
   - 玻璃基板
@@ -2035,7 +2037,7 @@
   - 出口管制
   - 光伏钨丝
   - commodity-cyclical
-- stock_code: '002428'
+- stock_code: 002428
   stock_name: 云南锗业
   market: A
   currency: CNY

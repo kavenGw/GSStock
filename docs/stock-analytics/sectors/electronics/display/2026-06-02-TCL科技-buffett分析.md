@@ -16,8 +16,8 @@ related_docs:
 - path: ../../energy/solar/2026-05-28-TCL中环-buffett分析.md
   note: TCL科技控股子公司，光伏业务主要拖累因素
   symmetric: true
-- path: 2026-06-01-京东方-buffett分析.md
-  note: 面板双寡头另一极，市占率26%vs华星23%，同周期同估值逻辑
+- path: 京东方/index.md
+  note: 面板双寡头另一极，同周期同估值逻辑；京东方 2026-08-29 重估安全边际 −19.8%（PB 1.647x 处近五年 93 分位）、Q2 毛利率环比 −1.12pct 触发减持阈值，对本档的周期定位是同向警示
   symmetric: true
 - path: ../../consumer/consumer-electronics/2026-06-20-TCL电子-buffett分析.md
   note: 同属 TCL 集团；TCL电子(01070.HK)是消费电子终端主体，本公司(华星)为其面板供应方
@@ -34,7 +34,7 @@ related_docs:
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-05-28-TCL中环-buffett分析](../../energy/solar/2026-05-28-TCL中环-buffett分析.md) — TCL科技控股子公司，光伏业务主要拖累因素
-> - [2026-06-01-京东方-buffett分析](2026-06-01-京东方-buffett分析.md) — 面板双寡头另一极，市占率26%vs华星23%，同周期同估值逻辑
+> - [index](京东方/index.md) — 面板双寡头另一极，同周期同估值逻辑；京东方 2026-08-29 重估安全边际 −19.8%（PB 1.647x 处近五年 93 分位）、Q2 毛利率环比 −1.12pct 触发减持阈值，对本档的周期定位是同向警示
 > - [2026-06-20-TCL电子-buffett分析](../../consumer/consumer-electronics/2026-06-20-TCL电子-buffett分析.md) — 同属 TCL 集团；TCL电子(01070.HK)是消费电子终端主体，本公司(华星)为其面板供应方
 > - [2026-06-20-面板折旧capex拐点](../../../themes/2026-06-20-面板折旧capex拐点.md) — 京东方IR确认行业成熟期+扩产已过，背书双寡头供给侧逻辑但不解光伏拖累，维持watch
 > - [2026-07-13-TCL科技H1预增-面板双寡头盈利兑现](../../../themes/2026-07-13-TCL科技H1预增-面板双寡头盈利兑现.md) — H1预增96-108%验证base正常化70亿，Q2隐含拆分首现光伏减亏间接证据；但股价抢跑至5.12元、安全边际转负，买点条件均未满足，watch维持
