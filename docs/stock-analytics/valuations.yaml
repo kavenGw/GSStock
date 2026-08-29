@@ -1475,17 +1475,20 @@
   source_doc: sectors/semiconductor/materials/2026-05-08-巨化股份-buffett分析.md
   note: 三情景市值265/473/765亿÷26.98亿股
 - stock_code: '600378'
-  stock_name: 昊华化学
+  stock_name: 昊华科技
   market: A
   currency: CNY
   sector: semiconductor
-  rating: exclude
-  bear: null
-  base: 14.0
-  bull: null
-  conviction_date: '2026-05-08'
-  source_doc: sectors/semiconductor/materials/2026-05-08-昊华化学-buffett分析.md
-  note: 仅给建议买入价<14元(市值~180亿)，无独立bear/bull
+  rating: watch
+  bear: 17.70
+  base: 27.40
+  bull: 55.80
+  conviction_date: '2026-08-29'
+  source_doc: sectors/semiconductor/materials/昊华科技/index.md
+  note: 期望内在价值30.17元/股(389.15亿)=17.70×30%+27.40×50%+55.80×20%，安全边际-43.4%(vs 2026-08-28收53.31元/687.70亿)，买点≤18.0元；SOTP主锚，bull封顶720亿
+  dividend_yield: 0.74
+  themes:
+  - fluorochemical-quota
 - stock_code: '600498'
   stock_name: 烽火通信
   market: A
