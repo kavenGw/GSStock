@@ -4406,3 +4406,20 @@
   - 三氟化氮
   - 出口管制
   - AI
+- stock_code: '688268'
+  stock_name: 华特气体
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 7.4
+  base: 14.57
+  bull: 30.7
+  dividend_yield: 0.35
+  conviction_date: '2026-08-29'
+  source_doc: sectors/materials/industrial-gas/华特气体/index.md
+  themes:
+  - 电子特气
+  - 工业气体
+  - 国产替代
+  - 氦气
