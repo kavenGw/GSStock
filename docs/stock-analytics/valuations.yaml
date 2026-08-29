@@ -1480,9 +1480,9 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 17.70
-  base: 27.40
-  bull: 55.80
+  bear: 17.7
+  base: 27.4
+  bull: 55.8
   conviction_date: '2026-08-29'
   source_doc: sectors/semiconductor/materials/昊华科技/index.md
   note: 期望内在价值30.17元/股(389.15亿)=17.70×30%+27.40×50%+55.80×20%，安全边际-43.4%(vs 2026-08-28收53.31元/687.70亿)，买点≤18.0元；SOTP主锚，bull封顶720亿
@@ -4354,3 +4354,20 @@
   - 国产替代
   - 先进封装
   - 非经常性损益
+- stock_code: 002971
+  stock_name: 和远气体
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 1.78
+  base: 2.67
+  bull: 3.92
+  dividend_yield: 0.11
+  conviction_date: '2026-08-29'
+  source_doc: sectors/materials/industrial-gas/和远气体/index.md
+  note: 期望内在价值每股2.61元(5.50亿)=1.78×35%+2.67×45%+3.92×20%，安全边际-94.5%(vs 2026-08-28收47.08元/99.16亿)；PE-TTM 210.3x(近5年98.3分位)、倒推ROIC仅2~3%，在建工程30.96亿转固后年增折旧粗测~2.17亿而TTM归母仅0.471亿；电子特气主力品种未认证未接单、公司自认2-3年内不影响业绩
+  themes:
+  - 工业气体
+  - 电子特气
+  - 重资产扩张
