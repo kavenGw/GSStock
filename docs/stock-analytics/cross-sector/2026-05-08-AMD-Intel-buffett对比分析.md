@@ -5,8 +5,8 @@ stock_names: [AMD, Intel]
 themes: [CPU竞争, x86服务器, buffett对比]
 date: 2026-05-08
 related_docs:
-- path: ../themes/2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认.md
-  note: 通富（AMD 后段封测占其营收 60%+）H1 营收推算 +22%~30%，是 AMD 数据中心出货未失速的供应链侧第三方读数，弱正向确认；但通富利润端为持股重估、对 AMD 无信息量。不改本档 AMD 侧结论
+- path: ../sectors/semiconductor/packaging/通富微电/index.md
+  note: '通富微电 buffett 档（2026-08-28 首建，watch）。原引用的通富 H1 预增 theme 已于 2026-08-29 随中报落地删除，其结论并入本档：通富 26H1 营收 +23.03% 是 AMD 出货未失速的独立第三方读数，但利润端不构成 AMD 侧增量信息——AMD 数据中心 26Q2 +107% 的同期，通富超威两厂合计净利 6.28 亿（−13.4%）、净利率 8.73%→6.50%，且 AMD 2026-05-21 官宣的下一代 2.5D bridge/EFB 伙伴全为台系（ASE/SPIL/PTI + 欣兴/南亚/景硕），无大陆 OSAT'
   symmetric: true
 - path: ../sectors/semiconductor/design/2026-08-05-AMD-buffett分析.md
   note: AMD Q2 FY2026 财报后独立 buffett 首建档，评级 watch（与本档 Keep Watching 连续未翻转）。期望内在价值约 $204/股 vs 盘后价 $472.85，安全边际 -57%；本档合理估值上限 $200 与新档 base 档 $210 基本吻合，三个月强财报没有改变估值框架结论。AMD 侧结论以新档为准，本档保留作基线底稿
@@ -16,7 +16,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认](../themes/2026-07-14-通富微电H1预增288-337%-OSAT非经常性利润模式确认.md) — 通富（AMD 后段封测占其营收 60%+）H1 营收推算 +22%~30%，是 AMD 数据中心出货未失速的供应链侧第三方读数，弱正向确认；但通富利润端为持股重估、对 AMD 无信息量。不改本档 AMD 侧结论
+> - [index](../sectors/semiconductor/packaging/通富微电/index.md) — 通富微电 buffett 档（2026-08-28 首建，watch）。原引用的通富 H1 预增 theme 已于 2026-08-29 随中报落地删除，其结论并入本档：通富 26H1 营收 +23.03% 是 AMD 出货未失速的独立第三方读数，但利润端不构成 AMD 侧增量信息——AMD 数据中心 26Q2 +107% 的同期，通富超威两厂合计净利 6.28 亿（−13.4%）、净利率 8.73%→6.50%，且 AMD 2026-05-21 官宣的下一代 2.5D bridge/EFB 伙伴全为台系（ASE/SPIL/PTI + 欣兴/南亚/景硕），无大陆 OSAT
 > - [2026-08-05-AMD-buffett分析](../sectors/semiconductor/design/2026-08-05-AMD-buffett分析.md) — AMD Q2 FY2026 财报后独立 buffett 首建档，评级 watch（与本档 Keep Watching 连续未翻转）。期望内在价值约 $204/股 vs 盘后价 $472.85，安全边际 -57%；本档合理估值上限 $200 与新档 base 档 $210 基本吻合，三个月强财报没有改变估值框架结论。AMD 侧结论以新档为准，本档保留作基线底稿
 <!-- END related_docs -->
 
