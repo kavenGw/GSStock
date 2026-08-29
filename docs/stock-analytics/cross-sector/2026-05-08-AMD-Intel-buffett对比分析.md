@@ -24,7 +24,7 @@ related_docs:
 > 撰写日期：2026-05-08（AMD 26Q1 财报后第 3 个交易日）
 > 数据截止：2026-05-07
 > 视角：从 Buffett 投资体系出发，对 AMD 与 Intel 做"是否值得买入 / 持有"的并行判断
-> 关联文档：[2026-05-06 通富微电 AMD 26Q1 财报联动专题](analysis/26q1/2026-05-06-通富微电-AMD26Q1财报联动专题.md)
+> 关联文档：2026-05-06 通富微电 AMD 26Q1 财报联动专题（**已于 2026-08-29 随通富 26H1 建档删除**，结论并入 [通富微电 buffett 档](../sectors/semiconductor/packaging/通富微电/index.md)）
 
 ---
 
@@ -308,7 +308,7 @@ P/B:                  ~1.0x
 
 ## 附录 B：数据来源
 
-- AMD 26Q1 财报：参见 [2026-05-06 通富微电 AMD 26Q1 财报联动专题](analysis/26q1/2026-05-06-通富微电-AMD26Q1财报联动专题.md) 附录 B
+- AMD 26Q1 财报：参见 2026-05-06 通富微电 AMD 26Q1 财报联动专题（**已于 2026-08-29 随通富 26H1 建档删除**，结论并入 [通富微电 buffett 档](../sectors/semiconductor/packaging/通富微电/index.md)） 附录 B
 - Intel TTM 数据：Intel IR 25Q4 财报 + 25 年报披露
 - Buffett 引用：1982 / 1985 / 1991 / 1999 / 2018 letter to shareholders
 - Buffett 框架：`.claude/skills/buffett/references/03-business-moat.md` / `08-industry-playbooks.md`（Technology & Internet 章节）

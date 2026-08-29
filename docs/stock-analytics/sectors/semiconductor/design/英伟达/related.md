@@ -51,7 +51,7 @@ related_docs:
 ## 记录备查（单向提及，不建结构性引用）
 
 - **`quarterly/` 下无本股季报点评档**（已全目录核对）——即本文件夹档是英伟达当前唯一的定期报告论据来源。
-- **`cross-sector/` 下无本股专属对比档**；`2026-05-08-AMD-Intel-buffett对比分析.md` 与 `2026-05-06-通富微电-AMD26Q1财报联动专题.md` 属 AMD 档的基线，与本股无直接结构性关系。
+- **`cross-sector/` 下无本股专属对比档**；`2026-05-08-AMD-Intel-buffett对比分析.md` 与 `2026-05-06-通富微电-AMD26Q1财报联动专题.md`（已删除） 属 AMD 档的基线，与本股无直接结构性关系。
 - 涉及本股的 **5 份 theme 档**（H200 vs Rubin、VR200 BOM 拆解、PCB 降价传闻、晶圆代工 2.0、Kyber 机架延迟）**全部落 [events.md](events.md)**，不在本文件重复登记——本仓文件夹档 v2 架构里，事件类引用归 events.md、结构性引用归 related.md，两者覆盖语义不同（related 重做重写、events 永不覆盖）。
 - 全仓原有 2026-05-21 平铺旧档，本轮 Phase C 已 `git rm` 删除，其结论由本文件夹档取代；指向该旧档的 4 处反向链（微软档、谷歌档、AMD 档、晶圆代工 2.0 theme）与 `valuations.yaml` 的 `source_doc` 已改指 `英伟达/index.md`。
 - **lens 库缺口备案**：`design` 子板块缺一条「AI 算力芯片设计」族的板块专属 lens，详见 [sources.md §12.6](sources.md)。

@@ -41,8 +41,8 @@ related_docs:
   - path: ../sectors/electronics/components/沃尔核材/index.md
     note: 光互联/CPO 推迟间接利好高速铜缆景气延续
     symmetric: true
-  - path: ../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md
-    note: 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
+  - path: ../sectors/semiconductor/packaging/通富微电/index.md
+    note: '通富微电 buffett 档（2026-08-28 首建，watch）。原引用的通富-AMD 26Q1 财报联动专题已随 26H1 中报落地删除。本主题「英伟达裂缝为 AMD 打开追赶窗口、利好 AMD 封装链」的推论，在通富 26H1 得到一次反向校准：AMD 侧确在放量（数据中心 26Q2 +107%、Q3 指引 130 亿美元），但 AMD 的先进封装增量并未落到大陆 OSAT——AMD 2026-05-21 官宣的下一代 2.5D bridge/EFB 伙伴全为台系，MI450/Helios 走台积电 CoWoS-L + SoIC，通富两厂净利同期 −13.4%'
     symmetric: true
   - path: ../sectors/semiconductor/design/英伟达/index.md
     note: 延迟主体本身的回写（英伟达 FY27Q2 后全量重做，2026-08-28，watch）——**截至 2026-08-28 维持未决**：FY27Q2 财报与 10-Q 全文未提及 Kyber / NVL144 / NVL576 / Rubin Ultra 任何字样（已全文检索确认），SemiAnalysis 未撤稿，英伟达的否认仍停留在「Our roadmap is intact」这句笼统措辞、未给出具体日期。**不得因 Q2 财报大超预期而反向推断 Kyber 已解决**——Q2 确认的是 VR200 NVL72（Oberon 机架世代）按计划爬坡，而 Kyber 属 Rubin Ultra 世代，Q2 的强劲对 Kyber 时点不具判别力。英伟达档因此在三情景中均未对 Kyber 作任何假设，与本仓沪电档、建滔档的裁定一致
@@ -68,10 +68,10 @@ related_docs:
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 旧档明列"CPO 2027+ 蚕食可插拔"为核心 overhang，本次 CPO 延迟正击此点
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 可插拔器件景气延续利好，CPO 配套(FAU/ELS)放量预期推后，净中性偏多
 > - [index](../sectors/electronics/pcb/沪电股份/index.md) — 沪电中报重做（2026-08-25，watch）裁定回写：不得沿用本档既定口径——SemiAnalysis 报延至 2028 vs 英伟达公开否认「roadmap is intact」，截至 2026-08-25 无任何裁决性新证据【缺】，时点分歧未解。被延后的 78 层正交中板属 Rubin Ultra 机架内连接，与沪电 26H1 的 71.39 亿交换机整机主板是两条产品线，属尚未兑现的期权而非在手订单；若 Kyber 确实推到 2028，该期权贴现要后推两年，对估值是减项
-> - [index](../sectors/semiconductor/pcb/胜宏科技/index.md) — Kyber 主板放量推迟削弱最激进增长曲线，强化"安全边际为负、等回调"
+> - [index](../sectors/semiconductor/pcb/胜宏科技/index.md) — Kyber 主板放量推迟削弱最激进增长曲线，强化"安全边际为负、等回调
 > - [2026-05-31-立讯精密-buffett分析](../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md) — 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久
 > - [index](../sectors/electronics/components/沃尔核材/index.md) — 光互联/CPO 推迟间接利好高速铜缆景气延续
-> - [2026-05-06-通富微电-AMD26Q1财报联动专题](../cross-sector/2026-05-06-通富微电-AMD26Q1财报联动专题.md) — 英伟达规模优势裂缝为 AMD/谷歌打开追赶窗口，利好 AMD 封装链
+> - [index](../sectors/semiconductor/packaging/通富微电/index.md) — 通富微电 buffett 档（2026-08-28 首建，watch）。原引用的通富-AMD 26Q1 财报联动专题已随 26H1 中报落地删除。本主题「英伟达裂缝为 AMD 打开追赶窗口、利好 AMD 封装链」的推论，在通富 26H1 得到一次反向校准：AMD 侧确在放量（数据中心 26Q2 +107%、Q3 指引 130 亿美元），但 AMD 的先进封装增量并未落到大陆 OSAT——AMD 2026-05-21 官宣的下一代 2.5D bridge/EFB 伙伴全为台系，MI450/Helios 走台积电 CoWoS-L + SoIC，通富两厂净利同期 −13.4%
 > - [index](../sectors/semiconductor/design/英伟达/index.md) — 延迟主体本身的回写（英伟达 FY27Q2 后全量重做，2026-08-28，watch）——**截至 2026-08-28 维持未决**：FY27Q2 财报与 10-Q 全文未提及 Kyber / NVL144 / NVL576 / Rubin Ultra 任何字样（已全文检索确认），SemiAnalysis 未撤稿，英伟达的否认仍停留在「Our roadmap is intact」这句笼统措辞、未给出具体日期。**不得因 Q2 财报大超预期而反向推断 Kyber 已解决**——Q2 确认的是 VR200 NVL72（Oberon 机架世代）按计划爬坡，而 Kyber 属 Rubin Ultra 世代，Q2 的强劲对 Kyber 时点不具判别力。英伟达档因此在三情景中均未对 Kyber 作任何假设，与本仓沪电档、建滔档的裁定一致
 > - [2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪](2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md) — 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
 > - [2026-07-31-芯碁微装-buffett分析](../sectors/semiconductor/equipment/2026-07-31-芯碁微装-buffett分析.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
