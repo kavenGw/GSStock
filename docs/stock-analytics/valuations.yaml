@@ -2031,25 +2031,28 @@
   - 出口管制
   - 光伏钨丝
   - commodity-cyclical
-- stock_code: 002428
+- stock_code: '002428'
   stock_name: 云南锗业
   market: A
   currency: CNY
   sector: materials
   rating: exclude
-  bear: 4.6
-  base: 13.02
-  bull: 26.8
+  bear: 2.11
+  base: 2.82
+  bull: 4.7
   dividend_yield: 0.01
-  conviction_date: '2026-06-11'
-  source_doc: sectors/materials/minor-metals/2026-06-11-云南锗业-buffett分析.md
-  note: 每股=市值内在价值/6.53亿股（bear 30亿/base 85亿/bull 175亿）；期望内在价值约81亿 vs 市值约536亿，安全边际-85%；exclude
+  conviction_date: '2026-08-28'
+  source_doc: sectors/materials/minor-metals/云南锗业/index.md
+  note: 每股=内在价值/6.5312亿股（bear 13.81亿/base 18.42亿/bull 30.70亿）；期望内在价值19.60亿/每股3.00元 vs 收盘市值650.90亿（2026-08-28收盘99.66元），安全边际-97.0%，bull压测-95.3%；PB 42.41x、PE(TTM) 900.7x；2026半年报证伪旧档「增收不增利」但拐点仅一个季度且经营现金流-1.568亿；exclude
   themes:
+  - 锗
   - 小金属
   - 出口管制
   - 磷化铟
+  - 砷化镓
   - 光模块
   - AI概念
+  - commodity-cyclical
 - stock_code: '301071'
   stock_name: 力量钻石
   market: A
