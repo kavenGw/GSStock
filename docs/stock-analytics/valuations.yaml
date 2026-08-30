@@ -1525,13 +1525,18 @@
   market: A
   currency: CNY
   sector: semiconductor
-  rating: watch
-  bear: 8.0
-  base: 10.6
-  bull: 13.3
-  conviction_date: '2026-05-07'
-  source_doc: sectors/semiconductor/materials/2026-05-07-宏和科技-buffett分析.md
-  note: 内在价值72-120亿（端点为bear/bull中点为base）÷9.05亿股
+  rating: exclude
+  bear: 2.68
+  base: 3.65
+  bull: 13.74
+  dividend_yield: 0.049
+  conviction_date: '2026-08-30'
+  source_doc: sectors/semiconductor/materials/宏和科技/index.md
+  note: 期望内在价值5.38元/股（48.64亿，s=5%主用变体）÷9.04586445亿股，安全边际-96.1%（现价139.17元，2026-08-28收盘）
+  themes:
+  - cpu_pcb
+  - 电子布
+  - 供给侧
 - stock_code: '603283'
   stock_name: 赛腾股份
   market: A
