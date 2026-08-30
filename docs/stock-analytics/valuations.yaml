@@ -114,11 +114,12 @@
   currency: HKD
   sector: consumer
   rating: watch
-  bear: 19.0
-  base: 63.0
-  bull: 123.0
-  conviction_date: '2026-06-02'
-  source_doc: sectors/consumer/local-services/2026-06-02-美团-buffett分析.md
+  watch_reason: 26Q2 经调整净利 +25.24 亿 RMB 大超共识（3.4 亿）、CLC 经营利润率转正至 7.9%、外卖量价剪刀差闭合，生意质量确认改善；但 GAAP 经营溢利 +26.91 亿含其他收益净额 +34.94 亿、剔除后主营经营仍亏约 −8.0 亿，管理层自陈补贴仍远高于 2024 且主动预告 Q3 UE 环比走弱。自下而上重算期望内在价值 397.5 BN HKD（64.37 HKD/股），对实时市值 478.60 BN HKD 安全边际 −16.9%（仍为负）。安全边际较旧档 −22.6% 的改善主要来自股价 −9.4%，不是价值上修（内在价值实际由 414 微降至 397.5 BN HKD）。等主营口径连续两季转正 + 价格回落再上车。
+  bear: 23.48
+  base: 55.4
+  bull: 106.57
+  conviction_date: '2026-08-30'
+  source_doc: sectors/consumer/local-services/美团/index.md
   themes:
   - 即时零售
   - 外卖大战
@@ -1531,8 +1532,6 @@
   conviction_date: '2026-05-07'
   source_doc: sectors/semiconductor/materials/2026-05-07-宏和科技-buffett分析.md
   note: 内在价值72-120亿（端点为bear/bull中点为base）÷9.05亿股
-  themes:
-  - cpu_pcb
 - stock_code: '603283'
   stock_name: 赛腾股份
   market: A
