@@ -74,7 +74,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### Phase A — 联网采证（A1 数据锚 / A2 论点 / A3 lens，并行，均 opus）→ dispatch.md §1
 
-闸门：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A`（结论层标题按 `^##.*结论层$` 匹配，agent 自加编号前缀不算缺项 [L28]），exit 0 **且**所有在途校准项
+闸门（exit 1 先分「形式失败/内容失败」，形式失败亲验内容后放行、不代写 end 戳 [L52]）：`python scripts/deep_redo_gate.py <股票名> <日期> --phase A`（结论层标题按 `^##.*结论层$` 匹配，agent 自加编号前缀不算缺项 [L28]），exit 0 **且**所有在途校准项
 已收到「已闭合」回复才派 B [L1][L2]。**控制者接棒补写过收口的路，exit 0 只证明形态完整、不证明内容定稿**——该路仍可能二次收工推翻自己的硬数字，下游 prompt 引用其口径类数字前须复核或标「待二次确认」[L46]。需等待时按 [L7] 探测模板包一层（超时分支也要发信号）；**探测条件调用 `deep_redo_gate.py`，别自己手写 `grep -q "^end:"`** —— 收工戳的字面三路三样，自创判据会在产物全部完整时报 TIMEOUT [L44]；探测点报 TIMEOUT 后先 `ls` 全部产物 + `ListAgents` 看状态，分辨 agent 是死在交付前还是交付后 [L22]。
 预估按「最慢路 + 1~2 轮校准」[L4]；派发前先粗数必查条数，上限管"查多深"管不住"有多少条"；A+H / 多业务线 / 多 lens 命中往上取。
 某一路报「前提变化」时先 grep 另两路 evidence 确认是否已自发命中，命中就别派校准轮 [L16]。
@@ -98,6 +98,7 @@ comps/theme/quarterly 底稿冲突不知以谁为准。
 
 ### Phase C — 收尾（1 个 sonnet）→ dispatch.md §4
 
+派发单须显式列出「本 session 已改但未提交的 docs 文件」交 C 一并提交，收尾亲验必看 `git status` 并按 diff 认领——C 无本 session 上下文，其「非本任务产物」自报不可信 [L51]。
 清理「一次性脚本」前必须验 mtime 与内容归属：`scripts/_a1_*`/`_a3_*` 是各轮共用前缀，并行 session 的在写产物同名且无 git 留痕，按前缀一把删不可恢复 [L30]。
 
 闸门：`lint_docs_frontmatter.py` / `lint_docs_refs.py` 双 exit 0 + `git show HEAD:docs/stock-analytics/valuations.yaml`
