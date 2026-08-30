@@ -1946,10 +1946,7 @@
   dividend_yield: 0.59
   conviction_date: '2026-08-30'
   source_doc: sectors/semiconductor/packaging/深科技/index.md
-  note: 26H1 重做，评级从 watch 下调至 exclude。核心多头论点"HBM 量产+英伟达认证"被公司 2026-06-30
-    异动公告与 26H1 半年报三路证伪，HBM/AI 业绩层敞口为 0；营收增量 100% 来自毛利率仅 11.90% 的 EMS
-    代工，非 HBM 升级。三情景加权期望内在价值每股 5.57 元，安全边际 −85.0%，即使 100% 兑现 bull
-    情景仍为 −75.6%，无任何价格可辩护。
+  note: 26H1 重做，评级从 watch 下调至 exclude。核心多头论点"HBM 量产+英伟达认证"被公司 2026-06-30 异动公告与 26H1 半年报三路证伪，HBM/AI 业绩层敞口为 0；营收增量 100% 来自毛利率仅 11.90% 的 EMS 代工，非 HBM 升级。三情景加权期望内在价值每股 5.57 元，安全边际 −85.0%，即使 100% 兑现 bull 情景仍为 −75.6%，无任何价格可辩护。
   themes:
   - HBM
   - 存储周期
@@ -4427,3 +4424,22 @@
   - 工业气体
   - 国产替代
   - 氦气
+- stock_code: 002842
+  stock_name: 翔鹭钨业
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 1.44
+  base: 6.92
+  bull: 16.82
+  dividend_yield: 0.344
+  conviction_date: '2026-08-30'
+  source_doc: sectors/materials/nonferrous/翔鹭钨业/index.md
+  themes:
+  - 钨
+  - 小金属
+  - 光伏钨丝
+  - 硬质合金
+  - 定增摊薄
+  - commodity-cyclical
