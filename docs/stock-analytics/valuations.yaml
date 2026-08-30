@@ -1939,13 +1939,17 @@
   market: A
   currency: CNY
   sector: semiconductor
-  rating: watch
-  bear: 26.68
-  base: 31.45
-  bull: 45.11
-  dividend_yield: 0.6
-  conviction_date: '2026-06-08'
-  source_doc: sectors/semiconductor/packaging/2026-06-08-深科技-buffett分析.md
+  rating: exclude
+  bear: 3.79
+  base: 5.99
+  bull: 9.09
+  dividend_yield: 0.59
+  conviction_date: '2026-08-30'
+  source_doc: sectors/semiconductor/packaging/深科技/index.md
+  note: 26H1 重做，评级从 watch 下调至 exclude。核心多头论点"HBM 量产+英伟达认证"被公司 2026-06-30
+    异动公告与 26H1 半年报三路证伪，HBM/AI 业绩层敞口为 0；营收增量 100% 来自毛利率仅 11.90% 的 EMS
+    代工，非 HBM 升级。三情景加权期望内在价值每股 5.57 元，安全边际 −85.0%，即使 100% 兑现 bull
+    情景仍为 −75.6%，无任何价格可辩护。
   themes:
   - HBM
   - 存储周期
