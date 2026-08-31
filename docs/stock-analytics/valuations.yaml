@@ -4447,7 +4447,7 @@
   - 硬质合金
   - 定增摊薄
   - commodity-cyclical
-- stock_code: '002008'
+- stock_code: 002008
   stock_name: 大族激光
   market: A
   currency: CNY
@@ -4467,3 +4467,20 @@
   - 控股平台折价
   - 消费电子设备
   - 周期
+- stock_code: '603068'
+  stock_name: 博通集成
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 营收 +70.21% 是真实量增长且账上净现金 9.4413 亿（占市值 15.82%），但期望内在价值仅 25.13 元/股（三情景 2028 加权市值 49.70 亿按 r=12% 折现 2.336 年得 38.14 亿），较 39.31 元现价安全边际 −36.1%；扣非 TTM 仅 154.65 万元、2026Q2 扣非环比 −48.9%、经营现金流半年 −3,102 万，盈利尚未证明可持续。跟踪不买入，买点 ① 12.57 元 / 买点 ② 10.62 元。
+  bear: 10.62
+  base: 26.29
+  bull: 55.11
+  dividend_yield: 0.025
+  conviction_date: '2026-08-31'
+  source_doc: sectors/semiconductor/design/博通集成/index.md
+  themes:
+  - wifi-mcu
+  - edge-ai
+  - 端侧AI
