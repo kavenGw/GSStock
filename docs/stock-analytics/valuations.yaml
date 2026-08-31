@@ -4447,7 +4447,7 @@
   - 硬质合金
   - 定增摊薄
   - commodity-cyclical
-- stock_code: '002008'
+- stock_code: 002008
   stock_name: 大族激光
   market: A
   currency: CNY
@@ -4484,3 +4484,23 @@
   - wifi-mcu
   - edge-ai
   - 端侧AI
+- stock_code: '301511'
+  stock_name: 德福科技
+  market: A
+  currency: CNY
+  sector: materials
+  commodity: copper
+  commodity_impact: neutral
+  rating: watch
+  watch_reason: 期望内在价值 50.9 亿 vs 2026-08-31 收盘市值 615.13 亿，安全边际 −91.7%；PE-TTM 182.4x / PB 14.55x；分部结构与市场叙事倒挂（电子电路铜箔占营收 14.2% 却仅占毛利 7.6%，毛利率 4.85% 低于锂电铜箔 9.47%）；经营现金流连续 4 期为负（26H1 −6.13 亿为历史最差半年）；资产负债率 77.49%、有息负债/归母净资产 2.51x。商业逻辑在能力圈内、电子电路拐点方向为真，故不判 exclude，但价格不符合任何买入标准。
+  bear: 2.28
+  base: 8.09
+  bull: 21.58
+  dividend_yield: 0.1
+  conviction_date: '2026-08-31'
+  source_doc: sectors/materials/copper-foil/德福科技/index.md
+  themes:
+  - copper-foil
+  - AI算力
+  - HVLP
+  - 锂电池
