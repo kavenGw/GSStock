@@ -4504,3 +4504,21 @@
   - AI算力
   - HVLP
   - 锂电池
+- stock_code: '002886'
+  stock_name: 沃特股份
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: 市场按「PTFE 进 AI 高频 CCL」给 104.1 倍 TTM PE，而公司自己在 2026-08-28 异动公告里把该业务的 PCB 用收入拆到 400 万元 / 占营收 0.37% 并自述「不会对经营业绩产生重大影响」——叙事与财务落地严重脱节。期望内在价值 10.63 元/股（对应市值 27.98 亿元，三情景 PB 加权 1.0/1.6/2.6×），较 29.04 元现价安全边际 −63.4%。不买入但跟踪：LCP 子公司净利率 10.55%、经营现金流为归母净利 2.71 倍、商誉仅 3,430 万、无年度亏损，生意是真的，只是被贴错标签并按错误标签定了价。买点 ① 5.32 元 / 买点 ② 7.04 元。
+  bear: 7.04
+  base: 11.26
+  bull: 18.31
+  dividend_yield: 0.26
+  conviction_date: '2026-08-31'
+  source_doc: sectors/materials/high-performance-polymer/沃特股份/index.md
+  themes:
+  - lcp
+  - ptfe
+  - 高频CCL
+  - 国产替代
