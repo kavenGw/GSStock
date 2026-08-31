@@ -26,7 +26,7 @@ related_codes:
 - '002617'
 date: '2026-06-27'
 related_docs:
-- path: ../sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md
+- path: ../sectors/semiconductor/power/英诺赛科/index.md
   note: 英诺赛科（8英寸GaN纯玩龙头）——GaN单瓦价值$3→$46(15x)是本框架最锐利数字，弹性最大映射
   symmetric: true
 - path: ../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md
@@ -73,7 +73,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-06-19-英诺赛科-buffett分析](../sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md) — 英诺赛科（8英寸GaN纯玩龙头）——GaN单瓦价值$3→$46(15x)是本框架最锐利数字，弹性最大映射
+> - [index](../sectors/semiconductor/power/英诺赛科/index.md) — 英诺赛科（8英寸GaN纯玩龙头）——GaN单瓦价值$3→$46(15x)是本框架最锐利数字，弹性最大映射
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安光电（SiC+GaN全产业链IDM）——双轨同时受益SiC翻倍与GaN爆发，但盈利未兑现
 > - [2026-08-20-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md) — 天岳先进（8英寸SiC衬底）——SiC单瓦$30→$60翻倍放大衬底需求底盘，验证而非翻案
 > - [events](../sectors/semiconductor/power/士兰微/events.md) — 士兰微（功率IDM+SiC主驱）——AI电源+SiC双引擎获TAM背书但估值已透支

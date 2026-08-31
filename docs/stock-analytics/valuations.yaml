@@ -1248,13 +1248,13 @@
   currency: HKD
   sector: semiconductor
   rating: watch
-  bear: 31.8
-  base: 63.5
-  bull: 126.0
-  dividend_yield: null
-  conviction_date: '2026-06-19'
-  source_doc: sectors/semiconductor/power/2026-06-19-英诺赛科-buffett分析.md
-  note: 每股由市值(亿港元)÷总股本9.13亿股反推；无分红成长亏损股
+  watch_reason: 26H1质地进一步证实（收入+50.6%、毛利率11.6%、经营现金流首次转正、零摊薄、现金+79.5%），但旧档2026E营收26亿被证伪（实际外推18.27亿）、海外专利战全面败诉致境外收入-42.0%占比降至4.4%、AI营收占比连续两期不披露、H股全流通40.85%抛压未出清、新增募资用途偏离+CFO同日更换的治理瑕疵；期望内在价值520亿HKD（每股56.82）vs市值401.36亿HKD，安全边际+29.6%且该数字应读作押注赔率而非传统安全边际，不足以升级
+  bear: 23.93
+  base: 47.1
+  bull: 100.21
+  conviction_date: '2026-08-31'
+  source_doc: sectors/semiconductor/power/英诺赛科/index.md
+  note: 每股由三情景内在价值(亿HKD)÷总股本9.151亿股得出；26H1重做，汇率CNY→HKD 1.166；仍亏损无分红，安全边际+29.6%应读作押注赔率而非传统安全边际
   themes:
   - GaN功率半导体
   - AI服务器电源
