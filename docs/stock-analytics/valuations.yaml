@@ -4447,7 +4447,7 @@
   - 硬质合金
   - 定增摊薄
   - commodity-cyclical
-- stock_code: 002008
+- stock_code: '002008'
   stock_name: 大族激光
   market: A
   currency: CNY
