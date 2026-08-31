@@ -4504,7 +4504,7 @@
   - AI算力
   - HVLP
   - 锂电池
-- stock_code: '002886'
+- stock_code: 002886
   stock_name: 沃特股份
   market: A
   currency: CNY
@@ -4522,3 +4522,22 @@
   - ptfe
   - 高频CCL
   - 国产替代
+- stock_code: '301526'
+  stock_name: 国际复材
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: 生意与 AI 敞口都是真的（LDK 二代已进多家头部 CCL 厂稳定批量供货、纱布一体自产电子纱），但价格与之完全脱节——期望内在价值 2.89 元/股（108.8 亿元）vs 2026-08-31 收盘 31.00 元（1,168.97 亿元），安全边际 −90.7%；PB 13.35 为近 5 年 93.8 分位、中位数 2.47 的 5.4 倍。两个可监控的再评估时点已锁定：2026-12-28 解禁 23.66 亿股（总股本 62.76%、流通盘 1.69 倍）、2027 年行业已公告约 6.6 亿米/年电子布新增产能集中投放而公司主力项目投产期为 2027 年 6 月
+  bear: 2.32
+  base: 3.02
+  bull: 3.41
+  dividend_yield: 0.065
+  conviction_date: '2026-08-31'
+  source_doc: sectors/materials/fiberglass/国际复材/index.md
+  themes:
+  - 电子纱
+  - 电子布
+  - AI高速CCL
+  - 供给侧
+  - 玻纤
