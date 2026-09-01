@@ -3747,12 +3747,12 @@
   currency: HKD
   sector: ai-application
   rating: watch
-  watch_reason: 技术领先是硬证据（AA 智能指数开源榜第一 51 分、三年营收 CAGR 132.5%、逆势提价 83% 而调用量 +400%），但价格与结构均无安全边际——PS(TTM) 549x / forward PS 59x（后者依赖公司未确认的软证据），期望内在价值 374.6 HKD 较现价 987.50 HKD 低 62.1%，即便 bull 情景完全兑现安全边际也仅 +2.8%；且万亿市值曾建立在 2.67% 自由流通盘上、2027-01-08 还有约 40% 待解禁，价格发现机制本身失效
-  bear: 59.0
-  base: 307.8
-  bull: 1014.9
-  conviction_date: '2026-08-01'
-  source_doc: sectors/ai-application/llm/2026-08-01-智谱-buffett分析.md
+  watch_reason: 1H2026 中报把两件事同时坐实——收入质量实质改善（本地化一次性项目占比 73.7%→13.5%，API 占 86.5%，云端分部毛利率 −0.4%→+24.6%，单位算力变现 +14x），以及估值支柱塌陷（旧档 forward PS 所依赖的 ARR 与实际入账 API 收入年化存在 6.5–8.7x 裂口，唯一合法主锚只剩 PS(TTM) 320.7x）。旧档触发器 2a（H1 营收 < 20 亿 CNY）与触发器 3（混合毛利率 < 41% 且 API 分部毛利率未过 25%）双双命中并已执行，base 终局 PS 由 12x 下修至 9x；触发器 4（技术领先被抹平）被明确证伪，bull 不因技术面下调。期望内在价值 212.8 HKD 对现价 1,195.00 HKD 安全边际 −82.2%，且 bull 单档安全边际已由旧档 +2.8% 转为 −27.9%——最乐观情景也不再托得住现价
+  bear: 28.6
+  base: 160.2
+  bull: 861.7
+  conviction_date: '2026-09-01'
+  source_doc: sectors/ai-application/llm/智谱/index.md
   themes:
   - 大模型
   - AI应用
