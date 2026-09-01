@@ -4561,3 +4561,22 @@
   - 先进封装
   - 临时键合
   - AI算力capex
+- stock_code: '600176'
+  stock_name: 中国巨石
+  market: A
+  currency: CNY
+  sector: materials
+  rating: watch
+  watch_reason: 生意是真的、业绩是真的、护城河也是真的，但价格把它们全部提前买单了——期望内在价值 11.35 元/股（454.4 亿元）vs 2026-08-31 收盘 43.93 元（1,758.58 亿元），安全边际 −74.2%；PB 5.30 为近 5 年周频 97.3 分位、中位数 2.04 的 2.6 倍，PE-TTM 38.81 约 97–98 分位。三个可监控的再评估时点已锁定：2027 年公司自身新增粗纱约 +19.4%、电子布约 +23.5%（新批 2.5 亿米线）集中释放；公司对该新线自估税前 IRR 仅 13.27%；低介电等特种电子布至 2026-06-24 公告仍为零订单零收入，半年报未更新
+  bear: 8.28
+  base: 11.99
+  bull: 14.99
+  dividend_yield: 0.0082
+  conviction_date: '2026-09-01'
+  source_doc: sectors/materials/fiberglass/中国巨石/index.md
+  themes:
+  - 电子布
+  - 电子纱
+  - AI高速CCL
+  - 玻纤
+  - 供给侧
