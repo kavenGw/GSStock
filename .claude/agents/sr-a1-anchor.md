@@ -24,6 +24,13 @@ effort: high
 - 行情锚必须明写「盘中 + 精确时刻」还是「收盘」，不许把盘中价写成收盘价。
 - 市值自洽校验必做：现价 × 总股本 = 市值。
 - 港/美股市值/PE/PB/52 周优先 WebFetch `stockanalysis.com` 或 Yahoo，**双源交叉**。亏损标的 PE=N/A 改看 PS/PB/Forward PE。
+- **美股财报原文走 SEC EDGAR，WebFetch 直连 `www.sec.gov` 必 403**。破解：`curl` 带 SEC 强制要求的
+  `User-Agent: <姓名> <邮箱>` 请求头即全部 200；**目录清单必须走 `.../index.json`**（HTML 目录页已改 JS 渲染，抓不到）。
+  8-K 正文数字在 `EX-99.1` 附件。此法一次可取全 8-K / 10-Q / DEF 14A / 全量 Form 4。
+  仍不通再退 Dell/公司官方 IR 站的季度财务附表或新闻稿 PDF，**二手媒体只作交叉验证、不作原表**。
+- **美股多股权类别（Class A/B/C）须取 10-Q 封面股数**：yfinance `sharesOutstanding` 可能只返回其中一类
+  （实测 DELL 返回 325.0M 仅 Class C，真实合计 648.1M，据前者算市值会低估约 50%）。
+  必做自洽校验：市值 ÷ 现价 = 隐含股本，与封面合计对得上才用。
 
 ## 裁决纪律
 

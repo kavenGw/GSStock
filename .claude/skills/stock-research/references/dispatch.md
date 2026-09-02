@@ -79,7 +79,8 @@ L24 的三路污染就是因为把竞价参考价当成了实际涨幅写进三�
 
 派发坑：写 300+ 行可能报 `Stream idle timeout`、文件 0 落盘。先 `ls <文件夹>` 确认
 哪些未生成，再用 `SendMessage` 按原 agentId 续跑（"只 Write 缺的文件、勿再读文件/
-联网、勿分段"），**别重派**。
+联网、勿分段"），**别重派**。agent 报 failed 时其 result 里的「进度自述」不可信
+（"正要开始写" ≠ 零落盘），一律 `ls -la` + `tail` 验完再决定重派还是补收口棒 [L64]。
 
 ## 3. 合并审查 → `subagent_type: sr-reviewer`
 
