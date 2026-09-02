@@ -1196,23 +1196,24 @@
   - CPU竞争
   - x86服务器
   - buffett对比
-- stock_code: 00189
+- stock_code: '00189'
   stock_name: 东岳集团
   market: HK
   currency: HKD
   sector: semiconductor
   rating: watch
-  bear: 3.47
-  base: 7.22
-  bull: 10.98
-  conviction_date: '2026-06-09'
-  source_doc: sectors/semiconductor/materials/2026-06-09-东岳集团-buffett分析.md
-  note: 每股=情景市值HKD÷17.3亿股(bear 60/base 125/bull 190亿)；股息率按现价16.34算
-  dividend_yield: 1.84
+  bear: 4.58
+  base: 9.85
+  bull: 14.14
+  conviction_date: '2026-09-02'
+  source_doc: sectors/semiconductor/materials/东岳集团/index.md
+  note: 每股 = 情景市值 HKD ÷ 17.327 亿股（bear 79.4/base 170.7/bull 245.0 亿 HKD）；正常化利润 CNY→HKD ×1.1663；期望内在价值 149.0 亿 HKD/每股 8.60；安全边际 −36.9%（现价 13.620）；bear 概率 40%
+  dividend_yield: 2.2
   themes:
   - fluorochemical-quota
   - ptfe
   - rubin-ai-ccl
+  - organosilicon
 - stock_code: 002149
   stock_name: 西部材料
   market: A

@@ -25,7 +25,7 @@ related_docs: []
 
 **连带清理（Phase C 执行）**：`comps/2026-05-20-存储扩厂双雄受益链-comps.md` 正文行内提及「昊华化学」3 处、
 `themes/2026-07-06-万华化学H1预增-化工景气上行.md` 提及 2 处、
-`sectors/semiconductor/materials/2026-06-09-东岳集团-buffett分析.md` 与
+`sectors/semiconductor/materials/东岳集团/index.md`（2026-09-02 已由平铺档迁移为文件夹档）与
 `2026-05-08-巨化股份-buffett分析.md` 的 `related_docs` 指向旧路径——
 **refs lint 抓不到正文行内死链，须全仓 grep「昊华化学」逐处改。**
 
