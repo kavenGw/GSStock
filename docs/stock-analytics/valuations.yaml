@@ -485,16 +485,18 @@
   currency: USD
   sector: electronics
   rating: watch
-  bear: 130.0
-  base: 157.0
-  bull: 185.0
-  conviction_date: '2026-05-29'
-  source_doc: sectors/electronics/servers/2026-05-29-戴尔科技-buffett分析.md
+  watch_reason: 维持 watch 但**理由已完全改变**。生意质量上调：Q2 FY27 ISG 经营利润率 15.04%（同比 +629bps），但归因桥表证明其中 **103% 来自非 AI 业务**（mix 效应 −20bps、非 AI 利润率扩张 +649bps），即靠内存短缺期的定价租金而非 AI —— 护城河形态从"成本/渠道"迁移到"关键件配额"，opex 降至营收 8%（42 年最低）是唯一确认的结构性改善。空头重心同步从"AI 薄利压毛利"迁到**现金流质量**：H1 收入 +71% 而 non-GAAP 毛利率反 −30bps（20.0%→19.7%）、真实 FCF 零增长（$4,096M→$4,104M），股东回报 $6,293M 超真实 FCF **53%**、缺口靠净增债务 $3,046M 补；DFS 融资应收 Q2 单季 +46.5%（Q1 还是 −2.3%），存货 $21.3B 创历史新高。估值透支证据更强：期望内在价值 **$211.22/股**（$136.5B），对 9/2 盘前 $466.53 安全边际 **−54.7%**，即便 bull 情景 $302.72 单独压测仍为 **−35.1%**。买点第一档 $148–150、第二档 $116，距现价需再跌 68%。
+  bear: 154.89
+  base: 214.37
+  bull: 302.72
+  dividend_yield: 0.54
+  conviction_date: '2026-09-02'
+  source_doc: sectors/electronics/servers/戴尔科技/index.md
   note: 正常化区间近似，无明确三档分档
   themes:
   - AI服务器
   - 算力硬件
-  - 企业基础设施
+  - 内存周期
   - owner-operator
 - stock_code: 002129
   stock_name: TCL中环
@@ -1196,7 +1198,7 @@
   - CPU竞争
   - x86服务器
   - buffett对比
-- stock_code: '00189'
+- stock_code: 00189
   stock_name: 东岳集团
   market: HK
   currency: HKD
