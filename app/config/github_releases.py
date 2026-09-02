@@ -26,12 +26,6 @@ GITHUB_RELEASE_REPOS = [
         'emoji': '💰',
     },
     {
-        'key': 'graphify',
-        'repo': 'safishamsi/graphify',
-        'name': 'graphify',
-        'emoji': '🕸️',
-    },
-    {
         'key': 'rtk',
         'repo': 'rtk-ai/rtk',
         'name': 'RTK',
