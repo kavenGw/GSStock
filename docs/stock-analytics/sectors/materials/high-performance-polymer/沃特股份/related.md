@@ -6,8 +6,6 @@ related_docs: []
 ---
 # 沃特股份（002886）关联文档
 
-<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
-<!-- END related_docs -->
 
 ## 本轮无结构性引用的理由
 
