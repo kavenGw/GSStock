@@ -4600,3 +4600,20 @@
   - 消费级3D打印机
   - 次新股解禁
   - 价格战
+- stock_code: '688333'
+  stock_name: 铂力特
+  market: A
+  currency: CNY
+  sector: industrial
+  rating: exclude
+  bear: 22.15
+  base: 53.55
+  bull: 86.77
+  dividend_yield: 0.1
+  conviction_date: '2026-09-03'
+  source_doc: sectors/industrial/additive-manufacturing/铂力特/index.md
+  themes:
+  - 3D打印
+  - 增材制造
+  - 军工航天
+  - 治理风险
