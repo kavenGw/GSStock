@@ -4617,3 +4617,24 @@
   - 增材制造
   - 军工航天
   - 治理风险
+- stock_code: AVGO
+  stock_name: 博通
+  market: US
+  currency: USD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 生意质地极强（FY26Q3 营收 296 亿/+86%、AI 半导体 167 亿/+221%、FCF 137 亿占营收 46%、互连与以太网为 Franchise 级），但整个投资判断收敛到一个变量：卖方一致 Forward PE 18.8–20.9× 隐含 FY2027 EPS $17.6–19.6，与用管理层 FY27 AI 收入 1,150 亿反推的约 $18.8 几乎完全吻合——**当前股价已 100% 计入 FY27 AI 1,150 亿兑现**，而该数字是口头指引、非审计 backlog、无统一 RPO 可交叉验证。场景加权期望内在价值 $221/股（市值约 1.0514 万亿），对 2026-09-02 收盘 $367.24 安全边际 −39.8%，且 **bull $292 仍低于现价 20.5%**——最乐观情景都不足以支撑现价。买点 $132/股（市值约 6,280 亿）。
+  bear: 137
+  base: 242
+  bull: 292
+  dividend_yield: 0.71
+  quality: 5
+  conviction_date: '2026-09-03'
+  source_doc: sectors/semiconductor/design/博通/index.md
+  note: 股息不构成估值支撑（0.71%，AVGO 属再投资型成长股，Q3 回购已归零）
+  themes:
+  - ai-infra
+  - custom-asic
+  - ethernet
+  - vmware
+  - 表外担保
