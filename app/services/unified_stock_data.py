@@ -52,6 +52,7 @@ VOLUME_SOURCE_UNITS = {
     'eastmoney_intraday': 'lots',   # ak.stock_intraday_em 的「手数」列
     'etf_fund_hist': 'lots',        # ak.fund_etf_hist_em
     'yfinance': 'shares',           # yfinance Volume
+    'hithink_snapshot': 'shares',   # 同花顺 /prices/snapshot volume（实测 600519 为股）
 }
 
 

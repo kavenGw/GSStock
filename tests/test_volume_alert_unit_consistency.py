@@ -14,6 +14,11 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVICE_FILE = ROOT / 'app' / 'services' / 'unified_stock_data.py'
+# _normalize_volume 的外部调用点（source 登记在 unified_stock_data.py，调用可能在别的文件）
+EXTERNAL_CALLER_FILES = [
+    ROOT / 'app' / 'services' / 'data_source_providers.py',
+    ROOT / 'app' / 'services' / 'hithink' / 'provider.py',
+]
 
 
 # ============ 1. 单位归一化源码契约锁定 ============
@@ -828,17 +833,18 @@ def test_all_volume_assignments_go_through_normalize_helper():
 
 
 def test_all_used_source_keys_are_registered():
-    """所有 _normalize_volume 调用点用到的 source 字面量都已登记"""
-    tree = ast.parse(SERVICE_FILE.read_text(encoding='utf-8'))
+    """所有 _normalize_volume 调用点用到的 source 字面量都已登记（含外部调用文件）"""
     used = set()
-    for node in ast.walk(tree):
-        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-                and node.func.id == '_normalize_volume' and len(node.args) >= 2):
-            src = node.args[1]
-            assert isinstance(src, ast.Constant), (
-                f"第 {node.lineno} 行 _normalize_volume 的 source 必须是字面量，不能是变量"
-            )
-            used.add(src.value)
+    for f in [SERVICE_FILE] + EXTERNAL_CALLER_FILES:
+        tree = ast.parse(f.read_text(encoding='utf-8'))
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                    and node.func.id == '_normalize_volume' and len(node.args) >= 2):
+                src = node.args[1]
+                assert isinstance(src, ast.Constant), (
+                    f"{f.name} 第 {node.lineno} 行 _normalize_volume 的 source 必须是字面量，不能是变量"
+                )
+                used.add(src.value)
 
     unknown = used - set(VOLUME_SOURCE_UNITS)
     assert not unknown, f"未登记的数据源: {unknown}"
