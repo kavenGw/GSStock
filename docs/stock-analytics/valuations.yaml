@@ -4638,3 +4638,19 @@
   - ethernet
   - vmware
   - 表外担保
+- stock_code: 01879
+  stock_name: 曦智科技
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: exclude
+  bear: 34.5
+  base: 85.37
+  bull: 210.07
+  conviction_date: '2026-09-03'
+  source_doc: sectors/semiconductor/optical-chip/曦智科技/index.md
+  themes:
+  - CPO
+  - 光互连
+  - 国产算力
+  - 港股18C

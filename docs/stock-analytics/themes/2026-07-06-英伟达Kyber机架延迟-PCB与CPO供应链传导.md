@@ -59,6 +59,9 @@ related_docs:
   - path: ../sectors/semiconductor/materials/建滔积层板/index.md
     note: 建滔 08-25 中报重做**维持**本档对 Kyber 延期的【软·官方否认】分级（SemiAnalysis 称延至 2028 且未撤稿，英伟达仅笼统否认「roadmap is intact」，**争议本轮仍未解决**）。对建滔的净影响进一步确认为有限，且理由比旧档更明确：**中报全文未出现 ABF／BT／HDI 任何字样，「封裝載板」仅 2 次且均系描述玻纤纱布的下游应用方向** —— 建滔在载板环节的定位是**材料供应商（特种玻纤纱/布）而非载板厂**，Kyber 级 M9 + 石英布 + 78 层 Midplane 三样全无位置
     symmetric: true
+  - path: ../sectors/semiconductor/optical-chip/曦智科技/index.md
+    note: 曦智科技（01879.HK）buffett 首建档（exclude）——国产光子计算 scale-up 域参与者而非全球 CPO 玩家，本档机架延迟传导链条为其产业位置提供纠偏参照
+    symmetric: true
 ---
 # 英伟达 Kyber 机架延迟——高端 PCB 与 CPO 供应链传导专题（2026-07-06）
 
@@ -77,6 +80,7 @@ related_docs:
 > - [2026-07-31-芯碁微装-buffett分析](../sectors/semiconductor/equipment/2026-07-31-芯碁微装-buffett分析.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
 > - [2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点](2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md) — 同一 CPO 时点争议链条的相反方向证据——本档是机架延迟（推后），彼档是 FAU 量产整线下单（推进），须并读避免单边取证
 > - [index](../sectors/semiconductor/materials/建滔积层板/index.md) — 建滔 08-25 中报重做**维持**本档对 Kyber 延期的【软·官方否认】分级（SemiAnalysis 称延至 2028 且未撤稿，英伟达仅笼统否认「roadmap is intact」，**争议本轮仍未解决**）。对建滔的净影响进一步确认为有限，且理由比旧档更明确：**中报全文未出现 ABF／BT／HDI 任何字样，「封裝載板」仅 2 次且均系描述玻纤纱布的下游应用方向** —— 建滔在载板环节的定位是**材料供应商（特种玻纤纱/布）而非载板厂**，Kyber 级 M9 + 石英布 + 78 层 Midplane 三样全无位置
+> - [index](../sectors/semiconductor/optical-chip/曦智科技/index.md) — 曦智科技（01879.HK）buffett 首建档（exclude）——国产光子计算 scale-up 域参与者而非全球 CPO 玩家，本档机架延迟传导链条为其产业位置提供纠偏参照
 <!-- END related_docs -->
 
 > 撰写日期：2026-07-06
