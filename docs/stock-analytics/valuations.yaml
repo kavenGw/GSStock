@@ -4654,3 +4654,20 @@
   - 光互连
   - 国产算力
   - 港股18C
+- stock_code: 01787
+  stock_name: 山东黄金
+  market: HK
+  currency: HKD
+  sector: materials
+  rating: watch
+  watch_reason: H 股 26.780 HKD 对期望内在价值 12.73 HKD 的安全边际 −52.5%，是四只金矿档里最好的一只（中金 −69.4%、赤峰 −56.0%、紫金 −56.6%），且 H 相对 A 折价 38.7%、储采比 19.9 年可排除资源枯竭、控股股东报告期增持 5.10 亿；但 2026H1 矿产金 19.10 吨（−22.70%，境内矿山 −34.8%）对全年 ≥49 吨指引只完成 39.0% 且指引已被半年报软性放弃，金价大年 FY2025 加权 ROE 仅 10.56%，中期分红被砍 44.4%，商誉 126.37 亿未测试、1 年内到期有息债缺口 221 亿、少数股东吞掉 38.19% 净利，AISC 与套保头寸双【缺】——够不上买，也不到 exclude
+  bear: 5.66
+  base: 15.19
+  bull: 24.19
+  dividend_yield: 1.22
+  conviction_date: '2026-09-03'
+  source_doc: sectors/materials/nonferrous/山东黄金/index.md
+  themes:
+  - 黄金
+  - 周期顶定价
+  - A+H折价
