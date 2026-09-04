@@ -22,7 +22,7 @@ valuation:
   currency: CNY
   dividend_yield: 0.49
 related_docs:
-- path: ../2026-06-19-华润微-buffett分析.md
+- path: ../华润微/index.md
   note: 功率 IDM 同业产能对照；华润微 PE 91.49 / PB 3.60 是「高 PE = 分母塌陷」的典型，本档据此改用 PB 做同业对照（详见 valuation.md §9.5）
   symmetric: true
 - path: ../2026-06-24-捷捷微电-buffett分析.md
@@ -39,7 +39,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-06-19-华润微-buffett分析](../2026-06-19-华润微-buffett分析.md) — 功率 IDM 同业产能对照；华润微 PE 91.49 / PB 3.60 是「高 PE = 分母塌陷」的典型，本档据此改用 PB 做同业对照（详见 valuation.md §9.5）
+> - [index](../华润微/index.md) — 功率 IDM 同业产能对照；华润微 PE 91.49 / PB 3.60 是「高 PE = 分母塌陷」的典型，本档据此改用 PB 做同业对照（详见 valuation.md §9.5）
 > - [2026-06-24-捷捷微电-buffett分析](../2026-06-24-捷捷微电-buffett分析.md) — 功率分立同业横向对照；唯一同为 2026Q2 已披露、可同 TTM 窗口比较者，其倍数 24/40/52x 与本档 22/29/38x 的档位差异见 valuation.md §9.2
 > - [index](../士兰微/index.md) — IDM 功率同业；估值分母质量的正面对照——士兰微分母含 37.40% 公允价值浮盈故弃 PE 改 PB，扬杰非经常仅占归母 6.02% 故正常用 PE
 > - [2026-07-03-功率半导体-第三代半导体七方横评-comps](../../../../comps/2026-07-03-功率半导体-第三代半导体七方横评-comps.md) — 七方横评，本档为其质地第一档；该 comps「PE 回到 30x 附近再看」的条件本档回应为尚未满足（PE 51 → 38.69，距 30x 仍差 22.4%，见 valuation.md §9.8）

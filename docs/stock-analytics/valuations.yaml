@@ -2345,18 +2345,20 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 10.84
-  base: 28.46
-  bull: 50.08
-  dividend_yield: 0.08
-  conviction_date: '2026-06-19'
-  source_doc: sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md
+  watch_reason: 2026H1 经营拐点是真的（Q2 扣非环比 +93.8%、毛利率 26.62% 站上 2025 全年阈值、两轮涨价落地），但归母 7.224 亿里 42.65% 是非经常性、其中金融资产浮盈 2.671 亿占归母 36.97%，两条 12 吋参股线权益法拖累从 −2.316 亿扩大到 −2.650 亿。剔浮盈并按公司自身 5Y PE 分布重锚倍数（18/25/32x，旧档 18/28/35x 太松）后，三情景加权期望内在价值约 267.5 亿元 / 20.14 元，对实时市值 751.10 亿安全边际 −64.4%，bull 压测仍 −42.5%。相对旧档 watch 的性质已变：矛盾从「分母是周期底」转为「分母含大额非经常 + 倍数给太松 + 12 吋拖累扩大」
+  bear: 8.13
+  base: 21.27
+  bull: 32.52
+  dividend_yield: 0.13
+  conviction_date: '2026-09-04'
+  source_doc: sectors/semiconductor/power/华润微/index.md
   note: 每股由情景内在价值÷13.28亿股反推；PE107x因周期底利润失真，按正常化利润+PB估值
   themes:
   - 功率半导体
   - 第三代半导体
   - 国产替代
   - 周期复苏
+  - 利润质量
 - stock_code: '06613'
   stock_name: 蓝思科技
   market: HK

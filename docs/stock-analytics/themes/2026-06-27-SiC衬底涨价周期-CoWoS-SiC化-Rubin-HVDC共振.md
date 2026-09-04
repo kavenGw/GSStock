@@ -30,7 +30,7 @@ related_docs:
 - path: ../sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md
   note: 晶盛机电（SiC长晶设备+12英寸SiC中介层晶体设备）——卖铲人，不直接受价格战伤害
   symmetric: true
-- path: ../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md
+- path: ../sectors/semiconductor/power/华润微/index.md
   note: 华润微（功率IDM）——SiC器件涨价受益但估值已透支
   symmetric: true
 - path: ../sectors/semiconductor/power/士兰微/events.md
@@ -62,7 +62,7 @@ related_docs:
 > - [2026-08-20-天岳先进-buffett分析](../sectors/semiconductor/sic-substrate/2026-08-20-天岳先进-buffett分析.md) — 天岳为本新闻直接主角；2026 半年报重做后该涨价叙事被大幅证伪——公司官方口径仅到"企稳"、从未称涨价缺货，"回升15%+/跳涨170%"经核查无一手来源且与 Yole（天岳自己援引）2027 年 8 英寸再跌 22.4% 的预测冲突，合同负债 213 万 + 存货 +54.9% + 仍计提跌价三重证伪"供不应求"；本档由"动摇旧硬伤"降级为"局部紧缺非全面反转"
 > - [2026-06-25-三安光电-buffett分析](../sectors/semiconductor/compound-semiconductor/2026-06-25-三安光电-buffett分析.md) — 三安光电（含SiC衬底的全产业链IDM）——SiC涨价+缺货利好其SiC分部减亏
 > - [2026-06-19-晶盛机电-buffett分析](../sectors/semiconductor/equipment/2026-06-19-晶盛机电-buffett分析.md) — 晶盛机电（SiC长晶设备+12英寸SiC中介层晶体设备）——卖铲人，不直接受价格战伤害
-> - [2026-06-19-华润微-buffett分析](../sectors/semiconductor/power/2026-06-19-华润微-buffett分析.md) — 华润微（功率IDM）——SiC器件涨价受益但估值已透支
+> - [index](../sectors/semiconductor/power/华润微/index.md) — 华润微（功率IDM）——SiC器件涨价受益但估值已透支
 > - [events](../sectors/semiconductor/power/士兰微/events.md) — 士兰微（功率IDM+SiC主驱）——SiC器件涨价受益但估值已透支
 > - [2026-06-25-斯达半导-buffett分析](../sectors/semiconductor/power/2026-06-25-斯达半导-buffett分析.md) — 斯达半导（车规IGBT+SiC模块）——衬底涨价对其是成本压力的双面性
 > - [events](../sectors/semiconductor/power/扬杰科技/events.md) — 扬杰科技（300373）事件回写；方向须纠正——扬杰在器件端，衬底涨价对其是成本项而非收入项；其 SiC 仅 6 吋线且无 8 寸规划，「8 寸替代」风险应挂国内 6 吋 SiC 线而非越南线

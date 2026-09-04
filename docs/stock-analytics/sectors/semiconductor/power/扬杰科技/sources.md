@@ -51,7 +51,7 @@ section: sources
 ## 12.4 本仓内部基线
 
 - **旧档基线**：`sectors/semiconductor/power/2026-06-25-扬杰科技-buffett分析.md`（307 行；Phase C 删除）。逐条对账见 [valuation.md 相对旧档变化清单](valuation.md)。
-- **兄弟档口径对齐**：[士兰微 index](../士兰微/index.md)（弃 PE 改 PB 的分母质量判据）、[捷捷微电](../2026-06-24-捷捷微电-buffett分析.md)（板块倍数框架 24/40/52x）、[华润微](../2026-06-19-华润微-buffett分析.md)、[七方横评 comps](../../../../comps/2026-07-03-功率半导体-第三代半导体七方横评-comps.md)（"PE 回到 30x 附近再看"的旧承诺）。
+- **兄弟档口径对齐**：[士兰微 index](../士兰微/index.md)（弃 PE 改 PB 的分母质量判据）、[捷捷微电](../2026-06-24-捷捷微电-buffett分析.md)（板块倍数框架 24/40/52x）、[华润微](../华润微/index.md)、[七方横评 comps](../../../../comps/2026-07-03-功率半导体-第三代半导体七方横评-comps.md)（"PE 回到 30x 附近再看"的旧承诺）。
 - **Phase A evidence 底稿**（gitignore，不入库）：`.omc/artifacts/扬杰科技-2026-08-24-evidence-A1-数据锚.md` / `-A2-论点.md` / `-A3-lens.md`，每个数字挂 URL + 日期 + 【硬/软/缺】。
 
 ---
