@@ -6,6 +6,7 @@
 import logging
 import os
 import threading
+import time
 
 import requests
 
@@ -14,6 +15,15 @@ logger = logging.getLogger(__name__)
 BASE_URL = 'https://fuyao.aicubes.cn'
 ENV_KEY = 'HITHINK_FINANCE_API_KEY'
 TIMEOUT = 15
+MAX_RETRIES = 3
+BACKOFF_BASE = 0.5
+
+
+def _is_retryable(code) -> bool:
+    """4001 限流与 5xxx 服务端异常可重试；1xxx-2xxx 调用方问题不重试。"""
+    if code == 4001:
+        return True
+    return isinstance(code, int) and 5000 <= code < 6000
 
 
 class HithinkError(Exception):
@@ -60,23 +70,36 @@ class HithinkClient:
             raise HithinkError(f'{ENV_KEY} 未配置')
 
         url = f"{BASE_URL}{path}"
-        resp = self._session.get(
-            url, params=params,
-            headers={'X-api-key': self.api_key},
-            timeout=TIMEOUT,
-        )
-        if resp.status_code != 200:
-            raise HithinkError(f'HTTP {resp.status_code}', code=resp.status_code)
+        last_error = None
 
-        payload = resp.json()
-        code = payload.get('code')
-        if code != 0:
-            raise HithinkError(
+        for attempt in range(MAX_RETRIES):
+            resp = self._session.get(
+                url, params=params,
+                headers={'X-api-key': self.api_key},
+                timeout=TIMEOUT,
+            )
+            if resp.status_code != 200:
+                raise HithinkError(f'HTTP {resp.status_code}', code=resp.status_code)
+
+            payload = resp.json()
+            code = payload.get('code')
+            if code == 0:
+                return payload.get('data') or {}
+
+            last_error = HithinkError(
                 payload.get('message', '未知错误'),
                 code=code,
                 request_id=payload.get('request_id'),
             )
-        return payload.get('data') or {}
+            if not _is_retryable(code):
+                raise last_error
+
+            if attempt < MAX_RETRIES - 1:
+                delay = BACKOFF_BASE * (2 ** attempt)
+                logger.warning(f'[同花顺] code={code} 退避 {delay}s 后重试 ({attempt + 1}/{MAX_RETRIES})')
+                time.sleep(delay)
+
+        raise last_error
 
 
 _client = None

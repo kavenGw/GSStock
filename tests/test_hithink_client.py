@@ -85,3 +85,46 @@ def test_get_raises_without_key():
     with patch.dict(os.environ, {}, clear=True):
         with pytest.raises(HithinkError):
             HithinkClient().get('/api/a-share/prices/snapshot', {})
+
+
+def _client_with_key():
+    return HithinkClient()
+
+
+def test_4001_retries_with_backoff_then_succeeds():
+    rate_limited = {'code': 4001, 'message': '限流', 'request_id': 'r'}
+    ok = load_fixture('snapshot.json')
+    with patch.dict(os.environ, {'HITHINK_FINANCE_API_KEY': 'sk-test'}, clear=True):
+        client = _client_with_key()
+        responses = [_mock_response(rate_limited), _mock_response(ok)]
+        with patch.object(client._session, 'get', side_effect=responses) as m:
+            with patch('app.services.hithink.client.time.sleep') as sleep_mock:
+                data = client.get('/api/a-share/prices/snapshot', {})
+
+    assert data['total'] == 2
+    assert m.call_count == 2
+    assert sleep_mock.call_count == 1
+
+
+def test_5xxx_retries_bounded_then_raises():
+    err = {'code': 5001, 'message': '服务端异常', 'request_id': 'r'}
+    with patch.dict(os.environ, {'HITHINK_FINANCE_API_KEY': 'sk-test'}, clear=True):
+        client = _client_with_key()
+        with patch.object(client._session, 'get', return_value=_mock_response(err)) as m:
+            with patch('app.services.hithink.client.time.sleep'):
+                with pytest.raises(HithinkError):
+                    client.get('/api/a-share/prices/snapshot', {})
+
+    assert m.call_count == 3
+
+
+@pytest.mark.parametrize('code', [1001, 2001])
+def test_client_side_errors_do_not_retry(code):
+    err = {'code': code, 'message': '缺参', 'request_id': 'r'}
+    with patch.dict(os.environ, {'HITHINK_FINANCE_API_KEY': 'sk-test'}, clear=True):
+        client = _client_with_key()
+        with patch.object(client._session, 'get', return_value=_mock_response(err)) as m:
+            with pytest.raises(HithinkError):
+                client.get('/api/a-share/prices/snapshot', {})
+
+    assert m.call_count == 1
