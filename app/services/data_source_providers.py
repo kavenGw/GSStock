@@ -383,7 +383,7 @@ class PolygonProvider(DataSourceProvider):
 # 数据源注册表
 DATA_SOURCE_REGISTRY = {
     'A': {
-        'sources': ['sina', 'tencent', 'eastmoney'],
+        'sources': ['hithink', 'sina', 'tencent', 'eastmoney'],
         'fallback': 'yfinance'
     },
     'US': {
@@ -414,11 +414,15 @@ class DataSourceFactory:
     def get_provider(cls, name: str) -> Optional[DataSourceProvider]:
         """获取数据源提供器实例"""
         if name not in cls._instances:
-            provider_class = {
-                'yfinance': YFinanceProvider,
-                'twelvedata': TwelveDataProvider,
-                'polygon': PolygonProvider,
-            }.get(name)
+            if name == 'hithink':
+                from app.services.hithink.provider import HithinkProvider
+                provider_class = HithinkProvider
+            else:
+                provider_class = {
+                    'yfinance': YFinanceProvider,
+                    'twelvedata': TwelveDataProvider,
+                    'polygon': PolygonProvider,
+                }.get(name)
 
             if provider_class:
                 cls._instances[name] = provider_class()

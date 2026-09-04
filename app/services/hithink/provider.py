@@ -67,3 +67,65 @@ def fetch_snapshot(codes, now_str):
         names = ', '.join(d['name'] for d in result.values())
         logger.info(f'[数据服务.实时价格] 同花顺 → {names} ({len(result)}只)')
     return result
+
+
+class HithinkProvider(DataSourceProvider):
+    """同花顺 A 股数据源。日 K 仅作 fallback——复权因子需自行推导，腾讯 fqkline 直接给 qfq。"""
+
+    name = 'hithink'
+    market = 'A'
+
+    def is_available(self) -> bool:
+        return get_client().is_available()
+
+    def get_realtime_price(self, symbol: str):
+        from datetime import datetime
+        now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return fetch_snapshot([symbol], now_str).get(from_thscode(to_thscode(symbol)))
+
+    def get_batch_prices(self, symbols: list) -> dict:
+        from datetime import datetime
+        now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return fetch_snapshot(symbols, now_str)
+
+    def get_historical_data(self, symbol: str, days: int):
+        from datetime import datetime, timedelta
+
+        from app.services.unified_stock_data import _normalize_volume
+
+        end_ms = int(datetime.now().timestamp() * 1000)
+        start_ms = int((datetime.now() - timedelta(days=days * 2)).timestamp() * 1000)
+
+        data = _get(_HISTORICAL, {
+            'thscode': to_thscode(symbol),
+            'start': start_ms,
+            'end': end_ms,
+            'interval': '1d',
+            'adjust': 'forward',
+        })
+        items = data.get('item') or []
+        if not items:
+            return None
+
+        bars = []
+        prev_close = None
+        for row in sorted(items, key=lambda r: r.get('date_ms') or 0):
+            close = row.get('close_price')
+            change_pct = ((close - prev_close) / prev_close * 100) if (prev_close and close) else 0
+            bars.append({
+                'date': datetime.fromtimestamp(row['date_ms'] / 1000).strftime('%Y-%m-%d'),
+                'open': row.get('open_price'),
+                'high': row.get('high_price'),
+                'low': row.get('low_price'),
+                'close': close,
+                'volume': _normalize_volume(row.get('volume'), 'hithink_snapshot', 'A'),
+                'change_pct': round(change_pct, 2),
+            })
+            prev_close = close
+
+        return {
+            'stock_code': from_thscode(to_thscode(symbol)),
+            'stock_name': from_thscode(to_thscode(symbol)),
+            'data': bars[-days:] if len(bars) > days else bars,
+            'source': 'hithink',
+        }
