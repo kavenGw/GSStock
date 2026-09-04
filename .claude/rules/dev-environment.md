@@ -82,6 +82,8 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 
 **并行 session 抢 git index**：多 Claude session 同跑一仓时，`git add` 暂存的文件会被另一 session 的 `git reset`/`git add` 在你两次 Bash 调用之间清空（实测 staged 下一条命令就消失，`git diff --cached` 变空 → 提交漏文件）。铁律：**`git add` 与 `git commit` 放进同一条 Bash 命令链**（`git add <精确路径...> && git commit -F .git/MSG.txt`，中文多行 message 走文件避免 heredoc 失配），切勿跨工具调用分开；提交后 `git show --stat <sha>` 确认只含本任务文件、未裹挟他人在写档。删除文件用 `git rm -q --ignore-unmatch <path>` 同链处理（文件已不在磁盘时 `git add` 该路径会 pathspec 报错）。
 
+**同链里混入被 gitignore 的路径会让整条链在 commit 前中止**：`git add` 遇到被忽略的路径直接报错退出（`Use -f if you really want to add them`），`&&` 链随即断在 `git commit` 之前 —— **提交静默没落地**，而上一条铁律要求的正是「add 与 commit 同链」，两者叠加就成了这个坑。实测 SDD 流程里 subagent 把任务报告 `.superpowers/sdd/*/task-N-report.md`（`.superpowers/` 已 gitignore）与代码一起 add，首次提交无声失败，第二次单独 add 代码才成功。铁律：**同链只 add 会入库的代码与测试路径**，报告/计划/中间产物等 gitignore 目录下的文件永远不放进 `git add`。疑似没落地时用 `git merge-base --is-ancestor <预期SHA> HEAD` 验证（见下文「验证自己的 commit 没脱链」）。
+
 **别用 `git commit -- <pathspec>` 防裹挟——它提交的是工作区而非暂存区**：想「只提交本任务文件」时容易误用 `git commit -F msg -- <path>`，但带 pathspec 的 commit **绕过 index、直接取这些路径的工作区内容**（等价于对这些路径隐式 `git add`）。并行 session 正在改同一文件时，这恰恰把对方的在写改动一起吃进你的 commit —— 与你的本意相反。实测 stock-research 模式 1 收尾时用此形式提交 `valuations.yaml`，把并行 session 的另一只股条目裹挟进来，**且自己那只股的同步结果反被对方工作区版本覆盖掉**（自报"已同步"、磁盘上仍是旧值）。正确做法仍是 `git add <精确路径...> && git commit -F .git/MSG.txt` 同链。
 
 **`valuations.yaml` 这类单文件聚合无法按条目分离暂存**：多 session 同时 sync 时，`git add` 必然连带对方刚写入的条目（git 只有文件粒度）。此时**别为了"干净"而回退对方内容**（破坏其工作）——连带提交并在 commit message 注明该条目非本任务产物即可，双方内容都不丢。**提交后必须 `git show HEAD:<file>` 复核自己那条真的落库**：另一 session 可能在你两次调用之间抢先提交（连带你的改动，属良性），也可能其工作区版本较旧而把你的改动覆盖（需重跑 sync 补正）。sync 类脚本的"已同步"自报一律不可信，以 `git show HEAD:` 读到的内容为准。
