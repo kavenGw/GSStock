@@ -2352,7 +2352,7 @@
   dividend_yield: 0.13
   conviction_date: '2026-09-04'
   source_doc: sectors/semiconductor/power/华润微/index.md
-  note: 每股由情景内在价值÷13.28亿股反推；PE107x因周期底利润失真，按正常化利润+PB估值
+  note: 每股由情景内在价值÷13.28亿股反推；2026 中报重做口径——正常化利润 11.3 亿（剔金融资产浮盈、扣 12 吋权益法拖累）× 自身 5Y PE 分布重锚 18/25/32x；明确拒绝 PB 2.0x 托底（净资产正常化 ROE 仅 4.8%），PB 仅作交叉验证
   themes:
   - 功率半导体
   - 第三代半导体
