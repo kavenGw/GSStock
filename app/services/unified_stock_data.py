@@ -975,21 +975,33 @@ class UnifiedStockDataService:
                 logger.info(f"[数据服务.实时价格] {today} yfinance(A股兜底) → {names} ({len(result)}只)")
             return result
 
-        # 使用优先级负载均衡器分配任务
-        # 主数据源：腾讯和新浪并行获取
-        # 备用数据源：东方财富获取主数据源失败的
-        # 兜底：yfinance
+        def fetch_from_hithink(codes: list) -> dict:
+            from app.services.hithink.provider import fetch_snapshot
+            return fetch_snapshot(codes, now_str)
+
+        # 优先级：同花顺为主 → 腾讯/新浪/东财按序补投 → yfinance 兜底
+        # 未配 HITHINK_FINANCE_API_KEY 时同花顺整体跳过，回到接入前的腾讯/新浪主源
+        from app.services.hithink.client import get_client as _hithink_client
+
         fetch_funcs = {
             'tencent': fetch_from_tencent,
             'sina': fetch_from_sina,
             'eastmoney': fetch_from_eastmoney,
         }
 
+        if _hithink_client().is_available():
+            fetch_funcs['hithink'] = fetch_from_hithink
+            primary_sources = ['hithink']
+            secondary_sources = ['tencent', 'sina', 'eastmoney']
+        else:
+            primary_sources = ['tencent', 'sina']
+            secondary_sources = ['eastmoney']
+
         return load_balancer.fetch_with_priority_balancing(
             stock_codes,
             fetch_funcs,
-            primary_sources=['tencent', 'sina'],
-            secondary_sources=['eastmoney'],
+            primary_sources=primary_sources,
+            secondary_sources=secondary_sources,
             fallback_func=fetch_from_yfinance
         )
 

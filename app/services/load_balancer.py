@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 # 各市场数据源配置
 MARKET_SOURCES = {
     'A': {
-        'sources': ['tencent', 'sina', 'eastmoney'],
+        'sources': ['hithink', 'tencent', 'sina', 'eastmoney'],
         'fallback': 'yfinance',
-        'weights': {'tencent': 50, 'sina': 50, 'eastmoney': 0},  # 腾讯和新浪为主，东方财富为备用
-        # 优先级模式配置：主数据源失败后再用备用数据源
+        'weights': {'hithink': 100, 'tencent': 0, 'sina': 0, 'eastmoney': 0},
+        # 优先级模式：同花顺为主，失败依次降级腾讯/新浪/东财，最后 yfinance 兜底
         'priority_mode': True,
-        'primary_sources': ['tencent', 'sina'],  # 主数据源：腾讯和新浪
-        'secondary_sources': ['eastmoney'],  # 备用数据源：东方财富
+        'primary_sources': ['hithink'],
+        'secondary_sources': ['tencent', 'sina', 'eastmoney'],
     },
     'US': {
         'sources': ['yfinance', 'twelvedata', 'polygon'],
@@ -61,10 +61,10 @@ class LoadBalancer:
     _instance = None
     _lock = threading.Lock()
 
-    # A股数据源（按优先级排序：腾讯和新浪为主，东方财富为备用）
-    A_SHARE_SOURCES = ['tencent', 'sina', 'eastmoney']
-    A_SHARE_PRIMARY = ['tencent', 'sina']  # 主数据源
-    A_SHARE_SECONDARY = ['eastmoney']  # 备用数据源
+    # A股数据源（按优先级排序：同花顺为主，腾讯/新浪/东方财富依次降级）
+    A_SHARE_SOURCES = ['hithink', 'tencent', 'sina', 'eastmoney']
+    A_SHARE_PRIMARY = ['hithink']                              # 主数据源
+    A_SHARE_SECONDARY = ['tencent', 'sina', 'eastmoney']       # 备用数据源（按序补投）
 
     def __new__(cls):
         if cls._instance is None:
