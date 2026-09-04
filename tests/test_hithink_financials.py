@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 from unittest.mock import patch
 
@@ -12,6 +13,13 @@ FIXTURES = Path(__file__).parent / 'fixtures' / 'hithink'
 def load_fixture(name):
     with open(FIXTURES / name, encoding='utf-8') as f:
         return json.load(f)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_cache_dir(tmp_path):
+    """财务缓存落盘到 tmp_path，避免污染仓库 data/cache/hithink/ 与跨测试状态泄漏。"""
+    with patch.object(financials, 'CACHE_DIR', tmp_path):
+        yield
 
 
 def test_income_statements_returns_periods_newest_first():
@@ -29,6 +37,9 @@ def test_income_statements_returns_periods_newest_first():
 def test_income_statements_normalizes_bare_and_prefixed_codes():
     data = load_fixture('income_annual.json')['data']
     for raw in ('600519', 'sh600519', '600519.SH'):
+        # 三种写法归一化后是同一个 thscode，缓存 key 相同 —— 每轮清空缓存，
+        # 避免上一轮的缓存命中吃掉本轮对 _get 的调用，破坏"验证归一化"的原意。
+        shutil.rmtree(financials.CACHE_DIR, ignore_errors=True)
         with patch.object(financials, '_get', return_value=data) as m:
             financials.get_income_statements(raw)
         assert m.call_args[0][1]['thscode'] == '600519.SH'
@@ -68,3 +79,32 @@ def test_valuations_empty_codes_short_circuits():
     with patch.object(financials, '_get') as m:
         assert financials.get_valuations([]) == {}
     m.assert_not_called()
+
+
+def test_disclosed_annual_report_cached_forever():
+    data = load_fixture('income_annual.json')['data']
+    with patch.object(financials, '_get', return_value=data) as m:
+        first = financials.get_income_statements('600519', period='annual', limit=2)
+        second = financials.get_income_statements('600519', period='annual', limit=2)
+
+    assert m.call_count == 1
+    assert first == second
+
+
+def test_cache_key_separates_period_and_limit():
+    data = load_fixture('income_annual.json')['data']
+    with patch.object(financials, '_get', return_value=data) as m:
+        financials.get_income_statements('600519', period='annual', limit=2)
+        financials.get_income_statements('600519', period='annual', limit=5)
+        financials.get_income_statements('600519', period='quarterly', limit=2)
+
+    assert m.call_count == 3
+
+
+def test_valuations_never_cached():
+    data = load_fixture('valuations.json')['data']
+    with patch.object(financials, '_get', return_value=data) as m:
+        financials.get_valuations(['600519'])
+        financials.get_valuations(['600519'])
+
+    assert m.call_count == 2
