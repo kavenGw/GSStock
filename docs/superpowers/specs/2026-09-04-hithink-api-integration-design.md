@@ -111,7 +111,9 @@
 ### 5.4 缓存
 
 - **行情**：走现有 `SmartCacheStrategy` / `get_effective_cache_date(code)`，**不新造缓存层**。
-- **财务**：轻量文件缓存，按 `(thscode, period, report)` 存 JSON 落 `data/cache/hithink/`。TTL 按报告期而非天数 —— 已披露年报永不过期，当期在途给 6 小时。不进 DB、不进 git。
+- **财务**：轻量文件缓存，按 `(thscode, period, report)` 存 JSON 落 `data/cache/hithink/`。三表 TTL 24 小时，indicators 6 小时。不进 DB、不进 git。
+
+> **实施修正（2026-09-04，commit `ba0df787`）**：本节原设计为「TTL 按报告期 —— 已披露年报永不过期，当期在途给 6 小时」。实施后的全分支 review 指出该设计在本模块的查询形态下不成立：`_statements` 是「取最新 N 期」查询，无论缓存的是哪一期，永远可能出现更新的一期。按原设计，2026-01 调 `annual` 查询时 FY2025 年报尚未披露、返回最新为 FY2024（期末已过去）会被标记永不过期，导致 **FY2025 此后永远取不到**，且无告警、只能手删缓存目录才能恢复 —— 与本模块「财务线不静默降级」的原则正面冲突。故删除 `forever` 概念，统一 TTL-only；原设计意图（避免无谓回源）由 TTL 完整保留。
 
 ## 6. 配置
 

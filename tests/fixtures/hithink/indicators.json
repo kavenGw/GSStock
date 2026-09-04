@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "93a44775920c433a99dfe2a19ca76750",
+  "data": {
+    "thscode": "600519.SH",
+    "report": "2025-4",
+    "abilities": [
+      {"ability": "growth", "indicators": [
+        {"index_id": "calculate_operating_income_yoy_growth_ratio", "value": "-1.20600400"},
+        {"index_id": "calculate_parent_holder_net_profit_yoy_growth_ratio", "value": "-4.53225500"}
+      ]},
+      {"ability": "profitability", "indicators": [
+        {"index_id": "index_weighted_avg_roe", "value": "32.5300"},
+        {"index_id": "index_deduct_weighted_avg_roe", "value": "32.5200"},
+        {"index_id": "sale_gross_margin", "value": "91.1796"},
+        {"index_id": "sale_net_interest_ratio", "value": "50.5279"}
+      ]},
+      {"ability": "solvency", "indicators": [
+        {"index_id": "assets_debt_ratio", "value": "16.4154"},
+        {"index_id": "earned_interest_multiple", "value": null}
+      ]},
+      {"ability": "operation", "indicators": [
+        {"index_id": "total_assets_turnover_ratio", "value": "0.5602"}
+      ]},
+      {"ability": "cash-flow", "indicators": [
+        {"index_id": "net_profit_cash_content", "value": "74.73536800"}
+      ]}
+    ]
+  }
+}
