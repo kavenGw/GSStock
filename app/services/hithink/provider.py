@@ -6,6 +6,7 @@ snapshot 端点不返回中文名，valuations 端点返回 name 且同样支持
 """
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timezone, timedelta
 
 from app.services.data_source_providers import DataSourceProvider
 from app.services.hithink.client import get_client, to_thscode, from_thscode
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 _SNAPSHOT = '/api/a-share/prices/snapshot'
 _HISTORICAL = '/api/a-share/prices/historical'
+_CST = timezone(timedelta(hours=8))  # date_ms 编码的是北京日期，转换须脱钩运行机本地时区
 
 
 def _get(path, params):
@@ -113,7 +115,7 @@ class HithinkProvider(DataSourceProvider):
             close = row.get('close_price')
             change_pct = ((close - prev_close) / prev_close * 100) if (prev_close and close) else 0
             bars.append({
-                'date': datetime.fromtimestamp(row['date_ms'] / 1000).strftime('%Y-%m-%d'),
+                'date': datetime.fromtimestamp(row['date_ms'] / 1000, _CST).strftime('%Y-%m-%d'),
                 'open': row.get('open_price'),
                 'high': row.get('high_price'),
                 'low': row.get('low_price'),
@@ -126,6 +128,6 @@ class HithinkProvider(DataSourceProvider):
         return {
             'stock_code': from_thscode(to_thscode(symbol)),
             'stock_name': from_thscode(to_thscode(symbol)),
-            'data': bars[-days:] if len(bars) > days else bars,
+            'data': bars[-days:],
             'source': 'hithink',
         }
