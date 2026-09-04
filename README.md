@@ -56,6 +56,7 @@ cp .env.sample .env
 | `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
+| `HITHINK_FINANCE_API_KEY` | 同花顺 A 股行情/财务/估值 API key，未配置则该数据源整体跳过，行为与接入前一致 | 空 |
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
 | `GEMINI_API_KEY` | Google Gemini 密钥，多个逗号分隔（可选，公司识别） | 空 |
 | `LLM_DAILY_BUDGET` | LLM 日预算上限（美元） | 无上限 |

@@ -1,0 +1,14 @@
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "be7d3037f7a84edc84be1347139e7027",
+  "data": {
+    "timestamp": 1788499220000,
+    "total": 1,
+    "item": [
+      {"thscode": "600519.SH", "ticker": "600519", "name": "贵州茅台",
+       "pe_ttm": 20.421708, "pe_mrq": 18.678544, "pb_mrq": 6.618895,
+       "ps_ttm": 9.599605, "pcf_ttm": 13.963949}
+    ]
+  }
+}
