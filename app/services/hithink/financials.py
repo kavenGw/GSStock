@@ -20,7 +20,8 @@ _INDICATORS = '/api/a-share/financials/indicators'
 _VALUATIONS = '/api/a-share/valuations/snapshot'
 
 CACHE_DIR = Path('data/cache/hithink')
-INFLIGHT_TTL = 6 * 3600  # 在途报告期 6 小时
+INFLIGHT_TTL = 6 * 3600  # indicators：在途报告期 6 小时
+STATEMENTS_TTL = 24 * 3600  # 三表：「取最新 N 期」查询本质不可 freeze，统一走 TTL
 
 
 def _get(path, params):
@@ -42,25 +43,13 @@ def _cache_path(kind, key):
     return Path(CACHE_DIR) / kind / f'{digest}.json'
 
 
-def _is_disclosed(payload):
-    """已披露的历史报告期永不过期；在途/未来期给 6 小时。
-
-    判据：最新一期的 period_end_ms 已经过去 —— 报表期已结束即视为已定稿。
-    """
-    rows = payload if isinstance(payload, list) else [payload]
-    ends = [r.get('period_end_ms') for r in rows if isinstance(r, dict) and r.get('period_end_ms')]
-    if not ends:
-        return False
-    return max(ends) / 1000 < time.time()
-
-
-def _cached(kind, key, loader):
+def _cached(kind, key, loader, ttl):
     path = _cache_path(kind, key)
     if path.exists():
         try:
             with open(path, encoding='utf-8') as f:
                 entry = json.load(f)
-            if entry.get('forever') or time.time() - entry['saved_at'] < INFLIGHT_TTL:
+            if time.time() - entry['saved_at'] < ttl:
                 return entry['payload']
         except (OSError, ValueError, KeyError):
             logger.warning(f'[同花顺.缓存] 读取失败，回源: {path}')
@@ -69,10 +58,7 @@ def _cached(kind, key, loader):
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, 'w', encoding='utf-8') as f:
-            json.dump(
-                {'saved_at': time.time(), 'forever': _is_disclosed(payload), 'payload': payload},
-                f, ensure_ascii=False,
-            )
+            json.dump({'saved_at': time.time(), 'payload': payload}, f, ensure_ascii=False)
     except OSError as e:
         logger.warning(f'[同花顺.缓存] 写入失败（不影响取数）: {e}')
     return payload
@@ -86,7 +72,7 @@ def _statements(path, code, period, limit):
         items = data.get('item') or []
         return sorted(items, key=lambda r: r.get('period_end_ms') or 0, reverse=True)
 
-    return _cached('statements', f'{path}|{ths}|{period}|{limit}', loader)
+    return _cached('statements', f'{path}|{ths}|{period}|{limit}', loader, STATEMENTS_TTL)
 
 
 def get_income_statements(code, period='annual', limit=5):
@@ -122,7 +108,7 @@ def get_indicators(code, report):
         flat['_abilities'] = grouped
         return flat
 
-    return _cached('indicators', f'{ths}|{report}', loader)
+    return _cached('indicators', f'{ths}|{report}', loader, INFLIGHT_TTL)
 
 
 def get_valuations(codes):

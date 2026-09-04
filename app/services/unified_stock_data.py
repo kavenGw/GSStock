@@ -53,6 +53,7 @@ VOLUME_SOURCE_UNITS = {
     'etf_fund_hist': 'lots',        # ak.fund_etf_hist_em
     'yfinance': 'shares',           # yfinance Volume
     'hithink_snapshot': 'shares',   # 同花顺 /prices/snapshot volume（实测 600519 为股）
+    'hithink_historical': 'shares', # 同花顺 /prices/historical volume（实测首根K线 7,842,956 股 × close 1293.09 ≈ 101.1亿元成交额，自洽）
 }
 
 

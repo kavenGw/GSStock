@@ -81,14 +81,22 @@ def test_valuations_empty_codes_short_circuits():
     m.assert_not_called()
 
 
-def test_disclosed_annual_report_cached_forever():
+def test_statements_cache_hits_within_ttl_and_refetches_after():
     data = load_fixture('income_annual.json')['data']
-    with patch.object(financials, '_get', return_value=data) as m:
+    with patch.object(financials, '_get', return_value=data) as m, \
+         patch.object(financials.time, 'time', return_value=1000.0):
         first = financials.get_income_statements('600519', period='annual', limit=2)
         second = financials.get_income_statements('600519', period='annual', limit=2)
 
     assert m.call_count == 1
     assert first == second
+
+    with patch.object(financials, '_get', return_value=data) as m, \
+         patch.object(financials.time, 'time', return_value=1000.0 + financials.STATEMENTS_TTL + 1):
+        third = financials.get_income_statements('600519', period='annual', limit=2)
+
+    assert m.call_count == 1
+    assert third == first
 
 
 def test_cache_key_separates_period_and_limit():

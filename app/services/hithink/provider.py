@@ -120,7 +120,7 @@ class HithinkProvider(DataSourceProvider):
                 'high': row.get('high_price'),
                 'low': row.get('low_price'),
                 'close': close,
-                'volume': _normalize_volume(row.get('volume'), 'hithink_snapshot', 'A'),
+                'volume': _normalize_volume(row.get('volume'), 'hithink_historical', 'A'),
                 'change_pct': round(change_pct, 2),
             })
             prev_close = close
