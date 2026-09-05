@@ -31,5 +31,14 @@ if %errorlevel% equ 0 (
 start "" /min powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0wait_and_open.ps1"
 
 set WSLENV=SSHPASS
-wsl -d Ubuntu sshpass -e ssh -N -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=60 -L 5000:127.0.0.1:5000 %SERVER_USER%@%SERVER_HOST%
-pause
+set SSH_OPTS=-o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes
+
+REM Retry loop: ssh -N prints nothing on success, so echo before each attempt.
+REM ConnectTimeout=10 surfaces an unreachable host in ~10s instead of the ~2 min
+REM TCP default. Press Ctrl+C to stop the tunnel.
+:connect
+echo [%time:~0,8%] Connecting to %SERVER_USER%@%SERVER_HOST% (port 5000 -^> 127.0.0.1:5000) ...
+wsl -d Ubuntu sshpass -e ssh -N %SSH_OPTS% -L 5000:127.0.0.1:5000 %SERVER_USER%@%SERVER_HOST%
+echo [%time:~0,8%] ssh exited with code %errorlevel%, reconnecting in 5s (Ctrl+C to quit)
+timeout /t 5 /nobreak >nul
+goto connect
