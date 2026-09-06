@@ -3,6 +3,9 @@ doc_type: buffett-related
 stock_code: '002428'
 stock_name: 云南锗业
 related_docs:
+- path: ../北方稀土/index.md
+  note: 同 subsector（minor-metals）的方法论对照档。北方稀土档三处沿用本档判例：①周期股 bear 情景利润法无解则改资产法 PB 定价（本档 bear 0.9x/base 1.2x/bull 2.0x，北方稀土 bear 0.70x/base 未列/bull 未列，因北方稀土从未年度亏损、资产质量折价更深）；②bull 隐含 PE 须留在窄护城河 8–12x 框架内并显式披露（本档 12.1x，北方稀土档 12.0x）；③安全边际一律对收盘锚市值计算。**两档结论同为 exclude 但机理不同**：本档是「真拐点 + 32 倍量级错配」，北方稀土档是「拐点本身就是基数效应 + 利润被制度性切分给上游」
+  symmetric: true
 - path: ../../nonferrous/2026-06-11-章源钨业-buffett分析.md
   note: 同为「出口管制小金属 + price-taker」的商品型标的对照。两档共用穿越周期正常化盈利法与 bull 概率门控纪律；章源 bear/base/bull 倍数 13x/16x/23x、bull 概率封顶 18%，且「管制+配额构成持续结构性供给刚性」只在 bull 情景里给——本档在 thesis.md §6.4 独立得出更强的结论：锗的供给刚性是「商业可逆」级别（铅锌冶炼惜售、主矿企业自建下游都是价格驱动的商业选择），2025 年已完整演示过一次反向剧本
   symmetric: true
@@ -30,6 +33,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
+> - [index](../北方稀土/index.md) — 同 subsector（minor-metals）的方法论对照档。北方稀土档三处沿用本档判例：①周期股 bear 情景利润法无解则改资产法 PB 定价（本档 bear 0.9x/base 1.2x/bull 2.0x，北方稀土 bear 0.70x/base 未列/bull 未列，因北方稀土从未年度亏损、资产质量折价更深）；②bull 隐含 PE 须留在窄护城河 8–12x 框架内并显式披露（本档 12.1x，北方稀土档 12.0x）；③安全边际一律对收盘锚市值计算。**两档结论同为 exclude 但机理不同**：本档是「真拐点 + 32 倍量级错配」，北方稀土档是「拐点本身就是基数效应 + 利润被制度性切分给上游」
 > - [2026-06-11-章源钨业-buffett分析](../../nonferrous/2026-06-11-章源钨业-buffett分析.md) — 同为「出口管制小金属 + price-taker」的商品型标的对照。两档共用穿越周期正常化盈利法与 bull 概率门控纪律；章源 bear/base/bull 倍数 13x/16x/23x、bull 概率封顶 18%，且「管制+配额构成持续结构性供给刚性」只在 bull 情景里给——本档在 thesis.md §6.4 独立得出更强的结论：锗的供给刚性是「商业可逆」级别（铅锌冶炼惜售、主矿企业自建下游都是价格驱动的商业选择），2025 年已完整演示过一次反向剧本
 > - [index](../../nonferrous/中钨高新/index.md) — bull 概率门控的同源判例。中钨在「扩产证据由软升硬」后把 bull 从 20% 上调到 22% 且明确未用满 25% 上限；本档 valuation.md §9.7 采用同源同幅的处理（capex 由无指引升级为 18,856 万元董事会决议 + 30.44% 实际进度 → 20%→22%），并额外扣减两条反向门控（客户合法豁免不可具名、45 万片达产撞 2028 过剩窗口）
 > - [2026-08-21-紫金矿业-buffett分析](../../nonferrous/2026-08-21-紫金矿业-buffett分析.md) — 有色板块 PB 买点纪律的对照锚。紫金档以 PB 法定买点（西部矿业 PB 4.3x 即判无安全边际、买点 PB<1.5x）；本档 valuation.md §9.4 对一家五年均 ROE 仅 +0.43% 的公司给 bear PB 0.9x / base 1.2x / bull 2.0x，与该纪律一致——本股当前 PB 42.41x

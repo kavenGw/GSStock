@@ -4673,3 +4673,24 @@
   - 黄金
   - 周期顶定价
   - A+H折价
+- stock_code: '600111'
+  stock_name: 北方稀土
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 5.08
+  base: 6.79
+  bull: 11.75
+  dividend_yield: 0.34
+  conviction_date: '2026-09-05'
+  source_doc: sectors/materials/minor-metals/北方稀土/index.md
+  themes:
+  - 稀土
+  - 轻稀土
+  - 磁材
+  - 钕铁硼
+  - 配额
+  - 出口管制
+  - 人形机器人
+  - commodity-cyclical
