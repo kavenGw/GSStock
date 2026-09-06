@@ -26,9 +26,11 @@ skills: buffett, buffett-doc-spec
 抗中断：先落主体、市值分母等待锚处留 `【待锚】` 再填 [L14]；财报盘后披露 + 次日盘前采证时开盘后补锚 [L10]。
 汇报含评级 + 期望内在价值 + 安全边际 + 最脆弱论点自评。
 
+**落盘纪律（抗中断，硬要求）**：**每写完一个文件立刻落盘**，顺序
+`valuation → thesis → business → sources → related → events → index`。`index.md` 是引用其余六文件的汇总
+（§0/§10/§11 全是相对链接），先写必然回改；而"先保结论与估值"的本体是 `valuation.md` —— 该顺序两个目标都满足。
 **派发坑**：写 300+ 行可能报 `Stream idle timeout`、文件 0 落盘。先 `ls <文件夹>`/逐文件行数确认哪些未生成，再用
-`SendMessage` 按原 agentId 续跑（"只 Write 缺的文件、勿再读文件/联网、勿分段"），**别重派**。七文件天然分段，
-落盘顺序建议 index → valuation → thesis → business → sources → related → events，先保结论与估值。
+`SendMessage` 按原 agentId 续跑（"只 Write 缺的文件、勿再读文件/联网、勿分段"），**别重派**；但**零落盘时**该重派完整写手而非收口棒。
 
 ## 交付
 

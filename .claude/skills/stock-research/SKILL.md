@@ -56,8 +56,8 @@ description: >-
 | `mode-meeting.md` | 模式 4 流程：核实 → 判主体 → 读旧档 → quarterly 档 → 反向链 | 控制者 |
 | `dispatch.md` | 每个 subagent 的**变量清单**（固定协议已在 `.claude/agents/sr-*.md`） | 控制者，派发前读对应节 |
 | `lessons.md` | 实测教训（模式 1/2 为主，L18/L20 跨模式）。**不通读**，按族索引定位后翻单条 | 控制者，按需 |
-| `timing-baseline.md` | 十五轮分棒耗时明细 | 控制者，收尾报账时 |
-| `lenses/` | 板块视角（7 份精确粒度） | sr-a3-lens / sr-writer / sr-reviewer **自读** |
+| `timing-baseline.md` | **轮数与耗时统计的唯一真源** + 近五轮分棒明细 | 控制者，收尾报账时（必追加一行并重算统计表）|
+| `lenses/` | 板块视角，按精确粒度拆分；命中映射表在 `sr-a3-lens` 定义里 | sr-a3-lens / sr-writer / sr-reviewer **自读** |
 | `impact-rubric.md` | 模式 3 传导 rubric + theme 档模板 | 控制者 |
 | `finalize.md` | Phase C 收尾动作清单：删旧档 → 反向链 → 双 lint → valuations 同步 → 安全提交 → 亲验 | 模式 3/4 与 buffett 写档收尾（模式 1/2 已内置进 `sr-finalize`） |
 | `scripts/pool_index.py` | 模式 2 溢出 / 模式 3 候选召回 | 脚本 |
@@ -65,6 +65,7 @@ description: >-
 ## 维护规则
 
 - 路由判据、歧义门、共享默认改本文件；各模式流程改对应 `mode-*.md`；教训只追加到 `lessons.md`（同步族索引行）
-  并在对应 mode 文件闸门处加 `[Ln]` 引用；耗时明细追加到 `timing-baseline.md`。
+  并在对应 mode 文件闸门处加 `[Ln]` 引用；耗时追加到 `timing-baseline.md` 并**重算其统计表**。
+- **轮数/中位数/区间只写在 `timing-baseline.md`**，本文件与 `mode-*.md` 一律写指针不复制数字（已漂移过两次）。
 - 新增模式 = 加一行表 + 一份 `mode-*.md` + `evals/evals.json` 一条识别用例。
 - 本文件目标 **≤100 行**。

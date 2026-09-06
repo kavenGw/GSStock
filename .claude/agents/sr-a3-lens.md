@@ -34,7 +34,13 @@ effort: medium
 | `pcb-ccl.md` | 板块专属 | sector=electronics 且 subsector 含 pcb / components / ccl / 覆铜板 / 载板 / HDI |
 | `storage-dram-nand.md` | 板块专属 | sector=semiconductor 且 subsector 含 storage / memory / dram / nand / 利基存储 |
 | `storage-nor-flash.md` | 板块专属 | sector=semiconductor 且 subsector 含 storage / memory；主营含 NOR / SPI NOR / 串行闪存 / 代码型闪存 / AMOLED 驱动存储 / EEPROM |
+| `semi-design-fabless.md` | 板块专属 | sector=semiconductor 且 subsector 含 design / fabless / ic-design；或主营为自研芯片且**无自有晶圆厂**（MCU / SoC / 模拟 / 电源管理 / 射频 / 信号链 / 驱动 IC / 传感器 SoC）。存储设计公司优先取 `storage-*`，本份作补充 |
+| `semi-equipment.md` | 板块专属 | sector=semiconductor 且 subsector 含 equipment / 设备；或主营为晶圆制造设备（刻蚀/薄膜/涂胶显影/清洗/离子注入/抛光）、量检测设备、封测设备、设备核心零部件 |
+| `semi-materials.md` | 板块专属 | sector=semiconductor 且 subsector 含 materials / 材料；或 sector=materials 且主营为电子特气 / 光刻胶 / CMP / 靶材 / 硅片外延 / 前驱体 / 湿电子化学品且下游是晶圆厂 |
+| `semi-power-igbt-sic.md` | 板块专属 | sector=semiconductor 且 subsector 含 power / 功率；或主营为 IGBT / MOSFET / 二极管 / SiC / GaN / 功率模块 / IPM |
 | `metals-copper.md` | 板块专属 | sector=materials 且 subsector 含 copper / 铜 / 有色 / 矿业 / 冶炼 |
+| `metals-precious.md` | 板块专属 | sector=materials 且 subsector 含 gold / silver / 黄金 / 白银 / 贵金属；或 nonferrous 且主营为金银矿采选、伴生金银回收、贵金属冶炼 |
+| `metals-rare-earth.md` | 板块专属 | sector=materials 且 subsector 含 rare-earth / 稀土 / minor-metals 且主营为稀土；或主营为钕铁硼永磁、稀土冶炼分离、稀土功能材料（抛光粉/储氢/催化）|
 | `optical-fiber-cable.md` | 板块专属 | sector ∈ {industrial, electronics} 且 subsector 含 cable / 光缆 / 光纤 / optical / 光通信；或主营含光棒/裸纤/光缆/海缆/特种光纤/空芯光纤。电线电缆企业的光通信板块利润占比显著高于收入占比时同样命中 |
 
 ## 证据分级

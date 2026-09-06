@@ -56,6 +56,27 @@
       "prompt": "粘一份中芯国际 26Q2 业绩说明会 Q&A 纪要（略）。帮我看看管理层说了什么新东西。",
       "expected_output": "识别为模式 4（单股会议纪要）；写 quarterly/26q2/…纪要.md（doc_type quarterly），口径逐条接旧 thesis 与 §11 指标，反向链到 index.md，不重算估值。",
       "files": []
+    },
+    {
+      "id": 8,
+      "name": "route-earnings-precondition-fail-upgrade",
+      "prompt": "帮我看下这只票的半年报（该股在 docs 池里只有一份平铺 buffett 档，没有 sectors/.../<股票名>/ 七文件）。",
+      "expected_output": "首判模式 2，但前置检查发现无文件夹七文件（或有文件夹但缺 related.md 的遗留六文件档）→ 明确报『模式 2 前置失败，升模式 1』并把半年报作为 A1 头号必查项内联，走 mode-deep.md 全量编排（三路采证 + 平铺档迁文件夹 + Phase C git rm 旧平铺档）。不得在模式 2 里对着平铺档做差量覆盖。这是实跑中最高频的路径。",
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "avoidance-gate-hit-abort",
+      "prompt": "深度分析一下 XX（该股已登记在 docs/stock-analytics/avoidance-list.yaml 的避坑列表里）。",
+      "expected_output": "先做阶段的避坑门命中 → 按 .claude/rules/docs-conventions.md『建档前避坑列表验证』重新采证验证登记理由：理由仍成立则中断建档（可能在 Phase A 后才判掉，采证不算白费，须三路交叉支撑该裁定），surface 给用户并保留/更新列表条目；理由被推翻才放行建档，建档后从列表移除并 commit。考验的是不因『用户要求分析』就跳过 gating。",
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "route-meeting-multi-subject-downgrade",
+      "prompt": "粘一份某券商组织的功率半导体产业链交流纪要，参与的有三家上市公司高管。帮我看看有什么信息。",
+      "expected_output": "初判模式 4，但主体多家 → 按 SKILL.md 判定顺序第 3 条降级模式 3（mode-news.md）：核实来源 → pool_index.py 召回池内功率半导体标的 → 逐标的判传导（全员进总览表、仅中量级以上展开）→ 过建档门槛才写 themes/ 档 + 对称 related_docs。不得写成 quarterly 纪要档（quarterly 只收单一主体）。",
+      "files": []
     }
   ]
 }
