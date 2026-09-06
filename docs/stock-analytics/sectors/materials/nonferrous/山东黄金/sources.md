@@ -46,7 +46,7 @@ section: sources
 - 新浪财经：山东黄金 2024-11 加纳 Namdini 投产、设计年产 8.5 吨 https://finance.sina.com.cn/roll/2024-11-13/doc-incvxpff1190808.shtml
 - 智通财经/Investing：中报后 H 股午后涨超 7% https://cn.investing.com/news/stock-market-news/article-3544062 （2026-08-29）
 
-**兄弟档（本仓，口径对齐用）**：`../2026-06-21-中金黄金-buffett分析.md`、`../2026-07-09-赤峰黄金-buffett分析.md`、`../2026-08-21-紫金矿业-buffett分析.md`、`../../../../themes/2026-06-24-金价跌破4000美元.md`（见 [related.md](related.md)）。
+**兄弟档（本仓，口径对齐用）**：`../2026-06-21-中金黄金-buffett分析.md`、`../赤峰黄金/index.md`、`../2026-08-21-紫金矿业-buffett分析.md`、`../../../../themes/2026-06-24-金价跌破4000美元.md`（见 [related.md](related.md)）。
 
 ## 12.4 已知局限
 
