@@ -730,21 +730,24 @@
   currency: CNY
   sector: materials
   commodity: copper
-  commodity_impact: positive
+  commodity_impact: neutral
   rating: watch
-  bear: 3.67
-  base: 5.04
-  bull: 6.82
-  conviction_date: '2026-06-02'
-  source_doc: sectors/materials/nonferrous/2026-06-02-北方铜业-buffett分析.md
-  note: 文中直接给每股：70/96/130亿
+  watch_reason: 2026H1 归母 13.96 亿（+186.61%）是真实的经营跃升，但三根支柱全部换位——自给率按半年报硬口径只有 13.4%（自产铜精矿含铜 4.3 万吨 ÷ 阴极铜产能 32 万吨），旧档并列的券商 33% 冶炼口径本轮作废，"矿端受益 1/3 + 外购受损 2/3"须改写为约 13%:87%；旧档三大支柱之一的高毛利贵金属副产已塌（毛利率 2025 全年 17.48% → 2026H1 10.77%，已低于阴极铜的 12.05%，毛利占比 32% → 19.36%，管理层明示要增加金精矿采购比例，本质是第二条外购加工线而非资源敞口）；接棒的是旧档判为"量级中偏低"的硫酸（毛利率 82.79%、+47.29pp，贡献 H1 毛利增量 16.09 亿中的 3.63 亿即 22.5%），该 theme 判定本轮正式证伪。盈利质量须三档口径并列：账面 13.96 亿 / 剔 QP 后约 10.68 亿（经营下界）/ 对称剥离减值后约 17.28 亿（可比上界），会计扣非 13.81 亿几乎未剥离任何一项，不可当"已剥离口径"用。估值上两个 PE 必须并列：峰值口径约 10.9x（H2 与 H1 持平的年化 25 亿）vs 穿越周期口径约 33.4x（273.33 亿 ÷ 七点均归一化 8.19 亿），差 3.1 倍；PB 3.46 按 PB=ROE/r（r=10%）反推隐含永续 ROE 约 34.6%，恰好等于当前 H1 年化的峰值 ROE，是教科书式的周期顶定价形态。三情景加权期望内在价值约 101 亿（5.32 元/股），对现价市值 273.33 亿安全边际 −63%，连 bull（172 亿 / 9.03 元）也 −37%。AI 铜箔从"基本证伪"升级为"已证伪"（半年报产品用途表无 AI 高速板、覆铜板环节公司自认技术人才不足未投建、募投半年仅推进 2.73pp 且 9.51 亿募资中 6.4 亿用于补流）。维持看不买，等 PB 回到 2.2–2.5 带以内且铜价/硫酸价回落被证实后再议
+  bear: 3.15
+  base: 5.15
+  bull: 9.03
+  dividend_yield: 0.98
+  conviction_date: '2026-09-06'
+  source_doc: sectors/materials/nonferrous/北方铜业/index.md
+  note: 三情景市值60/98/172亿，除以总股本19.047亿股
   themes:
   - 铜
   - commodity-cyclical
   - 铜价周期
   - 自有矿
-  - 贵金属副产
+  - 硫酸副产
   - AI铜箔证伪
+  - 周期顶定价
 - stock_code: 000807
   stock_name: 云铝股份
   market: A
@@ -824,7 +827,7 @@
   conviction_date: '2026-05-08'
   source_doc: sectors/materials/chemicals/2026-05-08-万华化学-buffett分析.md
   note: 三情景1300/1885/2600亿；股本~31.5亿股估算
-- stock_code: '00358'
+- stock_code: 00358
   stock_name: 江西铜业
   market: HK
   currency: HKD
