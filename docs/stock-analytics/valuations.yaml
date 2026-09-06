@@ -3357,10 +3357,10 @@
   currency: CNY
   sector: materials
   rating: exclude
-  bear: 8.30
-  base: 21.00
-  bull: 27.40
-  dividend_yield: 0.70
+  bear: 8.3
+  base: 21.0
+  bull: 27.4
+  dividend_yield: 0.7
   conviction_date: '2026-09-06'
   source_doc: sectors/materials/nonferrous/赤峰黄金/index.md
   quality: 4
@@ -4697,3 +4697,19 @@
   - 出口管制
   - 人形机器人
   - commodity-cyclical
+- stock_code: '601069'
+  stock_name: 西部黄金
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 4.01
+  base: 10.67
+  bull: 21.67
+  dividend_yield: 0.52
+  conviction_date: '2026-09-06'
+  source_doc: sectors/materials/nonferrous/西部黄金/index.md
+  themes:
+  - gold_defense
+  - 央行购金
+  - 资产注入
