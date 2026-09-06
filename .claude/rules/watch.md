@@ -8,44 +8,28 @@ paths:
 ---
 # 盯盘助手
 
-> **何时读**：改 app/templates/watch.html、修改盯盘前端 JS、调整 watch_realtime / watch_alert 策略、改 WatchAnalysisService、调整 AI 分析调度（realtime/7d/30d）
-> **不必读**：通知格式（见 notifications.md）/ 数据获取主链路
-
-## 盯盘助手配置
-
-**盯盘助手前端架构**：
-- 图表：ECharts 分时线图，全宽，支撑/阻力标线，九转信号浮动标注
-- 下方双栏：左=AI分析（realtime/7d/30d标签页），右=季度财报表格
-- 缓存：localStorage（WatchStore），按市场分key持久化，每日自动清理
-- 数据流：init→缓存恢复→API刷新→定时轮询（价格60s/分析15min/市场状态5min）；后端 A股/港股每分钟 force_refresh，美股每3分钟（差异化提频，见 watch_preload）
+> **何时读**：改 watch.html / 盯盘 JS、调 watch_realtime / watch_alert 策略、改 WatchAnalysisService、调 AI 分析调度
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
 | `WATCH_INTERVAL_MINUTES` | 盯盘刷新间隔（分钟） | `1` |
-| `WATCH_ALERT_COOLDOWN_MINUTES` | 盘中极值告警冷却时间（分钟） | `5` |
+| `WATCH_ALERT_COOLDOWN_MINUTES` | 极值告警冷却（分钟） | `5` |
 
-**AI分析调度**：
-- realtime：`watch_realtime` 策略，开盘时段每15分钟（`*/15 9-23 * * 1-5`，内部检查市场状态）
-- realtime 增量推送：`_realtime_push_state` 追踪每股当日已推状态，首次完整推送，后续仅推变化（信号/支撑阻力/摘要），无变化跳过
-- 7d/30d：每日简报推送时自动计算（8:00am），结果包含在 Slack 消息中
-- 分析入口：`WatchAnalysisService.analyze_stocks(period, force)`
+## 前端与数据流
 
-## 盯盘告警信号管线（合并/分级/上下文）
+- ECharts 分时图（支撑/阻力标线、九转标注）；下方左=AI 分析（realtime/7d/30d），右=季度财报。
+- `WatchStore` 用 localStorage 按市场分 key，每日自动清理。数据流：init → 缓存恢复 → API 刷新 → 轮询（价格 60s / 分析 15min / 市场状态 5min）；后端 `watch_preload` A/港每分钟、美股每 3 分钟 `force_refresh`。
+- **盯盘池是代码配置**：`stock_codes.py:WATCH_CODES`（每条 `{'code','name','market'}`，`market` 显式写死，`MarketIdentifier` 不认 `.KS` 等后缀）是唯一权威源，无 `watch_list` 表/增删 UI。`WatchAnalysis` 表只存 AI 结果。
+- **分区指数条**：`MARKET_INDICES`（A=上证 `000001.SS`/创业板 `399006.SZ`/科创50 `000688.SS`，KR=`^KS11`）仅作参照，不进告警/信号/AI。A 指数走 `get_a_share_index_quotes(cache_only=True)`，点击 chip 复用 `/watch/chart-data?period=intraday`。坑：腾讯代码由 `_tencent_code()` 按 `.SS→sh`/`.SZ→sz` 定交易所，上证/科创50 是 0 开头但在沪，不能用裸启发式；`^KS11` 由 `identify` 特判 `KR`。
+- **summary 表信号列**：`watch.js` 拉 `GET /watch/signals`（60 日 OHLC）后用 `signal-detector.js`（与 heavy_metals 共享，勿删）算 RSI/MACD/布林/量/均线 + 形态。阈值存 localStorage `watchSignalThresholds`（不带 `watch_` 前缀，避开每日清空）。徽标文案须 HTML 转义。独立 `/alert` 页已删。
 
-`watch_alert.scan` 不再逐条 `event_bus.publish`，而是 `check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`app/services/watch_signal_pipeline.py`，纯函数）按股合并、加权共振分级（HIGH/MID/LOW）、上下文增强（涨幅/量比/区间位置）→ `NotificationService.push_watch_alerts` 一股一条直推、`scan` 返回 `[]`（复用 watch_realtime 直推先例）。跨 tick 去重仍归 `WatchAlertService._fired`；管线只做同 tick 合并。新增第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5% 急拉急跌，`_price_ring` 环形缓冲）。**已知限制**：盯盘内存态（`WatchAlertService._fired`/`_price_ring`/极值/`_momentum_cooldown`）均为进程内变量，盘中重启会重置，可能导致极值重报或跨 tick 去重失效（漏报/重报），健壮性与持久化留后续 spec。
+## AI 分析调度
 
-**价格新鲜度闸门**：`app/services/price_freshness.py`（纯函数）在三处接入点拦截非实时数据，宁可不推也不推旧价——阈值 = 2×preload 刷新周期（A 股/港股 120s / 美股 360s）：`watch_alert.scan`（告警）、`WatchAnalysisService.analyze_stocks('realtime')`（AI 实时分析，7d/30d 不加门）、`NotificationService.push_realtime_analysis`（推送层再查一遍，防 LLM 循环期间价已过期）。**告警/分析/推送盘中突然静默是期望行为而非故障**（preload 退避期间、午休复盘首 tick 等均会触发），排障看日志关键词「跳过N只降级/超龄旧价」。
+- realtime：`watch_realtime` 策略 `*/15 9-23 * * 1-5`，内部查市场状态；`_realtime_push_state` 追踪每股当日已推，首次全推、后续仅推变化。
+- 7d/30d：每日简报 8:00 计算并随 Slack 推送。入口 `WatchAnalysisService.analyze_stocks(period, force)`。
 
-## 盯盘股票池（代码配置，非 DB）
+## 告警信号管线
 
-盯盘要盯哪些股票由 `app/config/stock_codes.py` 的 `WATCH_CODES` 常量决定（唯一权威源），不再有 `watch_list` 表/增删 UI/`/watch/add`/`/watch/remove`。改盯盘池=改 WATCH_CODES（每条 `{'code','name','market'}`，`market` 显式写死——`MarketIdentifier` 不认 `.KS` 等后缀会误判）。`WatchService` 的 `get_watch_codes/get_watch_list/get_watched_markets/get_market_map` 全部读该常量。`WatchAnalysis` 表（AI 分析结果）与盯盘池无关，仍在 DB。DB 里遗留的 `watch_list` 孤立表已于 2026-08-03 drop（旧 7 条数据与 WATCH_CODES 不一致，直连查 DB 会读到过时盯盘池而误判）。
+`watch_alert.scan`：`check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`watch_signal_pipeline.py`，纯函数）按股合并、加权分级 HIGH/MID/LOW、上下文增强（涨幅/量比/区间位置）→ `push_watch_alerts` 一股一条直推，`scan` 返回 `[]`。跨 tick 去重归 `WatchAlertService._fired`。第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5%，`_price_ring`）。**已知限制**：`_fired`/`_price_ring`/极值/`_momentum_cooldown` 均为进程内状态，盘中重启会重报或漏报。
 
-## 盯盘各市场分区指数条
-
-各市场分区大图上方的指数 chip 由 `app/config/stock_codes.py` 的 `MARKET_INDICES`（按市场键）决定，仅做行情参照——**不进** `WATCH_CODES`/告警/信号/AI 分析。当前：A 股=上证`000001.SS`/创业板`399006.SZ`/科创50`000688.SS`，韩股=KOSPI`^KS11`。数据经 `/watch/prices` 的 `indices` 字段下发：A 指数走 `get_a_share_index_quotes(cache_only=True)`（东财/新浪，正确处理 `.SS/.SZ`），KR 走 `get_realtime_prices` 缓存；`watch_preload` 每分钟按开盘市场预热价格+分时。点击 chip 复用 `/watch/chart-data?period=intraday` 展开分时 mini 面板（单开切换）。
-
-**关键坑**：腾讯行情代码由 `_tencent_code()`（`unified_stock_data.py`）按 `.SS→sh`/`.SZ→sz` 定交易所——上证/科创50 是 `0` 开头但在沪，不能用「6/5→sh 其余→sz」裸启发式。KOSPI `^KS11` 由 `MarketIdentifier.identify` 特判为 `KR`（否则 `^` 通配落 US，交易时段/取数源错）。
-
-## 盯盘 summary 表技术信号列（原 /alert 预警页已并入）
-
-每市场 summary 表有「信号」列：`watch.js` 拉 `GET /watch/signals`（批量 60 日 OHLC）后复用 `signal-detector.js`（与 heavy_metals 页共享，勿删）的 `SignalDetector.detectAll` 逐股算 RSI/MACD/布林/成交量/均线 + 买卖形态（取最近 3 根 K 线内）。阈值（RSI 超买超卖/放量倍数）存独立 localStorage key `watchSignalThresholds`——**不带 `watch_` 前缀**以避开 `WatchStore.clearAll` 每日清空。徽标 `name`/`description` 须 HTML 转义。独立 `/alert` 页（alert.py/alert.html/alert-page.js/alert.css）已删除，能力收缩进此处仅覆盖 `WATCH_CODES`。
+**价格新鲜度闸门** `price_freshness.py`（纯函数）：阈值 = 2× preload 周期（A/港 120s，美 360s），在 `watch_alert.scan`、`analyze_stocks('realtime')`（7d/30d 不加门）、`push_realtime_analysis` 三处拦截。**盘中突然静默是期望行为**（preload 退避、午休首 tick），排障看日志「跳过N只降级/超龄旧价」。

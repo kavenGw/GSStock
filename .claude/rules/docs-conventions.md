@@ -5,92 +5,60 @@ paths:
 ---
 # 文档写作与 lint 规范
 
-> **何时读**：写 docs/stock-analytics/ 新文档、改 frontmatter、跑 lint_docs_*、维护 related_docs、判 sector 归属
-> **不必读**：portfolio/valuations skill 行为（见 portfolio-valuations.md）/ 纯代码 / 通知 / 数据获取
+> **何时读**：写 docs/stock-analytics/ 文档、改 frontmatter、跑 lint_docs_*、维护 related_docs、判 sector 归属、建档前 gating
 
-## 文档目录约定（docs/stock-analytics/）
+## 目录约定（docs/stock-analytics/）
 
-- `sectors/<sector>/<subsector>/<股票名>/{index,business,thesis,valuation,sources,events}.md` — 个股 buffett 深度分析文件夹形态（2026-08-23 起新建/重做一律用此；只有 `index.md` 是 `doc_type: buffett`，规格见 `buffett-doc-spec`，设计见 `docs/superpowers/specs/2026-08-23-buffett-doc-folder-architecture-design.md`）
-- `sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md` — 平铺形态（存量档，不再新建；消费者双模识别）
-- `cross-sector/YYYY-MM-DD-<主题>.md` — 多股专题 / 多股 buffett 对比（如 AMD-Intel、立讯-歌尔、工业富联-甲骨文）
-- `themes/YYYY-MM-DD-<主题>.md` — 事件驱动主题（世界杯炒作 / CCL 涨价 / 磷化铟板块）
-- `quarterly/<NNqN>/YYYY-MM-DD-<股票>-<类型>.md` — 季报点评 + 同期专题（时间归档，跨板块横看）
-- `comps/YYYY-MM-DD-<横向主题>-comps.md` — 估值/财务横向对比
-- `comps/quarterly/<NNqN>/...` — 季度 comps
+- `sectors/<sector>/<subsector>/<股票名>/{index,business,thesis,valuation,sources,events,related}.md` — 个股 buffett 文件夹档（新建/重做一律用此；只有 `index.md` 是 `doc_type: buffett`，规格见 `buffett-doc-spec`）
+- `sectors/<sector>/<subsector>/YYYY-MM-DD-<股票名>-buffett分析.md` — 平铺存量档，不再新建
+- `cross-sector/YYYY-MM-DD-<主题>.md` — 多股专题/对比
+- `themes/YYYY-MM-DD-<主题>.md` — 事件驱动主题
+- `quarterly/<NNqN>/YYYY-MM-DD-<股票>-<类型>.md` — 季报点评
+- `comps/YYYY-MM-DD-<主题>-comps.md`、`comps/quarterly/<NNqN>/...` — 横向对比
 
-**一级 sector 枚举**（11 项，linter 强校验）：
-`semiconductor` / `electronics` / `consumer` / `materials` / `energy` / `healthcare` / `media` / `financial` / `industrial` / `ai-application` / `other`
+**一级 sector 枚举**（linter 强校验）：`semiconductor` / `electronics` / `consumer` / `materials` / `energy` / `healthcare` / `media` / `financial` / `industrial` / `ai-application` / `other`。subsector 自由起名。schema 见 `scripts/_docs_schema.py`。
 
-二级 subsector 自由起名。详细 schema + lint 用法见 `docs/stock-analytics/README.md` 与 `scripts/_docs_schema.py`。
+**sector 归属**：跨板块标的按**收入第一权重**归类（用 `ak.stock_zygc_em` 最新报告期「按产品分类」判），次要业务在 thesis/themes 说明；仅两业务旗鼓相当且核心叙事来自次要业务时放 `cross-sector/`。锂电/储能成品制造归 `energy`，`materials` 仅放上游锂盐/正负极/隔膜/电解液（两者锂价传导方向相反，采证 subagent 易误判）。
 
-**跨板块标的 sector 归属准则**：标的横跨两个一级板块时（如罗博特科 51% 半导体 + 48% 光伏、工业富联 PCB+服务器），按**收入第一权重**归类，次要业务在 thesis / themes 中说明。仅在两业务旗鼓相当且核心叙事来自次要业务时，例外放 `cross-sector/`。判断主业权重用 `ak.stock_zygc_em(symbol='SZ<code>')` 取最新报告期的"按产品分类"切片。
+## 建档 gating
 
-**锂电/储能成品制造归 `energy`/`battery`，不归 `materials`**：电芯/电池系统/动力/储能/消费电池制造（如亿纬锂能）属 energy；`materials` 仅放上游锂盐/正负极/隔膜/电解液（如赣锋锂业=materials/lithium）。中游电池厂 vs 上游锂资源成本传导方向相反（电池厂是锂买方，锂价涨=成本压力）。采证 subagent 易误判电池厂为 materials/industrial，控制者需纠。
+**低质地非科技不建档**：质地差（ROE 长期低/曾巨亏/无护城河多元化）且非科技类的标的，采证粗筛命中即口头说明「不建档」停手，不写档、不写 valuations。判别核心是**题材敞口≈0**（主业与所蹭题材无关）；若题材就是主业（锂矿商锂价 watch、周期股顶部 watch），属合理归类正常建档。科技类即便 exclude 仍可建档；非科技高质地不受限。删档时同步删 valuations 条目、清兄弟档反向链、跑 `lint_docs_refs.py`。
 
-## 建档 gating：低质地非科技标的不建档
+**避坑列表硬门**：采证第一步 load `docs/stock-analytics/avoidance-list.yaml` 按 `stock_code` 查。命中 → 用最新单季 + akshare 重取指标，对照 `avoid_reason` **逐条列出当前实测值**判仍成立/被推翻；仍成立 → 中断建档；被推翻 → 放行，建档完成后移除该条并 commit。新判掉一只标的或删档时补一条（`stock_code` 带引号）。该文件不受 docs linter 约束。
 
-跑 buffett / stock-research / analyze-category 时，若标的**质地很差（ROE 长期偏低、曾巨亏、无护城河的低质量多元化制造）且不属于科技类**，直接判掉——不建 buffett/分析档、不写 valuations.yaml，采证阶段先粗筛命中即口头说明「不建档」后停手，不进入写档/estimate/valuations 流程。这类"蹭题材热度"的 exclude 档只是给炒作背书、占用 doc 池，价值为负（案例：露笑 002617 多元化工业蹭 SiC 概念，建 exclude 档后被要求删除并撤 valuations 条目，2026-07-03）。
+## Frontmatter
 
-例外：**科技类**标的即便评 exclude/watch 仍可建档（记录反面对照有价值）；**非科技的高质地**标的（消费/金融龙头等）不受此限。删已建档时同步删 valuations 条目 + 清理兄弟档 related_docs 反向链，跑 `lint_docs_refs.py` 收尾（exit 0 为真闸）。
+按 `scripts/_docs_schema.py:REQUIRED_FIELDS_BY_TYPE` 补齐。强制：
+- `stock_code`/`stock_codes` 字符串引号（防丢前导 0）
+- `rating=watch` 必填 `watch_reason`；`rating=exclude` 必填 `exclude_reason`
+- `conviction_date`/`date` 为 `YYYY-MM-DD`；`period` 与 `quarterly/<NNqN>/` 目录一致
+- `yaml.safe_load` 把 `conviction_date` 解析为 `datetime.date`，与 str 比较抛 TypeError，聚合时先 `str(...)`
 
-**「题材敞口≈0」是本 gating 的判别核心**：低质地非科技 exclude 的靶子是「主业与所蹭题材几乎无关、硬蹭概念」（露笑=多元化工业蹭 SiC，SiC 收入≈0）。**若被 watch/exclude 的"题材"本身就是其主营业务**（如锂矿商锂价 watch、电解铝厂周期顶 watch、啤酒龙头复兴 thesis 待验证），即便 ROE 一般或曾周期性亏损，也属「生意看得懂但当前不便宜/不确定」的合理归类，**不删、正常建档**——勿把周期股/质地一般股误判为"蹭题材占坑"。（2026-07-04 全量核对 68 条非科技 watch/exclude 档，0 条命中，doc 池已洁净。）
-
-## 建档前避坑列表验证（硬门）
-
-建档 skill（buffett / stock-research / analyze-category）采证阶段**第一步**先 load `docs/stock-analytics/avoidance-list.yaml`，按 `stock_code` 查命中：
-
-- **未命中** → 正常建档流程。
-- **命中** → 强制「避坑原因验证」:用最新单季季报 + akshare 重取 `key_metrics_snapshot` 对应指标，对照 `avoid_reason` **逐条**判「仍成立 / 被推翻」，**必须列出每条原因 + 当前实测值对照**，不接受空口「改善了」。
-  - **理由仍成立** → **中断建档**，口头说明「命中避坑列表且理由仍成立，不建档」，停手，不进入写档/estimate/valuations 流程。
-  - **理由被推翻**（基本面真实反转）→ 放行建档；建档完成后从 `avoidance-list.yaml` **移除该条**并 commit。
-
-`avoidance-list.yaml` 与 `valuations.yaml` 并列，不受 docs frontmatter/refs linter 约束；字段见文件头注释。新判掉一只低质地非科技标的（或删档）时同步补一条（`stock_code` 带引号）。
-
-## Frontmatter 约定（5 类 doc_type）
-
-所有文档必须有 YAML frontmatter，按 `scripts/_docs_schema.py:REQUIRED_FIELDS_BY_TYPE` 字段集补齐。
-
-**强制规则**：
-- `stock_code` / `stock_codes` 必须字符串引号（防 YAML int 化丢前导 0）—— `'000021'` 而非 `000021`
-- `rating=watch` → 必填 `watch_reason`；`rating=exclude` → 必填 `exclude_reason`
-- `conviction_date` / `date` 必须 `YYYY-MM-DD` 格式
-- `period` 必须与所在 `quarterly/<NNqN>/` 目录名一致
-
-**`conviction_date` YAML 解析为 `datetime.date` 不是 str** — `yaml.safe_load` 把 `conviction_date: 2026-05-09` 转 `datetime.date` 对象。与字符串做 `>` 比较会抛 `TypeError`。聚合多 doc 取最新时必须 `str(fm.get('conviction_date') or '')` 先转字符串。
-
-## 跨文档引用：frontmatter.related_docs 唯一源
+## related_docs（跨文档引用唯一源）
 
 ```yaml
 related_docs:
   - path: ../../quarterly/26q1/2026-04-29-兆易-26Q1季报点评.md
     note: 26Q1 实证点评
-    symmetric: true  # 默认 true，要求反向对称
-  - path: ../../themes/2026-08-21-中芯国际26Q2业绩说明会.md
-    note: 供给侧机理获代工方口径确认
-    impact: 动摇      # 可选，stock-research 模式 3 回写：强化/动摇/推翻/无关
-    magnitude: 中     # 可选：高/中/低；与 impact 一起渲染为【动摇·中】
+    symmetric: true   # 默认 true，要求反向对称
+    impact: 动摇      # 可选（模式 3 回写）：强化/动摇/推翻/无关
+    magnitude: 中     # 可选：高/中/低
 ```
 
-h1 之后的 `<!-- BEGIN related_docs -->` / `<!-- END related_docs -->` 块由脚本生成，**不要手编**。
+- h1 后的 `<!-- BEGIN/END related_docs -->` 块由脚本生成，不手编。首建档 `related_docs: []` 时 `--rewrite-blocks` 移除空占位块、`--check-orphans` 列为孤儿，均属预期，frontmatter lint exit 0 即合规。
+- **文件夹档落点**：`related.md` 放结构性引用，`events.md` 放事件回写，`index.md` 不写 related_docs。lint 按**文件夹粒度**判对称：外部档指 `index.md`、回链写在 `related.md` 即对称；文件夹内互指报错（内部用正文相对链接）。
 
-**首建档 `related_docs: []` 的预期行为**：`--rewrite-blocks` 会移除空的 `<!-- BEGIN/END related_docs -->` 占位块（empty list 无内容可渲染），不是脏 diff；`--check-orphans` 会把无反向链的首建档列为孤儿——**属预期，非硬错误**，frontmatter lint 仍 exit 0 即合规。
-
-**文件夹档的 related_docs 落点（2026-08-24 起）**：`<股票名>/related.md` 放结构性引用（comps/quarterly/cross-sector/兄弟 buffett 档），`<股票名>/events.md` 放事件 theme 回写，`index.md` 不写 related_docs。`lint_docs_refs.py` 的对称与孤儿判定按**文件夹粒度**：`<股票名>/` 下任一文件视为同一引用节点，故外部档指 `index.md`、回链写在 `related.md` 里也算对称；同一文件夹内部互指则报错（文件夹内用正文相对链接 `[§9](valuation.md)`）。2026-08-24 前建的文件夹档 index.md 里仍带 related_docs，属合规存量，不迁移。
-
-## Lint 脚本（手动 run）
+## Lint
 
 ```bash
-python scripts/lint_docs_frontmatter.py          # 校验所有 frontmatter
-python scripts/lint_docs_refs.py                 # 校验 related_docs 路径 + 反向对称
-python scripts/lint_docs_refs.py --rewrite-blocks  # 重生所有文档顶部 markdown 块
-python scripts/lint_docs_refs.py --check-orphans   # 列孤儿文档
+python scripts/lint_docs_frontmatter.py            # frontmatter
+python scripts/lint_docs_refs.py                   # related_docs 路径 + 反向对称
+python scripts/lint_docs_refs.py --rewrite-blocks  # 重生文档顶部块
+python scripts/lint_docs_refs.py --check-orphans   # 列孤儿
 ```
 
-退出码 0 = 全过；非 0 = 列违例清单。新写或迁移文档后跑 lint 自检。
-
-**Lint 坑（Windows + 并发）**：
-> 编码坑见 dev-environment.md
-- `--check-orphans` 会因 print 含中文（如「铜」）的孤儿路径撞 cp950 抛 `UnicodeEncodeError` 返回 exit 1，**而 orphan 判定逻辑其实已跑完**——加 `PYTHONIOENCODING=utf-8` 才得真实 exit 0，别误判为 lint 失败。
-- `--rewrite-blocks` 会重生**所有** block 与 frontmatter 失步的文档（含并行 session 未提交的在写档），易产生跨任务连带 diff。跑完**只精确 `git add` 本任务的档**，**勿 `git add -A`**，避免裹挟他人半成品。
-- 但"精确 add"仍有盲区：refs `symmetric: true` **强制**你 touch 兄弟档补反向条目才过 lint，若该兄弟档正被并行 session 改（带未提交分析改动），`git add <兄弟档>` 会连其未提交改动一并裹挟进你的 commit。add 前先 `git diff <兄弟档>`：若有 `related_docs` 块以外的改动即对方在写，归其自行提交（其后续 commit 会干净收尾、非破坏性，但勿误判为本任务产物）。**对偶情形**：并行 session 同跑 stock-research 模式 1 于同板块兄弟股、共享同一 comps 时，指向你新档的反向条目可能已被对方抢先写入并 committed——补反向链前先 `grep <新档名> <兄弟档>`，已在则跳过（勿重复追加），以 `refs lint exit 0` 为真闸而非"必须由我添加"。
-- **`--rewrite-blocks` 是全局 fail-closed**：`lint_docs_refs.py` 的 `main()` 一旦 `_check` 发现**任何**违例就**早于** rewrite 直接 return（exit 1），**一个 block 都不渲染**——含并行 session 在写档的**无关**不对称（实测他人 `希荻微→模拟功率芯片` 档的不对称把本任务 theme 的块渲染全堵死）。绕过：`import` 该模块后对**只含本任务文件的 dict** 调 `_rewrite_blocks(sub)`（`sub={(root/p).resolve():docs[(root/p).resolve()] for p in mine}`），跳过全局 `_check` 只渲染自己的块；无关违例留对方收尾，勿动他人档。
+exit 0 为真闸。坑：
+- `--check-orphans` 打印含中文路径会撞 cp950 返回 exit 1，加 `PYTHONIOENCODING=utf-8`。
+- `--rewrite-blocks` 会重生**所有**失步文档（含并行 session 在写档），跑完只精确 `git add` 本任务档，勿 `-A`。
+- `symmetric: true` 强制 touch 兄弟档：add 前 `git diff <兄弟档>`，若有 related_docs 以外改动即对方在写，归其提交。补反向链前先 `grep <新档名> <兄弟档>`，已被对方写入则跳过。
+- `--rewrite-blocks` 全局 fail-closed：任何违例（含他人无关的不对称）都会让一个块都不渲染。绕过：import 该模块后对只含本任务文件的 dict 调 `_rewrite_blocks(sub)`，无关违例留对方收尾。

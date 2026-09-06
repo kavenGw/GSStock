@@ -7,81 +7,44 @@ paths:
 ---
 # Slack 推送、告警格式与推送语义
 
-> **何时读**：改 app/services/notification.py、新增推送策略、改盯盘告警格式/排版、调 Slack 频道路由、改 _fetch_* 失败语义或新闻推送去重
-> **不必读**：数据获取 / 调度配置 / 数据库变更
+> **何时读**：改 notification.py、新增推送策略、改告警格式/排版、调频道路由、改 `_fetch_*` 失败语义或新闻去重
 
-## Slack 推送配置
-
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `SLACK_BOT_TOKEN` | Slack Bot Token | 空 |
-
-频道路由：
+## 频道路由（`SLACK_BOT_TOKEN`，常量在 `app/config/notification_config.py`）
 
 | 频道 | 内容 |
 |------|------|
 | `news` | 每日简报、预警、公司新闻、兴趣新闻 |
-| `news_watch` | 盯盘实时分析、每日简报盯盘部分 |
-| `news_ai_tool` | GitHub Release 更新 |
-| `news_lol` | LoL 赛事 |
-| `news_nba` | NBA 赛事 |
-| `news_daily` | 每日核心观点（带日期） |
+| `news_watch` | 盯盘实时分析、简报盯盘部分 |
+| `news_daily` | 每日核心观点 |
 | `news_operation` | 清仓策略、操作计划 |
-| `news_research` | 投行观点日报 |
+| `news_research` | 投行观点 / 野村研报 |
+| `news_ai_tool` | GitHub Release / Trending / 博客 |
+| `news_nba` / `news_lol` / `news_worldcup` | 赛事 |
 
-## 盯盘告警推送格式
+## 盯盘告警格式
 
-盯盘告警 title 一行展示核心信息，detail 补充上下文。支撑/阻力用描述性标签（跌破/突破/测试/触及），其余用 `>` `<` 直观比较。
+title 一行核心信息，detail 补上下文。支撑/阻力用描述性标签（跌破/突破/测试/触及），其余用 `>` `<`：
 
-| 告警类型 | 格式示例 |
-|---------|--------|
-| 盘中极值 | `当前 26.00 > 前高 25.50` |
-| 目标价 | `当前 26.00 > 目标 25.50` |
-| 跌破支撑 | `跌破支撑 25.00 \| 当前 24.95` + detail: `下方支撑 24.00(-3.8%)` |
-| 突破阻力 | `突破阻力 30.00 \| 当前 30.05` + detail: `上方阻力 32.00(+6.5%)` |
-| 测试支撑 | `测试支撑 25.00 \| 当前 25.05` + detail: `上方阻力 28.00(+11.8%)` |
-| 测试阻力 | `测试阻力 30.00 \| 当前 29.95` + detail: `下方支撑 28.00(-6.5%)` |
+| 类型 | 示例 |
+|------|------|
+| 盘中极值 / 目标价 | `当前 26.00 > 前高 25.50` / `当前 26.00 > 目标 25.50` |
+| 支撑阻力 | `跌破支撑 25.00 \| 当前 24.95` + detail `下方支撑 24.00(-3.8%)` |
 | 均线穿越 | `上穿 当前 21.00 > MA5 20.50` |
 | 成交量异动 | `成交量 100 > 日均 50 (2.0x)` |
-| TD九转 | `TD九转买入信号 | 当前 26.00` |
+| TD九转 | `TD九转买入信号 \| 当前 26.00` |
 
-**涉及文件**：
-- `app/services/watch_alert_service.py` — 7种检测器（极值/目标价/支撑阻力/均线/成交量/TD九转）
-- `app/services/notification.py` — `dispatch_signal()` direction→emoji 路由（🔴=up/buy/resistance_break, 🟢=down/sell/support_break），`push_realtime_analysis()` 实时分析推送格式。取价改 `cache_only=True` + `price_freshness` 新鲜度闸门（见 watch.md），无新鲜价的股整块不推（不降级推旧价）
-- `app/strategies/volume_alert/__init__.py` — 收盘成交量异动策略
+- 检测器在 `watch_alert_service.py`（8 种：极值/目标价/支撑阻力/均线/成交量/TD九转/动量）；`notification.py` 的 `dispatch_signal()` 按 direction 路由 emoji（🔴=up/buy/resistance_break，🟢=down/sell/support_break）。
+- **合并推送**：`watch_alert` 经 `WatchSignalPipeline` 按股合并 → `push_watch_alerts()` 一股一条。首行 `emoji *名称(代码)* 股价 涨幅 [优先级]`，主信号行 + 次信号 `  · ` + 上下文行（量比/区间位置）。A 类（支撑阻力/TD/动量）信号行尾 ` | 当前 X` 由 `_strip_current` 剥离，B 类（极值/目标价/均线）保留作比较主语。HIGH/MID 推送，LOW 只 debug log。
+- 取价 `cache_only=True` + `price_freshness` 闸门（见 watch.md），无新鲜价整块不推，不降级推旧价。
 
-**合并推送（信号管线）**：`watch_alert` 不再逐条 dispatch，而是经 `WatchSignalPipeline` 按股合并 → `NotificationService.push_watch_alerts()` 一股一条。格式：`emoji *名称(代码)* 股价 涨幅 [优先级]` 首行（股价千分位去尾零、change_percent 非空才拼涨幅）+ 主信号行 + 次信号 `  · ` bullet + 上下文行（量比/区间位置）。股价提到标题后，A 类告警（支撑阻力/TD九转/动量）主/次信号行尾部 ` | 当前 X` 由 `_strip_current` 去重剥离；B 类（盘中极值/目标价/均线穿越）`当前 X` 作比较主语保留。优先级 HIGH/MID 推送，LOW 静默（只 debug log）。分级 = 主信号权重 + 同向次信号×0.5 + 量价配合+1。
+## Slack 排版规范（所有 `format_*`，mrkdwn）
 
-## Slack 推送排版规范
+- 标题 `emoji + *粗体*`；多条目列表用 `'─' * 30` 分隔、条目名粗体、正文前空行、链接放末行；紧凑列表用 `  · ` 前缀、同类数据 ` | ` 一行。
+- 大数千分位 `{:,}`，百分比带正负号。
+- **涨跌着色**统一走 `NotificationService.fmt_pct(pct, digits=2, code=False, none='—')`：全局红涨绿跌不分市场（🔴/🟢/⚪平/`—` 无数据），色块紧贴百分比；Block Kit 传 `code=True`。**不着色**：ETF 溢价、ADR 溢价折价、距支撑/阻力距离、成交量倍数。一条目只出现一个色块。`📈` 仅作节标题；`📉` `▲` `▼` 已废弃。
+- 避免同一信息重复出现、同一 emoji 表达不同含义。
 
-所有 `notification.py` 和策略中的 `format_*` 方法遵循以下规范（Slack mrkdwn 格式）：
+## 失败语义与去重
 
-**标题**：`emoji + *粗体标题*`，如 `🎯 *今日核心观点*`
-
-**多条目列表**（每条含3行以上信息）：
-- 条目间用分隔线 `'─' * 30` 隔开
-- 条目名 `*粗体*`，元数据紧随其后
-- 描述/正文前空一行，增加呼吸感
-- 链接放最后一行
-
-**紧凑列表**（每条仅1行信息）：
-- 条目用 `  · ` 前缀，无需分隔线
-- 同类数据用 ` | ` 分隔在一行内
-
-**数字格式**：大数加千分位 `{:,}`，百分比含正负号
-
-**涨跌着色**：价格涨跌幅/盈亏幅一律走 `NotificationService.fmt_pct(pct, digits=2, code=False, none='—')` —— Slack 无行内文字色，用色块 emoji 代替，**全局红涨绿跌不分市场**（🔴涨 / 🟢跌 / ⚪平盘 / `—` 无数据），色块紧贴百分比。Block Kit 传 `code=True` 让数字走等宽 backtick。
-
-- **不得着色**的百分比：ETF 溢价（`buy=适合买入` 语义与红绿相反）、ADR 溢价/折价（自带 ↑↓delta）、距离支撑/阻力（中性距离）、成交量倍数
-- **一条目只出现一个色块**：盯盘告警首行 emoji 前置作消息标识，该行百分比不再重复加色块
-- `📈` 仅作节标题 emoji（`📈 市场行情`），不再用于表示单条涨跌；表示涨跌的 `📉` `▲` `▼` 已废弃
-
-**避免**：
-- 同一信息重复出现（如标题行已截断描述 + 下方再输出完整描述）
-- 同一 emoji 表达不同含义（如 ⭐ 既标记标题又标记星数）
-
-## 数据获取失败语义与去重
-
-**数据获取服务失败语义二分**：`_fetch_*` 类方法返回 `None` 表示异常/获取失败（已重试耗尽），返回空数据字典如 `{'today': [], 'yesterday': []}` 表示 API 成功但当下无数据。推送/聚合层据此区分"数据获取失败" vs "今日无赛事"。涉及该约定的服务异常分支必须 `logger.warning(... exc_info=True)` + 含 `type(e).__name__` + 关键上下文（如 league_id / HTTP status / 响应体片段），否则吞异常会让两种场景在日志中无法区分。参考 `app/services/esports_service.py:_fetch_lol_esports_schedule`。
-
-**新闻推送多分支去重**：`InterestPipeline.process_new_items` 有 `_identify_and_notify_companies`（🔍 AI 公司识别）和 `_notify_interest_slack`（📰 兴趣关键词）两条独立 Slack 分支，同一条 NewsItem 可同时命中。前者推送时已包含原文全文，须按 `NewsItem.id` 集合去重避免重复推送；新增第三条推送路径时也要并入该去重链。
+- **`_fetch_*` 返回 None = 异常/重试耗尽，空 dict = API 成功但无数据**，上层据此区分「获取失败」vs「今日无内容」。异常分支必须 `logger.warning(..., exc_info=True)` 并含 `type(e).__name__` + 关键上下文（league_id / HTTP status / 响应片段）。
+- **新闻多分支去重**：`InterestPipeline.process_new_items` 的 AI 公司识别与兴趣关键词两条 Slack 分支可同时命中同一 NewsItem，按 `NewsItem.id` 集合去重；新增推送路径并入该去重链。

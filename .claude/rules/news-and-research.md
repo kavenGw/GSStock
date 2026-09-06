@@ -6,74 +6,39 @@ paths:
 ---
 # 新闻 / 研报 / 监控源
 
-> **何时读**：调整新闻轮询参数、新增新闻源、修改博客/Trending/Release 监控、修改 plugin discovery、新增第三方仓库到 GITHUB_RELEASE_REPOS
-> **不必读**：盯盘 / 持仓 / 股票数据获取主链路
-
-## 新闻轮询配置
+> **何时读**：调新闻轮询、新增新闻源、改博客/Trending/Release 监控、plugin discovery、加仓库到 GITHUB_RELEASE_REPOS
 
 | 环境变量 | 说明 | 默认值 |
 |---------|------|-------|
-| `NEWS_INTERVAL_MINUTES` | 新闻后台轮询间隔（分钟） | `3` |
+| `NEWS_INTERVAL_MINUTES` | 新闻轮询间隔（分钟） | `3` |
+| `NEWS_FETCH_TIMEOUT` | 新闻源超时（秒） | `15` |
+| `NEWS_DEDUP_WINDOW_MINUTES` | 推送去重窗口（分钟） | `1440` |
+| `COMPANY_NEWS_MAX_COMPANIES` | 每轮最多处理公司数 | `3` |
+| `COMPANY_NEWS_MAX_ARTICLES` | 每公司最多文章数 | `5` |
+| `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻间隔（分钟） | `30` |
+| `WALLSTREET_NEWS_ENABLED` | 华尔街见闻投行观点 | `true` |
+| `WALLSTREET_NEWS_FETCH_TIMEOUT` | crawl4ai 全文超时（秒） | `10` |
+| `NOMURA_RESEARCH_ENABLED` | 野村研报 | `true` |
+| `BLOG_MONITOR_ENABLED` | 博客监控 | `true` |
+| `GITHUB_TRENDING_ENABLED` | GitHub Trending | `true` |
+| `GITHUB_TRENDING_TOP_N` | Trending 取前 N | `10` |
+| `GITHUB_RELEASE_ENABLED` | GitHub Release | `true` |
+| `CLAUDE_PLUGINS_DIR` | 插件目录（动态发现已装插件仓库） | `~/.claude/plugins` |
 
-## 公司新闻配置
+## 各源调度
 
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `COMPANY_NEWS_MAX_COMPANIES` | 每次轮询最多处理的公司数 | `3` |
-| `COMPANY_NEWS_MAX_ARTICLES` | 每个公司最多爬取文章数 | `5` |
-| `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻获取间隔（分钟） | `30` |
-| `NEWS_FETCH_TIMEOUT` | 新闻源获取超时（秒） | `15` |
-| `NEWS_DEDUP_WINDOW_MINUTES` | 新闻推送去重窗口（分钟） | `1440` |
+| 源 | 时机 | 处理 | 频道 |
+|----|------|------|------|
+| 华尔街见闻 | 工作日 20:00 | 关键词过滤投行观点 → crawl4ai 全文 → GLM 整理 | `news_research` |
+| 野村 nomuraconnects | 工作日 20:10 | economics / central-banks，过滤亚洲/中国 → GLM | `news_research` |
+| 博客（Anthropic Eng / OpenAI / DeepMind） | 每日 5:00 | 新文章 crawl4ai + GLM 中文摘要；源在 `app/config/blog_monitor.py` | `news_ai_tool` |
+| GitHub Trending | 每日 5:00 | Top N 与已推记录比对，只推新上榜；首次只记录 | `news_ai_tool` |
+| GitHub Release | 每 6 小时 | 发现新 Release 即推 | `news_ai_tool` |
 
-## 华尔街见闻投行观点配置
+## GitHub Release 仓库列表
 
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `WALLSTREET_NEWS_ENABLED` | 是否启用华尔街见闻策略 | `true` |
-| `WALLSTREET_NEWS_FETCH_TIMEOUT` | crawl4ai 全文爬取超时（秒） | `10` |
+监控列表 = `app/config/github_releases.py:GITHUB_RELEASE_REPOS` ∪ 本地已装 Claude Code 插件的 marketplace 仓库（`app/services/plugin_discovery.py` 读 `installed_plugins.json`，动态条目 key 加 `marketplace_` 前缀），按 `repo` 去重、静态优先。非 github 源 / 目录缺失 / JSON 损坏静默降级为只用静态配置。
 
-每日 20:00（工作日）自动抓取华尔街见闻快讯流和文章列表，关键词过滤投行/机构观点（高盛、摩根、花旗等），crawl4ai 爬取全文，GLM Flash 整理关键信息后 Slack 推送到 `news_research` 频道。
-
-## 野村证券研报配置
-
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `NOMURA_RESEARCH_ENABLED` | 是否启用野村研报爬虫 | `true` |
-
-每日 20:10（工作日）抓取 nomuraconnects.com 的 economics 和 central-banks 分类，关键词过滤亚洲/中国相关文章，crawl4ai 爬取全文，GLM Flash 整理关键观点后推送到 `news_research` 频道。
-
-## 博客监控配置
-
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `BLOG_MONITOR_ENABLED` | 是否启用博客监控 | `true` |
-
-每日 5:00 独立调度检查 Anthropic Engineering / OpenAI Blog / DeepMind Blog 新文章，crawl4ai 抓取全文 + GLM 中文摘要，推送到 `news_ai_tool` 频道。博客源配置在 `app/config/blog_monitor.py`。
-
-## GitHub Trending 监控配置
-
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `GITHUB_TRENDING_ENABLED` | 是否启用 GitHub Trending 监控 | `true` |
-| `GITHUB_TRENDING_TOP_N` | 取前 N 个项目 | `10` |
-
-每日 5:00 独立调度爬取 github.com/trending 页面 Top N 项目，与已推送记录比对，仅推送新上榜的项目（含 GLM 中文摘要）到 `news_ai_tool` 频道。首次运行只记录不推送。
-
-## GitHub Release 监控配置
-
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `GITHUB_RELEASE_ENABLED` | 是否启用 GitHub Release 监控 | `true` |
-| `CLAUDE_PLUGINS_DIR` | Claude Code 插件目录（动态发现本地已装插件所属仓库） | `~/.claude/plugins` |
-
-独立调度策略 `github_release`：每 6 小时检查一次新版本（`0 */6 * * *`），发现新 Release 立即推送到 `news_ai_tool` 频道。
-
-监控仓库列表 = 静态配置（`app/config/github_releases.py` 的 `GITHUB_RELEASE_REPOS`） ∪ 本地已装 Claude Code 插件对应 marketplace 仓库，按 `repo` 去重（静态优先保留自定义 `name`/`emoji`/`key`）。
-
-> 安装任何第三方仓库（skill/plugin/工具）后，需把对应 marketplace 仓库加入 `GITHUB_RELEASE_REPOS`。
-
-动态发现逻辑见 `app/services/plugin_discovery.py`：读 `$CLAUDE_PLUGINS_DIR/installed_plugins.json` → 查 marketplace `source`（支持 github/git 两种）→ 动态条目 `key` 加 `marketplace_` 前缀避免冲突。非 github 源 / 目录缺失 / JSON 损坏均静默降级为空列表（只用静态配置）。
-
-注意：不使用 GitHub Releases 发版的仓库（仅 commit 或 tag，如 `anthropics/claude-plugins-official`、`supabase/agent-skills`）纳入监控后不会产生推送，直到其首次发 Release。
-
-**smoke test 空列表 != 代码坏**：`format_github_release_updates` 返回 `([], [])` 通常是 `data/github_release_<key>_last_version.txt` 已被并行调度更新过。强制复测可临时删除该标记文件或写入更老版本号。
+- 安装任何第三方仓库（skill/plugin/工具）后加入 `GITHUB_RELEASE_REPOS`。
+- 不用 GitHub Releases 发版的仓库纳入后不会推送。
+- smoke test 返回 `([], [])` 通常是 `data/github_release_<key>_last_version.txt` 已被调度更新，删标记文件或写更老版本号即可复测。
