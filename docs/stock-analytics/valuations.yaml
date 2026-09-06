@@ -824,7 +824,7 @@
   conviction_date: '2026-05-08'
   source_doc: sectors/materials/chemicals/2026-05-08-万华化学-buffett分析.md
   note: 三情景1300/1885/2600亿；股本~31.5亿股估算
-- stock_code: 00358
+- stock_code: '00358'
   stock_name: 江西铜业
   market: HK
   currency: HKD
@@ -832,21 +832,24 @@
   commodity: copper
   commodity_impact: neutral
   rating: watch
-  watch_reason: 跟踪主体由A股600362切换至H股00358.HK——H股41.06 HKD/PE15.61/PB1.66，较A股折价约-33.5%，把同一份江铜资产买入价压低约三分之一、股息率从A股1.88%抬到2.82%，AH折价是本次切换的核心安全边际放大器；但折价≠便宜到位，铜价周期顶+price-taker无定价权的硬伤未解；H股口径安全边际约-56%（vs A股口径约-71%，AH折价把负安全边际收窄约15pp），维持watch不买，等铜价回落+PB向1x回归
-  bear: 10.8
-  base: 17.7
-  bull: 28.1
-  dividend_yield: 2.82
-  conviction_date: '2026-06-19'
-  source_doc: sectors/materials/nonferrous/2026-06-19-江西铜业-buffett分析.md
+  watch_reason: 维持 watch 但论据较旧档实质恶化——评级未翻转不等于论据未变。期望内在价值 24.65 HKD vs H 现价 36.58 HKD，安全边际 −32.6%（旧档 18.1 HKD / −56%，改善主因是盈利中枢上修 50→80 亿与 H 股价下跌 10.9%，不是质地改善）；买点闸 0/4（铜价 $14,371.5/t LME 3M 为十年中枢 $8,140.5 的 1.77 倍且是十年最高收盘、H 股 PB 1.237x 未破 1.0x、现货 TC 长单 $0 现货 −159.37 美元/干吨未转正、资产负债率 65.48% 未回 60% 以下）。旧档三条多方支柱两条被打穿：中期分红归零使 H 股前瞻股息率由 3.20% 腰斩至 1.92%，AH 折价由 −33.5% 收窄至 −31.74%；旧档两条回避触发器（周期高点大型激进扩产、负债率破 60%）已被 SolGold 8.67 亿英镑全现金收购 + 短期借款翻倍至 1,204.89 亿同时击穿。不转 exclude 的理由是资产端：FQM 18.47% 公开报价公允价值 285.56 亿、未入账浮盈 142.55 亿（每股 4.81 HKD，单列敏感性不入主锚）+ Cascabel 1,220 万吨铜资源 + 全板块唯一的 TC/RC 反向减震器（TC 每回升 50 美元/干吨约 33 亿 RMB，可抵消铜价下跌约 2,350 美元/吨的矿端损失），无质地硬伤
+  bear: 13.46
+  base: 26.99
+  bull: 38.95
+  dividend_yield: 3.2
+  conviction_date: '2026-09-06'
+  source_doc: sectors/materials/nonferrous/江西铜业/index.md
+  note: A 股口径对照（600362）：期望内在价值 21.09 CNY，安全边际 −54.0%（跟踪主体取 H 股口径 −32.6%，因 AH 折价 −31.74% 更低）
   themes:
   - 铜
   - commodity-cyclical
   - AH折价
   - 海外主权风险
   - Cascabel
-  - AI算力用铜
+  - SolGold
   - First-Quantum
+  - AI算力用铜
+  - 分红削减
 - stock_code: '600489'
   stock_name: 中金黄金
   market: A
