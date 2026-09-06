@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh .claude/hooks/git_add_guard.sh"
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/git_add_guard.sh"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh .claude/hooks/docs_lint_reminder.sh"
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/docs_lint_reminder.sh"
           }
         ]
       }
