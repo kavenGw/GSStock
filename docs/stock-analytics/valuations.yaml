@@ -4737,7 +4737,7 @@
   - AI叙事
   - 算力租赁
   - ABF载板材料
-- stock_code: '002916'
+- stock_code: 002916
   stock_name: 深南电路
   market: A
   currency: CNY
@@ -4758,3 +4758,20 @@
   - CCL涨价
   - 扩产
   - 国产替代
+- stock_code: '603186'
+  stock_name: 华正新材
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: exclude
+  bear: 8.57
+  base: 14.22
+  bull: 37.38
+  dividend_yield: 0.07
+  conviction_date: '2026-09-07'
+  source_doc: sectors/semiconductor/materials/华正新材/index.md
+  themes:
+  - ccl
+  - pcb-supply-chain
+  - ai-server
+  - 涨价周期
