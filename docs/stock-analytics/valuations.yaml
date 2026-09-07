@@ -384,18 +384,18 @@
   currency: CNY
   sector: electronics
   rating: exclude
-  bear: 4.0
-  base: 8.3
-  bull: 16.1
-  conviction_date: '2026-06-03'
-  source_doc: sectors/electronics/pcb/2026-06-03-兴森科技-buffett分析.md
-  note: 三情景市值bear≈70亿/base≈143亿/bull≈279亿；股本按市值/现价换算
+  bear: 2.56
+  base: 4.15
+  bull: 6.64
+  conviction_date: '2026-09-07'
+  source_doc: sectors/electronics/pcb/兴森科技/index.md
+  note: 三情景市值 bear 43.5 / base 70.5 / bull 112.8 亿（资产法主锚 PB 0.85/1.25/2.00x，利润法因三档隐含 ROE 低于股权成本失效）；期望 69.51 亿 / 4.09 元，安全边际 −88.87%，买点 ≤2.91 元；股本 1,699,673,563 股
   themes:
   - PCB
   - IC载板
   - FC-BGA
-  - 华为昇腾
-  - 半导体测试板
+  - 存储CSP基板
+  - 光模块mSAP
 - stock_code: '603920'
   stock_name: 世运电路
   market: A
