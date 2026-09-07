@@ -1,6 +1,6 @@
 ---
 name: portfolio-rebalance
-description: 日常再平衡分析。读最新持仓 + 已固化的目标权重，算 target/current 差额，输出 BUY/SELL/HOLD 操作建议（100 股倍数）+ 主题偏离 + 关键事件。支持 --dry-run 不写库。v2: 主题归属从 docs frontmatter 读，HTML 报告含锚点导航 + SELL 表盈亏列 + 内联理由。
+description: "日常再平衡分析。读最新持仓 + 已固化的目标权重，算 target/current 差额，输出 BUY/SELL/HOLD 操作建议（100 股倍数）+ 主题偏离 + 关键事件。支持 --dry-run 不写库。v2: 主题归属从 docs frontmatter 读，HTML 报告含锚点导航 + SELL 表盈亏列 + 内联理由。"
 ---
 
 # Portfolio Rebalance — 日常再平衡（v2）

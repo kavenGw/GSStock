@@ -1,6 +1,6 @@
 ---
 name: portfolio-init
-description: 首次配置或主题权重大调时调用。从 docs/stock-analytics/sectors/ + cross-sector/ 已分析的股票池中筛选 15-25 只重点池，按主题权重分配目标仓位（100 股倍数），写入 RebalanceConfig 和 StockWeight 表。v2: 评级与主题归属从 docs frontmatter 读取，HTML 报告含锚点导航 + 持仓盈亏 + 内联理由 + 文档链接。
+description: "首次配置或主题权重大调时调用。从 docs/stock-analytics/sectors/ + cross-sector/ 已分析的股票池中筛选 15-25 只重点池，按主题权重分配目标仓位（100 股倍数），写入 RebalanceConfig 和 StockWeight 表。v2: 评级与主题归属从 docs frontmatter 读取，HTML 报告含锚点导航 + 持仓盈亏 + 内联理由 + 文档链接。"
 ---
 
 # Portfolio Init — 首次持仓配置（v2）
