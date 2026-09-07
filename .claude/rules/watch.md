@@ -30,7 +30,7 @@ paths:
 
 ## 告警信号管线
 
-`watch_alert.scan`：`check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`watch_signal_pipeline.py`，纯函数）按股合并、加权分级 HIGH/MID/LOW、上下文增强（涨幅/量比/区间位置）→ `push_watch_alerts` 一股一条直推，`scan` 返回 `[]`。跨 tick 去重归 `WatchAlertService._fired`。第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5%，`_price_ring`）。**已知限制**：`_fired`/`_price_ring`/极值/`_momentum_cooldown` 均为进程内状态，盘中重启会重报或漏报。
+`watch_alert.scan`：`check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`watch_signal_pipeline.py`，纯函数）按股合并、加权分级 HIGH/MID/LOW、上下文增强（涨幅/量比/区间位置）→ `push_watch_alerts` 一股一条直推，`scan` 返回 `[]`。跨 tick 去重归 `WatchAlertService._fired`。支撑/阻力**突破类信号须跨越**（`_prev_prices` 上一 tick 在另一侧），仅靠近不报；7d/30d/realtime 入库前 `_sanitize_levels` 剔除错边的位（支撑≥现价、阻力≤现价），防 LLM 把前高当支撑导致创新高时报「跌破支撑」。第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5%，`_price_ring`）。**已知限制**：`_fired`/`_price_ring`/极值/`_momentum_cooldown` 均为进程内状态，盘中重启会重报或漏报。
 
 **价格新鲜度闸门** `price_freshness.py`（纯函数）：阈值 = 2× preload 周期（A/港 120s，美 360s），在 `watch_alert.scan`、`analyze_stocks('realtime')`（7d/30d 不加门）、`push_realtime_analysis` 三处拦截。**盘中突然静默是期望行为**（preload 退避、午休首 tick），排障看日志「跳过N只降级/超龄旧价」。
 

@@ -172,6 +172,7 @@ class WatchAlertService:
     def _check_support_resistance(self, code: str, name: str, curr: float, params: dict) -> list[Signal]:
         signals = []
         tolerance = 0.005
+        prev = self._prev_prices.get(code)
 
         support_levels = sorted([l for l in params.get('support_levels', []) if l], reverse=True)
         resistance_levels = sorted([l for l in params.get('resistance_levels', []) if l])
@@ -182,6 +183,9 @@ class WatchAlertService:
                 continue
             if abs(curr - level) / level <= tolerance:
                 if curr < level:
+                    # 只有从上方跌下来才算跌破；自下方上涨靠近的"支撑"实为阻力，不报
+                    if prev is None or prev < level:
+                        continue
                     label, direction = '跌破支撑', 'support_break'
                 elif curr > level:
                     label, direction = '测试支撑', 'support_hold'
@@ -200,6 +204,8 @@ class WatchAlertService:
                 continue
             if abs(curr - level) / level <= tolerance:
                 if curr > level:
+                    if prev is None or prev > level:
+                        continue
                     label, direction = '突破阻力', 'resistance_break'
                 elif curr < level:
                     label, direction = '测试阻力', 'resistance_test'

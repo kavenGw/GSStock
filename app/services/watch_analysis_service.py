@@ -41,6 +41,22 @@ class WatchAnalysisService:
         return None
 
     @staticmethod
+    def _sanitize_levels(parsed: dict, current_price: float):
+        """LLM 偶尔把支撑给到现价之上（或阻力给到现价之下），入库前按分析时价格剔除错边的位"""
+        if not current_price:
+            return
+        def _nums(key):
+            out = []
+            for v in parsed.get(key) or []:
+                try:
+                    out.append(float(v))
+                except (TypeError, ValueError):
+                    continue
+            return out
+        parsed['support_levels'] = [v for v in _nums('support_levels') if v < current_price]
+        parsed['resistance_levels'] = [v for v in _nums('resistance_levels') if v > current_price]
+
+    @staticmethod
     def analyze_stocks(period: str, force: bool = False) -> dict:
         from app.services.unified_stock_data import unified_stock_data_service
         from app.llm.router import llm_router
@@ -157,6 +173,7 @@ class WatchAnalysisService:
                         break
                     continue
                 consecutive_llm_failures = 0
+                WatchAnalysisService._sanitize_levels(parsed, current_price)
                 detail_data = {
                     'signal_text': parsed.get('signal_text', ''),
                     'ma_levels': parsed.get('ma_levels', {}),
