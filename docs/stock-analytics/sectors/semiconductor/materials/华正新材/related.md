@@ -20,13 +20,13 @@ related_docs:
   symmetric: true
 - path: ../../../materials/copper-foil/德福科技/index.md
   note: 铜箔环节另一对照档，用于交叉验证铜箔加工费上行的行业普遍性（非单一厂商行为）。华正铜箔全外购、无一体化缓冲，铜箔环节的定价能力直接决定华正毛利率的可持续性。
-  symmetric: false
+  symmetric: true
 - path: ../../../materials/fiberglass/中国巨石/index.md
   note: 玻纤（电子纱/电子布上游）龙头档。电子纱-电子布-CCL 是同一条成本传导链的三段，本档 §3.6 涨价传导精算依赖该链条的上游报价。玻纤扩产节奏也是「2027-2028 若高端电子布供给同步放量则 CCL 扩产迅速转为价格战」这一 bear 触发路径的前瞻观察点。
-  symmetric: false
+  symmetric: true
 - path: ../../../materials/fiberglass/国际复材/index.md
   note: 玻纤环节第二对照档，同上用于电子布价格与供给节奏的交叉验证。
-  symmetric: false
+  symmetric: true
 ---
 
 # 华正新材（603186）关联文档
