@@ -3178,13 +3178,13 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  watch_reason: 好生意（全球第一光模块龙头+2026Q1营收+192%/归母57亿仍加速+归母≈扣非盈利成色七家最硬），但价格透支——PB36.8/近5年98.3%分位、PE(TTM)85x、市值1.27万亿，场景加权期望内在价值约320元/股、安全边际约-72%，即便bull压力测试仍-54.5%，无任何安全边际
-  bear: 129
-  base: 336
-  bull: 520
-  dividend_yield: 0.12
-  conviction_date: '2026-07-02'
-  source_doc: sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md
+  watch_reason: 好生意被半年报显著超预期地证实（H1 营收 417.78 亿 +182.49%/归母 136.51 亿 +241.70%/扣非 130.92 亿/光模块毛利率 46.59% 创新高/量 +109.8% 且 ASP +36.6%），旧档估值体系已整体作废并从零重建；但重建后场景加权期望内在价值仍仅约 423.1 元/股、对现价 880.11 元安全边际 -51.9%，即便 100% 押注 bull（615.5 元）压测仍 -30.1%。PB 26.01 定价的是「永续 43% ROE」，而渗透率已约 45%（份额端接近天花板）、OCF/归母塌至 13.2%、2027 同业产能集中释放与自身达产窗口重合、FCC 禁令悬置未决——无安全边际，维持 watch 不买
+  bear: 217.3
+  base: 463.5
+  bull: 615.5
+  dividend_yield: 0.14
+  conviction_date: '2026-09-07'
+  source_doc: sectors/semiconductor/optical/中际旭创/index.md
   quality: 5
   themes:
   - ai_compute

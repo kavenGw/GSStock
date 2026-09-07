@@ -20,7 +20,7 @@ related_codes:
   - '600183'
 date: '2026-07-06'
 related_docs:
-  - path: ../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md
+  - path: ../sectors/semiconductor/optical/中际旭创/index.md
     note: CPO 延迟直接延长可插拔光模块景气，缓解其长期核心 overhang
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
@@ -67,7 +67,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-07-02-中际旭创-buffett分析](../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md) — CPO 延迟直接延长可插拔光模块景气，缓解其长期核心 overhang
+> - [index](../sectors/semiconductor/optical/中际旭创/index.md) — CPO 延迟直接延长可插拔光模块景气，缓解其长期核心 overhang
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 旧档明列"CPO 2027+ 蚕食可插拔"为核心 overhang，本次 CPO 延迟正击此点
 > - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 可插拔器件景气延续利好，CPO 配套(FAU/ELS)放量预期推后，净中性偏多
 > - [index](../sectors/electronics/pcb/沪电股份/index.md) — 沪电中报重做（2026-08-25，watch）裁定回写：不得沿用本档既定口径——SemiAnalysis 报延至 2028 vs 英伟达公开否认「roadmap is intact」，截至 2026-08-25 无任何裁决性新证据【缺】，时点分歧未解。被延后的 78 层正交中板属 Rubin Ultra 机架内连接，与沪电 26H1 的 71.39 亿交换机整机主板是两条产品线，属尚未兑现的期权而非在手订单；若 Kyber 确实推到 2028，该期权贴现要后推两年，对估值是减项

@@ -8,7 +8,7 @@ related_docs:
   - path: ../themes/2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效.md
     note: 索尔思（东山子公司）H1 光模块兑现为 800G/1.6T 需求再添一个模块厂本体数据点，但七家自身 Q1/H1 业绩已是更硬更早的证据、本次不构成增量信息，全链"业绩真兑现+估值全额透支"格局不变
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md
+  - path: ../sectors/semiconductor/optical/中际旭创/index.md
     note: 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md
@@ -62,7 +62,7 @@ related_docs:
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效](../themes/2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效.md) — 索尔思（东山子公司）H1 光模块兑现为 800G/1.6T 需求再添一个模块厂本体数据点，但七家自身 Q1/H1 业绩已是更硬更早的证据、本次不构成增量信息，全链"业绩真兑现+估值全额透支"格局不变
-> - [2026-07-02-中际旭创-buffett分析](../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md) — 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
+> - [index](../sectors/semiconductor/optical/中际旭创/index.md) — 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
 > - [2026-07-02-源杰科技-buffett分析](../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md) — 源杰科技个股 buffett 深度分析（本对比的源杰口径来源）
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 新易盛个股 buffett 深度分析（全球第二光模块龙头，本对比的新易盛口径来源）
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — Coherent 个股 buffett 深度分析（AI 光互联西方 incumbent，本对比的 Coherent 口径来源）
@@ -287,7 +287,7 @@ related_docs:
 
 ## 五、中际旭创（300308）
 
-> 完整口径见个股档 `../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md`。
+> 完整口径见个股档 `../sectors/semiconductor/optical/中际旭创/index.md`。
 
 ### 5.1 商业质量
 
@@ -806,7 +806,7 @@ AI 兑现: 1.6T 光引擎已量产 58.5万→2026预计190万只(+225%)·海外�
 - 迈威尔行情/财务：Yahoo Finance / CNBC / Seeking Alpha 汇总（2026-06-30）
 - Coherent 行情/财务/估值：stockanalysis.com + stocktitan（2026-07-02，行情锚 07-01）；FY26Q3 8-K + NVIDIA/Coherent 官方 PR；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md`
 - Lumentum 行情/财务/估值：stockanalysis.com + Google Finance 二源交叉（2026-07-02，行情锚 07-01）；Q3 FY26 8-K + investing.com slides；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md`（本条来源记录为本横评撰写当时；该个股档已于 2026-08-13 重做并替换）
-- 中际旭创行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300308` + akshare `stock_zh_valuation_baidu('300308', 市净率, 近5年)`（2026-07-02）；财务：akshare `stock_financial_abstract_ths('300308')` 年度/单季 + 2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-中际旭创-buffett分析.md`
+- 中际旭创行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300308` + akshare `stock_zh_valuation_baidu('300308', 市净率, 近5年)`（2026-07-02）；财务：akshare `stock_financial_abstract_ths('300308')` 年度/单季 + 2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/中际旭创/index.md`
 - 新易盛行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300502` + akshare `stock_zh_valuation_baidu('300502')`（2026-07-02）；财务：2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md`
 - 仕佳光子行情：腾讯 `qt.gtimg.cn` 实时接口（2026-07-02）；财务：招商证券 26Q1 点评 / 2025 年报点评
 - 源杰科技行情/财务/估值分位：本地 akshare（腾讯 `qt.gtimg.cn/q=sh688498`、`stock_zh_valuation_baidu` 近 5 年、`stock_financial_abstract_ths`），采于 2026-07-02；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md`
