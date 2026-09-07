@@ -1083,6 +1083,7 @@
   themes:
   - ai_compute
   - optical
+  - 薄膜铌酸锂
 - stock_code: '688127'
   stock_name: 蓝特光学
   market: A
@@ -4717,3 +4718,22 @@
   - gold_defense
   - 央行购金
   - 资产注入
+- stock_code: '600186'
+  stock_name: 莲花控股
+  market: A
+  currency: CNY
+  sector: consumer
+  rating: exclude
+  bear: 1.03
+  base: 2.45
+  bull: 4.79
+  dividend_yield: 0.0676
+  conviction_date: '2026-09-07'
+  source_doc: sectors/consumer/food-beverage/莲花控股/index.md
+  note: 味精主业占收入 97.44% 却按 IC 载板材料股定价，PB 11.16 是同质龙头梅花生物 1.39 的 8.03 倍；ABF 概念子公司纽菲斯收入占比仅 2.85% 且 2026H1 净亏损，期望内在价值每股 2.38 元对 2026-09-07 收盘 12.55 元，安全边际 −81.1%
+  themes:
+  - 调味品
+  - 味精
+  - AI叙事
+  - 算力租赁
+  - ABF载板材料
