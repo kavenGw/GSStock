@@ -2,6 +2,8 @@
     let stocks = [];
     let currentPeriod = '30d';
     let relChart = null;
+    let sortKey = 'pullback';
+    let sortAsc = true;
 
     // 相对走势图 legend 显示/隐藏选择持久化（不带 watch_ 前缀，避开 WatchStore.clearAll 每日清空）
     const LEGEND_KEY = 'valueDipRelLegend';
@@ -22,6 +24,19 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadStocks();
         loadRelative();
+        document.getElementById('stock-head').addEventListener('click', e => {
+            const th = e.target.closest('[data-sort]');
+            if (!th) return;
+            const key = th.dataset.sort;
+            if (key === sortKey) {
+                sortAsc = !sortAsc;
+            } else {
+                sortKey = key;
+                // 涨跌幅/回退默认看最差的，价格与文本默认升序
+                sortAsc = !(key === 'price');
+            }
+            render();
+        });
         document.getElementById('period-toggle').addEventListener('click', e => {
             const btn = e.target.closest('[data-period]');
             if (!btn) return;
@@ -64,6 +79,29 @@
         }[c]));
     }
 
+    function compare(a, b, key) {
+        const av = a[key], bv = b[key];
+        const aNull = av === null || av === undefined || av === '';
+        const bNull = bv === null || bv === undefined || bv === '';
+        if (aNull && bNull) return 0;
+        if (aNull) return 1;   // 空值恒沉底，不随升降序翻转
+        if (bNull) return -1;
+        if (typeof av === 'string' || typeof bv === 'string') {
+            return String(av).localeCompare(String(bv), 'zh-CN') * (sortAsc ? 1 : -1);
+        }
+        return (av - bv) * (sortAsc ? 1 : -1);
+    }
+
+    function updateHeadIndicator(pbKey) {
+        document.querySelectorAll('#stock-head [data-sort]').forEach(th => {
+            const active = th.dataset.sort === sortKey;
+            th.classList.toggle('sorted', active);
+            const base = th.textContent.replace(/[↑↓↕]\s*$/, '').trim();
+            th.innerHTML = esc(base) + '<span class="sort-arrow">' +
+                (active ? (sortAsc ? '↑' : '↓') : '↕') + '</span>';
+        });
+    }
+
     function render() {
         const tbody = document.getElementById('stock-body');
         const th = document.getElementById('pullback-th');
@@ -71,12 +109,9 @@
         if (th) th.textContent = `${days}日高点回退`;
 
         const pbKey = 'pullback_' + currentPeriod;
-        const sorted = [...stocks].sort((a, b) => {
-            const av = a[pbKey], bv = b[pbKey];
-            if (av === null || av === undefined) return 1;
-            if (bv === null || bv === undefined) return -1;
-            return av - bv;
-        });
+        const key = sortKey === 'pullback' ? pbKey : sortKey;
+        updateHeadIndicator(pbKey);
+        const sorted = [...stocks].sort((a, b) => compare(a, b, key));
 
         if (!sorted.length) {
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">暂无数据</td></tr>';

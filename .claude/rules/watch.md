@@ -33,3 +33,9 @@ paths:
 `watch_alert.scan`：`check_alerts` 产原始信号 → `WatchSignalPipeline.process`（`watch_signal_pipeline.py`，纯函数）按股合并、加权分级 HIGH/MID/LOW、上下文增强（涨幅/量比/区间位置）→ `push_watch_alerts` 一股一条直推，`scan` 返回 `[]`。跨 tick 去重归 `WatchAlertService._fired`。第 8 检测器 `_check_intraday_momentum`（≤3min ±1.5%，`_price_ring`）。**已知限制**：`_fired`/`_price_ring`/极值/`_momentum_cooldown` 均为进程内状态，盘中重启会重报或漏报。
 
 **价格新鲜度闸门** `price_freshness.py`（纯函数）：阈值 = 2× preload 周期（A/港 120s，美 360s），在 `watch_alert.scan`、`analyze_stocks('realtime')`（7d/30d 不加门）、`push_realtime_analysis` 三处拦截。**盘中突然静默是期望行为**（preload 退避、午休首 tick），排障看日志「跳过N只降级/超龄旧价」。
+
+## 表格排序（通用约定）
+
+- **新增/改动任何数据表格都必须支持点击表头排序**，不允许只留一个写死的默认排序。参考实现：`value_dip.js` 的 `compare()` / `updateHeadIndicator()` + `watch.html` 的 `th.sortable[data-sort]`。
+- 三条硬要求：① N/A / null **恒沉底**，不随升降序翻转（否则升序时满屏空值）② 表头带箭头指示当前排序列与方向（未排序列 ↕）③ 中文列用 `localeCompare(..., 'zh-CN')`，不要按码点排。
+- 列 key 随状态变化时（如价值洼地的「高点回退」列随 7d/30d/90d 切换 `pullback_*`），`sortKey` 存**逻辑名**（`pullback`），渲染时再映射到实际字段，否则切周期后排序静默失效。

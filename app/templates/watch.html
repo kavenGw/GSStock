@@ -123,6 +123,12 @@
     </div>
 </div>
 
+<style>
+#stock-head th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+#stock-head th.sortable .sort-arrow { opacity: .35; margin-left: 2px; }
+#stock-head th.sortable.sorted .sort-arrow { opacity: 1; }
+</style>
+
 <!-- 价值洼地（盯盘股涨跌幅 + 高点回退排行） -->
 <div class="mt-4 pt-3 border-top">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -142,14 +148,14 @@
         <div class="card-body p-0">
             <table class="table table-hover table-sm mb-0 align-middle">
                 <thead>
-                    <tr>
-                        <th>股票</th>
-                        <th>市场</th>
-                        <th class="text-end">现价</th>
-                        <th class="text-end">7d</th>
-                        <th class="text-end">30d</th>
-                        <th class="text-end">90d</th>
-                        <th class="text-end" id="pullback-th">30日高点回退</th>
+                    <tr id="stock-head">
+                        <th class="sortable" data-sort="name">股票</th>
+                        <th class="sortable" data-sort="market">市场</th>
+                        <th class="text-end sortable" data-sort="price">现价</th>
+                        <th class="text-end sortable" data-sort="change_7d">7d</th>
+                        <th class="text-end sortable" data-sort="change_30d">30d</th>
+                        <th class="text-end sortable" data-sort="change_90d">90d</th>
+                        <th class="text-end sortable" data-sort="pullback" id="pullback-th">30日高点回退</th>
                     </tr>
                 </thead>
                 <tbody id="stock-body">
