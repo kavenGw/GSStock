@@ -19,6 +19,12 @@ valuation:
   currency: USD
   dividend_yield: null
 related_docs:
+
+- path: 光库科技/index.md
+
+  note: 国际对标与 FCC 反向路径参照——FCC 禁令推动国内模块厂压降美系元器件占比，是国产上游器件替代需求的来源，对光库（2026-09-07 重做，watch / −96.4%）构成对冲性利好；光库收购的 Lumentum 铌酸锂产线亦是其 IDM 能力来源
+
+  symmetric: true
 - path: ../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md
   note: AI 光互联全景横评；本轮 Lumentum 完全稀释市值 $94.27B / P-S 31.3 是全景中最贵的一档，但 P-B 17.79 反而是整组最低，溢价全部押在利润率持续性上
   symmetric: true
@@ -54,6 +60,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
+> - [index](光库科技/index.md) — 国际对标与 FCC 反向路径参照——FCC 禁令推动国内模块厂压降美系元器件占比，是国产上游器件替代需求的来源，对光库（2026-09-07 重做，watch / −96.4%）构成对冲性利好；光库收购的 Lumentum 铌酸锂产线亦是其 IDM 能力来源
 > - [2026-07-02-AI光互联全景横评-buffett对比](../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md) — AI 光互联全景横评；本轮 Lumentum 完全稀释市值 $94.27B / P-S 31.3 是全景中最贵的一档，但 P-B 17.79 反而是整组最低，溢价全部押在利润率持续性上
 > - [2026-07-02-源杰科技-buffett分析](2026-07-02-源杰科技-buffett分析.md) — 源杰已从"远期追赶者"变为 CY2027 供给释放的一环——CW 激光获 NVIDIA 认证、100mW 已过客户验证、200G EML 规划 CY2026 末量产，是 Lumentum 缺口租金收敛的三条产能曲线之一
 > - [2026-07-02-Coherent-buffett分析](2026-07-02-Coherent-buffett分析.md) — 最直接西方对手；同日获 NVIDIA 完全对称的 $20 亿入股（明确 non-exclusive），6 英寸 InP 已量产 EML-CW-PD 且良率超其 3 英寸线，是 Lumentum EML 护城河被挤压的主要向量

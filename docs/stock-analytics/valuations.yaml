@@ -1074,11 +1074,12 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  bear: 19.0
-  base: 47.0
-  bull: 76.0
-  conviction_date: '2026-06-04'
-  source_doc: sectors/semiconductor/optical/2026-06-04-光库科技-buffett分析.md
+  bear: 4.33
+  base: 10.55
+  bull: 19.62
+  conviction_date: '2026-09-07'
+  source_doc: sectors/semiconductor/optical/光库科技/index.md
+  note: 2026 半年报重做——H1 兑现的是无源微光学连接件（FAU/MPO/CPO）的行业 β，而市场按 TFLN 技术主权的 α 定价；TFLN 数通 PAM-4 仍在送样、公司自认延后、铌酸锂募投累计效益 −2986.60 万。护城河由"强·拓宽中"重判为"窄"→ 倍数框架 8-12x。期望内在价值 26.95 亿/每股 10.81 元，对 2026-09-07 收盘市值 753.25 亿，安全边际 −96.4%（同 subsector 最负：光迅 −88.4%、德科立 −88%）
   themes:
   - ai_compute
   - optical
