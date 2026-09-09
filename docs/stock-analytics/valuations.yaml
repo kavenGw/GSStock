@@ -4775,3 +4775,19 @@
   - pcb-supply-chain
   - ai-server
   - 涨价周期
+- stock_code: 01191
+  stock_name: 海光芯正
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: exclude
+  bear: 17.5
+  base: 27.9
+  bull: 49.0
+  conviction_date: '2026-09-08'
+  source_doc: sectors/semiconductor/optical/海光芯正/index.md
+  themes:
+  - AI
+  - 光模块
+  - 硅光
+  - 港股新股
