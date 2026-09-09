@@ -4791,3 +4791,21 @@
   - 光模块
   - 硅光
   - 港股新股
+- stock_code: '300122'
+  stock_name: 智飞生物
+  market: A
+  currency: CNY
+  sector: healthcare
+  rating: watch
+  watch_reason: 期望内在价值 3.63 元 vs 现价 13.51 元，安全边际 −73.1%（EV 口径 −58.5%）；账面 PB 2.15 经净资产质量扣减后升至 3.77×；叠加六年会计差错更正与回购承诺零执行的治理红旗。保留跟踪而非 exclude 的唯一理由是司美格鲁肽审评（T10）与回购执行（T13）是两个有明确到期日的可证伪观察点。买点 2.00 元。
+  bear: 1.74
+  base: 3.34
+  bull: 7.18
+  dividend_yield: null
+  conviction_date: '2026-09-09'
+  source_doc: sectors/healthcare/vaccine/智飞生物/index.md
+  note: 资产法主锚（PB 三读数：账面 2.15x / 净资产质量扣减后 2.90x / EV 口径 3.77x），安全边际 −73.1%，买点 2.00 元
+  themes:
+  - GLP-1
+  - 疫苗
+  - 困境反转
