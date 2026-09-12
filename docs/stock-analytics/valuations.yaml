@@ -69,12 +69,13 @@
   currency: USD
   sector: ai-application
   rating: exclude
-  bear: 115.0
-  base: 165.0
-  bull: 290.0
-  conviction_date: '2026-05-09'
-  source_doc: sectors/ai-application/database/2026-05-09-甲骨文-buffett分析.md
-  note: 12M目标价口径，非DCF每股
+  bear: 60.0
+  base: 121.0
+  bull: 153.0
+  dividend_yield: 1.33
+  conviction_date: '2026-09-12'
+  source_doc: sectors/ai-application/database/甲骨文/index.md
+  note: EV/EBITDA + EV/Revenue 双轨场景加权内在价值，非12M目标价；主锚2026-09-11收盘$150.28，股本30.237亿股，期望内在价值$109.10，安全边际−27.4%，买点$60-70，评级exclude属账户跨市场约束非质地裁定
 - stock_code: 01810
   stock_name: 小米集团-W
   market: HK
