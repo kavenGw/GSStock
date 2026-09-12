@@ -11,7 +11,7 @@ related_docs:
   symmetric: true
 - path: ../../../consumer/e-commerce/2026-08-20-阿里巴巴-buffett分析.md
   note: 股东回报体检口径来源（该档 capex:回购 = 62:1）；本档因回购为零改用净流向口径 -$184.0 亿。两档同用 SOTP 交叉验证 + bull 三要素门控
-  symmetric: false
+  symmetric: true
 - path: ../../cloud/2026-08-23-优刻得-buffett分析.md
   note: A 股 IaaS 可比，同属"重资产算力出租、FCF 为负"形态，可对照本档 EV/EBITDA + EV/Revenue 双轨主锚的适用边界
   symmetric: true
@@ -20,10 +20,10 @@ related_docs:
   symmetric: true
 - path: ../../../electronics/pcb/沪电股份/index.md
   note: AI 服务器 PCB 环节，CSP capex 上行的同向受益方；与本档共享"四家 CSP 2026 capex 全部上调"这一事实基础
-  symmetric: false
+  symmetric: true
 - path: ../../../semiconductor/materials/生益科技/index.md
   note: CCL 上游材料壁垒视角，AI 资本开支链更上游环节
-  symmetric: false
+  symmetric: true
 ---
 # 甲骨文（ORCL）关联文档
 
