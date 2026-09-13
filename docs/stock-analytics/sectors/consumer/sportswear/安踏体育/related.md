@@ -6,6 +6,9 @@ related_docs:
 - path: ../2026-06-03-李宁-buffett分析.md
   note: 同板块兄弟档（李宁 02331.HK），国产运动鞋服双龙头对比。⚠️ 口径不对称：李宁档 conviction_date 为 2026-06-03、基准是 2025 年报，本档已含 2026H1 中报；两档估值时点相差近三个月，三情景不可直接横比
   symmetric: true
+- path: ../../designer-toy/泡泡玛特/index.md
+  note: 同 sector（consumer）兄弟档 + 同为港股文件夹档。本档的「倍数是否破框架」与「隐含 ROE 校验」两项估值格式被泡泡玛特档直接沿用。⚠️ 口径不对称：两档 conviction_date 与基准财报期不同，三情景不可直接横比
+  symmetric: true
 ---
 
 # 安踏体育（2020.HK）关联文档
@@ -13,6 +16,7 @@ related_docs:
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [2026-06-03-李宁-buffett分析](../2026-06-03-李宁-buffett分析.md) — 同板块兄弟档（李宁 02331.HK），国产运动鞋服双龙头对比。⚠️ 口径不对称：李宁档 conviction_date 为 2026-06-03、基准是 2025 年报，本档已含 2026H1 中报；两档估值时点相差近三个月，三情景不可直接横比
+> - [index](../../designer-toy/泡泡玛特/index.md) — 同 sector（consumer）兄弟档 + 同为港股文件夹档。本档的「倍数是否破框架」与「隐含 ROE 校验」两项估值格式被泡泡玛特档直接沿用。⚠️ 口径不对称：两档 conviction_date 与基准财报期不同，三情景不可直接横比
 <!-- END related_docs -->
 
 ## 兄弟档口径对照：李宁（02331.HK）
