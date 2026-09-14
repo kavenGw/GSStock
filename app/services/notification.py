@@ -131,6 +131,19 @@ class NotificationService:
         return pushed > 0
 
     @staticmethod
+    def push_extended_alerts(session: str, rows: list) -> bool:
+        """美股暗盘异动合并一条：rows 已按 |涨跌幅| 降序，每条 {code,name,price,change_pct}"""
+        if not rows:
+            return False
+        title = '🌙 *美股盘前异动*' if session == 'pre' else '🌙 *美股盘后异动*'
+        lines = [title]
+        for r in rows:
+            price = f"${r['price']:,.2f}" if r.get('price') is not None else '—'
+            lines.append(f"  · *{r['name']}({r['code']})* {price} "
+                         f"{NotificationService.fmt_pct(r['change_pct'])}")
+        return NotificationService.send_slack('\n'.join(lines), CHANNEL_WATCH)
+
+    @staticmethod
     def _sanitize_hk_codes(text: str) -> str:
         """`0358.HK` → `HK 0358`
 

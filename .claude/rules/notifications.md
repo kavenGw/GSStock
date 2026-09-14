@@ -36,6 +36,7 @@ title 一行核心信息，detail 补上下文。支撑/阻力用描述性标签
 - 检测器在 `watch_alert_service.py`（8 种：极值/目标价/支撑阻力/均线/成交量/TD九转/动量）；`notification.py` 的 `dispatch_signal()` 按 direction 路由 emoji（🔴=up/buy/resistance_break，🟢=down/sell/support_break）。
 - **合并推送**：`watch_alert` 经 `WatchSignalPipeline` 按股合并 → `push_watch_alerts()` 一股一条。首行 `emoji *名称(代码)* 股价 涨幅 [优先级]`，主信号行 + 次信号 `  · ` + 上下文行（量比/区间位置）。A 类（支撑阻力/TD/动量）信号行尾 ` | 当前 X` 由 `_strip_current` 剥离，B 类（极值/目标价/均线）保留作比较主语。HIGH/MID 推送，LOW 只 debug log。
 - 取价 `cache_only=True` + `price_freshness` 闸门（见 watch.md），无新鲜价整块不推，不降级推旧价。
+- **美股暗盘异动** `push_extended_alerts(session, rows)`：标题 `🌙 *美股盘前异动*`/`盘后`，条目 `  · *名称(代码)* $价格 fmt_pct`，一 tick 一条；触发与去重逻辑在 `watch_extended_alert` 策略（见 watch.md）。
 
 ## Slack 排版规范（所有 `format_*`，mrkdwn）
 
