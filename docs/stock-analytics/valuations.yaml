@@ -2103,16 +2103,16 @@
   currency: CNY
   sector: consumer
   rating: watch
-  bear: 20.2
-  base: 43.64
-  bull: 74.81
-  dividend_yield: null
-  conviction_date: '2026-06-11'
-  source_doc: sectors/consumer/consumer-electronics/2026-06-11-影石创新-buffett分析.md
-  note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；高成长投入期无分红
+  bear: 8.98
+  base: 22.74
+  bull: 51.87
+  dividend_yield: 0.25
+  conviction_date: '2026-09-14'
+  source_doc: sectors/consumer/consumer-electronics/影石创新/index.md
+  note: 内在价值按总市值口径(亿)÷总股本4.01亿股换算每股；期望 IV 83.9 亿(20.92 元)对 377.42 亿市值安全边际 −77.8%；2025 年度每 10 股派 2.35 元、派息率 10.14%、股息率 0.25%
   themes:
   - 智能影像
-  - 全景相机龙头
+  - 全景相机
   - 第二曲线无人机
   - 次新股解禁
 - stock_code: 000519
