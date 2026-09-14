@@ -532,6 +532,7 @@ const Watch = {
             const pctClass = p.change_pct > 0 ? 'price-up' : p.change_pct < 0 ? 'price-down' : 'price-flat';
             const pctSign = p.change_pct > 0 ? '+' : '';
             const pctDisplay = p.change_pct != null ? `${pctSign}${p.change_pct.toFixed(2)}%` : '--';
+            const extHtml = this._renderExtQuote(p.ext, mkt);
 
             const meta = this.chartMeta[code] || {};
             const supports = (meta.supportLevels || []).filter(s => p.price != null && s < p.price);
@@ -580,7 +581,7 @@ const Watch = {
 
             html += `<tr>
                 <td class="stock-name">${name}${tdBadge}</td>
-                <td class="text-end ${pctClass} fw-bold">${pctDisplay}</td>
+                <td class="text-end"><span class="${pctClass} fw-bold">${pctDisplay}</span>${extHtml}</td>
                 <td>${this._renderSignalBadges(code)}</td>
                 <td>${rangeBarHtml}${freshnessTag(p)}</td>
                 <td>${aiHtml}</td>
@@ -589,6 +590,16 @@ const Watch = {
 
         html += '</tbody></table>';
         el.innerHTML = html;
+    },
+
+    // 美股盘前/盘后（暗盘）报价：涨跌% 单元格下方一行小字，颜色沿用 price-up/down
+    _renderExtQuote(ext, market) {
+        if (!ext || ext.price == null) return '';
+        const label = ext.session === 'pre' ? '盘前' : '盘后';
+        const cls = ext.change_pct > 0 ? 'price-up' : ext.change_pct < 0 ? 'price-down' : 'price-flat';
+        const sign = ext.change_pct > 0 ? '+' : '';
+        const pct = ext.change_pct != null ? `${sign}${ext.change_pct.toFixed(2)}%` : '--';
+        return `<div class="small ${cls}">${label} ${this.formatPrice(ext.price, market)} ${pct}</div>`;
     },
 
     _updateAllSummaryTables() {
@@ -1050,7 +1061,7 @@ const Watch = {
                 this.recordRefreshTime();
             }
 
-            const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
+            const hasActiveMarket = Object.values(this.marketStatus).some(m => this.isActiveStatus(m.status));
             if (!hasActiveMarket) {
                 this.stopRefreshLoop();
                 this.stopAnalysisLoop();
@@ -1115,7 +1126,7 @@ const Watch = {
     // --- 定时器 ---
     startRefreshLoop() {
         this.stopRefreshLoop();
-        const hasActiveMarket = Object.values(this.marketStatus).some(m => m.status === 'trading');
+        const hasActiveMarket = Object.values(this.marketStatus).some(m => this.isActiveStatus(m.status));
         if (!hasActiveMarket) return;
         this.refreshTimer = setInterval(() => this.refreshIncrementalData(), this.REFRESH_INTERVAL * 1000);
     },
@@ -1150,7 +1161,7 @@ const Watch = {
                 if (data.success) {
                     this.marketStatus = data.data || {};
                     this.updateMarketStatusBadges();
-                    const hasActive = Object.values(this.marketStatus).some(m => m.status === 'trading');
+                    const hasActive = Object.values(this.marketStatus).some(m => this.isActiveStatus(m.status));
                     if (hasActive && !this.refreshTimer) {
                         this.startRefreshLoop();
                     }
@@ -1246,8 +1257,14 @@ const Watch = {
         return sign + abs.toFixed(0);
     },
 
+    // 交易中与美股盘前/盘后都视为活跃：价格轮询继续
+    isActiveStatus(status) {
+        return status === 'trading' || status === 'pre_market' || status === 'post_market';
+    },
+
     getStatusIcon(status) {
-        const map = { trading: '🟢', lunch: '🟡', closed: '⚫', pre_open: '⚪', holiday: '⚫' };
+        const map = { trading: '🟢', lunch: '🟡', closed: '⚫', pre_open: '⚪', holiday: '⚫',
+                      pre_market: '🔵', post_market: '🔵' };
         return map[status] || '⚫';
     },
 
@@ -1257,6 +1274,8 @@ const Watch = {
             lunch: 'bg-warning bg-opacity-25 text-warning',
             closed: 'bg-secondary bg-opacity-25 text-secondary',
             pre_open: 'bg-info bg-opacity-25 text-info',
+            pre_market: 'bg-primary bg-opacity-25 text-primary',
+            post_market: 'bg-primary bg-opacity-25 text-primary',
             holiday: 'bg-secondary bg-opacity-25 text-secondary',
         };
         return map[status] || 'bg-secondary';

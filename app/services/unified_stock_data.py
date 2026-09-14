@@ -3348,6 +3348,79 @@ class UnifiedStockDataService:
         self._miss_count = 0
         memory_cache.reset_stats()
 
+    # ============ 美股暗盘（盘前/盘后） ============
+    EXTENDED_CACHE_TYPE = 'extended'
+    EXTENDED_TTL_SECONDS = 600
+
+    @staticmethod
+    def _fetch_yf_info(yf_code: str) -> dict:
+        import yfinance as yf
+        return yf.Ticker(yf_code).info or {}
+
+    @staticmethod
+    def _parse_extended_quote(info: dict) -> dict | None:
+        """从 yfinance info 提取盘前/盘后报价；常规时段或无暗盘价返回 None
+
+        Yahoo 在 20:00 ET 后 marketState 变 CLOSED 但仍带 postMarketPrice，视为盘后。
+        """
+        state = (info.get('marketState') or '').upper()
+        if state.startswith('PRE'):
+            key, session = 'preMarket', 'pre'
+        elif state in ('POST', 'POSTPOST', 'CLOSED'):
+            key, session = 'postMarket', 'post'
+        else:
+            return None
+        price = info.get(f'{key}Price')
+        if price is None:
+            return None
+        ts = info.get(f'{key}Time')
+        time_str = None
+        if ts:
+            tz = TradingCalendarService._get_timezone('US')
+            time_str = datetime.fromtimestamp(int(ts), tz).isoformat()
+        return {
+            'session': session,
+            'price': round(float(price), 2),
+            'change_pct': round(float(info.get(f'{key}ChangePercent') or 0), 2),
+            'time': time_str,
+        }
+
+    def get_us_extended_quotes(self, stock_codes: list, force_refresh: bool = False) -> dict:
+        """美股暗盘报价 {code: {session, price, change_pct, time}}，仅内存缓存"""
+        if not stock_codes:
+            return {}
+        result = {} if force_refresh else self.get_us_extended_cached(stock_codes)
+        todo = [c for c in stock_codes if c not in result]
+        if not todo:
+            return result
+
+        def fetch_one(code: str) -> tuple:
+            try:
+                info = self._fetch_yf_info(self._get_yfinance_symbol(code))
+                return code, self._parse_extended_quote(info)
+            except Exception as e:
+                logger.debug(f"[数据服务.暗盘] {code} 获取失败: {e}")
+                return code, None
+
+        now_str = datetime.now().isoformat()
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            for code, quote in executor.map(fetch_one, todo):
+                if not quote:
+                    continue
+                quote['last_fetch_time'] = now_str
+                result[code] = quote
+                memory_cache.set(code, self.EXTENDED_CACHE_TYPE, quote, ttl=self.EXTENDED_TTL_SECONDS)
+
+        fetched = [c for c in todo if c in result]
+        if fetched:
+            logger.info(f"[数据服务.暗盘] yfinance → {', '.join(fetched)} ({len(fetched)}只)")
+        return result
+
+    def get_us_extended_cached(self, stock_codes: list) -> dict:
+        if not stock_codes:
+            return {}
+        return memory_cache.get_batch(stock_codes, self.EXTENDED_CACHE_TYPE)
+
     def get_prices_cached_only(self, stock_codes: list) -> tuple:
         """只查缓存获取实时价格，不触发API"""
         if not stock_codes:

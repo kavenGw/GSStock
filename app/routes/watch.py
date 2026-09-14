@@ -48,6 +48,11 @@ def prices():
                 'stale': code not in raw_prices or data.get('_is_degraded', False),
                 'age_seconds': price_age_seconds(data),
             })
+        from app.utils.market_identifier import MarketIdentifier
+        us_codes = [c for c in codes if MarketIdentifier.identify(c) == 'US']
+        ext_quotes = unified_stock_data_service.get_us_extended_cached(us_codes)
+        for p in price_list:
+            p['ext'] = ext_quotes.get(p['code'])
 
     bench_codes = [b['code'] for b in BENCHMARK_CODES]
     bench_raw = _read_cached_prices(bench_codes)
@@ -154,6 +159,8 @@ def market_status():
         lunch = LUNCH_WINDOWS.get(key)
         is_lunch = (is_trading_day and not is_open
                     and lunch and lunch[0] <= now.time() < lunch[1])
+        ext_session = (TradingCalendarService.get_us_extended_session(now)
+                       if key == 'US' and is_trading_day and not is_open else None)
 
         if not is_trading_day:
             status, status_text = 'holiday', '休市'
@@ -161,6 +168,10 @@ def market_status():
             status, status_text = 'trading', '交易中'
         elif is_lunch:
             status, status_text = 'lunch', '午休'
+        elif ext_session == 'pre':
+            status, status_text = 'pre_market', '盘前'
+        elif ext_session == 'post':
+            status, status_text = 'post_market', '盘后'
         elif TradingCalendarService.is_after_close(key, now):
             status, status_text = 'closed', '已收盘'
         else:

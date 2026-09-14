@@ -117,4 +117,10 @@ WATCH_CODES = [
     {'code': '2899.HK',   'name': '紫金矿业',  'market': 'HK',
      'ah': {'code': '601899', 'market': 'A', 'name': '紫金矿业'}},
     {'code': '002428',    'name': '云南锗业',  'market': 'A'},
+    {'code': 'NVDA',      'name': '英伟达',    'market': 'US'},
+    {'code': 'AMD',       'name': 'AMD',       'market': 'US'},
+    {'code': 'XPEV',      'name': '小鹏ADR',   'market': 'US'},
+    {'code': 'LITE',      'name': 'Lumentum',  'market': 'US'},
+    {'code': 'WOLF',      'name': 'Wolfspeed', 'market': 'US'},
+    {'code': 'SOXX',      'name': '半导体ETF', 'market': 'US'},
 ]

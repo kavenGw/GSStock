@@ -56,6 +56,27 @@ class WatchPreloadStrategy(Strategy):
             return True
         return tick % non_a_every == 0
 
+    def _preload_us_extended(self, us_codes: list[str], tick: int):
+        """美股盘前/盘后每 3 tick 取一次暗盘报价，退避键独立于盘中取价"""
+        if not us_codes or not self._should_refresh_market('US', tick):
+            return
+        from app.services.trading_calendar import TradingCalendarService
+        from app.services.unified_stock_data import unified_stock_data_service
+
+        if not TradingCalendarService.get_us_extended_session():
+            return
+        if self._should_skip('US_EXT'):
+            return
+        try:
+            quotes = unified_stock_data_service.get_us_extended_quotes(us_codes, force_refresh=True)
+            ok = len(quotes) >= len(us_codes) * 0.5
+            if ok:
+                logger.debug(f'[盯盘预取] 美股暗盘预取完成: {len(quotes)}只')
+        except Exception as e:
+            logger.error(f'[盯盘预取] 美股暗盘预取失败: {e}')
+            ok = False
+        self._record_result('US_EXT', ok)
+
     def scan(self) -> list[Signal]:
         from app.services.watch_service import WatchService
         from app.services.trading_calendar import TradingCalendarService
@@ -66,24 +87,27 @@ class WatchPreloadStrategy(Strategy):
         if not codes:
             return []
 
+        tick = self._tick_count
+        self._tick_count += 1
+
+        all_by_market = {}
+        for code in codes:
+            all_by_market.setdefault(MarketIdentifier.identify(code) or 'A', []).append(code)
+
+        self._preload_us_extended(all_by_market.get('US', []), tick)
+
         markets = WatchService.get_watched_markets()
         open_markets = {m for m in markets if TradingCalendarService.is_market_open(m)}
         if not open_markets:
             return []
 
-        market_codes = {}
-        for code in codes:
-            market = MarketIdentifier.identify(code) or 'A'
-            if market in open_markets:
-                market_codes.setdefault(market, []).append(code)
-
-        active_codes = [c for codes_list in market_codes.values() for c in codes_list]
-        if not active_codes:
+        market_codes = {m: l for m, l in all_by_market.items() if m in open_markets}
+        if not market_codes:
             return []
 
         # 每次按市场预取价格，失败市场指数退避（yfinance 限流不连累腾讯源）
         for market, m_codes in market_codes.items():
-            if not self._should_refresh_market(market, self._tick_count):
+            if not self._should_refresh_market(market, tick):
                 continue
             if self._should_skip(market):
                 continue
@@ -127,20 +151,19 @@ class WatchPreloadStrategy(Strategy):
         trend_interval = self._config.get('trend_interval', 15)
         a_codes_trend = market_codes.get('A', [])
         non_a_trend = [c for m, l in market_codes.items() if m != 'A' for c in l]
-        if a_codes_trend and self._tick_count % trend_interval == 0:
+        if a_codes_trend and tick % trend_interval == 0:
             try:
                 unified_stock_data_service.get_trend_data(a_codes_trend, days=7)
                 unified_stock_data_service.get_trend_data(a_codes_trend, days=30)
-                logger.info(f'[盯盘预取] A股走势预取完成: {len(a_codes_trend)}只 (tick={self._tick_count})')
+                logger.info(f'[盯盘预取] A股走势预取完成: {len(a_codes_trend)}只 (tick={tick})')
             except Exception as e:
                 logger.error(f'[盯盘预取] A股走势预取失败: {e}')
-        if non_a_trend and self._tick_count % (trend_interval * 3) == 0:
+        if non_a_trend and tick % (trend_interval * 3) == 0:
             try:
                 unified_stock_data_service.get_trend_data(non_a_trend, days=7)
                 unified_stock_data_service.get_trend_data(non_a_trend, days=30)
-                logger.info(f'[盯盘预取] 非A走势预取完成: {len(non_a_trend)}只 (tick={self._tick_count})')
+                logger.info(f'[盯盘预取] 非A走势预取完成: {len(non_a_trend)}只 (tick={tick})')
             except Exception as e:
                 logger.error(f'[盯盘预取] 非A走势预取失败: {e}')
 
-        self._tick_count += 1
         return []

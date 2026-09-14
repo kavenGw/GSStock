@@ -22,7 +22,7 @@ def test_get_watch_list_fields():
 
 def test_get_watched_markets_priority_order():
     markets = WatchService.get_watched_markets()
-    assert markets == ['A', 'HK', 'KR']
+    assert markets == ['A', 'US', 'HK', 'KR']
 
 
 def test_get_market_map():

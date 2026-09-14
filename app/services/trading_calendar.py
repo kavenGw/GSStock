@@ -52,6 +52,9 @@ class TradingCalendarService:
         'JP': [(time(9, 0), time(11, 30)), (time(12, 30), time(15, 0))],
     }
 
+    # 美股盘前/盘后（暗盘）时段边界（ET）
+    US_EXTENDED_HOURS = (time(4, 0), time(20, 0))
+
     # 缓存日历实例
     _calendars = {}
 
@@ -266,6 +269,30 @@ class TradingCalendarService:
             return False
 
         return dt.time() > close_time
+
+    @classmethod
+    def get_us_extended_session(cls, dt: datetime = None) -> Optional[str]:
+        """美股暗盘时段：交易日 ET 04:00–09:30 → 'pre'，16:00–20:00 → 'post'，其余 None"""
+        market = 'US'
+        if dt is None:
+            dt = cls.get_market_now(market)
+        elif dt.tzinfo is None:
+            dt = cls._get_timezone(market).localize(dt)
+
+        if not cls.is_trading_day(market, dt.date()):
+            return None
+
+        open_time, close_time = cls.get_market_hours(market, dt.date())
+        if open_time is None:
+            return None
+
+        ext_open, ext_close = cls.US_EXTENDED_HOURS
+        current = dt.time()
+        if ext_open <= current < open_time:
+            return 'pre'
+        if close_time < current <= ext_close:
+            return 'post'
+        return None
 
     @classmethod
     def is_before_open(cls, market: str, dt: datetime = None) -> bool:
