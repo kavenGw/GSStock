@@ -1148,7 +1148,13 @@ rtk git add app/ tests/ .claude/rules/watch.md .claude/rules/notifications.md CL
 ```python
 """夜盘语义实测：确认 overnight=1 时 pPrice 为夜盘实时价而非 ET 20:00 陈价
 
-判据：两次采样间隔 60s，至少一只票的 pPrice 发生变化。
+判据一：两次采样间隔 60s，至少一只票的 pPrice 发生变化。
+判据二（终审 I2 追加）：pChRatio 的基准是前收盘还是 ET 20:00 价。
+  对每只票算 pPrice/preClose - 1 与 pPrice/close - 1，看 pChRatio 贴近哪个。
+  若贴近 preClose：post→overnight 换段时 watch_extended_alert 清空 _pushed 会把
+  盘后涨跌榜原样重推一遍却标「暗盘异动」，需改为保留 _pushed 或用 post 末值播种。
+  若贴近 close(ET 20:00 价)：threshold_pct 3 在夜盘的语义与 pre/post 不同，
+  spec §7「阈值不分段」的 YAGNI 需重新讨论。
 """
 import sys
 import time
@@ -1192,8 +1198,21 @@ for sym in SYMS:
     print(f'{sym:<6} {before} -> {after}  {"变化" if before != after else "未变"}'
           f'{"  [等于收盘价]" if same_as_close else ""}')
 
-print(f'\n结论：{len(changed)}/{len(SYMS)} 只 pPrice 在 60s 内变化 -> '
+    # 判据二：pChRatio 贴近哪个基准
+    try:
+        px, ratio = float(after), float(raw.get('pChRatio'))
+        close_px, pre_close = float(raw.get('close')), float(raw.get('preClose'))
+        vs_close = px / close_px - 1
+        vs_preclose = px / pre_close - 1
+        base = 'close(ET20:00)' if abs(ratio - vs_close) < abs(ratio - vs_preclose) else 'preClose'
+        print(f'       pChRatio={ratio:.6f}  vs_close={vs_close:.6f}  '
+              f'vs_preClose={vs_preclose:.6f}  -> 基准={base}')
+    except (TypeError, ValueError, ZeroDivisionError):
+        print('       pChRatio 基准判定跳过（字段缺失或为零）')
+
+print(f'\n结论一：{len(changed)}/{len(SYMS)} 只 pPrice 在 60s 内变化 -> '
       f'{"夜盘价有效" if changed else "疑似停更，需降级"}')
+print('结论二：见上方各票「基准=」，若为 preClose 则需处理换段重推（终审 I2）')
 ```
 
 - [ ] **Step 2: 执行**
