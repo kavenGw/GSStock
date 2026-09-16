@@ -64,68 +64,113 @@ class TestUsSession:
 
 class TestParseExtendedQuote:
     def test_pre_market(self):
-        info = {'marketState': 'PRE', 'preMarketPrice': 212.5175,
-                'preMarketChangePercent': -2.6444142, 'preMarketTime': 1789389705,
-                'postMarketPrice': None}
-        q = UnifiedStockDataService._parse_extended_quote(info)
+        info = {'preMarketPrice': 212.5175, 'preMarketChangePercent': -2.6444142,
+                'preMarketTime': 1789389705}
+        q = UnifiedStockDataService._parse_extended_quote(info, 'pre')
         assert q['session'] == 'pre'
         assert q['price'] == 212.52
         assert q['change_pct'] == -2.64
         assert q['time'] == '2026-09-14T08:41:45-04:00'
+        assert q['source'] == 'yfinance'
 
     def test_post_market(self):
-        info = {'marketState': 'POST', 'postMarketPrice': 100.123,
-                'postMarketChangePercent': 1.234, 'postMarketTime': 1789430400}
-        q = UnifiedStockDataService._parse_extended_quote(info)
-        assert q['session'] == 'post'
+        info = {'postMarketPrice': 100.123, 'postMarketChangePercent': 1.234,
+                'postMarketTime': 1789430400}
+        q = UnifiedStockDataService._parse_extended_quote(info, 'post')
         assert q['price'] == 100.12 and q['change_pct'] == 1.23
 
-    def test_closed_with_post_price_still_post(self):
+    def test_overnight_has_no_yfinance_fallback(self):
+        # 修掉旧的 CLOSED→post 误判：夜盘不得再拿停更的 postMarketPrice 冒充
         info = {'marketState': 'CLOSED', 'postMarketPrice': 50.0,
                 'postMarketChangePercent': -0.5, 'postMarketTime': 1789430400}
-        assert UnifiedStockDataService._parse_extended_quote(info)['session'] == 'post'
+        assert UnifiedStockDataService._parse_extended_quote(info, 'overnight') is None
 
-    def test_regular_or_missing_returns_none(self):
-        assert UnifiedStockDataService._parse_extended_quote({'marketState': 'REGULAR'}) is None
-        assert UnifiedStockDataService._parse_extended_quote({'marketState': 'PRE'}) is None
-        assert UnifiedStockDataService._parse_extended_quote({}) is None
+    def test_regular_and_missing_return_none(self):
+        assert UnifiedStockDataService._parse_extended_quote({'preMarketPrice': 1.0}, 'regular') is None
+        assert UnifiedStockDataService._parse_extended_quote({}, 'pre') is None
+        assert UnifiedStockDataService._parse_extended_quote({'preMarketPrice': None}, 'pre') is None
 
 
 class TestGetUsExtendedQuotes:
-    def test_fetch_parse_and_cache(self, monkeypatch):
+    def _patch_session(self, monkeypatch, session):
+        monkeypatch.setattr(TradingCalendarService, 'get_us_session',
+                            classmethod(lambda cls, dt=None: session))
+
+    def test_webull_is_primary(self, monkeypatch):
         from app.services import memory_cache as mc
+        from app.services import webull_quote
         svc = unified_stock_data_service
-        calls = []
-
-        def fake_info(yf_code):
-            calls.append(yf_code)
-            return {'marketState': 'PRE', 'preMarketPrice': 10.0,
-                    'preMarketChangePercent': 2.0, 'preMarketTime': 1789389600}
-
-        monkeypatch.setattr(svc, '_fetch_yf_info', fake_info)
+        self._patch_session(monkeypatch, 'pre')
         mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: {
+                                c: {'session': session, 'price': 10.0, 'change_pct': 2.0,
+                                    'time': 't', 'source': 'webull'} for c in symbols})
+        monkeypatch.setattr(svc, '_fetch_yf_info',
+                            lambda yf_code: (_ for _ in ()).throw(AssertionError('不应回落 yfinance')))
 
         out = svc.get_us_extended_quotes(['NVDA', 'AMD'], force_refresh=True)
         assert set(out) == {'NVDA', 'AMD'}
-        assert out['NVDA']['session'] == 'pre' and out['NVDA']['price'] == 10.0
-        assert sorted(calls) == ['AMD', 'NVDA']
+        assert out['NVDA']['source'] == 'webull' and out['NVDA']['session'] == 'pre'
 
-        cached = svc.get_us_extended_cached(['NVDA', 'AMD', 'LITE'])
-        assert cached['NVDA']['price'] == 10.0
-        assert 'LITE' not in cached
-
-    def test_failed_ticker_skipped(self, monkeypatch):
+    def test_falls_back_to_yfinance_for_missing(self, monkeypatch):
+        from app.services import memory_cache as mc
+        from app.services import webull_quote
         svc = unified_stock_data_service
+        self._patch_session(monkeypatch, 'post')
+        mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: {'NVDA': {
+                                'session': session, 'price': 10.0, 'change_pct': 1.0,
+                                'time': 't', 'source': 'webull'}})
+        monkeypatch.setattr(svc, '_fetch_yf_info',
+                            lambda yf_code: {'postMarketPrice': 5.0,
+                                             'postMarketChangePercent': -1.0,
+                                             'postMarketTime': 1789430400})
 
-        def fake_info(yf_code):
-            if yf_code == 'WOLF':
-                raise RuntimeError('boom')
-            return {'marketState': 'POST', 'postMarketPrice': 1.0,
-                    'postMarketChangePercent': 0.0, 'postMarketTime': 1789430400}
+        out = svc.get_us_extended_quotes(['NVDA', 'AMD'], force_refresh=True)
+        assert out['NVDA']['source'] == 'webull'
+        assert out['AMD']['source'] == 'yfinance' and out['AMD']['price'] == 5.0
 
-        monkeypatch.setattr(svc, '_fetch_yf_info', fake_info)
-        out = svc.get_us_extended_quotes(['WOLF', 'SOXX'], force_refresh=True)
-        assert set(out) == {'SOXX'}
+    def test_overnight_does_not_fall_back(self, monkeypatch):
+        from app.services import memory_cache as mc
+        from app.services import webull_quote
+        svc = unified_stock_data_service
+        self._patch_session(monkeypatch, 'overnight')
+        mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes', lambda symbols, session: {})
+        monkeypatch.setattr(svc, '_fetch_yf_info',
+                            lambda yf_code: (_ for _ in ()).throw(AssertionError('夜盘无兜底')))
+        assert svc.get_us_extended_quotes(['NVDA'], force_refresh=True) == {}
+
+    def test_regular_session_returns_empty(self, monkeypatch):
+        from app.services import webull_quote
+        svc = unified_stock_data_service
+        self._patch_session(monkeypatch, 'regular')
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: (_ for _ in ()).throw(AssertionError('盘中不取')))
+        assert svc.get_us_extended_quotes(['NVDA'], force_refresh=True) == {}
+
+    def test_cache_isolated_by_session(self, monkeypatch):
+        from app.services import memory_cache as mc
+        from app.services import webull_quote
+        svc = unified_stock_data_service
+        mc.memory_cache.invalidate(cache_type='extended')
+        self._patch_session(monkeypatch, 'pre')
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: {'NVDA': {
+                                'session': session, 'price': 10.0, 'change_pct': 1.0,
+                                'time': 't', 'source': 'webull'}})
+        svc.get_us_extended_quotes(['NVDA'], force_refresh=True)
+        assert svc.get_us_extended_cached(['NVDA'])['NVDA']['price'] == 10.0
+
+        # 切到盘中：盘前价不得串场
+        self._patch_session(monkeypatch, 'regular')
+        assert svc.get_us_extended_cached(['NVDA']) == {}
+
+        # 切到盘后：缓存里那条是 pre，同样失效
+        self._patch_session(monkeypatch, 'post')
+        assert svc.get_us_extended_cached(['NVDA']) == {}
 
 
 def _make_client():
