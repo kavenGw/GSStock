@@ -52,7 +52,7 @@ class TradingCalendarService:
         'JP': [(time(9, 0), time(11, 30)), (time(12, 30), time(15, 0))],
     }
 
-    # 美股盘前/盘后（暗盘）时段边界（ET）
+    # 美股盘前/盘后时段边界（ET）；此区间之外为暗盘（夜盘）
     US_EXTENDED_HOURS = (time(4, 0), time(20, 0))
 
     # 缓存日历实例
@@ -271,28 +271,39 @@ class TradingCalendarService:
         return dt.time() > close_time
 
     @classmethod
-    def get_us_extended_session(cls, dt: datetime = None) -> Optional[str]:
-        """美股暗盘时段：交易日 ET 04:00–09:30 → 'pre'，16:00–20:00 → 'post'，其余 None"""
+    def get_us_session(cls, dt: datetime = None) -> Optional[str]:
+        """美股四态时段：'pre' | 'regular' | 'post' | 'overnight' | None
+
+        边界左闭右开：[04:00, open) pre、[open, close) regular、
+        [close, 20:00) post、[20:00, 04:00) overnight。
+
+        夜盘（暗盘）归属其结束那天的交易日：周五 20:00 后次日非交易日故无夜盘，
+        周日 20:00 起次日为周一故有夜盘。
+        """
         market = 'US'
         if dt is None:
             dt = cls.get_market_now(market)
         elif dt.tzinfo is None:
             dt = cls._get_timezone(market).localize(dt)
 
+        current = dt.time()
+        ext_open, ext_close = cls.US_EXTENDED_HOURS
+
+        if current >= ext_close:
+            return 'overnight' if cls.is_trading_day(market, dt.date() + timedelta(days=1)) else None
+        if current < ext_open:
+            return 'overnight' if cls.is_trading_day(market, dt.date()) else None
+
         if not cls.is_trading_day(market, dt.date()):
             return None
-
         open_time, close_time = cls.get_market_hours(market, dt.date())
-        if open_time is None:
+        if open_time is None or close_time is None:
             return None
-
-        ext_open, ext_close = cls.US_EXTENDED_HOURS
-        current = dt.time()
-        if ext_open <= current < open_time:
+        if current < open_time:
             return 'pre'
-        if close_time < current <= ext_close:
-            return 'post'
-        return None
+        if current < close_time:
+            return 'regular'
+        return 'post'
 
     @classmethod
     def is_before_open(cls, market: str, dt: datetime = None) -> bool:

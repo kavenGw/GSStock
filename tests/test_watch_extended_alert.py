@@ -16,7 +16,7 @@ def env(monkeypatch):
         {'stock_code': 'LITE', 'stock_name': 'Lumentum', 'market': 'US'},
         {'stock_code': '0700.HK', 'stock_name': '腾讯控股', 'market': 'HK'},
     ]))
-    monkeypatch.setattr(TradingCalendarService, 'get_us_extended_session',
+    monkeypatch.setattr(TradingCalendarService, 'get_us_session',
                         classmethod(lambda cls, dt=None: state['session']))
     monkeypatch.setattr(usd.unified_stock_data_service, 'get_us_extended_cached',
                         lambda codes: {c: q for c, q in state['cached'].items() if c in codes})

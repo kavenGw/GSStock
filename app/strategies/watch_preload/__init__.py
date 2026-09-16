@@ -63,7 +63,7 @@ class WatchPreloadStrategy(Strategy):
         from app.services.trading_calendar import TradingCalendarService
         from app.services.unified_stock_data import unified_stock_data_service
 
-        if not TradingCalendarService.get_us_extended_session():
+        if TradingCalendarService.get_us_session() not in ('pre', 'post'):
             return
         if self._should_skip('US_EXT'):
             return

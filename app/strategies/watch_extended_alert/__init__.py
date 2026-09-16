@@ -28,7 +28,9 @@ class WatchExtendedAlertStrategy(Strategy):
         from app.services.unified_stock_data import unified_stock_data_service
         from app.services.watch_service import WatchService
 
-        session = TradingCalendarService.get_us_extended_session()
+        session = TradingCalendarService.get_us_session()
+        if session == 'regular':
+            session = None
         if session != self._session:
             self._pushed = {}
             self._session = session

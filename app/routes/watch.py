@@ -159,7 +159,7 @@ def market_status():
         lunch = LUNCH_WINDOWS.get(key)
         is_lunch = (is_trading_day and not is_open
                     and lunch and lunch[0] <= now.time() < lunch[1])
-        ext_session = (TradingCalendarService.get_us_extended_session(now)
+        ext_session = (TradingCalendarService.get_us_session(now)
                        if key == 'US' and is_trading_day and not is_open else None)
 
         if not is_trading_day:

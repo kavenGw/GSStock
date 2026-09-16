@@ -17,29 +17,49 @@ def _et(y, m, d, hh, mm):
     return datetime(y, m, d, hh, mm)
 
 
-class TestUsExtendedSession:
-    def test_before_0400_is_none(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 3, 59)) is None
+class TestUsSession:
+    def test_0359_is_overnight(self):
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 3, 59)) == 'overnight'
 
     def test_0400_is_pre(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 4, 0)) == 'pre'
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 4, 0)) == 'pre'
 
     def test_0929_is_pre(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 9, 29)) == 'pre'
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 9, 29)) == 'pre'
 
-    def test_regular_hours_is_none(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 9, 30)) is None
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 16, 0)) is None
+    def test_0930_to_1559_is_regular(self):
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 9, 30)) == 'regular'
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 15, 59)) == 'regular'
 
-    def test_1601_is_post(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 16, 1)) == 'post'
+    def test_1600_is_post(self):
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 16, 0)) == 'post'
 
-    def test_2000_is_post_2001_is_none(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 20, 0)) == 'post'
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 6, 20, 1)) is None
+    def test_1959_is_post(self):
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 19, 59)) == 'post'
 
-    def test_weekend_is_none(self):
-        assert TradingCalendarService.get_us_extended_session(_et(2026, 7, 11, 8, 0)) is None
+    def test_2000_is_overnight(self):
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 20, 0)) == 'overnight'
+
+    def test_friday_night_is_not_overnight(self):
+        # 周五 20:00 后次日为周六，非交易日 → 无夜盘
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 10, 20, 0)) is None
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 10, 23, 0)) is None
+
+    def test_sunday_night_is_overnight(self):
+        # 周日 20:00 后次日为周一，归属周一的夜盘
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 12, 20, 0)) == 'overnight'
+
+    def test_saturday_is_none(self):
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 11, 2, 0)) is None
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 11, 8, 0)) is None
+
+    def test_half_day_post_starts_at_close(self, monkeypatch):
+        # 半日市 13:00 收盘：13:00 起即为 post，而非 regular
+        from datetime import time as _time
+        monkeypatch.setattr(TradingCalendarService, 'get_market_hours',
+                            classmethod(lambda cls, market, dt=None: (_time(9, 30), _time(13, 0))))
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 12, 59)) == 'regular'
+        assert TradingCalendarService.get_us_session(_et(2026, 7, 6, 13, 0)) == 'post'
 
 
 class TestParseExtendedQuote:
@@ -173,7 +193,7 @@ class TestPreloadExtended:
         monkeypatch.setattr(WatchService, 'get_watched_markets', staticmethod(lambda: ['US', 'HK']))
         monkeypatch.setattr(TradingCalendarService, 'is_market_open',
                             classmethod(lambda cls, market, dt=None: False))
-        monkeypatch.setattr(TradingCalendarService, 'get_us_extended_session',
+        monkeypatch.setattr(TradingCalendarService, 'get_us_session',
                             classmethod(lambda cls, dt=None: session))
         called = []
         monkeypatch.setattr(svc, 'get_us_extended_quotes',
