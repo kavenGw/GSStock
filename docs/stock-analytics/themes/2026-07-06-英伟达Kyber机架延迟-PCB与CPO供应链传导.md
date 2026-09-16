@@ -50,7 +50,7 @@ related_docs:
   - path: 2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md
     note: 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
     symmetric: true
-  - path: ../sectors/semiconductor/equipment/2026-07-31-芯碁微装-buffett分析.md
+  - path: ../sectors/semiconductor/equipment/芯碁微装/index.md
     note: Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
     symmetric: true
   - path: 2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md
@@ -77,7 +77,7 @@ related_docs:
 > - [index](../sectors/semiconductor/packaging/通富微电/index.md) — 通富微电 buffett 档（2026-08-28 首建，watch）。原引用的通富-AMD 26Q1 财报联动专题已随 26H1 中报落地删除。本主题「英伟达裂缝为 AMD 打开追赶窗口、利好 AMD 封装链」的推论，在通富 26H1 得到一次反向校准：AMD 侧确在放量（数据中心 26Q2 +107%、Q3 指引 130 亿美元），但 AMD 的先进封装增量并未落到大陆 OSAT——AMD 2026-05-21 官宣的下一代 2.5D bridge/EFB 伙伴全为台系，MI450/Helios 走台积电 CoWoS-L + SoIC，通富两厂净利同期 −13.4%
 > - [index](../sectors/semiconductor/design/英伟达/index.md) — 延迟主体本身的回写（英伟达 FY27Q2 后全量重做，2026-08-28，watch）——**截至 2026-08-28 维持未决**：FY27Q2 财报与 10-Q 全文未提及 Kyber / NVL144 / NVL576 / Rubin Ultra 任何字样（已全文检索确认），SemiAnalysis 未撤稿，英伟达的否认仍停留在「Our roadmap is intact」这句笼统措辞、未给出具体日期。**不得因 Q2 财报大超预期而反向推断 Kyber 已解决**——Q2 确认的是 VR200 NVL72（Oberon 机架世代）按计划爬坡，而 Kyber 属 Rubin Ultra 世代，Q2 的强劲对 Kyber 时点不具判别力。英伟达档因此在三情景中均未对 Kyber 作任何假设，与本仓沪电档、建滔档的裁定一致
 > - [2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪](2026-07-13-沪电H1业绩预告-AI-PCB杀跌中的基本面证伪.md) — 沪电 H1 预告只证伪杀跌逻辑的近端一半（Q2 毛利率承压），本档的远端一半（2027-28 PCB/CCL 增量下调 5-16%）未被回答
-> - [2026-07-31-芯碁微装-buffett分析](../sectors/semiconductor/equipment/2026-07-31-芯碁微装-buffett分析.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
+> - [index](../sectors/semiconductor/equipment/芯碁微装/index.md) — Kyber 背板由 2027 推迟至 2028【软】是芯碁下游 capex 节奏的负面变量，设备订单领先 PCB 产能 12-18 个月 → 传导至芯碁会更早；本次芯碁重做未取得该时间表的任何更新或反转证据，维持【软】状态，仍是芯碁 bear 情景的主要触发路径之一
 > - [2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点](2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md) — 同一 CPO 时点争议链条的相反方向证据——本档是机架延迟（推后），彼档是 FAU 量产整线下单（推进），须并读避免单边取证
 > - [index](../sectors/semiconductor/materials/建滔积层板/index.md) — 建滔 08-25 中报重做**维持**本档对 Kyber 延期的【软·官方否认】分级（SemiAnalysis 称延至 2028 且未撤稿，英伟达仅笼统否认「roadmap is intact」，**争议本轮仍未解决**）。对建滔的净影响进一步确认为有限，且理由比旧档更明确：**中报全文未出现 ABF／BT／HDI 任何字样，「封裝載板」仅 2 次且均系描述玻纤纱布的下游应用方向** —— 建滔在载板环节的定位是**材料供应商（特种玻纤纱/布）而非载板厂**，Kyber 级 M9 + 石英布 + 78 层 Midplane 三样全无位置
 > - [index](../sectors/semiconductor/optical-chip/曦智科技/index.md) — 曦智科技（01879.HK）buffett 首建档（exclude）——国产光子计算 scale-up 域参与者而非全球 CPO 玩家，本档机架延迟传导链条为其产业位置提供纠偏参照

@@ -56,7 +56,7 @@ section: sources
 ### 本仓交叉档
 
 - [北方华创 index.md](../北方华创/index.md)（控股股东档，26H1 已把芯源微作为并表子公司写入）——本档与其做了 6 项逐条对账，见 [valuation.md 变化清单](valuation.md)。
-- [芯碁微装档](../2026-07-31-芯碁微装-buffett分析.md)（板块估值纪律来源）。
+- [芯碁微装档](../芯碁微装/index.md)（板块估值纪律来源）。
 - 其余结构性引用见 [related.md](related.md)。
 
 ---
