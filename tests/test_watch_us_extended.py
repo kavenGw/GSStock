@@ -200,33 +200,72 @@ def test_prices_attaches_ext_for_us_only(monkeypatch):
 
 
 class TestMarketStatusExtended:
-    def _patch(self, monkeypatch, et_time):
+    def _patch(self, monkeypatch, et_time, is_trading_day=True, is_open=False):
         monkeypatch.setattr(WatchService, 'get_watched_markets', staticmethod(lambda: ['US']))
         tz = pytz.timezone('America/New_York')
         monkeypatch.setattr(TradingCalendarService, 'get_market_now',
                             classmethod(lambda cls, market: tz.localize(et_time)))
         monkeypatch.setattr(TradingCalendarService, 'is_trading_day',
-                            classmethod(lambda cls, market, dt=None: True))
+                            classmethod(lambda cls, market, dt=None: is_trading_day))
+        monkeypatch.setattr(TradingCalendarService, 'is_market_open',
+                            classmethod(lambda cls, market, dt=None: is_open))
+
+    def _us(self):
+        return _make_client().get('/watch/market-status').get_json()['data']['US']
 
     def test_pre_market(self, monkeypatch):
         self._patch(monkeypatch, _et(2026, 7, 6, 8, 0))
-        us = _make_client().get('/watch/market-status').get_json()['data']['US']
+        us = self._us()
         assert us['status'] == 'pre_market' and us['status_text'] == '盘前'
+
+    def test_regular_says_pan_zhong(self, monkeypatch):
+        self._patch(monkeypatch, _et(2026, 7, 6, 11, 0), is_open=True)
+        us = self._us()
+        assert us['status'] == 'trading' and us['status_text'] == '盘中'
 
     def test_post_market(self, monkeypatch):
         self._patch(monkeypatch, _et(2026, 7, 6, 17, 0))
-        us = _make_client().get('/watch/market-status').get_json()['data']['US']
+        us = self._us()
         assert us['status'] == 'post_market' and us['status_text'] == '盘后'
 
-    def test_late_night_closed(self, monkeypatch):
+    def test_late_night_is_overnight(self, monkeypatch):
         self._patch(monkeypatch, _et(2026, 7, 6, 21, 0))
-        us = _make_client().get('/watch/market-status').get_json()['data']['US']
-        assert us['status'] == 'closed'
+        us = self._us()
+        assert us['status'] == 'overnight' and us['status_text'] == '暗盘'
 
-    def test_early_morning_pre_open(self, monkeypatch):
+    def test_early_morning_is_overnight(self, monkeypatch):
         self._patch(monkeypatch, _et(2026, 7, 6, 3, 0))
-        us = _make_client().get('/watch/market-status').get_json()['data']['US']
-        assert us['status'] == 'pre_open'
+        us = self._us()
+        assert us['status'] == 'overnight' and us['status_text'] == '暗盘'
+
+    def test_sunday_night_overnight_beats_holiday(self, monkeypatch):
+        # 周日非交易日，但 20:00 后属周一夜盘，不得显示休市
+        self._patch(monkeypatch, _et(2026, 7, 12, 21, 0), is_trading_day=False)
+        monkeypatch.setattr(TradingCalendarService, 'get_us_session',
+                            classmethod(lambda cls, dt=None: 'overnight'))
+        us = self._us()
+        assert us['status'] == 'overnight' and us['status_text'] == '暗盘'
+
+    def test_saturday_is_holiday(self, monkeypatch):
+        self._patch(monkeypatch, _et(2026, 7, 11, 8, 0), is_trading_day=False)
+        monkeypatch.setattr(TradingCalendarService, 'get_us_session',
+                            classmethod(lambda cls, dt=None: None))
+        assert self._us()['status'] == 'holiday'
+
+
+def test_non_us_market_keeps_jiao_yi_zhong(monkeypatch):
+    import datetime as dt_module
+    monkeypatch.setattr(WatchService, 'get_watched_markets', staticmethod(lambda: ['A']))
+    tz = pytz.timezone('Asia/Shanghai')
+    now = tz.localize(datetime(2026, 7, 6, 11, 0))
+    monkeypatch.setattr(TradingCalendarService, 'get_market_now',
+                        classmethod(lambda cls, market: now))
+    monkeypatch.setattr(TradingCalendarService, 'is_trading_day',
+                        classmethod(lambda cls, market, dt=None: True))
+    monkeypatch.setattr(TradingCalendarService, 'is_market_open',
+                        classmethod(lambda cls, market, dt=None: True))
+    a = _make_client().get('/watch/market-status').get_json()['data']['A']
+    assert a['status'] == 'trading' and a['status_text'] == '交易中'
 
 
 class TestPreloadExtended:
