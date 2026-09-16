@@ -286,6 +286,7 @@ class TestPreloadExtended:
                             lambda *a, **k: (_ for _ in ()).throw(AssertionError('盘外不应取正股价')))
         strat = WatchPreloadStrategy()
         strat._tick_count = tick
+        strat._backoff = {}  # 类级共享字典，隔离跨用例退避状态污染
         return strat, called
 
     def test_pre_session_fetches_us_codes(self, monkeypatch):
@@ -300,5 +301,15 @@ class TestPreloadExtended:
 
     def test_respects_three_tick_cadence(self, monkeypatch):
         strat, called = self._setup(monkeypatch, 'post', tick=1)
+        strat.scan()
+        assert called == []
+
+    def test_overnight_session_fetches(self, monkeypatch):
+        strat, called = self._setup(monkeypatch, 'overnight')
+        strat.scan()
+        assert called == [(['AMD', 'NVDA'], True)]
+
+    def test_regular_session_skips(self, monkeypatch):
+        strat, called = self._setup(monkeypatch, 'regular')
         strat.scan()
         assert called == []

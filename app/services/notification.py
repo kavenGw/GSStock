@@ -132,10 +132,13 @@ class NotificationService:
 
     @staticmethod
     def push_extended_alerts(session: str, rows: list) -> bool:
-        """美股暗盘异动合并一条：rows 已按 |涨跌幅| 降序，每条 {code,name,price,change_pct}"""
+        """美股扩展时段异动合并一条：rows 已按 |涨跌幅| 降序，每条 {code,name,price,change_pct}"""
         if not rows:
             return False
-        title = '🌙 *美股盘前异动*' if session == 'pre' else '🌙 *美股盘后异动*'
+        title = {'pre': '🌙 *美股盘前异动*', 'post': '🌙 *美股盘后异动*',
+                 'overnight': '🌑 *美股暗盘异动*'}.get(session)
+        if not title:
+            return False
         lines = [title]
         for r in rows:
             price = f"${r['price']:,.2f}" if r.get('price') is not None else '—'

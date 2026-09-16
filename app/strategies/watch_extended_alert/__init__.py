@@ -29,7 +29,7 @@ class WatchExtendedAlertStrategy(Strategy):
         from app.services.watch_service import WatchService
 
         session = TradingCalendarService.get_us_session()
-        if session not in ('pre', 'post'):
+        if session not in ('pre', 'post', 'overnight'):
             session = None
         if session != self._session:
             self._pushed = {}

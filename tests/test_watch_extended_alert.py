@@ -111,9 +111,36 @@ def test_non_us_codes_ignored(env):
     assert env['sent'] == []
 
 
-def test_overnight_session_not_pushed(env):
-    # get_us_session 的 'overnight' 不在白名单内，须视同无时段，不推送
+def test_overnight_session_pushed(env):
     env['session'] = 'overnight'
     env['cached'] = {'NVDA': _q('overnight', 212.0, -5.0)}
     env['strat'].scan()
-    assert env['sent'] == []
+    assert len(env['sent']) == 1
+    assert env['sent'][0][0].startswith('🌑 *美股暗盘异动*')
+
+
+class TestOvernightSession:
+    def test_overnight_title(self, monkeypatch):
+        sent = []
+        monkeypatch.setattr(NotificationService, 'send_slack',
+                            staticmethod(lambda text, channel=None: sent.append(text) or True))
+        rows = [{'code': 'NVDA', 'name': '英伟达', 'price': 213.47, 'change_pct': 5.2}]
+        assert NotificationService.push_extended_alerts('overnight', rows) is True
+        assert sent[0].startswith('🌑 *美股暗盘异动*')
+
+    def test_pre_post_titles_unchanged(self, monkeypatch):
+        sent = []
+        monkeypatch.setattr(NotificationService, 'send_slack',
+                            staticmethod(lambda text, channel=None: sent.append(text) or True))
+        rows = [{'code': 'NVDA', 'name': '英伟达', 'price': 1.0, 'change_pct': 3.5}]
+        NotificationService.push_extended_alerts('pre', rows)
+        NotificationService.push_extended_alerts('post', rows)
+        assert sent[0].startswith('🌙 *美股盘前异动*')
+        assert sent[1].startswith('🌙 *美股盘后异动*')
+
+    def test_unknown_session_not_pushed(self, monkeypatch):
+        monkeypatch.setattr(NotificationService, 'send_slack',
+                            staticmethod(lambda text, channel=None: (_ for _ in ()).throw(
+                                AssertionError('盘中不应推送'))))
+        rows = [{'code': 'NVDA', 'name': '英伟达', 'price': 1.0, 'change_pct': 9.9}]
+        assert NotificationService.push_extended_alerts('regular', rows) is False

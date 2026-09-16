@@ -57,13 +57,13 @@ class WatchPreloadStrategy(Strategy):
         return tick % non_a_every == 0
 
     def _preload_us_extended(self, us_codes: list[str], tick: int):
-        """美股盘前/盘后每 3 tick 取一次暗盘报价，退避键独立于盘中取价"""
+        """美股盘前/盘后/暗盘每 3 tick 取一次报价，退避键独立于盘中取价"""
         if not us_codes or not self._should_refresh_market('US', tick):
             return
         from app.services.trading_calendar import TradingCalendarService
         from app.services.unified_stock_data import unified_stock_data_service
 
-        if TradingCalendarService.get_us_session() not in ('pre', 'post'):
+        if TradingCalendarService.get_us_session() not in ('pre', 'post', 'overnight'):
             return
         if self._should_skip('US_EXT'):
             return
