@@ -1,4 +1,4 @@
-"""美股暗盘（盘前/盘后）：时段判断、yfinance 解析、/prices ext 字段、市场状态文案、预取调度"""
+"""美股扩展时段（盘前/盘中/盘后/暗盘）：时段判断、Webull/yfinance 取价、/prices ext 字段、市场状态文案、预取调度"""
 from datetime import datetime
 
 import pytz

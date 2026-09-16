@@ -1,4 +1,4 @@
-"""美股暗盘异动推送 — 盘前/盘后涨跌超阈值合并一条推 Slack（只读缓存，不触发 API）"""
+"""美股扩展时段异动推送 — 盘前/盘后/暗盘涨跌超阈值合并一条推 Slack（只读缓存，不触发 API）"""
 import logging
 
 from app.strategies.base import Strategy, Signal
@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class WatchExtendedAlertStrategy(Strategy):
     name = "watch_extended_alert"
-    description = "美股盘前/盘后暗盘异动推送"
+    description = "美股盘前/盘后/暗盘异动推送"
     schedule = "interval_minutes:1"
     needs_llm = False
 

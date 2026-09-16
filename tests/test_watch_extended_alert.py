@@ -1,4 +1,4 @@
-"""美股暗盘异动推送：阈值、首推/复推、时段外重置、合并一条消息、缓存为空不推"""
+"""美股扩展时段异动推送：阈值、首推/复推、时段外重置、合并一条消息、缓存为空不推"""
 import pytest
 
 from app.services.notification import NotificationService

@@ -71,9 +71,9 @@ class WatchPreloadStrategy(Strategy):
             quotes = unified_stock_data_service.get_us_extended_quotes(us_codes, force_refresh=True)
             ok = len(quotes) >= len(us_codes) * 0.5
             if ok:
-                logger.debug(f'[盯盘预取] 美股暗盘预取完成: {len(quotes)}只')
+                logger.debug(f'[盯盘预取] 美股扩展时段预取完成: {len(quotes)}只')
         except Exception as e:
-            logger.error(f'[盯盘预取] 美股暗盘预取失败: {e}')
+            logger.error(f'[盯盘预取] 美股扩展时段预取失败: {e}')
             ok = False
         self._record_result('US_EXT', ok)
 
