@@ -71,6 +71,18 @@ class TestResolveTickerId:
         assert webull_quote.resolve_ticker_id('NOPE') is None
         assert len(calls) == 1
 
+    def test_exception_not_cached_retries_next_call(self, monkeypatch):
+        calls = []
+
+        def boom(url, **kw):
+            calls.append(url)
+            raise RuntimeError('network down')
+
+        monkeypatch.setattr(webull_quote.requests, 'get', boom)
+        assert webull_quote.resolve_ticker_id('NVDA') is None
+        assert webull_quote.resolve_ticker_id('NVDA') is None
+        assert len(calls) == 2
+
 
 class TestParseQuote:
     def test_ratio_converted_to_percent(self):

@@ -21,10 +21,10 @@ _ticker_ids = {}
 
 
 def resolve_ticker_id(symbol: str) -> int | None:
-    """symbol → Webull tickerId，进程内永久缓存（tickerId 稳定不变，查无结果也缓存 None 避免重复请求）"""
+    """symbol → Webull tickerId，进程内永久缓存（tickerId 稳定不变，查无结果也缓存 None 避免重复请求；
+    网络异常不缓存，留给下次调用重试）"""
     if symbol in _ticker_ids:
         return _ticker_ids[symbol]
-    ticker_id = None
     try:
         resp = requests.get(SEARCH_URL,
                             params={'keyword': symbol, 'pageIndex': 1, 'pageSize': 10},
@@ -32,12 +32,13 @@ def resolve_ticker_id(symbol: str) -> int | None:
         resp.raise_for_status()
         for item in (resp.json().get('data') or []):
             if item.get('symbol') == symbol and item.get('regionId') == US_REGION_ID:
-                ticker_id = item['tickerId']
-                break
+                _ticker_ids[symbol] = item['tickerId']
+                return item['tickerId']
     except Exception as e:
         logger.debug(f'[Webull] {symbol} tickerId 解析失败: {e}')
-    _ticker_ids[symbol] = ticker_id
-    return ticker_id
+        return None
+    _ticker_ids[symbol] = None
+    return None
 
 
 def _fetch_quote(ticker_id: int) -> dict:
