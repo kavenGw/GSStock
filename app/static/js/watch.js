@@ -599,7 +599,7 @@ const Watch = {
         const cls = ext.change_pct > 0 ? 'price-up' : ext.change_pct < 0 ? 'price-down' : 'price-flat';
         const sign = ext.change_pct > 0 ? '+' : '';
         const pct = ext.change_pct != null ? `${sign}${ext.change_pct.toFixed(2)}%` : '--';
-        return `<div class="small ${cls}">${label} ${this.formatPrice(ext.price, market)} ${pct}</div>`;
+        return `<div class="small ${cls}">${label ? label + ' ' : ''}${this.formatPrice(ext.price, market)} ${pct}</div>`;
     },
 
     _updateAllSummaryTables() {
@@ -1278,6 +1278,7 @@ const Watch = {
             pre_market: 'bg-primary bg-opacity-25 text-primary',
             post_market: 'bg-primary bg-opacity-25 text-primary',
             holiday: 'bg-secondary bg-opacity-25 text-secondary',
+            overnight: 'bg-dark bg-opacity-25 text-body',
         };
         return map[status] || 'bg-secondary';
     },

@@ -59,6 +59,18 @@ class TestResolveTickerId:
         monkeypatch.setattr(webull_quote.requests, 'get', boom)
         assert webull_quote.resolve_ticker_id('NVDA') is None
 
+    def test_no_match_caches_negative_result(self, monkeypatch):
+        calls = []
+
+        def fake_get(url, **kw):
+            calls.append(url)
+            return _Resp({'data': []})
+
+        monkeypatch.setattr(webull_quote.requests, 'get', fake_get)
+        assert webull_quote.resolve_ticker_id('NOPE') is None
+        assert webull_quote.resolve_ticker_id('NOPE') is None
+        assert len(calls) == 1
+
 
 class TestParseQuote:
     def test_ratio_converted_to_percent(self):

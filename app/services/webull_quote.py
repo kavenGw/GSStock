@@ -15,15 +15,16 @@ QUOTE_URL = 'https://quotes-gw.webullfintech.com/api/stock/tickerRealTime/getQuo
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
            'Accept': 'application/json'}
 US_REGION_ID = 6
-TIMEOUT = 10
+TIMEOUT = 5
 
 _ticker_ids = {}
 
 
 def resolve_ticker_id(symbol: str) -> int | None:
-    """symbol → Webull tickerId，进程内永久缓存（tickerId 稳定不变）"""
+    """symbol → Webull tickerId，进程内永久缓存（tickerId 稳定不变，查无结果也缓存 None 避免重复请求）"""
     if symbol in _ticker_ids:
         return _ticker_ids[symbol]
+    ticker_id = None
     try:
         resp = requests.get(SEARCH_URL,
                             params={'keyword': symbol, 'pageIndex': 1, 'pageSize': 10},
@@ -31,11 +32,12 @@ def resolve_ticker_id(symbol: str) -> int | None:
         resp.raise_for_status()
         for item in (resp.json().get('data') or []):
             if item.get('symbol') == symbol and item.get('regionId') == US_REGION_ID:
-                _ticker_ids[symbol] = item['tickerId']
-                return item['tickerId']
+                ticker_id = item['tickerId']
+                break
     except Exception as e:
         logger.debug(f'[Webull] {symbol} tickerId 解析失败: {e}')
-    return None
+    _ticker_ids[symbol] = ticker_id
+    return ticker_id
 
 
 def _fetch_quote(ticker_id: int) -> dict:

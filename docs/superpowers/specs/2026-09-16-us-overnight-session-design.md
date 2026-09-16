@@ -63,6 +63,8 @@
 
 `open` / `close` 取自 `get_market_hours()` 而非硬编码 09:30 / 16:00：半日市（如感恩节次日 13:00 收盘）时 post 窗口须从 13:00 起算。现有代码已是此写法，保留。
 
+**现状说明（与上述设计意图不符）**：`get_market_hours()` 目前对 `'US'` 返回硬编码字面量 `(9:30, 16:00)`，仅用 `exchange_calendars` 判 `is_trading_day`，从不查 `early_closes`。因此半日市当天 `close` 仍取到 16:00，13:00–16:00 会被误判为 `regular` 而非 `post`。这是历史欠债，未在本次改动范围内修复。
+
 ## 4. 数据层
 
 ### 4.1 新模块 `app/services/webull_quote.py`

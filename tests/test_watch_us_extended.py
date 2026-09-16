@@ -254,7 +254,6 @@ class TestMarketStatusExtended:
 
 
 def test_non_us_market_keeps_jiao_yi_zhong(monkeypatch):
-    import datetime as dt_module
     monkeypatch.setattr(WatchService, 'get_watched_markets', staticmethod(lambda: ['A']))
     tz = pytz.timezone('Asia/Shanghai')
     now = tz.localize(datetime(2026, 7, 6, 11, 0))
