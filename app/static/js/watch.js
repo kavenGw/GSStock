@@ -592,10 +592,10 @@ const Watch = {
         el.innerHTML = html;
     },
 
-    // 美股盘前/盘后（暗盘）报价：涨跌% 单元格下方一行小字，颜色沿用 price-up/down
+    // 美股盘前/盘后/暗盘报价：涨跌% 单元格下方一行小字，颜色沿用 price-up/down
     _renderExtQuote(ext, market) {
         if (!ext || ext.price == null) return '';
-        const label = ext.session === 'pre' ? '盘前' : '盘后';
+        const label = { pre: '盘前', post: '盘后', overnight: '暗盘' }[ext.session] || '';
         const cls = ext.change_pct > 0 ? 'price-up' : ext.change_pct < 0 ? 'price-down' : 'price-flat';
         const sign = ext.change_pct > 0 ? '+' : '';
         const pct = ext.change_pct != null ? `${sign}${ext.change_pct.toFixed(2)}%` : '--';
@@ -1257,14 +1257,15 @@ const Watch = {
         return sign + abs.toFixed(0);
     },
 
-    // 交易中与美股盘前/盘后都视为活跃：价格轮询继续
+    // 交易中与美股盘前/盘后/暗盘都视为活跃：价格轮询继续
     isActiveStatus(status) {
-        return status === 'trading' || status === 'pre_market' || status === 'post_market';
+        return status === 'trading' || status === 'pre_market'
+            || status === 'post_market' || status === 'overnight';
     },
 
     getStatusIcon(status) {
         const map = { trading: '🟢', lunch: '🟡', closed: '⚫', pre_open: '⚪', holiday: '⚫',
-                      pre_market: '🔵', post_market: '🔵' };
+                      pre_market: '🔵', post_market: '🔵', overnight: '🌑' };
         return map[status] || '⚫';
     },
 
