@@ -109,3 +109,11 @@ def test_non_us_codes_ignored(env):
     env['cached'] = {'0700.HK': _q('pre', 500.0, -9.0)}
     env['strat'].scan()
     assert env['sent'] == []
+
+
+def test_overnight_session_not_pushed(env):
+    # get_us_session 的 'overnight' 不在白名单内，须视同无时段，不推送
+    env['session'] = 'overnight'
+    env['cached'] = {'NVDA': _q('overnight', 212.0, -5.0)}
+    env['strat'].scan()
+    assert env['sent'] == []
