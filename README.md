@@ -56,6 +56,8 @@ cp .env.sample .env
 | `PRIVATE_DATABASE_URL` | 私有数据库路径 | `sqlite:///data/private.db` |
 | `TWELVE_DATA_API_KEY` | Twelve Data 密钥（可选，美股/港股） | 空 |
 | `POLYGON_API_KEY` | Polygon.io 密钥（可选，仅美股） | 空 |
+| `ALPACA_API_KEY_ID` | Alpaca 密钥 ID（可选，美股暗盘/夜盘报价），未配置则暗盘不给价 | 空 |
+| `ALPACA_API_SECRET_KEY` | Alpaca 密钥 Secret，与上一项成对使用 | 空 |
 | `HITHINK_FINANCE_API_KEY` | 同花顺 A 股行情/财务/估值 API key，未配置则该数据源整体跳过，行为与接入前一致 | 空 |
 | `ZHIPU_API_KEY` | 智谱 GLM 密钥（可选，AI 分析） | 空 |
 | `GEMINI_API_KEY` | Google Gemini 密钥，多个逗号分隔（可选，公司识别） | 空 |
@@ -210,6 +212,8 @@ pip install -r requirements.txt
 | Yahoo Finance | 无限制 | 无需 |
 | Twelve Data | 8请求/分钟, 800请求/天 | `TWELVE_DATA_API_KEY` |
 | Polygon.io | 5请求/分钟 | `POLYGON_API_KEY` |
+| Webull | 无需 key | 无需（盘前/盘后） |
+| Alpaca | 免费档含 feed=overnight（实时） | `ALPACA_API_KEY_ID` + `ALPACA_API_SECRET_KEY`（暗盘） |
 
 ### 港股
 

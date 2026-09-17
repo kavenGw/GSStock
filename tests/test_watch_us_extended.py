@@ -132,12 +132,66 @@ class TestGetUsExtendedQuotes:
         assert out['NVDA']['source'] == 'webull'
         assert out['AMD']['source'] == 'yfinance' and out['AMD']['price'] == 5.0
 
-    def test_overnight_does_not_fall_back(self, monkeypatch):
+    def test_overnight_prefers_alpaca(self, monkeypatch):
         from app.services import memory_cache as mc
-        from app.services import webull_quote
+        from app.services import alpaca_quote, webull_quote
         svc = unified_stock_data_service
         self._patch_session(monkeypatch, 'overnight')
         mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(alpaca_quote, 'get_overnight_quotes',
+                            lambda symbols: {c: {'session': 'overnight', 'price': 215.51,
+                                                 'change_pct': 0.83, 'time': 't',
+                                                 'source': 'alpaca'} for c in symbols})
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: (_ for _ in ()).throw(
+                                AssertionError('Alpaca 全覆盖时不应再问 Webull')))
+        out = svc.get_us_extended_quotes(['NVDA', 'AMD'], force_refresh=True)
+        assert set(out) == {'NVDA', 'AMD'}
+        assert out['NVDA']['source'] == 'alpaca' and out['NVDA']['change_pct'] == 0.83
+
+    def test_overnight_falls_back_to_webull_for_gap(self, monkeypatch):
+        from app.services import memory_cache as mc
+        from app.services import alpaca_quote, webull_quote
+        svc = unified_stock_data_service
+        self._patch_session(monkeypatch, 'overnight')
+        mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(alpaca_quote, 'get_overnight_quotes',
+                            lambda symbols: {'NVDA': {'session': 'overnight', 'price': 1.0,
+                                                      'change_pct': 0.1, 'time': 't',
+                                                      'source': 'alpaca'}})
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: {c: {'session': session, 'price': 2.0,
+                                                          'change_pct': 0.2, 'time': 't',
+                                                          'source': 'webull'} for c in symbols})
+        out = svc.get_us_extended_quotes(['NVDA', 'AMD'], force_refresh=True)
+        assert out['NVDA']['source'] == 'alpaca'
+        assert out['AMD']['source'] == 'webull'
+
+    def test_pre_post_do_not_call_alpaca(self, monkeypatch):
+        from app.services import memory_cache as mc
+        from app.services import alpaca_quote, webull_quote
+        svc = unified_stock_data_service
+        mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(alpaca_quote, 'get_overnight_quotes',
+                            lambda symbols: (_ for _ in ()).throw(
+                                AssertionError('盘前盘后不应走 Alpaca')))
+        monkeypatch.setattr(webull_quote, 'get_extended_quotes',
+                            lambda symbols, session: {c: {'session': session, 'price': 3.0,
+                                                          'change_pct': 0.3, 'time': 't',
+                                                          'source': 'webull'} for c in symbols})
+        for sess in ('pre', 'post'):
+            self._patch_session(monkeypatch, sess)
+            mc.memory_cache.invalidate(cache_type='extended')
+            out = svc.get_us_extended_quotes(['NVDA'], force_refresh=True)
+            assert out['NVDA']['source'] == 'webull' and out['NVDA']['session'] == sess
+
+    def test_overnight_does_not_fall_back(self, monkeypatch):
+        from app.services import memory_cache as mc
+        from app.services import alpaca_quote, webull_quote
+        svc = unified_stock_data_service
+        self._patch_session(monkeypatch, 'overnight')
+        mc.memory_cache.invalidate(cache_type='extended')
+        monkeypatch.setattr(alpaca_quote, 'get_overnight_quotes', lambda symbols: {})
         monkeypatch.setattr(webull_quote, 'get_extended_quotes', lambda symbols, session: {})
         monkeypatch.setattr(svc, '_fetch_yf_info',
                             lambda yf_code: (_ for _ in ()).throw(AssertionError('夜盘无兜底')))

@@ -3386,7 +3386,8 @@ class UnifiedStockDataService:
     def get_us_extended_quotes(self, stock_codes: list, force_refresh: bool = False) -> dict:
         """美股扩展时段报价 {code: {session, price, change_pct, time, source}}，仅内存缓存
 
-        主源 Webull，缺口由 yfinance 兜底（夜盘无兜底）。
+        盘前/盘后主源 Webull，缺口由 yfinance 兜底；
+        夜盘主源 Alpaca（feed=overnight），缺口回落 Webull（其 overnight=1 自闸仍在），无 yfinance 兜底。
         """
         if not stock_codes:
             return {}
@@ -3399,8 +3400,15 @@ class UnifiedStockDataService:
         if not todo:
             return result
 
-        from app.services import webull_quote
-        fetched = webull_quote.get_extended_quotes(todo, session)
+        fetched = {}
+        if session == 'overnight':
+            from app.services import alpaca_quote
+            fetched = alpaca_quote.get_overnight_quotes(todo)
+
+        remaining = [c for c in todo if c not in fetched]
+        if remaining:
+            from app.services import webull_quote
+            fetched.update(webull_quote.get_extended_quotes(remaining, session))
 
         missing = [c for c in todo if c not in fetched]
         if missing and session != 'overnight':
