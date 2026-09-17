@@ -31,7 +31,7 @@ def _credentials() -> tuple:
 
 def _normalize_time(ts: str) -> str:
     """Alpaca 返回纳秒精度，datetime.fromisoformat 只吃到微秒，多余位数直接截掉"""
-    if not ts:
+    if not ts or not isinstance(ts, str):
         return None
     raw = _NANOS_RE.sub(r'.\1', ts.replace('Z', '+00:00'))
     try:
@@ -47,13 +47,18 @@ def _bar_date(bar: dict) -> str:
 def _baseline_close(regular: dict, night_date: str):
     """取夜盘之前那个常规交易日的收盘价
 
-    正常情况 dailyBar 就是它；若 dailyBar 已翻篇到夜盘所属日（与 night_date 同日或更晚），
-    说明常规时段已开或日线提前滚动，改取 prevDailyBar。
+    正常情况 dailyBar 就是它；若已翻篇到夜盘所属日（同日或更晚），退回 prevDailyBar。
+    返回的基准必须带一个严格早于 night_date 的日期 —— 日期缺失或无法核验时一律返回
+    None。错误基准比缺数据危险得多：前者会安静地算出假涨跌幅并触发告警，后者只是不给价。
     """
-    daily = (regular or {}).get('dailyBar') or {}
-    if daily.get('c') is not None and (not night_date or _bar_date(daily) < night_date):
-        return daily.get('c')
-    return ((regular or {}).get('prevDailyBar') or {}).get('c')
+    if not night_date:
+        return None
+    for key in ('dailyBar', 'prevDailyBar'):
+        bar = (regular or {}).get(key) or {}
+        bar_date = _bar_date(bar)
+        if bar.get('c') is not None and bar_date and bar_date < night_date:
+            return bar.get('c')
+    return None
 
 
 def parse_snapshot(night: dict, regular: dict) -> dict | None:
@@ -110,7 +115,11 @@ def get_overnight_quotes(symbols: list) -> dict:
 
     result = {}
     for symbol in symbols:
-        quote = parse_snapshot(night.get(symbol), regular.get(symbol))
+        try:
+            quote = parse_snapshot(night.get(symbol), regular.get(symbol))
+        except Exception as e:
+            logger.debug(f'[Alpaca] {symbol} 解析失败: {e}')
+            continue
         if quote:
             result[symbol] = quote
     return result
