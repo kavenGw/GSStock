@@ -288,6 +288,29 @@ class TestPreloadExtended:
         strat._backoff = {}  # 类级共享字典，隔离跨用例退避状态污染
         return strat, called
 
+    def test_backoff_cleared_on_session_change(self, monkeypatch):
+        # 夜盘 Webull 未供数会一路累到 BACKOFF_CAP，残留计数不得跨过 ET 04:00 带进盘前
+        strat, called = self._setup(monkeypatch, 'overnight')
+        strat._ext_session = None
+        strat.scan()
+        assert strat._backoff.get('US_EXT'), '夜盘取到 0 只应记退避'
+
+        strat._backoff['US_EXT'] = {'skip': 8, 'remaining': 8}
+        monkeypatch.setattr(TradingCalendarService, 'get_us_session',
+                            classmethod(lambda cls, dt=None: 'pre'))
+        called.clear()
+        strat._tick_count = 0
+        strat.scan()
+        assert called == [(['AMD', 'NVDA'], True)], '换段到盘前应立即取价，不受夜盘退避残留影响'
+
+    def test_backoff_persists_within_same_session(self, monkeypatch):
+        # 同一时段内退避仍须生效，否则夜盘整夜白打请求
+        strat, called = self._setup(monkeypatch, 'overnight')
+        strat._ext_session = 'overnight'
+        strat._backoff['US_EXT'] = {'skip': 8, 'remaining': 8}
+        strat.scan()
+        assert called == [], '同段内退避未耗尽不应取价'
+
     def test_pre_session_fetches_us_codes(self, monkeypatch):
         strat, called = self._setup(monkeypatch, 'pre')
         strat.scan()

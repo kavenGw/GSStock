@@ -162,6 +162,17 @@ class TestGetExtendedQuotes:
         out = webull_quote.get_extended_quotes(['NVDA'], 'overnight')
         assert out['NVDA']['price'] == 215.68 and out['NVDA']['session'] == 'overnight'
 
+    def test_overnight_flag_string_forms(self, monkeypatch):
+        # 该字段现在参与判定，不能假定后端恒返回 int：'0' 若按真值判断会放行陈价
+        monkeypatch.setattr(webull_quote, 'resolve_ticker_id', lambda symbol: 1)
+        for flag, served in [('0', False), (0, False), (False, False), (None, False),
+                             ('1', True), (1, True), ('true', True), (True, True)]:
+            monkeypatch.setattr(webull_quote, '_fetch_quote',
+                                lambda ticker_id, f=flag: {'pPrice': '10', 'pChRatio': '0',
+                                                           'overnight': f})
+            out = webull_quote.get_extended_quotes(['NVDA'], 'overnight')
+            assert bool(out) is served, f'overnight={flag!r} 应{"给价" if served else "不给价"}'
+
     def test_pre_post_unaffected_by_flag(self, monkeypatch):
         # overnight 标志只管夜盘，不得波及盘前/盘后
         monkeypatch.setattr(webull_quote, 'resolve_ticker_id', lambda symbol: 1)
