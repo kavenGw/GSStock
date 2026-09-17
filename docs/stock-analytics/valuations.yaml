@@ -1571,12 +1571,12 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 14.6
-  base: 30.2
-  bull: 45.5
-  conviction_date: '2026-06-01'
-  source_doc: sectors/semiconductor/materials/2026-06-01-彤程新材-buffett分析.md
-  note: 三情景总市值90/186/280亿÷6.16亿股
+  bear: 7.03
+  base: 9.68
+  bull: 13.62
+  conviction_date: '2026-09-17'
+  source_doc: sectors/semiconductor/materials/彤程新材/index.md
+  note: 资产法主锚三档43.33/59.63/83.89亿÷6.16070亿股；联营mark-to-market另计，利润法47/112/192亿已降格压力测试
   themes:
   - 光刻胶国产替代
   - 半导体材料

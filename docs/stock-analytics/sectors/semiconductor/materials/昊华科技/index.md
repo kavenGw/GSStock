@@ -10,6 +10,10 @@ themes:
 rating: watch
 watch_reason: 业务侧旧档核心假设「需持续高 capex（15–21 亿/年）」被证伪——2026H1 capex 3.41 亿（−55.52%）、折旧 6.61 亿已反超 capex、FCF 由 −5.01 亿转 +8.93 亿，且 C₄F₆ 1,200 t/a、WF₆ 600 t/a、NF₃ 二期达产与 C919 轮胎 CTSO 是可验证的真实资产，故自 exclude 上调 watch 进入观察池；但价格侧结论仍是不买——53.31 元对应期望内在价值 30.17 元，安全边际 −43.4%，现价已落 bull 情景（封顶 55.8 元）上沿，买点 ≤18 元（相对现价折价约 66%）
 thesis: 央企氟化工拼盘的二线配额持有者：96.90 亿营收中 79% 的增量来自高端氟材料一个分部、且靠氟碳化学品 ASP +16.46% 与含氟锂电材料 ASP +63.49% 两条纯价格弹性，毛利率 24.53% 与 2025 全年持平（氟化锂原料 +94.87% 吃掉涨价）；电子化学品仅占 6.86% 且以价换量（均价 −11.43%、推算销量 +30.6%），市场按 PE-TTM 40.4x（剔政策性与联营收益后 60.4x）给的是半导体材料倍数、公司交的是氟化工周期报——质地上修、价格不买
+related_docs:
+- path: ../彤程新材/index.md
+  note: 同 sector/subsector 兄弟档，彤程本轮 SOTP 方法直接继承昊华档；彤程联营占比 51–64%（中策橡胶）是昊华（约 26.7%）的 2–2.4 倍
+  symmetric: true
 valuation:
   bear: 17.70
   base: 27.40
@@ -18,6 +22,11 @@ valuation:
   dividend_yield: 0.74
 ---
 # 昊华科技（600378.SH）— Buffett 视角分析
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [index](../彤程新材/index.md) — 同 sector/subsector 兄弟档，彤程本轮 SOTP 方法直接继承昊华档；彤程联营占比 51–64%（中策橡胶）是昊华（约 26.7%）的 2–2.4 倍
+<!-- END related_docs -->
 
 > **文件夹七文件档**：本文件为阅读入口，含 §0 结论摘要 / §10 评级决策 / §11 风险与监控。
 > 业务面见 [business.md](business.md)（§1–§5）、论点见 [thesis.md](thesis.md)（§6–§8）、
