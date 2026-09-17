@@ -16,6 +16,7 @@ class WatchPreloadStrategy(Strategy):
 
     _tick_count = 0
     _backoff = {}
+    _ext_session = None
 
     def _should_skip(self, market: str) -> bool:
         state = self._backoff.get(market)
@@ -24,7 +25,8 @@ class WatchPreloadStrategy(Strategy):
             return True
         return False
 
-    def _record_result(self, market: str, ok: bool):
+    def _record_result(self, market: str, ok: bool, expected_empty: bool = False):
+        """expected_empty：本就取不到（如夜盘 Webull 未供数），仍退避降低无效轮询但不报警"""
         if ok:
             if self._backoff.pop(market, None):
                 logger.info(f'[盯盘预取] {market} 取价恢复，退避清零')
@@ -32,7 +34,10 @@ class WatchPreloadStrategy(Strategy):
         prev = self._backoff.get(market)
         skip = min(prev['skip'] * 2, BACKOFF_CAP) if prev else 1
         self._backoff[market] = {'skip': skip, 'remaining': skip}
-        logger.warning(f'[盯盘预取] {market} 取价失败，退避 {skip} tick')
+        if expected_empty:
+            logger.debug(f'[盯盘预取] {market} 无可用报价，退避 {skip} tick')
+        else:
+            logger.warning(f'[盯盘预取] {market} 取价失败，退避 {skip} tick')
 
     @staticmethod
     def _prices_ok(prices: dict, codes: list[str]) -> bool:
@@ -63,19 +68,28 @@ class WatchPreloadStrategy(Strategy):
         from app.services.trading_calendar import TradingCalendarService
         from app.services.unified_stock_data import unified_stock_data_service
 
-        if TradingCalendarService.get_us_session() not in ('pre', 'post', 'overnight'):
+        session = TradingCalendarService.get_us_session()
+        if session not in ('pre', 'post', 'overnight'):
+            self._ext_session = session
             return
+        # 换段清零退避：夜盘常年取不到会累到 BACKOFF_CAP，残留计数会跨进盘前白跳过 24 分钟
+        if session != self._ext_session:
+            self._backoff.pop('US_EXT', None)
+            self._ext_session = session
         if self._should_skip('US_EXT'):
             return
+        expected_empty = False
         try:
             quotes = unified_stock_data_service.get_us_extended_quotes(us_codes, force_refresh=True)
             ok = len(quotes) >= len(us_codes) * 0.5
             if ok:
                 logger.debug(f'[盯盘预取] 美股扩展时段预取完成: {len(quotes)}只')
+            else:
+                expected_empty = session == 'overnight' and not quotes
         except Exception as e:
             logger.error(f'[盯盘预取] 美股扩展时段预取失败: {e}')
             ok = False
-        self._record_result('US_EXT', ok)
+        self._record_result('US_EXT', ok, expected_empty)
 
     def scan(self) -> list[Signal]:
         from app.services.watch_service import WatchService

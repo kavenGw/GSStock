@@ -1,7 +1,10 @@
 """Webull 公开行情 — 美股盘前/盘后/夜盘报价（无需 API key）
 
-session 一律由调用方按 TradingCalendarService.get_us_session() 给定；
-Webull 返回的 overnight 字段仅用于校验与日志，不参与判定。
+session 一律由调用方按 TradingCalendarService.get_us_session() 给定。
+
+例外：夜盘（overnight）时段额外以 Webull 自报的 overnight 字段为准入闸——
+该字段非 1 时 pPrice 是冻结的盘后陈价（2026-09-17 实测），不予采用。
+盘前/盘后不受此闸影响。
 """
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -41,6 +44,11 @@ def resolve_ticker_id(symbol: str) -> int | None:
     return None
 
 
+def _is_overnight_flag(value) -> bool:
+    """Webull 的 overnight 字段可能是 int / bool / str，统一判真"""
+    return str(value).strip().lower() in ('1', 'true')
+
+
 def _fetch_quote(ticker_id: int) -> dict:
     resp = requests.get(QUOTE_URL,
                         params={'tickerId': ticker_id, 'includeSecu': 1, 'includeQuote': 1},
@@ -76,8 +84,9 @@ def get_extended_quotes(symbols: list, session: str) -> dict:
                 return symbol, None
             raw = _fetch_quote(ticker_id)
             quote = parse_quote(raw, session)
-            if quote and session == 'overnight' and not raw.get('overnight'):
-                logger.debug(f'[Webull] {symbol} 时钟判夜盘但 overnight=0')
+            if quote and session == 'overnight' and not _is_overnight_flag(raw.get('overnight')):
+                logger.debug(f'[Webull] {symbol} 时钟判夜盘但 overnight=0，pPrice 视为盘后陈价不采用')
+                return symbol, None
             return symbol, quote
         except Exception as e:
             logger.debug(f'[Webull] {symbol} 取价失败: {e}')
