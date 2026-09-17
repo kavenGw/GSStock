@@ -77,7 +77,8 @@ def get_extended_quotes(symbols: list, session: str) -> dict:
             raw = _fetch_quote(ticker_id)
             quote = parse_quote(raw, session)
             if quote and session == 'overnight' and not raw.get('overnight'):
-                logger.debug(f'[Webull] {symbol} 时钟判夜盘但 overnight=0')
+                logger.debug(f'[Webull] {symbol} 时钟判夜盘但 overnight=0，pPrice 视为盘后陈价不采用')
+                return symbol, None
             return symbol, quote
         except Exception as e:
             logger.debug(f'[Webull] {symbol} 取价失败: {e}')
