@@ -32,7 +32,7 @@ def test_fetch_disclosure_map_picks_actual_over_scheduled(monkeypatch):
     from app.services import earnings as mod
 
     monkeypatch.setattr(mod, '_disclosure_cache', {})
-    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', lambda market, period: _df([
+    monkeypatch.setattr(mod, '_fetch_disclosure_df', lambda period, market='沪深京': _df([
         ['603986', '兆易创新', pd.Timestamp('2026-08-19'), pd.NaT, pd.NaT, pd.NaT,
          pd.Timestamp('2026-08-19')],
     ]))
@@ -47,7 +47,7 @@ def test_fetch_disclosure_map_marks_changed_and_records_original(monkeypatch):
     from app.services import earnings as mod
 
     monkeypatch.setattr(mod, '_disclosure_cache', {})
-    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', lambda market, period: _df([
+    monkeypatch.setattr(mod, '_fetch_disclosure_df', lambda period, market='沪深京': _df([
         ['002156', '通富微电', pd.Timestamp('2026-08-26'), pd.Timestamp('2026-08-29'),
          pd.NaT, pd.NaT, pd.NaT],
     ]))
@@ -64,12 +64,12 @@ def test_fetch_disclosure_map_swallows_unpublished_period(monkeypatch):
     """未发布期次时 akshare 内部抛 ValueError，必须吞掉返回空 dict。"""
     from app.services import earnings as mod
 
-    def _boom(market, period):
+    def _boom(period, market='沪深京'):
         raise ValueError('Length mismatch: Expected axis has 0 elements, '
                          'new values have 10 elements')
 
     monkeypatch.setattr(mod, '_disclosure_cache', {})
-    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', _boom)
+    monkeypatch.setattr(mod, '_fetch_disclosure_df', _boom)
 
     assert mod.EarningsService.fetch_disclosure_map('2026三季') == {}
 
@@ -79,13 +79,13 @@ def test_fetch_disclosure_map_caches_per_period(monkeypatch):
 
     calls = []
 
-    def _spy(market, period):
+    def _spy(period, market='沪深京'):
         calls.append(period)
         return _df([['603986', '兆易创新', pd.Timestamp('2026-08-19'),
                      pd.NaT, pd.NaT, pd.NaT, pd.NaT]])
 
     monkeypatch.setattr(mod, '_disclosure_cache', {})
-    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', _spy)
+    monkeypatch.setattr(mod, '_fetch_disclosure_df', _spy)
 
     mod.EarningsService.fetch_disclosure_map('2026半年报')
     mod.EarningsService.fetch_disclosure_map('2026半年报')
@@ -98,11 +98,11 @@ def test_fetch_disclosure_map_propagates_network_failure(monkeypatch):
     否则下游会把失败误判为"当期无数据"进而清空日历事件。"""
     from app.services import earnings as mod
 
-    def _boom(market, period):
+    def _boom(period, market='沪深京'):
         raise ConnectionError('boom')
 
     monkeypatch.setattr(mod, '_disclosure_cache', {})
-    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', _boom)
+    monkeypatch.setattr(mod, '_fetch_disclosure_df', _boom)
 
     with pytest.raises(ConnectionError):
         mod.EarningsService.fetch_disclosure_map('2026半年报')
@@ -115,11 +115,11 @@ def test_fetch_disclosure_map_propagates_other_valueerror(monkeypatch):
     不能被误判为期次未发布。"""
     from app.services import earnings as mod
 
-    def _boom(market, period):
+    def _boom(period, market='沪深京'):
         raise ValueError('unexpected token')
 
     monkeypatch.setattr(mod, '_disclosure_cache', {})
-    monkeypatch.setattr(mod.ak, 'stock_report_disclosure', _boom)
+    monkeypatch.setattr(mod, '_fetch_disclosure_df', _boom)
 
     with pytest.raises(ValueError):
         mod.EarningsService.fetch_disclosure_map('2026半年报')

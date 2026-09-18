@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import akshare as ak
 import pandas as pd
+import requests
 
 from app.models.unified_cache import UnifiedStockCache
 from app.services.circuit_breaker import circuit_breaker
@@ -33,6 +34,55 @@ RETRY_DELAY = 1.0
 _disclosure_cache: dict = {}
 
 _DISCLOSURE_PICK_ORDER = ['实际披露', '三次变更', '二次变更', '初次变更', '首次预约']
+
+_DISCLOSURE_URL = 'http://www.cninfo.com.cn/new/information/getPrbookInfo'
+_DISCLOSURE_HEADERS = {
+    'User-Agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                   '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'),
+    'Referer': 'http://www.cninfo.com.cn/new/commonUrl?url=data/yypl',
+    'X-Requested-With': 'XMLHttpRequest',
+}
+
+
+def _fetch_disclosure_df(period: str, market: str = '沪深京') -> pd.DataFrame:
+    """巨潮预约披露原始表。
+
+    akshare 的 stock_report_disclosure 不带 UA，cninfo 现对无 UA 请求返回
+    403 HTML，导致 JSONDecodeError，故在此自取并复刻其列名与语义。
+    """
+    market_map = {
+        '沪深京': 'szsh', '深市': 'sz', '深主板': 'szmb', '创业板': 'szcn',
+        '沪市': 'sh', '沪主板': 'shmb', '科创板': 'shkcp', '北交所': 'bj',
+    }
+    year = period[:4]
+    period_map = {
+        f'{year}一季': f'{year}-03-31',
+        f'{year}半年报': f'{year}-06-30',
+        f'{year}三季': f'{year}-09-30',
+        f'{year}年报': f'{year}-12-31',
+    }
+    params = {
+        'sectionTime': period_map[period],
+        'firstTime': '', 'lastTime': '',
+        'market': market_map[market],
+        'stockCode': '', 'orderClos': '', 'isDesc': '',
+        'pagesize': '10000', 'pagenum': '1',
+    }
+    r = requests.post(_DISCLOSURE_URL, params=params,
+                      headers=_DISCLOSURE_HEADERS, timeout=30)
+    r.raise_for_status()
+    rows = r.json().get('prbookinfos') or []
+    df = pd.DataFrame(rows)
+    if df.empty:
+        raise ValueError('Length mismatch: 期次暂无数据')
+    df.columns = ['股票代码', '股票简称', '首次预约', '实际披露', '初次变更',
+                  '二次变更', '三次变更', '报告期', '-', '组织码']
+    df = df[['股票代码', '股票简称', '首次预约', '初次变更', '二次变更',
+             '三次变更', '实际披露']]
+    for col in ('首次预约', '初次变更', '二次变更', '三次变更', '实际披露'):
+        df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
+    return df
+
 _DISCLOSURE_CHANGE_COLS = ['三次变更', '二次变更', '初次变更']
 
 # 月份 -> [(报告期中文, 年份偏移)]，覆盖该月可能发生的财报披露
@@ -281,7 +331,7 @@ class EarningsService:
             return _disclosure_cache[cache_key]
 
         try:
-            df = ak.stock_report_disclosure(market='沪深京', period=period)
+            df = _fetch_disclosure_df(period)
         except ValueError as e:
             if 'Length mismatch' not in str(e):
                 logger.warning(f'[财报.预约披露] 期次 {period} 取数异常: {e}')
