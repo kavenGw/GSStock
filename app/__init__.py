@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from logging.handlers import RotatingFileHandler as _RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler as _TimedRotatingFileHandler
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -120,8 +120,8 @@ def migrate_company_keyword_table():
     logging.info("company_keyword 表迁移完成")
 
 
-class SafeRotatingFileHandler(_RotatingFileHandler):
-    """Windows 安全的 RotatingFileHandler，轮转失败时跳过而非崩溃"""
+class SafeTimedRotatingFileHandler(_TimedRotatingFileHandler):
+    """Windows 安全的按天轮转 handler，轮转失败时跳过而非崩溃"""
 
     def doRollover(self):
         try:
@@ -131,9 +131,13 @@ class SafeRotatingFileHandler(_RotatingFileHandler):
 
 
 def setup_logging(app):
-    """配置应用日志系统（幂等，重复调用不会叠加 handler）"""
+    """配置应用日志系统（幂等，重复调用不会叠加 handler）
+
+    所有文件按天轮转、保留 7 天，过期自动删除；落盘级别 INFO，
+    DEBUG 只给专用文件（match.log / news.log）挂的 logger。
+    """
     root_logger = logging.getLogger()
-    if root_logger.handlers:
+    if any(isinstance(h, SafeTimedRotatingFileHandler) for h in root_logger.handlers):
         return
 
     log_dir = app.config.get('LOG_DIR', 'data/logs')
@@ -144,46 +148,34 @@ def setup_logging(app):
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    # app.log - 所有日志（5MB轮转，保留3份）
-    file_handler = SafeRotatingFileHandler(
-        os.path.join(log_dir, 'app.log'),
-        maxBytes=5*1024*1024, backupCount=3,
-        encoding='utf-8'
-    )
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
+    def daily_handler(filename, level, keep_days=7):
+        handler = SafeTimedRotatingFileHandler(
+            os.path.join(log_dir, filename),
+            when='midnight', backupCount=keep_days, encoding='utf-8'
+        )
+        handler.setLevel(level)
+        handler.setFormatter(formatter)
+        return handler
 
-    # error.log - 仅错误（2MB轮转，保留3份）
-    error_handler = SafeRotatingFileHandler(
-        os.path.join(log_dir, 'error.log'),
-        maxBytes=2*1024*1024, backupCount=3,
-        encoding='utf-8'
-    )
-    error_handler.setLevel(logging.ERROR)
-    error_handler.setFormatter(formatter)
-
-    # 控制台输出
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
 
     root_logger.setLevel(logging.DEBUG)
-    root_logger.addHandler(file_handler)
-    root_logger.addHandler(error_handler)
+    root_logger.addHandler(daily_handler('app.log', logging.INFO))
+    root_logger.addHandler(daily_handler('error.log', logging.ERROR))
     root_logger.addHandler(console_handler)
 
-    # match.log - 赛事监控专用（2MB轮转，保留5份），便于排查 NBA/LoL 推送问题
-    match_handler = SafeRotatingFileHandler(
-        os.path.join(log_dir, 'match.log'),
-        maxBytes=2*1024*1024, backupCount=5,
-        encoding='utf-8'
-    )
-    match_handler.setLevel(logging.DEBUG)
-    match_handler.setFormatter(formatter)
-    for name in ('app.services.esports_service', 'app.services.esports_monitor_service'):
-        lg = logging.getLogger(name)
-        lg.setLevel(logging.DEBUG)
-        lg.addHandler(match_handler)
+    dedicated = {
+        'match.log': ('app.services.esports_service', 'app.services.esports_monitor_service'),
+        'news.log': ('app.services.news_service', 'app.services.news_sources'),
+    }
+    for filename, logger_names in dedicated.items():
+        handler = daily_handler(filename, logging.DEBUG)
+        for name in logger_names:
+            lg = logging.getLogger(name)
+            lg.setLevel(logging.DEBUG)
+            lg.addHandler(handler)
 
     # 抑制第三方库噪音
     logging.getLogger('yfinance').setLevel(logging.CRITICAL)
