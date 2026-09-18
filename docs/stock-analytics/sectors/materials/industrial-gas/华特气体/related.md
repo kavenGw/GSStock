@@ -18,7 +18,7 @@ related_docs:
 - path: ../../../semiconductor/materials/昊华科技/index.md
   note: 邻接 semiconductor/materials 兄弟档，是本组**定价最理性**的样本（PE-TTM 40.43x / PB 3.68x，本仓判 exclude 上调 watch、安全边际 −43.4%）。本档 bull 封顶依据②直接引用它：**退出倍数不得超过 30x，理由是不能用高于昊华当前 40.43x 的倍数给华特做乐观情景**——那等于把「比已判贵的标的更贵」写进 bull。见本股 valuation.md §9.3。
   symmetric: true
-- path: ../../../semiconductor/materials/2026-06-01-雅克科技-buffett分析.md
+- path: ../../../semiconductor/materials/雅克科技/index.md
   note: 邻接 semiconductor/materials 电子材料兄弟档，属 A3 横向比较中同 subsector 五家（华特/广钢/金宏/南大/雅克）之一。用于「2022→2025 营收 CAGR」横向排序——华特 −7.66% 是五家中唯一负增长，这一判定否定了「电子特气 + 国产替代 + AI 三重叙事叠加的成长股」这一市场定位。见本股 valuation.md §9.0。
   symmetric: true
 - path: ../../../../themes/2026-06-28-半导体高纯二氧化碳短缺-影响分析专题.md
@@ -34,6 +34,6 @@ related_docs:
 > - [index](../和远气体/index.md) — 同 subsector 工业气体兄弟档，同为 exclude，是「重资产扩张 + 电子特气叙事」的极端样本（在建工程 30.96 亿 vs TTM 归母 0.471 亿，倒推 ROIC 仅 2~3%，安全边际 −94.5%）。与华特构成**转固压力的两个极端**：和远在建工程/固定资产远超华特的 18.2%，且电子特气主力品种未认证未接单；华特则是「认证最全但增长最难看」。用于校准「多重的扩产才算自杀式」这一判据。
 > - [2026-06-28-南大光电-buffett分析](../../../semiconductor/materials/2026-06-28-南大光电-buffett分析.md) — 邻接 semiconductor/materials 电子材料兄弟档，是本档横向对照中**唯一收入与利润同步高增**的样本（2025 营收 25.85 亿 +9.93%、归母 3.20 亿 +18.00%、加权 ROE 9.19%、毛利率 39.62%、2022→2025 营收 CAGR +17.8%）。对照价值：南大 PB 10.86x 比华特还贵，但它的贵有 ROE 与增长支撑；华特 ROE 只有南大的 74%、营收增长是组内唯一负数（−7.66%），却背着接近南大的 PB 和高于南大的 PE——**这组对照是本档「估值-基本面错配最严重」判定的直接依据**。见本股 thesis.md §8.3。
 > - [index](../../../semiconductor/materials/昊华科技/index.md) — 邻接 semiconductor/materials 兄弟档，是本组**定价最理性**的样本（PE-TTM 40.43x / PB 3.68x，本仓判 exclude 上调 watch、安全边际 −43.4%）。本档 bull 封顶依据②直接引用它：**退出倍数不得超过 30x，理由是不能用高于昊华当前 40.43x 的倍数给华特做乐观情景**——那等于把「比已判贵的标的更贵」写进 bull。见本股 valuation.md §9.3。
-> - [2026-06-01-雅克科技-buffett分析](../../../semiconductor/materials/2026-06-01-雅克科技-buffett分析.md) — 邻接 semiconductor/materials 电子材料兄弟档，属 A3 横向比较中同 subsector 五家（华特/广钢/金宏/南大/雅克）之一。用于「2022→2025 营收 CAGR」横向排序——华特 −7.66% 是五家中唯一负增长，这一判定否定了「电子特气 + 国产替代 + AI 三重叙事叠加的成长股」这一市场定位。见本股 valuation.md §9.0。
+> - [index](../../../semiconductor/materials/雅克科技/index.md) — 邻接 semiconductor/materials 电子材料兄弟档，属 A3 横向比较中同 subsector 五家（华特/广钢/金宏/南大/雅克）之一。用于「2022→2025 营收 CAGR」横向排序——华特 −7.66% 是五家中唯一负增长，这一判定否定了「电子特气 + 国产替代 + AI 三重叙事叠加的成长股」这一市场定位。见本股 valuation.md §9.0。
 > - [2026-06-28-半导体高纯二氧化碳短缺-影响分析专题](../../../../themes/2026-06-28-半导体高纯二氧化碳短缺-影响分析专题.md) — 半导体特气短缺主题档。华特是国内首家打破高纯 CO₂/CO/NO 进口制约的气体公司，属该主题的直接标的；本档提供的是该主题的**反面校验**——短缺/涨价主题在华特身上的实测结果是「营业额变大、毛利率反降 3.38pct」，即涨价被全额转给下游。凡引用该主题推导受益标的，须对照本档 thesis.md §6.2 的价差捕获判据。
 <!-- END related_docs -->

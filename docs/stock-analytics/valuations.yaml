@@ -1243,12 +1243,12 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 28.4
-  base: 61.8
-  bull: 103.0
-  conviction_date: '2026-06-01'
-  source_doc: sectors/semiconductor/materials/2026-06-01-雅克科技-buffett分析.md
-  note: 雅克科技；市值135/294/490亿÷4.76亿股
+  bear: 13.03
+  base: 19.33
+  bull: 28.37
+  conviction_date: '2026-09-18'
+  source_doc: sectors/semiconductor/materials/雅克科技/index.md
+  note: 2026-09-18 深度重做，迁文件夹七文件。盘中锚 137.18/市值 652.878 亿/PE-TTM(扣非) 68.19x/PB(归母) 8.16x(5年95.5分位)。估值口径由整体单一倍数改为 SOTP 分部倍数，经破框架对称测试（bull 框架内 140.8 亿 < base 181 亿）判利润法失效，改以资产法 RIM/PB 阶梯为主锚(CoE 11%/g 5%)；三情景股权价值 62/92/135 亿÷4.75927678 亿股，概率 40/40/20(bull 证据包三要素仅需求真实性一项硬证据成立，两项硬反证，封顶 20%)。期望内在价值 88.6 亿/每股 18.62 元，安全边际 −86.4%；bull 全兑现仍 −79.3%，最宽容破框架利润法 bull(302 亿)仍 −53.7%。下修主因是方法变更而非基本面恶化(沿用旧口径约 −55%)。
   themes:
   - 半导体材料
   - 前驱体
