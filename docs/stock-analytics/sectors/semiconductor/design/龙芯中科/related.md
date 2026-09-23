@@ -11,16 +11,16 @@ related_docs:
   symmetric: true
 - path: ../2026-08-09-寒武纪-buffett分析.md
   note: 估值口径参照——bear 利润法失效时以资产法托底、常态年价值按 12% 折现 4 年（÷1.5735）同口径沿用；AI 维度对照：寒武纪是 AI 业绩层真驱动，龙芯 9A1000（RX 550 级入门独显）判【蹭概念】，AI 周期经存储涨价对龙芯为负向传导
-  symmetric: false
+  symmetric: true
 - path: ../2026-04-25-国芯科技-buffett分析.md
   note: 同板块国产 CPU/嵌入式设计小体量对照——国芯为车规/嵌入式，龙芯工控类芯片 26H1 −22.55% 依赖特种领域单笔大单，两者都在政策与国产替代叙事下估值高于兑现
-  symmetric: false
+  symmetric: true
 - path: ../../../ai-application/software/2026-07-31-金山办公-buffett分析.md
   note: 信创生态下游软件侧——金山 WPS 与龙芯/飞腾/鲲鹏全栈兼容；龙芯开放市场卡在「适配」档，生态壁垒（二进制翻译、通算服务器软件）是其第二曲线的主约束
-  symmetric: false
+  symmetric: true
 - path: ../../../../themes/2026-08-30-长鑫LPDDR6量产-国产DRAM同代突破的传导.md
   note: 存储涨价周期对龙芯是整机交付拖累而非受益——公司半年报原文「内存、硬盘等配件价格上涨，招标采购中标整机出货放慢，导致上半年 3A6000 系列芯片的销售降低」；存储价格走势列为龙芯整机交付节奏的领先指标
-  symmetric: false
+  symmetric: true
 ---
 
 # 龙芯中科（688047）关联文档
