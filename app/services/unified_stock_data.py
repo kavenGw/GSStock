@@ -740,6 +740,12 @@ class UnifiedStockDataService:
                     prev_close = float(prev['Close'])
                     change_val = price_val - prev_close
                     change_pct = (change_val / prev_close * 100) if prev_close else 0
+                    # 开盘初期 yfinance 日线尚无当日 bar，末行是昨日收盘；盘中拿到非当日 bar 标记降级供盯盘闸门过滤
+                    bar_date = hist.index[-1].date()
+                    stale_bar = (TradingCalendarService.is_market_open(market)
+                                 and bar_date < TradingCalendarService.get_market_now(market).date())
+                    if stale_bar:
+                        logger.info(f"[数据服务.获取] {code} yfinance 末行 bar={bar_date} 非当日，标记降级")
 
                     return code, {
                         'code': code,
@@ -747,6 +753,7 @@ class UnifiedStockDataService:
                         'current_price': round(price_val, 2),
                         'change': round(change_val, 2),
                         'change_percent': round(change_pct, 2),
+                        '_is_degraded': stale_bar,
                         'volume': _normalize_volume(latest['Volume'], 'yfinance', market),
                         'high': round(float(latest['High']), 2) if not pd.isna(latest['High']) else None,
                         'low': round(float(latest['Low']), 2) if not pd.isna(latest['Low']) else None,
