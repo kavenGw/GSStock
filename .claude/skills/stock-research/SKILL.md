@@ -63,6 +63,7 @@ description: >-
 | `impact-rubric.md` | 模式 3 传导 rubric + theme 档模板 | 控制者 |
 | `finalize.md` | Phase C 收尾动作清单：删旧档 → 反向链 → 双 lint → valuations 同步 → 安全提交 → 亲验 | 模式 3/4 与 buffett 写档收尾（模式 1/2 已内置进 `sr-finalize`） |
 | `scripts/pool_index.py` | 模式 2 溢出 / 模式 3 候选召回 | 脚本 |
+| `scripts/timing_stats.py` | 重算 `timing-baseline.md` 统计表，`--check` 抓漂移 | 收尾报账时 |
 
 ## 维护规则
 

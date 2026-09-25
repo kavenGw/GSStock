@@ -46,6 +46,21 @@ effort: high
 
 一次性取数脚本写到 `scripts/_a1_*.py`，用 `PYTHONIOENCODING=utf-8 python scripts/_a1_xxx.py` 跑，写文件显式 `encoding='utf-8'`，**别用 heredoc**（Windows bash 易 EOF 失配），管道可能吞 stdout（验证改写文件再读）。**跑完必须 `rm`，不入库。**
 
-## 交付
+## 交付（硬协议，`deep_redo_gate.py` 据此放行）
 
-产出文件路径与格式见控制者派发。汇报**必须**写进文件，消息回传是可选冗余通道，不是交付方式。
+只写**一份**文件 `.omc/artifacts/<股票名>-<日期>-A1.md`（具体路径以控制者派发单为准），结构固定四段：
+
+```
+start: YYYY-MM-DD HH:MM:SS      ← 开工时跑 date "+%Y-%m-%d %H:%M:%S" 取实测值
+
+## 明细层
+（边做边追加）
+
+## 结论层
+（全部完成后最后写；标题行必须含「结论层」三字）
+
+end: YYYY-MM-DD HH:MM:SS        ← 收工前再跑一次 date；字面 `end: ` 前缀，不用 HTML 注释、不用 `A1-END`
+```
+
+`## 结论层` 标题与 `end:` 戳缺任一项闸门即判 NOT-READY、控制者要亲验放行（历轮最高频的形式失败）。
+汇报**必须**写进文件，消息回传是可选冗余通道，不是交付方式。

@@ -16,7 +16,7 @@ effort: medium
 
 1. `git status` 查遗留改动，确认工作区没有他人在写的文件会被裹挟。
 2. **删除旧档**（目标此前已是 `<股票名>/` 文件夹**且**清单内无季报点评/预告 theme → 步骤 2/3 整体跳过，路径稳定无反向链可改）：对控制者传来的待删清单逐个 `git rm -q --ignore-unmatch <path>`。清单只含三类：
-   **该股历史 buffett 档**，以及**控制者已 surface 用户确认、被本次新档取代的 `quarterly/**/*季报点评.md` 与单主体业绩预告 theme**（判据见 `mode-deep.md` 步骤 4b/4c）。
+   **该股历史 buffett 档**，以及**控制者已 surface 用户确认、被本次财报取代的该股「期间数据本体」档**——季报点评 / 业绩预告 / 财报联动专题 / 行情验证 / 单期事项落地档，跨 `quarterly/` `themes/` `cross-sector/` 全目录（判据见 `mode-deep.md` 步骤 4b；comps、机理专题档、他股主体的行业 theme 始终保留）。
    **comps / theme / quarterly 下的专题档与业绩说明会档一律保留**。无清单（首建档）跳过。
 3. **反向链收尾**（两类被删档处理方式不同，别混）：
 
@@ -83,6 +83,21 @@ git rm -q --ignore-unmatch <待删旧档...> && git add <新档文件夹>/ <被�
 含：双 lint 退出码、valuations 同步状态（以 `git show HEAD:` 为准）、commit SHA、`git show --stat HEAD`
 文件清单、遗留检查结论。不主动 push。
 
-## 交付
+## 交付（硬协议，`deep_redo_gate.py` 据此放行）
 
-产出文件路径与格式见控制者派发。汇报**必须**写进文件，消息回传是可选冗余通道，不是交付方式。
+只写**一份**文件 `.omc/artifacts/<股票名>-<日期>-C.md`（具体路径以控制者派发单为准），结构固定四段：
+
+```
+start: YYYY-MM-DD HH:MM:SS      ← 开工时跑 date "+%Y-%m-%d %H:%M:%S" 取实测值
+
+## 明细层
+（边做边追加）
+
+## 结论层
+（全部完成后最后写；标题行必须含「结论层」三字）
+
+end: YYYY-MM-DD HH:MM:SS        ← 收工前再跑一次 date；字面 `end: ` 前缀，不用 HTML 注释、不用 `C-END`
+```
+
+`## 结论层` 标题与 `end:` 戳缺任一项闸门即判 NOT-READY、控制者要亲验放行（历轮最高频的形式失败）。
+汇报**必须**写进文件，消息回传是可选冗余通道，不是交付方式。
