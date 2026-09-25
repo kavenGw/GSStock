@@ -13,7 +13,7 @@ paths:
 
 **市场识别** `app/utils/market_identifier.py`：`identify(code)` 返回 `'A'`（6 位数字，6 开头 `.SS`、0/3 开头 `.SZ`）/ `'US'`（字母）/ `'HK'`（`.HK` 后缀）/ `'KR'`（`^KS11` 特判）；`to_yfinance` / `is_a_share` / `is_index`。
 
-**数据源**：A 股实时价/分时优先腾讯 `qt.gtimg.cn`；港股腾讯 `q=r_hk<code>` 优先、yfinance 兜底（裸 `hk` 前缀是 15 分钟延迟，实时价勿用）；美股 yfinance。字段索引与取数坑见 data-fetch-conventions.md。
+**数据源**：A 股实时价/分时优先腾讯 `qt.gtimg.cn`；港股腾讯 `r_hk` 优先、yfinance 兜底；美股 yfinance。各源字段索引、港股前缀口径、A+H 校验等取数坑见 data-fetch-conventions.md。
 
 ## 缓存
 

@@ -81,6 +81,7 @@ cp .env.sample .env
 | `GITHUB_TRENDING_ENABLED` | 是否启用 GitHub Trending 监控 | `true` |
 | `GITHUB_TRENDING_TOP_N` | 取前 N 个项目 | `10` |
 | `GITHUB_RELEASE_ENABLED` | 是否启用 GitHub Release 监控（每6小时检查） | `true` |
+| `CLAUDE_PLUGINS_DIR` | Claude Code 插件目录，动态发现已装插件仓库纳入 Release 监控 | `~/.claude/plugins` |
 | `ESPORTS_ENABLED` | 是否启用赛事推送（NBA/LoL） | `true` |
 | `ESPORTS_FETCH_TIMEOUT` | 赛事API请求超时（秒） | `15` |
 | `ESPORTS_NBA_MONITOR_INTERVAL` | NBA 比分轮询间隔（分钟） | `15` |

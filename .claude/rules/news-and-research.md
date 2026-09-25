@@ -1,6 +1,12 @@
 ---
 paths:
-  - "app/services/**"
+  - "app/services/*news*"
+  - "app/services/news_sources/**"
+  - "app/services/interest_pipeline.py"
+  - "app/services/nomura_research_service.py"
+  - "app/services/blog_monitor_service.py"
+  - "app/services/github_*"
+  - "app/services/plugin_discovery.py"
   - "app/config/github_releases.py"
   - "app/config/blog_monitor.py"
 ---
@@ -8,22 +14,7 @@ paths:
 
 > **何时读**：调新闻轮询、新增新闻源、改博客/Trending/Release 监控、plugin discovery、加仓库到 GITHUB_RELEASE_REPOS
 
-| 环境变量 | 说明 | 默认值 |
-|---------|------|-------|
-| `NEWS_INTERVAL_MINUTES` | 新闻轮询间隔（分钟） | `3` |
-| `NEWS_FETCH_TIMEOUT` | 新闻源超时（秒） | `15` |
-| `NEWS_DEDUP_WINDOW_MINUTES` | 推送去重窗口（分钟） | `1440` |
-| `COMPANY_NEWS_MAX_COMPANIES` | 每轮最多处理公司数 | `3` |
-| `COMPANY_NEWS_MAX_ARTICLES` | 每公司最多文章数 | `5` |
-| `COMPANY_NEWS_INTERVAL_MINUTES` | 公司新闻间隔（分钟） | `30` |
-| `WALLSTREET_NEWS_ENABLED` | 华尔街见闻投行观点 | `true` |
-| `WALLSTREET_NEWS_FETCH_TIMEOUT` | crawl4ai 全文超时（秒） | `10` |
-| `NOMURA_RESEARCH_ENABLED` | 野村研报 | `true` |
-| `BLOG_MONITOR_ENABLED` | 博客监控 | `true` |
-| `GITHUB_TRENDING_ENABLED` | GitHub Trending | `true` |
-| `GITHUB_TRENDING_TOP_N` | Trending 取前 N | `10` |
-| `GITHUB_RELEASE_ENABLED` | GitHub Release | `true` |
-| `CLAUDE_PLUGINS_DIR` | 插件目录（动态发现已装插件仓库） | `~/.claude/plugins` |
+环境变量（`NEWS_*` / `COMPANY_NEWS_*` / `WALLSTREET_NEWS_*` / `NOMURA_RESEARCH_ENABLED` / `BLOG_MONITOR_ENABLED` / `GITHUB_TRENDING_*` / `GITHUB_RELEASE_ENABLED`）清单与默认值见 `.env.sample`。带坑的两项：`NEWS_DEDUP_WINDOW_MINUTES` 默认 1440 是 Slack 推送去重窗口；`CLAUDE_PLUGINS_DIR`（默认 `~/.claude/plugins`）决定动态发现哪些插件仓库。
 
 ## 各源调度
 

@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **通用约定**：响应中文；不写多余注释；不写 backup 文件（git 留痕足够）；所有 git/cargo/npm/pytest 命令前加 `rtk`，链式 `&&` 中也要。
 
-**表格一律可排序**：新增或改动任何页面的数据表格都要支持点击表头排序（空值沉底 + 箭头指示 + 中文 `localeCompare`），细则与参考实现见 `.claude/rules/watch.md#表格排序通用约定`。
+**表格一律可排序**：新增或改动任何页面的数据表格都要支持点击表头排序（空值沉底 + 箭头指示 + 中文 `localeCompare`），细则与参考实现见 `.claude/rules/frontend.md`。
 
 **投研 skill 路由**：个股/持仓/板块投研一律走本仓 skill（`stock-research`（深度分析/财报/新闻影响/会议纪要四模式自动路由）/ `buffett` / `analyze-category` / `portfolio-init` / `portfolio-rebalance` / `liquidation-strategy`）。全局插件 `equity-research` / `investment-banking` / `private-equity` 面向卖方/PE 工作流，**不适用于本仓**，勿因"分析某股"等模糊请求误触发。
 
@@ -30,8 +30,9 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 - `.claude/rules/data-fetch-conventions.md` — akshare/腾讯HTTP/yfinance港股/PDF/A+H市值自洽校验 — 写新取数脚本前
 - `.claude/rules/notifications.md` — Slack频道/盯盘告警7类格式/排版/失败语义二分/推送去重 — 改推送前
 - `.claude/rules/news-and-research.md` — 新闻轮询/公司/华尔街/野村/博客/Trending/Release(GITHUB_RELEASE_REPOS) — 调轮询或加新源前
-- `.claude/rules/esports.md` — NBA/LoL/worldcup(2026并入) 推送 + 失败重试队列 — 改 esports_service.py 前
-- `.claude/rules/watch.md` — 盯盘前端架构 + AI 分析调度（realtime/7d/30d）— 改 watch 模块前
+- `.claude/rules/esports.md` — NBA/LoL/worldcup(已结束待删) 推送 + 失败重试队列 — 改 esports_service.py 前
+- `.claude/rules/watch.md` — 盯盘前端架构 + 美股扩展时段取价（Webull/Alpaca/退避）+ AI 分析调度 — 改 watch 模块前
+- `.claude/rules/frontend.md` — 表格排序等前端通用约定 — 改任何模板/静态 JS 前
 - `.claude/rules/supply-chain.md` — 产业链图谱 SUPPLY_CHAIN_GRAPHS + tag 同步 — 改 supply_chain.py 或加图谱前
 - `.claude/rules/docs-conventions.md` — docs目录/frontmatter/lint/related_docs/sector归属 — 写分析文档、改 frontmatter、跑 lint 前
 - `.claude/rules/portfolio-valuations.md` — portfolio-init/rebalance/valuations页/A+H口径铁律 — 跑 portfolio 或改 RebalanceConfig 前

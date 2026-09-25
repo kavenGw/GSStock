@@ -20,12 +20,13 @@
 - 只读巡检直接 sqlite3：`PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.db').cursor(); ..."`。
 - 表名先查 `sqlite_master`（`Stock`→`stock`，`StockCategory`→`stock_categories`，不可从类名推）。
 
-## 分支与测试
+## 分支、代码与测试
 
 - **投研写档在 main，功能开 worktree**：`stock-research` / `buffett` / `analyze-category` / `portfolio-rebalance` / `liquidation-strategy` 等往 `docs/stock-analytics/` 写档的 skill 在 main 跑（跨档 `related_docs` 对称与 lint 依赖同一工作树）；改 `app/` 代码先开独立 worktree。
 - 单测平铺 `tests/test_*.py`，不建子目录。
 - 一次性脚本（`scripts/_xxx.py`、`verify_*`）任务结束 `rm`，不入库；产物可留 `.omc/artifacts/`。
-- 新增/修改环境变量同步 `CLAUDE.md`、`README.md`、`.env.sample`。装第三方仓库后同步 `GITHUB_RELEASE_REPOS`（见 news-and-research.md）。
+- **删路由/服务模块前全仓 grep importer**：`grep -rn "from app.routes.<mod> import\|app.services.<mod>"`，service 常函数级惰性 import 且在 `try` 外，漏删会静默 500。删后跑全量 pytest 并补 smoke 测试。
+- **环境变量三处同步**：新增/修改环境变量同步 `.env.sample`、`README.md`，及对应 rule 的带坑说明（`.env.sample` 是清单唯一源，rule 不再列表）。装第三方仓库后同步 `GITHUB_RELEASE_REPOS`（见 news-and-research.md）。
 
 ## Git 协议（并行 session）
 
@@ -35,4 +36,3 @@
 - **`valuations.yaml` 等单文件聚合无法按条目分离暂存**：连带提交对方条目并在 message 注明即可，勿回退对方内容。提交后 `git show HEAD:<file>` 复核自己那条真的落库，sync 脚本自报不可信。
 - **amend 前 `git rev-parse HEAD` 核对**，HEAD 已变则改新建 commit。
 - **验证 commit 没脱链用 `git merge-base --is-ancestor <SHA> HEAD`**，别信 `git log -N` 短列表。
-- **删路由/服务模块前全仓 grep importer**：`grep -rn "from app.routes.<mod> import\|app.services.<mod>"`，service 常函数级惰性 import 且在 `try` 外，漏删会静默 500。删后跑全量 pytest 并补 smoke 测试。
