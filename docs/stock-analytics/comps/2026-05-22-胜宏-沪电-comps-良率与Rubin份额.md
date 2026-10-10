@@ -43,6 +43,9 @@ related_docs:
   - path: ../sectors/electronics/pcb/沪电股份/index.md
     note: 沪电中报重做（2026-08-25，watch）：两条核心口径双双被推翻——「良率 95%（行业平均 80%）」全网无公开出处（半年报/2025年报/港交所443页文件/2026年17份IR记录均无）；「沪电英伟达份额 >50%」证伪（最大客户仅 14.26%，单一终端 >50% 算术上不可能）；「沪电客户比胜宏分散」亦证伪（2025 同口径沪电五大 53.32% vs 胜宏 41.98%）
     symmetric: true
+  - path: ../sectors/electronics/pcb/景旺电子/index.md
+    note: "景旺电子首建档（03228，2026-10-10，watch）。本 comps 将景旺定位为 Rubin 配套 follower；景旺档部分上修（已量产 GPU 高阶 HDI、800G/1.6T 光模块板），follower 定位维持。"
+    symmetric: true
 ---
 # 胜宏科技 vs 沪电股份 — 良率与 Rubin 份额 comps（2026-05-22）
 
@@ -57,6 +60,7 @@ related_docs:
 > - [index](../sectors/semiconductor/pcb/胜宏科技/index.md) — 胜宏 buffett 个股深度分析（六维 + 多情景估值）
 > - [2026-06-04-世运电路-buffett分析](../sectors/electronics/pcb/2026-06-04-世运电路-buffett分析.md) — 世运电路 buffett 深度分析
 > - [index](../sectors/electronics/pcb/沪电股份/index.md) — 沪电中报重做（2026-08-25，watch）：两条核心口径双双被推翻——「良率 95%（行业平均 80%）」全网无公开出处（半年报/2025年报/港交所443页文件/2026年17份IR记录均无）；「沪电英伟达份额 >50%」证伪（最大客户仅 14.26%，单一终端 >50% 算术上不可能）；「沪电客户比胜宏分散」亦证伪（2025 同口径沪电五大 53.32% vs 胜宏 41.98%）
+> - [index](../sectors/electronics/pcb/景旺电子/index.md) — 景旺电子首建档（03228，2026-10-10，watch）。本 comps 将景旺定位为 Rubin 配套 follower；景旺档部分上修（已量产 GPU 高阶 HDI、800G/1.6T 光模块板），follower 定位维持。
 <!-- END related_docs -->
 
 > 撰写日期：2026-05-22

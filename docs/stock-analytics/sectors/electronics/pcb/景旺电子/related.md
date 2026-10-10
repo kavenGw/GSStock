@@ -1,0 +1,51 @@
+---
+doc_type: buffett-related
+stock_code: '03228'
+stock_name: 景旺电子
+related_docs:
+- path: ../沪电股份/index.md
+  note: 同 subsector 最直接的兄弟档（2026-08-25，watch）。本档的方法论对齐该档：先取 2026–2029 会计中枢再打 owner-earnings 折价（本档取区间上沿 12%）、bull 概率封顶 20%、买点 = base × 70%。倍数比该档低一档（24/18/12 vs 26/20/13），理由是景旺毛利率低 10–20pp、ROE 九年下滑、AI 身位是跟随者。汇兑方向与该档相反：沪电剔除汇兑损失，景旺有系统性锁汇，取归母（汇兑 + 套保净额）口径。2026-10-09 同日横比：沪电 PE-TTM 42.7x、26Q2 毛利率 41.28%，景旺新 TTM（含 Q3 预告）分段 54.2x／H 侧 38.7x、毛利率 21.43%
+  symmetric: true
+- path: ../深南电路/index.md
+  note: 同 subsector 兄弟档（2026-09-07，watch）。方法论同上；本档 bear 12x 与该档相同。该档 §10.3 把景旺 89.69x「归母 −7.4%、分母失真」排除出有效对标——10-09 Q3 预告后景旺新 TTM 降至分段 54.2x，分母问题部分修复，但单季年化在正式三季报和 Q4 验证前仍不宜作跨档对标。2026-10-09 同日横比：深南 PE-TTM 56.8x、毛利率 32.41%
+  symmetric: true
+- path: ../2026-08-14-生益电子-buffett分析.md
+  note: 同 subsector 兄弟档（2026-08-14，watch，倍数 28/22/13）。本档三档倍数都低于该档，理由同沪电条。2026-10-09 同日横比：生益电子 PE-TTM 42.4x、26H1 归母 +109.4%、26Q2 毛利率 33.67%，景旺 26H1 归母 −7.4%（Q3 预告后 1–3Q +69%）
+  symmetric: true
+- path: ../../../semiconductor/pcb/胜宏科技/index.md
+  note: 同为 A+H、以 H 股为跟踪主体的 AI PCB 档（02476，2026-08-28，watch）。专家口径 GB300 compute tray PCB 份额胜宏 40–50%、景旺约 10%【软】；本档判定景旺在 AI 链上是跟随者，胜宏是第一梯队。两档的安全边际都按「H 价 × 全股本」计算
+  symmetric: true
+- path: ../兴森科技/index.md
+  note: 同 subsector 兄弟档（exclude）。景旺不属于 exclude：十年从未亏损、周期底 ROE 仍有 10.35%、汽车 PCB 全球第一。路线不同：兴森把 IC 载板（FCBGA）作为第二曲线、投入期拖累利润；景旺载板只有 FCBGA 小批量，不是本轮增量来源
+  symmetric: true
+- path: ../../../semiconductor/materials/建滔积层板/index.md
+  note: 上游 CCL 供应商（1888.HK，exclude）。建滔 2026 年连续提价（FR-4 年内累计 >100%）是景旺 26Q1 毛利率创上市最低 18.76% 的主因之一；景旺处在 CCL 涨价受压的一侧，与建滔方向相反
+  symmetric: true
+- path: ../../../semiconductor/materials/生益科技/index.md
+  note: 上游 CCL 龙头（600183，watch）。CCL 涨价对生益是受益、对景旺是成本压力；景旺 Q3 预告首次称「通用产品成本价格合理传导」，顺价持续性是本档 §11 T10 的监控项
+  symmetric: true
+- path: ../../../../comps/2026-05-29-沪电-胜宏-生益-市值重估-comps.md
+  note: PCB 市值重估 comps（2026-05-29）。该档把景旺列为可能从胜宏切走 Rubin 份额的竞争者之一；本档未找到景旺 Rubin 份额的任何官方证据（4-10 业绩会三次拒答），「中板一供 40%+」传闻不采信
+  symmetric: true
+- path: ../../../../comps/2026-05-22-胜宏-沪电-comps-良率与Rubin份额.md
+  note: Rubin 分工 comps（2026-05-22），将景旺定位为「周边／电源板／辅助板 + 抢 Rubin 配套订单的 follower」。本档部分上修：景旺已量产 GPU 高阶 HDI 板、800G/1.6T 光模块 PCB、224G 交换机 PCB；follower 定位维持
+  symmetric: true
+- path: ../../../../comps/quarterly/26q1/2026-04-27-兴森科技-comps-成长性与投资决策.md
+  note: 26Q1 七家 PCB/CCL comps（2026-04-27），判景旺「不买（PE 5y 100% + 毛利率 6 年下滑）」，股价 75.35 元、PE 65.2x。本档结论维持（watch，不买），股价已涨至 96.98 元；「毛利率 6 年下滑」被 Q3 隐含净利率 15.3% 挑战，但只有一个季度的预告
+  symmetric: true
+---
+# 景旺电子（03228）关联文档
+
+<!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
+> **关联文档**
+> - [index](../沪电股份/index.md) — 同 subsector 最直接的兄弟档（2026-08-25，watch）。本档的方法论对齐该档：先取 2026–2029 会计中枢再打 owner-earnings 折价（本档取区间上沿 12%）、bull 概率封顶 20%、买点 = base × 70%。倍数比该档低一档（24/18/12 vs 26/20/13），理由是景旺毛利率低 10–20pp、ROE 九年下滑、AI 身位是跟随者。汇兑方向与该档相反：沪电剔除汇兑损失，景旺有系统性锁汇，取归母（汇兑 + 套保净额）口径。2026-10-09 同日横比：沪电 PE-TTM 42.7x、26Q2 毛利率 41.28%，景旺新 TTM（含 Q3 预告）分段 54.2x／H 侧 38.7x、毛利率 21.43%
+> - [index](../深南电路/index.md) — 同 subsector 兄弟档（2026-09-07，watch）。方法论同上；本档 bear 12x 与该档相同。该档 §10.3 把景旺 89.69x「归母 −7.4%、分母失真」排除出有效对标——10-09 Q3 预告后景旺新 TTM 降至分段 54.2x，分母问题部分修复，但单季年化在正式三季报和 Q4 验证前仍不宜作跨档对标。2026-10-09 同日横比：深南 PE-TTM 56.8x、毛利率 32.41%
+> - [2026-08-14-生益电子-buffett分析](../2026-08-14-生益电子-buffett分析.md) — 同 subsector 兄弟档（2026-08-14，watch，倍数 28/22/13）。本档三档倍数都低于该档，理由同沪电条。2026-10-09 同日横比：生益电子 PE-TTM 42.4x、26H1 归母 +109.4%、26Q2 毛利率 33.67%，景旺 26H1 归母 −7.4%（Q3 预告后 1–3Q +69%）
+> - [index](../../../semiconductor/pcb/胜宏科技/index.md) — 同为 A+H、以 H 股为跟踪主体的 AI PCB 档（02476，2026-08-28，watch）。专家口径 GB300 compute tray PCB 份额胜宏 40–50%、景旺约 10%【软】；本档判定景旺在 AI 链上是跟随者，胜宏是第一梯队。两档的安全边际都按「H 价 × 全股本」计算
+> - [index](../兴森科技/index.md) — 同 subsector 兄弟档（exclude）。景旺不属于 exclude：十年从未亏损、周期底 ROE 仍有 10.35%、汽车 PCB 全球第一。路线不同：兴森把 IC 载板（FCBGA）作为第二曲线、投入期拖累利润；景旺载板只有 FCBGA 小批量，不是本轮增量来源
+> - [index](../../../semiconductor/materials/建滔积层板/index.md) — 上游 CCL 供应商（1888.HK，exclude）。建滔 2026 年连续提价（FR-4 年内累计 >100%）是景旺 26Q1 毛利率创上市最低 18.76% 的主因之一；景旺处在 CCL 涨价受压的一侧，与建滔方向相反
+> - [index](../../../semiconductor/materials/生益科技/index.md) — 上游 CCL 龙头（600183，watch）。CCL 涨价对生益是受益、对景旺是成本压力；景旺 Q3 预告首次称「通用产品成本价格合理传导」，顺价持续性是本档 §11 T10 的监控项
+> - [2026-05-29-沪电-胜宏-生益-市值重估-comps](../../../../comps/2026-05-29-沪电-胜宏-生益-市值重估-comps.md) — PCB 市值重估 comps（2026-05-29）。该档把景旺列为可能从胜宏切走 Rubin 份额的竞争者之一；本档未找到景旺 Rubin 份额的任何官方证据（4-10 业绩会三次拒答），「中板一供 40%+」传闻不采信
+> - [2026-05-22-胜宏-沪电-comps-良率与Rubin份额](../../../../comps/2026-05-22-胜宏-沪电-comps-良率与Rubin份额.md) — Rubin 分工 comps（2026-05-22），将景旺定位为「周边／电源板／辅助板 + 抢 Rubin 配套订单的 follower」。本档部分上修：景旺已量产 GPU 高阶 HDI 板、800G/1.6T 光模块 PCB、224G 交换机 PCB；follower 定位维持
+> - [2026-04-27-兴森科技-comps-成长性与投资决策](../../../../comps/quarterly/26q1/2026-04-27-兴森科技-comps-成长性与投资决策.md) — 26Q1 七家 PCB/CCL comps（2026-04-27），判景旺「不买（PE 5y 100% + 毛利率 6 年下滑）」，股价 75.35 元、PE 65.2x。本档结论维持（watch，不买），股价已涨至 96.98 元；「毛利率 6 年下滑」被 Q3 隐含净利率 15.3% 挑战，但只有一个季度的预告
+<!-- END related_docs -->
