@@ -1446,23 +1446,6 @@
   - 硅光
   - AI
   - 供给侧
-- stock_code: '301308'
-  stock_name: 江波龙
-  market: A
-  currency: CNY
-  sector: semiconductor
-  rating: exclude
-  bear: 11.17
-  base: 56.32
-  bull: 111.71
-  dividend_yield: 0.24
-  conviction_date: '2026-08-10'
-  source_doc: sectors/semiconductor/storage/2026-08-10-江波龙-buffett分析.md
-  note: 期望内在价值 226 亿、市值 1745 亿、安全边际 −87.1%，第一否决项已从估值位移到品类（NAND 2027H2 转宽松）
-  themes:
-  - memory
-  - 供给侧
-  - 存储涨价
 - stock_code: '301629'
   stock_name: 矽电股份
   market: A
@@ -4866,3 +4849,21 @@
   - 扩产
   - A+H
   - 港股上市
+- stock_code: '09976'
+  stock_name: 江波龙
+  market: HK
+  currency: HKD
+  sector: semiconductor
+  rating: watch
+  watch_reason: 企业级与自研UFS商业化已兑现，撤销NAND品类一票否决；正常化现金收益仍待验证，H股价格未提供期望安全边际。
+  bear: 20.41
+  base: 76.54
+  bull: 199.0
+  conviction_date: '2026-10-15'
+  source_doc: sectors/semiconductor/storage/江波龙/index.md
+  themes:
+  - memory
+  - 供给侧
+  - 存储涨价
+  dividend_yield: null
+  note: 10-15重审watch；H股09976/HKD三档20.41/76.54/199.00，期望参考84.19港元为低置信度且未扣等待期上界；Q3预告待原公告核实，未核得H股上市后派息。
