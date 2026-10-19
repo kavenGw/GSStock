@@ -1,0 +1,39 @@
+{
+  "stock_code": "600489",
+  "stock_name": "中金黄金",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-中金黄金-buffett分析.md",
+      "md5": "85e00a5ba0aced5ecd6e64d34911c5c7",
+      "extracted_at": "2026-05-10T22:17:21"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-中金黄金-26Q1季报点评.md",
+      "md5": "e6b187968fdb3b6e44c1512c96c3cb6f",
+      "extracted_at": "2026-05-10T22:17:21"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "央企纯黄金标的，无定价权+重资产+零特许经营，毛利 20.47% 同业垫底(紫金 36/赤峰 59)",
+      0.25
+    ],
+    "valuation": [
+      "25.94 元 vs 周期摊平内在价值 19-23 元安全边际负 12-35%，按 7y 均值 EPS 严苛口径更差",
+      0.2
+    ],
+    "catalyst": [
+      "26Q1 净利+129% 但 OCF -21.8 亿净流出 = 周期顶部囤货剧本，金价反转双杀风险",
+      0.4
+    ],
+    "theme_fit": [
+      "gold_defense 主题纯黄金 β 工具，但同业内紫金/赤峰/山金更优",
+      0.65
+    ],
+    "realized_or_invalidated": [
+      "26Q1 OCF 负值同业唯一+毛利率行业垫底+应收账款扩张三重红灯印证 4-24 结构性劣势",
+      -0.4
+    ]
+  },
+  "version": 2
+}

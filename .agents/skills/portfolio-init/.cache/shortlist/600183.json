@@ -1,0 +1,44 @@
+{
+  "stock_code": "600183",
+  "stock_name": "生益科技",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-07-生益科技-26Q1季报点评.md",
+      "md5": "92bee9d061b2949fce4af6f3b9f5bae8",
+      "extracted_at": "2026-05-10T22:17:30"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-07-生益科技-CCL产业链上下游专题.md",
+      "md5": "bfb3095d8082524e0c04255566219c20",
+      "extracted_at": "2026-05-10T22:17:30"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-09-CCL涨价-产业链影响专题.md",
+      "md5": "a26cd2493696107a95f92d14367281f3",
+      "extracted_at": "2026-05-10T22:17:30"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "CCL 国内龙头(M6+ 国内市占 60%)，26Q1 营收+45%/净利+105%跑赢下游沪电+胜宏，AI 上游纯标的",
+      0.85
+    ],
+    "valuation": [
+      "PE-TTM 50.7x(5y 84.6%)/PB 11.11x(5y 97.8%极贵)，PCB 链中等估值已饱",
+      0.35
+    ],
+    "catalyst": [
+      "AI 高速 CCL ASP 跃升(M6/M7/M8 单价 2.5-3.5x标准 FR-4)+毛利率 28.10% 5y 新高",
+      0.85
+    ],
+    "theme_fit": [
+      "cpu_pcb 主题 AI 价值链上游纯弹性标的，5/9 CCL 涨价专题确认 α+β 双优",
+      0.95
+    ],
+    "realized_or_invalidated": [
+      "26Q1 +105%+毛利率创历史新高+5y 跨业绩兑现，但 OCF/EPS 0.49x 与下游沪电同病",
+      0.4
+    ]
+  },
+  "version": 2
+}

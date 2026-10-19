@@ -1,0 +1,34 @@
+{
+  "stock_code": "002281",
+  "stock_name": "光迅科技",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-05-09-光迅科技-光库科技-buffett分析.md",
+      "md5": "ef62b0860b96f4b31af24895b3209eb5",
+      "extracted_at": "2026-05-10T22:17:26"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "国内光模块龙头但 10y ROE 中位仅 9% 毛利率 23%，落后中际旭创/新易盛，commodity 业务",
+      0.45
+    ],
+    "valuation": [
+      "PE 140.7 / PB 14.10 均处 5y 历史最高，已至历史顶部估值",
+      0.05
+    ],
+    "catalyst": [
+      "AI 算力 1.6T LPO 主线，但 5/8 涨停后情绪溢价拉满；CPO 路线落地反构成结构风险",
+      0.55
+    ],
+    "theme_fit": [
+      "ai_compute 光通信链直接受益，但板块相对沪电/立讯赔率劣",
+      0.75
+    ],
+    "realized_or_invalidated": [
+      "doc 已显式标卖出条件触发(严重高估)，叠加 CPO 替代风险",
+      -0.5
+    ]
+  },
+  "version": 2
+}

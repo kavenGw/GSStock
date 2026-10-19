@@ -1,0 +1,39 @@
+{
+  "stock_code": "603986",
+  "stock_name": "兆易创新",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-21-兆易创新-buffett分析.md",
+      "md5": "aec286fda987ce798fd235cc080ed52d",
+      "extracted_at": "2026-05-10T22:17:19"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-兆易创新-26Q1季报点评.md",
+      "md5": "ef103784723921d2009e6af8d705f9a2",
+      "extracted_at": "2026-05-10T22:17:19"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "NOR Flash + MCU + 利基 DRAM commodity 业务，26Q1 营收+119%/净利+523%周期反转兑现",
+      0.6
+    ],
+    "valuation": [
+      "PE-TTM 44x/PB 8.16x(5y 64%)，市值 2063 亿 vs 内在价值中枢 200-360 亿，溢价 70-80%",
+      0.2
+    ],
+    "catalyst": [
+      "存储周期反转持续 + DDR4 自研 + GD32 车规扩张；但 26Q1 +48 亿权益融资=周期顶部扩产警讯",
+      0.65
+    ],
+    "theme_fit": [
+      "memory 主题核心标的，NOR/DRAM 双轮驱动",
+      0.95
+    ],
+    "realized_or_invalidated": [
+      "5/7 创始人朱一明减持已实证触发卖出条件，减仓建议从 1/3 升级至 1/2",
+      -0.5
+    ]
+  },
+  "version": 2
+}

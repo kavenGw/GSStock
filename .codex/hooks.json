@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh 'D:\\Git\\stock\\.codex\\hooks\\git_add_guard.sh'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh 'D:\\Git\\stock\\.codex\\hooks\\docs_lint_reminder.sh'"
+          }
+        ]
+      }
+    ]
+  }
+}

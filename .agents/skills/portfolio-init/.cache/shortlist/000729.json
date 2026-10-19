@@ -1,0 +1,34 @@
+{
+  "stock_code": "000729",
+  "stock_name": "燕京啤酒",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-26-燕京啤酒-buffett分析.md",
+      "md5": "52f491a4070db9519f77fa56e9bf7413",
+      "extracted_at": "2026-05-10T22:17:26"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "区域寡头(北京 80%/广西 70%)+朱程改革驱动，5y 扣非 CAGR 57.7%；但护城河 70% 依赖管理层执行力",
+      0.6
+    ],
+    "valuation": [
+      "PE 20x/PB 2.26x，市值 355 亿 vs 内在价值中枢 280 亿溢价 27%，无安全边际",
+      0.4
+    ],
+    "catalyst": [
+      "U8 单品扩张 + 世界杯阶段3跟随；但高 CAGR 受 2020 低基数严重放大，加速度边际递减风险",
+      0.65
+    ],
+    "theme_fit": [
+      "world_cup 主题跟随消费标的，弹性大于青啤但基本面弱",
+      0.75
+    ],
+    "realized_or_invalidated": [
+      "ROE 6y 均仅 4.8%/2025 才到 11.1% 仍未达 Buffett 15% 标准，未经下行验证",
+      0.0
+    ]
+  },
+  "version": 2
+}

@@ -1,0 +1,34 @@
+{
+  "stock_code": "300476",
+  "stock_name": "胜宏科技",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-胜宏科技-26Q1季报点评.md",
+      "md5": "cf3cb5ea1ec2d1cec8f2bfafb4794fc6",
+      "extracted_at": "2026-05-10T22:17:28"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "AI PCB 高端龙头(NVIDIA >50%)，26Q1 营收+28%/净利+40%加速度结束 + OCF/EPS 1.64x 现金流验真",
+      0.7
+    ],
+    "valuation": [
+      "PE 71x / PB 18.5x 双 5y 96% 极值，安全边际 -64% 至 -72%",
+      0.1
+    ],
+    "catalyst": [
+      "GB200 红利 plateau + Rubin 接力期，单股已贴近主题上限；NVIDIA 单一客户依赖",
+      0.55
+    ],
+    "theme_fit": [
+      "cpu_pcb 主线 AI PCB 顶级标的",
+      0.95
+    ],
+    "realized_or_invalidated": [
+      "26Q1 兑现+加速度结束已确认，现金流改善是亮点但估值已透支两代红利",
+      -0.2
+    ]
+  },
+  "version": 2
+}

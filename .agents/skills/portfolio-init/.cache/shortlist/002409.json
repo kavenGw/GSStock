@@ -1,0 +1,34 @@
+{
+  "stock_code": "002409",
+  "stock_name": "雅克科技",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-雅克科技-26Q1季报点评.md",
+      "md5": "13bdc1df6ba7199ed40e8dc493056ab8",
+      "extracted_at": "2026-05-10T22:17:28"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "存储材料(前驱体)+UP Chemical，26Q1 营收-6.85% 首次转负但毛利率 31.25% 升至 8 季度第二高",
+      0.55
+    ],
+    "valuation": [
+      "PE-TTM ~42x，市值 ~424 亿，触发买入需 < 280 亿 + PE < 30x",
+      0.4
+    ],
+    "catalyst": [
+      "前驱体占比上升驱动毛利改善 + UP Chemical 商誉无减值；但需 Q2 验证营收恢复",
+      0.45
+    ],
+    "theme_fit": [
+      "memory 主题上游材料层，间接受益于存储 capex",
+      0.65
+    ],
+    "realized_or_invalidated": [
+      "26Q1 营收首次转负打破 4 年单调上行，OCF/EPS 已回升至 1.03x",
+      0.0
+    ]
+  },
+  "version": 2
+}

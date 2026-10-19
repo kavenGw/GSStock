@@ -1,0 +1,34 @@
+{
+  "stock_code": "300651",
+  "stock_name": "金陵体育",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-金陵体育-buffett分析.md",
+      "md5": "c699662238ec0d470034cf1d5bb24fca",
+      "extracted_at": "2026-05-10T22:17:23"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "B2B 政府/学校/赛事采购，五维护城河全弱，commodity 商品业务+无定价权",
+      0.25
+    ],
+    "valuation": [
+      "ROIC 长期 <10% 部分年份负值，盈利政策/赛事脉冲主导不可预测",
+      0.25
+    ],
+    "catalyst": [
+      "世界杯阶段1硬件预热旗舰(2022 卡塔尔 9-10 月连板)，纯题材弹性",
+      0.6
+    ],
+    "theme_fit": [
+      "world_cup 主题阶段1硬件旗舰，2022 经验有效",
+      0.8
+    ],
+    "realized_or_invalidated": [
+      "doc 显式 Don't Buy + 应收周转 200+天政策周期风险",
+      -0.2
+    ]
+  },
+  "version": 2
+}

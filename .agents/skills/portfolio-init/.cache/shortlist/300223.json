@@ -1,0 +1,39 @@
+{
+  "stock_code": "300223",
+  "stock_name": "北京君正",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-21-北京君正-buffett分析.md",
+      "md5": "01f2aa54b5a12a4383c479ef810ad1a7",
+      "extracted_at": "2026-05-10T22:17:19"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-北京君正-26Q1季报点评.md",
+      "md5": "81830f55a53179706d8b0ffcc78420e3",
+      "extracted_at": "2026-05-10T22:17:19"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "ISSI 车规 SRAM/DRAM 利基存储龙头(车规 30%+)，26Q1 营收+47%/净利+332%，但商品+利基混合",
+      0.55
+    ],
+    "valuation": [
+      "PE-TTM 96.3x A股周期股显著高位，PB 4.79x，按悲观情景偏贵 30-80%",
+      0.1
+    ],
+    "catalyst": [
+      "存储周期反转兑现 + 车规库存补充；但应收账款环比+36.7%渠道压货早期警报",
+      0.55
+    ],
+    "theme_fit": [
+      "memory 主题，车规存储差异化定位",
+      0.85
+    ],
+    "realized_or_invalidated": [
+      "26Q1 已兑现反转但 PE 96x 透支，已持仓者按纪律分批减持窗口开启",
+      -0.3
+    ]
+  },
+  "version": 2
+}

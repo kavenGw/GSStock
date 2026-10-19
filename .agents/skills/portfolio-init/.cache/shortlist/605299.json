@@ -1,0 +1,34 @@
+{
+  "stock_code": "605299",
+  "stock_name": "舒华体育",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-舒华体育-buffett分析.md",
+      "md5": "15c6c020e38b5a04dcff41c25b5485d8",
+      "extracted_at": "2026-05-10T22:17:22"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "健身器材制造，五维护城河全失败，小米/Keep/跨境白牌持续挤压家用市场",
+      0.2
+    ],
+    "valuation": [
+      "ROIC 5-8%/远低 15% 门槛，按 commodity 10-12x 内在价值仅 10-12 亿",
+      0.25
+    ],
+    "catalyst": [
+      "世界杯阶段1硬件跟随，弹性低于金陵/共创",
+      0.45
+    ],
+    "theme_fit": [
+      "world_cup 主题阶段1边缘标的，关联牵强",
+      0.55
+    ],
+    "realized_or_invalidated": [
+      "doc 显式 Don't Buy/商品化陷阱加深，建议跳过+替换",
+      -0.3
+    ]
+  },
+  "version": 2
+}

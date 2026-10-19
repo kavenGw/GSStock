@@ -1,0 +1,39 @@
+{
+  "stock_code": "603993",
+  "stock_name": "洛阳钼业",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-洛阳钼业-buffett分析.md",
+      "md5": "ea318b1bf73c7c7fb942e39ca9bed386",
+      "extracted_at": "2026-05-10T22:17:21"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-洛阳钼业-26Q1季报点评.md",
+      "md5": "66a2f2da7c82768dc4144cde5dfc8a84",
+      "extracted_at": "2026-05-10T22:17:21"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "刚果 TFM/KFM 多金属矿(铜钴钼铌磷+IXM贸易)，26Q1 营收+44%/净利+97%/OCF/EPS 1.47x 真金白银",
+      0.7
+    ],
+    "valuation": [
+      "PE-TTM 20.3x，按 7y 均值 EPS 估值偏贵 34-68%，安全边际为负",
+      0.3
+    ],
+    "catalyst": [
+      "铜钴价格高位+KFM 放产+TFM 混矿；刚果地缘风险是结构性尾部风险(60% 利润集中)",
+      0.7
+    ],
+    "theme_fit": [
+      "gold_defense 主题铜钴弹性标的，相比紫金毛利低/OCF略弱",
+      0.85
+    ],
+    "realized_or_invalidated": [
+      "26Q1 5 项假设全部印证(C1 成本+铜价中枢上移+TFM/KFM 放量)，作业级季报",
+      0.3
+    ]
+  },
+  "version": 2
+}

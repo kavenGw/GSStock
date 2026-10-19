@@ -1,0 +1,39 @@
+{
+  "stock_code": "600584",
+  "stock_name": "长电科技",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-28-长电科技-26Q1季报点评.md",
+      "md5": "6068feca75ffceaba5af542e28be4a8f",
+      "extracted_at": "2026-05-10T22:17:27"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-09-长电科技-26Q1业绩说明会专题.md",
+      "md5": "da2f56622d5baf5569a064a64beba622",
+      "extracted_at": "2026-05-10T22:17:27"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "封测全球第三，26Q1 营收-2%/净利+37%高端化兑现 + OCF/股+55% + 资负率 5y 降至 43%",
+      0.9
+    ],
+    "valuation": [
+      "PE-TTM 51.6x/隐含 26 PE 41x/PB 2.81x(5y 50%中位)，PCB 板块最合理估值",
+      0.7
+    ],
+    "catalyst": [
+      "5/9 业绩说明会确认 3 条新增长曲线(CPO+海外2.5D溢出+长电微几十亿规模) + 100亿 capex 支撑",
+      0.9
+    ],
+    "theme_fit": [
+      "cpu_pcb 主线封测核心标的，AI 算力链相对优解",
+      0.95
+    ],
+    "realized_or_invalidated": [
+      "5/9 业绩会三轨道增长逻辑落地，从 2-3% 试探升级至 3-4% 标准建仓",
+      0.4
+    ]
+  },
+  "version": 2
+}

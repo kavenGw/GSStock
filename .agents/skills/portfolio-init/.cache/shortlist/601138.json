@@ -1,0 +1,39 @@
+{
+  "stock_code": "601138",
+  "stock_name": "工业富联",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-05-09-工业富联-buffett分析.md",
+      "md5": "cdbd5606bd7d655608bcab2bc6215745",
+      "extracted_at": "2026-05-10T22:17:27"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-05-09-工业富联-甲骨文-走势相关性专题.md",
+      "md5": "eb8f07a1f845712a8bf928b6818b403f",
+      "extracted_at": "2026-05-10T22:17:27"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "AI 服务器 ODM 龙头但本质 commodity 代工，毛利率 10 年从 10.5% 滑至 6.76%，结构性议价权流失",
+      0.55
+    ],
+    "valuation": [
+      "PE 30.89 处 5y 顶部区(中位 16.37)，PB 7.13(中位 3.08)，期望值加权 -67%",
+      0.15
+    ],
+    "catalyst": [
+      "GB300/Rubin 接力订单 + 北美 CSP capex 上行，但 25Q3 经营现金流首次转负警讯",
+      0.55
+    ],
+    "theme_fit": [
+      "ai_compute 主线代理标的，A 股资金贴在 ODM 弹性层，相关性 +0.187/+0.267",
+      0.95
+    ],
+    "realized_or_invalidated": [
+      "5/9 双 doc 已识别叙事过热 + ORCL 走势相关性专题，叠加估值杀伤风险",
+      -0.4
+    ]
+  },
+  "version": 2
+}

@@ -1,0 +1,44 @@
+{
+  "stock_code": "002463",
+  "stock_name": "沪电股份",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-01-沪电股份-26Q1季报点评.md",
+      "md5": "23a42a49554d204baba7b7a8b24946cd",
+      "extracted_at": "2026-05-10T22:17:30"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-02-沪电股份-泰国工厂专题.md",
+      "md5": "6b3c6a6d747d92f7e38ced2a44f204a1",
+      "extracted_at": "2026-05-10T22:17:30"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-08-沪电股份-近期走势专题.md",
+      "md5": "77b29eec0bc26cb2aff6a36c7d855876",
+      "extracted_at": "2026-05-10T22:17:30"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "AI PCB 多客户分散(NVIDIA+博通+Marvell)，5y ROE 21% 同业最优，26Q1 营收+54%/净利+63%再加速",
+      0.95
+    ],
+    "valuation": [
+      "PE 48.6x(5y 90%+)/PB 12.5x 突破 5y 100% 极值，乐观情景安全边际已-1%",
+      0.2
+    ],
+    "catalyst": [
+      "GB300/Rubin 持续放量 + 泰国厂 26Q2 减亏拐点 + 港股募资；OCF 红灯需 26 中报验证",
+      0.85
+    ],
+    "theme_fit": [
+      "cpu_pcb 主线性价比最优 AI PCB 标的，多客户结构稳固",
+      1.0
+    ],
+    "realized_or_invalidated": [
+      "5/8 走势专题确认缩量破前高+ PB 极值再升，业绩兑现+乐观薄垫被吃光",
+      0.3
+    ]
+  },
+  "version": 2
+}

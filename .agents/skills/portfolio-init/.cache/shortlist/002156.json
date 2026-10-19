@@ -1,0 +1,54 @@
+{
+  "stock_code": "002156",
+  "stock_name": "通富微电",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-29-通富微电-26Q1季报点评.md",
+      "md5": "53e43ae23b3d98d34bbdbbcc58659e9a",
+      "extracted_at": "2026-05-10T22:17:29"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-02-通富微电-TFAMD马来西亚专题.md",
+      "md5": "7f53826f90d3a4aa540ab33768e5a0bb",
+      "extracted_at": "2026-05-10T22:17:29"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-03-通富微电-AgentCPU专题.md",
+      "md5": "bb819c7ec8d3d78a8150104fd2180df4",
+      "extracted_at": "2026-05-10T22:17:29"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-06-通富微电-AMD26Q1财报联动专题.md",
+      "md5": "685a2c80c9f494cc8d399858d4d87a4a",
+      "extracted_at": "2026-05-10T22:17:29"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-05-08-通富微电-5月8日行情验证.md",
+      "md5": "6c8f2860c6d5bccce2c84cad8bf935d9",
+      "extracted_at": "2026-05-10T22:17:29"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "AMD 80% 全球封测代工(TFAMD 苏州+槟城)，26Q1 净利+224%同业第一；17.5% gross markup 锁 ROE 上限",
+      0.85
+    ],
+    "valuation": [
+      "PB 5.54x(5y 95%+)突破减仓触发线 5.5x；隐含 26 PE ~32x，绝对估值偏贵",
+      0.3
+    ],
+    "catalyst": [
+      "AMD MI400/Helios 26H2 量产 + Meta 6GW 双签 + AgentCPU 1:2 配比传导",
+      0.95
+    ],
+    "theme_fit": [
+      "cpu_pcb 主线 AMD AI 数据中心代理标的，5/3+5/6+5/8 多专题反复证实",
+      1.0
+    ],
+    "realized_or_invalidated": [
+      "5/6 一字板+5/7 冲高后 5/8 估值消化；OCF -35% 警示+大基金/华达减持+44亿定增三重供给",
+      0.2
+    ]
+  },
+  "version": 2
+}

@@ -1,0 +1,34 @@
+{
+  "stock_code": "600132",
+  "stock_name": "重庆啤酒",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-重庆啤酒-buffett分析.md",
+      "md5": "90660a3714a177c656a7f0042567946b",
+      "extracted_at": "2026-05-10T22:17:23"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "嘉士伯 60% 控股+乌苏单品爆款+西部区域优势，但'借来的护城河'+爆款依赖",
+      0.5
+    ],
+    "valuation": [
+      "历史曾 PE >80x泡沫，当前 PE 仍偏高，需 PE <15x 才进入买点",
+      0.3
+    ],
+    "catalyst": [
+      "世界杯阶段3跟随，但乌苏单品周期风险+健康消费挤压",
+      0.5
+    ],
+    "theme_fit": [
+      "world_cup 主题跟随消费标的，相对青啤弹性弱",
+      0.6
+    ],
+    "realized_or_invalidated": [
+      "doc 显式标 Keep Watching+乌苏周期风险未被市场充分定价",
+      -0.1
+    ]
+  },
+  "version": 2
+}

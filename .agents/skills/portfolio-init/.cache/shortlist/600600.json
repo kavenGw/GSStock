@@ -1,0 +1,49 @@
+{
+  "stock_code": "600600",
+  "stock_name": "青岛啤酒",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-22-青岛啤酒-buffett分析.md",
+      "md5": "46949a93f6dd481be8daadfd0e5e4bd2",
+      "extracted_at": "2026-05-10T22:17:20"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-26-青岛啤酒-buffett分析.md",
+      "md5": "fe2f280402b9c0a6ac4e595e92990b4d",
+      "extracted_at": "2026-05-10T22:17:20"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-05-08-世界杯2026-炒作时间锚专题.md",
+      "md5": "aef2695aec32e1a09ef0863aafe5846f",
+      "extracted_at": "2026-05-10T22:17:20"
+    },
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\26q1\\2026-04-30-青岛啤酒-26Q1季报点评.md",
+      "md5": "fb15fd69876fca0c4bc62eaa194c99c4",
+      "extracted_at": "2026-05-10T22:17:20"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "百年品牌+山东 60%市占率+CR5寡头，26Q1 营收-1.5%/净利+5.2%/毛利率 42.74% 历史 Q1 新高，减量提质",
+      0.85
+    ],
+    "valuation": [
+      "PE-TTM 18.3x/PB 2.75x，5y 历史 3% 极低分位；内在价值中枢 750 亿 vs 当前 841 亿微贵 12%",
+      0.65
+    ],
+    "catalyst": [
+      "世界杯 2026 阶段3旗舰(6/11-7/19)+赞助商红利+消费 +兑现期；OCF/NI 1.665x 现金流极优",
+      0.85
+    ],
+    "theme_fit": [
+      "world_cup 主题旗舰消费标的，5/8 专题确认题材+基本面共振，可退潮持有",
+      1.0
+    ],
+    "realized_or_invalidated": [
+      "4/22→4/26→4/30→5/8 四 doc 反复验证 5 假设强兑现 3 项；财务费用+33%是新增黄灯",
+      0.4
+    ]
+  },
+  "version": 2
+}

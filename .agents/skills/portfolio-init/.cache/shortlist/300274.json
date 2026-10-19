@@ -1,0 +1,34 @@
+{
+  "stock_code": "300274",
+  "stock_name": "阳光电源",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-阳光电源-buffett分析.md",
+      "md5": "afca9ac9a6cb63ab763048eb3fb7251e",
+      "extracted_at": "2026-05-10T22:17:24"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "数据中心电源+储能/光伏逆变器，2025 ROE 31.3%/净利率 15.2%/资负率降至 58.1%财务质量优秀",
+      0.7
+    ],
+    "valuation": [
+      "PE-TTM 20.61x/PB 5.95x，对应 25x owner earnings 略贵但不离谱，需 90 元(PE 14x)以下买入",
+      0.4
+    ],
+    "catalyst": [
+      "储能海外+数据中心电源第二曲线，但海外 IRA/欧盟反补贴+技术路线颠覆+价格战重演风险",
+      0.55
+    ],
+    "theme_fit": [
+      "ai_compute 主题数据中心电源间接受益，关联牵强非主线核心",
+      0.55
+    ],
+    "realized_or_invalidated": [
+      "doc 显式纠偏(财务质量超出预期)，但海外地缘风险+储能价格战路径未变",
+      0.1
+    ]
+  },
+  "version": 2
+}

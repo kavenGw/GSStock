@@ -1,0 +1,34 @@
+{
+  "stock_code": "605099",
+  "stock_name": "共创草坪",
+  "docs": [
+    {
+      "path": "D:\\Git\\stock\\docs\\analysis\\2026-04-24-共创草坪-buffett分析.md",
+      "md5": "887978cead26ca8a69ba2adf1a713fe3",
+      "extracted_at": "2026-05-10T22:17:21"
+    }
+  ],
+  "summary": {
+    "logic": [
+      "FIFA Preferred Producer 全球龙头，但 80%+外销受关税/海运/汇率四重外生约束，commodity-plus",
+      0.55
+    ],
+    "valuation": [
+      "ROIC 周期波动 10-15%，建议 PE 8-10x 内才进入区间，当前估值无安全边际",
+      0.4
+    ],
+    "catalyst": [
+      "世界杯阶段1硬件预热旗舰(3-5月T-100~T-30)，业绩兑现度近零纯情绪",
+      0.65
+    ],
+    "theme_fit": [
+      "world_cup 主题阶段1旗舰但关税风险打折，单一题材逻辑",
+      0.75
+    ],
+    "realized_or_invalidated": [
+      "5/8 时间锚专题确认阶段1资金路径+T-30切换时点 5/12，但题材属性不持有过决赛日",
+      0.1
+    ]
+  },
+  "version": 2
+}
