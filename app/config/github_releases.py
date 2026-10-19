@@ -8,6 +8,12 @@ GITHUB_RELEASE_REPOS = [
         'emoji': '🤖',
     },
     {
+        'key': 'codex',
+        'repo': 'openai/codex',
+        'name': 'Codex',
+        'emoji': '🧠',
+    },
+    {
         'key': 'superpowers',
         'repo': 'obra/superpowers',
         'name': 'Superpowers',
