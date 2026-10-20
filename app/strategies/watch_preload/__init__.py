@@ -91,18 +91,36 @@ class WatchPreloadStrategy(Strategy):
             ok = False
         self._record_result('US_EXT', ok, expected_empty)
 
+    def _preload_oil(self, tick: int):
+        from app.config.stock_codes import BENCHMARK_CODES
+        from app.services.unified_stock_data import unified_stock_data_service
+
+        if not self._should_refresh_market('US', tick) or self._should_skip('OIL'):
+            return
+        codes = [b['code'] for b in BENCHMARK_CODES if b['code'] in ('CL=F', 'BZ=F')]
+        if not codes:
+            return
+        try:
+            prices = unified_stock_data_service.get_realtime_prices(codes, force_refresh=True)
+            ok = all((prices.get(code) or {}).get('current_price') is not None for code in codes)
+        except Exception as e:
+            logger.warning(f'[盯盘预取] 油价获取失败: {e}')
+            ok = False
+        self._record_result('OIL', ok)
+
     def scan(self) -> list[Signal]:
         from app.services.watch_service import WatchService
         from app.services.trading_calendar import TradingCalendarService
         from app.services.unified_stock_data import unified_stock_data_service
         from app.utils.market_identifier import MarketIdentifier
 
+        tick = self._tick_count
+        self._tick_count += 1
+        self._preload_oil(tick)
+
         codes = WatchService.get_watch_codes()
         if not codes:
             return []
-
-        tick = self._tick_count
-        self._tick_count += 1
 
         all_by_market = {}
         for code in codes:

@@ -65,6 +65,8 @@ CATEGORY_NAMES = {
 
 # 盯盘助手预置基准标的
 BENCHMARK_CODES = [
+    {'code': 'CL=F', 'name': 'WTI原油期货（美元/桶）', 'market': 'US'},
+    {'code': 'BZ=F', 'name': '布伦特原油期货（美元/桶）', 'market': 'US'},
     {'code': 'GC=F', 'name': 'COMEX黄金', 'market': 'US'},
     {'code': 'SI=F', 'name': 'COMEX白银', 'market': 'US'},
     {'code': '^NDX', 'name': '纳指100', 'market': 'US'},

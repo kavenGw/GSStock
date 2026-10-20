@@ -29,6 +29,10 @@ def test_prices_returns_indices(monkeypatch):
     resp = client.get('/watch/prices').get_json()
 
     assert 'indices' in resp
+    oil = {b['code']: b for b in resp['benchmarks'] if b['code'] in ('CL=F', 'BZ=F')}
+    assert set(oil) == {'CL=F', 'BZ=F'}
+    assert all(b['price'] == 2500.0 and b['change_pct'] == 0.3 for b in oil.values())
+    assert all('美元/桶' in b['name'] for b in oil.values())
     assert set(resp['indices'].keys()) == {'A', 'KR'}
     a = resp['indices']['A']
     assert [i['code'] for i in a] == ['000001.SS', '399006.SZ', '000688.SS']
