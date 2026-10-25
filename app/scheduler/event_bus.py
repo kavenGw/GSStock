@@ -20,6 +20,9 @@ class EventBus:
             self._handlers.append(handler)
 
     def publish(self, signal: Signal):
+        if not self._handlers:
+            logger.warning('[事件总线] 信号未分发 strategy=%s reason=no_handlers', signal.strategy)
+            return
         for handler in self._handlers:
             try:
                 handler(signal)

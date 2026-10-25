@@ -79,8 +79,10 @@ class NotificationService:
     def dispatch_signal(signal):
         """事件总线回调：去重 + 格式化 + 按策略路由频道"""
         if signal.priority == "LOW":
+            logger.info('[通知路由] 跳过 strategy=%s reason=low_priority', signal.strategy)
             return
         if NotificationService._is_duplicate(signal):
+            logger.info('[通知路由] 跳过 strategy=%s reason=duplicate', signal.strategy)
             return
         direction = (signal.data or {}).get('direction', '')
         if direction in ('high', 'above', 'up', 'buy', 'resistance_break'):
@@ -97,14 +99,19 @@ class NotificationService:
             'volume_alert': CHANNEL_DAILY,
         }
         channel = STRATEGY_CHANNEL.get(signal.strategy, CHANNEL_NEWS)
+        logger.info('[通知路由] 分发 strategy=%s channel=%s priority=%s',
+                    signal.strategy, channel, signal.priority)
         NotificationService.send_slack(text, channel)
 
     @staticmethod
     def push_watch_alerts(alerts) -> bool:
         """合并盯盘告警推送：一股一条，跳过 LOW（LOW 只 debug log）"""
         pushed = 0
+        skipped = 0
+        failed = 0
         for a in alerts:
             if a.priority == 'LOW':
+                skipped += 1
                 logger.debug(f'[盯盘告警] {a.name}({a.code}) LOW 静默: {a.primary_line}')
                 continue
             chg = a.change_percent
@@ -128,6 +135,9 @@ class NotificationService:
                 lines.append(a.context_line)
             if NotificationService.send_slack('\n'.join(lines), CHANNEL_WATCH):
                 pushed += 1
+            else:
+                failed += 1
+        logger.info('[盯盘告警] 发送汇总 sent=%d failed=%d low_priority=%d', pushed, failed, skipped)
         return pushed > 0
 
     @staticmethod
@@ -185,19 +195,25 @@ class NotificationService:
             with urlopen(req, timeout=10, context=ctx) as resp:
                 body = json.loads(resp.read().decode('utf-8'))
                 if not body.get('ok'):
-                    logger.error(f'[通知.Slack] API 错误: {body.get("error", "unknown")}')
+                    logger.error('[通知.Slack] API拒绝 channel=%s error=%s',
+                                 data.get('channel'), body.get('error', 'unknown'))
                     return False
+                logger.info('[通知.Slack] 发送成功 channel=%s ts=%s',
+                            data.get('channel'), body.get('ts'))
                 return True
         except Exception as e:
-            logger.error(f'[通知.Slack] 推送失败: {e}', exc_info=True)
+            logger.error('[通知.Slack] 请求失败 channel=%s error_type=%s status=%s',
+                         data.get('channel'), type(e).__name__, getattr(e, 'code', None))
             return False
 
     @staticmethod
     def send_slack(message: str, channel: str = CHANNEL_NEWS, blocks: list = None) -> bool:
         if not SLACK_ENABLED:
-            logger.warning('[通知.Slack] Slack 未配置')
+            logger.warning('[通知.Slack] 跳过 channel=%s reason=slack_not_configured', channel)
             return False
 
+        logger.info('[通知.Slack] 发送开始 channel=%s text_chars=%d blocks=%d',
+                    channel, len(message), min(len(blocks or []), 50))
         data = {'channel': channel, 'text': NotificationService._sanitize_hk_codes(message)}
         if blocks:
             data['blocks'] = NotificationService._sanitize_blocks(blocks[:50])

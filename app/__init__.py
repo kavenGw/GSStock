@@ -378,9 +378,13 @@ def create_app(config_class=None):
 
     registry.discover()
     event_bus.subscribe(NotificationService.dispatch_signal)
+    logging.info('[推送诊断] 启动 slack_enabled=%s active_strategies=%d',
+                 NotificationService.get_status()['slack'], len(registry.active))
 
     import os as _os
     if not app.debug or _os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         scheduler_engine.init_app(app)
+    else:
+        logging.info('[调度器] 未启动 reason=debug_reloader_parent')
 
     return app

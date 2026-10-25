@@ -1,6 +1,7 @@
 """APScheduler 调度引擎"""
 import atexit
 import logging
+from time import monotonic
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -210,17 +211,21 @@ class SchedulerEngine:
         from app.scheduler.event_bus import event_bus
 
         if not self.app:
+            logger.warning('[调度器] 跳过 strategy=%s reason=app_unavailable', strategy_name)
             return
         with self.app.app_context():
             strategy = registry.get(strategy_name)
             if not strategy:
+                logger.warning('[调度器] 跳过 strategy=%s reason=strategy_not_found', strategy_name)
                 return
+            started = monotonic()
+            logger.info('[调度器] 扫描开始 strategy=%s', strategy_name)
             try:
                 signals = strategy.scan()
                 for signal in signals:
                     event_bus.publish(signal)
-                if signals:
-                    logger.info(f'[调度器] {strategy_name} 产出 {len(signals)} 个信号')
+                logger.info('[调度器] 扫描完成 strategy=%s returned_signals=%d elapsed_ms=%.0f',
+                            strategy_name, len(signals), (monotonic() - started) * 1000)
             except Exception as e:
                 logger.error(f'[调度器] {strategy_name} 执行失败: {e}')
                 self._notify_error(strategy_name, e)

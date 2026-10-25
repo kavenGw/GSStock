@@ -29,6 +29,7 @@ class WatchAlertStrategy(Strategy):
 
         codes = WatchService.get_watch_codes()
         if not codes:
+            logger.info('[盯盘告警] 跳过 reason=empty_watch_list')
             return []
 
         market_map = WatchService.get_market_map()
@@ -36,9 +37,11 @@ class WatchAlertStrategy(Strategy):
         # 按股票所属市场过滤，只保留市场已开盘的股票
         open_markets = {m for m in set(market_map.values()) if m and TradingCalendarService.is_market_open(m)}
         if not open_markets:
+            logger.info('[盯盘告警] 跳过 reason=markets_closed watched=%d', len(codes))
             return []
         active_codes = [c for c in codes if market_map.get(c) in open_markets]
         if not active_codes:
+            logger.info('[盯盘告警] 跳过 reason=no_active_codes')
             return []
 
         from app.services.unified_stock_data import UnifiedStockDataService
@@ -56,6 +59,10 @@ class WatchAlertStrategy(Strategy):
 
         # 取价失败降级(_is_degraded)或超龄(2倍preload周期)的旧价会污染极值并误报，直接跳过该股
         watch_prices = self._filter_fresh(prices, active_codes, market_map)
+        logger.info('[盯盘告警] 行情检查 active=%d cached=%d fresh=%d missing=%d rejected=%d',
+                    len(active_codes), len(prices), len(watch_prices),
+                    sum(c not in prices for c in active_codes),
+                    sum(c in prices and c not in watch_prices for c in active_codes))
         skipped = [c for c in active_codes if c in prices and c not in watch_prices]
         if skipped:
             from app.services.price_freshness import age_str
@@ -75,6 +82,8 @@ class WatchAlertStrategy(Strategy):
             trading_minutes=trading_minutes,
         )
         if not signals:
+            logger.info('[盯盘告警] 扫描结束 reason=no_signals fresh=%d params=%d',
+                        len(watch_prices), len(alert_params_map))
             return []
 
         from app.services.watch_signal_pipeline import WatchSignalPipeline
@@ -82,9 +91,12 @@ class WatchAlertStrategy(Strategy):
         alerts = WatchSignalPipeline.process(
             signals, watch_prices, alert_params_map, name_map, trading_minutes)
         pushable = [a for a in alerts if a.priority != 'LOW']
+        logger.info('[盯盘告警] 信号处理 raw=%d merged=%d pushable=%d',
+                    len(signals), len(alerts), len(pushable))
         if pushable:
-            NotificationService.push_watch_alerts(alerts)
-            logger.info(f'[盯盘告警] 合并推送 {len(pushable)} 股（原始 {len(signals)} 信号）')
+            sent = NotificationService.push_watch_alerts(alerts)
+            if not sent:
+                logger.warning('[盯盘告警] 未成功发送任何告警 pushable=%d', len(pushable))
         return []
 
     @staticmethod
