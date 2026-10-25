@@ -627,6 +627,46 @@ class NotificationService:
         return {'text': text}
 
     @staticmethod
+    def _expected_last_trading_date(market: str) -> str | None:
+        """该市场按本地时间应有的最近一根日 K 日期（开盘前/非交易日取前一交易日）"""
+        from app.services.trading_calendar import TradingCalendarService as TC
+        try:
+            now = TC.get_market_now(market)
+            today = now.date()
+            if TC.is_trading_day(market, today) and not TC.is_before_open(market, now):
+                return today.isoformat()
+            return TC.get_last_trading_day(market, today).isoformat()
+        except Exception as e:
+            logger.debug(f'[通知.盯盘区间] {market} 最近交易日计算失败: {e}')
+            return None
+
+    @staticmethod
+    def format_watch_range_stats() -> str:
+        """盯盘池 7d/30d 区间统计（最高/最低/VWAP/区间位置），不依赖 LLM"""
+        try:
+            from app.config.stock_codes import WATCH_CODES
+            from app.services.unified_stock_data import unified_stock_data_service
+            from app.services.watch_range_stats import WINDOWS, compute_range_stats, format_range_stats
+
+            codes = [e['code'] for e in WATCH_CODES]
+            # get_trend_data 的 days 按自然日取数，30 只得 ~23 根 K 线；取 60 再截交易日窗口
+            result = unified_stock_data_service.get_trend_data(codes, days=60)
+            trend = {s['stock_code']: s.get('data', []) for s in result.get('stocks', [])}
+
+            expected = {m: NotificationService._expected_last_trading_date(m)
+                        for m in {e['market'] for e in WATCH_CODES}}
+            entries = [{
+                'code': e['code'], 'name': e['name'], 'market': e['market'],
+                'expected_date': expected.get(e['market']),
+                'stats': {label: compute_range_stats(trend.get(e['code'], []), window)
+                          for label, window in WINDOWS},
+            } for e in WATCH_CODES]
+            return format_range_stats(entries)
+        except Exception as e:
+            logger.warning(f'[通知.盯盘区间] 生成失败: {type(e).__name__}: {e}', exc_info=True)
+            return ''
+
+    @staticmethod
     def format_indices_summary() -> str:
         """格式化指数行情用于推送"""
         try:
@@ -1299,6 +1339,8 @@ class NotificationService:
         except Exception as e:
             logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
 
+        range_text = NotificationService.format_watch_range_stats()
+
         # GitHub Release 版本更新
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
 
@@ -1426,6 +1468,9 @@ class NotificationService:
             if NotificationService.send_slack(msg, CHANNEL_DAILY, blocks=blks):
                 sent += 1
 
+        if range_text and NotificationService.send_slack(range_text, CHANNEL_WATCH):
+            sent += 1
+
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
             sent += 1
 
@@ -1440,7 +1485,7 @@ class NotificationService:
                     for key, version in release_pushed_versions:
                         GitHubReleaseService.mark_pushed_version(key, version)
 
-        total = len(news_messages) + (1 if watch_msg else 0)
+        total = len(news_messages) + (1 if watch_msg else 0) + (1 if range_text else 0)
         results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': total}
         results['content_preview'] = news_messages[0][:500] if news_messages else ''
 
