@@ -1,7 +1,6 @@
 """盯盘区间统计（7d/30d 最高/最低/VWAP/区间位置）— 纯函数，供每日推送使用"""
 
 WINDOWS = (('7d', 7), ('30d', 30))
-MARKET_ORDER = ['A', 'HK', 'KR', 'US']
 MARKET_LABELS = {'A': 'A股', 'HK': '港股', 'KR': '韩股', 'US': '美股'}
 
 
@@ -46,33 +45,30 @@ def _window_line(label: str, window: int, s: dict) -> str:
             f" | 均 {fmt_price(s['vwap'])} | 位置 {pos}")
 
 
-def format_range_stats(entries: list[dict]) -> str:
+def format_range_stats(entries: list[dict]) -> list[str]:
     """entries: [{code, name, market, expected_date, stats: {'7d': {...}, '30d': {...}}}]
 
     expected_date 为该市场最近交易日（'YYYY-MM-DD'），K 线截止早于它时标注截至日期。
     """
-    entries = [e for e in entries if any(e['stats'].values())]
-    if not entries:
-        return ''
-
-    as_of = max(s['end_date'] for e in entries for s in e['stats'].values() if s)
-    markets = MARKET_ORDER + sorted({e['market'] for e in entries} - set(MARKET_ORDER))
-
-    lines = [f"📊 *盯盘区间统计*（截至 {as_of}）"]
-    for market in markets:
-        group = [e for e in entries if e['market'] == market]
+    messages = []
+    for label, window in WINDOWS:
+        group = [e for e in entries if e['stats'].get(label)]
         if not group:
             continue
-        lines.append('─' * 30)
-        lines.append(f"*{MARKET_LABELS.get(market, market)}*")
+        group.sort(key=lambda e: (
+            e['stats'][label]['position'] is None,
+            e['stats'][label]['position'] if e['stats'][label]['position'] is not None else 0,
+        ))
+        as_of = max(e['stats'][label]['end_date'] for e in group)
+        lines = [f"📊 *盯盘区间统计 · {window} 天*（最近 {window} 个交易日，截至 {as_of}）",
+                 '按区间位置从低到高排序']
         for e in group:
-            main = e['stats'].get('30d') or e['stats'].get('7d')
+            main = e['stats'][label]
             stale = ''
             if e.get('expected_date') and main['end_date'] < e['expected_date']:
                 stale = f" (截至 {main['end_date'][5:]})"
-            lines.append(f"*{e['name']}({e['code']})*{stale} 当前 {fmt_price(main['current'])}")
-            for label, window in WINDOWS:
-                s = e['stats'].get(label)
-                if s:
-                    lines.append(_window_line(label, window, s))
-    return '\n'.join(lines)
+            market = MARKET_LABELS.get(e['market'], e['market'])
+            lines.append(f"*{e['name']}({e['code']})* [{market}]{stale} 当前 {fmt_price(main['current'])}")
+            lines.append(_window_line(label, window, main))
+        messages.append('\n'.join(lines))
+    return messages

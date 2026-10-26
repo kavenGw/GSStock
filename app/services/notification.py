@@ -641,7 +641,7 @@ class NotificationService:
             return None
 
     @staticmethod
-    def format_watch_range_stats() -> str:
+    def format_watch_range_stats() -> list[str]:
         """盯盘池 7d/30d 区间统计（最高/最低/VWAP/区间位置），不依赖 LLM"""
         try:
             from app.config.stock_codes import WATCH_CODES
@@ -664,7 +664,7 @@ class NotificationService:
             return format_range_stats(entries)
         except Exception as e:
             logger.warning(f'[通知.盯盘区间] 生成失败: {type(e).__name__}: {e}', exc_info=True)
-            return ''
+            return []
 
     @staticmethod
     def format_indices_summary() -> str:
@@ -1339,7 +1339,7 @@ class NotificationService:
         except Exception as e:
             logger.warning(f'[通知.盯盘分析] 生成失败: {e}')
 
-        range_text = NotificationService.format_watch_range_stats()
+        range_messages = NotificationService.format_watch_range_stats()
 
         # GitHub Release 版本更新
         release_texts, release_pushed_versions = NotificationService.format_github_release_updates()
@@ -1468,8 +1468,9 @@ class NotificationService:
             if NotificationService.send_slack(msg, CHANNEL_DAILY, blocks=blks):
                 sent += 1
 
-        if range_text and NotificationService.send_slack(range_text, CHANNEL_WATCH):
-            sent += 1
+        for range_text in range_messages:
+            if NotificationService.send_slack(range_text, CHANNEL_WATCH):
+                sent += 1
 
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):
             sent += 1
@@ -1485,7 +1486,7 @@ class NotificationService:
                     for key, version in release_pushed_versions:
                         GitHubReleaseService.mark_pushed_version(key, version)
 
-        total = len(news_messages) + (1 if watch_msg else 0) + (1 if range_text else 0)
+        total = len(news_messages) + (1 if watch_msg else 0) + len(range_messages)
         results = {'slack': sent > 0, 'messages_sent': sent, 'messages_total': total}
         results['content_preview'] = news_messages[0][:500] if news_messages else ''
 
