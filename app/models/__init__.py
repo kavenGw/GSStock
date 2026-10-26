@@ -21,5 +21,6 @@ from app.models.news import NewsItem, InterestKeyword, IdentifiedCompany
 from app.models.dram_price import DramPrice
 from app.models.earnings_snapshot import EarningsSnapshot
 from app.models.stock_event import StockEvent
+from app.models.oil_alert import OilAlert
 
-__all__ = ['Position', 'Advice', 'Config', 'Category', 'StockCategory', 'Trade', 'Settlement', 'WyckoffReference', 'WyckoffAnalysis', 'Stock', 'StockAlias', 'StockWeight', 'MetalTrendCache', 'IndexTrendCache', 'DailySnapshot', 'PositionPlan', 'RebalanceConfig', 'SignalCache', 'UnifiedStockCache', 'BankTransfer', 'WatchAnalysis', 'NewsItem', 'InterestKeyword', 'IdentifiedCompany', 'DramPrice', 'EarningsSnapshot', 'StockEvent']
+__all__ = ['Position', 'Advice', 'Config', 'Category', 'StockCategory', 'Trade', 'Settlement', 'WyckoffReference', 'WyckoffAnalysis', 'Stock', 'StockAlias', 'StockWeight', 'MetalTrendCache', 'IndexTrendCache', 'DailySnapshot', 'PositionPlan', 'RebalanceConfig', 'SignalCache', 'UnifiedStockCache', 'BankTransfer', 'WatchAnalysis', 'NewsItem', 'InterestKeyword', 'IdentifiedCompany', 'DramPrice', 'EarningsSnapshot', 'StockEvent', 'OilAlert']

@@ -23,6 +23,14 @@ class InterestPipeline:
             if not items:
                 return
 
+            from app.services.oil_alert_service import OilAlertService
+            oil_ids = {n.id for n in items if OilAlertService.is_oil_news(n.content)}
+            try:
+                OilAlertService.process_news(items)
+            except Exception:
+                db.session.rollback()
+                logger.exception('[原油提醒] 新闻处理失败，定时扫描将重试')
+
             # Step 1: GLM 批量分类打分
             classified = InterestPipeline._classify_items(items)
 
@@ -32,10 +40,12 @@ class InterestPipeline:
             db.session.commit()
 
             # 对所有含未具名公司的新闻做公司识别（不限于兴趣新闻）
-            pushed_ids = InterestPipeline._identify_and_notify_companies(items)
+            pushed_ids = InterestPipeline._identify_and_notify_companies(
+                [n for n in items if n.id not in oil_ids])
 
             # Slack 推送兴趣新闻（跳过已经在 AI 识别环节推送过的，避免同一条新闻发两次）
-            interest_items = [n for n in items if n.is_interest and n.id not in pushed_ids]
+            interest_items = [n for n in items if n.is_interest
+                              and n.id not in pushed_ids and n.id not in oil_ids]
             if interest_items:
                 InterestPipeline._notify_interest_slack(interest_items)
 
@@ -160,17 +170,17 @@ class InterestPipeline:
         kw_set = {kw.keyword.lower() for kw in user_keywords}
         kw_set.update(c.name.lower() for c in company_keywords)
 
-        for r in classified:
-            idx = r.get('index', -1)
-            if idx < 0 or idx >= len(items):
-                continue
-            item = items[idx]
-            extracted = r.get('keywords', [])
+        by_index = {r['index']: r for r in classified if isinstance(r, dict)
+                    and isinstance(r.get('index'), int)}
+        for idx, item in enumerate(items):
+            extracted = by_index.get(idx, {}).get('keywords', []) or []
 
             # 兴趣关键词匹配
             matched = []
             if kw_set:
                 for ext_kw in extracted:
+                    if not isinstance(ext_kw, str) or not ext_kw:
+                        continue
                     ext_lower = ext_kw.lower()
                     for user_kw in kw_set:
                         if user_kw in ext_lower or ext_lower in user_kw:

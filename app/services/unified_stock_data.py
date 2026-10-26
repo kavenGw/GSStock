@@ -734,6 +734,15 @@ class UnifiedStockDataService:
                     if hist.empty or len(hist) < 2:
                         return code, None
 
+                    if code in ('CL=F', 'BZ=F'):
+                        from app.services.oil_quotes import fetch_oil_quote
+                        try:
+                            oil_quote = fetch_oil_quote(ticker, code, hist, now_str)
+                            if oil_quote:
+                                return code, oil_quote
+                        except Exception as exc:
+                            logger.warning('[原油行情] 分钟报价不可用 code=%s error=%s', code, type(exc).__name__)
+
                     latest = hist.iloc[-1]
                     prev = hist.iloc[-2]
                     price_val = float(latest['Close'])
@@ -753,7 +762,7 @@ class UnifiedStockDataService:
                         'current_price': round(price_val, 2),
                         'change': round(change_val, 2),
                         'change_percent': round(change_pct, 2),
-                        '_is_degraded': stale_bar,
+                        '_is_degraded': stale_bar or code in ('CL=F', 'BZ=F'),
                         'volume': _normalize_volume(latest['Volume'], 'yfinance', market),
                         'high': round(float(latest['High']), 2) if not pd.isna(latest['High']) else None,
                         'low': round(float(latest['Low']), 2) if not pd.isna(latest['Low']) else None,
