@@ -11,7 +11,6 @@ if [ -f "$VENV/bin/python" ]; then
 else
     PYTHON="python3"
 fi
-GUNICORN="$PYTHON -m gunicorn"
 
 cd "$APP_DIR"
 
@@ -41,14 +40,7 @@ start() {
         return 1
     fi
     echo "启动 GSStock..."
-    $GUNICORN -c gunicorn.conf.py run:app -D -p "$PIDFILE"
-    sleep 1
-    if pid=$(get_pid); then
-        echo "GSStock 启动成功 (PID: $pid)"
-    else
-        echo "GSStock 启动失败，查看日志排查"
-        return 1
-    fi
+    "$PYTHON" startup.py --detach
 }
 
 stop() {

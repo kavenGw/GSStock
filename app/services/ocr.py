@@ -343,19 +343,6 @@ class OcrLogger:
             self.file.close()
             self.file = None
 
-def preload_model():
-    """应用启动时预加载 OCR 模型（已加载则跳过）"""
-    if OcrBackend._instance is not None:
-        return
-    logger.info("[OCR] 预加载 OCR 模型...")
-    try:
-        OcrBackend.get_ocr_instance()
-        backend = OcrBackend.get_backend_type()
-        logger.info(f"[OCR] OCR 模型加载完成，后端: {backend.upper()}")
-    except Exception as e:
-        logger.warning(f"[OCR] OCR 模型预加载失败: {e}")
-
-
 class OcrService:
     @staticmethod
     def recognize(image_path: str) -> dict:

@@ -102,6 +102,7 @@ class EsportsMonitorService:
 
     def __init__(self, app):
         self.app = app
+        self._recovering = False
 
     def setup_match_monitors(self, match_type=None, target_date=None):
         """为指定日期的比赛创建监控 job
@@ -224,10 +225,11 @@ class EsportsMonitorService:
 
     def recover_monitors(self):
         """服务器启动时恢复监控"""
+        self._recovering = True
         try:
             self.setup_match_monitors()
-        except Exception as e:
-            logger.warning(f'[赛事监控] 恢复失败（不影响启动）: {e}')
+        finally:
+            self._recovering = False
 
     def _create_pre_match_job(self, match_info):
         """创建赛前提醒 job（开赛前N分钟推送一次）"""
@@ -273,9 +275,13 @@ class EsportsMonitorService:
             logger.info(f'[赛事监控] 创建赛前提醒: {job_id} ({match_info["teams_desc"]}, {remind_dt.strftime("%H:%M")})')
             return True
         except (ValueError, TypeError) as e:
+            if self._recovering:
+                raise
             logger.warning(f'[赛事监控] 创建赛前提醒失败 {job_id}: {e}')
             return False
         except Exception as e:
+            if self._recovering:
+                raise
             logger.error(f'[赛事监控] 创建赛前提醒失败 {job_id}: {e}')
             return False
 
@@ -369,6 +375,8 @@ class EsportsMonitorService:
             logger.info(f'[赛事监控] 创建任务: {job_id} ({match_info["teams_desc"]}, 每{interval}分钟)')
             return True
         except Exception as e:
+            if self._recovering:
+                raise
             logger.error(f'[赛事监控] 创建任务失败 {job_id}: {e}')
             return False
 

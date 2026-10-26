@@ -1,5 +1,7 @@
 #!/bin/bash
 # 强制拉取最新代码并重启 GSStock
+set -Eeuo pipefail
+trap 'rc=$?; echo "[FAIL] 更新/启动失败，行 $LINENO，退出码 $rc" >&2; exit "$rc"' ERR
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$APP_DIR"
@@ -19,7 +21,8 @@ if [ ! -f venv/bin/pip ]; then
         echo "venv 模块缺失，尝试自动安装..."
         PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
         if command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq "python${PY_VER}-venv"
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq "python${PY_VER}-venv"
         else
             echo "错误：请手动安装 python3-venv 包"
             exit 1
@@ -31,7 +34,12 @@ venv/bin/pip install -r requirements.txt -q
 venv/bin/pip install -U akshare -q
 
 echo "=== 安装 Playwright Chromium 浏览器 ==="
-venv/bin/playwright install chromium --with-deps || echo "⚠ Playwright 浏览器安装失败，公司新闻爬取功能将不可用"
+READONLY_MODE=$(venv/bin/python -c 'from config import Config; print(int(Config.READONLY_MODE))')
+if [ "$READONLY_MODE" = "1" ]; then
+    echo "[SKIP] Chromium: 只读模式"
+else
+    venv/bin/python -m playwright install chromium --with-deps
+fi
 
 echo "=== 检查 PyTorch（AI走势预测，可选） ==="
 if venv/bin/python -c "import torch" 2>/dev/null; then

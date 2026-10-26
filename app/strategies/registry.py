@@ -20,6 +20,8 @@ class StrategyRegistry:
 
     def discover(self):
         """扫描 app/strategies/ 下所有子包并注册"""
+        from startup import report
+        self._strategies.clear()
         strategies_dir = Path(__file__).parent
         for child in sorted(strategies_dir.iterdir()):
             if not child.is_dir() or child.name.startswith('_'):
@@ -37,8 +39,11 @@ class StrategyRegistry:
                         if instance.enabled:
                             self._strategies[instance.name] = instance
                             logger.info(f'[策略注册] {instance.name}: {instance.description}')
+                            report(f'strategy:{instance.name}')
+                        else:
+                            report(f'strategy:{instance.name}', 'SKIP', '未启用')
             except Exception as e:
-                logger.error(f'[策略注册] 加载 {child.name} 失败: {e}')
+                raise RuntimeError(f'[策略注册] 加载 {child.name} 失败: {e}') from e
 
     @property
     def active(self) -> list[Strategy]:

@@ -45,7 +45,7 @@ class SchedulerEngine:
                 )
                 registered.append(f'{strategy.name}({schedule_desc})')
             except Exception as e:
-                logger.error(f'[调度器] 注册 {strategy.name} 失败: {e}')
+                raise RuntimeError(f'[调度器] 注册 {strategy.name} 失败: {e}') from e
 
         from apscheduler.triggers.interval import IntervalTrigger
         from app.config.news_config import NEWS_INTERVAL_MINUTES
@@ -89,11 +89,18 @@ class SchedulerEngine:
         )
         registered.append('esports_tomorrow_monitors(22:00)')
 
-        self.scheduler.start()
+        self.scheduler.start(paused=True)
         atexit.register(self.shutdown)
         logger.info(f'[调度器] 启动完成，{len(registered)} 个任务: {", ".join(registered)}')
-        self._check_daily_push_catchup(app)
-        self._recover_esports_monitors(app)
+        try:
+            from app.services.startup_checks import validate_scheduler
+            validate_scheduler(self)
+            self._check_daily_push_catchup(app)
+            self._recover_esports_monitors(app)
+            self.scheduler.resume()
+        except Exception:
+            self.shutdown()
+            raise
 
     def _check_daily_push_catchup(self, app):
         """检查是否需要补发每日推送（含周末 extras）"""
@@ -151,7 +158,7 @@ class SchedulerEngine:
                 from app.services.esports_monitor_service import EsportsMonitorService
                 EsportsMonitorService(app).recover_monitors()
         except Exception as e:
-            logger.warning(f'[调度器] 赛事监控恢复失败（不影响启动）: {e}')
+            raise RuntimeError(f'[调度器] 赛事监控恢复失败: {e}') from e
 
     def _setup_esports_monitors_safe(self):
         """安全地创建赛事监控（已在 app context 内）"""

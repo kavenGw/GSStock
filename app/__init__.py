@@ -198,6 +198,8 @@ def check_playwright():
             executable = p.chromium.executable_path
             if not executable or not os.path.exists(executable):
                 raise FileNotFoundError(f"Chromium 未找到: {executable}")
+            browser = p.chromium.launch(headless=True)
+            browser.close()
     except Exception as e:
         raise RuntimeError(
             f"Playwright Chromium 浏览器未安装！请运行: playwright install chromium\n"
@@ -224,6 +226,16 @@ def _sanitize_nan(obj):
 
 
 def create_app(config_class=None):
+    from startup import report
+    try:
+        return _create_app(config_class)
+    except Exception as exc:
+        report('应用初始化', 'FAIL', str(exc))
+        raise
+
+
+def _create_app(config_class=None):
+    from startup import report
     app = Flask(__name__)
     app.json_provider_class = _SafeJsonProvider
     app.json = _SafeJsonProvider(app)
@@ -236,7 +248,11 @@ def create_app(config_class=None):
 
     # Playwright 强制检查（只读模式跳过，不需要爬取新闻）
     if not app.config.get('READONLY_MODE'):
+        report('Chromium', 'WAIT')
         check_playwright()
+        report('Chromium')
+    else:
+        report('Chromium', 'SKIP', '只读模式')
 
     # 确保必要目录存在
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -250,6 +266,7 @@ def create_app(config_class=None):
 
     setup_logging(app)
 
+    report('数据库初始化与迁移', 'WAIT')
     db.init_app(app)
 
     if db_uri.startswith('sqlite:///'):
@@ -262,6 +279,7 @@ def create_app(config_class=None):
             stock_db_path, _ = get_db_paths(app)
             cleanup_legacy_tables(stock_db_path)
 
+    report('Blueprint 导入与注册', 'WAIT')
     from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, briefing_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, supply_chain_bp, valuations_bp, minerals_bp, calendar_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
@@ -284,6 +302,7 @@ def create_app(config_class=None):
     app.register_blueprint(minerals_bp)
     app.register_blueprint(calendar_bp)
 
+    report('数据库建表、迁移与种子数据', 'WAIT')
     with app.app_context():
         from app.models import Position, Advice, Category, StockCategory, Trade, Settlement, WyckoffReference, WyckoffAnalysis, Stock, StockAlias, StockWeight, DailySnapshot, PositionPlan, SignalCache, UnifiedStockCache, WatchAnalysis, NewsItem, InterestKeyword, EarningsSnapshot
 
@@ -351,15 +370,19 @@ def create_app(config_class=None):
                 db.session.commit()
                 logging.info('[迁移] watch_analysis 新增 period 字段')
 
-        # 初始化市场状态缓存（仅 reloader 子进程，父进程不处理请求）
-        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or 'werkzeug' not in sys.modules:
-            from app.services.market_status import market_status_service
-            market_status_service.initialize()
+        report('市场缓存', 'WAIT')
+        from app.services.market_status import market_status_service
+        market_status_service.initialize()
 
     # 预加载 OCR 模型（仅 Windows，Linux 不安装 rapidocr-onnxruntime）
     if sys.platform == 'win32':
-        from app.services.ocr import preload_model
-        preload_model()
+        report('OCR', 'WAIT')
+        from app.services.ocr import OcrBackend
+        if OcrBackend.get_ocr_instance() is None:
+            raise RuntimeError('OCR 模型初始化失败')
+        report('OCR')
+    else:
+        report('OCR', 'SKIP', '仅 Windows 启用')
 
     # 添加只读模式上下文处理器
     @app.context_processor
@@ -376,15 +399,22 @@ def create_app(config_class=None):
     from app.scheduler.event_bus import event_bus
     from app.services.notification import NotificationService
 
+    report('策略注册', 'WAIT')
     registry.discover()
+    report('策略注册')
     event_bus.subscribe(NotificationService.dispatch_signal)
     logging.info('[推送诊断] 启动 slack_enabled=%s active_strategies=%d',
                  NotificationService.get_status()['slack'], len(registry.active))
 
+    from app.services.startup_checks import validate_modules, register_readiness
+    validate_modules(app)
     import os as _os
     if not app.debug or _os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        report('调度器及赛事恢复', 'WAIT')
         scheduler_engine.init_app(app)
+        report('调度器及赛事恢复')
     else:
         logging.info('[调度器] 未启动 reason=debug_reloader_parent')
 
+    register_readiness(app)
     return app
