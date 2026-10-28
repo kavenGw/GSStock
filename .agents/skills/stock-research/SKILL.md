@@ -53,15 +53,15 @@ description: >-
 | 文件 | 内容 | 谁读 |
 |------|------|------|
 | `mode-deep.md` | 模式 1 编排：先做 → A 三路并行 → B → 审查 → C，各阶段闸门与预估 | 控制者 |
-| `mode-earnings.md` | 模式 2 编排：模式 1 的增量版（单路采证 + 差量覆盖） | 控制者 |
+| `mode-earnings.md` | 模式 2 独立合同：单层主控、空白上下文、差量研究、独立审查 | 控制者 |
 | `mode-news.md` | 模式 3 六步流程：核实 → 脚本召回 → 判传导 → theme 档门槛 → 对称 → 汇报 | 控制者 |
 | `mode-meeting.md` | 模式 4 流程：核实 → 判主体 → 读旧档 → quarterly 档 → 反向链 | 控制者 |
-| `dispatch.md` | 每个 subagent 的**变量清单**（固定协议已在 `.Codex/agents/sr-*.md`） | 控制者，派发前读对应节 |
+| `dispatch.md` | 模式 1 subagent 变量清单；模式 2 合同在 `mode-earnings.md` | 模式 1 控制者，派发前读对应节 |
 | `lessons.md` | 实测教训的**案例溯源**（规则句真源在 `mode-*.md` 的 `[Ln]` 引用点）。**不通读**，按族索引定位后翻单条；新增须过其「新增门槛」 | 控制者，按需 |
 | `timing-baseline.md` | **轮数与耗时统计的唯一真源** + 近五轮分棒明细 | 控制者，收尾报账时（必追加一行并重算统计表）|
 | `lenses/` | 板块视角，按精确粒度拆分；命中映射表在 `sr-a3-lens` 定义里 | sr-a3-lens / sr-writer / sr-reviewer **自读** |
 | `impact-rubric.md` | 模式 3 传导 rubric + theme 档模板 | 控制者 |
-| `finalize.md` | Phase C 收尾动作清单：删旧档 → 反向链 → 双 lint → valuations 同步 → 安全提交 → 亲验 | 模式 3/4 与 buffett 写档收尾（模式 1/2 已内置进 `sr-finalize`） |
+| `finalize.md` | Phase C：删旧档、反向链、双 lint、估值同步、安全提交、亲验 | 模式 2/3/4 主控；模式 1 用 `sr-finalize` |
 | `scripts/pool_index.py` | 模式 2 溢出 / 模式 3 候选召回 | 脚本 |
 | `scripts/timing_stats.py` | 重算 `timing-baseline.md` 统计表，`--check` 抓漂移 | 收尾报账时 |
 

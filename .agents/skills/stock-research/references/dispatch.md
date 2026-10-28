@@ -1,4 +1,6 @@
-# stock-research 模式 1/2 派发手册（控制者读；§0 由控制者摘给 subagent）
+# stock-research 模式 1 派发手册（控制者读；§0 由控制者摘给 subagent）
+
+模式 2 使用 `mode-earnings.md` 的独立合同和空白上下文派发，不加载下述全量清单。
 
 每轮每个 subagent 只需拿到§1–§4 对应节的变量 + §0 产出协议；固定协议（角色定义/证据分级/取数脚本/动作清单）
 已内置进 `.claude/agents/sr-*.md` 定义，不要重复写进 prompt。

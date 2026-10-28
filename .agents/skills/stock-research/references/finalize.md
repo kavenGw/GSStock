@@ -1,6 +1,6 @@
 # 分析档收尾（Phase C）
 
-> 适用：模式 3/4 及 buffett 等写档收尾按需取用（模式 1/2 的 Phase C 已由 `.claude/agents/sr-finalize.md` 内置承载）。执行者通常是控制者派的 sonnet，派发时要求其 **Read 本文件**。
+> 适用：模式 2/3/4 及 buffett 写档收尾。模式 2 由根控制者直接执行现有脚本；模式 1 使用 `sr-finalize`。
 >
 > **本文件正文与 `.claude/agents/sr-finalize.md` 同源，改一处必须同步另一处。**
 
