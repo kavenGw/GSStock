@@ -5,11 +5,23 @@
 """
 import json
 import logging
+import sqlite3
+import time
 from datetime import datetime, date
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from app import db
 
 logger = logging.getLogger(__name__)
+
+
+def is_sqlite_lock_error(error):
+    if not isinstance(error, OperationalError) or not isinstance(error.orig, sqlite3.OperationalError):
+        return False
+    code = getattr(error.orig, 'sqlite_errorcode', None)
+    if code is not None:
+        return code & 0xff in (5, 6)  # SQLITE_BUSY / SQLITE_LOCKED，包括扩展错误码
+    message = str(error.orig).lower()
+    return message == 'database is locked' or message.startswith('database table is locked')
 
 
 class UnifiedStockCache(db.Model):
@@ -104,6 +116,26 @@ class UnifiedStockCache(db.Model):
     def set_cached_data(cls, stock_code: str, cache_type: str, data: dict | list,
                         cache_date: date = None, is_complete: bool = False,
                         data_end_date: date = None) -> 'UnifiedStockCache':
+        """缓存写入遇到 SQLite 锁时，回滚整个事务并有限重试。"""
+        cache_date = cache_date or date.today()
+        for attempt in range(4):
+            try:
+                return cls._set_cached_data_once(
+                    stock_code, cache_type, data, cache_date, is_complete, data_end_date
+                )
+            except OperationalError as error:
+                db.session.rollback()
+                if not is_sqlite_lock_error(error) or attempt == 3:
+                    raise
+                delay = 0.2 * (2 ** attempt)
+                logger.warning('缓存写入锁冲突: %s %s，%.1f 秒后重试 (%s/3)',
+                               stock_code, cache_type, delay, attempt + 1)
+                time.sleep(delay)
+
+    @classmethod
+    def _set_cached_data_once(cls, stock_code: str, cache_type: str, data: dict | list,
+                              cache_date: date, is_complete: bool,
+                              data_end_date: date) -> 'UnifiedStockCache':
         """设置缓存数据（并发安全）"""
         if cache_date is None:
             cache_date = date.today()

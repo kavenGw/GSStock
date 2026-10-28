@@ -19,7 +19,8 @@ from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app import db
-from app.models.unified_cache import UnifiedStockCache
+from app.models.unified_cache import UnifiedStockCache, is_sqlite_lock_error
+from sqlalchemy.exc import OperationalError
 from app.services.cache_validator import CacheValidator
 from app.services.circuit_breaker import circuit_breaker
 from app.services.load_balancer import load_balancer
@@ -1091,6 +1092,15 @@ class UnifiedStockDataService:
 
     # ============ OHLC走势数据 ============
 
+    @staticmethod
+    def _save_trend_cache(*args, **kwargs):
+        try:
+            UnifiedStockCache.set_cached_data(*args, **kwargs)
+        except OperationalError as error:
+            if not is_sqlite_lock_error(error):
+                raise
+            logger.warning('趋势缓存写入重试耗尽: %s %s，本轮继续使用已获取数据', args[0], args[1])
+
     def get_trend_data(self, stock_codes: list, days: int = 60,
                        force_refresh: bool = False) -> dict:
         """获取OHLC走势数据
@@ -1307,7 +1317,7 @@ class UnifiedStockDataService:
                                     data_end_date = date.fromisoformat(merged_data[-1]['date'])
                                 except ValueError:
                                     pass
-                            UnifiedStockCache.set_cached_data(
+                            self._save_trend_cache(
                                 code, cache_type, merged_stock, effective_dates[code],
                                 is_complete=is_closed,
                                 data_end_date=data_end_date
@@ -1744,7 +1754,7 @@ class UnifiedStockDataService:
                         data_end = date.fromisoformat(last_date_str)
                     except ValueError:
                         pass
-            UnifiedStockCache.set_cached_data(
+            self._save_trend_cache(
                 code, cache_type, result, effective_date,
                 is_complete=is_closed,
                 data_end_date=data_end
