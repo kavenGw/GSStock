@@ -26,8 +26,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
     note: 旧档明列"CPO 2027+ 蚕食可插拔"为核心 overhang，本次 CPO 延迟正击此点
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
-    note: 可插拔器件景气延续利好，CPO 配套(FAU/ELS)放量预期推后，净中性偏多
+  - path: ../sectors/semiconductor/optical/天孚通信/index.md
+    note: 可插拔与CPO架构排期影响分开看；天孚已批量交付CPO，2027提量为管理层前瞻判断，不据旧排期认定零交付。2026-10-29重估维持watch，期望价值25.78元，163.23元午间价对应安全边际−84.21%。
     symmetric: true
   - path: ../sectors/electronics/pcb/沪电股份/index.md
     note: 沪电中报重做（2026-08-25，watch）裁定回写：不得沿用本档既定口径——SemiAnalysis 报延至 2028 vs 英伟达公开否认「roadmap is intact」，截至 2026-08-25 无任何裁决性新证据【缺】，时点分歧未解。被延后的 78 层正交中板属 Rubin Ultra 机架内连接，与沪电 26H1 的 71.39 亿交换机整机主板是两条产品线，属尚未兑现的期权而非在手订单；若 Kyber 确实推到 2028，该期权贴现要后推两年，对估值是减项
@@ -65,11 +65,13 @@ related_docs:
 ---
 # 英伟达 Kyber 机架延迟——高端 PCB 与 CPO 供应链传导专题（2026-07-06）
 
+> 2026-10-29复核：下文涉及天孚的历史价格、估值及预测保留原时点记录；当前结论以[三季报重估](../sectors/semiconductor/optical/天孚通信/index.md)为准。旧1.6T销量为卖方预测，技术全面替代未获实证。
+
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [index](../sectors/semiconductor/optical/中际旭创/index.md) — CPO 延迟直接延长可插拔光模块景气，缓解其长期核心 overhang
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 旧档明列"CPO 2027+ 蚕食可插拔"为核心 overhang，本次 CPO 延迟正击此点
-> - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — 可插拔器件景气延续利好，CPO 配套(FAU/ELS)放量预期推后，净中性偏多
+> - [index](../sectors/semiconductor/optical/天孚通信/index.md) — 可插拔与CPO架构排期影响分开看；天孚已批量交付CPO，2027提量为管理层前瞻判断，不据旧排期认定零交付。2026-10-29重估维持watch，期望价值25.78元，163.23元午间价对应安全边际−84.21%。
 > - [index](../sectors/electronics/pcb/沪电股份/index.md) — 沪电中报重做（2026-08-25，watch）裁定回写：不得沿用本档既定口径——SemiAnalysis 报延至 2028 vs 英伟达公开否认「roadmap is intact」，截至 2026-08-25 无任何裁决性新证据【缺】，时点分歧未解。被延后的 78 层正交中板属 Rubin Ultra 机架内连接，与沪电 26H1 的 71.39 亿交换机整机主板是两条产品线，属尚未兑现的期权而非在手订单；若 Kyber 确实推到 2028，该期权贴现要后推两年，对估值是减项
 > - [index](../sectors/semiconductor/pcb/胜宏科技/index.md) — Kyber 主板放量推迟削弱最激进增长曲线，强化"安全边际为负、等回调"
 > - [2026-05-31-立讯精密-buffett分析](../sectors/electronics/ems/2026-05-31-立讯精密-buffett分析.md) — 中板消灭线缆丛林被推迟，224G/448G 高速铜背板线缆架构延续更久

@@ -61,8 +61,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md
     note: CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
-    note: CPO 对天孚是配套受益 vs 关键耦合环节被玻璃桥/被动对准替代的双刃，区别于模块厂纯逆风；CPO 延后缓释替代时点但不翻案估值
+  - path: ../sectors/semiconductor/optical/天孚通信/index.md
+    note: CPO配套需求与连接技术迭代双面框架保留；天孚10月已确认CPO批量交付，GlassBridge定位含FAU补充而非全面取代。2026-10-29重估维持watch，期望价值25.78元，163.23元午间价对应安全边际−84.21%。
     symmetric: true
   - path: ../sectors/semiconductor/optical/中际旭创/index.md
     note: CPO延后点名受益的下游光模块全球第一龙头
@@ -75,6 +75,8 @@ related_docs:
     symmetric: true
 ---
 # SemiAnalysis CPO/800VDC 落地延后 — 影响专题（2026-06-11）
+
+> 2026-10-29复核：下文涉及天孚的历史价格、估值及预测保留原时点记录；当前结论以[三季报重估](../sectors/semiconductor/optical/天孚通信/index.md)为准。旧1.6T销量为卖方预测，技术全面替代未获实证。
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
@@ -90,7 +92,7 @@ related_docs:
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — CPO/NPO 替代延后，缓释新易盛档 CPO 替代风险，延长可插拔光模块跑道（利好但估值不翻案）
 > - [2026-08-13-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md) — CPO 延后当日 Lumentum −8%、并被放大成 6 周内 −35.6% 峰谷杀跌；其 buffett 深度档。8 月 Q4 财报证伪该报告的短期版本（lead CPO 客户计划 on track 且需求信号上修）
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — CPO 延后触发 COHR 单日 -11%，但 CPO 仍需 CW 外部光源、对其材料层双刃
-> - [2026-07-02-天孚通信-buffett分析](../sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md) — CPO 对天孚是配套受益 vs 关键耦合环节被玻璃桥/被动对准替代的双刃，区别于模块厂纯逆风；CPO 延后缓释替代时点但不翻案估值
+> - [index](../sectors/semiconductor/optical/天孚通信/index.md) — CPO配套需求与连接技术迭代双面框架保留；天孚10月已确认CPO批量交付，GlassBridge定位含FAU补充而非全面取代。2026-10-29重估维持watch，期望价值25.78元，163.23元午间价对应安全边际−84.21%。
 > - [index](../sectors/semiconductor/optical/中际旭创/index.md) — CPO延后点名受益的下游光模块全球第一龙头
 > - [2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点](2026-07-27-罗博特科FAU整线订单-光纤阵列制造自动化拐点.md) — 反向证据——ficonTEC 已收到 FAU 量产（非研发）自动化整线订单，设备端在为 CPO/OIO 落地下量产单，对本档"推迟至 2028-2029"构成局部反证；但设备下单领先量产 12-18 个月，不推翻良率 19% 与可维护性主论据
 > - [index](../sectors/semiconductor/optical-chip/曦智科技/index.md) — 曦智科技（01879.HK）buffett 首建档（exclude，安全边际 −77.5%）——国产光子计算 scale-up 域新玩家，本档「scale-up CPO 被指向 Rubin 世代及本十年后段」是曦智 §8 周期定位的反向信号来源

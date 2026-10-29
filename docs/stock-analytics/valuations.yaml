@@ -3145,18 +3145,18 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  watch_reason: 好生意（无源光器件国内龙头+高毛利54-57%+AI光引擎业绩真兑现，1.6T光引擎已量产58.5万只→2026预计190万只），但极贵价格+尖锐风险——PE(TTM)126x/PB50x/分位97-99%历史极高位、Fabrinet单客63%极端集中、康宁玻璃桥威胁FAU/主动耦合环节，场景加权期望内在价值约34.4元/股、安全边际约-86%，即便bull压测仍约-79%，无任何安全边际
-  bear: 16.1
-  base: 36.7
-  bull: 52.3
-  dividend_yield: 0.2
-  conviction_date: '2026-07-02'
-  source_doc: sectors/semiconductor/optical/2026-07-02-天孚通信-buffett分析.md
-  quality: 4
+  watch_reason: 三季报盈利和毛利台阶提高，但客户集中、备货占款与跨代技术适配限制可持续现金收益；按正常化现金收益及护城河相容倍数重估，期望价值25.78元，163.23元午间盘中价对应安全边际−84.21%，保持观察。
+  bear: 8.8
+  base: 24.2
+  bull: 51.34
+  dividend_yield: 0.613
+  conviction_date: '2026-10-29'
+  source_doc: sectors/semiconductor/optical/天孚通信/index.md
   themes:
   - ai_compute
   - 光器件
   - CPO
+  note: 2026三季报重估；窄护城河按正常化现金收益估值，三档概率25%/55%/20%，期望25.78元，163.23元午间价安全边际−84.21%。盈利基础上修，估值下修源于现金桥与倍数纠错；不把卖方销量预测或激励目标当公司保证。
 - stock_code: '300308'
   stock_name: 中际旭创
   market: A
