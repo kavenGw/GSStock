@@ -12,8 +12,8 @@ related_docs:
   - path: 2026-05-25-兆易-君正-业务客户晶圆深度对比.md
     note: 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
     symmetric: true
-  - path: ../sectors/semiconductor/storage/2026-08-19-普冉股份-buffett分析.md
-    note: 普冉 8-19 半年报深度重做（仍 Exclude）：本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断进一步彻底失效——半年报坐实 SHM 单半年 SLC NAND/eMMC/MCP 系营收 23.4597 亿、占集团 59.3%，普冉现为三家中 2D NAND 敞口最直接一家，且该量被 2032 到期供应协议封顶；SOTP 重估后安全边际由 -88.3% 恶化至 -92.7%
+  - path: ../sectors/semiconductor/storage/普冉股份/index.md
+    note: 普冉股份2026Q3重做：期望109.56亿元、73.68元，仍exclude。旧无SLC敞口判断已失效，SHM已并表；合同片数约束不等于企业永远量封顶，2032是供货合同边界。最新口径以新档为准。
     symmetric: true
   - path: ../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md
     note: 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
@@ -34,12 +34,15 @@ related_docs:
 > **关联文档**
 > - [2026-05-20-存储扩厂双雄受益链-comps](2026-05-20-存储扩厂双雄受益链-comps.md) — 存储扩厂双雄受益链 comps（产业链上游视角的对照）
 > - [2026-05-25-兆易-君正-业务客户晶圆深度对比](2026-05-25-兆易-君正-业务客户晶圆深度对比.md) — 5-25 兆易 vs 君正 业务客户晶圆深度对比 + 4 专题深挖（DDR4/LPDDR4 弹性精算 + 评级修正）
-> - [2026-08-19-普冉股份-buffett分析](../sectors/semiconductor/storage/2026-08-19-普冉股份-buffett分析.md) — 普冉 8-19 半年报深度重做（仍 Exclude）：本档"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"的判断进一步彻底失效——半年报坐实 SHM 单半年 SLC NAND/eMMC/MCP 系营收 23.4597 亿、占集团 59.3%，普冉现为三家中 2D NAND 敞口最直接一家，且该量被 2032 到期供应协议封顶；SOTP 重估后安全边际由 -88.3% 恶化至 -92.7%
+> - [index](../sectors/semiconductor/storage/普冉股份/index.md) — 普冉股份2026Q3重做：期望109.56亿元、73.68元，仍exclude。旧无SLC敞口判断已失效，SHM已并表；合同片数约束不等于企业永远量封顶，2032是供货合同边界。最新口径以新档为准。
 > - [2026-05-31-东芯股份-buffett分析](../sectors/semiconductor/storage/2026-05-31-东芯股份-buffett分析.md) — 东芯 5-31 buffett 重做（Exclude/SLC NAND 份额最小 + NOR涨价几乎无弹性）
 > - [2026-06-03-佰维存储-buffett分析](../sectors/semiconductor/storage/2026-06-03-佰维存储-buffett分析.md) — 佰维 6-03 buffett 分析（Watch/AI端侧最纯敞口、周期顶部估值）
 > - [2026-08-16-SkyHighMemory-普冉收购标的-深度承做](../themes/2026-08-16-SkyHighMemory-普冉收购标的-深度承做.md) — 本档原判"普冉产品线无 SLC NAND、与利基存储涨价关联度最低"已失效——SHM 并表后普冉成为三家中 SLC NAND/eMMC 敞口最直接一家；该档给出 SHM 的定量卡位（2025 收入 13.49 亿、eMMC 占 64.13%、晶圆配额约 6.3 万片/年）与"只传导价、不传导量"的传导判定，是本档的 SLC NAND 敞口补丁
 > - [index](../sectors/semiconductor/storage/君正股份/index.md) — 君正股份 8-28 半年报全量重做（watch，切 H 口径 03223.HK）对本档做两处替换：①"君正是 DDR4+LPDDR4 涨价的纯弹性标的"须双向修正——招股书量价拆分显示存储收入 +53.6% 中量贡献约 72%、价只贡献约 28%，真正的纯涨价弹性那条腿是计算芯片（价 +32.5%、成本 yoy −0.60%）；②NOR 容量段分化是新增区分维度，君正在 512Mb/1Gb 大容量段、普冉在中小容量段，2H26 分水岭在容量段而非"是否有 SLC NAND 敏感度"
 <!-- END related_docs -->
+
+> 2026年10月29日口径更新：本文期间数据及原判断保留为历史记录；普冉当前结论见[最新研究](../sectors/semiconductor/storage/普冉股份/index.md)，期望109.56亿元、73.68元，仍exclude。旧无SLC敞口判断已失效，SHM已并表；合同片数约束不等于企业永远量封顶，2032是供货合同边界。
+
 
 > 分析日期：2026-05-15
 > 视角：**行业专题 + 受益标的横向对比**

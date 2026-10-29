@@ -1807,13 +1807,13 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 12.6
-  base: 31.8
-  bull: 78.0
-  dividend_yield: 0.03
-  conviction_date: '2026-08-19'
-  source_doc: sectors/semiconductor/storage/2026-08-19-普冉股份-buffett分析.md
-  note: 普冉股份；SOTP=本体(正常化owner earnings×8-12×框架内倍数)+SHM(有限年期折现至2032、无终值)；期望50.51亿÷1.48704亿股=33.97元，安全边际-92.7%（2026-08-18收盘694.16亿）；bull含49%收购完成的股本摊薄
+  bear: 23.62
+  base: 77.5
+  bull: 139.21
+  dividend_yield: 0.04
+  conviction_date: '2026-10-29'
+  source_doc: sectors/semiconductor/storage/普冉股份/index.md
+  note: 普冉股份2026Q3；本体正常化3/6/9亿×8/11/12倍，加近端超额现金；SHM有限期现金与2032条件续存分拆。30%/50%/20%期望老股等值109.56亿元、73.68元，较披露前270.50元安全边际-72.76%；bear保持51%，base/bull收购完成且全转股摊薄，现金归属保守取值。
   themes:
   - memory
   - NOR涨价
