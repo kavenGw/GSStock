@@ -4867,3 +4867,21 @@
   - 存储涨价
   dividend_yield: null
   note: 10-15重审watch；H股09976/HKD三档20.41/76.54/199.00，期望参考84.19港元为低置信度且未扣等待期上界；Q3预告待原公告核实，未核得H股上市后派息。
+- stock_code: '688808'
+  stock_name: 联讯仪器
+  market: A
+  currency: CNY
+  sector: semiconductor
+  rating: watch
+  watch_reason: 高速互联测试已兑现增长，客户扩产周期、回款占用和跨代竞争限制可持续现金收益；场景加权价值268.78元，963.47元收盘锚对应安全边际−72.10%，继续观察。
+  bear: 84.55
+  base: 244.31
+  bull: 566.37
+  conviction_date: '2026-10-29'
+  source_doc: sectors/semiconductor/equipment/联讯仪器/index.md
+  themes:
+  - ai_compute
+  - 光通信测试
+  - 半导体设备
+  - CPO
+  note: 官方2026Q3已核且与用户PDF哈希一致；10/29收盘963.47元为完整财报披露前锚。正常化OE按8/12/20倍、25%/55%/20%加权，期望268.78元，安全边际-72.10%。现有现金先覆盖债务、剩余受经营与募投约束的现金不另加回，IPO资金不重复计价；新品验证不独立加利润，watch。
