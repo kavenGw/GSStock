@@ -1414,18 +1414,18 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  watch_reason: 估值反向暴走至 PE TTM 165-177x、PB 14-17.6、forward PE 114-146x，期望内在价值约 89 元/股对应安全边际深度负值（约 -75%）；基本面两红旗虽部分修复但被市场过度定价，现价已透支至 2028 年之后。
-  bear: 40
-  base: 68
-  bull: 190
-  dividend_yield: 0.11
-  conviction_date: '2026-06-26'
-  source_doc: sectors/semiconductor/materials/2026-06-26-江丰电子-buffett分析.md
-  note: 仅乐观稳态情景，买入区53-68元，无独立bear每股值
+  watch_reason: 扣非盈利改善和认证壁垒有实证，但持续股东现金回报与扩产达产尚未确认，现价缺乏安全边际。
+  bear: 8.69
+  base: 18.83
+  bull: 30.88
+  dividend_yield: 0.24
+  conviction_date: '2026-10-29'
+  source_doc: sectors/semiconductor/materials/江丰电子/index.md
+  note: 2026Q3重审：bear/base/bull为8.69/18.83/30.88元，概率30/50/20%，期望18.20元；以归母经济权益、正常化OE及再投资后现金回报估值，对163.69元盘中锚安全边际-88.88%，40%安全边际对应复核价不高于13.00元，仍须经营与现金条件确认。
   themes:
   - 半导体材料
-  - 供给侧涨价
   - 国产替代
+  - 先进制程耗材
 - stock_code: '300757'
   stock_name: 罗博特科
   market: A
