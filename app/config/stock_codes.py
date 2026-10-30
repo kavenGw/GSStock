@@ -86,6 +86,7 @@ MARKET_INDICES = {
 
 # 盯盘股票池（唯一权威源，替代 watch_list 表）
 WATCH_CODES = [
+    {'code': '002463',    'name': '沪电股份',  'market': 'A'},
     {'code': '300223',    'name': '君正股份',  'market': 'A'},
     {'code': '603986',    'name': '兆易创新',  'market': 'A'},
     {'code': '688766',    'name': '普冉股份',  'market': 'A'},
