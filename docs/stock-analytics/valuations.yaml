@@ -3646,20 +3646,20 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  watch_reason: 生意本身已从"能不能扭亏"变成全球第四大 DRAM 原厂（2025Q4 销售额份额 7.67%、Q1 单季 OCF 425.66 亿），但首日收盘 49.00 元对应 3.28 万亿市值 = pro-forma PB 约 19.5x（三大原厂 2017-2024 年末 PB 从未破 2.3x），期望内在价值 5.79 元/股，安全边际 -88.2%；即便最乐观 bull 情景（10.29 元）安全边际仍为 -79.0%。不买的理由是价格与周期位置，不是生意看不懂——市值回落到 2,150~2,800 亿（3.2~4.2 元，1.0~1.3x 2026E 归母净资产）区间才值得转入建仓评估。
-  bear: 3.21
-  base: 5.79
-  bull: 10.29
-  conviction_date: '2026-07-27'
-  source_doc: sectors/semiconductor/storage/2026-07-27-长鑫科技-buffett分析.md
+  watch_reason: Q3毛利继续上升，LPDDR6与G5量产使技术判断改善；归母增长放缓须结合少数权益占比变化。正常化现金与未来超额现金重算后，期望价值8.97元，低于41.80元收盘价，安全边际−78.55%；等待价值折扣或可持续现金的新证据。
+  bear: 3.6
+  base: 8.86
+  bull: 17.28
+  conviction_date: '2026-10-30'
+  source_doc: sectors/semiconductor/storage/长鑫科技/index.md
   themes:
   - 存储芯片
   - 国产替代
   - 半导体制造
   - DRAM
-  - 周期股
-  - 新股定价
   - AI存储
+  - 周期股
+  note: 2026三季报重估；归母正常化OE230/510/890亿元，8/10/12倍，加未来有限期超额现金，概率30/50/20%；期望6086.68亿元/8.97元。未另加IPO或集团净现金。
 - stock_code: '02050'
   stock_name: 三花智控
   market: HK
