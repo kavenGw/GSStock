@@ -1,0 +1,34 @@
+schema_version: 1
+stock_code: '002156'
+stock_name: 通富微电
+unit: CNY_100M
+periods:
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 85.593
+  adjusted_profit: 5.758
+  inventory: 50.0866704015
+  sources:
+  - title: 通富微电 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-29/1225527099.PDF
+    locator: 营收：2026H1 页码未保留，按研究档sources.md及以下科目定位；既有研究档单季显示值（三位亿元）；未找到本地Q1原数/该差分原始算式；原数8559300000元；扣非归母：2026H1
+      页码未保留，按研究档sources.md及以下科目定位；既有研究档单季显示值（三位亿元）；未找到本地Q1原数/该差分原始算式；原数575800000元；季末合并存货净额：2026H1
+      PAGE 19；原报表时点净额；原数5008667040.15元
+  notes: 营收沿用证据精度100000元；扣非归母沿用证据精度100000元
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 88.4415507761
+  adjusted_profit: 6.3038082722
+  inventory: 59.0749596505
+  sources:
+  - title: 通富微电 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-30/1225640437.PDF
+    locator: 营收：2026Q3 PAGE 2；本地原报表抽文；原数24885174987.36元；扣非归母：2026Q3 PAGE 2；本地原报表抽文；原数1377842113.83元；季末合并存货净额：2026Q3
+      PAGE 3；原报表时点净额；原数5907495965.05元
+  - title: 通富微电 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-29/1225527099.PDF
+    locator: 营收：2026H1 PAGE 7；本地原报表抽文；原数16041019909.75元；扣非归母：2026H1 PAGE 7；本地原报表抽文；原数747461286.61元
+  notes: 营收单季差分（元）：24885174987.36 - 16041019909.75 = 8844155077.61；扣非归母单季差分（元）：1377842113.83
+    - 747461286.61 = 630380827.22

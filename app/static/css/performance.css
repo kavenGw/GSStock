@@ -1,0 +1,27 @@
+.performance-controls { display: flex; align-items: end; gap: 1rem; flex-wrap: wrap; }
+.performance-controls .form-label { font-size: .8rem; color: var(--text-secondary); }
+.performance-search { width: min(100%, 22rem); }
+.performance-card { border: 1px solid var(--border-color); border-radius: .6rem; }
+.performance-table { font-size: .875rem; white-space: nowrap; }
+.performance-table th { padding: 1rem .8rem; background: var(--bg-secondary); }
+.performance-table td { padding: 1rem .8rem; vertical-align: top; }
+.performance-table th button { border: 0; background: none; color: inherit; padding: 0; font: inherit; }
+.performance-table th[aria-sort='descending'], .performance-table th[aria-sort='ascending'] { color: var(--accent) !important; }
+.performance-company a { font-weight: 600; text-decoration: none; }
+.performance-company small, .performance-sources small { display: block; color: var(--text-secondary); margin-top: .3rem; }
+.performance-number { text-align: right; font-variant-numeric: tabular-nums; }
+.performance-table td.performance-positive { color: var(--profit) !important; }
+.performance-table td.performance-negative { color: var(--loss) !important; }
+.performance-sources summary { cursor: pointer; color: var(--accent); }
+.performance-sources details[open] { white-space: normal; min-width: 14rem; max-width: 22rem; }
+.performance-sources details a { display: block; margin-top: .5rem; }
+.performance-research { overflow-wrap: anywhere; }
+.performance-research table { display: block; overflow-x: auto; max-width: 100%; margin-bottom: 1rem; }
+.performance-research th, .performance-research td { padding: .6rem; border: 1px solid var(--border-color); }
+.performance-research h2 { font-size: 1.5rem; margin-top: 2rem; }
+.performance-research h3 { font-size: 1.2rem; margin-top: 1.5rem; }
+.performance-research pre { padding: 1rem; background: var(--bg-tertiary); }
+@media (max-width: 576px) {
+    .performance-controls > div { width: 100%; }
+    .performance-table th, .performance-table td { padding: .8rem .6rem; }
+}

@@ -1,0 +1,50 @@
+schema_version: 1
+stock_code: '002463'
+stock_name: 沪电股份
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 62.14156406
+  adjusted_profit: 11.62681935
+  inventory: 49.1340915
+  sources:
+  - title: 沪电股份 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225147393.PDF
+    locator: 营收：2026Q1 === PDF PAGE 1 ===；本地原报表抽文；原数6214156406元；扣非归母：2026Q1 === PDF
+      PAGE 1 ===；本地原报表抽文；原数1162681935元；季末合并存货净额：2026Q1 === PDF PAGE 5 ===；原报表时点净额；原数4913409150元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 74.75271098
+  adjusted_profit: 16.31844006
+  inventory: 60.41283966
+  sources:
+  - title: 沪电股份 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-26/1225502252.PDF
+    locator: 营收：2026H1 === PDF PAGE 7 ===；本地原报表抽文；原数13689427504元；扣非归母：2026H1 === PDF
+      PAGE 7 ===；本地原报表抽文；原数2794525941元；季末合并存货净额：2026H1 === PDF PAGE 17 ===；原报表时点净额；原数6041283966元
+  - title: 沪电股份 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225147393.PDF
+    locator: 营收：2026Q1 === PDF PAGE 1 ===；本地原报表抽文；原数6214156406元；扣非归母：2026Q1 === PDF
+      PAGE 1 ===；本地原报表抽文；原数1162681935元
+  notes: 营收单季差分（元）：13689427504 - 6214156406 = 7475271098；扣非归母单季差分（元）：2794525941 -
+    1162681935 = 1631844006
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 95.36012843
+  adjusted_profit: 26.79660679
+  inventory: 71.38922765
+  sources:
+  - title: 沪电股份 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-28/1225627804.PDF
+    locator: 营收：2026Q3 === PDF PAGE 1 ===；本地原报表抽文；原数23225440347元；扣非归母：2026Q3 === PDF
+      PAGE 1 ===；本地原报表抽文；原数5474186620元；季末合并存货净额：2026Q3 === PDF PAGE 5 ===；原报表时点净额；原数7138922765元
+  - title: 沪电股份 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-26/1225502252.PDF
+    locator: 营收：2026H1 === PDF PAGE 7 ===；本地原报表抽文；原数13689427504元；扣非归母：2026H1 === PDF
+      PAGE 7 ===；本地原报表抽文；原数2794525941元
+  notes: 营收单季差分（元）：23225440347 - 13689427504 = 9536012843；扣非归母单季差分（元）：5474186620 -
+    2794525941 = 2679660679

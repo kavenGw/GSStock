@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}业绩{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/performance.css') }}">
+{% endblock %}
+{% block content %}
+<div class="performance-page">
+    <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="mb-2">业绩</h2>
+            <p class="text-muted mb-0">已研究公司的正式财报 · 单季度经营对比</p>
+        </div>
+        <span class="text-muted small">金额：亿元人民币 · 增速：%</span>
+    </div>
+    {% if error %}
+    <div class="alert alert-danger" role="alert">业绩数据校验失败，暂时无法展示。请检查研究业绩文件后重试。</div>
+    {% else %}
+    <div class="performance-controls mb-3">
+        <div>
+            <label for="performancePeriod" class="form-label">报告季度</label>
+            <select id="performancePeriod" class="form-select" {% if not periods %}disabled{% endif %}>
+                {% for period in periods %}<option value="{{ period }}">{{ period }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="performance-search">
+            <label for="performanceSearch" class="form-label">查找公司</label>
+            <input id="performanceSearch" type="search" class="form-control" placeholder="公司名称或代码" autocomplete="off">
+        </div>
+        <span id="performanceCount" class="text-muted small" aria-live="polite"></span>
+    </div>
+    <div class="table-responsive performance-card">
+        <table class="table performance-table mb-0">
+            <thead><tr>
+                <th scope="col">公司</th>
+                {% for key, label in [('revenue', '当季营收'), ('revenue_qoq', '营收环比'), ('adjusted_profit', '当季扣非利润'), ('adjusted_profit_qoq', '扣非环比'), ('inventory', '季末存货'), ('inventory_qoq', '存货环比')] %}
+                <th scope="col" class="text-end" aria-sort="none"><button type="button" data-sort="{{ key }}">{{ label }} <span class="sort-indicator" aria-hidden="true">↕</span></button></th>
+                {% endfor %}
+                <th scope="col">来源</th>
+            </tr></thead>
+            <tbody id="performanceBody"></tbody>
+        </table>
+        <div id="performanceEmpty" class="text-center text-muted py-5" {% if rows %}hidden{% endif %}>暂无业绩记录，研究完成后会自动收录。</div>
+    </div>
+    <p class="text-muted small mt-3">扣非利润为扣非归母净利润。环比与上一单季度比较，存货与上一季末比较；缺少数据或比较基数时显示“—”。亏损及零基数情形以文字标注。</p>
+    <noscript><p class="alert alert-info">请启用 JavaScript 查看业绩数据和筛选结果。</p></noscript>
+    <script id="performanceData" type="application/json">{{ rows | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/performance.js') }}"></script>
+{% endblock %}

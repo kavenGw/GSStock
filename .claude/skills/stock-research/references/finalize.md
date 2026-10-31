@@ -43,6 +43,10 @@ PYTHONIOENCODING=utf-8 rtk python scripts/sync_valuations.py --stock-code <code>
 
    脚本按 `stock_code` upsert（`market` 按 `stock_code` 推断；无参数则全量扫描）、不删存量条目、保留 `note`/`quality` 手写值。**sync 不覆盖 `note`**：重做档后
    旧 note 停在旧估值口径需手改。
+
+   **模式 1/2 正式财报业绩**：按 `.agents/skills/stock-research/references/performance.md` 确认本股 `performance.yaml` 已由写手合并，
+   跑 `python scripts/sync_performance.py --check`（exit 0），对照 A1 亲验本季度及比较基数。
+   提交本股文件夹时包含此文件；页面直接读取，不写 SQLite。预告/快报、模式 3/4 跳过。
 7. **quality 质地星级（仅当与 rating 背离才写）**：渲染层缺省按 rating 现算（core→5 / config→4 / watch→3 /
    exclude→2）。护城河顶级仅因太贵评 watch → 手工在该条目加 `quality: 5`；平庸生意因超跌进 config → `quality: 2`；
    ★1 留给"质地很差"。一致时留空。

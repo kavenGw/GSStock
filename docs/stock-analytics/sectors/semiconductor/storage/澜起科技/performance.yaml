@@ -1,0 +1,43 @@
+schema_version: 1
+stock_code: '688008'
+stock_name: 澜起科技
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 14.6072
+  adjusted_profit: 6.0384
+  inventory: null
+  missing_reasons:
+    inventory: 本次回填未取得同口径原数，保留缺失，不用其他期间/科目代替
+  sources:
+  - title: 澜起科技 2026Q1
+    url: https://www.montage-tech.com/cn/uploads/files/202605/688008_2026_Q1_20260428.pdf
+    locator: 营收：2026Q1 页码未保留，按研究档sources.md及以下科目定位；A1已算单季显示值（四位亿元；本地无Q1/H1原抽文）；原数1460720000.0000元；扣非归母：2026Q1
+      页码未保留，按研究档sources.md及以下科目定位；A1已算单季显示值（四位亿元；本地无Q1/H1原抽文）；原数603840000.0000元
+  notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 18.7478
+  adjusted_profit: 7.1864
+  inventory: 9.9635
+  sources:
+  - title: 澜起科技 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-29/1225530486.PDF
+    locator: 营收：2026H1 页码未保留，按研究档sources.md及以下科目定位；A1已算单季显示值（四位亿元；本地无Q1/H1原抽文）；原数1874780000.0000元；扣非归母：2026H1
+      页码未保留，按研究档sources.md及以下科目定位；A1已算单季显示值（四位亿元；本地无Q1/H1原抽文）；原数718640000.0000元；季末合并存货净额：2026H1
+      页码未保留，按研究档sources.md及以下科目定位；A1明确记录时点净额（保留其精度）；原数996350000元
+  notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元；季末合并存货净额沿用证据精度10000元
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 20.7891866966
+  adjusted_profit: 10.0479616713
+  inventory: 11.6585289844
+  sources:
+  - title: 澜起科技 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-30/1225643270.PDF
+    locator: 营收：2026Q3 PAGE 1；本地原报表抽文；原数2078918669.66元；扣非归母：2026Q3 PAGE 1；本地原报表抽文；原数1004796167.13元；季末合并存货净额：2026Q3
+      PAGE 8；原报表时点净额；原数1165852898.44元

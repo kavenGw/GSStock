@@ -1,0 +1,49 @@
+schema_version: 1
+stock_code: '603986'
+stock_name: 兆易创新
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 41.8807557404
+  adjusted_profit: 14.100642842
+  inventory: 34.0143866014
+  sources:
+  - title: 兆易创新 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-30/1225257883.PDF
+    locator: 营收：2026Q1 ===PAGE 1===；本地原报表抽文；原数4188075574.04元；扣非归母：2026Q1 ===PAGE 1===；本地原报表抽文；原数1410064284.20元；季末合并存货净额：2026Q1
+      ===PAGE 5===；原报表时点净额；原数3401438660.14元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 73.7768485811
+  adjusted_profit: 34.7296919473
+  inventory: 41.8422474831
+  sources:
+  - title: 兆易创新 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-19/1225480384.PDF
+    locator: 营收：2026H1 ===PAGE 6===；本地原报表抽文；原数11565760432.15元；扣非归母：2026H1 ===PAGE
+      6===；本地原报表抽文；原数4883033478.93元；季末合并存货净额：2026H1 ===PAGE 14===；原报表时点净额；原数4184224748.31元
+  - title: 兆易创新 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-30/1225257883.PDF
+    locator: 营收：2026Q1 ===PAGE 1===；本地原报表抽文；原数4188075574.04元；扣非归母：2026Q1 ===PAGE 1===；本地原报表抽文；原数1410064284.20元
+  notes: 营收单季差分（元）：11565760432.15 - 4188075574.04 = 7377684858.11；扣非归母单季差分（元）：4883033478.93
+    - 1410064284.20 = 3472969194.73
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 87.3161094435
+  adjusted_profit: 45.5092744296
+  inventory: 62.9197470244
+  sources:
+  - title: 兆易创新 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-30/1225641959.PDF
+    locator: 营收：2026Q3 ===PAGE 1===；本地原报表抽文；原数20297371376.50元；扣非归母：2026Q3 ===PAGE
+      1===；本地原报表抽文；原数9433960921.89元；季末合并存货净额：2026Q3 ===PAGE 6===；原报表时点净额；原数6291974702.44元
+  - title: 兆易创新 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-19/1225480384.PDF
+    locator: 营收：2026H1 ===PAGE 6===；本地原报表抽文；原数11565760432.15元；扣非归母：2026H1 ===PAGE
+      6===；本地原报表抽文；原数4883033478.93元
+  notes: 营收单季差分（元）：20297371376.50 - 11565760432.15 = 8731610944.35；扣非归母单季差分（元）：9433960921.89
+    - 4883033478.93 = 4550927442.96

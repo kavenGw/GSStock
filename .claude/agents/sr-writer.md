@@ -23,6 +23,7 @@ skills: buffett, buffett-doc-spec
 
 交办：写"相对旧档变化清单"（valuation.md 末尾）；标注 A2/A3 与 A1 的数字冲突（取 A1 并显式标注）；
 只跑 `python scripts/lint_docs_frontmatter.py`，**不跑 refs、不 git add/commit**。
+正式财报另按 `.agents/skills/stock-research/references/performance.md` 从 A1 数据块执行 `sync_performance.py`，本股 `performance.yaml` 也属写权限；保留历史季度。
 抗中断：先落主体、市值分母等待锚处留 `【待锚】` 再填 [L14]；财报盘后披露 + 次日盘前采证时开盘后补锚 [L10]。
 汇报含评级 + 期望内在价值 + 安全边际 + 最脆弱论点自评。
 

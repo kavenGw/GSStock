@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} · 研究档{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/performance.css') }}">
+{% endblock %}
+{% block content %}
+<a href="{{ url_for('performance.index') }}" class="d-inline-block mb-3">← 返回业绩</a>
+<article class="performance-research">{{ content | safe }}</article>
+{% endblock %}

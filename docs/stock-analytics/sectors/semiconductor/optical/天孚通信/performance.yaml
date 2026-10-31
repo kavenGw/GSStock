@@ -1,0 +1,49 @@
+schema_version: 1
+stock_code: '300394'
+stock_name: 天孚通信
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 13.3027017536
+  adjusted_profit: 4.9319241772
+  inventory: 5.3851334382
+  sources:
+  - title: 天孚通信 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-21/1225128020.PDF
+    locator: 营收：2026Q1 PAGE 1；本地原报表抽文；原数1330270175.36元；扣非归母：2026Q1 PAGE 1；本地原报表抽文；原数493192417.72元；季末合并存货净额：2026Q1
+      PAGE 6；原报表时点净额；原数538513343.82元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 14.9766857301
+  adjusted_profit: 6.9307106335
+  inventory: 9.2883069011
+  sources:
+  - title: 天孚通信 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-19/1225480328.PDF
+    locator: 营收：2026H1 PAGE 10；本地原报表抽文；原数2827938748.37元；扣非归母：2026H1 PAGE 10；本地原报表抽文；原数1186263481.07元；季末合并存货净额：2026H1
+      PAGE 23；原报表时点净额；原数928830690.11元
+  - title: 天孚通信 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-21/1225128020.PDF
+    locator: 营收：2026Q1 PAGE 1；本地原报表抽文；原数1330270175.36元；扣非归母：2026Q1 PAGE 1；本地原报表抽文；原数493192417.72元
+  notes: 营收单季差分（元）：2827938748.37 - 1330270175.36 = 1497668573.01；扣非归母单季差分（元）：1186263481.07
+    - 493192417.72 = 693071063.35
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 19.2316115663
+  adjusted_profit: 8.7856530545
+  inventory: 12.7396808313
+  sources:
+  - title: 天孚通信 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-29/1225634414.PDF
+    locator: 营收：2026Q3 PAGE 1；原表抽文分行数字拼接：4,751,099 + ,905.00；2,064,828 + ,786.52；原数4751099905.00元；扣非归母：2026Q3
+      PAGE 1；原表抽文分行数字拼接：4,751,099 + ,905.00；2,064,828 + ,786.52；原数2064828786.52元；季末合并存货净额：2026Q3
+      PAGE 6；原报表时点净额；原数1273968083.13元
+  - title: 天孚通信 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-19/1225480328.PDF
+    locator: 营收：2026H1 PAGE 10；本地原报表抽文；原数2827938748.37元；扣非归母：2026H1 PAGE 10；本地原报表抽文；原数1186263481.07元
+  notes: 营收单季差分（元）：4751099905.00 - 2827938748.37 = 1923161156.63；扣非归母单季差分（元）：2064828786.52
+    - 1186263481.07 = 878565305.45

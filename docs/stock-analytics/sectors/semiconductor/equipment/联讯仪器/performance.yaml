@@ -1,0 +1,50 @@
+schema_version: 1
+stock_code: '688808'
+stock_name: 联讯仪器
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 4.8772010479
+  adjusted_profit: 1.164086743
+  inventory: 7.5148001136
+  sources:
+  - title: 联讯仪器 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-29/1225243326.PDF
+    locator: 营收：2026Q1 === PAGE 1 ===；本地原报表抽文；原数487720104.79元；扣非归母：2026Q1 === PAGE
+      2 ===；本地原报表抽文；原数116408674.3元；季末合并存货净额：2026Q1 === PAGE 6 ===；原报表时点净额；原数751480011.36元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 10.4342891683
+  adjusted_profit: 4.4520522674
+  inventory: 11.5055320975
+  sources:
+  - title: 联讯仪器 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-27/1225511954.PDF
+    locator: 营收：2026H1 === PAGE 8 ===；本地原报表抽文；原数1531149021.62元；扣非归母：2026H1 === PAGE
+      8 ===；本地原报表抽文；原数561613901.04元；季末合并存货净额：2026H1 === PAGE 34 ===；原报表时点净额；原数1150553209.75元
+  - title: 联讯仪器 2026Q1
+    url: https://static.cninfo.com.cn/finalpage/2026-04-29/1225243326.PDF
+    locator: 营收：2026Q1 === PAGE 1 ===；本地原报表抽文；原数487720104.79元；扣非归母：2026Q1 === PAGE
+      2 ===；本地原报表抽文；原数116408674.3元
+  notes: 营收单季差分（元）：1531149021.62 - 487720104.79 = 1043428916.83；扣非归母单季差分（元）：561613901.04
+    - 116408674.3 = 445205226.74
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 25.1234639065
+  adjusted_profit: 13.7221119196
+  inventory: 17.7935125029
+  sources:
+  - title: 联讯仪器 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-30/1225642748.PDF
+    locator: 营收：2026Q3 === PAGE 1 ===；本地原报表抽文；原数4043495412.27元；扣非归母：2026Q3 === PAGE
+      1 ===；本地原报表抽文；原数1933825093.0元；季末合并存货净额：2026Q3 === PAGE 8 ===；原报表时点净额；原数1779351250.29元
+  - title: 联讯仪器 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-27/1225511954.PDF
+    locator: 营收：2026H1 === PAGE 8 ===；本地原报表抽文；原数1531149021.62元；扣非归母：2026H1 === PAGE
+      8 ===；本地原报表抽文；原数561613901.04元
+  notes: 营收单季差分（元）：4043495412.27 - 1531149021.62 = 2512346390.65；扣非归母单季差分（元）：1933825093.0
+    - 561613901.04 = 1372211191.96

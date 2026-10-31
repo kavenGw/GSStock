@@ -280,7 +280,7 @@ def _create_app(config_class=None):
             cleanup_legacy_tables(stock_db_path)
 
     report('Blueprint 导入与注册', 'WAIT')
-    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, briefing_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, supply_chain_bp, valuations_bp, minerals_bp, calendar_bp
+    from app.routes import main_bp, position_bp, advice_bp, category_bp, trade_bp, stock_bp, daily_record_bp, profit_bp, rebalance_bp, heavy_metals_bp, briefing_bp, stock_detail_bp, watch_bp, news_bp, value_dip_bp, earnings_page_bp, performance_bp, supply_chain_bp, valuations_bp, minerals_bp, calendar_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(position_bp)
     app.register_blueprint(advice_bp)
@@ -297,6 +297,7 @@ def _create_app(config_class=None):
     app.register_blueprint(news_bp)
     app.register_blueprint(value_dip_bp)
     app.register_blueprint(earnings_page_bp)
+    app.register_blueprint(performance_bp)
     app.register_blueprint(supply_chain_bp)
     app.register_blueprint(valuations_bp)
     app.register_blueprint(minerals_bp)

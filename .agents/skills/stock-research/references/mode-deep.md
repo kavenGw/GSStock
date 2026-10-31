@@ -44,6 +44,8 @@
 
 ### Phase A — 联网采证（A1 数据锚 / A2 论点 / A3 lens，并行，均 opus）→ dispatch.md §1
 
+核实正式财报时，A1 按 `performance.md` 在同份底稿交付季度数据及比较基数；写手落本股 `performance.yaml`，审查员同步核对，C 校验后提交。
+
 闸门 `python scripts/deep_redo_gate.py <股票名> <日期> --phase A`：exit 0 **且**在途校准项全部收到「已闭合」才派 B。
 预估「最慢路 + 1~2 轮校准」[L4]；派发前粗数必查条数（上限管"查多深"管不住"有多少条"），A+H / 多业务线 / 多 lens 往上取。
 

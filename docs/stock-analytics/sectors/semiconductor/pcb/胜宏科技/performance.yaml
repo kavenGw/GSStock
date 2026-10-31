@@ -1,0 +1,50 @@
+schema_version: 1
+stock_code: '02476'
+stock_name: 胜宏科技
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 55.1948506685
+  adjusted_profit: 12.5722394314
+  inventory: 39.0522701822
+  sources:
+  - title: 胜宏科技 2026Q1
+    url: https://disc.static.szse.cn/disc/disk03/finalpage/2026-04-29/74f20b93-58e2-4e54-b46c-11ccaf116614.PDF
+    locator: 营收：2026Q1 === PAGE 2 ===；本地原报表抽文；原数5519485066.85元；扣非归母：2026Q1 === PAGE
+      2 ===；本地原报表抽文；原数1257223943.14元；季末合并存货净额：2026Q1 === PAGE 7 ===；原报表时点净额；原数3905227018.22元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 61.0988222396
+  adjusted_profit: 11.6057654193
+  inventory: 58.8963998056
+  sources:
+  - title: 胜宏科技 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-28/1225522515.PDF
+    locator: 营收：2026H1 === PAGE 7 ===；本地原报表抽文；原数11629367290.81元；扣非归母：2026H1 === PAGE
+      7 ===；本地原报表抽文；原数2417800485.07元；季末合并存货净额：2026H1 === PAGE 21 ===；原报表时点净额；原数5889639980.56元
+  - title: 胜宏科技 2026Q1
+    url: https://disc.static.szse.cn/disc/disk03/finalpage/2026-04-29/74f20b93-58e2-4e54-b46c-11ccaf116614.PDF
+    locator: 营收：2026Q1 === PAGE 2 ===；本地原报表抽文；原数5519485066.85元；扣非归母：2026Q1 === PAGE
+      2 ===；本地原报表抽文；原数1257223943.14元
+  notes: 营收单季差分（元）：11629367290.81 - 5519485066.85 = 6109882223.96；扣非归母单季差分（元）：2417800485.07
+    - 1257223943.14 = 1160576541.93
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 68.3116521244
+  adjusted_profit: 12.7646833593
+  inventory: 92.4944041921
+  sources:
+  - title: 胜宏科技 2026Q3
+    url: https://static.cninfo.com.cn/finalpage/2026-10-30/1225644765.PDF
+    locator: 营收：2026Q3 === PAGE 2 ===；本地原报表抽文；原数18460532503.25元；扣非归母：2026Q3 === PAGE
+      2 ===；本地原报表抽文；原数3694268821.0元；季末合并存货净额：2026Q3 === PAGE 3 ===；原报表时点净额；原数9249440419.21元
+  - title: 胜宏科技 2026H1
+    url: https://static.cninfo.com.cn/finalpage/2026-08-28/1225522515.PDF
+    locator: 营收：2026H1 === PAGE 7 ===；本地原报表抽文；原数11629367290.81元；扣非归母：2026H1 === PAGE
+      7 ===；本地原报表抽文；原数2417800485.07元
+  notes: 营收单季差分（元）：18460532503.25 - 11629367290.81 = 6831165212.44；扣非归母单季差分（元）：3694268821.0
+    - 2417800485.07 = 1276468335.93

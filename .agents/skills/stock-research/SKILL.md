@@ -42,6 +42,7 @@ description: >-
 ## 共享默认（所有模式）
 
 - 语言中文；在 `main` 直接写档，不开 worktree，不主动 push（`.Codex/rules/dev-environment.md` 分支策略）。
+- 模式 1/2 核实正式财报时，A1/写手/审查/C 加载 `references/performance.md`，生成本公司 `performance.yaml` 供“业绩”页读取。
 - `mkdir -p .omc/artifacts`（闸门脚本与临时产物落点，已 gitignore）。
 - 避坑门：`docs/stock-analytics/avoidance-list.yaml` 对模式 1/2 生效，命中按 `.Codex/rules/docs-conventions.md` 重验。
 - 收尾闸门：`python scripts/lint_docs_frontmatter.py && python scripts/lint_docs_refs.py` 双 exit 0；
