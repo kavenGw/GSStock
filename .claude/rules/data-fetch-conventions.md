@@ -30,7 +30,7 @@ paths:
 - 分钟 K：`web.ifzq.gtimg.cn/appstock/app/kline/mkline?param=sh600519,m1,,240`；日 K：`.../fqkline/get?param=sh600519,day,...`。字段顺序 `[datetime, open, close, high, low, volume]`（close 在第 2 位）。
 - **`[41]/[42]` 年高/年低不可信**（除息日与非除息日都可能失真），**`[47]/[48]` 是涨跌停价不是 52 周区间**。52 周区间一律用日 K 拉一年 qfq 或 baidu 估值接口。
 - **一次性脚本只取实时价直连 HTTP**，比 `create_app()` 快 5x 且无副作用；需缓存/指数/OHLC 才走服务化路径。
-- **港股 `q=r_hk<code>`**（78 字段）：实时价字段索引与 A 股一致（`[3]`价 `[4]`昨收 `[6]`量为股 `[30]`时间戳），已接入主链路。**裸 `q=hk<code>` 是 15 分钟延迟口径**，主链路一律 `r_hk`。估值字段索引与 A 股不同，勿照搬 `[39]/[45]/[46]`；港股市值/PE/PB/52 周改用 WebFetch `stockanalysis.com/quote/hkg/<去前导0代码>/statistics/` 或 Yahoo `<code>.HK`，两源交叉。亏损港股 PE=N/A，锚改 PS/PB/Forward PE。勿 `print` 中文 name 字段（cp950）。
+- **港股 `q=r_hk<code>`**（78 字段）：实时价字段索引与 A 股一致（`[3]`价 `[4]`昨收 `[6]`量为股 `[30]`时间戳），已接入主链路。**裸 `q=hk<code>` 是 15 分钟延迟口径**，主链路一律 `r_hk`。估值字段索引与 A 股不同，勿照搬 `[39]/[45]/[46]`；`[69]` 是全公司总股本、`[70]` 是 H 股股本（胜宏实测，A+H 全公司市值用 `[3]×[69]`，见 `MarketCapService.get_cny_market_caps`）；汇率 `q=whHKDCNY` 的 `[3]`；港股市值/PE/PB/52 周改用 WebFetch `stockanalysis.com/quote/hkg/<去前导0代码>/statistics/` 或 Yahoo `<code>.HK`，两源交叉。亏损港股 PE=N/A，锚改 PS/PB/Forward PE。勿 `print` 中文 name 字段（cp950）。
 - **A+H 标的 H 口径市值自洽校验**：stockanalysis 对 A+H 股本口径可能错。全公司市值用「A 股总市值 ÷ A 股价反推总股本 × H 股现价」；AH 折价 = H 口径市值 ÷ (A 市值×1.08) − 1。选哪一地口径的决策铁律见 portfolio-valuations.md。
 
 ## 研究取数

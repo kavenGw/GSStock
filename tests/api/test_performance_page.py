@@ -42,6 +42,36 @@ def test_real_backfill_renders_all_eleven_companies(client):
         assert row['stock_name'].encode('utf-8') in research.data
 
 
+def test_market_caps_endpoint_uses_researched_codes(client, monkeypatch):
+    from app.routes import performance
+    seen = {}
+
+    def fake(codes):
+        seen['codes'] = codes
+        return {'market_caps': {'002916': {'market_cap': 1587.04}}, 'as_of': '2026-10-30 16:14'}
+
+    monkeypatch.setattr(performance.MarketCapService, 'get_cny_market_caps', fake)
+    response = client.get('/performance/market-caps')
+    assert response.status_code == 200
+    assert response.get_json()['market_caps']['002916']['market_cap'] == 1587.04
+    assert {'002916', '02476'}.issubset(seen['codes'])
+
+
+def test_market_caps_endpoint_reports_corrupt_data(client, monkeypatch):
+    from app.routes import performance
+    def fail(_):
+        raise ValueError('bad record')
+    monkeypatch.setattr(performance, 'load_companies', fail)
+    assert client.get('/performance/market-caps').status_code == 503
+
+
+def test_page_declares_valuation_columns(client):
+    from bs4 import BeautifulSoup
+    page = BeautifulSoup(client.get('/performance/').data, 'html.parser')
+    assert {'market_cap', 'adjusted_pe'}.issubset({button['data-sort'] for button in page.select('[data-sort]')})
+    assert page.select_one('#performanceData')['data-market-cap-url'] == '/performance/market-caps'
+
+
 def test_missing_documents_return_404(client):
     for url in ('/performance/research/sectors/no-such.md', '/performance/research/../AGENTS.md'):
         assert client.get(url).status_code == 404

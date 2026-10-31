@@ -11,6 +11,9 @@
     const formatter = new Intl.NumberFormat('zh-CN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     let sort = 'revenue';
     let descending = true;
+    let marketCaps = {};
+    let marketCapMissing = '市值加载中';
+    const marketCapStatus = document.getElementById('performanceMarketCapStatus');
 
     function cell(text, className = '') {
         const element = document.createElement('td');
@@ -19,8 +22,39 @@
         return element;
     }
 
+    function valuation(row) {
+        const quote = marketCaps[row.stock_code];
+        const cap = quote?.market_cap ?? null;
+        const profit = row.adjusted_profit;
+        const unavailable = {cap, pe: null, label: '—'};
+        if (profit == null) return {...unavailable, title: row.missing_reasons?.adjusted_profit || '未取得扣非数据'};
+        if (profit < 0) return {cap, pe: null, label: '亏损', title: '当季扣非亏损，PE 无意义'};
+        if (profit === 0) return {...unavailable, title: '当季扣非为零，无法计算 PE'};
+        if (cap == null) return {...unavailable, title: marketCapMissing};
+        return {cap, pe: cap / (profit * 4), label: null, title: ''};
+    }
+
     function sortValue(row) {
+        if (sort === 'market_cap') return valuation(row).cap;
+        if (sort === 'adjusted_pe') return valuation(row).pe;
         return sort.endsWith('_qoq') ? row[sort].value : row[sort];
+    }
+
+    async function loadMarketCaps() {
+        try {
+            const response = await fetch(data.dataset.marketCapUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            marketCaps = result.market_caps;
+            if (Object.keys(marketCaps).length === 0) throw new Error('无可用市值');
+            marketCapMissing = '行情暂不可用';
+            marketCapStatus.textContent = result.as_of ? `市值截至 ${result.as_of.slice(5)}` : '市值时间未知';
+        } catch (error) {
+            console.warn('业绩页市值加载失败', error);
+            marketCapMissing = '行情暂不可用';
+            marketCapStatus.textContent = '行情暂不可用';
+        }
+        render();
     }
 
     function render() {
@@ -45,6 +79,15 @@
             code.textContent = row.stock_code;
             company.append(code);
             tr.append(company);
+            const {cap, pe, label, title} = valuation(row);
+            const capCell = cell(cap == null ? '—' : formatter.format(cap), 'performance-number');
+            const quote = marketCaps[row.stock_code];
+            capCell.title = cap == null ? marketCapMissing
+                : quote.basis === 'H' ? `H 股现价 × 总股本，按 1 港币 = ${quote.fx} 元折算` : '';
+            tr.append(capCell);
+            const peCell = cell(pe == null ? label : formatter.format(pe), 'performance-number');
+            peCell.title = title;
+            tr.append(peCell);
             for (const metric of ['revenue', 'adjusted_profit', 'inventory']) {
                 const value = row[metric];
                 const amount = cell(value == null ? '—' : formatter.format(value), 'performance-number');
@@ -100,9 +143,10 @@
     period.addEventListener('change', render);
     search.addEventListener('input', render);
     buttons.forEach(button => button.addEventListener('click', () => {
-        descending = button.dataset.sort === sort ? !descending : true;
+        descending = button.dataset.sort === sort ? !descending : button.dataset.sort !== 'adjusted_pe';
         sort = button.dataset.sort;
         render();
     }));
     render();
+    loadMarketCaps();
 })();

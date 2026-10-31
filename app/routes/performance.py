@@ -1,9 +1,10 @@
 import logging
 
-from flask import abort, current_app, render_template, url_for
+from flask import abort, current_app, jsonify, render_template, url_for
 import markdown
 
 from app.routes import performance_bp
+from app.services.market_cap_service import MarketCapService
 from app.services.performance import ANALYTICS_ROOT, load_companies, performance_rows, research_path
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,17 @@ def index():
         row['research_url'] = url_for('performance.research', document=row['source_doc'])
     periods = sorted({row['period'] for row in rows}, reverse=True)
     return render_template('performance.html', rows=rows, periods=periods, error=False)
+
+
+@performance_bp.route('/market-caps')
+def market_caps():
+    root = current_app.config.get('PERFORMANCE_ROOT', ANALYTICS_ROOT)
+    try:
+        codes = [company['stock_code'] for company in load_companies(root)]
+    except ValueError:
+        logger.exception('研究业绩文件校验失败')
+        return jsonify({'error': '业绩数据校验失败'}), 503
+    return jsonify(MarketCapService.get_cny_market_caps(codes))
 
 
 @performance_bp.route('/research/<path:document>')

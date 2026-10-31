@@ -10,7 +10,7 @@
             <h2 class="mb-2">业绩</h2>
             <p class="text-muted mb-0">已研究公司的正式财报 · 单季度经营对比</p>
         </div>
-        <span class="text-muted small">金额：亿元人民币 · 增速：%</span>
+        <span class="text-muted small">金额：亿元人民币 · 增速：%{% if not error %} · <span id="performanceMarketCapStatus" aria-live="polite">市值加载中</span>{% endif %}</span>
     </div>
     {% if error %}
     <div class="alert alert-danger" role="alert">业绩数据校验失败，暂时无法展示。请检查研究业绩文件后重试。</div>
@@ -32,7 +32,7 @@
         <table class="table performance-table mb-0">
             <thead><tr>
                 <th scope="col">公司</th>
-                {% for key, label in [('revenue', '当季营收'), ('revenue_qoq', '营收环比'), ('adjusted_profit', '当季扣非利润'), ('adjusted_profit_qoq', '扣非环比'), ('inventory', '季末存货'), ('inventory_qoq', '存货环比')] %}
+                {% for key, label in [('market_cap', '当前市值'), ('adjusted_pe', '年化扣非 PE'), ('revenue', '当季营收'), ('revenue_qoq', '营收环比'), ('adjusted_profit', '当季扣非利润'), ('adjusted_profit_qoq', '扣非环比'), ('inventory', '季末存货'), ('inventory_qoq', '存货环比')] %}
                 <th scope="col" class="text-end" aria-sort="none"><button type="button" data-sort="{{ key }}">{{ label }} <span class="sort-indicator" aria-hidden="true">↕</span></button></th>
                 {% endfor %}
                 <th scope="col">来源</th>
@@ -41,9 +41,9 @@
         </table>
         <div id="performanceEmpty" class="text-center text-muted py-5" {% if rows %}hidden{% endif %}>暂无业绩记录，研究完成后会自动收录。</div>
     </div>
-    <p class="text-muted small mt-3">扣非利润为扣非归母净利润。环比与上一单季度比较，存货与上一季末比较；缺少数据或比较基数时显示“—”。亏损及零基数情形以文字标注。</p>
+    <p class="text-muted small mt-3">扣非利润为扣非归母净利润。环比与上一单季度比较，存货与上一季末比较；缺少数据或比较基数时显示“—”。亏损及零基数情形以文字标注。年化扣非 PE = 当前市值 ÷（所选季度扣非 × 4），不是 TTM；历史季度同样按当前市值计算。A+H 公司按研究档跟踪的上市地口径计算全公司市值。</p>
     <noscript><p class="alert alert-info">请启用 JavaScript 查看业绩数据和筛选结果。</p></noscript>
-    <script id="performanceData" type="application/json">{{ rows | tojson }}</script>
+    <script id="performanceData" type="application/json" data-market-cap-url="{{ url_for('performance.market_caps') }}">{{ rows | tojson }}</script>
     {% endif %}
 </div>
 {% endblock %}
