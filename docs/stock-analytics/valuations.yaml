@@ -1741,14 +1741,14 @@
   currency: CNY
   sector: semiconductor
   rating: watch
-  watch_reason: 估值透支——即便卖方 2026E 8 亿净利兑现仍是远期 PE 274x，PB 处近 5 年 99.4 分位历史极值，三情景加权期望安全边际约 -92.5%，好生意但价格无任何安全边际
-  bear: 12
-  base: 127
-  bull: 353
-  dividend_yield: 0.04
-  conviction_date: '2026-07-02'
-  source_doc: sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md
-  note: 源杰科技buffett重做；除权后1.245亿股口径，悲观12/中性127/乐观353元每股；PB99.4分位、远期PE274x，好生意无安全边际
+  watch_reason: Q3主业持续兑现，但扩产与高毛利持续性仍待验证；期望内在价值128.74元，对688.99元收盘安全边际−81.31%，维持关注。
+  bear: 33.06
+  base: 130.65
+  bull: 243.1
+  dividend_yield: 0.15
+  conviction_date: '2026-10-31'
+  source_doc: sectors/semiconductor/optical/源杰科技/index.md
+  note: 2026Q3重估：正常化OE上修并撤回旧高倍数；三档33.06/130.65/243.10元，概率25/55/20%，期望128.74元；10月30日收688.99元，安全边际-81.31%；watch
   themes:
   - ai_compute
   - 光芯片

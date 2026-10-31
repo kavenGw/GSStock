@@ -28,8 +28,8 @@ related_docs:
     note: 周期节奏传导落点——CPO 延后 → 可插拔跑道延长 → 独立调制器与无源器件需求周期拉长，对光库（2026-09-07 重做，watch / −96.4%）弱利好；CPO 只改封装不改材料，不构成对铌酸锂的替代，维持原判不改评级
 
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md
-    note: buffett重做已修正——CPO/硅光均需外部CW光源，对源杰净偏利好非风险；估值结论仍不翻案（PB99分位）
+  - path: ../sectors/semiconductor/optical/源杰科技/index.md
+    note: 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-08-20-光迅科技-buffett分析.md
     note: CPO/NPO 替代是其 Risk #5，延后延长可插拔光模块跑道（利好但估值不翻案）；光迅 2026-08-20 重做重申此结论——CPO 延后基本维持，但英伟达 2026-08-14 Spectrum-X 硅光交换机全面量产已开始压缩远期终值倍数
@@ -81,7 +81,7 @@ related_docs:
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
 > - [index](../sectors/semiconductor/optical/光库科技/index.md) — 周期节奏传导落点——CPO 延后 → 可插拔跑道延长 → 独立调制器与无源器件需求周期拉长，对光库（2026-09-07 重做，watch / −96.4%）弱利好；CPO 只改封装不改材料，不构成对铌酸锂的替代，维持原判不改评级
-> - [2026-07-02-源杰科技-buffett分析](../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md) — buffett重做已修正——CPO/硅光均需外部CW光源，对源杰净偏利好非风险；估值结论仍不翻案（PB99分位）
+> - [index](../sectors/semiconductor/optical/源杰科技/index.md) — 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
 > - [2026-08-20-光迅科技-buffett分析](../sectors/semiconductor/optical/2026-08-20-光迅科技-buffett分析.md) — CPO/NPO 替代是其 Risk
 > - [2026-06-20-罗博特科-buffett分析](../sectors/semiconductor/equipment/2026-06-20-罗博特科-buffett分析.md) — CPO 光子耦合封装设备叙事兑现时点后移（利空，但 exclude 结论不变）
 > - [index](../sectors/electronics/components/沃尔核材/index.md) — CPO 延后 = scale-up 铜连接窗口延长（边际利好，估值仍贵）

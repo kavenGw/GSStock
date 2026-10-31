@@ -28,8 +28,8 @@ related_docs:
 - path: ../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md
   note: AI 光互联全景横评；本轮 Lumentum 完全稀释市值 $94.27B / P-S 31.3 是全景中最贵的一档，但 P-B 17.79 反而是整组最低，溢价全部押在利润率持续性上
   symmetric: true
-- path: 2026-07-02-源杰科技-buffett分析.md
-  note: 源杰已从"远期追赶者"变为 CY2027 供给释放的一环——CW 激光获 NVIDIA 认证、100mW 已过客户验证、200G EML 规划 CY2026 末量产，是 Lumentum 缺口租金收敛的三条产能曲线之一
+- path: 源杰科技/index.md
+  note: 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
   symmetric: true
 - path: 2026-07-02-Coherent-buffett分析.md
   note: 最直接西方对手；同日获 NVIDIA 完全对称的 $20 亿入股（明确 non-exclusive），6 英寸 InP 已量产 EML-CW-PD 且良率超其 3 英寸线，是 Lumentum EML 护城河被挤压的主要向量
@@ -62,7 +62,7 @@ related_docs:
 > **关联文档**
 > - [index](光库科技/index.md) — 国际对标与 FCC 反向路径参照——FCC 禁令推动国内模块厂压降美系元器件占比，是国产上游器件替代需求的来源，对光库（2026-09-07 重做，watch / −96.4%）构成对冲性利好；光库收购的 Lumentum 铌酸锂产线亦是其 IDM 能力来源
 > - [2026-07-02-AI光互联全景横评-buffett对比](../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md) — AI 光互联全景横评；本轮 Lumentum 完全稀释市值 $94.27B / P-S 31.3 是全景中最贵的一档，但 P-B 17.79 反而是整组最低，溢价全部押在利润率持续性上
-> - [2026-07-02-源杰科技-buffett分析](2026-07-02-源杰科技-buffett分析.md) — 源杰已从"远期追赶者"变为 CY2027 供给释放的一环——CW 激光获 NVIDIA 认证、100mW 已过客户验证、200G EML 规划 CY2026 末量产，是 Lumentum 缺口租金收敛的三条产能曲线之一
+> - [index](源杰科技/index.md) — 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
 > - [2026-07-02-Coherent-buffett分析](2026-07-02-Coherent-buffett分析.md) — 最直接西方对手；同日获 NVIDIA 完全对称的 $20 亿入股（明确 non-exclusive），6 英寸 InP 已量产 EML-CW-PD 且良率超其 3 英寸线，是 Lumentum EML 护城河被挤压的主要向量
 > - [2026-06-28-仕佳光子-buffett分析](../optical-chip/2026-06-28-仕佳光子-buffett分析.md) — 中国光芯片追赶者（无源强、有源 EML 早期）；中国 25G 以上光芯片国产化率仅约 4%，芯片层替代仍靠后，但去美化已成中国模块厂的明确目标
 > - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 是本案的物理约束层；Lumentum 日本两座 InP fab CY2026 产出 +50%、与 AXT 签衬底供应协议，而 6 英寸 InP 代差要等 Greensboro（2028 初首笔营收）才补上

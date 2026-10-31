@@ -1,0 +1,39 @@
+schema_version: 1
+stock_code: '688498'
+stock_name: 源杰科技
+unit: CNY_100M
+periods:
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 3.5527848649
+  adjusted_profit: 1.7793967639
+  inventory: 1.6223427131
+  sources:
+  - title: 源杰科技2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-28/1225208649.PDF
+    locator: 第1页主要数据，合并资产负债表存货162234271.31元；均为元除1亿
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 5.6987197607
+  adjusted_profit: 3.3650411116
+  inventory: 2.0730485233
+  sources:
+  - title: 源杰科技2026年半年度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-08-29/1225527905.PDF
+    locator: 第7页累计收入925150462.56、扣非514443787.55；第65页6月末存货207304852.33元；Q2收入=(925150462.56-355278486.49)/1亿，扣非=(514443787.55-177939676.39)/1亿
+  - title: 源杰科技2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-28/1225208649.PDF
+    locator: 第1页Q1收入355278486.49、扣非177939676.39，作为H1差分基数
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 6.8385678803
+  adjusted_profit: 4.0947385379
+  inventory: 2.8842161585
+  sources:
+  - title: 源杰科技2026年第三季度报告（公司原文PDF镜像）
+    url: https://pdf.dfcfw.com/pdf/H2_AN202610301831234626_1.pdf
+    locator: 第1页直接单季收入683856788.03及扣非409473853.79；第7页9月末存货288421615.85元；均除1亿
+  notes: 未经审计；交易所官方地址直连本轮受限，已核完整13页公司PDF镜像及新浪全文

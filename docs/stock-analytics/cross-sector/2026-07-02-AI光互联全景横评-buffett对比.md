@@ -11,8 +11,8 @@ related_docs:
   - path: ../sectors/semiconductor/optical/中际旭创/index.md
     note: 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
     symmetric: true
-  - path: ../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md
-    note: 源杰科技个股 buffett 深度分析（本对比的源杰口径来源）
+  - path: ../sectors/semiconductor/optical/源杰科技/index.md
+    note: 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
     symmetric: true
   - path: ../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md
     note: 新易盛个股 buffett 深度分析（全球第二光模块龙头，本对比的新易盛口径来源）
@@ -59,7 +59,7 @@ related_docs:
 > **关联文档**
 > - [2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效](../themes/2026-07-14-东山精密H1预增283-296%-光模块兑现与估值锚失效.md) — 索尔思（东山子公司）H1 光模块兑现为 800G/1.6T 需求再添一个模块厂本体数据点，但七家自身 Q1/H1 业绩已是更硬更早的证据、本次不构成增量信息，全链"业绩真兑现+估值全额透支"格局不变
 > - [index](../sectors/semiconductor/optical/中际旭创/index.md) — 中际旭创个股 buffett 深度分析（全球第一光模块龙头，本对比的旭创口径来源）
-> - [2026-07-02-源杰科技-buffett分析](../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md) — 源杰科技个股 buffett 深度分析（本对比的源杰口径来源）
+> - [index](../sectors/semiconductor/optical/源杰科技/index.md) — 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
 > - [2026-07-02-新易盛-buffett分析](../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md) — 新易盛个股 buffett 深度分析（全球第二光模块龙头，本对比的新易盛口径来源）
 > - [2026-07-02-Coherent-buffett分析](../sectors/semiconductor/optical/2026-07-02-Coherent-buffett分析.md) — Coherent 个股 buffett 深度分析（AI 光互联西方 incumbent，本对比的 Coherent 口径来源）
 > - [2026-08-13-Lumentum-buffett分析](../sectors/semiconductor/optical/2026-08-13-Lumentum-buffett分析.md) — Lumentum 个股 buffett 深度分析（高端 EML 全球第一，本对比的 Lumentum 口径来源）；2026-08-13 重做档口径：完全稀释市值 $94.27B / P-S 31.3 为全景最贵一档，但 P-B 17.79 为整组最低
@@ -419,7 +419,7 @@ PE **195x + PB 50x** —— 把 2025 +473% 利润爆发**再乘持续性预期**
 
 ## 八、源杰科技（688498）
 
-> 完整口径见个股档 `../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md`。
+> 完整口径见个股档 `../sectors/semiconductor/optical/源杰科技/index.md`。
 
 ### 8.1 商业质量
 
@@ -803,7 +803,7 @@ AI 兑现: 1.6T 光引擎已量产 58.5万→2026预计190万只(+225%)·海外�
 - 中际旭创行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300308` + akshare `stock_zh_valuation_baidu('300308', 市净率, 近5年)`（2026-07-02）；财务：akshare `stock_financial_abstract_ths('300308')` 年度/单季 + 2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/中际旭创/index.md`
 - 新易盛行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300502` + akshare `stock_zh_valuation_baidu('300502')`（2026-07-02）；财务：2025 年报 / 2026Q1 交易所披露转引；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-新易盛-buffett分析.md`
 - 仕佳光子行情：腾讯 `qt.gtimg.cn` 实时接口（2026-07-02）；财务：招商证券 26Q1 点评 / 2025 年报点评
-- 源杰科技行情/财务/估值分位：本地 akshare（腾讯 `qt.gtimg.cn/q=sh688498`、`stock_zh_valuation_baidu` 近 5 年、`stock_financial_abstract_ths`），采于 2026-07-02；口径与场景估值见个股档 `../sectors/semiconductor/optical/2026-07-02-源杰科技-buffett分析.md`
+- 源杰科技行情/财务/估值分位：本地 akshare（腾讯 `qt.gtimg.cn/q=sh688498`、`stock_zh_valuation_baidu` 近 5 年、`stock_financial_abstract_ths`），采于 2026-07-02；口径与场景估值见个股档 `../sectors/semiconductor/optical/源杰科技/index.md`
 - 天孚通信行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300394`（现价 250.77/−12.01%/PE 125.95/PB 50.04/市值 2735.46 亿，2026-07-02 盘中）+ eniu PE 近 5 年 97.9 分位；财务：2025 年报 / 2026Q1 交易所披露转引 + 康宁玻璃桥（2026-06-24）事件，evidence 已联网核实；口径与场景估值见个股档 `../sectors/semiconductor/optical/天孚通信/index.md`
 - 光迅科技行情/估值分位：腾讯 `qt.gtimg.cn/q=sz002281`（现价 224.50/+2.89%/PE(TTM) 179.32/市值 1857.88 亿，2026-07-03 盘中）+ akshare `stock_zh_valuation_baidu('002281')` PE/PB 近 5 年 99.7 分位；财务：akshare `stock_financial_abstract_ths('002281')` 年度/单季 + `stock_zygc_em('SZ002281')` 主营构成 + 2025 年报（不分红）/ 2026Q1 交易所披露 + 定增问询函回复（深交所）；星网/星间激光/北美敞口为财富号/研报口径（缺公司公告硬证，正文已标【软/缺】），evidence 已联网核实（本档 comps 条目，无独立个股档）
 - 光库科技行情/估值分位：腾讯 `qt.gtimg.cn/q=sz300620`（现价 324.90/+0.15%/PE(TTM) 384.48/PB 37.57/市值 809.59 亿，2026-07-03 盘中）+ akshare `stock_zh_valuation_baidu('300620')` PE/PB 近 5 年 99.4 分位；财务：akshare `stock_financial_abstract_ths('300620')` 年度/单季 + `stock_zygc_em('SZ300620')` 主营构成 + 2025 年报 / 2026Q1 季报（cninfo）；收购 Lumentum 米兰 LiNbO3 产线（1700 万美元，2019，c114/36氪）；TFLN 份额/客户/纯营收体量为媒体口径（正文已标【软】并标注"体量疑被夸大"），evidence 已联网核实（本档 comps 条目，无独立个股档）
