@@ -1,0 +1,53 @@
+schema_version: 1
+stock_code: 002916
+stock_name: 深南电路
+unit: CNY_100M
+periods:
+- period: 2025Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 63.0056058388
+  adjusted_profit: 9.1648665997
+  inventory: 46.8828787922
+  sources:
+  - title: 深南电路2025年第三季度报告
+    url: https://static.cninfo.com.cn/finalpage/2025-10-30/1224762647.PDF
+    locator: p2单季收入6300560583.88元、扣非916486659.97元；p3及p6合并存货4688287879.22元；除1亿
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 65.9558790238
+  adjusted_profit: 8.4944671547
+  inventory: 65.0133350781
+  sources:
+  - title: 深南电路2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-24/1225163815.PDF
+    locator: p2营业收入6595587902.38元、扣非归母849446715.47元；p6合并存货6501333507.81元；均除1亿
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 87.0077353805
+  adjusted_profit: 13.8972575888
+  inventory: 78.1730221585
+  sources:
+  - title: 深南电路2026年半年度报告全文
+    url: https://static.cninfo.com.cn/finalpage/2026-08-27/1225512708.PDF
+    locator: p8累计收入15296361440.43元、扣非2239172474.35元；p44合并期末存货7817302215.85元
+  - title: 深南电路2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-24/1225163815.PDF
+    locator: p2收入6595587902.38元、扣非849446715.47元；Q2收入=(15296361440.43-6595587902.38)/1亿=87.0077353805；扣非=(2239172474.35-849446715.47)/1亿=13.8972575888
+  notes: Q2流量以H1减Q1元原数推导；存货为6月末合并净额，不作差分
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-10-31'
+  revenue: 104.7751354438
+  adjusted_profit: 18.5849105751
+  inventory: 96.9966653691
+  sources:
+  - title: 深南电路2026年第三季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-10-23/1225616402.PDF
+    locator: p2单季收入10477513544.38元、扣非1858491057.51元；累计25773874984.81元/4097663531.86元；p6存货9699666536.91元
+  - title: 深南电路2026年半年度报告全文
+    url: https://static.cninfo.com.cn/finalpage/2026-08-27/1225512708.PDF
+    locator: p8累计收入15296361440.43元、扣非2239172474.35元；Q3收入=(25773874984.81-15296361440.43)/1亿=104.7751354438；扣非=(4097663531.86-2239172474.35)/1亿=18.5849105751
+  notes: 报告直接披露单季与累计差分吻合；存货为9月末净额；本期未经审计
