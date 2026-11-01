@@ -25,7 +25,7 @@ related_docs:
 
   - path: ../sectors/semiconductor/optical/光库科技/index.md
 
-    note: 周期节奏传导落点——CPO 延后 → 可插拔跑道延长 → 独立调制器与无源器件需求周期拉长，对光库（2026-09-07 重做，watch / −96.4%）弱利好；CPO 只改封装不改材料，不构成对铌酸锂的替代，维持原判不改评级
+    note: 周期节奏传导落点——CPO延后可能延长可插拔器件需求周期；光库2026-11-01三季报差量更新维持watch，纠正补贴重复剔除与订单能见度遗漏，最新估值与监控以个股档为准；CPO封装变化不直接等于材料替代。
 
     symmetric: true
   - path: ../sectors/semiconductor/optical/源杰科技/index.md
@@ -80,7 +80,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [index](../sectors/semiconductor/optical/光库科技/index.md) — 周期节奏传导落点——CPO 延后 → 可插拔跑道延长 → 独立调制器与无源器件需求周期拉长，对光库（2026-09-07 重做，watch / −96.4%）弱利好；CPO 只改封装不改材料，不构成对铌酸锂的替代，维持原判不改评级
+> - [index](../sectors/semiconductor/optical/光库科技/index.md) — 周期节奏传导落点——CPO延后可能延长可插拔器件需求周期；光库2026-11-01三季报差量更新维持watch，纠正补贴重复剔除与订单能见度遗漏，最新估值与监控以个股档为准；CPO封装变化不直接等于材料替代。
 > - [index](../sectors/semiconductor/optical/源杰科技/index.md) — 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
 > - [index](../sectors/semiconductor/optical/光迅科技/index.md) — 光迅科技2026Q3重估维持watch：期望151.80亿元/每股18.34元，安全边际−82.13%（10月30日收盘102.60元）；盈利弹性改善，现金回收与库存风险仍待验证。旧期间比较保留历史时点。
 > - [2026-06-20-罗博特科-buffett分析](../sectors/semiconductor/equipment/2026-06-20-罗博特科-buffett分析.md) — CPO 光子耦合封装设备叙事兑现时点后移（利空，但 exclude 结论不变）

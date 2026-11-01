@@ -1,0 +1,64 @@
+schema_version: 1
+stock_code: '300620'
+stock_name: 光库科技
+unit: CNY_100M
+periods:
+- period: 2025Q3
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 4.0176050234
+  adjusted_profit: 0.4317505464
+  inventory: 3.6748519201
+  sources:
+  - title: 光库科技2025年第三季度报告
+    url: https://static.cninfo.com.cn/finalpage/2025-10-23/1224724589.PDF
+    locator: P2本报告期营收401760502.34元、扣非43175054.64元；P7季末合并存货367485192.01元
+- period: 2025Q4
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 4.755580889
+  adjusted_profit: 0.5520900279
+  inventory: 3.6142185491
+  sources:
+  - title: 光库科技2025年年度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-03-24/1225026091.PDF
+    locator: P10分季度主要财务指标直接列Q4营收475558088.90元、扣非55209002.79元
+  - title: 光库科技2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225145817.PDF
+    locator: P6合并资产负债表期初2025-12-31存货361421854.91元
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 4.2646540222
+  adjusted_profit: 0.3580656083
+  inventory: 4.4186064713
+  sources:
+  - title: 光库科技2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225145817.PDF
+    locator: P2营收426465402.22元、扣非35806560.83元；P6季末合并存货441860647.13元
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 6.0519680364
+  adjusted_profit: 0.9564464176
+  inventory: 5.4732168611
+  sources:
+  - title: 光库科技2026年半年度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-08-18/1225477531.PDF
+    locator: P10 H1营收1031662205.86元、扣非131451202.59元；P64季末合并存货547321686.11元
+  - title: 光库科技2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225145817.PDF
+    locator: P2 Q1营收426465402.22元、扣非35806560.83元；Q2差分营收1031662205.86-426465402.22=605196803.64，扣非131451202.59-35806560.83=95644641.76，均为元
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 8.2942827268
+  adjusted_profit: 1.3301543914
+  inventory: 6.2139654526
+  sources:
+  - title: 光库科技2026年第三季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-10-23/1225616009.PDF
+    locator: P2本季直接列营收829428272.68元、扣非133015439.14元；累计1861090478.54元、264466641.73元；P7季末合并存货621396545.26元
+  - title: 光库科技2026年半年度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-08-18/1225477531.PDF
+    locator: P10 H1营收1031662205.86元、扣非131451202.59元；Q3差分1861090478.54-1031662205.86=829428272.68，264466641.73-131451202.59=133015439.14，均为元
