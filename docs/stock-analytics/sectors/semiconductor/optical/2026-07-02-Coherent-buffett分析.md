@@ -19,8 +19,8 @@ valuation:
   currency: USD
   dividend_yield: null
 related_docs:
-- path: 2026-08-20-光迅科技-buffett分析.md
-  note: 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）；光迅 2026-08-20 二季报重做维持 watch，PE_TTM 127.4x/PB 10.19x，反推 TTM ROE 约 8.0%，安全边际 −88.4%
+- path: 光迅科技/index.md
+  note: 光迅科技2026Q3重估维持watch：期望151.80亿元/每股18.34元，安全边际−82.13%（10月30日收盘102.60元）；盈利弹性改善，现金回收与库存风险仍待验证。旧期间比较保留历史时点。
   symmetric: true
 - path: 源杰科技/index.md
   note: 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
@@ -49,7 +49,7 @@ related_docs:
 
 <!-- BEGIN related_docs (auto-generated from frontmatter, do not edit) -->
 > **关联文档**
-> - [2026-08-20-光迅科技-buffett分析](2026-08-20-光迅科技-buffett分析.md) — 国内数通光模块直接可比（垂直一体化 vs Coherent 上游材料护城河）；光迅 2026-08-20 二季报重做维持 watch，PE_TTM 127.4x/PB 10.19x，反推 TTM ROE 约 8.0%，安全边际 −88.4%
+> - [index](光迅科技/index.md) — 光迅科技2026Q3重估维持watch：期望151.80亿元/每股18.34元，安全边际−82.13%（10月30日收盘102.60元）；盈利弹性改善，现金回收与库存风险仍待验证。旧期间比较保留历史时点。
 > - [index](源杰科技/index.md) — 源杰科技2026Q3重估：CW及100G EML批量兑现，watch；期望128.74元，旧期间比较保留历史时点。
 > - [2026-07-02-AI光互联全景横评-buffett对比](../../../cross-sector/2026-07-02-AI光互联全景横评-buffett对比.md) — AI 光互联赛道横评，Coherent 为西方 incumbent 参照
 > - [2026-05-13-磷化铟-板块分析](../../../themes/2026-05-13-磷化铟-板块分析.md) — InP 磷化铟板块——Coherent 全球领先 InP 晶圆/6英寸量产供应商

@@ -1,0 +1,51 @@
+schema_version: 1
+stock_code: 002281
+stock_name: 光迅科技
+unit: CNY_100M
+periods:
+- period: 2025Q4
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 33.970549922
+  adjusted_profit: 2.3697685774
+  inventory: 57.4597550272
+  sources:
+  - title: 光迅科技2025年年度报告（发行人公告全文镜像）
+    url: https://money.finance.sina.com.cn/corp/view/vCB_AllBulletinDetail.php?id=12145451&stockid=002281
+    locator: 第二节八分季度主要财务指标直接列Q4营收3397054992.20元、扣非236976857.74元；合并资产负债表2025年末存货5745975502.72元；年报经审计。
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 27.7335284792
+  adjusted_profit: 2.2777742056
+  inventory: 74.7766570375
+  sources:
+  - title: 光迅科技2026年第一季度报告
+    url: https://disc.static.szse.cn/disc/disk03/finalpage/2026-04-23/de5347b2-a48b-48ea-a994-54deb4dc2b6c.PDF
+    locator: p1主要会计数据营收2773352847.92元、扣非227777420.56元；p5合并资产负债表存货7477665703.75元；未经审计。
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 38.3631791744
+  adjusted_profit: 3.4021871122
+  inventory: 90.6957595218
+  sources:
+  - title: 光迅科技2026年半年度报告
+    url: https://disc.static.szse.cn/download/disc/disk03/finalpage/2026-08-20/d885674c-3ab8-445d-abd6-40b41e69d94f.PDF
+    locator: 正文p6累计营收6609670765.36元、扣非567996131.78元；p32合并资产负债表期末存货9069575952.18元；Q2营收=(6609670765.36-2773352847.92)/1e8；扣非=(567996131.78-227777420.56)/1e8。PDF页序比正文页码多1，半年报未经审计。
+  - title: 光迅科技2026年第一季度报告（差分减数）
+    url: https://disc.static.szse.cn/disc/disk03/finalpage/2026-04-23/de5347b2-a48b-48ea-a994-54deb4dc2b6c.PDF
+    locator: p1营收2773352847.92元、扣非227777420.56元；用于H1-Q1差分，不用于替代6月底库存。
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-11-01'
+  revenue: 50.7341913221
+  adjusted_profit: 7.0393172373
+  inventory: 121.1019499271
+  sources:
+  - title: 光迅科技2026年第三季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-10-26/1225619530.PDF
+    locator: p1直接列Q3营收5073419132.21元、扣非703931723.73元，亦等于前三季减H1；p5合并期末存货12110194992.71元。累计营收11683089897.57元、扣非1271927855.51元；未经审计。
+  - title: 光迅科技2026年半年度报告（单季差分校验）
+    url: https://disc.static.szse.cn/download/disc/disk03/finalpage/2026-08-20/d885674c-3ab8-445d-abd6-40b41e69d94f.PDF
+    locator: 正文p6 H1营收6609670765.36元、扣非567996131.78元；Q3差分分别5073419132.21元与703931723.73元，与三季报直接披露一致。

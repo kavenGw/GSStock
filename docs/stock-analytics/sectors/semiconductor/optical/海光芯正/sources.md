@@ -66,7 +66,7 @@ section: sources
 
 - `themes/2026-08-05-FCC拟禁中国新型号光模块-北美准入风险.md`（实体口径 vs 产地口径的判定）
 - `themes/2026-09-08-海光芯正携手格芯6.4T-NPO-硅光代工外包化传导.md`（同一事件的池内传导档）
-- 兄弟档：`../中际旭创/index.md`、`../2026-07-02-新易盛-buffett分析.md`、`../2026-08-20-光迅科技-buffett分析.md`（见 [related.md](related.md)）
+- 兄弟档：`../中际旭创/index.md`、`../2026-07-02-新易盛-buffett分析.md`、`../光迅科技/index.md`（见 [related.md](related.md)）
 
 ---
 
