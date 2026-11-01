@@ -33,3 +33,4 @@ scripts/tunnel.local.bat
 .claude/skills/portfolio-init/.cache/
 .claude/skills/stock-deep-redo-workspace/optim.log
 scripts/tunnel.bat
+scripts/tunnel-9090.bat
