@@ -68,16 +68,15 @@ def test_format_splits_windows_and_marks_short_window():
         _entry('NVDA', '英伟达', 'US', full_7, full_30),
         _entry('603986', '兆易创新', 'A', full_7, full_7),
     ]
-    short, long = format_range_stats(entries)
+    short, long = [m['text'] for m in format_range_stats(entries)]
     assert short.startswith('📊 *盯盘区间统计 · 7 天*（最近 7 个交易日，截至 2026-10-22）')
     assert long.startswith('📊 *盯盘区间统计 · 30 天*（最近 30 个交易日，截至 2026-10-22）')
     assert '30d' not in short and '7d' not in long
     assert short.index('NVDA') < short.index('603986')
-    lines = long.split('\n')
-    assert '*兆易创新(603986)* [A股] 当前 10.00' in lines
-    assert '  · 30d(7日) 高 12.00 | 低 8.00 | 均 10.00 | 位置 50%' in lines
-    assert '  · 30d 高 12.00 | 低 8.00 | 均 10.00 | 位置 50%' in lines
-    assert '  · 7d 高 12.00 | 低 8.00 | 均 10.00 | 位置 50%' in short
+    assert '兆易创新(603986) [A股]\n仅 7 个交易日' in long
+    assert '仅 7 个交易日' not in short
+    assert '10.00 | 12.00 | 8.00 | 10.00 | 50%' in long
+    assert '股票 | 收盘价 | 区间高 | 区间低 | 量加权均价 | 位置' in short
 
 
 def test_windows_sort_independently_across_markets_with_missing_positions_last():
@@ -90,18 +89,20 @@ def test_windows_sort_independently_across_markets_with_missing_positions_last()
         _entry('B', 'Beta', 'HK', low, high),
         _entry('C', 'Gamma', 'KR', low, high),
     ]
-    short, long = format_range_stats(entries)
-    assert short.index('*Beta') < short.index('*Gamma') < short.index('*Alpha') < short.index('*Flat')
-    assert long.index('*Alpha') < long.index('*Beta') < long.index('*Gamma') < long.index('*Flat')
+    short, long = [m['text'] for m in format_range_stats(entries)]
+    assert short.index('Beta') < short.index('Gamma') < short.index('Alpha') < short.index('Flat')
+    assert long.index('Alpha') < long.index('Beta') < long.index('Gamma') < long.index('Flat')
     assert '[港股]' in short and '[韩股]' in short and '[美股]' in short
 
 
 def test_format_marks_stale_and_dash_values():
     rows = [_row(20, 10, 10, 10, volume=0)]
     messages = format_range_stats([_entry('0100.HK', 'MiniMax', 'HK', rows, rows)])
-    for text in messages:
-        assert '*MiniMax(0100.HK)* [港股] (截至 10-20) 当前 10.00' in text
-        assert '均 — | 位置 —' in text
+    for message in messages:
+        text = message['text']
+        assert 'MiniMax(0100.HK) [港股]' in text
+        assert '截至 2026-10-20' in text
+        assert '10.00 | 10.00 | 10.00 | — | —' in text
 
 
 def test_notification_wiring_uses_watch_codes(monkeypatch):
@@ -127,8 +128,9 @@ def test_notification_wiring_uses_watch_codes(monkeypatch):
     messages = N.format_watch_range_stats()
     assert calls == [(('603986', '0981.HK'), 60)]
     assert len(messages) == 2
-    for text in messages:
-        assert '*兆易创新(603986)* [A股] 当前 10.00' in text and '中芯国际' not in text
+    for message in messages:
+        assert '兆易创新(603986) [A股]' in message['text'] and '中芯国际' not in message['text']
+        assert message['blocks'][1]['type'] == 'table'
 
 
 def test_notification_wiring_swallows_errors(monkeypatch):
@@ -145,8 +147,8 @@ def test_notification_wiring_swallows_errors(monkeypatch):
 def test_format_skips_stocks_without_data():
     entries = [_entry('NVDA', '英伟达', 'US', [], []),
                _entry('AMD', 'AMD', 'US', [_row(22, 11, 9, 10)], [_row(22, 11, 9, 10)])]
-    for text in format_range_stats(entries):
-        assert '英伟达' not in text and '*AMD(AMD)*' in text
+    for message in format_range_stats(entries):
+        assert '英伟达' not in message['text'] and 'AMD(AMD)' in message['text']
     assert format_range_stats([_entry('NVDA', '英伟达', 'US', [], [])]) == []
     assert format_range_stats([]) == []
 
@@ -155,8 +157,8 @@ def test_format_skips_empty_window_and_uses_its_own_dates():
     entries = [_entry('AMD', 'AMD', 'US', [], [_row(20, 11, 9, 10)])]
     messages = format_range_stats(entries)
     assert len(messages) == 1
-    assert '30 天*（最近 30 个交易日，截至 2026-10-20）' in messages[0]
-    assert '(截至 10-20)' in messages[0]
+    assert '30 天*（最近 30 个交易日，截至 2026-10-20）' in messages[0]['text']
+    assert '截至 2026-10-20' in messages[0]['blocks'][1]['rows'][1][0]['text']
 
 
 @pytest.mark.parametrize('range_results', [(True, True), (False, True)])
@@ -192,10 +194,12 @@ def test_daily_report_sends_each_window_and_counts_results(monkeypatch, range_re
 
     def fake_send(text, channel, **kwargs):
         sent.append((text, channel))
+        if channel == CHANNEL_WATCH:
+            assert kwargs['blocks'][1]['type'] == 'table'
         return next(outcomes) if channel == CHANNEL_WATCH else True
 
     monkeypatch.setattr(N, 'send_slack', fake_send)
     result = N.push_daily_report()
-    assert [text for text, channel in sent if channel == CHANNEL_WATCH] == messages
+    assert [text for text, channel in sent if channel == CHANNEL_WATCH] == [m['text'] for m in messages]
     assert result['messages_total'] == 3
     assert result['messages_sent'] == 1 + sum(range_results)

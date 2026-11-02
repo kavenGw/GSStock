@@ -84,6 +84,12 @@ class NotificationService:
         if NotificationService._is_duplicate(signal):
             logger.info('[通知路由] 跳过 strategy=%s reason=duplicate', signal.strategy)
             return
+        if signal.strategy == 'volume_alert' and 'alerts' in (signal.data or {}):
+            from app.services.notification_tables import format_volume_alerts
+
+            for message in format_volume_alerts(signal.data['alerts'], signal.title):
+                NotificationService.send_slack(message['text'], CHANNEL_DAILY, blocks=message['blocks'])
+            return
         direction = (signal.data or {}).get('direction', '')
         if direction in ('high', 'above', 'up', 'buy', 'resistance_break'):
             emoji = '🔴'
@@ -641,7 +647,7 @@ class NotificationService:
             return None
 
     @staticmethod
-    def format_watch_range_stats() -> list[str]:
+    def format_watch_range_stats() -> list[dict]:
         """盯盘池 7d/30d 区间统计（最高/最低/VWAP/区间位置），不依赖 LLM"""
         try:
             from app.config.stock_codes import WATCH_CODES
@@ -1468,8 +1474,8 @@ class NotificationService:
             if NotificationService.send_slack(msg, CHANNEL_DAILY, blocks=blks):
                 sent += 1
 
-        for range_text in range_messages:
-            if NotificationService.send_slack(range_text, CHANNEL_WATCH):
+        for message in range_messages:
+            if NotificationService.send_slack(message['text'], CHANNEL_WATCH, blocks=message['blocks']):
                 sent += 1
 
         if watch_msg and NotificationService.send_slack(watch_msg, CHANNEL_WATCH):

@@ -215,7 +215,6 @@ class SchedulerEngine:
     def _run_strategy(self, strategy_name: str):
         """在 app context 内执行策略扫描"""
         from app.strategies.registry import registry
-        from app.scheduler.event_bus import event_bus
 
         if not self.app:
             logger.warning('[调度器] 跳过 strategy=%s reason=app_unavailable', strategy_name)
@@ -229,8 +228,7 @@ class SchedulerEngine:
             logger.info('[调度器] 扫描开始 strategy=%s', strategy_name)
             try:
                 signals = strategy.scan()
-                for signal in signals:
-                    event_bus.publish(signal)
+                strategy.publish_signals(signals)
                 logger.info('[调度器] 扫描完成 strategy=%s returned_signals=%d elapsed_ms=%.0f',
                             strategy_name, len(signals), (monotonic() - started) * 1000)
             except Exception as e:

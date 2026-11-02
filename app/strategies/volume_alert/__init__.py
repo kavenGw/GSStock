@@ -132,7 +132,10 @@ class VolumeAlertStrategy(Strategy):
                 priority='HIGH' if abs(change_pct) >= 0.5 else 'MEDIUM',
                 title=f'{name}({code}) {direction}{pct_str}',
                 detail=f"今日 {today_vol:,.0f}{u} {vol_cmp} 昨日 {prev_vol:,.0f}{u} | 涨跌 {price_str}",
-                data={'stock_code': code, 'volume_change_pct': round(change_pct, 4)},
+                data={'stock_code': code, 'stock_name': name,
+                      'volume_change_pct': round(change_pct, 4),
+                      'today_volume': today_vol, 'previous_volume': prev_vol,
+                      'volume_unit': unit, 'price_change_pct': price_change},
             ))
 
         if missing_codes and not retry_codes:
@@ -145,9 +148,20 @@ class VolumeAlertStrategy(Strategy):
             logger.info(f'[成交量异动] 扫描 {len(codes)} 只, 产出 {len(signals)} 个信号')
         return signals
 
+    def publish_signals(self, signals: list[Signal], retry=False):
+        from app.scheduler.event_bus import event_bus
+
+        alerts = [dict(s.data, priority=s.priority) for s in signals if s.priority != 'LOW']
+        if alerts:
+            event_bus.publish(Signal(
+                strategy=self.name,
+                priority='HIGH' if any(a['priority'] == 'HIGH' for a in alerts) else 'MEDIUM',
+                title=f"📊 *成交量异动{' · 补数据重试' if retry else ''}* · {date.today()}",
+                detail='', data={'alerts': alerts},
+            ))
+
     def _schedule_retry(self, codes: list):
         from app.scheduler.engine import scheduler_engine
-        from app.scheduler.event_bus import event_bus
         from apscheduler.triggers.date import DateTrigger
 
         run_time = datetime.now() + timedelta(minutes=RETRY_DELAY_MINUTES)
@@ -156,8 +170,7 @@ class VolumeAlertStrategy(Strategy):
             try:
                 with scheduler_engine.app.app_context():
                     signals = self.scan(retry_codes=codes)
-                    for sig in signals:
-                        event_bus.publish(sig)
+                    self.publish_signals(signals, retry=True)
                     if signals:
                         logger.info(f'[成交量异动] 重试产出 {len(signals)} 个信号')
             except Exception as e:

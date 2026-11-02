@@ -44,5 +44,11 @@ class Strategy(ABC):
         """扫描并产出信号"""
         ...
 
+    def publish_signals(self, signals: list[Signal]):
+        from app.scheduler.event_bus import event_bus
+
+        for signal in signals:
+            event_bus.publish(signal)
+
     def get_config(self) -> dict:
         return self._config

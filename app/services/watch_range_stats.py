@@ -38,18 +38,10 @@ def fmt_price(value) -> str:
     return f"{value:,.0f}" if abs(value) >= 1000 else f"{value:.2f}"
 
 
-def _window_line(label: str, window: int, s: dict) -> str:
-    tag = label if s['days'] >= window else f"{label}({s['days']}日)"
-    pos = '—' if s['position'] is None else f"{s['position']:.0f}%"
-    return (f"  · {tag} 高 {fmt_price(s['high'])} | 低 {fmt_price(s['low'])}"
-            f" | 均 {fmt_price(s['vwap'])} | 位置 {pos}")
+def format_range_stats(entries: list[dict]) -> list[dict]:
+    """按窗口独立排序、分页，保留数据不足与滞后备注。"""
+    from app.services.notification_tables import table_messages
 
-
-def format_range_stats(entries: list[dict]) -> list[str]:
-    """entries: [{code, name, market, expected_date, stats: {'7d': {...}, '30d': {...}}}]
-
-    expected_date 为该市场最近交易日（'YYYY-MM-DD'），K 线截止早于它时标注截至日期。
-    """
     messages = []
     for label, window in WINDOWS:
         group = [e for e in entries if e['stats'].get(label)]
@@ -60,15 +52,23 @@ def format_range_stats(entries: list[dict]) -> list[str]:
             e['stats'][label]['position'] if e['stats'][label]['position'] is not None else 0,
         ))
         as_of = max(e['stats'][label]['end_date'] for e in group)
-        lines = [f"📊 *盯盘区间统计 · {window} 天*（最近 {window} 个交易日，截至 {as_of}）",
-                 '按区间位置从低到高排序']
+        title = f"📊 *盯盘区间统计 · {window} 天*（最近 {window} 个交易日，截至 {as_of}）"
+        rows = []
         for e in group:
-            main = e['stats'][label]
-            stale = ''
-            if e.get('expected_date') and main['end_date'] < e['expected_date']:
-                stale = f" (截至 {main['end_date'][5:]})"
+            s = e['stats'][label]
+            notes = []
+            if s['days'] < window:
+                notes.append(f"仅 {s['days']} 个交易日")
+            if e.get('expected_date') and s['end_date'] < e['expected_date']:
+                notes.append(f"截至 {s['end_date']}")
             market = MARKET_LABELS.get(e['market'], e['market'])
-            lines.append(f"*{e['name']}({e['code']})* [{market}]{stale} 当前 {fmt_price(main['current'])}")
-            lines.append(_window_line(label, window, main))
-        messages.append('\n'.join(lines))
+            stock = f"{e['name']}({e['code']}) [{market}]"
+            if notes:
+                stock += '\n' + '；'.join(notes)
+            rows.append([stock, fmt_price(s['current']), fmt_price(s['high']),
+                         fmt_price(s['low']), fmt_price(s['vwap']),
+                         '—' if s['position'] is None else f"{s['position']:.0f}%"])
+        messages.extend(table_messages(
+            title, ['股票', '收盘价', '区间高', '区间低', '量加权均价', '位置'],
+            rows, subtitle='按区间位置从低到高排序'))
     return messages
