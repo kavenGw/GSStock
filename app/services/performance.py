@@ -8,7 +8,7 @@ import yaml
 
 
 ANALYTICS_ROOT = Path(__file__).resolve().parents[2] / 'docs' / 'stock-analytics'
-METRICS = ('revenue', 'adjusted_profit', 'inventory')
+METRICS = ('revenue', 'adjusted_profit', 'inventory', 'accounts_receivable')
 PERIOD_PATTERN = re.compile(r'^\d{4}Q[1-4]$')
 
 

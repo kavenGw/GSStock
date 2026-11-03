@@ -5,30 +5,39 @@ unit: CNY_100M
 periods:
 - period: 2025Q3
   report_type: formal
-  updated_at: '2026-10-31'
+  updated_at: '2026-11-03'
   revenue: 63.0056058388
   adjusted_profit: 9.1648665997
   inventory: 46.8828787922
+  accounts_receivable: 54.5080003848
   sources:
   - title: 深南电路2025年第三季度报告
     url: https://static.cninfo.com.cn/finalpage/2025-10-30/1224762647.PDF
     locator: p2单季收入6300560583.88元、扣非916486659.97元；p3及p6合并存货4688287879.22元；除1亿
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002916
+    locator: 应收账款ACCOUNTS_RECE 5,450,800,038.48元；批量回填未核财报页码，同接口存货与本季已核存货一致
 - period: 2026Q1
   report_type: formal
-  updated_at: '2026-10-31'
+  updated_at: '2026-11-03'
   revenue: 65.9558790238
   adjusted_profit: 8.4944671547
   inventory: 65.0133350781
+  accounts_receivable: 58.4908321517
   sources:
   - title: 深南电路2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-24/1225163815.PDF
     locator: p2营业收入6595587902.38元、扣非归母849446715.47元；p6合并存货6501333507.81元；均除1亿
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002916
+    locator: 应收账款ACCOUNTS_RECE 5,849,083,215.17元；批量回填未核财报页码，同接口存货与本季已核存货一致
 - period: 2026Q2
   report_type: formal
-  updated_at: '2026-10-31'
+  updated_at: '2026-11-03'
   revenue: 87.0077353805
   adjusted_profit: 13.8972575888
   inventory: 78.1730221585
+  accounts_receivable: 72.9235946065
   sources:
   - title: 深南电路2026年半年度报告全文
     url: https://static.cninfo.com.cn/finalpage/2026-08-27/1225512708.PDF
@@ -36,13 +45,17 @@ periods:
   - title: 深南电路2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-24/1225163815.PDF
     locator: p2收入6595587902.38元、扣非849446715.47元；Q2收入=(15296361440.43-6595587902.38)/1亿=87.0077353805；扣非=(2239172474.35-849446715.47)/1亿=13.8972575888
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002916
+    locator: 应收账款ACCOUNTS_RECE 7,292,359,460.65元；批量回填未核财报页码，同接口存货与本季已核存货一致
   notes: Q2流量以H1减Q1元原数推导；存货为6月末合并净额，不作差分
 - period: 2026Q3
   report_type: formal
-  updated_at: '2026-10-31'
+  updated_at: '2026-11-03'
   revenue: 104.7751354438
   adjusted_profit: 18.5849105751
   inventory: 96.9966653691
+  accounts_receivable: 90.5773503747
   sources:
   - title: 深南电路2026年第三季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-10-23/1225616402.PDF
@@ -50,4 +63,7 @@ periods:
   - title: 深南电路2026年半年度报告全文
     url: https://static.cninfo.com.cn/finalpage/2026-08-27/1225512708.PDF
     locator: p8累计收入15296361440.43元、扣非2239172474.35元；Q3收入=(25773874984.81-15296361440.43)/1亿=104.7751354438；扣非=(4097663531.86-2239172474.35)/1亿=18.5849105751
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002916
+    locator: 应收账款ACCOUNTS_RECE 9,057,735,037.47元；批量回填未核财报页码，同接口存货与本季已核存货一致
   notes: 报告直接披露单季与累计差分吻合；存货为9月末净额；本期未经审计

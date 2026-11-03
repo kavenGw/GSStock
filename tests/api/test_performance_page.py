@@ -33,8 +33,9 @@ def test_real_backfill_renders_all_eleven_companies(client):
         '长鑫科技', '沪电股份', '普冉股份', '胜宏科技', '澜起科技', '兆易创新',
         '联讯仪器', '通富微电', '江丰电子', '兴森科技', '天孚通信',
     }.issubset({row['stock_name'] for row in current})
-    assert all(row[metric] is not None for row in current for metric in ('revenue', 'adjusted_profit', 'inventory'))
-    assert all(row[f'{metric}_qoq']['value'] is not None for row in current for metric in ('revenue', 'adjusted_profit', 'inventory'))
+    metrics = ('revenue', 'adjusted_profit', 'inventory', 'accounts_receivable')
+    assert all(row[metric] is not None for row in current for metric in metrics)
+    assert all(row[f'{metric}_qoq']['value'] is not None for row in current for metric in metrics)
     assert page.select_one('#performancePeriod option')['value'] == max(row['period'] for row in rows)
     for row in current:
         research = client.get(row['research_url'])
@@ -68,7 +69,8 @@ def test_market_caps_endpoint_reports_corrupt_data(client, monkeypatch):
 def test_page_declares_valuation_columns(client):
     from bs4 import BeautifulSoup
     page = BeautifulSoup(client.get('/performance/').data, 'html.parser')
-    assert {'market_cap', 'adjusted_pe'}.issubset({button['data-sort'] for button in page.select('[data-sort]')})
+    assert {'market_cap', 'adjusted_pe', 'accounts_receivable', 'accounts_receivable_qoq'}.issubset(
+        {button['data-sort'] for button in page.select('[data-sort]')})
     assert page.select_one('#performanceData')['data-market-cap-url'] == '/performance/market-caps'
 
 

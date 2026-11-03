@@ -5,20 +5,25 @@ unit: CNY_100M
 periods:
 - period: 2025Q3
   report_type: formal
-  updated_at: '2026-11-01'
+  updated_at: '2026-11-03'
   revenue: 4.0176050234
   adjusted_profit: 0.4317505464
   inventory: 3.6748519201
+  accounts_receivable: 4.9097206263
   sources:
   - title: 光库科技2025年第三季度报告
     url: https://static.cninfo.com.cn/finalpage/2025-10-23/1224724589.PDF
     locator: P2本报告期营收401760502.34元、扣非43175054.64元；P7季末合并存货367485192.01元
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300620
+    locator: 应收账款ACCOUNTS_RECE 490,972,062.63元；批量回填未核财报页码，同接口存货与本季已核存货一致
 - period: 2025Q4
   report_type: formal
-  updated_at: '2026-11-01'
+  updated_at: '2026-11-03'
   revenue: 4.755580889
   adjusted_profit: 0.5520900279
   inventory: 3.6142185491
+  accounts_receivable: 5.2043428844
   sources:
   - title: 光库科技2025年年度报告
     url: https://static.cninfo.com.cn/finalpage/2026-03-24/1225026091.PDF
@@ -26,22 +31,30 @@ periods:
   - title: 光库科技2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225145817.PDF
     locator: P6合并资产负债表期初2025-12-31存货361421854.91元
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300620
+    locator: 应收账款ACCOUNTS_RECE 520,434,288.44元；批量回填未核财报页码，同接口存货与本季已核存货一致
 - period: 2026Q1
   report_type: formal
-  updated_at: '2026-11-01'
+  updated_at: '2026-11-03'
   revenue: 4.2646540222
   adjusted_profit: 0.3580656083
   inventory: 4.4186064713
+  accounts_receivable: 5.0836379558
   sources:
   - title: 光库科技2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225145817.PDF
     locator: P2营收426465402.22元、扣非35806560.83元；P6季末合并存货441860647.13元
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300620
+    locator: 应收账款ACCOUNTS_RECE 508,363,795.58元；批量回填未核财报页码，同接口存货与本季已核存货一致
 - period: 2026Q2
   report_type: formal
-  updated_at: '2026-11-01'
+  updated_at: '2026-11-03'
   revenue: 6.0519680364
   adjusted_profit: 0.9564464176
   inventory: 5.4732168611
+  accounts_receivable: 7.1766593637
   sources:
   - title: 光库科技2026年半年度报告
     url: https://static.cninfo.com.cn/finalpage/2026-08-18/1225477531.PDF
@@ -49,12 +62,16 @@ periods:
   - title: 光库科技2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225145817.PDF
     locator: P2 Q1营收426465402.22元、扣非35806560.83元；Q2差分营收1031662205.86-426465402.22=605196803.64，扣非131451202.59-35806560.83=95644641.76，均为元
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300620
+    locator: 应收账款ACCOUNTS_RECE 717,665,936.37元；批量回填未核财报页码，同接口存货与本季已核存货一致
 - period: 2026Q3
   report_type: formal
-  updated_at: '2026-11-01'
+  updated_at: '2026-11-03'
   revenue: 8.2942827268
   adjusted_profit: 1.3301543914
   inventory: 6.2139654526
+  accounts_receivable: 8.7728850879
   sources:
   - title: 光库科技2026年第三季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-10-23/1225616009.PDF
@@ -62,3 +79,6 @@ periods:
   - title: 光库科技2026年半年度报告
     url: https://static.cninfo.com.cn/finalpage/2026-08-18/1225477531.PDF
     locator: P10 H1营收1031662205.86元、扣非131451202.59元；Q3差分1861090478.54-1031662205.86=829428272.68，264466641.73-131451202.59=133015439.14，均为元
+  - title: 东方财富资产负债表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300620
+    locator: 应收账款ACCOUNTS_RECE 877,288,508.79元；批量回填未核财报页码，同接口存货与本季已核存货一致

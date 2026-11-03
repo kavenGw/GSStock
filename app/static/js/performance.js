@@ -88,7 +88,7 @@
             const peCell = cell(pe == null ? label : formatter.format(pe), 'performance-number');
             peCell.title = title;
             tr.append(peCell);
-            for (const metric of ['revenue', 'adjusted_profit', 'inventory']) {
+            for (const metric of ['revenue', 'adjusted_profit', 'inventory', 'accounts_receivable']) {
                 const value = row[metric];
                 const amount = cell(value == null ? '—' : formatter.format(value), 'performance-number');
                 if (value == null) amount.title = row.missing_reasons?.[metric] || '未取得数据';
@@ -97,7 +97,7 @@
                 const percentage = change.value;
                 const text = percentage == null ? change.label : `${percentage > 0 ? '+' : ''}${formatter.format(percentage)}%`;
                 const growth = cell(text, 'performance-number');
-                if (metric !== 'inventory' && percentage != null) {
+                if (['revenue', 'adjusted_profit'].includes(metric) && percentage != null) {
                     growth.classList.add(percentage > 0 ? 'performance-positive' : percentage < 0 ? 'performance-negative' : 'text-muted');
                 }
                 if (text === '—') growth.title = '当季数据或上一季度同口径基数缺失';
