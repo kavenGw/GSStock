@@ -1,0 +1,59 @@
+schema_version: 1
+stock_code: 002428
+stock_name: 云南锗业
+unit: CNY_100M
+periods:
+- period: 2025Q4
+  report_type: formal
+  updated_at: '2026-11-04'
+  revenue: 2.6705110146
+  adjusted_profit: -0.090385852
+  inventory: 8.2852682605
+  accounts_receivable: 3.5272218655
+  sources:
+  - title: 云南锗业2025年年度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225152695.PDF
+    locator: p8分季度主要财务指标直接披露第四季度营业收入267051101.46元、扣非归母-9038585.20元；p89合并资产负债表应收账款352722186.55元，p90存货828526826.05元（期末）；元除以100000000。
+  notes: 年报分季度表直接披露Q4单季数，经审计年报，公司声明与已披露季报加总无重大差异。
+- period: 2026Q1
+  report_type: formal
+  updated_at: '2026-11-04'
+  revenue: 2.8886593179
+  adjusted_profit: 0.0484697085
+  inventory: 7.4501813668
+  accounts_receivable: 4.0765721436
+  sources:
+  - title: 云南锗业2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-30/1225259410.PDF
+    locator: p2营业收入288865931.79元、扣非归母4846970.85元；p7合并资产负债表应收账款407657214.36元、存货745018136.68元；元除以100000000。
+  notes: 正式未经审计季报。
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-11-04'
+  revenue: 4.4293612893
+  adjusted_profit: 0.6205661046
+  inventory: 8.1362675346
+  accounts_receivable: 5.4758329733
+  sources:
+  - title: 云南锗业2026年半年度报告全文
+    url: https://static.cninfo.com.cn/finalpage/2026-08-28/1225520955.PDF
+    locator: p7累计营业收入731802060.72元、累计扣非归母66903581.31元；p45合并资产负债表应收账款547583297.33元、存货813626753.46元（6月30日余额，不差分）。
+  - title: 云南锗业2026年第一季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-04-30/1225259410.PDF
+    locator: p2营业收入288865931.79元、扣非归母4846970.85元；Q2收入=(731802060.72-288865931.79)/100000000=4.4293612893；Q2扣非=(66903581.31-4846970.85)/100000000=0.6205661046。
+  notes: Q2为同口径H1减Q1；半年报未经审计。
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-11-04'
+  revenue: 6.3186429437
+  adjusted_profit: 0.9623322845
+  inventory: 9.1014175604
+  accounts_receivable: 6.9609188595
+  sources:
+  - title: 云南锗业2026年第三季度报告
+    url: https://static.cninfo.com.cn/finalpage/2026-10-21/1225612953.PDF
+    locator: p2直接披露本报告期营业收入631864294.37元、扣非归母96233228.45元（年初至报告期末1363666355.09元、163136809.76元）；p7合并资产负债表应收账款696091885.95元、存货910141756.04元（9月30日余额）。
+  - title: 云南锗业2026年半年度报告全文
+    url: https://static.cninfo.com.cn/finalpage/2026-08-28/1225520955.PDF
+    locator: p7累计营业收入731802060.72元、累计扣非归母66903581.31元；差分核对Q3收入=(1363666355.09-731802060.72)/100000000=6.3186429437，Q3扣非=(163136809.76-66903581.31)/100000000=0.9623322845，与季报直接披露数一致。
+  notes: 正式未经审计三季报；单季数由季报直接披露并经前三季减半年报差分复核一致。

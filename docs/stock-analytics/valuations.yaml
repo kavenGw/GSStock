@@ -2045,13 +2045,13 @@
   currency: CNY
   sector: materials
   rating: exclude
-  bear: 2.11
-  base: 2.82
-  bull: 4.7
+  bear: 2.25
+  base: 3.44
+  bull: 10.57
   dividend_yield: 0.01
-  conviction_date: '2026-08-28'
+  conviction_date: '2026-11-04'
   source_doc: sectors/materials/minor-metals/云南锗业/index.md
-  note: 每股=内在价值/6.5312亿股（bear 13.81亿/base 18.42亿/bull 30.70亿）；期望内在价值19.60亿/每股3.00元 vs 收盘市值650.90亿（2026-08-28收盘99.66元），安全边际-97.0%，bull压测-95.3%；PB 42.41x、PE(TTM) 900.7x；2026半年报证伪旧档「增收不增利」但拐点仅一个季度且经营现金流-1.568亿；exclude
+  note: 混合分部加总期望内在价值31.48亿/每股4.82元（bear 14.67亿/2.25、base 22.50亿/3.44、bull 69.05亿/10.57，概率28/48/24）vs 收盘市值492.32亿（2026-11-04收盘75.38元），安全边际-93.6%，bull压测-86.0%；PB 30.20x、PE(TTM) 276.6x；2026Q3拐点连续两季确认（Q3单季扣非9623万），但AOI 13.05亿合同以对美出口许可为前提、2027年产能装不下、2028年起不锁价；exclude理由整套更换
   themes:
   - 锗
   - 小金属
