@@ -69,7 +69,8 @@ def test_market_caps_endpoint_reports_corrupt_data(client, monkeypatch):
 def test_page_declares_valuation_columns(client):
     from bs4 import BeautifulSoup
     page = BeautifulSoup(client.get('/performance/').data, 'html.parser')
-    assert {'market_cap', 'adjusted_pe', 'accounts_receivable', 'accounts_receivable_qoq'}.issubset(
+    assert {'market_cap', 'adjusted_pe', 'operating_cash_flow', 'operating_cash_flow_qoq',
+            'accounts_receivable', 'accounts_receivable_qoq'}.issubset(
         {button['data-sort'] for button in page.select('[data-sort]')})
     assert page.select_one('#performanceData')['data-market-cap-url'] == '/performance/market-caps'
 

@@ -8,30 +8,40 @@ periods:
   updated_at: '2026-11-04'
   revenue: 2.6705110146
   adjusted_profit: -0.090385852
+  operating_cash_flow: -0.1456080981
   inventory: 8.2852682605
   accounts_receivable: 3.5272218655
   sources:
   - title: 云南锗业2025年年度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-23/1225152695.PDF
     locator: p8分季度主要财务指标直接披露第四季度营业收入267051101.46元、扣非归母-9038585.20元；p89合并资产负债表应收账款352722186.55元，p90存货828526826.05元（期末）；元除以100000000。
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002428
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：年报累计-187,347,968.19元 − 三季报累计-172,787,158.38元
+      = -14,560,809.81元；批量回填未核财报页码，单季差分
   notes: 年报分季度表直接披露Q4单季数，经审计年报，公司声明与已披露季报加总无重大差异。
 - period: 2026Q1
   report_type: formal
   updated_at: '2026-11-04'
   revenue: 2.8886593179
   adjusted_profit: 0.0484697085
+  operating_cash_flow: 0.2275721415
   inventory: 7.4501813668
   accounts_receivable: 4.0765721436
   sources:
   - title: 云南锗业2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-30/1225259410.PDF
     locator: p2营业收入288865931.79元、扣非归母4846970.85元；p7合并资产负债表应收账款407657214.36元、存货745018136.68元；元除以100000000。
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002428
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：一季报累计22,757,214.15元为单季数；批量回填未核财报页码
   notes: 正式未经审计季报。
 - period: 2026Q2
   report_type: formal
   updated_at: '2026-11-04'
   revenue: 4.4293612893
   adjusted_profit: 0.6205661046
+  operating_cash_flow: -1.7954222487
   inventory: 8.1362675346
   accounts_receivable: 5.4758329733
   sources:
@@ -41,12 +51,17 @@ periods:
   - title: 云南锗业2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-30/1225259410.PDF
     locator: p2营业收入288865931.79元、扣非归母4846970.85元；Q2收入=(731802060.72-288865931.79)/100000000=4.4293612893；Q2扣非=(66903581.31-4846970.85)/100000000=0.6205661046。
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002428
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：中报累计-156,785,010.72元 − 一季报累计22,757,214.15元
+      = -179,542,224.87元；批量回填未核财报页码，单季差分
   notes: Q2为同口径H1减Q1；半年报未经审计。
 - period: 2026Q3
   report_type: formal
   updated_at: '2026-11-04'
   revenue: 6.3186429437
   adjusted_profit: 0.9623322845
+  operating_cash_flow: 3.405105418
   inventory: 9.1014175604
   accounts_receivable: 6.9609188595
   sources:
@@ -56,4 +71,8 @@ periods:
   - title: 云南锗业2026年半年度报告全文
     url: https://static.cninfo.com.cn/finalpage/2026-08-28/1225520955.PDF
     locator: p7累计营业收入731802060.72元、累计扣非归母66903581.31元；差分核对Q3收入=(1363666355.09-731802060.72)/100000000=6.3186429437，Q3扣非=(163136809.76-66903581.31)/100000000=0.9623322845，与季报直接披露数一致。
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ002428
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：三季报累计183,725,531.08元 − 中报累计-156,785,010.72元
+      = 340,510,541.80元；批量回填未核财报页码，单季差分
   notes: 正式未经审计三季报；单季数由季报直接披露并经前三季减半年报差分复核一致。
