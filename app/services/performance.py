@@ -8,7 +8,8 @@ import yaml
 
 
 ANALYTICS_ROOT = Path(__file__).resolve().parents[2] / 'docs' / 'stock-analytics'
-METRICS = ('revenue', 'adjusted_profit', 'inventory', 'accounts_receivable')
+METRICS = ('revenue', 'adjusted_profit', 'operating_cash_flow', 'inventory', 'accounts_receivable')
+SIGNED_METRICS = ('adjusted_profit', 'operating_cash_flow')
 PERIOD_PATTERN = re.compile(r'^\d{4}Q[1-4]$')
 
 
@@ -91,7 +92,7 @@ def validate_company(data, doc_dir):
                     raise ValueError(f'{period} {metric} 缺失但未解释原因')
             elif isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
                 raise ValueError(f'{period} {metric} 必须为有限数值或 null')
-            elif metric != 'adjusted_profit' and value < 0:
+            elif metric not in SIGNED_METRICS and value < 0:
                 raise ValueError(f'{period} {metric} 不得为负')
         sources = row.get('sources')
         if not isinstance(sources, list) or not sources:
@@ -134,7 +135,7 @@ def performance_rows(companies):
             }
             for metric in METRICS:
                 row[f'{metric}_qoq'] = quarter_change(
-                    raw[metric], previous.get(metric), profit=metric == 'adjusted_profit',
+                    raw[metric], previous.get(metric), profit=metric in SIGNED_METRICS,
                 )
             rows.append(row)
     return sorted(rows, key=lambda row: (row['period'], row['stock_code']), reverse=True)

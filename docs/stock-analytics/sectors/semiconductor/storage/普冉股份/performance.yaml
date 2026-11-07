@@ -8,6 +8,7 @@ periods:
   updated_at: '2026-11-03'
   revenue: 14.467798
   adjusted_profit: 2.491316
+  operating_cash_flow: 2.4369169426
   inventory: 15.8403792946
   accounts_receivable: 7.4381484742
   sources:
@@ -18,12 +19,16 @@ periods:
   - title: 普冉股份2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-29/1225247925.PDF
     locator: P7季末合并存货1,584,037,929.46元、应收账款743,814,847.42元
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688766
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：一季报累计243,691,694.26元为单季数；批量回填未核财报页码
   notes: 营收沿用证据精度100元；扣非归母沿用证据精度100元
 - period: 2026Q2
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 25.125122
   adjusted_profit: 5.754224
+  operating_cash_flow: 7.008218604600001
   inventory: 21.2872980726
   accounts_receivable: 11.1427678481
   sources:
@@ -35,12 +40,17 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688766
     locator: 应收账款ACCOUNTS_RECE 1,114,276,784.81元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688766
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：中报累计944,513,554.72元 − 一季报累计243,691,694.26元
+      = 700,821,860.46元；批量回填未核财报页码，单季差分
   notes: 营收沿用证据精度100元；扣非归母沿用证据精度100元
 - period: 2026Q3
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 30.5036022538
   adjusted_profit: 7.2003693735
+  operating_cash_flow: 6.5769872886
   inventory: 25.537895328
   accounts_receivable: 15.6667156544
   sources:
@@ -51,3 +61,7 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688766
     locator: 应收账款ACCOUNTS_RECE 1,566,671,565.44元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688766
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：三季报累计1,602,212,283.58元 − 中报累计944,513,554.72元
+      = 657,698,728.86元；批量回填未核财报页码，单季差分

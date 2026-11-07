@@ -8,6 +8,7 @@ periods:
   updated_at: '2026-11-03'
   revenue: 13.0551
   adjusted_profit: 1.254
+  operating_cash_flow: 1.8552049572
   inventory: 18.2851316327
   accounts_receivable: 13.9915586731
   sources:
@@ -18,12 +19,16 @@ periods:
   - title: 江丰电子2026年第一季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-04-29/1225228116.PDF
     locator: P8季末合并存货1,828,513,163.27元、应收账款1,399,155,867.31元
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300666
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：一季报累计185,520,495.72元为单季数；批量回填未核财报页码
   notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元
 - period: 2026Q2
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 14.318
   adjusted_profit: 0.8058
+  operating_cash_flow: 1.4325607068000001
   inventory: 18.6503572249
   accounts_receivable: 16.3064318886
   sources:
@@ -37,12 +42,17 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300666
     locator: 应收账款ACCOUNTS_RECE 1,630,643,188.86元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300666
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：中报累计328,776,566.40元 − 一季报累计185,520,495.72元
+      = 143,256,070.68元；批量回填未核财报页码，单季差分
   notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元
 - period: 2026Q3
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 17.2794
   adjusted_profit: 2.2733
+  operating_cash_flow: 5.511178721399999
   inventory: 24.198
   accounts_receivable: 18.1036751585
   sources:
@@ -54,4 +64,8 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300666
     locator: 应收账款ACCOUNTS_RECE 1,810,367,515.85元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SZ300666
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：三季报累计879,894,438.54元 − 中报累计328,776,566.40元
+      = 551,117,872.14元；批量回填未核财报页码，单季差分
   notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元；季末合并存货净额沿用证据精度10000元

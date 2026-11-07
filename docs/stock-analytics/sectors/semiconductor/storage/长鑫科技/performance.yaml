@@ -8,11 +8,13 @@ periods:
   updated_at: '2026-11-03'
   revenue: 508.001455
   adjusted_profit: 263.407841
+  operating_cash_flow: null
   inventory: null
   accounts_receivable: null
   missing_reasons:
     inventory: 招股书未列2026-03-31时点数，无季报原文；东财列存货318.83亿元、应收账款29.15亿元，无法核对未采用
     accounts_receivable: 招股书未列2026-03-31时点数，无季报原文；东财列存货318.83亿元、应收账款29.15亿元，无法核对未采用
+    operating_cash_flow: 招股书未独立列2026年1—3月经营活动现金流量净额单季数，无季报原文；东财一季报累计42,565,992,940.30元无法核对，未采用
   sources:
   - title: 长鑫科技 2026Q1招股书经审阅历史数据
     url: https://static.cninfo.com.cn/finalpage/2026-07-22/1225435990.PDF
@@ -24,8 +26,11 @@ periods:
   updated_at: '2026-11-03'
   revenue: 995.09931258
   adjusted_profit: 524.5224126721
+  operating_cash_flow: null
   inventory: 351.296205774
   accounts_receivable: 66.5309878344
+  missing_reasons:
+    operating_cash_flow: 单季经营现金流=中报累计−一季报累计，一季报累计基数无原文核对（见2026Q1说明），故本季单季数无法可靠拆分
   sources:
   - title: 长鑫科技 2026H1
     url: https://static.cninfo.com.cn/finalpage/2026-08-29/1225529543.PDF
@@ -45,6 +50,7 @@ periods:
   updated_at: '2026-11-03'
   revenue: 1187.1402975218
   adjusted_profit: 552.3711877616
+  operating_cash_flow: 1235.9558875455
   inventory: 392.2718335956
   accounts_receivable: 93.1048618337
   sources:
@@ -55,3 +61,7 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688825
     locator: 应收账款ACCOUNTS_RECE 9,310,486,183.37元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688825
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：三季报累计254,751,254,805.69元 − 中报累计131,155,666,051.14元
+      = 123,595,588,754.55元；批量回填未核财报页码，单季差分

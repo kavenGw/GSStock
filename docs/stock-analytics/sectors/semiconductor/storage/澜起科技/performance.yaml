@@ -8,6 +8,7 @@ periods:
   updated_at: '2026-11-03'
   revenue: 14.6072
   adjusted_profit: 6.0384
+  operating_cash_flow: 6.266354725599999
   inventory: 9.8227286203
   accounts_receivable: 6.1990303752
   sources:
@@ -18,12 +19,16 @@ periods:
   - title: 澜起科技2026年第一季度报告
     url: https://www.montage-tech.com/cn/uploads/files/202605/688008_2026_Q1_20260428.pdf
     locator: P7季末合并存货982,272,862.03元、应收账款619,903,037.52元
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688008
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：一季报累计626,635,472.56元为单季数；批量回填未核财报页码
   notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元
 - period: 2026Q2
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 18.7478
   adjusted_profit: 7.1864
+  operating_cash_flow: 7.01392571
   inventory: 9.9635
   accounts_receivable: 9.7461142398
   sources:
@@ -35,12 +40,17 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688008
     locator: 应收账款ACCOUNTS_RECE 974,611,423.98元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688008
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：中报累计1,328,028,043.56元 − 一季报累计626,635,472.56元
+      = 701,392,571.00元；批量回填未核财报页码，单季差分
   notes: 营收沿用证据精度10000元；扣非归母沿用证据精度10000元；季末合并存货净额沿用证据精度10000元
 - period: 2026Q3
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 20.7891866966
   adjusted_profit: 10.0479616713
+  operating_cash_flow: 15.702890115399999
   inventory: 11.6585289844
   accounts_receivable: 5.3041110001
   sources:
@@ -51,3 +61,7 @@ periods:
   - title: 澜起科技2026年第三季度报告
     url: https://static.cninfo.com.cn/finalpage/2026-10-30/1225643270.PDF
     locator: P8季末合并应收账款530,411,100.01元
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH688008
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：三季报累计2,898,317,055.10元 − 中报累计1,328,028,043.56元
+      = 1,570,289,011.54元；批量回填未核财报页码，单季差分

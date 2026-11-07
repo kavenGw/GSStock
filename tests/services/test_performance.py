@@ -21,7 +21,8 @@ def company(tmp_path):
         'schema_version': 1, 'stock_code': '000001', 'stock_name': '测试公司', 'unit': 'CNY_100M',
         'periods': [{
             'period': '2026Q1', 'report_type': 'formal', 'updated_at': '2026-10-31',
-            'revenue': 100, 'adjusted_profit': 10, 'inventory': 20, 'accounts_receivable': 30,
+            'revenue': 100, 'adjusted_profit': 10, 'operating_cash_flow': 15,
+            'inventory': 20, 'accounts_receivable': 30,
             'sources': [{'title': '正式季报', 'url': 'https://example.com/q1.pdf', 'locator': 'p2主要指标/p5合并存货及应收账款'}],
         }],
     }
@@ -97,6 +98,20 @@ def test_receivable_is_required_and_compared_with_previous_quarter_end(company):
     data['periods'].append({**q1, 'period': '2026Q2', 'accounts_receivable': 45})
     q2 = next(row for row in performance_rows([data]) if row['period'] == '2026Q2')
     assert q2['accounts_receivable_qoq']['value'] == 50
+
+
+def test_operating_cash_flow_is_required_and_allows_negative(company):
+    folder, data = company
+    q1 = data['periods'][0]
+    del q1['operating_cash_flow']
+    with pytest.raises(ValueError, match='缺少字段 operating_cash_flow'):
+        validate_company(data, folder)
+    q1['operating_cash_flow'] = -8
+    data['source_doc'] = 'sectors/electronics/pcb/测试公司/index.md'
+    validate_company(data, folder)
+    data['periods'].append({**q1, 'period': '2026Q2', 'operating_cash_flow': 24})
+    q2 = next(row for row in performance_rows([data]) if row['period'] == '2026Q2')
+    assert q2['operating_cash_flow_qoq'] == {'value': None, 'label': '扭亏'}
 
 
 def test_missing_value_requires_reason_and_preserves_zero(company):

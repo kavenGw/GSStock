@@ -8,6 +8,7 @@ periods:
   updated_at: '2026-11-03'
   revenue: 41.8807557404
   adjusted_profit: 14.100642842
+  operating_cash_flow: 17.8305727872
   inventory: 34.0143866014
   accounts_receivable: 2.8654032923
   sources:
@@ -18,11 +19,15 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH603986
     locator: 应收账款ACCOUNTS_RECE 286,540,329.23元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH603986
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：一季报累计1,783,057,278.72元为单季数；批量回填未核财报页码
 - period: 2026Q2
   report_type: formal
   updated_at: '2026-11-03'
   revenue: 73.7768485811
   adjusted_profit: 34.7296919473
+  operating_cash_flow: 42.6528377834
   inventory: 41.8422474831
   accounts_receivable: 4.3568950357
   sources:
@@ -36,6 +41,10 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH603986
     locator: 应收账款ACCOUNTS_RECE 435,689,503.57元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH603986
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：中报累计6,048,341,057.06元 − 一季报累计1,783,057,278.72元
+      = 4,265,283,778.34元；批量回填未核财报页码，单季差分
   notes: 营收单季差分（元）：11565760432.15 - 4188075574.04 = 7377684858.11；扣非归母单季差分（元）：4883033478.93
     - 1410064284.20 = 3472969194.73
 - period: 2026Q3
@@ -43,6 +52,7 @@ periods:
   updated_at: '2026-11-03'
   revenue: 87.3161094435
   adjusted_profit: 45.5092744296
+  operating_cash_flow: 40.7573117182
   inventory: 62.9197470244
   accounts_receivable: 5.9966392058
   sources:
@@ -57,5 +67,9 @@ periods:
   - title: 东方财富资产负债表（按报告期）
     url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH603986
     locator: 应收账款ACCOUNTS_RECE 599,663,920.58元；批量回填未核财报页码，同接口存货与本季已核存货一致
+  - title: 东方财富现金流量表（按报告期）
+    url: https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=SH603986
+    locator: 经营活动产生的现金流量净额NETCASH_OPERATE：三季报累计10,124,072,228.88元 − 中报累计6,048,341,057.06元
+      = 4,075,731,171.82元；批量回填未核财报页码，单季差分
   notes: 营收单季差分（元）：20297371376.50 - 11565760432.15 = 8731610944.35；扣非归母单季差分（元）：9433960921.89
     - 4883033478.93 = 4550927442.96
