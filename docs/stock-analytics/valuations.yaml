@@ -4168,18 +4168,20 @@
   currency: CNY
   sector: semiconductor
   rating: exclude
-  bear: 2.1
-  base: 4.2
-  bull: 10.5
+  bear: 2.24
+  base: 4.05
+  bull: 16.47
   dividend_yield: 0
-  conviction_date: '2026-08-17'
-  source_doc: sectors/semiconductor/materials/2026-08-17-光智科技-buffett分析.md
+  conviction_date: '2026-11-07'
+  source_doc: sectors/semiconductor/materials/光智科技/index.md
   quality: 1
   themes:
   - 磷化铟
   - 红外光学
-  - 国产替代
-  - 关联并购
+  - 光模块
+  - AI概念
+  - 出口管制
+  - 关联交易
   - 题材炒作
 - stock_code: 002979
   stock_name: 雷赛智能
