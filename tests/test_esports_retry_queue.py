@@ -144,8 +144,7 @@ def test_push_lol_supplement_empty_data_for_always_show(_reset_state, monkeypatc
 
     rq._push_supplement(unit, {'today': [], 'yesterday': []})
 
-    assert len(cap.calls) == 1
-    assert '今日无赛事' in cap.calls[0][0] and 'LCK' in cap.calls[0][0]
+    assert cap.calls == []
 
 
 def test_push_lol_supplement_empty_data_for_non_always_show(_reset_state, monkeypatch):

@@ -119,7 +119,7 @@ class EsportsDailyScheduleStrategy(Strategy):
                     continue
                 prev = data.get('yesterday') or []
                 matches = data.get('today') or []
-                if not prev and not matches and league not in LOL_ALWAYS_SHOW:
+                if not prev and not matches:
                     continue
                 total += len(matches)
 

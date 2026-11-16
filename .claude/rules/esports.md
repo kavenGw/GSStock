@@ -10,7 +10,7 @@ paths:
 环境变量（`ESPORTS_ENABLED` / `NBA_ENABLED` / `WORLDCUP_ENABLED` / `ESPORTS_*_MONITOR_INTERVAL` / `ESPORTS_PRE_MATCH_MINUTES` / `ESPORTS_FETCH_TIMEOUT`）清单与默认值见 `.env.sample`。
 
 **推送逻辑**：
-- 每日 07:00 `esports_daily_schedule` 推**昨日结果 + 今日赛程**到 `news_nba` / `news_lol` / `news_worldcup`，是赛事推送**唯一入口**，勿再挂到每日简报（曾造成双推）。NBA 按 `NBA_TEAM_MONITOR` 过滤球队；LoL 覆盖 LPL/LCK/先锋赛/Worlds/MSI；世界杯全量不过滤。
+- 每日 07:00 `esports_daily_schedule` 推**昨日结果 + 今日赛程**到 `news_nba` / `news_lol` / `news_worldcup`，是赛事推送**唯一入口**，勿再挂到每日简报（曾造成双推）。NBA 按 `NBA_TEAM_MONITOR` 过滤球队；LoL 覆盖 LPL/LCK/先锋赛/Worlds/MSI，昨日今日都无赛事的联赛不出现、全部为空则不推（补推同理，`LOL_ALWAYS_SHOW` 只用于失败入队）；世界杯全量不过滤。
 - 赛前提醒、比分变化（仅变化时推）、终场比分；NBA 18:00 额外 setup 覆盖当晚；世界杯靠 22:00 与 5:00 setup 覆盖凌晨/白天场次。
 - **失败重试**：拉取失败挂起 5min × 3 轮，任一轮成功立即补推，3 轮全失败才推「数据获取失败」。状态在进程内 `esports_retry_queue.py`，重启丢失（接受漏一次）。
 - `_fetch_*` 返回 None（失败）vs 空 dict（无赛事）语义与日志要求见 notifications.md。

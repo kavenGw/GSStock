@@ -122,15 +122,9 @@ def _push_supplement(unit, matches):
 def _push_lol_supplement(league, matches):
     from app.services.notification import NotificationService
     from app.config.notification_config import CHANNEL_LOL
-    from app.config.esports_config import LOL_ALWAYS_SHOW
 
     today_matches = matches.get('today') or []
     if not today_matches:
-        if league in LOL_ALWAYS_SHOW:
-            NotificationService.send_slack(
-                f'🎮 *LoL 补充* — *{league}*\n今日无赛事',
-                CHANNEL_LOL,
-            )
         return
 
     lines = [f'🎮 *LoL 补充* — *{league}* ({len(today_matches)}场)']

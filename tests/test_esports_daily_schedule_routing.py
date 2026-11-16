@@ -111,8 +111,21 @@ def test_lol_all_success_pushes_first_no_enqueue(monkeypatch):
 
     assert len(cap.calls) == 1
     text = cap.calls[0][0]
-    assert 'LPL' in text and 'LCK' in text and '先锋赛' in text and '今日: 无赛事' in text
+    assert 'LPL' in text and 'LCK' in text and '先锋赛' not in text
     assert rq._pending == {}
+
+
+def test_lol_no_matches_no_push(monkeypatch):
+    cap = _patch_slack(monkeypatch)
+    fake_lol = {league: {'today': [], 'yesterday': []} for league in ('LPL', 'LCK', '先锋赛')}
+    monkeypatch.setattr(
+        'app.services.esports_service.EsportsService.get_lol_schedule',
+        staticmethod(lambda today=None: fake_lol),
+    )
+
+    EsportsDailyScheduleStrategy._push_lol_today()
+
+    assert cap.calls == []
 
 
 def test_nba_failure_enqueues(monkeypatch, enable_nba):
