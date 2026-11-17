@@ -1,0 +1,57 @@
+schema_version: 1
+stock_code: 09868
+stock_name: 小鹏集团
+unit: CNY_100M
+periods:
+- period: 2025Q3
+  report_type: formal
+  updated_at: '2026-11-17'
+  revenue: 203.81
+  adjusted_profit: null
+  operating_cash_flow: null
+  inventory: 92.41
+  accounts_receivable: null
+  missing_reasons:
+    adjusted_profit: 美国会计准则无扣非口径；GAAP 归母净亏 -3.81 亿、公司 Non-GAAP 归母净亏 -1.52 亿（仅剔股权激励与或有对价公允价值），二者均非扣非，不填
+    operating_cash_flow: 季度业绩公告不含现金流量表，无同主体累计数可差分
+    accounts_receivable: 原表为“应收账款及票据”合并列示（16.36 亿），无法拆出不含票据的应收账款
+  sources:
+  - title: XPENG Reports Third Quarter 2025 Unaudited Financial Results（6-K EX-99.1）
+    url: https://www.sec.gov/Archives/edgar/data/1810997/000119312525283869/d948120dex991.htm
+    locator: 未经审计简明合并综合亏损表 Total revenues 20,380,950 千元；资产负债表 Inventory 9,240,680
+      千元（2025-09-30）
+- period: 2026Q2
+  report_type: formal
+  updated_at: '2026-11-17'
+  revenue: 197.44
+  adjusted_profit: null
+  operating_cash_flow: null
+  inventory: 137.29
+  accounts_receivable: null
+  missing_reasons:
+    adjusted_profit: 美国会计准则无扣非口径；GAAP 归母净亏 -13.37 亿、公司 Non-GAAP 归母净亏 -12.37 亿，二者均非扣非，不填
+    operating_cash_flow: 季度业绩公告不含现金流量表；中期报告仅有上半年累计，一季度累计数未披露，无法差分单季
+    accounts_receivable: 原表为“应收账款及票据”合并列示（11.40 亿），无法拆出不含票据的应收账款
+  sources:
+  - title: XPENG Reports Second Quarter 2026 Unaudited Financial Results（6-K EX-99.1）
+    url: https://www.sec.gov/Archives/edgar/data/1810997/000119312526364050/d75446dex991.htm
+    locator: 未经审计简明合并综合亏损表 Total revenues 19,743,593 千元（三个月截至 2026-06-30）；资产负债表 Inventory
+      13,729,266 千元（2026-06-30）
+- period: 2026Q3
+  report_type: formal
+  updated_at: '2026-11-17'
+  revenue: 242.76
+  adjusted_profit: null
+  operating_cash_flow: null
+  inventory: 168.6
+  accounts_receivable: null
+  missing_reasons:
+    adjusted_profit: 美国会计准则无扣非口径；GAAP 归母净亏 -8.68 亿、公司 Non-GAAP 归母净亏 -8.87 亿，二者均非扣非，不填
+    operating_cash_flow: 季度业绩公告不含现金流量表；电话会称经营现金流超 20 亿元属口头转述，非正式财报，不填
+    accounts_receivable: 原表为“应收账款及票据”合并列示（26.20 亿），无法拆出不含票据的应收账款
+  sources:
+  - title: XPENG Reports Third Quarter 2026 Unaudited Financial Results（6-K EX-99.1）
+    url: https://www.sec.gov/Archives/edgar/data/0001810997/000119312526461897/d182197dex991.htm
+    locator: 第 11 页未经审计简明合并综合亏损表 Total revenues 24,276,048 千元（三个月截至 2026-09-30）；第
+      9 页资产负债表 Inventory 16,859,516 千元（2026-09-30）
+  notes: 未经审计季度数；金额为原表千元÷100000 取两位；Q3 单季直接取三个月报表列，未做累计差分
