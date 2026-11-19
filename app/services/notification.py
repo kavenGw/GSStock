@@ -25,6 +25,9 @@ _HK_CODE_RE = re.compile(r'\b(\d{4,5})\.HK\b')
 # Slack section text 硬上限 3000 字，留出余量防表情/转义放大后越界
 CALENDAR_SECTION_MAX_CHARS = 2800
 
+# Slack 纯文本 text 建议上限 4000 字，盯盘告警按股为单位装箱
+WATCH_ALERT_MAX_CHARS = 4000
+
 
 class NotificationService:
     """消息推送服务"""
@@ -111,15 +114,18 @@ class NotificationService:
 
     @staticmethod
     def push_watch_alerts(alerts) -> bool:
-        """合并盯盘告警推送：一股一条，跳过 LOW（LOW 只 debug log）"""
-        pushed = 0
+        """同一 tick 的告警合并一条，超 WATCH_ALERT_MAX_CHARS 按股拆；HIGH 在前，跳过 LOW"""
         skipped = 0
-        failed = 0
+        blocks = []
+        pushable = []
         for a in alerts:
             if a.priority == 'LOW':
                 skipped += 1
                 logger.debug(f'[盯盘告警] {a.name}({a.code}) LOW 静默: {a.primary_line}')
-                continue
+            else:
+                pushable.append(a)
+        pushable.sort(key=lambda a: a.priority != 'HIGH')
+        for a in pushable:
             chg = a.change_percent
             if chg is None:
                 emoji = '⚠️'
@@ -139,11 +145,17 @@ class NotificationService:
                 lines.append(f'  · {s}')
             if a.context_line:
                 lines.append(a.context_line)
-            if NotificationService.send_slack('\n'.join(lines), CHANNEL_WATCH):
-                pushed += 1
+            blocks.append('\n'.join(lines))
+
+        messages = []
+        for block in blocks:
+            if messages and len(messages[-1]) + 2 + len(block) <= WATCH_ALERT_MAX_CHARS:
+                messages[-1] += '\n\n' + block
             else:
-                failed += 1
-        logger.info('[盯盘告警] 发送汇总 sent=%d failed=%d low_priority=%d', pushed, failed, skipped)
+                messages.append(block)
+        pushed = sum(1 for m in messages if NotificationService.send_slack(m, CHANNEL_WATCH))
+        logger.info('[盯盘告警] 发送汇总 stocks=%d messages=%d sent=%d failed=%d low_priority=%d',
+                    len(blocks), len(messages), pushed, len(messages) - pushed, skipped)
         return pushed > 0
 
     @staticmethod

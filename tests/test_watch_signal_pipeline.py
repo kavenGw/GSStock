@@ -108,6 +108,38 @@ def test_push_skips_low_and_formats_high():
     assert '  · 下穿 MA5 20.50' in text
 
 
+def _capture_push(alerts):
+    from unittest.mock import patch
+    from app.services.notification import NotificationService
+    sent = []
+    with patch.object(NotificationService, 'send_slack', side_effect=lambda t, c: sent.append(t) or True):
+        NotificationService.push_watch_alerts(alerts)
+    return sent
+
+
+def test_push_merges_tick_into_one_message_high_first():
+    mid = ConsolidatedAlert(code='002463', name='沪电股份', priority='MID', direction='down',
+                            primary_line='急跌 -1.6%', change_percent=0.36)
+    high = ConsolidatedAlert(code='603626', name='科森科技', priority='HIGH', direction='resistance_break',
+                             primary_line='突破阻力 30.00', change_percent=2.30)
+    sent = _capture_push([mid, high])
+    assert len(sent) == 1
+    assert sent[0].index('科森科技') < sent[0].index('沪电股份')
+    assert '\n\n' in sent[0]
+
+
+def test_push_splits_on_stock_boundary_over_limit():
+    from app.services.notification import WATCH_ALERT_MAX_CHARS
+    filler = 'x' * (WATCH_ALERT_MAX_CHARS // 3)
+    alerts = [ConsolidatedAlert(code=f'60000{i}', name=f'股{i}', priority='MID', direction='down',
+                                primary_line='急跌', context_line=filler, change_percent=-1.0)
+              for i in range(5)]
+    sent = _capture_push(alerts)
+    assert len(sent) == 3
+    assert all(len(m) <= WATCH_ALERT_MAX_CHARS for m in sent)
+    assert sum(m.count('[MID]') for m in sent) == 5
+
+
 def test_process_populates_change_percent():
     raw = [_sig('603626', 'resistance_break', 'resistance_break', '突破阻力 30.0 | 当前 30.05')]
     prices = {'603626': {'current_price': 30.05, 'change_percent': 2.35, 'volume': 1200}}
