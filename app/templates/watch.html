@@ -22,6 +22,9 @@
 .price-up { color: #dc3545; }
 .price-down { color: #28a745; }
 .price-flat { color: #6c757d; }
+#perpetualRows td.price-up { color: #dc3545 !important; }
+#perpetualRows td.price-down { color: #28a745 !important; }
+#perpetualRows td.text-muted { color: var(--text-muted, #6c757d) !important; }
 .price-age { margin-left: 4px; font-size: 11px; color: #999; }
 .entry-signal {
     display: inline-block;
@@ -89,6 +92,25 @@
 
 <!-- 股票卡片列表 -->
 <div id="stockCards" class="d-none"></div>
+
+<section class="card mt-4 mb-3" aria-labelledby="perpetualTitle">
+    <div class="card-header">
+        <h5 id="perpetualTitle" class="mb-1">币安永续</h5>
+        <small class="text-muted">全天每分钟更新 · 合约报价与股票/商品期货报价可能不同 · 资金费率为本期费率</small>
+        <div id="perpetualStatus" class="small text-muted" role="status">加载中...</div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead><tr>
+                <th>标的 / 合约</th><th>类型 / 报价单位</th>
+                <th class="text-end">成交价</th><th class="text-end">24h涨跌</th>
+                <th class="text-end">标记价格</th><th class="text-end">资金费率</th>
+                <th>下次资金结算</th><th>状态 / 最后更新</th>
+            </tr></thead>
+            <tbody id="perpetualRows"><tr><td colspan="8" class="text-center text-muted">加载中...</td></tr></tbody>
+        </table>
+    </div>
+</section>
 
 <!-- 信号阈值设置弹窗 -->
 <div class="modal fade" id="signalSettingsModal" tabindex="-1">
@@ -171,5 +193,6 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/signal-detector.js') }}"></script>
 <script src="{{ url_for('static', filename='js/watch.js') }}"></script>
+<script src="{{ url_for('static', filename='js/watch_perpetuals.js') }}"></script>
 <script src="{{ url_for('static', filename='js/value_dip.js') }}"></script>
 {% endblock %}

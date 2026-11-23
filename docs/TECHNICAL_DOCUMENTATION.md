@@ -1,5 +1,7 @@
 # GSStock 技术文档
 
+币安永续盯盘的行情口径、全天调度、Slack 阈值与故障处理见 [盯盘币安永续](watch-binance-perpetuals.md)。
+
 > 版本: 1.0
 > 最后更新: 2026-02-14
 

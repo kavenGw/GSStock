@@ -1,0 +1,64 @@
+"""独立于股票交易日历的币安永续行情与推送。"""
+import time
+from datetime import datetime, timedelta, timezone
+
+from app.config.binance_config import BINANCE_ALERT_THRESHOLD_PCT, BINANCE_ALERT_COOLDOWN_MINUTES
+from app.config.notification_config import CHANNEL_WATCH
+from app.services.binance_perpetual import binance_perpetual_service
+from app.strategies.base import Strategy
+
+CST = timezone(timedelta(hours=8))
+
+
+def format_rows(rows):
+    lines = []
+    for row in rows:
+        label = f"{row['name']} · {row['symbol']} · {row['kind']}"
+        if not row['available']:
+            updated = row.get('updated_at')
+            last = datetime.fromtimestamp(updated, CST).strftime('%m-%d %H:%M') if updated else '暂无'
+            lines.append(f'{label}：行情不可用（最后更新 {last}）')
+            continue
+        change = row.get('change_15m_pct')
+        window = f' · 15分钟 {change:+.2f}%' if change is not None else ''
+        lines.append(
+            f"{label}：成交 {row['price']:g} {row['price_unit']} · "
+            f"24h {row['change_pct']:+.2f}% · 标记 {row['mark_price']:g} · "
+            f"资金费率 {row['funding_rate_pct']:+.4f}%{window}")
+    return '\n'.join(lines)
+
+
+class BinanceWatchStrategy(Strategy):
+    name = 'binance_watch'
+    description = '币安永续全天行情、十五分钟异动和北京时间早晚摘要'
+    schedule = 'interval_minutes:1'
+
+    def __init__(self):
+        super().__init__()
+        self._pushed = {}
+        self._summary_slot = None
+
+    def scan(self):
+        from app.services.notification import NotificationService
+
+        binance_perpetual_service.refresh()
+        rows = binance_perpetual_service.snapshot()['data']
+        if not rows:
+            return []
+        now = time.time()
+        alerts = [r for r in rows if r['available'] and r['change_15m_pct'] is not None
+                  and abs(r['change_15m_pct']) >= BINANCE_ALERT_THRESHOLD_PCT
+                  and now - self._pushed.get(r['symbol'], 0) >= BINANCE_ALERT_COOLDOWN_MINUTES * 60]
+        if alerts and NotificationService.send_slack(
+                '*币安永续 · 15分钟异动*\n' + format_rows(alerts), CHANNEL_WATCH):
+            for row in alerts:
+                self._pushed[row['symbol']] = now
+
+        local = datetime.fromtimestamp(now, CST)
+        slot = local.strftime('%Y-%m-%d %H')
+        if local.hour in (9, 21) and local.minute < 5 and self._summary_slot != slot:
+            if NotificationService.send_slack(
+                    f'*币安永续 · 行情摘要 {local:%Y-%m-%d %H:%M} 北京时间*\n' + format_rows(rows),
+                    CHANNEL_WATCH):
+                self._summary_slot = slot
+        return []

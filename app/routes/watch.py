@@ -19,6 +19,13 @@ def watch_list():
     return jsonify({'success': True, 'data': items})
 
 
+@watch_bp.route('/perpetuals')
+def perpetuals():
+    from app.services.binance_perpetual import binance_perpetual_service
+
+    return jsonify({'success': True, **binance_perpetual_service.snapshot()})
+
+
 @watch_bp.route('/prices')
 def prices():
     from app.services.unified_stock_data import unified_stock_data_service
