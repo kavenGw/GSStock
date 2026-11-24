@@ -10,22 +10,24 @@ from app.strategies.base import Strategy
 CST = timezone(timedelta(hours=8))
 
 
-def format_rows(rows):
+def format_rows(rows, *, alert=False):
     lines = []
     for row in rows:
-        label = f"{row['name']} · {row['symbol']} · {row['kind']}"
+        label = f"*{row['name']} · {row['symbol']}*"
         if not row['available']:
             updated = row.get('updated_at')
             last = datetime.fromtimestamp(updated, CST).strftime('%m-%d %H:%M') if updated else '暂无'
-            lines.append(f'{label}：行情不可用（最后更新 {last}）')
+            lines.append(f'{label}\n行情不可用（最后更新 {last}）')
             continue
         change = row.get('change_15m_pct')
-        window = f' · 15分钟 {change:+.2f}%' if change is not None else ''
+        heading = ''
+        if alert and change is not None:
+            direction = '上涨' if change > 0 else '下跌'
+            heading = f'*币安永续 · 15分钟{direction} {change:+.2f}%*\n'
         lines.append(
-            f"{label}：成交 {row['price']:g} {row['price_unit']} · "
-            f"24h {row['change_pct']:+.2f}% · 标记 {row['mark_price']:g} · "
-            f"资金费率 {row['funding_rate_pct']:+.4f}%{window}")
-    return '\n'.join(lines)
+            f"{heading}{label}\n"
+            f"最新价 {row['price']:g} {row['price_unit']} ｜24小时 {row['change_pct']:+.2f}%")
+    return '\n\n'.join(lines)
 
 
 class BinanceWatchStrategy(Strategy):
@@ -50,7 +52,7 @@ class BinanceWatchStrategy(Strategy):
                   and abs(r['change_15m_pct']) >= BINANCE_ALERT_THRESHOLD_PCT
                   and now - self._pushed.get(r['symbol'], 0) >= BINANCE_ALERT_COOLDOWN_MINUTES * 60]
         if alerts and NotificationService.send_slack(
-                '*币安永续 · 15分钟异动*\n' + format_rows(alerts), CHANNEL_WATCH):
+                format_rows(alerts, alert=True), CHANNEL_WATCH):
             for row in alerts:
                 self._pushed[row['symbol']] = now
 
@@ -58,7 +60,7 @@ class BinanceWatchStrategy(Strategy):
         slot = local.strftime('%Y-%m-%d %H')
         if local.hour in (9, 21) and local.minute < 5 and self._summary_slot != slot:
             if NotificationService.send_slack(
-                    f'*币安永续 · 行情摘要 {local:%Y-%m-%d %H:%M} 北京时间*\n' + format_rows(rows),
+                    f'*币安永续 · 行情摘要 {local:%Y-%m-%d %H:%M} 北京时间*\n\n' + format_rows(rows),
                     CHANNEL_WATCH):
                 self._summary_slot = slot
         return []
