@@ -4887,3 +4887,24 @@
   - 半导体设备
   - CPO
   note: 官方2026Q3已核且与用户PDF哈希一致；10/29收盘963.47元为完整财报披露前锚。正常化OE按8/12/20倍、25%/55%/20%加权，期望268.78元，安全边际-72.10%。现有现金先覆盖债务、剩余受经营与募投约束的现金不另加回，IPO资金不重复计价；新品验证不独立加利润，watch。
+- stock_code: '600641'
+  stock_name: 先导基电
+  market: A
+  currency: CNY
+  sector: materials
+  rating: exclude
+  bear: 4.0
+  base: 6.13
+  bull: 9.17
+  conviction_date: '2026-11-24'
+  source_doc: sectors/materials/minor-metals/先导基电/index.md
+  themes:
+  - 铋
+  - 小金属
+  - 出口管制
+  - 离子注入
+  - 半导体设备
+  - 资产注入
+  - 关联交易
+  - commodity-cyclical
+  note: 首次建档（2026Q3 报后），exclude。三档正常化归母 −3.34 / −0.59 / +2.26 亿，利润法失效，三档全部以资产法分部加总为主锚（PB 0.45× / 0.69× / 1.03×），期望每股 5.99 元，安全边际 −78.7%。主业为铋材料（H1 占营收 86.9%）。
