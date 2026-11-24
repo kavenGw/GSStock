@@ -30,6 +30,19 @@ def format_rows(rows, *, alert=False):
     return '\n\n'.join(lines)
 
 
+def send_summary(rows, local):
+    from app.services.notification import NotificationService
+    from app.services.notification_tables import format_binance_summary
+
+    title = f'币安永续 · 行情摘要 {local:%Y-%m-%d %H:%M} 北京时间'
+    for message in format_binance_summary(rows, title):
+        if NotificationService.send_slack(message['text'], CHANNEL_WATCH, blocks=message['blocks']):
+            continue
+        if not NotificationService.send_slack(message['text'], CHANNEL_WATCH):
+            return False
+    return True
+
+
 class BinanceWatchStrategy(Strategy):
     name = 'binance_watch'
     description = '币安永续全天行情、十五分钟异动和北京时间早晚摘要'
@@ -59,8 +72,6 @@ class BinanceWatchStrategy(Strategy):
         local = datetime.fromtimestamp(now, CST)
         slot = local.strftime('%Y-%m-%d %H')
         if local.hour in (9, 21) and local.minute < 5 and self._summary_slot != slot:
-            if NotificationService.send_slack(
-                    f'*币安永续 · 行情摘要 {local:%Y-%m-%d %H:%M} 北京时间*\n\n' + format_rows(rows),
-                    CHANNEL_WATCH):
+            if send_summary(rows, local):
                 self._summary_slot = slot
         return []

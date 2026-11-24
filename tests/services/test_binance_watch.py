@@ -9,13 +9,14 @@ from app.services.notification import NotificationService
 @pytest.fixture
 def env(monkeypatch):
     state = {'now': datetime(2026, 11, 22, 1, 0, tzinfo=timezone.utc).timestamp(),
-             'ok': True, 'sent': [], 'rows': []}
+             'ok': True, 'sent': [], 'blocks': [], 'rows': []}
     monkeypatch.setattr(module.time, 'time', lambda: state['now'])
     monkeypatch.setattr(module.binance_perpetual_service, 'refresh', lambda: None)
     monkeypatch.setattr(module.binance_perpetual_service, 'snapshot', lambda: {'data': state['rows']})
 
-    def send(message, channel):
+    def send(message, channel, blocks=None):
         state['sent'].append((message, channel))
+        state['blocks'].append(blocks)
         return state['ok']
 
     monkeypatch.setattr(NotificationService, 'send_slack', staticmethod(send))
@@ -32,19 +33,22 @@ def test_weekend_summary_uses_beijing_time_and_success_dedup(env):
     env['ok'] = False
     strategy.scan()
     assert strategy._summary_slot is None
+    assert len(env['sent']) == 2
+    assert env['blocks'][0][1]['type'] == 'table'
+    assert env['blocks'][1] is None
     env['ok'] = True
     env['now'] += 60
     strategy.scan()
     strategy.scan()
-    assert len(env['sent']) == 2
+    assert len(env['sent']) == 3
     text, channel = env['sent'][-1]
     assert channel == 'news_watch'
     assert '2026-11-22 09:01 北京时间' in text
-    assert '*英伟达 · NVDAUSDT*\n最新价 103 USDT ｜24小时 +2.00%' in text
+    assert '英伟达 | NVDAUSDT | 103 USDT | +2.00% | 交易中' in text
     assert all(field not in text for field in ('资金费率', '标记', '股票/ETF永续', '15分钟'))
     env['now'] += 12 * 3600
     strategy.scan()
-    assert len(env['sent']) == 3
+    assert len(env['sent']) == 4
 
 
 @pytest.mark.parametrize('change', [3.1, -3.1])
@@ -86,7 +90,8 @@ def test_summary_marks_unavailable_quotes(env):
     env['rows'][0]['available'] = False
     env['strategy'].scan()
     assert '行情不可用' in env['sent'][0][0]
-    assert '最新价' not in env['sent'][0][0]
+    row = env['blocks'][0][1]['rows'][1]
+    assert [cell['text'] for cell in row[2:4]] == ['—', '—']
 
 
 def test_summary_separates_symbols_and_preserves_quanto_unit(env):
@@ -94,7 +99,7 @@ def test_summary_separates_symbols_and_preserves_quanto_unit(env):
                             price=35.2, price_unit='HKD（quanto）', change_pct=-1.2))
     env['strategy'].scan()
     text = env['sent'][0][0]
-    assert '24小时 +2.00%\n\n*小米 · HK1810USDT*\n最新价 35.2 HKD（quanto） ｜24小时 -1.20%' in text
+    assert '小米 | HK1810USDT | 35.2 HKD（quanto） | -1.20%' in text
 
 
 def test_multiple_alerts_keep_direction_with_each_symbol(env):
@@ -107,3 +112,20 @@ def test_multiple_alerts_keep_direction_with_each_symbol(env):
     assert '*币安永续 · 15分钟上涨 +3.74%*\n*英伟达 · NVDAUSDT*' in text
     assert '\n\n*币安永续 · 15分钟下跌 -4.20%*\n*智谱 · ZHIPUSDT*' in text
     assert set(env['strategy']._pushed) == {'NVDAUSDT', 'ZHIPUSDT'}
+
+
+def test_table_failure_falls_back_to_text_and_deduplicates(env, monkeypatch):
+    attempts = []
+
+    def send(message, channel, blocks=None):
+        attempts.append((message, blocks))
+        return blocks is None
+
+    monkeypatch.setattr(NotificationService, 'send_slack', staticmethod(send))
+    env['strategy'].scan()
+    env['strategy'].scan()
+    assert len(attempts) == 2
+    assert attempts[0][0] == attempts[1][0]
+    assert attempts[0][1][1]['type'] == 'table'
+    assert attempts[1][1] is None
+    assert env['strategy']._summary_slot == '2026-11-22 09'

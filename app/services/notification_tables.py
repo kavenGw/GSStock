@@ -1,4 +1,5 @@
 """Slack 数值列表表格及纯文本回退。"""
+from datetime import datetime, timedelta, timezone
 
 PAGE_SIZE = 20
 
@@ -24,6 +25,27 @@ def table_messages(title: str, headers: list[str], rows: list[list[str]],
         }]
         messages.append({'text': text, 'blocks': blocks})
     return messages
+
+
+def format_binance_summary(rows: list[dict], title: str) -> list[dict]:
+    ordered = sorted(rows, key=lambda r: (not r['available'],
+                                         -r['change_pct'] if r['available'] else 0))
+    table_rows = []
+    for row in ordered:
+        if row['available']:
+            price = f"{row['price']:g} {row['price_unit']}"
+            change = f"{row['change_pct']:+.2f}%"
+            status = '交易中'
+        else:
+            price = change = '—'
+            updated = row.get('updated_at')
+            last = (datetime.fromtimestamp(updated, timezone(timedelta(hours=8)))
+                    .strftime('%m-%d %H:%M')) if updated else '暂无'
+            status = f'行情不可用（最后更新 {last}）'
+        table_rows.append([row['name'], row['symbol'], price, change, status])
+    return table_messages(title, ['标的', '合约', '最新价', '24小时涨跌', '状态'],
+                          table_rows, left_columns=(0, 1, 4),
+                          subtitle='按滚动 24 小时涨跌幅降序 · 不可用行情置底')
 
 
 def format_volume(value, unit: str) -> str:

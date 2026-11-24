@@ -23,11 +23,17 @@
 - 每天北京时间 09:00、21:00 各发一次摘要，包含不可用条目的状态；由 UTC+8 显式换算，不依赖服务器时区。调度每分钟触发，允许前五分钟内发送或重试，窗口之外不补发。
 - 两类消息均发到既有 `CHANNEL_WATCH`（`news_watch`），标题带“币安永续”。只有 Slack 返回成功才记录冷却或摘要已发送状态；失败下次扫描重试。
 
-推送统一使用精简分行格式：异动先显示“币安永续 · 15分钟上涨/下跌 ±x.xx%”，再显示加粗的名称与合约代码，下一行显示最新价（保留实际报价单位）及 24 小时涨跌。多标的之间空行分隔，每个异动标的各自显示方向与幅度。定时摘要保留北京时间标题，各标的统一显示名称、代码、最新价与 24 小时涨跌；不可用行情只显示状态及最后更新时间。合约类型、标记价和资金费率不再常驻推送正文，仍可在盯盘页查看。
+异动继续使用精简分行格式：先显示“币安永续 · 15分钟上涨/下跌 ±x.xx%”，再显示加粗的名称与合约代码，下一行显示最新价（保留实际报价单位）及 24 小时涨跌。多标的之间空行分隔，每个异动标的各自显示方向与幅度。
+
+定时摘要使用 Slack 原生 Block Kit `table`，复用 `notification_tables.table_messages` 的表格和纯文本正文。列为“标的、合约、最新价、24小时涨跌、状态”，按滚动 24 小时涨跌幅降序排列，不可用标的置底。最新价保留实际报价单位；不可用行情的最新价与涨跌幅显示“—”，状态列保留最后更新时间，不展示旧价格。标题保留北京时间，超过二十个标的时分页，每条消息一张表。
+
+表格发送失败时立即尝试纯文本摘要；表格或回退文字发送成功后记录当前摘要已发送，两者均失败则在五分钟窗口内重试。异动提醒格式不变。合约类型、标记价和资金费率仍可在盯盘页查看。
 
 缓存、窗口、冷却和摘要去重均保存在进程内，重启后重新预热，摘要发送窗口内重启可能重复推送。沿用项目 `gunicorn.conf.py` 的单 worker 部署约定；多进程独立缓存不能保证共享行情或推送去重。没有新增数据库表或迁移。
 
 部署需重启应用，以注册 `strategy_binance_watch`，并启用既有调度器和 `SLACK_BOT_TOKEN`。页面首次加载可能等待一个扫描周期；调度器未启用时显示行情不可用。
+
+表格沿用现有 Slack Bot 和 `chat.postMessage`，无需图片上传权限或服务器中文字体。表格格式遵循 [Slack 官方 table block 文档](https://docs.slack.dev/reference/block-kit/blocks/table-block/)。
 
 可选环境变量：
 
@@ -40,5 +46,7 @@
 ## 验证
 
 沿用仓库现有 pytest：`python -m pytest tests/services/test_binance_perpetual.py tests/services/test_binance_watch.py tests/api/test_watch_perpetuals.py tests/test_watch_extended_alert.py tests/test_watch_prices_indices.py -q`。通知测试全部使用模拟发送，不发送真实 Slack；真实行情单独做只读接口验证。
+
+表格专项验证：`python -m pytest tests/services/test_binance_watch.py tests/services/test_notification_tables.py -q`，覆盖排序、报价单位、不可用行情、分页、表格失败回退、北京时间早晚时段和成功去重。
 
 官方来源：[行情接口](https://developers.binance.info/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data)、[股票永续与 NVIDIA 标的说明](https://www.binance.com/en/support/announcement/detail/1aa8f5f80e4a4afcab149e653fd3113d)、[港股 USDT 与 Quanto 口径](https://www.binance.com/en-AE/support/announcement/detail/18724cba64a048938986a98bbb257258)。

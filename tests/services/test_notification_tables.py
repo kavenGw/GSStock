@@ -6,7 +6,7 @@ from flask import Flask
 
 from app.scheduler.event_bus import event_bus
 from app.services.notification import NotificationService, CHANNEL_DAILY
-from app.services.notification_tables import format_volume, format_volume_alerts
+from app.services.notification_tables import format_binance_summary, format_volume, format_volume_alerts
 from app.services.watch_range_stats import format_range_stats
 from app.strategies.base import Signal, Strategy
 from app.strategies.volume_alert import VolumeAlertStrategy
@@ -111,3 +111,35 @@ def test_other_strategies_still_publish_individual_signals(monkeypatch):
     signals = [Signal('other', 'MEDIUM', 'title', 'detail') for _ in range(2)]
     Strategy.publish_signals(None, signals)
     assert [call.args[0] for call in publish.call_args_list] == signals
+
+
+def test_binance_table_sorts_and_hides_unavailable_quote():
+    rows = [
+        {'name': '小米', 'symbol': 'HK1810USDT', 'price': 26.2,
+         'price_unit': 'HKD（quanto）', 'change_pct': -5.21, 'available': True},
+        {'name': '泡泡玛特', 'symbol': 'POPMARTUSDT', 'price': 99,
+         'change_pct': 100, 'available': False, 'updated_at': 1795524780},
+        {'name': 'SK海力士', 'symbol': 'SKHYNIXUSDT', 'price': 842.34,
+         'price_unit': 'USDT', 'change_pct': 4.12, 'available': True},
+    ]
+    message, = format_binance_summary(rows, '币安永续 · 行情摘要')
+    table = message['blocks'][1]
+    cells = [[cell['text'] for cell in row] for row in table['rows']]
+    assert cells[0] == ['标的', '合约', '最新价', '24小时涨跌', '状态']
+    assert cells[1] == ['SK海力士', 'SKHYNIXUSDT', '842.34 USDT', '+4.12%', '交易中']
+    assert cells[2][2:4] == ['26.2 HKD（quanto）', '-5.21%']
+    assert cells[3][2:] == ['—', '—', '行情不可用（最后更新 11-24 20:53）']
+    assert rows[0]['name'] == '小米'
+
+
+def test_binance_table_pages_keep_all_rows_and_missing_timestamp():
+    rows = [{'name': f'Stock {i}', 'symbol': f'A{i}USDT', 'price': 10,
+             'price_unit': 'USDT', 'change_pct': i, 'available': True} for i in range(41)]
+    rows.append({'name': 'Unavailable', 'symbol': 'STALEUSDT', 'available': False})
+    messages = format_binance_summary(rows, '币安摘要')
+    assert len(messages) == 3
+    cells = [row for m in messages for row in m['blocks'][1]['rows'][1:]]
+    assert len(cells) == 42
+    assert cells[0][0]['text'] == 'Stock 40'
+    assert cells[-1][-1]['text'] == '行情不可用（最后更新 暂无）'
+    assert format_binance_summary([], '币安摘要') == []
