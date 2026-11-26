@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-个人股票管理工具（Flask + SQLAlchemy + SQLite + akshare/yfinance + 智谱GLM/Gemini + APScheduler），OCR 识别用 RapidOCR(ONNX)，行情补充数据源 同花顺 / Twelve Data / Polygon / Webull（美股盘前盘后，无需 key）/ Alpaca（美股暗盘，免费档实时），可选 PyTorch（`app/ml/` AI 走势预测，未安装自动跳过）。
+个人股票管理工具（Flask + SQLAlchemy + SQLite + akshare/yfinance + 智谱GLM/Gemini + APScheduler），OCR 识别用 RapidOCR(ONNX)，行情补充数据源 同花顺 / Twelve Data / Polygon / Webull（美股盘前盘后，无需 key）/ 币安永续（暗盘合约行情），可选 PyTorch（`app/ml/` AI 走势预测，未安装自动跳过）。
 管理多个证券账户的持仓情况，支持上传持仓截图自动识别、多账户合并、操作建议记录。
 访问地址：http://127.0.0.1:5000
 
@@ -31,7 +31,7 @@ PYTHONIOENCODING=utf-8 python -c "import sqlite3; c=sqlite3.connect('data/stock.
 - `.claude/rules/notifications.md` — Slack频道/盯盘告警7类格式/排版/失败语义二分/推送去重 — 改推送前
 - `.claude/rules/news-and-research.md` — 新闻轮询/公司/华尔街/野村/博客/Trending/Release(GITHUB_RELEASE_REPOS) — 调轮询或加新源前
 - `.claude/rules/esports.md` — NBA/LoL/worldcup(已结束待删) 推送 + 失败重试队列 — 改 esports_service.py 前
-- `.claude/rules/watch.md` — 盯盘前端架构 + 美股扩展时段取价（Webull/Alpaca/退避）+ AI 分析调度 — 改 watch 模块前
+- `.claude/rules/watch.md` — 盯盘前端架构 + 美股扩展时段取价（Webull/币安/退避）+ AI 分析调度 — 改 watch 模块前
 - `.claude/rules/frontend.md` — 表格排序等前端通用约定 — 改任何模板/静态 JS 前
 - `.claude/rules/supply-chain.md` — 产业链图谱 SUPPLY_CHAIN_GRAPHS + tag 同步 — 改 supply_chain.py 或加图谱前
 - `.claude/rules/docs-conventions.md` — docs目录/frontmatter/lint/related_docs/sector归属 — 写分析文档、改 frontmatter、跑 lint 前

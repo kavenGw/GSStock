@@ -1,4 +1,4 @@
-"""美股扩展时段异动推送：阈值、首推/复推、时段外重置、合并一条消息、缓存为空不推"""
+﻿"""美股扩展时段异动推送：阈值、首推/复推、时段外重置、合并一条消息、缓存为空不推"""
 import pytest
 
 from app.services.notification import NotificationService
@@ -116,7 +116,7 @@ def test_overnight_session_pushed(env):
     env['cached'] = {'NVDA': _q('overnight', 212.0, -5.0)}
     env['strat'].scan()
     assert len(env['sent']) == 1
-    assert env['sent'][0][0].startswith('🌑 *美股暗盘异动*')
+    assert env['sent'][0][0].startswith('🌑 *币安永续暗盘异动（24h）*')
 
 
 class TestOvernightSession:
@@ -126,7 +126,7 @@ class TestOvernightSession:
                             staticmethod(lambda text, channel=None: sent.append(text) or True))
         rows = [{'code': 'NVDA', 'name': '英伟达', 'price': 213.47, 'change_pct': 5.2}]
         assert NotificationService.push_extended_alerts('overnight', rows) is True
-        assert sent[0].startswith('🌑 *美股暗盘异动*')
+        assert sent[0].startswith('🌑 *币安永续暗盘异动（24h）*')
 
     def test_pre_post_titles_unchanged(self, monkeypatch):
         sent = []

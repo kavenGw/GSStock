@@ -3413,7 +3413,7 @@ class UnifiedStockDataService:
         """美股扩展时段报价 {code: {session, price, change_pct, time, source}}，仅内存缓存
 
         盘前/盘后主源 Webull，缺口由 yfinance 兜底；
-        夜盘主源 Alpaca（feed=overnight），缺口回落 Webull（其 overnight=1 自闸仍在），无 yfinance 兜底。
+        暗盘读取币安永续快照，涨跌幅采用合约 24 小时口径。
         """
         if not stock_codes:
             return {}
@@ -3421,23 +3421,19 @@ class UnifiedStockDataService:
         if session in (None, 'regular'):
             return {}
 
+        if session == 'overnight':
+            return self.get_us_extended_cached(stock_codes)
+
         result = {} if force_refresh else self.get_us_extended_cached(stock_codes)
         todo = [c for c in stock_codes if c not in result]
         if not todo:
             return result
 
-        fetched = {}
-        if session == 'overnight':
-            from app.services import alpaca_quote
-            fetched = alpaca_quote.get_overnight_quotes(todo)
-
-        remaining = [c for c in todo if c not in fetched]
-        if remaining:
-            from app.services import webull_quote
-            fetched.update(webull_quote.get_extended_quotes(remaining, session))
+        from app.services import webull_quote
+        fetched = webull_quote.get_extended_quotes(todo, session)
 
         missing = [c for c in todo if c not in fetched]
-        if missing and session != 'overnight':
+        if missing:
             def fallback_one(code: str) -> tuple:
                 try:
                     info = self._fetch_yf_info(self._get_yfinance_symbol(code))
@@ -3471,6 +3467,18 @@ class UnifiedStockDataService:
         session = TradingCalendarService.get_us_session()
         if session in (None, 'regular'):
             return {}
+        if session == 'overnight':
+            from app.services.binance_perpetual import binance_perpetual_service
+
+            return {
+                row['source_code']: {
+                    'session': session, 'source': 'binance', 'price': row['price'],
+                    'change_pct': row['change_pct'],
+                    'time': datetime.fromtimestamp(row['updated_at']).isoformat(),
+                }
+                for row in binance_perpetual_service.snapshot()['data']
+                if row['available'] and row['source_code'] in stock_codes
+            }
         cached = memory_cache.get_batch(stock_codes, self.EXTENDED_CACHE_TYPE)
         return {c: q for c, q in cached.items() if q.get('session') == session}
 

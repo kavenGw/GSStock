@@ -26,8 +26,7 @@ paths:
 
 **取价源优先级**：
 - 盘前/盘后主源 **Webull**（`app/services/webull_quote.py`，无需 key，`pPrice` / `pChRatio×100`，tickerId 进程内永久缓存）；缺口由 yfinance `Ticker.info` 的 `preMarket*` / `postMarket*` 兜底。
-- 夜盘主源 **Alpaca**（`app/services/alpaca_quote.py`，`GET /v2/stocks/snapshots`，两个 feed 各一次批量请求）。`price` 取 `feed=overnight` 的 `latestTrade.p`；**基准取另一次 `feed=delayed_sip` 快照的 `dailyBar.c`**（若已翻篇退回该快照的 `prevDailyBar.c`；两者日期都须严格早于夜盘 bar 日期，否则不给价，宁缺勿错）。纳秒时间戳截到微秒否则 `fromisoformat` 抛错。未配 `ALPACA_API_KEY_ID` / `ALPACA_API_SECRET_KEY` 则返回空、暗盘只剩时段标签。2026-09-17 实测免费档 `feed=overnight` 即实时（quote lag 1.9–7.8s），`feed=boats` 需付费（403）。
-- 夜盘 Alpaca 取不到的票回落 Webull，但 **Webull 须自报 `overnight=1` 才采用 `pPrice`，否则不给价**。实测夜盘窗口内 Webull 仍报 `overnight=0` / `status=A`，`pPrice` 冻结在盘后价且 `pChRatio` 以 ET 20:00 收盘价为基准；不设此闸会把盘后陈价标成「暗盘」并在换段时重推一遍。闸自动恢复：Webull 一旦真供夜盘数据即照常出价。
+- 暗盘直接读取币安永续快照，使用合约 24 小时涨跌幅，仅展示有有效报价的映射标的。
 - 夜盘无 yfinance 兜底：Yahoo 在 ET 20:00 后 `marketState=CLOSED` 但 `postMarketPrice` 已停更，拿来冒充即陈价。
 
 **涨跌基准与假告警**：

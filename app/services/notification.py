@@ -164,7 +164,7 @@ class NotificationService:
         if not rows:
             return False
         title = {'pre': '🌙 *美股盘前异动*', 'post': '🌙 *美股盘后异动*',
-                 'overnight': '🌑 *美股暗盘异动*'}.get(session)
+                 'overnight': '🌑 *币安永续暗盘异动（24h）*'}.get(session)
         if not title:
             return False
         lines = [title]

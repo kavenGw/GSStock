@@ -595,7 +595,7 @@ const Watch = {
     // 美股盘前/盘后/暗盘报价：涨跌% 单元格下方一行小字，颜色沿用 price-up/down
     _renderExtQuote(ext, market) {
         if (!ext || ext.price == null) return '';
-        const label = { pre: '盘前', post: '盘后', overnight: '暗盘' }[ext.session] || '';
+        const label = { pre: '盘前', post: '盘后', overnight: '币安永续 USDT · 24h' }[ext.session] || '';
         const cls = ext.change_pct > 0 ? 'price-up' : ext.change_pct < 0 ? 'price-down' : 'price-flat';
         const sign = ext.change_pct > 0 ? '+' : '';
         const pct = ext.change_pct != null ? `${sign}${ext.change_pct.toFixed(2)}%` : '--';
